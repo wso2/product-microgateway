@@ -97,24 +97,28 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
 
-	for _, ep := range mgwSwagger.GetProdEndpoints().Endpoints {
-		prodEp := &api.Endpoint{
-			Basepath: ep.Basepath,
-			Host:     ep.Host,
-			Port:     ep.Port,
-			URLType:  ep.URLType,
+	if mgwSwagger.GetProdEndpoints() != nil {
+		for _, ep := range mgwSwagger.GetProdEndpoints().Endpoints {
+			prodEp := &api.Endpoint{
+				Basepath: ep.Basepath,
+				Host:     ep.Host,
+				Port:     ep.Port,
+				URLType:  ep.URLType,
+			}
+			prodUrls = append(prodUrls, prodEp)
 		}
-		prodUrls = append(prodUrls, prodEp)
 	}
 
-	for _, ep := range mgwSwagger.GetSandEndpoints().Endpoints {
-		sandEp := &api.Endpoint{
-			Basepath: ep.Basepath,
-			Host:     ep.Host,
-			Port:     ep.Port,
-			URLType:  ep.URLType,
+	if mgwSwagger.GetSandEndpoints() != nil {
+		for _, ep := range mgwSwagger.GetSandEndpoints().Endpoints {
+			sandEp := &api.Endpoint{
+				Basepath: ep.Basepath,
+				Host:     ep.Host,
+				Port:     ep.Port,
+				URLType:  ep.URLType,
+			}
+			sandUrls = append(sandUrls, sandEp)
 		}
-		sandUrls = append(sandUrls, sandEp)
 	}
 
 	for _, res := range mgwSwagger.GetResources() {

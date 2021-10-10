@@ -272,14 +272,18 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
 
-	if len(mgwSwagger.GetProdEndpoints().Endpoints) == 0 || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/" {
+	if (mgwSwagger.GetProdEndpoints() == nil || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/") &&
+		apiContent.ProductionEndpoint != "" {
+
 		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
 		if productionEndpointErr != nil {
 			return deployedRevision, productionEndpointErr
 		}
 	}
 
-	if len(mgwSwagger.GetSandEndpoints().Endpoints) == 0 || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/" {
+	if (mgwSwagger.GetSandEndpoints() == nil || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/") &&
+		apiContent.SandboxEndpoint != "" {
+
 		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
 		if sandboxEndpointErr != nil {
 			return deployedRevision, sandboxEndpointErr
