@@ -29,6 +29,7 @@ import org.wso2.am.integration.clients.publisher.api.ApiException;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.*;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
+import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.am.integration.test.utils.bean.*;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.dto.Api;
@@ -38,6 +39,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import javax.ws.rs.core.Response;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -96,6 +98,46 @@ public class PublisherUtils {
         } else apiRequest.setTier(api.getTier());
 
         return createAPI(apiRequest, publisherRestClient);
+    }
+
+    /**
+     * Creates API using a given OAS file in publisher.
+     *
+     * @param apiName Name for the API to be created
+     * @param apiContext API context for the API to be created
+     * @param apiVersion API version for the API to be created
+     * @param userName Username relevant to the user
+     * @param filePath File path for the OAS file
+     * @param publisherRestClient An instance of RestAPIPublisherImpl
+     * @return API id as a string
+     * @throws MalformedURLException
+     * @throws ApiException
+     */
+    public static String createAPIUsingOAS(String apiName, String apiContext, String apiVersion, String userName,
+                                           String filePath, RestAPIPublisherImpl publisherRestClient)
+                                           throws MalformedURLException, ApiException {
+        File definition = new File(filePath);
+        JSONObject endpoints = new JSONObject();
+        endpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
+
+        JSONObject endpointConfig = new JSONObject();
+        endpointConfig.put("endpoint_type", "http");
+        endpointConfig.put("production_endpoints", endpoints);
+        endpointConfig.put("sandbox_endpoints", endpoints);
+
+        List<String> tierList = new ArrayList<>();
+        tierList.add(APIMIntegrationConstants.API_TIER.UNLIMITED);
+
+        JSONObject apiProperties = new JSONObject();
+        apiProperties.put("name", apiName);
+        apiProperties.put("context", "/" + apiContext);
+        apiProperties.put("version", apiVersion);
+        apiProperties.put("provider", userName);
+        apiProperties.put("endpointConfig", endpointConfig);
+        apiProperties.put("policies", tierList);
+
+        APIDTO apiDTO = publisherRestClient.importOASDefinition(definition, apiProperties.toString());
+        return  apiDTO.getId();
     }
 
     /**
