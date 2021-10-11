@@ -66,6 +66,8 @@ public class APIKeyTestCase extends ApimBaseTest {
         Application app = new Application(APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
         applicationId = StoreUtils.createApplication(app, storeRestClient);
 
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
+
         PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
 
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
