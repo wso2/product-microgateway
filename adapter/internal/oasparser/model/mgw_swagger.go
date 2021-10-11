@@ -36,6 +36,7 @@ import (
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
 	id                  string
+	UUID                string
 	apiType             string
 	description         string
 	title               string
@@ -52,21 +53,6 @@ type MgwSwagger struct {
 	xWso2AuthHeader     string
 	disableSecurity     bool
 	OrganizationID      string
-}
-
-// EndpointSecurity contains the SandBox/Production endpoint security
-type EndpointSecurity struct {
-	SandBox    SecurityInfo
-	Production SecurityInfo
-}
-
-// SecurityInfo contains the parameters of endpoint security
-type SecurityInfo struct {
-	Password         string
-	CustomParameters string
-	SecurityType     string
-	Enabled          bool
-	Username         string
 }
 
 // EndpointCluster represent an upstream cluster

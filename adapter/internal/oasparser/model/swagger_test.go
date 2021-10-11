@@ -17,6 +17,7 @@
 package model_test
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -39,7 +40,11 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+
+	var apiYaml model.APIJson
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 
 	dataItems := []setInfoSwaggerWebSocketTestItem{
@@ -66,7 +71,6 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	}
 
 	for _, item := range dataItems {
-		err := item.input.SetInfoSwaggerWebSocket(item.apiData)
 		assert.Nil(t, err, "Error while populating the mgwSwagger object for web sockets")
 		assert.Equal(t, item.input.GetID(), item.apiData["data"].(map[string]interface{})["id"], "MgwSwagger id mismatch")
 		assert.Equal(t, item.input.GetTitle(), item.apiData["data"].(map[string]interface{})["name"], "MgwSwagger title mismatch")

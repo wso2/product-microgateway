@@ -188,35 +188,31 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) error {
+func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIJson) error {
 
-	data := apiData["data"].(map[string]interface{})
+	data := apiData.Data
 	// UUID in the generated api.yaml file is considerd as swagger.id
-	swagger.id = data["id"].(string)
+	swagger.id = data.ID
 	// Set apiType as WS for websockets
 	swagger.apiType = "WS"
 	// name and version in api.yaml corresponds to title and version respectively.
-	swagger.title = data["name"].(string)
-	swagger.version = data["version"].(string)
+	swagger.title = data.Name
+	swagger.version = data.Version
 	// context value in api.yaml is assigned as xWso2Basepath
-	swagger.xWso2Basepath = data["context"].(string) + "/" + swagger.version
+	swagger.xWso2Basepath = data.Context + "/" + swagger.version
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
-	endpointConfig := data["endpointConfig"].(map[string]interface{})
-	if endpointConfig["sandbox_endpoints"] != nil {
-		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
-		sandBoxURL := sandboxEndpoints["url"].(string)
-		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(sandBoxURL)
+	endpointConfig := data.EndpointConfig
+	if endpointConfig.SandBoxEndpoints.Endpoint != "" {
+		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.SandBoxEndpoints.Endpoint)
 		if err == nil {
 			swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, []Endpoint{*sandBoxEndpoint})
 		} else {
 			return err
 		}
 	}
-	if endpointConfig["production_endpoints"] != nil {
-		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
-		productionURL := productionEndpoints["url"].(string)
-		productionEndpoint, err := getHostandBasepathandPortWebSocket(productionURL)
+	if endpointConfig.ProductionEndpoints.Endpoint != "" {
+		productionEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.ProductionEndpoints.Endpoint)
 		if err == nil {
 			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, []Endpoint{*productionEndpoint})
 		} else {

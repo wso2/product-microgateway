@@ -26,9 +26,9 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
 	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // GetMgwSwagger converts the openAPI v3 and v2 content
@@ -145,13 +145,8 @@ func GetXWso2LabelsWebSocket(webSocketAPIDef model.MgwSwagger) []string {
 /*
 GetMgwSwaggerWebSocket returns a MgwSwagger for the web socket APIs
 */
-func GetMgwSwaggerWebSocket(apiContent []byte) (model.MgwSwagger, error) {
+func GetMgwSwaggerWebSocket(apiData model.APIJson) (model.MgwSwagger, error) {
 	var mgwSwagger model.MgwSwagger
-	var apiData map[string]interface{}
-	unmarshalErr := json.Unmarshal(apiContent, &apiData)
-	if unmarshalErr != nil {
-		logger.LoggerOasparser.Errorf("JSON unmarshalling error: %v", unmarshalErr)
-	}
 	err := mgwSwagger.SetInfoSwaggerWebSocket(apiData)
 	if err != nil {
 		return mgwSwagger, err

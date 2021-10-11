@@ -17,10 +17,12 @@
 package envoyconf_test
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"strings"
 	"testing"
 
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 
 	"github.com/stretchr/testify/assert"
@@ -120,7 +122,11 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+
+	var apiYaml model.APIJson
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
@@ -279,7 +285,11 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+
+	var apiYaml model.APIJson
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")

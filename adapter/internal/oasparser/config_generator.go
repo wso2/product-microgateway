@@ -23,7 +23,6 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	"github.com/wso2/product-microgateway/adapter/config"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -92,7 +91,7 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArr
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition
 // along with the vhost to deploy the API.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity config.EndpointSecurity, vhost string) *api.Api {
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity mgw.APIEndpointSecurity, vhost string) *api.Api {
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
@@ -136,11 +135,11 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 
 	endpointSecurityDetails := &api.EndpointSecurity{
 		SandBoxSecurityInfo: &api.SecurityInfo{
-			Username:         endpointSecurity.SandBox.Username,
-			Password:         endpointSecurity.SandBox.Password,
-			SecurityType:     endpointSecurity.SandBox.SecurityType,
-			Enabled:          endpointSecurity.SandBox.Enabled,
-			CustomParameters: endpointSecurity.SandBox.CustomParameters,
+			Username:         endpointSecurity.Sandbox.Username,
+			Password:         endpointSecurity.Sandbox.Password,
+			SecurityType:     endpointSecurity.Sandbox.SecurityType,
+			Enabled:          endpointSecurity.Sandbox.Enabled,
+			CustomParameters: endpointSecurity.Sandbox.CustomParameters,
 		},
 		ProductionSecurityInfo: &api.SecurityInfo{
 			Username:         endpointSecurity.Production.Username,
