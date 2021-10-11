@@ -344,7 +344,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 	updateVhostInternalMaps(apiInfo.ID, apiInfo.Name, apiInfo.Version, vHost, newLabels)
 
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiProject.UpstreamCerts,
+	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, apiProject.UpstreamCerts,
 		apiProject.InterceptorCerts, vHost, organizationID)
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {

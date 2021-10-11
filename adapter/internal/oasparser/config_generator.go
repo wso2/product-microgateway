@@ -29,9 +29,9 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/api"
 )
 
-// GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
+// GetRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
 // when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
-func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts []byte, interceptorCerts []byte,
+func GetRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts []byte, interceptorCerts []byte,
 	vHost string, organizationID string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	var routes []*routev3.Route
 	var clusters []*clusterv3.Cluster

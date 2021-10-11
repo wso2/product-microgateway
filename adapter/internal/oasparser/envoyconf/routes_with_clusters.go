@@ -63,9 +63,9 @@ import (
 func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte, interceptorCerts []byte, vHost string, organizationID string) (routesP []*routev3.Route,
 	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
 	var (
-		routesProd []*routev3.Route
-		clusters   []*clusterv3.Cluster
-		endpoints  []*corev3.Address
+		routes    []*routev3.Route
+		clusters  []*clusterv3.Cluster
+		endpoints []*corev3.Address
 
 		apiLevelEndpointProd    []model.Endpoint
 		apilevelClusterProd     *clusterv3.Cluster
@@ -275,14 +275,14 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 
 		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, vHost, endpointBasepath, clusterRefProd,
 			clusterRefSand, resourceRequestInterceptor, resourceResponseInterceptor))
-		routesProd = append(routesProd, routeP)
+		routes = append(routes, routeP)
 	}
 	if mgwSwagger.GetAPIType() == mgw.WS {
 		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiEndpointBasePath, apilevelClusterProd.GetName(),
 			apilevelClusterSand.GetName(), apiRequestInterceptor, apiResponseInterceptor))
-		routesProd = append(routesProd, routesP)
+		routes = append(routes, routesP)
 	}
-	return routesProd, clusters, endpoints
+	return routes, clusters, endpoints
 }
 
 // CreateLuaCluster creates lua cluster configuration.
