@@ -113,7 +113,7 @@ public class RestAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
+                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).

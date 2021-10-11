@@ -67,7 +67,6 @@ public class WebSocketAPI implements API {
         String apiType = api.getApiType();
         Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
         List<String> securitySchemeList = new ArrayList<>();
-        List<ResourceConfig> resources = new ArrayList<>();
 
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
             if (securityScheme.getType() != null) {
@@ -99,7 +98,7 @@ public class WebSocketAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
+                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).build();
         initFilters();

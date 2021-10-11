@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.api.config;
+package org.wso2.choreo.connect.commons.model;
 
 /**
  * Holds security schemes defined in the swagger definition.
