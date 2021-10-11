@@ -109,8 +109,8 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 	conf, _ := config.ReadConfigs()
 	certPool := tlsutils.GetTrustedCertPool(conf.Adapter.Truststore.Location)
 	// There is a single private-public key pair for XDS server initialization, as well as for XDS client authentication
-	certificate, err := tlsutils.GetServerCertificate(conf.Adapter.Keystore.PublicKeyLocation,
-		conf.Adapter.Keystore.PrivateKeyLocation)
+	certificate, err := tlsutils.GetServerCertificate(conf.Adapter.Keystore.CertPath,
+		conf.Adapter.Keystore.KeyPath)
 	if err != nil {
 		logger.LoggerGA.Fatal("Error while processing the private-public key pair", err)
 	}
@@ -119,8 +119,8 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 		RootCAs:      certPool,
 	}
 	// This option is used if the calling IP and SAN of the certificate is different.
-	if conf.GlobalAdapter.HostName != "" {
-		tlsConfig.ServerName = conf.GlobalAdapter.HostName
+	if conf.GlobalAdapter.OverwriteHostName != "" {
+		tlsConfig.ServerName = conf.GlobalAdapter.OverwriteHostName
 	}
 	return credentials.NewTLS(tlsConfig)
 }

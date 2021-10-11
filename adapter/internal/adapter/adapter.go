@@ -73,8 +73,8 @@ var (
 )
 
 const (
-	ads                        = "ads"
-	amqpProtocol               = "amqp"
+	ads          = "ads"
+	amqpProtocol = "amqp"
 )
 
 func init() {

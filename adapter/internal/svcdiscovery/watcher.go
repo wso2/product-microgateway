@@ -20,13 +20,14 @@ package svcdiscovery
 import (
 	"crypto/tls"
 	"crypto/x509"
-	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"io/ioutil"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
+
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -201,14 +202,14 @@ func CreateUpstreamTLSContext(upstreamCACert, privateKey, publicKey string) *tls
 	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
 		CommonTlsContext: &tlsv3.CommonTlsContext{
 			TlsParams: &tlsv3.TlsParameters{
-				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinVersion),
-				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaxVersion),
+				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinimumProtocolVersion),
+				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaximumProtocolVersion),
 				CipherSuites:              ciphersArray,
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
 		},
 	}
-	if !conf.Envoy.Upstream.TLS.DisableSSLVerification {
+	if !conf.Envoy.Upstream.TLS.DisableSslVerification {
 		var trustedCASrc *corev3.DataSource
 		trustedCASrc = &corev3.DataSource{
 			Specifier: &corev3.DataSource_InlineString{

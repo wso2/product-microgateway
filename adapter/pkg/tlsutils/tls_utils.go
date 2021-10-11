@@ -125,8 +125,8 @@ func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error)
 // GetKeyLocations function returns the public key path and private key path
 func GetKeyLocations() (string, string, string) {
 	conf, _ := config.ReadConfigs()
-	publicKeyLocation := conf.Adapter.Keystore.PublicKeyLocation
-	privateKeyLocation := conf.Adapter.Keystore.PrivateKeyLocation
+	publicKeyLocation := conf.Adapter.Keystore.CertPath
+	privateKeyLocation := conf.Adapter.Keystore.KeyPath
 	truststoreLocation := conf.Adapter.Truststore.Location
 	return publicKeyLocation, privateKeyLocation, truststoreLocation
 }

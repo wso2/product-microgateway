@@ -32,11 +32,11 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/auth"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
-	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
 const (

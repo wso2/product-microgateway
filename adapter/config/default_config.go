@@ -51,8 +51,8 @@ var defaultConfig = &Config{
 			KeyFile:            "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem",
 		},
 		Keystore: keystore{
-			PrivateKeyLocation: "/home/wso2/security/keystore/mg.key",
-			PublicKeyLocation:  "/home/wso2/security/keystore/mg.pem",
+			KeyPath:  "/home/wso2/security/keystore/mg.key",
+			CertPath: "/home/wso2/security/keystore/mg.pem",
 		},
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
@@ -66,8 +66,8 @@ var defaultConfig = &Config{
 		ClusterTimeoutInSeconds:          20,
 		EnforcerResponseTimeoutInSeconds: 20,
 		KeyStore: keystore{
-			PrivateKeyLocation: "/home/wso2/security/keystore/mg.key",
-			PublicKeyLocation:  "/home/wso2/security/keystore/mg.pem",
+			KeyPath:  "/home/wso2/security/keystore/mg.key",
+			CertPath: "/home/wso2/security/keystore/mg.pem",
 		},
 		SystemHost: "localhost",
 		Cors: globalCors{
@@ -81,14 +81,14 @@ var defaultConfig = &Config{
 		},
 		Upstream: envoyUpstream{
 			TLS: upstreamTLS{
-				MinVersion: "TLS1_1",
-				MaxVersion: "TLS1_2",
+				MinimumProtocolVersion: "TLS1_1",
+				MaximumProtocolVersion: "TLS1_2",
 				Ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, " +
 					"AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, " +
 					"ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA",
-				CACrtPath:              "/etc/ssl/certs/ca-certificates.crt",
+				TrustedCertPath:        "/etc/ssl/certs/ca-certificates.crt",
 				VerifyHostName:         true,
-				DisableSSLVerification: false,
+				DisableSslVerification: false,
 			},
 			Timeouts: upstreamTimeout{
 				RouteTimeoutInSeconds:     60,
@@ -177,17 +177,17 @@ var defaultConfig = &Config{
 		},
 		Tracing: tracing{
 			Enabled: false,
-			Type: "azure",
+			Type:    "azure",
 			ConfigProperties: map[string]string{
-				"connectionString":   "",
-				"instrumentationName": "CHOREO-CONNECT",
+				"connectionString":       "",
+				"instrumentationName":    "CHOREO-CONNECT",
 				"maximumTracesPerSecond": "2",
 			},
 		},
-        Metrics: metrics{
-            Enabled: false,
-            Type: "azure",
-        },
+		Metrics: metrics{
+			Enabled: false,
+			Type:    "azure",
+		},
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,
 			EnableHeaderConditions:             false,
@@ -251,7 +251,7 @@ var defaultConfig = &Config{
 			PublicCertificatePath: "/home/wso2/security/truststore/mg.pem",
 			PrivateKeyPath:        "/home/wso2/security/keystore/mg.key",
 			ValidityPeriod:        3600,
-			JwtUsers: []JwtUser{
+			JwtUser: []JwtUser{
 				{
 					Username: "admin",
 					Password: "$env{enforcer_admin_pwd}",
@@ -269,16 +269,16 @@ var defaultConfig = &Config{
 		SkipSSLVerification: false,
 		BrokerConnectionParameters: brokerConnectionParameters{
 			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
-			ReconnectInterval:      5000, //in milli seconds
-			ReconnectRetryCount:    60,
+			ReconnectInterval:       5000, //in milli seconds
+			ReconnectRetryCount:     60,
 		},
 	},
 	GlobalAdapter: globalAdapter{
-		Enabled:       false,
-		ServiceURL:    "global-adapter:18000",
-		HostName:      "",
-		LocalLabel:    "default",
-		RetryInterval: 5,
+		Enabled:           false,
+		ServiceURL:        "global-adapter:18000",
+		OverwriteHostName: "",
+		LocalLabel:        "default",
+		RetryInterval:     5,
 	},
 	Analytics: analytics{
 		Enabled: false,
@@ -292,7 +292,7 @@ var defaultConfig = &Config{
 				"authURL":   "$env{analytics_authURL}",
 				"authToken": "$env{analytics_authToken}",
 			},
-			EnforcerLogReceiver: authService{
+			LogReceiver: authService{
 				Port:           18090,
 				MaxMessageSize: 1000000000,
 				MaxHeaderLimit: 8192,

@@ -348,7 +348,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 		return nil
 	}
-	tlsCert := generateTLSCert(conf.Envoy.KeyStore.PrivateKeyLocation, conf.Envoy.KeyStore.PublicKeyLocation)
+	tlsCert := generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
 	// Convert the cipher string to a string array
 	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
 	for i := range ciphersArray {
@@ -358,8 +358,8 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
 		CommonTlsContext: &tlsv3.CommonTlsContext{
 			TlsParams: &tlsv3.TlsParameters{
-				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinVersion),
-				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaxVersion),
+				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinimumProtocolVersion),
+				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaximumProtocolVersion),
 				CipherSuites:              ciphersArray,
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
@@ -371,7 +371,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
 	}
 
-	if !conf.Envoy.Upstream.TLS.DisableSSLVerification {
+	if !conf.Envoy.Upstream.TLS.DisableSslVerification {
 		var trustedCASrc *corev3.DataSource
 
 		if len(upstreamCerts) > 0 {
@@ -383,7 +383,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		} else {
 			trustedCASrc = &corev3.DataSource{
 				Specifier: &corev3.DataSource_Filename{
-					Filename: conf.Envoy.Upstream.TLS.CACrtPath,
+					Filename: conf.Envoy.Upstream.TLS.TrustedCertPath,
 				},
 			}
 		}
@@ -395,7 +395,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		}
 	}
 
-	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSSLVerification {
+	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSslVerification {
 		addressString := address.GetSocketAddress().GetAddress()
 		subjectAltNames := []*envoy_type_matcherv3.StringMatcher{
 			{
