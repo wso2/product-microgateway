@@ -337,17 +337,6 @@ public class FilterUtils {
         String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
         jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
-        if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
-            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
-            if (claims.get("sub") != null) {
-                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
-                jwtInfoDto.setSub(sub);
-            }
-            if (claims.get("organizations") != null) {
-                String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().get("organizations");
-                jwtInfoDto.setOrganizations(organizations);
-            }
-        }
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
     }
@@ -355,6 +344,20 @@ public class FilterUtils {
     private static void constructJWTContent(JSONObject subscribedAPI,
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
+        if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
+            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+            String subClaim = "sub";
+            String organizationsClaim = "organizations";
+            if (claims.get(subClaim) != null) {
+                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(subClaim);
+                jwtInfoDto.setSub(sub);
+            }
+            if (claims.get(organizationsClaim) != null) {
+                String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
+                        get(organizationsClaim);
+                jwtInfoDto.setOrganizations(organizations);
+            }
+        }
         if (apiKeyValidationInfoDTO != null) {
             jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
