@@ -73,6 +73,8 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 	}
 	err = mgwSwagger.SetXWso2Extensions()
 	if err != nil {
+		logger.LoggerOasparser.Error("Error occured while setting x-wso2 extensions for ",
+			mgwSwagger.GetTitle(), err)
 		return mgwSwagger, err
 	}
 	return mgwSwagger, nil
@@ -145,7 +147,7 @@ func GetXWso2LabelsWebSocket(webSocketAPIDef model.MgwSwagger) []string {
 /*
 GetMgwSwaggerWebSocket returns a MgwSwagger for the web socket APIs
 */
-func GetMgwSwaggerWebSocket(apiData model.APIJson) (model.MgwSwagger, error) {
+func GetMgwSwaggerWebSocket(apiData model.APIYaml) (model.MgwSwagger, error) {
 	var mgwSwagger model.MgwSwagger
 	err := mgwSwagger.SetInfoSwaggerWebSocket(apiData)
 	if err != nil {

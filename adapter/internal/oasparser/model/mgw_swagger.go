@@ -266,7 +266,7 @@ func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandBoxURL strin
 		// Error nil for successful execution
 		return nil
 	}
-	logger.LoggerOasparser.Error("invalid sandbox endpoint for API with basepath: ", swagger.xWso2Basepath)
+	logger.LoggerOasparser.Error("Invalid sandbox endpoint for API with basepath: ", swagger.xWso2Basepath)
 	return errors.New("invalid sandbox endpoint")
 }
 
@@ -281,7 +281,7 @@ func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionURL st
 		// Error nil for successful execution
 		return nil
 	}
-	logger.LoggerOasparser.Error("invalid production endpoint for API with basepath: ", swagger.xWso2Basepath)
+	logger.LoggerOasparser.Error("Invalid production endpoint for API with basepath: ", swagger.xWso2Basepath)
 	return errors.New("invalid production endpoint")
 }
 
@@ -471,7 +471,7 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName str
 					endpointCluster.Endpoints = endpoints
 					endpointCluster.EndpointType = "loadbalance"
 				} else {
-					return nil, errors.New("Error while parsing array of urls")
+					return nil, errors.New("Error while parsing array of urls in " + endpointName)
 				}
 			} else {
 				// TODO: (VirajSalaka) Throw an error and catch from an upper layer where the API name is visible.
@@ -491,7 +491,7 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName str
 
 			return &endpointCluster, nil
 		}
-		logger.LoggerOasparser.Error("x-wso2-production/sandbox-endpoints is not having a correct map structure")
+		logger.LoggerOasparser.Error("x-wso2-production/sandbox-endpoints OpenAPI extension does not adhere with the schema")
 		return nil, errors.New("invalid map structure detected")
 	}
 	return nil, nil // the vendor extension for prod or sandbox just isn't present
@@ -501,10 +501,10 @@ func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
 	var endpoints []Endpoint
 	for _, v := range urlsArray {
 		if svcdiscovery.IsServiceDiscoveryEnabled && svcdiscovery.IsDiscoveryServiceEndpoint(v.(string)) {
-			logger.LoggerOasparser.Debug("consul query syntax found: ", v.(string))
+			logger.LoggerOasparser.Debug("Consul query syntax found: ", v.(string))
 			queryString, defHost, err := svcdiscovery.ParseConsulSyntax(v.(string))
 			if err != nil {
-				logger.LoggerOasparser.Error("consul syntax parse error ", err)
+				logger.LoggerOasparser.Error("Consul syntax parse error ", err)
 				continue
 			}
 			endpoint, err := getHostandBasepathandPort(defHost)
@@ -662,7 +662,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			if v, found := val[host]; found {
 				hostV = v.(string)
 			} else {
-				logger.LoggerOasparser.Error("error reading interceptors host value")
+				logger.LoggerOasparser.Error("Error reading interceptors host value")
 				return InterceptEndpoint{}, errors.New("error reading interceptors host value")
 			}
 			// port mandatory
@@ -671,7 +671,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				if err == nil {
 					portV = uint32(p)
 				} else {
-					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					logger.LoggerOasparser.Error("Error reading interceptors port value", err)
 					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}
@@ -685,7 +685,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				if err == nil {
 					clusterTimeoutV = time.Duration(p)
 				} else {
-					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					logger.LoggerOasparser.Error("Error reading interceptors port value", err)
 					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}
@@ -695,7 +695,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				if err == nil {
 					requestTimeoutV = int(p)
 				} else {
-					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					logger.LoggerOasparser.Error("Error reading interceptors port value", err)
 					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}

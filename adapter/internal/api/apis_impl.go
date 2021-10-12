@@ -146,7 +146,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 				loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
 				return apiProject, conversionErr
 			}
-			var apiYaml mgw.APIJson
+			var apiYaml mgw.APIYaml
 			err = json.Unmarshal(apiJsn, &apiYaml)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())

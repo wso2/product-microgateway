@@ -226,7 +226,7 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 
-	var apiYaml model.APIJson
+	var apiYaml model.APIYaml
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)

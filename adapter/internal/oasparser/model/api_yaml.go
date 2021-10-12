@@ -32,7 +32,7 @@ const (
 )
 
 // VerifyMandatoryFields check and pupulates the mandatory fields if null
-func VerifyMandatoryFields(apiYaml APIJson) error {
+func VerifyMandatoryFields(apiYaml APIYaml) error {
 	var errMsg string = ""
 	var apiName string = apiYaml.Data.Name
 	var apiVersion string = apiYaml.Data.Version
@@ -70,7 +70,7 @@ func VerifyMandatoryFields(apiYaml APIJson) error {
 }
 
 // ExtractAPIInformation reads the values in api.yaml/api.json and populates ProjectAPI struct
-func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIJson) {
+func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 	apiProject.APIType = strings.ToUpper(apiYaml.Data.APIType)
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiYaml.Data.LifeCycleStatus)
 
@@ -108,7 +108,7 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIJson) {
 }
 
 func retrieveEndPointSecurityInfo(value string, endPointSecurity EndpointSecurity,
-	keyType string) (epSecurityInfo SecurityInfo, err error) {
+	keyType string) (epSecurityInfo EndpointSecurity, err error) {
 	var username string
 	var password string
 	var securityType = endPointSecurity.Type
@@ -120,12 +120,12 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity EndpointSecurit
 
 			epSecurityInfo.Username = username
 			epSecurityInfo.Password = password
-			epSecurityInfo.SecurityType = securityType
+			epSecurityInfo.Type = securityType
 			epSecurityInfo.Enabled = endPointSecurity.Enabled
 			return epSecurityInfo, nil
 		}
 		errMsg := securityType + " endpoint security type is not currently supported with" +
-			"WSO2 micro-gateway"
+			"WSO2 Choreo Connect"
 		err = errors.New(errMsg)
 		loggers.LoggerAPI.Error(errMsg)
 	}

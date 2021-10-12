@@ -137,14 +137,14 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		SandBoxSecurityInfo: &api.SecurityInfo{
 			Username:         endpointSecurity.Sandbox.Username,
 			Password:         endpointSecurity.Sandbox.Password,
-			SecurityType:     endpointSecurity.Sandbox.SecurityType,
+			SecurityType:     endpointSecurity.Sandbox.Type,
 			Enabled:          endpointSecurity.Sandbox.Enabled,
 			CustomParameters: endpointSecurity.Sandbox.CustomParameters,
 		},
 		ProductionSecurityInfo: &api.SecurityInfo{
 			Username:         endpointSecurity.Production.Username,
 			Password:         endpointSecurity.Production.Password,
-			SecurityType:     endpointSecurity.Production.SecurityType,
+			SecurityType:     endpointSecurity.Production.Type,
 			Enabled:          endpointSecurity.Production.Enabled,
 			CustomParameters: endpointSecurity.Production.CustomParameters,
 		},

@@ -275,13 +275,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	mgwSwagger.SetID(apiYaml.ID)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
+	mgwSwagger.OrganizationID = apiProject.OrganizationID
 	organizationID := apiProject.OrganizationID
-
-	validationErr := mgwSwagger.Validate()
-	if validationErr != nil {
-		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", apiYaml.Name, apiYaml.Name, organizationID)
-		return nil, validationErr
-	}
 
 	if (mgwSwagger.GetProdEndpoints() == nil || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/") &&
 		apiProject.ProductionEndpoint != "" {
@@ -299,6 +294,13 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		if sandboxEndpointErr != nil {
 			return nil, sandboxEndpointErr
 		}
+	}
+
+	validationErr := mgwSwagger.Validate()
+	if validationErr != nil {
+		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s",
+			apiYaml.Name, apiYaml.Name, organizationID)
+		return nil, validationErr
 	}
 
 	uniqueIdentifier := apiYaml.ID

@@ -18,7 +18,7 @@ package model
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIYaml            APIJson
+	APIYaml            APIYaml
 	Deployments        []Deployment
 	OpenAPIJsn         []byte
 	UpstreamCerts      []byte
@@ -33,25 +33,17 @@ type ProjectAPI struct {
 
 // EndpointSecurity contains parameters of endpoint security at api.json
 type EndpointSecurity struct {
-	Password string `json:"password,omitempty"`
-	Type     string `json:"type,omitempty"`
-	Enabled  bool   `json:"enabled,omitempty"`
-	Username string `json:"username,omitempty"`
+	Password         string `json:"password,omitempty"`
+	Type             string `json:"type,omitempty"`
+	Enabled          bool   `json:"enabled,omitempty"`
+	Username         string `json:"username,omitempty"`
+	CustomParameters string `json:"customparameters,omitempty"`
 }
 
 // APIEndpointSecurity represents the structure of endpoint_security param in api.yaml
 type APIEndpointSecurity struct {
-	Production SecurityInfo
-	Sandbox    SecurityInfo
-}
-
-// SecurityInfo contains the parameters of endpoint security
-type SecurityInfo struct {
-	Password         string `json:"password,omitempty"`
-	CustomParameters string `json:"customparameters,omitempty"`
-	SecurityType     string `json:"Type,omitempty"`
-	Enabled          bool   `json:"enabled,omitempty"`
-	Username         string `json:"username,omitempty"`
+	Production EndpointSecurity
+	Sandbox    EndpointSecurity
 }
 
 // ApimMeta represents APIM meta information of files received from APIM
@@ -74,8 +66,10 @@ type Deployment struct {
 	DeploymentEnvironment string `yaml:"deploymentEnvironment"`
 }
 
-// APIJson contains everything necessary to extract api.json/api.yaml file
-type APIJson struct {
+// APIYaml contains everything necessary to extract api.json/api.yaml file
+// To support both api.json and api.yaml we convert yaml to json and then use json.Unmarshal()
+// Therefore, the params are defined to support json.Unmarshal()
+type APIYaml struct {
 	ApimMeta
 	Data struct {
 		ID                         string   `json:"Id,omitempty"`
@@ -93,23 +87,33 @@ type APIJson struct {
 			EndpointType     string `json:"endpoint_type,omitempty"`
 			EndpointSecurity struct {
 				Production struct {
-					Password string `json:"password,omitempty"`
-					Type     string `json:"type,omitempty"`
-					Enabled  bool   `json:"enabled,omitempty"`
-					Username string `json:"username,omitempty"`
+					Password         string `json:"password,omitempty"`
+					Type             string `json:"type,omitempty"`
+					Enabled          bool   `json:"enabled,omitempty"`
+					Username         string `json:"username,omitempty"`
+					CustomParameters string `json:"customparameters,omitempty"`
 				} `json:"production,omitempty"`
 				Sandbox struct {
-					Password string `json:"password,omitempty"`
-					Type     string `json:"type,omitempty"`
-					Enabled  bool   `json:"enabled,omitempty"`
-					Username string `json:"username,omitempty"`
+					Password         string `json:"password,omitempty"`
+					Type             string `json:"type,omitempty"`
+					Enabled          bool   `json:"enabled,omitempty"`
+					Username         string `json:"username,omitempty"`
+					CustomParameters string `json:"customparameters,omitempty"`
 				} `json:"sandbox,omitempty"`
 			} `json:"endpoint_security,omitempty"`
 			ProductionEndpoints struct {
 				Endpoint string `json:"url,omitempty"`
+				Config   struct {
+					RetryDelay   string `json:"retryDelay,omitempty"`
+					RetryTimeOut string `json:"retryTimeOut,omitempty"`
+				} `json:"config,omitempty"`
 			} `json:"production_endpoints,omitempty"`
 			SandBoxEndpoints struct {
 				Endpoint string `json:"url,omitempty"`
+				Config   struct {
+					RetryDelay   string `json:"retryDelay,omitempty"`
+					RetryTimeOut string `json:"retryTimeOut,omitempty"`
+				} `json:"config,omitempty"`
 			} `json:"sandbox_endpoints,omitempty"`
 		} `json:"endpointConfig,omitempty"`
 	} `json:"data"`

@@ -188,7 +188,7 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIJson) error {
+func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIYaml) error {
 
 	data := apiData.Data
 	// UUID in the generated api.yaml file is considerd as swagger.id
