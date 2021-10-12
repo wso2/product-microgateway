@@ -25,8 +25,10 @@ import (
 
 //Interceptor hold values used for interceptor
 type Interceptor struct {
-	RequestExternalCall  HTTPCallConfig
-	ResponseExternalCall HTTPCallConfig
+	RequestExternalCall  *HTTPCallConfig
+	ResponseExternalCall *HTTPCallConfig
+	RequestBody          *RequestBodyInclusions
+	ResponseBody         *RequestBodyInclusions
 }
 
 //HTTPCallConfig hold values used for external interceptor engine
@@ -35,20 +37,39 @@ type HTTPCallConfig struct {
 	ClusterName string
 	Path        string
 	Timeout     string
-	Headers     map[string]string
+}
+
+// RequestBodyInclusions represents which should be included in the request payload to the interceptor service
+type RequestBodyInclusions struct {
+	RequestHeaders   bool
+	RequestBody      bool
+	RequestTrailer   bool
+	ResponseHeaders  bool
+	ResponseBody     bool
+	ResponseTrailers bool
 }
 
 var (
 	requestInterceptorTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
 function envoy_on_request(request_handle)
-    interceptor.handle_request_interceptor(request_handle,"{{.RequestExternalCall.ClusterName}}","{{.RequestExternalCall.Path}}",{{.RequestExternalCall.Timeout}})
+    interceptor.handle_request_interceptor(
+		request_handle,
+		{cluster_name="{{.RequestExternalCall.ClusterName}}", resource_path="{{.RequestExternalCall.Path}}", timeout={{.RequestExternalCall.Timeout}}},
+		{headers={{.RequestBody.RequestHeaders}}, body={{.RequestBody.RequestBody}}, trailers={{.RequestBody.RequestTrailer}}},
+		{headers={{.RequestBody.ResponseHeaders}}, body={{.RequestBody.ResponseBody}}, trailers={{.RequestBody.ResponseTrailers}}}
+	)
 end
 `
 	responseInterceptorTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
 function envoy_on_response(response_handle)
-    interceptor.handle_response_interceptor(response_handle,"{{.ResponseExternalCall.ClusterName}}","{{.ResponseExternalCall.Path}}",{{.ResponseExternalCall.Timeout}})
+    interceptor.handle_response_interceptor(
+		response_handle,
+		{cluster_name="{{.ResponseExternalCall.ClusterName}}", resource_path="{{.ResponseExternalCall.Path}}", timeout={{.ResponseExternalCall.Timeout}}},
+		{headers={{.ResponseBody.RequestHeaders}}, body={{.ResponseBody.RequestBody}}, trailers={{.ResponseBody.RequestTrailer}}},
+		{headers={{.ResponseBody.ResponseHeaders}}, body={{.ResponseBody.ResponseBody}}, trailers={{.ResponseBody.ResponseTrailers}}}
+	)
 end
 `
 	defaultRequestInterceptorTemplate = `

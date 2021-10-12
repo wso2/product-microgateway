@@ -26,6 +26,7 @@ import (
 
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 )
@@ -118,10 +119,18 @@ type InterceptEndpoint struct {
 	ClusterTimeout time.Duration
 	RequestTimeout int
 	// Includes this is an enum allowing only values in
-	// {"request_headers", "request_body", "request_trailer", "response_headers", "response_body", "response_trailer",
-	//"invocation_context" }
-	Includes []string
+	// {"request_headers", "request_body", "request_trailers", "response_headers", "response_body", "response_trailers"}
+	Includes *interceptor.RequestBodyInclusions
 }
+
+//const (
+//	RequestHeaders   InterceptorBodyInclusions = "request_headers"
+//	RequestBody                               = "request_body"
+//	RequestTrailer                            = "request_trailers"
+//	ResponseHeaders                           = "response_headers"
+//	ResponseBody                              = "response_body"
+//	ResponseTrailers                          = "response_trailers"
+//)
 
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
@@ -608,7 +617,7 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 }
 
 //GetInterceptor returns interceptors
-func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) (InterceptEndpoint, error) {
+func (swagger *MgwSwagger) GetInterceptor(extensionName string) (InterceptEndpoint, error) {
 	urlV := "http"
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
@@ -616,11 +625,11 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	pathV := "/"
 	hostV := ""
 	portV := uint32(80)
-	var includesV []string
+	includesV := &interceptor.RequestBodyInclusions{}
 
 	var err error
 
-	if x, found := vendorExtensions[extensionName]; found {
+	if x, found := swagger.vendorExtensions[extensionName]; found {
 		if val, ok := x.(map[string]interface{}); ok {
 			//host mandatory
 			if v, found := val[host]; found {
@@ -673,9 +682,18 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				if len(includes) > 0 {
 					for _, include := range includes {
 						switch include.(string) {
-						case "request_headers", "request_body", "request_trailer", "response_headers", "response_body",
-							"response_trailer", "invocation_context":
-							includesV = append(includesV, include.(string))
+						case "request_headers":
+							includesV.RequestHeaders = true
+						case "request_body":
+							includesV.RequestBody = true
+						case "request_trailers":
+							includesV.RequestTrailer = true
+						case "response_headers":
+							includesV.ResponseHeaders = true
+						case "response_body":
+							includesV.ResponseBody = true
+						case "response_trailers":
+							includesV.ResponseTrailers = true
 						}
 					}
 				}

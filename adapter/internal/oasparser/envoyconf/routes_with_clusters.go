@@ -132,7 +132,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		}
 	}
 
-	apiRequestInterceptor, err := mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor)
+	apiRequestInterceptor, err := mgwSwagger.GetInterceptor(xWso2requestInterceptor)
 	// if lua filter exists on api level, add cluster
 	if err == nil && apiRequestInterceptor.Enable {
 		logger.LoggerOasparser.Debugln("API level request interceptors found " + mgwSwagger.GetID())
@@ -142,7 +142,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		clusters = append(clusters, CreateLuaCluster(interceptorCerts, apiRequestInterceptor))
 
 	}
-	apiResponseInterceptor, err = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor)
+	apiResponseInterceptor, err = mgwSwagger.GetInterceptor(xWso2responseInterceptor)
 	// if lua filter exists on api level, add cluster
 	if err == nil && apiResponseInterceptor.Enable {
 		logger.LoggerOasparser.Debugln("API level response interceptors found for " + mgwSwagger.GetID())
@@ -255,7 +255,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 				apiTitle, apiVersion, resource.GetPath())
 		}
 
-		reqInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor)
+		reqInterceptorVal, err := mgwSwagger.GetInterceptor(xWso2requestInterceptor)
 		if err == nil && reqInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugln("Resource level request interceptors found for " + resource.GetID())
 			resourceRequestInterceptor = reqInterceptorVal
@@ -265,7 +265,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			clusters = append(clusters, CreateLuaCluster(interceptorCerts, resourceRequestInterceptor))
 
 		}
-		respInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor)
+		respInterceptorVal, err := mgwSwagger.GetInterceptor(xWso2responseInterceptor)
 		if err == nil && respInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugln("Resource level response interceptors found for " + resource.GetID())
 			resourceResponseInterceptor = respInterceptorVal
@@ -642,20 +642,22 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInterceptor model.InterceptEndpoint) string {
 	i := interceptor.Interceptor{}
 	if requestInterceptor.Enable {
-		i.RequestExternalCall = interceptor.HTTPCallConfig{
+		i.RequestExternalCall = &interceptor.HTTPCallConfig{
 			Enable:      true,
 			ClusterName: requestInterceptor.ClusterName,
 			Path:        requestInterceptor.Path,
 			Timeout:     strconv.Itoa(requestInterceptor.RequestTimeout),
 		}
+		i.RequestBody = requestInterceptor.Includes
 	}
 	if responseInterceptor.Enable {
-		i.ResponseExternalCall = interceptor.HTTPCallConfig{
+		i.ResponseExternalCall = &interceptor.HTTPCallConfig{
 			Enable:      true,
 			ClusterName: responseInterceptor.ClusterName,
 			Path:        responseInterceptor.Path,
 			Timeout:     strconv.Itoa(responseInterceptor.RequestTimeout),
 		}
+		i.ResponseBody = responseInterceptor.Includes
 	}
 	return interceptor.GetInterceptor(i)
 }
