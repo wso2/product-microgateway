@@ -27,26 +27,25 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
-
-	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
-	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
-	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
-	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
-
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	oasParser "github.com/wso2/product-microgateway/adapter/internal/oasparser"
 	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
+	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
+	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 )
 
@@ -243,12 +242,12 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
 	var newLabels []string
-	apiInfo := apiProject.APIJsn.Data
+	apiYaml := apiProject.APIYaml.Data
 
 	// handle panic
 	defer func() {
 		if r := recover(); r != nil {
-			panic(fmt.Sprintf("Error encountered while applying API %v:%v to %v.", apiInfo.Name, apiInfo.Version, vHost))
+			panic(fmt.Sprintf("Error encountered while applying API %v:%v to %v.", apiYaml.Name, apiYaml.Version, vHost))
 		}
 	}()
 
@@ -257,15 +256,15 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
-		mgwSwagger, err = operator.GetMgwSwagger(apiProject.SwaggerJsn)
+		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
 			return nil, err
 		}
-		mgwSwagger.SetSecurityScheme(apiProject.SecurityScheme)
-		mgwSwagger.SetXWso2AuthHeader(apiProject.AuthHeader)
+		mgwSwagger.SetSecurityScheme(apiYaml.SecurityScheme)
+		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
 	} else if apiProject.APIType == mgw.WS {
-		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIJsn)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml)
 		if err != nil {
 			return nil, err
 		}
@@ -273,14 +272,14 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
-	mgwSwagger.SetID(apiInfo.ID)
-	mgwSwagger.SetName(apiInfo.Name)
-	mgwSwagger.SetVersion(apiInfo.Version)
+	mgwSwagger.SetID(apiYaml.ID)
+	mgwSwagger.SetName(apiYaml.Name)
+	mgwSwagger.SetVersion(apiYaml.Version)
 	organizationID := apiProject.OrganizationID
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
-		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", apiInfo.Name, apiInfo.Name, organizationID)
+		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", apiYaml.Name, apiYaml.Name, organizationID)
 		return nil, validationErr
 	}
 
@@ -302,12 +301,12 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		}
 	}
 
-	uniqueIdentifier := apiInfo.ID
+	uniqueIdentifier := apiYaml.ID
 
 	if uniqueIdentifier == "" {
 		// If API is imported from apictl generate hash as the unique ID
-		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiInfo.Name, apiInfo.Version)
-		reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiInfo.Name, apiInfo.Version)] = uniqueIdentifier
+		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiYaml.Name, apiYaml.Version)
+		reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiYaml.Name, apiYaml.Version)] = uniqueIdentifier
 	}
 	apiIdentifier := GenerateIdentifierForAPIWithUUID(vHost, uniqueIdentifier)
 
@@ -342,7 +341,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		openAPIEnvoyMap[apiIdentifier] = newLabels
 		orgIDOpenAPIEnvoyMap[organizationID] = openAPIEnvoyMap
 	}
-	updateVhostInternalMaps(apiInfo.ID, apiInfo.Name, apiInfo.Version, vHost, newLabels)
+	updateVhostInternalMaps(apiYaml.ID, apiYaml.Name, apiYaml.Version, vHost, newLabels)
 
 	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, apiProject.UpstreamCerts,
 		apiProject.InterceptorCerts, vHost, organizationID)
@@ -385,7 +384,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if revisionStatus {
 		// send updated revision to control plane
-		deployedRevision = notifier.UpdateDeployedRevisions(apiInfo.ID, apiProject.RevisionID, environments,
+		deployedRevision = notifier.UpdateDeployedRevisions(apiYaml.ID, apiYaml.RevisionID, environments,
 			vHost)
 	}
 	if svcdiscovery.IsServiceDiscoveryEnabled {

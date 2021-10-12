@@ -60,10 +60,9 @@ const (
 	sandbox                    string = "sandbox"
 )
 
-// extractAPIProject accepts the API project as a zip file and returns the extracted content
-// The apictl project must be in zipped format. And all the extensions should be defined with in the openAPI
-// definition as only swagger.yaml is taken into consideration here. For websocket APIs api.yaml is taken into
-// consideration. API type is decided by the type field in the api.yaml file.
+// extractAPIProject accepts the API project as a zip file and returns the extracted content.
+// The apictl project must be in zipped format.
+// API type is decided by the type field in the api.yaml file.
 func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	newLineByteArray := []byte("\n")
@@ -104,7 +103,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
 				return apiProject, conversionErr
 			}
-			apiProject.SwaggerJsn = swaggerJsn
+			apiProject.OpenAPIJsn = swaggerJsn
 			apiProject.APIType = mgw.HTTP
 		} else if strings.Contains(file.Name, interceptorCertDir+string(os.PathSeparator)) &&
 			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
@@ -148,9 +147,9 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 				return apiProject, conversionErr
 			}
 			var apiYaml mgw.APIJson
-			unmarshalErr := json.Unmarshal(apiJsn, &apiYaml)
-			if unmarshalErr != nil {
-				loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", unmarshalErr.Error())
+			err = json.Unmarshal(apiJsn, &apiYaml)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
 				return apiProject, err
 			}
 
@@ -166,11 +165,11 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 				err = errors.New(errmsg)
 				return apiProject, err
 			}
-			apiProject.APIJsn = apiYaml
+			apiProject.APIYaml = apiYaml
 			mgw.ExtractAPIInformation(&apiProject, apiYaml)
 		}
 	}
-	if apiProject.APIJsn.Type == "" {
+	if apiProject.APIYaml.Type == "" {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err := errors.New("could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
@@ -190,23 +189,23 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 // and updates the xds servers based upon the content.
 func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
-	apiData := apiProject.APIJsn.Data
 	if err != nil {
-		return deployedRevisionList, err
+		return nil, err
 	}
+	apiYaml := apiProject.APIYaml.Data
 
 	// handle panic
 	defer func() {
 		if r := recover(); r != nil {
 			loggers.LoggerAPI.Error("Recovered from panic. ", r)
-			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiData.Name, apiData.Version, apiData.ID)
+			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
 	}()
 
 	if apiProject.OrganizationID == "" {
 		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	}
-	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiData.Name, apiData.Version, apiProject.OrganizationID)
+	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
 
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
@@ -215,25 +214,25 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 	for vhost, environments := range vhostToEnvsMap {
 		// search for vhosts in the given environments
 		for _, env := range environments {
-			if existingVhost, exists := xds.GetVhostOfAPI(apiData.ID, env); exists {
+			if existingVhost, exists := xds.GetVhostOfAPI(apiYaml.ID, env); exists {
 				loggers.LoggerAPI.Infof("API %v:%v with UUID \"%v\" already deployed to vhost: %v",
-					apiData.Name, apiData.Version, apiData.ID, existingVhost)
+					apiYaml.Name, apiYaml.Version, apiYaml.ID, existingVhost)
 				if vhost != existingVhost {
 					loggers.LoggerAPI.Infof("Un-deploying API %v:%v with UUID \"%v\" which is already deployed to vhost: %v",
-						apiData.Name, apiData.Version, apiData.ID, existingVhost)
+						apiYaml.Name, apiYaml.Version, apiYaml.ID, existingVhost)
 					vhostsToRemove[existingVhost] = append(vhostsToRemove[existingVhost], env)
 				}
 			}
 		}
 
 		// allEnvironments represent all the environments the API should be deployed
-		allEnvironments := xds.GetAllEnvironments(apiData.ID, vhost, environments)
+		allEnvironments := xds.GetAllEnvironments(apiYaml.ID, vhost, environments)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
-			allEnvironments, vhost, apiData.Name, apiData.Version, apiData.ID)
+			allEnvironments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		// first update the API for vhost
 		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, allEnvironments)
 		if err != nil {
-			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiData.Name, apiData.Version, apiData.ID)
+			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
 		if deployedRevision != nil {
 			deployedRevisionList = append(deployedRevisionList, deployedRevision)
@@ -246,7 +245,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIsWithUUID(vhost, apiData.ID, environments, apiProject.OrganizationID); err != nil {
+		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiProject.OrganizationID); err != nil {
 			return deployedRevisionList, err
 		}
 	}
@@ -257,17 +256,17 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 // between create and update using the override param
 func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error) {
 	apiProject, err := extractAPIProject(payload)
-	apiData := apiProject.APIJsn.Data
-	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	if err != nil {
 		return err
 	}
+	apiYaml := apiProject.APIYaml.Data
+	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 
 	// handle panic
 	defer func() {
 		if r := recover(); r != nil {
 			loggers.LoggerAPI.Error("Recovered from panic. ", r)
-			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiData.Name, apiData.Version, apiData.ID)
+			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
 	}()
 
@@ -283,7 +282,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error)
 		// if the API already exists in the one of vhost, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiData.ID, apiProject.OrganizationID) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiProject.OrganizationID) {
 				exists = true
 				break
 			}
@@ -291,7 +290,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error)
 
 		if exists {
 			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.",
-				apiData.Name, apiData.Version)
+				apiYaml.Name, apiYaml.Version)
 			return errors.New(mgw.AlreadyExists)
 		}
 	}

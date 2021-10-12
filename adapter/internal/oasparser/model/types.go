@@ -18,21 +18,17 @@ package model
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIJsn                     APIJson
-	Deployments                []Deployment
-	RevisionID                 int
-	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
-	UpstreamCerts              []byte
-	InterceptorCerts           []byte
-	APIType                    string
-	APILifeCycleStatus         string
-	ProductionEndpoint         string
-	SandboxEndpoint            string
-	SecurityScheme             []string
-	endpointImplementationType string
-	AuthHeader                 string
-	OrganizationID             string
-	EndpointSecurity           APIEndpointSecurity
+	APIYaml            APIJson
+	Deployments        []Deployment
+	OpenAPIJsn         []byte
+	UpstreamCerts      []byte
+	InterceptorCerts   []byte
+	APIType            string              // read from api.yaml and formatted to upper case
+	APILifeCycleStatus string              // read from api.yaml and formatted to upper case
+	ProductionEndpoint string              // read from api.yaml or env variable
+	SandboxEndpoint    string              // read from api.yaml or env variable
+	OrganizationID     string              // read from api.yaml or config
+	EndpointSecurity   APIEndpointSecurity // derived from api.yaml or config
 }
 
 // EndpointSecurity contains parameters of endpoint security at api.json

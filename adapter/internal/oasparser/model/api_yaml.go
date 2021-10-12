@@ -32,10 +32,10 @@ const (
 )
 
 // VerifyMandatoryFields check and pupulates the mandatory fields if null
-func VerifyMandatoryFields(apiJSON APIJson) error {
+func VerifyMandatoryFields(apiYaml APIJson) error {
 	var errMsg string = ""
-	var apiName string = apiJSON.Data.Name
-	var apiVersion string = apiJSON.Data.Version
+	var apiName string = apiYaml.Data.Name
+	var apiVersion string = apiYaml.Data.Version
 
 	if apiName == "" {
 		apiName = "unknownAPIName"
@@ -47,12 +47,12 @@ func VerifyMandatoryFields(apiJSON APIJson) error {
 		errMsg = errMsg + "API Version "
 	}
 
-	if apiJSON.Data.Context == "" {
+	if apiYaml.Data.Context == "" {
 		errMsg = errMsg + "API Context "
 	}
 
-	if apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
-		apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
+	if apiYaml.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
+		apiYaml.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
 		errMsg = errMsg + "API production and sandbox endpoints "
 	}
 
@@ -61,8 +61,8 @@ func VerifyMandatoryFields(apiJSON APIJson) error {
 		return errors.New(errMsg)
 	}
 
-	if strings.HasPrefix(apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint, "/") ||
-		strings.HasPrefix(apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint, "/") {
+	if strings.HasPrefix(apiYaml.Data.EndpointConfig.ProductionEndpoints.Endpoint, "/") ||
+		strings.HasPrefix(apiYaml.Data.EndpointConfig.SandBoxEndpoints.Endpoint, "/") {
 		errMsg = "Relative urls are not supported for API production and sandbox endpoints"
 		return errors.New(errMsg)
 	}
@@ -70,18 +70,13 @@ func VerifyMandatoryFields(apiJSON APIJson) error {
 }
 
 // ExtractAPIInformation reads the values in api.yaml/api.json and populates ProjectAPI struct
-func ExtractAPIInformation(apiProject *ProjectAPI, apiObject APIJson) {
-	apiProject.APIType = strings.ToUpper(apiObject.Data.APIType)
-	apiProject.APILifeCycleStatus = strings.ToUpper(apiObject.Data.LifeCycleStatus)
-	apiProject.RevisionID = apiObject.Data.RevisionID
+func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIJson) {
+	apiProject.APIType = strings.ToUpper(apiYaml.Data.APIType)
+	apiProject.APILifeCycleStatus = strings.ToUpper(apiYaml.Data.LifeCycleStatus)
 
-	apiProject.AuthHeader = apiObject.Data.AuthorizationHeader
+	var apiHashValue string = generateHashValue(apiYaml.Data.Name, apiYaml.Data.Version)
 
-	apiProject.SecurityScheme = apiObject.Data.SecurityScheme
-
-	var apiHashValue string = generateHashValue(apiObject.Data.Name, apiObject.Data.Version)
-
-	endpointConfig := apiObject.Data.EndpointConfig
+	endpointConfig := apiYaml.Data.EndpointConfig
 
 	// production Endpoints set
 	var productionEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_0",
@@ -107,7 +102,7 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiObject APIJson) {
 	}
 
 	// organization ID would remain empty string if unassigned
-	apiProject.OrganizationID = apiObject.Data.OrganizationID
+	apiProject.OrganizationID = apiYaml.Data.OrganizationID
 
 	apiProject.EndpointSecurity = epSecurity
 }
