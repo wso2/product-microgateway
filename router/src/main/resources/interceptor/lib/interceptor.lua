@@ -25,11 +25,25 @@ local base64 = require 'home.wso2.interceptor.lib.base64'
 -- base64 library: https://github.com/iskolbin/lbase64
 
 -- keys of includes table
+local INCLUDES = {
+    HEADERS = "headers",
+    BODY = "body",
+    TRAILERS = "trailers"
+}
 local HEADERS = "headers"
 local BODY = "body"
 local TRAILERS = "trailers"
 
 -- keys of the payload to the interceptor service
+local REQUEST = {
+    INTCPT_CONTEXT = "interceptorContext",
+    REQ_HEADERS = "requestHeaders",
+    REQ_BODY = "requestBody",
+    REQ_TRAILERS = "requestTrailers",
+    RESP_HEADERS = "responseHeaders",
+    RESP_BODY = "responseBody",
+    RESP_TRAILERS = "responseTrailers"
+}
 local INTCPT_CONTEXT = "interceptorContext"
 local REQ_HEADERS = "requestHeaders"
 local REQ_BODY = "requestBody"
@@ -40,13 +54,45 @@ local RESP_TRAILERS = "responseTrailers"
 
 -- keys of the payload from the interceptor service
 local DIRECT_RESPOND = "directRespond"
+local HEADERS_TO_ADD = "headersToAdd"
+local HEADERS_TO_REPLACE = "headersToReplace"
+local HEADERS_TO_REMOVE = "headersToRemove"
 
 -- table of information shared between request and response flow
 local shared_info = {}
 local REQUEST_ID = "requestId"
+local CONTINUE_RESPONSE_PATH = "continueResponsePath"
 
 -- envoy headers
 local STATUS = ":status"
+
+local function modify_headers(handle, interceptor_response_body)
+    -- priority: headersToRemove, headersToReplace, headersToAdd
+    if interceptor_response_body[HEADERS_TO_ADD] ~= nil then
+        for key, val in pairs(interceptor_response_body[HEADERS_TO_ADD]) do
+            handle:headers():add(key, val)
+        end
+    end
+    if interceptor_response_body[HEADERS_TO_REPLACE] ~= nil then
+        for key, val in pairs(interceptor_response_body[HEADERS_TO_REPLACE]) do
+            handle:headers():replace(key, val)
+        end
+    end
+    if interceptor_response_body[HEADERS_TO_REMOVE] ~= nil then
+        for _, key in ipairs(interceptor_response_body[HEADERS_TO_REMOVE]) do
+            handle:headers():remove(key)
+        end
+    end
+end
+
+local function modify_body(handle, interceptor_response_body, request_id)
+    -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
+    if interceptor_response_body.body ~= nil then
+        handle:logDebug("Updating body for the request_id: " .. request_id)
+        local content_length = handle:body():setBytes(base64.decode(interceptor_response_body.body))
+        handle:headers():replace("content-length", content_length)
+    end
+end
 
 local function direct_respond(handle, headers, body)
     shared_info[DIRECT_RESPOND] = true
@@ -56,15 +102,37 @@ local function direct_respond(handle, headers, body)
     )
 end
 
-local function respond_error(handle, message)
-    -- TODO: (renuka) check error body
-    local headers = {}
-    headers[STATUS] = 500 -- TODO: check error status code
-    direct_respond(
-        handle,
-        headers,
-        '{"message": "' .. message ..'", "code": "00000"}' -- TODO: error code
-    )
+--- check for errors from interceptor response and handle error with responding to client
+---@param handle any
+---@param headers any
+---@param body_str any
+---@param is_request_flow any
+---@return boolean returns true if there are errors
+local function check_interceptor_call_errors(handle, headers, body_str, is_request_flow)
+    if headers[STATUS] == "200" then -- TODO: (renuka) we only check 200
+        return false
+    end
+
+    -- TODO: (renuka) check the error code and should we send the response from interceptor
+    handle:logErr('Invalid interceptor service response, HTTP status_code: "' .. headers[STATUS] .. '", message: "' .. body_str .. '"')
+
+    local message = ""
+    local description = ""
+    local err_code = "000" -- TODO: check error code
+    local resp_headers = {[STATUS] = "500"} -- TODO: check error status code
+    local resp_body = '{"error_message": "' .. message ..'", "error_description": "' .. description .. '", "code": "' .. err_code .. '", ""}'
+    
+    if is_request_flow then
+        direct_respond(
+            handle,
+            resp_headers,
+            resp_body
+        )
+        return true
+    end
+
+    modify_body(handle, {body = resp_body}, shared_info[REQUEST_ID])
+    return true
 end
 
 -- TODO: (renuka) check what to log as trace and debug
@@ -74,7 +142,7 @@ end
 -- @param interceptor_request_body a table of request body for the interceptor service
 -- @param intercept_service a table of connection details for the interceptor service
 -- @return a table of respose headers
--- @return a table of response body
+-- @return a string of response body
 local function send_http_call(handle, interceptor_request_body, intercept_service)
     local headers, interceptor_response_body_str = handle:httpCall(
         intercept_service["cluster_name"],
@@ -90,10 +158,7 @@ local function send_http_call(handle, interceptor_request_body, intercept_servic
         false -- async false, wait for response from interceptor service
     )
 
-    if headers[STATUS] ~= 200 then
-        respond_error(handle, "interceptor - " .. interceptor_response_body_str)
-    end
-    return headers, json.decode(interceptor_response_body_str)
+    return headers, interceptor_response_body_str
 end
 
 local function update_request_body(includes, include_key, body, body_key)
@@ -108,57 +173,17 @@ local function include_request_info(req_includes, body)
     update_request_body(req_includes, TRAILERS, body, REQ_TRAILERS)
 end
 
-local function include_response_info(resp_includes, body)
-    update_request_body(resp_includes, HEADERS, body, RESP_HEADERS)
-    update_request_body(resp_includes, BODY, body, RESP_BODY)
-    update_request_body(resp_includes, TRAILERS, body, RESP_TRAILERS)
-end
-
 local function handle_direct_respond(handle, interceptor_response_body, request_id)
     if interceptor_response_body[DIRECT_RESPOND] then
         handle:logDebug("Directly responding without calling the backend for request_id: " .. request_id)
-        local headers = interceptor_response_body.headersToAdd or {}
-        if headers[":status"] == nil then
-            headers = {[":status"] = "200"} -- TODO: (renuka) check default status code if direct respond
-        end
+        local headers = interceptor_response_body[HEADERS_TO_ADD] or {}
+        headers[STATUS] = headers[STATUS] or "200" -- TODO: (renuka) check default status code if direct respond
         direct_respond(handle, headers, base64.decode(interceptor_response_body.body))
     end
 end
 
 local function update_interceptor_context(interceptor_response_body)
-    local context = interceptor_response_body[INTCPT_CONTEXT]
-    if context == nil then
-        context = {}
-    end
-    shared_info[INTCPT_CONTEXT] = context
-end
-
-local function modify_headers(handle, interceptor_response_body)
-    -- priority: headersToRemove, headersToReplace, headersToAdd
-    if interceptor_response_body.headersToAdd ~= nil then
-        for key, val in pairs(interceptor_response_body.headersToAdd) do
-            handle:headers():add(key, val)
-        end
-    end
-    if interceptor_response_body.headersToReplace ~= nil then
-        for key, val in pairs(interceptor_response_body.headersToReplace) do
-            handle:headers():replace(key, val)
-        end
-    end
-    if interceptor_response_body.headersToRemove ~= nil then
-        for _, key in ipairs(interceptor_response_body.headersToRemove) do
-            handle:headers():remove(key)
-        end
-    end
-end
-
-local function modify_body(request_handle, interceptor_response_body, request_id)
-    -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
-    if interceptor_response_body.body ~= nil then
-        request_handle:logDebug("Updating body for the request_id: " .. request_id)
-        local content_length = request_handle:body():setBytes(base64.decode(interceptor_response_body.body))
-        request_handle:headers():replace("content-length", content_length)
-    end
+    shared_info[REQUEST.INTCPT_CONTEXT] = interceptor_response_body[REQUEST.INTCPT_CONTEXT] or {}
 end
 
 --- interceptor handler
@@ -206,22 +231,34 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     local interceptor_request_body = {}
     include_request_info(req_includes, interceptor_request_body)
 
-    -- TODO: (renuka) handle errors
-    local interceptor_response_headers, interceptor_response_body = send_http_call(request_handle, interceptor_request_body, intercept_service)
+    local interceptor_response_headers, interceptor_response_body_str = send_http_call(request_handle, interceptor_request_body, intercept_service)
+    if check_interceptor_call_errors(request_handle, interceptor_response_headers, interceptor_response_body_str, true) then
+        return true
+    end
+
+    local interceptor_response_body = json.decode(interceptor_response_body_str)
 
     handle_direct_respond(request_handle, interceptor_response_body, request_id)
     modify_body(request_handle, interceptor_response_body, request_id)
     modify_headers(request_handle, interceptor_response_body)
     update_interceptor_context(interceptor_response_body)
+
+    shared_info[CONTINUE_RESPONSE_PATH] = true
 end
 
 function interceptor.handle_response_interceptor(response_handle, intercept_service, req_includes, resp_includes)
-    -- TODO: (renuka) ignore response intercept path for auth failure as well
-    local request_id = shared_info[REQUEST_ID]
+    -- TODO: (renuka) ignore response intercept path for auth failure as well <- viraj
+    local request_id = shared_info[REQUEST_ID] or "" -- TODO: check getting correlation id <- viraj
     if shared_info[DIRECT_RESPOND] then
         response_handle:logInfo("Ignoring response path intercept since direct responding for request_id: " .. request_id)
         return
     end
+    if not shared_info[CONTINUE_RESPONSE_PATH] then -- TODO: do this without checkinng direct response
+        response_handle:logInfo("Ignoring response path since interceptor reqeust flow is not completed for reqeust_id: " .. request_id)
+        return
+    end
+
+    response_handle:logInfo("Continue request_id: " .. request_id)
 
     local interceptor_request_body = {}
 
@@ -240,10 +277,13 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
 
     include_request_info(req_includes, interceptor_request_body)
-    interceptor_request_body[INTCPT_CONTEXT] = shared_info[INTCPT_CONTEXT]
+    interceptor_request_body[REQUEST.INTCPT_CONTEXT] = shared_info[REQUEST.INTCPT_CONTEXT]
 
-    -- TODO: (renuka) handle errors
-    local _, interceptor_response_body = send_http_call(response_handle, interceptor_request_body, intercept_service)
+    local interceptor_response_headers, interceptor_response_body_str = send_http_call(response_handle, interceptor_request_body, intercept_service)
+    if check_interceptor_call_errors(response_handle, interceptor_response_headers, interceptor_response_body_str, false) then
+        return true
+    end
+    local interceptor_response_body = json.decode(interceptor_response_body_str)
 
     modify_body(response_handle, interceptor_response_body, request_id)
     modify_headers(response_handle, interceptor_response_body)
