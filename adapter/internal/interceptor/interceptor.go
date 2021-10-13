@@ -25,6 +25,7 @@ import (
 
 //Interceptor hold values used for interceptor
 type Interceptor struct {
+	Context              *InvocationContext
 	RequestExternalCall  *HTTPCallConfig
 	ResponseExternalCall *HTTPCallConfig
 	RequestBody          *RequestBodyInclusions
@@ -41,17 +42,44 @@ type HTTPCallConfig struct {
 
 // RequestBodyInclusions represents which should be included in the request payload to the interceptor service
 type RequestBodyInclusions struct {
-	RequestHeaders   bool
-	RequestBody      bool
-	RequestTrailer   bool
-	ResponseHeaders  bool
-	ResponseBody     bool
-	ResponseTrailers bool
+	InvocationContext bool
+	RequestHeaders    bool
+	RequestBody       bool
+	RequestTrailer    bool
+	ResponseHeaders   bool
+	ResponseBody      bool
+	ResponseTrailers  bool
+}
+
+// InvocationContext represents invocation context of a request
+type InvocationContext struct {
+	BasePath        string
+	Method          string
+	APIName         string
+	APIVersion      string
+	PathTemplate    string
+	Vhost           string
+	ProdClusterName string
+	SandClusterName string
 }
 
 var (
-	requestInterceptorTemplate = `
+	// commonTemplate contains common lua code for request and response intercept
+	// Note: this template only applies if request or response interceptor is enabled
+	commonTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
+{{if or .RequestBody.InvocationContext .ResponseBody.InvocationContext}}
+local BASE_PATH = "{{.Context.BasePath}}"
+local METHOD = "{{.Context.Method}}"
+local API_NAME = "{{.Context.APIName}}"
+local API_VERSION = "{{.Context.APIVersion}}"
+local PATH_TEMPLATE = "{{.Context.PathTemplate}}"
+local VHOST = "{{.Context.Vhost}}"
+local PROD_CLUSTER_NAME = "{{.Context.ProdClusterName}}"
+local SAND_CLUSTER_NAME = "{{.Context.SandClusterName}}"
+{{end}}
+`
+	requestInterceptorTemplate = `
 function envoy_on_request(request_handle)
     interceptor.handle_request_interceptor(
 		request_handle,
@@ -62,7 +90,6 @@ function envoy_on_request(request_handle)
 end
 `
 	responseInterceptorTemplate = `
-local interceptor = require 'home.wso2.interceptor.lib.interceptor'
 function envoy_on_response(response_handle)
     interceptor.handle_response_interceptor(
 		response_handle,
@@ -83,7 +110,8 @@ end
 )
 
 //GetInterceptor inject values and get request interceptor
-func GetInterceptor(values Interceptor) string {
+// Note: This method is called only if one of request or response interceptor is enabled
+func GetInterceptor(values *Interceptor) string {
 	templ := template.Must(template.New("lua-filter").Parse(getTemplate(values.RequestExternalCall.Enable,
 		values.ResponseExternalCall.Enable)))
 	var out bytes.Buffer
@@ -103,5 +131,5 @@ func getTemplate(isReqIntercept bool, isResIntercept bool) string {
 	if isResIntercept {
 		resT = responseInterceptorTemplate
 	}
-	return reqT + resT
+	return commonTemplate + reqT + resT
 }
