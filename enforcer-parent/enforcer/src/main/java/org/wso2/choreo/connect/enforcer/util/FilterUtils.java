@@ -33,6 +33,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.choreo.connect.commons.model.AuthenticationContext;
@@ -344,6 +345,18 @@ public class FilterUtils {
     private static void constructJWTContent(JSONObject subscribedAPI,
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
+        if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
+            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+            if (claims.get(JWTConstants.SUB) != null) {
+                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
+                jwtInfoDto.setSub(sub);
+            }
+            if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
+                String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
+                        get(JWTConstants.ORGANIZATIONS);
+                jwtInfoDto.setOrganizations(organizations);
+            }
+        }
         if (apiKeyValidationInfoDTO != null) {
             jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
