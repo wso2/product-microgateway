@@ -123,15 +123,6 @@ type InterceptEndpoint struct {
 	Includes *interceptor.RequestBodyInclusions
 }
 
-//const (
-//	RequestHeaders   InterceptorBodyInclusions = "request_headers"
-//	RequestBody                               = "request_body"
-//	RequestTrailer                            = "request_trailers"
-//	ResponseHeaders                           = "response_headers"
-//	ResponseBody                              = "response_body"
-//	ResponseTrailers                          = "response_trailers"
-//)
-
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
 	return swagger.xWso2Cors
@@ -694,6 +685,8 @@ func (swagger *MgwSwagger) GetInterceptor(extensionName string) (InterceptEndpoi
 							includesV.ResponseBody = true
 						case "response_trailers":
 							includesV.ResponseTrailers = true
+						case "invocation_context":
+							includesV.InvocationContext = true
 						}
 					}
 				}

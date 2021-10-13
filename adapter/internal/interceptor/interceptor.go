@@ -68,15 +68,22 @@ var (
 	// Note: this template only applies if request or response interceptor is enabled
 	commonTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
+
+local req_includes = {invocationContext={{.RequestBody.InvocationContext}}, requestHeaders={{.RequestBody.RequestHeaders}}, requestBody={{.RequestBody.RequestBody}}, requestTrailer={{.RequestBody.RequestTrailer}}}
+local resp_includes = {invocationContext={{.ResponseBody.InvocationContext}}, requestHeaders={{.ResponseBody.RequestHeaders}}, requestBody={{.ResponseBody.RequestBody}}, requestTrailer={{.ResponseBody.RequestTrailer}},
+			responseHeaders={{.ResponseBody.ResponseHeaders}}, responseBody={{.ResponseBody.ResponseBody}}, responseTrailers={{.ResponseBody.ResponseTrailers}}}
+local inv_context = nil
 {{if or .RequestBody.InvocationContext .ResponseBody.InvocationContext}}
-local BASE_PATH = "{{.Context.BasePath}}"
-local METHOD = "{{.Context.Method}}"
-local API_NAME = "{{.Context.APIName}}"
-local API_VERSION = "{{.Context.APIVersion}}"
-local PATH_TEMPLATE = "{{.Context.PathTemplate}}"
-local VHOST = "{{.Context.Vhost}}"
-local PROD_CLUSTER_NAME = "{{.Context.ProdClusterName}}"
-local SAND_CLUSTER_NAME = "{{.Context.SandClusterName}}"
+inv_context = {
+	basePath = "{{.Context.BasePath}}",
+	method = "{{.Context.Method}}",
+	apiName = "{{.Context.APIName}}",
+	apiVersion = "{{.Context.APIVersion}}",
+	pathTemplate = "{{.Context.PathTemplate}}",
+	vhost = "{{.Context.Vhost}}",
+	prodClusterName = "{{.Context.ProdClusterName}}",
+	sandClusterName = "{{.Context.SandClusterName}}"
+}
 {{end}}
 `
 	requestInterceptorTemplate = `
@@ -84,8 +91,7 @@ function envoy_on_request(request_handle)
     interceptor.handle_request_interceptor(
 		request_handle,
 		{cluster_name="{{.RequestExternalCall.ClusterName}}", resource_path="{{.RequestExternalCall.Path}}", timeout={{.RequestExternalCall.Timeout}}},
-		{headers={{.RequestBody.RequestHeaders}}, body={{.RequestBody.RequestBody}}, trailers={{.RequestBody.RequestTrailer}}},
-		{headers={{.RequestBody.ResponseHeaders}}, body={{.RequestBody.ResponseBody}}, trailers={{.RequestBody.ResponseTrailers}}}
+		req_includes, resp_includes, inv_context
 	)
 end
 `
@@ -94,8 +100,7 @@ function envoy_on_response(response_handle)
     interceptor.handle_response_interceptor(
 		response_handle,
 		{cluster_name="{{.ResponseExternalCall.ClusterName}}", resource_path="{{.ResponseExternalCall.Path}}", timeout={{.ResponseExternalCall.Timeout}}},
-		{headers={{.ResponseBody.RequestHeaders}}, body={{.ResponseBody.RequestBody}}, trailers={{.ResponseBody.RequestTrailer}}},
-		{headers={{.ResponseBody.ResponseHeaders}}, body={{.ResponseBody.ResponseBody}}, trailers={{.ResponseBody.ResponseTrailers}}}
+		req_includes, resp_includes
 	)
 end
 `
