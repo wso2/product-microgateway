@@ -345,8 +345,8 @@ public class FilterUtils {
     private static void constructJWTContent(JSONObject subscribedAPI,
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
-        if (jwtInfoDto.getJwtValidationInfo().getClaims() != null) {
-            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+        Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+        if (claims != null) {
             if (claims.get(JWTConstants.SUB) != null) {
                 String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
                 jwtInfoDto.setSub(sub);
