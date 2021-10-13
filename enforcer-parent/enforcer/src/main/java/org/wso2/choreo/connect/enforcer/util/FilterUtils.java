@@ -345,7 +345,7 @@ public class FilterUtils {
     private static void constructJWTContent(JSONObject subscribedAPI,
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
-        Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+        Map<String, Object> claims = getClaimsFromJWTValidationInfo(jwtInfoDto);
         if (claims != null) {
             if (claims.get(JWTConstants.SUB) != null) {
                 String sub = (String) claims.get(JWTConstants.SUB);
@@ -377,8 +377,7 @@ public class FilterUtils {
             jwtInfoDto.setSubscriptionTier(subscriptionTier);
             jwtInfoDto.setEndUserTenantId(0);
 
-            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
-            if (claims.get(JwtConstants.APPLICATION) != null) {
+            if (claims != null && claims.get(JwtConstants.APPLICATION) != null) {
                 JSONObject
                         applicationObj = (JSONObject) claims.get(JwtConstants.APPLICATION);
                 jwtInfoDto.setApplicationId(
@@ -391,6 +390,15 @@ public class FilterUtils {
             }
         }
     }
+
+    private static Map<String, Object> getClaimsFromJWTValidationInfo(JWTInfoDto jwtInfoDto) {
+
+        if (jwtInfoDto.getJwtValidationInfo() != null) {
+            return jwtInfoDto.getJwtValidationInfo().getClaims();
+        }
+        return null;
+    }
+
     /**
      * Set the error code, message and description to the request context. The enforcer response will
      * retrieve this error details from the request context. Make sure to call this method and set the proper error
