@@ -348,12 +348,11 @@ public class FilterUtils {
         Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
         if (claims != null) {
             if (claims.get(JWTConstants.SUB) != null) {
-                String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
+                String sub = (String) claims.get(JWTConstants.SUB);
                 jwtInfoDto.setSub(sub);
             }
             if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
-                String[] organizations = (String[]) jwtInfoDto.getJwtValidationInfo().getClaims().
-                        get(JWTConstants.ORGANIZATIONS);
+                String[] organizations = (String[]) claims.get(JWTConstants.ORGANIZATIONS);
                 jwtInfoDto.setOrganizations(organizations);
             }
         }
