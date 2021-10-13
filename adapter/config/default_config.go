@@ -267,11 +267,8 @@ var defaultConfig = &Config{
 		EnvironmentLabels:   []string{"Default"},
 		RetryInterval:       5,
 		SkipSSLVerification: false,
-		JmsConnectionParameters: jmsConnectionParameters{
-			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
-		},
 		BrokerConnectionParameters: brokerConnectionParameters{
-			EventListeningEndpoints: []string{"$env{ASB_CONNECTION_STRING}"},
+			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 			ReconnectInterval:      5000, //in milli seconds
 			ReconnectRetryCount:    60,
 		},

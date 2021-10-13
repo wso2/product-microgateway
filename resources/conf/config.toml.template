@@ -141,6 +141,16 @@ idleTimeoutInSeconds = 3600
 
 [enforcer] # --------------------------------------------------------
 
+# If Custom Filters needs to be engaged, mention them here with position.
+# Note: The jar file containing customFilter should be added to the enforcer/dropins directory.
+# Note: Position should be the final position (including already available filters) after all the filters engaged.
+# Position starts from 1
+[[enforcer.filters]]
+    # ClassName of the filter
+    className = "org.wso2.choreo.connect.custom.CCCustomFilter"
+    # Position of the filter within final filterchain
+    position = 3
+
 # The configurations of gRPC netty based server in Enforcer that handles the incoming requests in the Choreo Connect
 [enforcer.authService]
   # Port of the Enforcer auth service
@@ -370,11 +380,8 @@ enable = true
   # Skip SSL verification
   skipSSLVerification = false
   # Message broker connection URL of the control plane
-  [controlPlane.jmsConnectionParameters]
+  [controlPlane.brokerConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
-  # TODO: (dnwick) remove this config once a common connection parameter is introduced
-  [controlPlane.asbConnectionParameters]
-    eventListeningEndpoint = "$env{ASB_CONNECTION_STRING}"
     reconnectInterval = 5000
     reconnectRetryCount = 60
 

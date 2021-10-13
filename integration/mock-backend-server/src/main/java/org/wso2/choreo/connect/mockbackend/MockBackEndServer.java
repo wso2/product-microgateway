@@ -25,17 +25,18 @@ import com.sun.net.httpserver.HttpsServer;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.security.KeyStore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.util.logging.Level;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.util.logging.Logger;
 
 /**
  * Mock HTTP server for testing Open API tests.
@@ -276,6 +277,36 @@ public class MockBackEndServer extends Thread {
                 }
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(context + "/headers", exchange -> {
+                byte[] response;
+                JSONObject responseJSON = new JSONObject();
+                exchange.getRequestHeaders().forEach((key,values) -> {
+                    values.forEach(value -> {
+                        responseJSON.put(key, value);
+                    });
+                });
+                response = responseJSON.toString().getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(context + "/headers/23.api", exchange -> {
+                byte[] response;
+                JSONObject responseJSON = new JSONObject();
+                exchange.getRequestHeaders().forEach((key,values) -> {
+                    values.forEach(value -> {
+                        responseJSON.put(key, value);
+                    });
+                });
+                response = responseJSON.toString().getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
                         Constants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
