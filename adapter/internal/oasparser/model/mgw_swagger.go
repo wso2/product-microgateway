@@ -469,7 +469,7 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName str
 						return nil, err
 					}
 					endpointCluster.Endpoints = endpoints
-					endpointCluster.EndpointType = "loadbalance"
+					endpointCluster.EndpointType = LoadBalance
 				} else {
 					return nil, errors.New("Error while parsing array of urls in " + endpointName)
 				}
@@ -577,6 +577,7 @@ func generateEndpointCluster(endpointName string, endpoints []Endpoint) *Endpoin
 		endpointCluster := EndpointCluster{
 			EndpointName: endpointName,
 			Endpoints:    endpoints,
+			EndpointType: LoadBalance,
 		}
 		return &endpointCluster
 	}

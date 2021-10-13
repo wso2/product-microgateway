@@ -38,6 +38,7 @@ const (
 	xWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
 	DefaultSecurity      string = "default"
+	LoadBalance          string = "loadbalance"
 )
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
