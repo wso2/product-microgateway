@@ -16,7 +16,7 @@
 [controlPlane]
     enabled = true
     skipSSLVerification=true
-[controlPlane.jmsConnectionParameters]
+[controlPlane.brokerConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='250'&connectdelay='10'"]
 
 [analytics]

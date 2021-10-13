@@ -123,8 +123,9 @@ type enforcer struct {
 	JwtIssuer    jwtIssuer
 	Management   management
 	RestServer   restServer
-	Tracing		 tracing
-	Metrics		 metrics
+	Filters      []filter
+	Tracing      tracing
+	Metrics      metrics
 }
 
 type server struct {
@@ -328,14 +329,14 @@ type analytics struct {
 }
 
 type tracing struct {
-	Enabled  			bool 				`toml:"enabled"`
-	Type				string				`toml:"type"`
-	ConfigProperties	map[string]string	`toml:"configProperties"`
+	Enabled          bool              `toml:"enabled"`
+	Type             string            `toml:"type"`
+	ConfigProperties map[string]string `toml:"configProperties"`
 }
 
 type metrics struct {
-	Enabled  	bool 	`toml:"enabled"`
-	Type 		string 	`toml:"type"`
+	Enabled bool   `toml:"enabled"`
+	Type    string `toml:"type"`
 }
 
 type analyticsAdapter struct {
@@ -388,15 +389,14 @@ type APICtlUser struct {
 
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
-	Enabled                 bool                    `toml:"enabled"`
-	ServiceURL              string                  `toml:"serviceUrl"`
-	Username                string                  `toml:"username"`
-	Password                string                  `toml:"password"`
-	SyncApisOnStartUp       bool                    `toml:"syncApisOnStartUp"`
-	EnvironmentLabels       []string                `toml:"environmentLabels"`
-	RetryInterval           time.Duration           `toml:"retryInterval"`
-	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
-	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
+	Enabled                    bool                       `toml:"enabled"`
+	ServiceURL                 string                     `toml:"serviceUrl"`
+	Username                   string                     `toml:"username"`
+	Password                   string                     `toml:"password"`
+	SyncApisOnStartUp          bool                       `toml:"syncApisOnStartUp"`
+	EnvironmentLabels          []string                   `toml:"environmentLabels"`
+	RetryInterval              time.Duration              `toml:"retryInterval"`
+	SkipSSLVerification        bool                       `toml:"skipSSLVerification"`
 	BrokerConnectionParameters brokerConnectionParameters `toml:"brokerConnectionParameters"`
 }
 
@@ -408,14 +408,10 @@ type globalAdapter struct {
 	RetryInterval time.Duration `toml:"retryInterval"`
 }
 
-type jmsConnectionParameters struct {
-	EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
-}
-
 type brokerConnectionParameters struct {
-	EventListeningEndpoints []string        `toml:"eventListeningEndpoints"`
-	ReconnectInterval      time.Duration `toml:"reconnectInterval"`
-	ReconnectRetryCount    int           `toml:"reconnectRetryCount"`
+	EventListeningEndpoints []string      `toml:"eventListeningEndpoints"`
+	ReconnectInterval       time.Duration `toml:"reconnectInterval"`
+	ReconnectRetryCount     int           `toml:"reconnectRetryCount"`
 }
 
 // Configuration for Enforcer admin rest api
@@ -510,4 +506,9 @@ type SecurityInfo struct {
 	SecurityType     string `json:"Type,omitempty"`
 	Enabled          bool   `json:"enabled,omitempty"`
 	Username         string `json:"username,omitempty"`
+}
+
+type filter struct {
+	ClassName string
+	Position  int32
 }

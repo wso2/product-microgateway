@@ -24,7 +24,7 @@ rm -rf target
 mkdir -p target/deps
 
 ADAPTER_GEN_DIR=$cur_dir/../adapter/pkg/discovery/api
-ENFORCER_GEN_DIR=$cur_dir/../enforcer/src/main/gen
+ENFORCER_GEN_DIR=$cur_dir/../enforcer-parent/enforcer/src/main/gen
 GREEN='\033[0;32m'
 BOLD="\033[1m"
 NC='\033[0m' # No Color

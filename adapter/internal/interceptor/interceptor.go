@@ -40,35 +40,15 @@ type HTTPCallConfig struct {
 
 var (
 	requestInterceptorTemplate = `
+local interceptor = require 'home.wso2.interceptor.lib.interceptor'
 function envoy_on_request(request_handle)
-	local headers, response = request_handle:httpCall(
-		"{{.RequestExternalCall.ClusterName}}",
-		{
-		[":method"] = "POST",
-		[":path"] = "{{.RequestExternalCall.Path}}",
-		[":authority"] = "cc-interceptor",
-		},
-		"hello from lua request",
-		{{.RequestExternalCall.Timeout}} 
-	)
-	request_handle:logInfo("Hello from router.")
-	request_handle:headers():add("custom-header", "hello")
+    interceptor.handle_request_interceptor(request_handle,"{{.RequestExternalCall.ClusterName}}","{{.RequestExternalCall.Path}}",{{.RequestExternalCall.Timeout}})
 end
 `
 	responseInterceptorTemplate = `
+local interceptor = require 'home.wso2.interceptor.lib.interceptor'
 function envoy_on_response(response_handle)
-	local headers, response = response_handle:httpCall(
-		"{{.ResponseExternalCall.ClusterName}}",
-		{
-		[":method"] = "POST",
-		[":path"] = "{{.ResponseExternalCall.Path}}",
-		[":authority"] = "cc-interceptor",
-		},
-		"bye from lua response",
-		{{.ResponseExternalCall.Timeout}} 
-	)
-	response_handle:logInfo("Bye from router.")
-	response_handle:headers():add("custom-header", "bye")
+    interceptor.handle_response_interceptor(response_handle,"{{.ResponseExternalCall.ClusterName}}","{{.ResponseExternalCall.Path}}",{{.ResponseExternalCall.Timeout}})
 end
 `
 	defaultRequestInterceptorTemplate = `
