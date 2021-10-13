@@ -67,11 +67,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
-			swagger.productionEndpoints = &EndpointCluster{
-				EndpointName: xWso2ProdEndpoints,
-				EndpointType: "loadbalance",
-				Endpoints:    productionEndpoints,
-			}
+			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints)
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}
