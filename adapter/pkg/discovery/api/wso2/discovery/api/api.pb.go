@@ -31,8 +31,8 @@ type Api struct {
 	Version             string            `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
 	ApiType             string            `protobuf:"bytes,4,opt,name=apiType,proto3" json:"apiType,omitempty"`
 	Description         string            `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	ProductionUrls      []*Endpoint       `protobuf:"bytes,6,rep,name=productionUrls,proto3" json:"productionUrls,omitempty"`
-	SandboxUrls         []*Endpoint       `protobuf:"bytes,7,rep,name=sandboxUrls,proto3" json:"sandboxUrls,omitempty"`
+	ProductionEndpoints *EndpointCluster  `protobuf:"bytes,6,opt,name=productionEndpoints,proto3" json:"productionEndpoints,omitempty"`
+	SandboxEndpoints    *EndpointCluster  `protobuf:"bytes,7,opt,name=sandboxEndpoints,proto3" json:"sandboxEndpoints,omitempty"`
 	Resources           []*Resource       `protobuf:"bytes,8,rep,name=resources,proto3" json:"resources,omitempty"`
 	BasePath            string            `protobuf:"bytes,9,opt,name=basePath,proto3" json:"basePath,omitempty"`
 	Tier                string            `protobuf:"bytes,10,opt,name=tier,proto3" json:"tier,omitempty"`
@@ -112,16 +112,16 @@ func (x *Api) GetDescription() string {
 	return ""
 }
 
-func (x *Api) GetProductionUrls() []*Endpoint {
+func (x *Api) GetProductionEndpoints() *EndpointCluster {
 	if x != nil {
-		return x.ProductionUrls
+		return x.ProductionEndpoints
 	}
 	return nil
 }
 
-func (x *Api) GetSandboxUrls() []*Endpoint {
+func (x *Api) GetSandboxEndpoints() *EndpointCluster {
 	if x != nil {
-		return x.SandboxUrls
+		return x.SandboxEndpoints
 	}
 	return nil
 }
@@ -283,14 +283,14 @@ func file_wso2_discovery_api_api_proto_rawDescGZIP() []byte {
 var file_wso2_discovery_api_api_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_wso2_discovery_api_api_proto_goTypes = []interface{}{
 	(*Api)(nil),              // 0: wso2.discovery.api.Api
-	(*Endpoint)(nil),         // 1: wso2.discovery.api.Endpoint
+	(*EndpointCluster)(nil),  // 1: wso2.discovery.api.EndpointCluster
 	(*Resource)(nil),         // 2: wso2.discovery.api.Resource
 	(*SecurityScheme)(nil),   // 3: wso2.discovery.api.SecurityScheme
 	(*EndpointSecurity)(nil), // 4: wso2.discovery.api.EndpointSecurity
 }
 var file_wso2_discovery_api_api_proto_depIdxs = []int32{
-	1, // 0: wso2.discovery.api.Api.productionUrls:type_name -> wso2.discovery.api.Endpoint
-	1, // 1: wso2.discovery.api.Api.sandboxUrls:type_name -> wso2.discovery.api.Endpoint
+	1, // 0: wso2.discovery.api.Api.productionEndpoints:type_name -> wso2.discovery.api.EndpointCluster
+	1, // 1: wso2.discovery.api.Api.sandboxEndpoints:type_name -> wso2.discovery.api.EndpointCluster
 	2, // 2: wso2.discovery.api.Api.resources:type_name -> wso2.discovery.api.Resource
 	3, // 3: wso2.discovery.api.Api.securityScheme:type_name -> wso2.discovery.api.SecurityScheme
 	4, // 4: wso2.discovery.api.Api.endpointSecurity:type_name -> wso2.discovery.api.EndpointSecurity
@@ -306,7 +306,7 @@ func file_wso2_discovery_api_api_proto_init() {
 	if File_wso2_discovery_api_api_proto != nil {
 		return
 	}
-	file_wso2_discovery_api_Endpoint_proto_init()
+	file_wso2_discovery_api_endpoint_cluster_proto_init()
 	file_wso2_discovery_api_Resource_proto_init()
 	file_wso2_discovery_api_endpoint_security_proto_init()
 	file_wso2_discovery_api_security_scheme_proto_init()
