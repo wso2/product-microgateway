@@ -17,6 +17,7 @@
 package model_test
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 
@@ -39,7 +40,11 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+
+	var apiYaml model.APIYaml
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 
 	dataItems := []setInfoSwaggerWebSocketTestItem{
@@ -66,7 +71,6 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	}
 
 	for _, item := range dataItems {
-		err := item.input.SetInfoSwaggerWebSocket(item.apiData)
 		assert.Nil(t, err, "Error while populating the mgwSwagger object for web sockets")
 		assert.Equal(t, item.input.GetID(), item.apiData["data"].(map[string]interface{})["id"], "MgwSwagger id mismatch")
 		assert.Equal(t, item.input.GetTitle(), item.apiData["data"].(map[string]interface{})["name"], "MgwSwagger title mismatch")
@@ -86,16 +90,16 @@ func TestValidate(t *testing.T) {
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.Nil(t, err, "Validation Error should not be present when servers URL is properly provided.")
 
-	mgwSwaggerForOpenapi.GetProdEndpoints()[0].Host = ("/")
+	mgwSwaggerForOpenapi.GetProdEndpoints().Endpoints[0].Host = ("/")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.NotNil(t, err, "Validation Error should not be present when production URL is /")
 
-	mgwSwaggerForOpenapi.GetProdEndpoints()[0].Host = ("abc.com")
-	mgwSwaggerForOpenapi.GetSandEndpoints()[0].Host = ("/")
+	mgwSwaggerForOpenapi.GetProdEndpoints().Endpoints[0].Host = ("abc.com")
+	mgwSwaggerForOpenapi.GetSandEndpoints().Endpoints[0].Host = ("/")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.NotNil(t, err, "Validation Error should not be present when sandbox URL is /")
 
-	mgwSwaggerForOpenapi.GetSandEndpoints()[0].Host = ("/abc/abc")
+	mgwSwaggerForOpenapi.GetSandEndpoints().Endpoints[0].Host = ("/abc/abc")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.NotNil(t, err, "Validation Error should not be present when servers URL is relative URL")
 }

@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-m2-SNAPSHOT</version>
+    <version>1.0.0-m3-SNAPSHOT</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -474,7 +474,7 @@
 
         <andes.client.version>3.3.12</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
-        <carbon.apimgt.version>9.0.174</carbon.apimgt.version>
+        <carbon.apimgt.version>9.0.369</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.7</commons.io.version>

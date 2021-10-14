@@ -17,21 +17,21 @@
 package api
 
 import (
-	"encoding/json"
 	"github.com/ghodss/yaml"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 )
 
-func parseDeployments(data []byte) ([]Deployment, error) {
+func parseDeployments(data []byte) ([]mgw.Deployment, error) {
 	// deployEnvsFromAPI represents deployments read from API Project
-	deployEnvsFromAPI := &DeploymentEnvironments{}
+	deployEnvsFromAPI := &mgw.DeploymentEnvironments{}
 	if err := yaml.Unmarshal(data, deployEnvsFromAPI); err != nil {
 		loggers.LoggerAPI.Errorf("Error parsing content of deployment environments: %v", err.Error())
 		return nil, err
 	}
 
-	deployments := make([]Deployment, 0, len(deployEnvsFromAPI.Data))
+	deployments := make([]mgw.Deployment, 0, len(deployEnvsFromAPI.Data))
 	for _, deployFromAPI := range deployEnvsFromAPI.Data {
 		defaultVhost, exists, err := config.GetDefaultVhost(deployFromAPI.DeploymentEnvironment)
 		if err != nil {
@@ -52,13 +52,4 @@ func parseDeployments(data []byte) ([]Deployment, error) {
 		deployments = append(deployments, deployment)
 	}
 	return deployments, nil
-}
-
-func parseAPIInfo(data []byte) (ApictlProjectInfo, error) {
-	apiInfo := ApictlProjectInfoJSON{}
-	err := json.Unmarshal(data, &apiInfo)
-	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occurred while parsing api.json %v", err.Error())
-	}
-	return apiInfo.Data, err
 }

@@ -33,6 +33,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.choreo.connect.commons.model.AuthenticationContext;
@@ -344,6 +345,17 @@ public class FilterUtils {
     private static void constructJWTContent(JSONObject subscribedAPI,
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
+        Map<String, Object> claims = getClaimsFromJWTValidationInfo(jwtInfoDto);
+        if (claims != null) {
+            if (claims.get(JWTConstants.SUB) != null) {
+                String sub = (String) claims.get(JWTConstants.SUB);
+                jwtInfoDto.setSub(sub);
+            }
+            if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
+                String[] organizations = (String[]) claims.get(JWTConstants.ORGANIZATIONS);
+                jwtInfoDto.setOrganizations(organizations);
+            }
+        }
         if (apiKeyValidationInfoDTO != null) {
             jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
@@ -365,8 +377,7 @@ public class FilterUtils {
             jwtInfoDto.setSubscriptionTier(subscriptionTier);
             jwtInfoDto.setEndUserTenantId(0);
 
-            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
-            if (claims.get(JwtConstants.APPLICATION) != null) {
+            if (claims != null && claims.get(JwtConstants.APPLICATION) != null) {
                 JSONObject
                         applicationObj = (JSONObject) claims.get(JwtConstants.APPLICATION);
                 jwtInfoDto.setApplicationId(
@@ -379,6 +390,15 @@ public class FilterUtils {
             }
         }
     }
+
+    private static Map<String, Object> getClaimsFromJWTValidationInfo(JWTInfoDto jwtInfoDto) {
+
+        if (jwtInfoDto.getJwtValidationInfo() != null) {
+            return jwtInfoDto.getJwtValidationInfo().getClaims();
+        }
+        return null;
+    }
+
     /**
      * Set the error code, message and description to the request context. The enforcer response will
      * retrieve this error details from the request context. Make sure to call this method and set the proper error

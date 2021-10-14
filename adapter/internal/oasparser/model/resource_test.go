@@ -26,14 +26,14 @@ func TestSortResources(t *testing.T) {
 	resources := getResources()
 	sortedPaths := []string{
 		"/pet/index.html",
-        "/pet/pet.{anc}",
-        "/pet/{petId}.com",
-        "/pet/{pet}.{anc}",
-        "/pet",
-        "/pet/{id}",
-        "/pet/{id}/price",
-        "/pet/{id}/{price}",
-        "/pet/*",
+		"/pet/pet.{anc}",
+		"/pet/{petId}.com",
+		"/pet/{pet}.{anc}",
+		"/pet",
+		"/pet/{id}",
+		"/pet/{id}/price",
+		"/pet/{id}/{price}",
+		"/pet/*",
 	}
 	sortedResources := SortResources(resources)
 
@@ -57,7 +57,7 @@ func getResources() []Resource {
 	resources := make([]Resource, len(paths))
 	for index := range paths {
 		res := CreateMinimalDummyResourceForTests(paths[index], make([]Operation, 0), "",
-		        make([]Endpoint, 0), make([]Endpoint, 0))
+			make([]Endpoint, 0), make([]Endpoint, 0))
 		resources[index] = res
 	}
 	return resources
