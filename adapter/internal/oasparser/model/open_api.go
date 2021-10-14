@@ -166,8 +166,8 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 
 func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) ([]SecurityScheme) {
 	var securitySchemes []SecurityScheme
-	for _, val := range openAPI.Components.SecuritySchemes {
-		scheme := SecurityScheme{Type: val.Value.Type, Name: val.Value.Name, In: val.Value.In}
+	for key, val := range openAPI.Components.SecuritySchemes {
+		scheme := SecurityScheme{DefinitionName: key, Type: val.Value.Type, Name: val.Value.Name, In: val.Value.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
 	logger.LoggerOasparser.Debugf("Security schemes in  setSecuritySchemesOpenAPI method %v:",securitySchemes)

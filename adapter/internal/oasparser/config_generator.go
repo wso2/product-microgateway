@@ -101,9 +101,10 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 	logger.LoggerOasparser.Debugf("Security schemes in GetEnforcerAPI method %v:", mgwSwagger.GetSecurityScheme())
 	for _, securityScheme := range mgwSwagger.GetSecurityScheme() {
 		scheme := &api.SecurityScheme{
-			Type: securityScheme.Type,
-			Name: securityScheme.Name,
-			In: securityScheme.In,
+			DefinitionName: securityScheme.DefinitionName,
+			Type:           securityScheme.Type,
+			Name:           securityScheme.Name,
+			In:             securityScheme.In,
 		}
 		securitySchemes = append(securitySchemes, scheme)
 	}

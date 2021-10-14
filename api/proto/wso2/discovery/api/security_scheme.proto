@@ -11,7 +11,8 @@ option java_multiple_files = true;
 
 // SecurityScheme config model
 message SecurityScheme {
-  string type    = 1; // type of the security scheme
-  string name    = 2; // name of the security scheme
-  string in      = 3; // location of the API key
+  string definitionName = 1; // name used to define security scheme
+  string type           = 2; // type of the security scheme
+  string name           = 3; // name of the security scheme
+  string in             = 4; // location of the API key in request
 }

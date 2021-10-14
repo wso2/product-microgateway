@@ -548,17 +548,44 @@ public class FilterUtils {
         return authHeaderName.toLowerCase();
     }
 
-    public static String getAPIKeyHeaderName(RequestContext requestContext) {
-        APIConfig apiConfig = requestContext.getMatchedAPI();
-        Map<String, String> headerMap = requestContext.getHeaders();
-        String apiKeyHeader = "";
-        if (headerMap.containsKey(apiConfig.getApiKeyHeaderName())) {
-            return apiConfig.getApiKeyHeaderName();
+    /**
+     * Gives the name used to define API key.
+     * @param requestContext Request context instance
+     * @return String to identify API key
+     */
+    public static String getAPIKeyName(RequestContext requestContext) {
+        SecuritySchemaConfig apiKeySecurityScheme = getAPIKeySchemeConfig(requestContext);
+        String apiKeyNameInDefinition = "";
+        if (apiKeySecurityScheme != null) {
+            apiKeyNameInDefinition = apiKeySecurityScheme.getName();
         }
-        if (StringUtils.isEmpty(apiKeyHeader)) {
-            apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
+        return apiKeyNameInDefinition.toLowerCase();
+    }
+
+    /**
+     * Gives security scheme config relevant to API key.
+     * @param requestContext Request context instance
+     * @return Instance relevant to the security scheme config
+     */
+    public static SecuritySchemaConfig getAPIKeySchemeConfig(RequestContext requestContext) {
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI().
+                getSecuritySchemeDefinitions();
+        return  securitySchemeDefinitions.get(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME);
+    }
+
+    /**
+     * Gives arbitrary name used to define API key.
+     * @param securitySchemeDefinitions Map of security scheme definitions
+     * @return Arbitrary name used to define API key security scheme
+     */
+    public static String getAPIKeyArbitraryName(Map<String, SecuritySchemaConfig> securitySchemeDefinitions) {
+        String apiKeyArbitraryName = "";
+        SecuritySchemaConfig apiKeySecurityScheme = securitySchemeDefinitions.
+                get(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME);
+        if (apiKeySecurityScheme != null) {
+            return apiKeySecurityScheme.getDefinitionName();
         }
-        return apiKeyHeader.toLowerCase();
+        return apiKeyArbitraryName;
     }
 
     /**

@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,51 +18,43 @@
 
 package org.wso2.choreo.connect.tests.testcases.withapim;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.clients.publisher.api.ApiResponse;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class APIKeyHeaderTestCase extends ApimBaseTest {
+public class APIKeyQueryParamTestCase extends ApimBaseTest {
 
-    private static final String SAMPLE_API_NAME = "APIKeyHeaderTestAPI";
-    private static final String SAMPLE_API_CONTEXT = "apiKeyHeader";
+    private static final String SAMPLE_API_NAME = "APIKeyQueryParamTestAPI";
+    private static final String SAMPLE_API_CONTEXT = "apiKeyQueryParam";
     private static final String SAMPLE_API_VERSION = "1.0.0";
-    private static final String APP_NAME = "APIKeyHeaderTestApp";
-
-    protected String apiKey;
+    private static final String APP_NAME = "APIKeyQueryParamTestApp";
+    private String apiKey;
     private String applicationId;
     private String apiId;
     private String endPoint;
-    private String internalKey;
 
-    @BeforeClass(description = "Initialise the setup for API key tests")
+    @BeforeClass(description = "Initialise the setup for API key query param tests")
     void start() throws Exception {
         super.initWithSuperTenant();
 
         String targetDir = Utils.getTargetDirPath();
-        String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "api_key_openAPI.yaml";
+        String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "api_key_query_param_openAPI.yaml";
+
         apiId = PublisherUtils.createAPIUsingOAS(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
                 SAMPLE_API_VERSION, user.getUserName(), filePath, publisherRestClient);
 
         publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
 
-        //Create and subscribe to app
+        // creating the application
         Application app = new Application(APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
         applicationId = StoreUtils.createApplication(app, storeRestClient);
 
@@ -72,12 +64,7 @@ public class APIKeyHeaderTestCase extends ApimBaseTest {
 
         endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/1");
 
-        // Obtain internal key
-        ApiResponse<org.wso2.am.integration.clients.publisher.api.v1.dto.APIKeyDTO> internalApiKeyDTO =
-                publisherRestClient.generateInternalApiKey(apiId);
-        internalKey = internalApiKeyDTO.getData().getApikey();
-
-        // Obtain API key
+        // Obtain API keys
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
                 storeRestClient);
         apiKey = apiKeyDTO.getApikey();
@@ -85,26 +72,16 @@ public class APIKeyHeaderTestCase extends ApimBaseTest {
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
-    @Test(description = "Test to check the API Key in header is working")
-    public void invokeAPIKeyWithSimilarHeaderSuccessTest() throws Exception {
+    //Invoke API by including the API key as a query parameter
+    @Test(description = "Test to check the API Key in query param is working")
+    public void invokeAPIKeyInQueryParamSuccessTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", apiKey);
-        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps(endPoint + "?x-api-key=" + apiKey), headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(),
                 com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
                 "Response code mismatched");
-    }
-
-    @Test(description = "Test to check the Internal Key in header is working")
-    public void invokeInternalAPIKeyWithSimilarHeaderSuccessTest() throws Exception {
-        // Set header
-        Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", internalKey);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 }

@@ -100,6 +100,10 @@ type RetryConfig struct {
 
 // SecurityScheme represents the structure of an security scheme.
 type SecurityScheme struct {
+	// Arbitrary name used to define security scheme
+	DefinitionName string 
+	// ex: default, x-api-key etc.
+
 	// Type of the security scheme
 	Type string
 	// Possible values are apiKey, oauth2

@@ -71,7 +71,7 @@ public class RestAPI implements API {
         String apiType = api.getApiType();
         List<String> productionUrls = processEndpoints(api.getProductionUrlsList());
         List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
-        Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
         List<String> securitySchemeList = new ArrayList<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
@@ -81,20 +81,21 @@ public class RestAPI implements API {
             if (securityScheme.getType() != null) {
                 String schemaType = securityScheme.getType();
                 SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
+                securitySchemaConfig.setDefinitionName(securityScheme.getDefinitionName());
                 securitySchemaConfig.setType(schemaType);
                 securitySchemaConfig.setName(securityScheme.getName());
                 securitySchemaConfig.setIn(securityScheme.getIn());
-                securitySchemes.put(schemaType, securitySchemaConfig);
+                securitySchemeDefinitions.put(schemaType, securitySchemaConfig);
             }
         }
 
-        for (String schemeName : securitySchemes.keySet()) {
+        for (String schemeName : securitySchemeDefinitions.keySet()) {
             securitySchemeList.add(schemeName);
         }
 
         for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath());
+                ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
                 resources.add(resConfig);
             }
         }
@@ -116,8 +117,8 @@ public class RestAPI implements API {
                 .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).
-                apiKeyHeader(getAPIKeyHeaderName(securitySchemes).toLowerCase()).build();
+                .organizationId(api.getOrganizationId()).securitySchemeDefinitions(securitySchemeDefinitions).build();
+
         initFilters();
         return basePath;
     }
@@ -191,7 +192,8 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    private ResourceConfig buildResource(Operation operation, String resPath) {
+    private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
+            SecuritySchemaConfig> securitySchemeDefinitions) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
@@ -202,6 +204,10 @@ public class RestAPI implements API {
             if (security != null && security.getScopesList().size() > 0) {
                 List<String> scopeList = new ArrayList<>(security.getScopesList());
                 securityMap.put(key, scopeList);
+            }
+            if (security != null && key.equalsIgnoreCase(FilterUtils.
+                    getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+                securityMap.put(key, new ArrayList<>());
             }
         }));
         resource.setSecuritySchemas(securityMap);
@@ -254,14 +260,5 @@ public class RestAPI implements API {
                         + filterDTO.getClassName());
             }
         }
-    }
-
-    private String getAPIKeyHeaderName(Map<String, SecuritySchemaConfig> securitySchemes) {
-        String apiKeyHeaderName = "";
-        SecuritySchemaConfig securitySchemaConfig = securitySchemes.get(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME);
-        if (securitySchemaConfig != null) {
-            apiKeyHeaderName = securitySchemaConfig.getName();
-        }
-        return apiKeyHeaderName;
     }
 }

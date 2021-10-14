@@ -20,6 +20,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private SecurityScheme() {
+    definitionName_ = "";
     type_ = "";
     name_ = "";
     in_ = "";
@@ -58,16 +59,22 @@ private static final long serialVersionUID = 0L;
           case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            type_ = s;
+            definitionName_ = s;
             break;
           }
           case 18: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            name_ = s;
+            type_ = s;
             break;
           }
           case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            name_ = s;
+            break;
+          }
+          case 34: {
             java.lang.String s = input.readStringRequireUtf8();
 
             in_ = s;
@@ -105,14 +112,60 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.api.SecurityScheme.class, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder.class);
   }
 
-  public static final int TYPE_FIELD_NUMBER = 1;
+  public static final int DEFINITIONNAME_FIELD_NUMBER = 1;
+  private volatile java.lang.Object definitionName_;
+  /**
+   * <pre>
+   * name used to define security scheme
+   * </pre>
+   *
+   * <code>string definitionName = 1;</code>
+   * @return The definitionName.
+   */
+  @java.lang.Override
+  public java.lang.String getDefinitionName() {
+    java.lang.Object ref = definitionName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      definitionName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * name used to define security scheme
+   * </pre>
+   *
+   * <code>string definitionName = 1;</code>
+   * @return The bytes for definitionName.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDefinitionNameBytes() {
+    java.lang.Object ref = definitionName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      definitionName_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int TYPE_FIELD_NUMBER = 2;
   private volatile java.lang.Object type_;
   /**
    * <pre>
    * type of the security scheme
    * </pre>
    *
-   * <code>string type = 1;</code>
+   * <code>string type = 2;</code>
    * @return The type.
    */
   @java.lang.Override
@@ -133,7 +186,7 @@ private static final long serialVersionUID = 0L;
    * type of the security scheme
    * </pre>
    *
-   * <code>string type = 1;</code>
+   * <code>string type = 2;</code>
    * @return The bytes for type.
    */
   @java.lang.Override
@@ -151,14 +204,14 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int NAME_FIELD_NUMBER = 2;
+  public static final int NAME_FIELD_NUMBER = 3;
   private volatile java.lang.Object name_;
   /**
    * <pre>
    * name of the security scheme
    * </pre>
    *
-   * <code>string name = 2;</code>
+   * <code>string name = 3;</code>
    * @return The name.
    */
   @java.lang.Override
@@ -179,7 +232,7 @@ private static final long serialVersionUID = 0L;
    * name of the security scheme
    * </pre>
    *
-   * <code>string name = 2;</code>
+   * <code>string name = 3;</code>
    * @return The bytes for name.
    */
   @java.lang.Override
@@ -197,14 +250,14 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int IN_FIELD_NUMBER = 3;
+  public static final int IN_FIELD_NUMBER = 4;
   private volatile java.lang.Object in_;
   /**
    * <pre>
-   * location of the API key
+   * location of the API key in request
    * </pre>
    *
-   * <code>string in = 3;</code>
+   * <code>string in = 4;</code>
    * @return The in.
    */
   @java.lang.Override
@@ -222,10 +275,10 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * location of the API key
+   * location of the API key in request
    * </pre>
    *
-   * <code>string in = 3;</code>
+   * <code>string in = 4;</code>
    * @return The bytes for in.
    */
   @java.lang.Override
@@ -257,14 +310,17 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
+    if (!getDefinitionNameBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, definitionName_);
+    }
     if (!getTypeBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, type_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, type_);
     }
     if (!getNameBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
     }
     if (!getInBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, in_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, in_);
     }
     unknownFields.writeTo(output);
   }
@@ -275,14 +331,17 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
+    if (!getDefinitionNameBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, definitionName_);
+    }
     if (!getTypeBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, type_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, type_);
     }
     if (!getNameBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
     }
     if (!getInBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, in_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, in_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -299,6 +358,8 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.api.SecurityScheme other = (org.wso2.choreo.connect.discovery.api.SecurityScheme) obj;
 
+    if (!getDefinitionName()
+        .equals(other.getDefinitionName())) return false;
     if (!getType()
         .equals(other.getType())) return false;
     if (!getName()
@@ -316,6 +377,8 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + DEFINITIONNAME_FIELD_NUMBER;
+    hash = (53 * hash) + getDefinitionName().hashCode();
     hash = (37 * hash) + TYPE_FIELD_NUMBER;
     hash = (53 * hash) + getType().hashCode();
     hash = (37 * hash) + NAME_FIELD_NUMBER;
@@ -459,6 +522,8 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      definitionName_ = "";
+
       type_ = "";
 
       name_ = "";
@@ -491,6 +556,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.api.SecurityScheme buildPartial() {
       org.wso2.choreo.connect.discovery.api.SecurityScheme result = new org.wso2.choreo.connect.discovery.api.SecurityScheme(this);
+      result.definitionName_ = definitionName_;
       result.type_ = type_;
       result.name_ = name_;
       result.in_ = in_;
@@ -542,6 +608,10 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.api.SecurityScheme other) {
       if (other == org.wso2.choreo.connect.discovery.api.SecurityScheme.getDefaultInstance()) return this;
+      if (!other.getDefinitionName().isEmpty()) {
+        definitionName_ = other.definitionName_;
+        onChanged();
+      }
       if (!other.getType().isEmpty()) {
         type_ = other.type_;
         onChanged();
@@ -583,13 +653,109 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private java.lang.Object definitionName_ = "";
+    /**
+     * <pre>
+     * name used to define security scheme
+     * </pre>
+     *
+     * <code>string definitionName = 1;</code>
+     * @return The definitionName.
+     */
+    public java.lang.String getDefinitionName() {
+      java.lang.Object ref = definitionName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        definitionName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * name used to define security scheme
+     * </pre>
+     *
+     * <code>string definitionName = 1;</code>
+     * @return The bytes for definitionName.
+     */
+    public com.google.protobuf.ByteString
+        getDefinitionNameBytes() {
+      java.lang.Object ref = definitionName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        definitionName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * name used to define security scheme
+     * </pre>
+     *
+     * <code>string definitionName = 1;</code>
+     * @param value The definitionName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDefinitionName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      definitionName_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * name used to define security scheme
+     * </pre>
+     *
+     * <code>string definitionName = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDefinitionName() {
+      
+      definitionName_ = getDefaultInstance().getDefinitionName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * name used to define security scheme
+     * </pre>
+     *
+     * <code>string definitionName = 1;</code>
+     * @param value The bytes for definitionName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDefinitionNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      definitionName_ = value;
+      onChanged();
+      return this;
+    }
+
     private java.lang.Object type_ = "";
     /**
      * <pre>
      * type of the security scheme
      * </pre>
      *
-     * <code>string type = 1;</code>
+     * <code>string type = 2;</code>
      * @return The type.
      */
     public java.lang.String getType() {
@@ -609,7 +775,7 @@ private static final long serialVersionUID = 0L;
      * type of the security scheme
      * </pre>
      *
-     * <code>string type = 1;</code>
+     * <code>string type = 2;</code>
      * @return The bytes for type.
      */
     public com.google.protobuf.ByteString
@@ -630,7 +796,7 @@ private static final long serialVersionUID = 0L;
      * type of the security scheme
      * </pre>
      *
-     * <code>string type = 1;</code>
+     * <code>string type = 2;</code>
      * @param value The type to set.
      * @return This builder for chaining.
      */
@@ -649,7 +815,7 @@ private static final long serialVersionUID = 0L;
      * type of the security scheme
      * </pre>
      *
-     * <code>string type = 1;</code>
+     * <code>string type = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearType() {
@@ -663,7 +829,7 @@ private static final long serialVersionUID = 0L;
      * type of the security scheme
      * </pre>
      *
-     * <code>string type = 1;</code>
+     * <code>string type = 2;</code>
      * @param value The bytes for type to set.
      * @return This builder for chaining.
      */
@@ -685,7 +851,7 @@ private static final long serialVersionUID = 0L;
      * name of the security scheme
      * </pre>
      *
-     * <code>string name = 2;</code>
+     * <code>string name = 3;</code>
      * @return The name.
      */
     public java.lang.String getName() {
@@ -705,7 +871,7 @@ private static final long serialVersionUID = 0L;
      * name of the security scheme
      * </pre>
      *
-     * <code>string name = 2;</code>
+     * <code>string name = 3;</code>
      * @return The bytes for name.
      */
     public com.google.protobuf.ByteString
@@ -726,7 +892,7 @@ private static final long serialVersionUID = 0L;
      * name of the security scheme
      * </pre>
      *
-     * <code>string name = 2;</code>
+     * <code>string name = 3;</code>
      * @param value The name to set.
      * @return This builder for chaining.
      */
@@ -745,7 +911,7 @@ private static final long serialVersionUID = 0L;
      * name of the security scheme
      * </pre>
      *
-     * <code>string name = 2;</code>
+     * <code>string name = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearName() {
@@ -759,7 +925,7 @@ private static final long serialVersionUID = 0L;
      * name of the security scheme
      * </pre>
      *
-     * <code>string name = 2;</code>
+     * <code>string name = 3;</code>
      * @param value The bytes for name to set.
      * @return This builder for chaining.
      */
@@ -778,10 +944,10 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object in_ = "";
     /**
      * <pre>
-     * location of the API key
+     * location of the API key in request
      * </pre>
      *
-     * <code>string in = 3;</code>
+     * <code>string in = 4;</code>
      * @return The in.
      */
     public java.lang.String getIn() {
@@ -798,10 +964,10 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * location of the API key
+     * location of the API key in request
      * </pre>
      *
-     * <code>string in = 3;</code>
+     * <code>string in = 4;</code>
      * @return The bytes for in.
      */
     public com.google.protobuf.ByteString
@@ -819,10 +985,10 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * location of the API key
+     * location of the API key in request
      * </pre>
      *
-     * <code>string in = 3;</code>
+     * <code>string in = 4;</code>
      * @param value The in to set.
      * @return This builder for chaining.
      */
@@ -838,10 +1004,10 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * location of the API key
+     * location of the API key in request
      * </pre>
      *
-     * <code>string in = 3;</code>
+     * <code>string in = 4;</code>
      * @return This builder for chaining.
      */
     public Builder clearIn() {
@@ -852,10 +1018,10 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * location of the API key
+     * location of the API key in request
      * </pre>
      *
-     * <code>string in = 3;</code>
+     * <code>string in = 4;</code>
      * @param value The bytes for in to set.
      * @return This builder for chaining.
      */

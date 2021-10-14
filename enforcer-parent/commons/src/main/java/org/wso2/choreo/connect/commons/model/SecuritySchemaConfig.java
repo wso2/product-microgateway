@@ -23,9 +23,10 @@ package org.wso2.choreo.connect.commons.model;
  */
 public class SecuritySchemaConfig {
 
-    private String type; // type of the security scheme
-    private String name; // name of the security scheme
-    private String in;   // location of the API key
+    private String definitionName;  // name used to define security scheme
+    private String type;            // type of the security scheme
+    private String name;            // name of the security scheme
+    private String in;              // location of the API key
 
     public String getType() {
         return type;
@@ -49,5 +50,13 @@ public class SecuritySchemaConfig {
 
     public void setIn(String in) {
         this.in = in;
+    }
+
+    public String getDefinitionName() {
+        return definitionName;
+    }
+
+    public void setDefinitionName(String definitionName) {
+        this.definitionName = definitionName;
     }
 }

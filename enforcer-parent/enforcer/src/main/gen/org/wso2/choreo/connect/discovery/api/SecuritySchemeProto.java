@@ -29,12 +29,12 @@ public final class SecuritySchemeProto {
   static {
     java.lang.String[] descriptorData = {
       "\n(wso2/discovery/api/security_scheme.pro" +
-      "to\022\022wso2.discovery.api\"8\n\016SecurityScheme" +
-      "\022\014\n\004type\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\n\n\002in\030\003 \001(\t" +
-      "B}\n%org.wso2.choreo.connect.discovery.ap" +
-      "iB\023SecuritySchemeProtoP\001Z=github.com/env" +
-      "oyproxy/go-control-plane/wso2/discovery/" +
-      "api;apib\006proto3"
+      "to\022\022wso2.discovery.api\"P\n\016SecurityScheme" +
+      "\022\026\n\016definitionName\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022\014" +
+      "\n\004name\030\003 \001(\t\022\n\n\002in\030\004 \001(\tB}\n%org.wso2.cho" +
+      "reo.connect.discovery.apiB\023SecuritySchem" +
+      "eProtoP\001Z=github.com/envoyproxy/go-contr" +
+      "ol-plane/wso2/discovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -45,7 +45,7 @@ public final class SecuritySchemeProto {
     internal_static_wso2_discovery_api_SecurityScheme_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_SecurityScheme_descriptor,
-        new java.lang.String[] { "Type", "Name", "In", });
+        new java.lang.String[] { "DefinitionName", "Type", "Name", "In", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

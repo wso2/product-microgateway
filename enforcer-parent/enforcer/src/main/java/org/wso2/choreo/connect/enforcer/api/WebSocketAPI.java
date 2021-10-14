@@ -72,6 +72,7 @@ public class WebSocketAPI implements API {
             if (securityScheme.getType() != null) {
                 String schemaType = securityScheme.getType();
                 SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
+                securitySchemaConfig.setDefinitionName(securityScheme.getDefinitionName());
                 securitySchemaConfig.setType(schemaType);
                 securitySchemaConfig.setName(securityScheme.getName());
                 securitySchemaConfig.setIn(securityScheme.getIn());

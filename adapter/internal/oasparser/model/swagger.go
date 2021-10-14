@@ -154,8 +154,8 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 // Sets security definitions defined in swagger 2 format.
 func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 	var securitySchemes []SecurityScheme
-	for _, val := range swagger2.SecurityDefinitions {
-		scheme := SecurityScheme{Type: val.Type , Name: val.Name, In: val.In}
+	for key , val := range swagger2.SecurityDefinitions {
+		scheme := SecurityScheme{DefinitionName: key, Type: val.Type , Name: val.Name, In: val.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
 	logger.LoggerOasparser.Debugf("Security schemes in setSecurityDefinitions  %v:",securitySchemes)

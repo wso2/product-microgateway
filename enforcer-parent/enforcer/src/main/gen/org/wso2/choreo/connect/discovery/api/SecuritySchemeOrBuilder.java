@@ -9,10 +9,30 @@ public interface SecuritySchemeOrBuilder extends
 
   /**
    * <pre>
+   * name used to define security scheme
+   * </pre>
+   *
+   * <code>string definitionName = 1;</code>
+   * @return The definitionName.
+   */
+  java.lang.String getDefinitionName();
+  /**
+   * <pre>
+   * name used to define security scheme
+   * </pre>
+   *
+   * <code>string definitionName = 1;</code>
+   * @return The bytes for definitionName.
+   */
+  com.google.protobuf.ByteString
+      getDefinitionNameBytes();
+
+  /**
+   * <pre>
    * type of the security scheme
    * </pre>
    *
-   * <code>string type = 1;</code>
+   * <code>string type = 2;</code>
    * @return The type.
    */
   java.lang.String getType();
@@ -21,7 +41,7 @@ public interface SecuritySchemeOrBuilder extends
    * type of the security scheme
    * </pre>
    *
-   * <code>string type = 1;</code>
+   * <code>string type = 2;</code>
    * @return The bytes for type.
    */
   com.google.protobuf.ByteString
@@ -32,7 +52,7 @@ public interface SecuritySchemeOrBuilder extends
    * name of the security scheme
    * </pre>
    *
-   * <code>string name = 2;</code>
+   * <code>string name = 3;</code>
    * @return The name.
    */
   java.lang.String getName();
@@ -41,7 +61,7 @@ public interface SecuritySchemeOrBuilder extends
    * name of the security scheme
    * </pre>
    *
-   * <code>string name = 2;</code>
+   * <code>string name = 3;</code>
    * @return The bytes for name.
    */
   com.google.protobuf.ByteString
@@ -49,19 +69,19 @@ public interface SecuritySchemeOrBuilder extends
 
   /**
    * <pre>
-   * location of the API key
+   * location of the API key in request
    * </pre>
    *
-   * <code>string in = 3;</code>
+   * <code>string in = 4;</code>
    * @return The in.
    */
   java.lang.String getIn();
   /**
    * <pre>
-   * location of the API key
+   * location of the API key in request
    * </pre>
    *
-   * <code>string in = 3;</code>
+   * <code>string in = 4;</code>
    * @return The bytes for in.
    */
   com.google.protobuf.ByteString

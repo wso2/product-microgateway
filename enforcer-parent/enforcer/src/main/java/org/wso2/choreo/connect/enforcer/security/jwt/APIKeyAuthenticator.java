@@ -75,8 +75,40 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
+        boolean isAPIkeyProtected = getIsAPIKeyProtected(requestContext);
+        if (!isAPIkeyProtected) {
+            return  false;
+        }
         String apiKey = getAPIKeyFromRequest(requestContext);
         return isAPIKey(apiKey);
+    }
+
+    private String getAPIKeyAllowedIn(RequestContext requestContext) {
+        String apiKeyLocation = "";
+        SecuritySchemaConfig securitySchemaConfig = FilterUtils.getAPIKeySchemeConfig(requestContext);
+        if (securitySchemaConfig != null) {
+            apiKeyLocation = securitySchemaConfig.getIn();
+        }
+        return apiKeyLocation;
+    }
+
+    private boolean getIsAPIKeyProtected(RequestContext requestContext) {
+        boolean isAPIKeyProtected = false;
+        List<ResourceConfig> resourceConfigList = requestContext.getMatchedAPI().getResources();
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
+                .getSecuritySchemeDefinitions();
+        for (int a = 0; a < resourceConfigList.size(); a++) {
+            ResourceConfig resourceConfig = resourceConfigList.get(a);
+            if (resourceConfig.getPath().equalsIgnoreCase(requestContext.getMatchedResourcePath().getPath()) &&
+                    resourceConfig.getMethod().name().equalsIgnoreCase(requestContext.getRequestMethod())) {
+                Map<String, List<String>> resourceSecuritySchemes = resourceConfig.getSecuritySchemas();
+                if (resourceSecuritySchemes.containsKey(FilterUtils.
+                        getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+                    isAPIKeyProtected = true;
+                }
+            }
+        }
+        return isAPIKeyProtected;
     }
 
     // Gets API key from request
@@ -90,6 +122,20 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         }
         if (StringUtils.isEmpty(apiKey) && apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_QUERY)) {
             Map<String, String> queryParameters = requestContext.getQueryParameters();
+            apiKey = getAPIKeyFromMap(queryParameters, apiKeyName);
+        }
+        return apiKey;
+    }
+
+    private String getAPIKeyFromMap(Map<String, String> requestMetaData, String apiKeyName) {
+        String apiKey = "";
+        if (requestMetaData.containsKey(apiKeyName)) {
+            return requestMetaData.get(apiKeyName);
+        }
+        if (StringUtils.isEmpty(apiKey)) {
+            if (requestMetaData.containsKey(APIConstants.API_SECURITY_API_KEY)) {
+                return  requestMetaData.get(apiKeyName);
+            }
             apiKey = getAPIKeyFromMap(queryParameters, apiKeyName);
         }
         return apiKey;
