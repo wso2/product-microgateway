@@ -119,8 +119,9 @@ type InterceptEndpoint struct {
 	ClusterTimeout time.Duration
 	RequestTimeout int
 	// Includes this is an enum allowing only values in
-	// {"request_headers", "request_body", "request_trailers", "response_headers", "response_body", "response_trailers"}
-	Includes *interceptor.RequestBodyInclusions
+	// {"request_headers", "request_body", "request_trailer", "response_headers", "response_body", "response_trailer",
+	//"invocation_context" }
+	Includes *interceptor.RequestInclusions
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -608,7 +609,7 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 }
 
 //GetInterceptor returns interceptors
-func (swagger *MgwSwagger) GetInterceptor(extensionName string) (InterceptEndpoint, error) {
+func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) (InterceptEndpoint, error) {
 	urlV := "http"
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
@@ -616,7 +617,7 @@ func (swagger *MgwSwagger) GetInterceptor(extensionName string) (InterceptEndpoi
 	pathV := "/"
 	hostV := ""
 	portV := uint32(80)
-	includesV := &interceptor.RequestBodyInclusions{}
+	includesV := &interceptor.RequestInclusions{}
 
 	var err error
 

@@ -76,6 +76,8 @@ local SHARED = {
 
 -- envoy headers
 local STATUS = ":status"
+local FILTER_NAME = "envoy.filters.http.lua"
+local SHARED_INFO_META_KEY = "shared.info"
 
 local function modify_headers(handle, interceptor_response_body)
     -- priority: headersToAdd, headersToReplace, headersToRemove
@@ -126,7 +128,7 @@ end
 
 local function direct_respond(handle, headers, body, shared_info)
     shared_info[RESPOSE.DIRECT_RESPOND] = true
-    handle:streamInfo():dynamicMetadata():set("envoy.filters.http.lua", "shared.info", shared_info)
+    handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
     handle:respond(
         headers,
         body
@@ -148,12 +150,12 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
     if headers[STATUS] == "204" then -- handle empty body, terminate flow
         return true
     end
-    
-    handle:logErr('Invalid interceptor service response, HTTP status_code: "' .. headers[STATUS] ..
+
+    local flow = is_request_flow and "request" or "response"
+    handle:logErr('Invalid ' .. flow .. ' interceptor service response, HTTP status_code: "' .. headers[STATUS] ..
         '", message: "' .. body_str .. '"' .. ', request_id: "' .. request_id .. '"')
     local resp_headers = {[STATUS] = "500"}
-    -- TODO: (renuka) check the error code - get new error code
-    local resp_body = '{"error_message": "Internal Server Error", "error_description": "Internal Server Error", "code": "00000"}'
+    local resp_body = '{"error_message": "Internal Server Error", "error_description": "Internal Server Error", "code": "102517"}'
     
     --#region request flow
     if is_request_flow then
@@ -169,15 +171,18 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
 
     --#region response flow
     local backend_headers = handle:headers()
-    for key, _ in pairs(backend_headers) do -- remmove all headers from backend
+    local headers_to_remove = {}
+    for key, _ in pairs(backend_headers) do
+        headers_to_remove[key] = "" -- can not remove headers while iterating, hence adding first
+    end
+    for key, _ in pairs(headers_to_remove) do -- remmove all headers from backend
         backend_headers:remove(key)
     end
-    modify_body(handle, {body = resp_body}, request_id)
+    backend_headers:add(STATUS, "500")
+    modify_body(handle, {body = base64.encode(resp_body)}, request_id)
     return true
     --#endregion
 end
-
--- TODO: (renuka) check what to log as trace and debug
 
 --- send an HTTP request to the interceptor
 -- @param handle request/response handler object
@@ -216,8 +221,8 @@ local function include_request_info(req_includes, interceptor_request_body, requ
     update_request_body(req_includes, interceptor_request_body, REQUEST.REQ_TRAILERS, request_trailers_table)
 end
 
-local function include_invocation_context(handle, req_includes, resp_includes, inv_context, interceptor_request_body, shared_info, request_headers)
-    if req_includes[INCLUDES.INV_CONTEXT] or resp_includes[INCLUDES.INV_CONTEXT] then
+local function include_invocation_context(handle, req_flow_includes, resp_flow_includes, inv_context, interceptor_request_body, shared_info, request_headers)
+    if req_flow_includes[INCLUDES.INV_CONTEXT] or resp_flow_includes[INCLUDES.INV_CONTEXT] then
         local client_ip = request_headers:get("x-forwarded-for")
         if client_ip == nil or client_ip == "" then
             client_ip = handle:streamInfo():downstreamDirectRemoteAddress()
@@ -228,14 +233,14 @@ local function include_invocation_context(handle, req_includes, resp_includes, i
         inv_context[INV_CONTEXT.SCHEME] = request_headers:get(":scheme")
         inv_context[INV_CONTEXT.PATH] = request_headers:get(":path")
         inv_context[INV_CONTEXT.SOURCE] = client_ip
-        inv_context[INV_CONTEXT.DESTINATION] = handle:streamInfo():downstreamLocalAddress() -- TODO: check this viraj, amali
+        -- inv_context[INV_CONTEXT.DESTINATION] = handle:streamInfo():downstreamLocalAddress() -- TODO: (renuka) check this
         inv_context[INV_CONTEXT.ENFORCER_DENIED] = false
         --#endregion
     end
-    if req_includes[INCLUDES.INV_CONTEXT] then
+    if req_flow_includes[INCLUDES.INV_CONTEXT] then
         interceptor_request_body[REQUEST.INV_CONTEXT] = inv_context
     end
-    if resp_includes[INCLUDES.INV_CONTEXT] then
+    if resp_flow_includes[INCLUDES.INV_CONTEXT] then
         shared_info[REQUEST.INV_CONTEXT] = inv_context
     end
 end
@@ -260,10 +265,11 @@ end
 ---interceptor handler for request flow
 ---@param request_handle table - request_handle
 ---@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
----@param req_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean}
----@param resp_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
+---@param req_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean}
+---@param resp_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
 ---@param inv_context table
-function interceptor.handle_request_interceptor(request_handle, intercept_service, req_includes, resp_includes, inv_context)
+---@param skip_interceptor_call boolean
+function interceptor.handle_request_interceptor(request_handle, intercept_service, req_flow_includes, resp_flow_includes, inv_context, skip_interceptor_call)
     local shared_info = {}
 
     local request_headers = request_handle:headers()
@@ -273,23 +279,23 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     local interceptor_request_body = {}
     -- including invocation context first it is required to read headers
     -- setting invocation context done only in the request flow and set it to the shared info to refer in response flow
-    include_invocation_context(request_handle, req_includes, resp_includes, inv_context, interceptor_request_body, shared_info, request_headers)
+    include_invocation_context(request_handle, req_flow_includes, resp_flow_includes, inv_context, interceptor_request_body, shared_info, request_headers)
 
-    --#region read request headers
+    --#region read request headers and update shared_info
     local request_headers_table = {}
-    if req_includes[INCLUDES.REQ_HEADERS] or resp_includes[INCLUDES.REQ_HEADERS] then
+    if req_flow_includes[INCLUDES.REQ_HEADERS] or resp_flow_includes[INCLUDES.REQ_HEADERS] then
         for key, value in pairs(request_headers) do
             request_headers_table[key] = value
         end
     end
-    if resp_includes[INCLUDES.REQ_HEADERS] then
+    if resp_flow_includes[INCLUDES.REQ_HEADERS] then
         shared_info[REQUEST.REQ_HEADERS] = request_headers_table
     end
     --#endregion
     
-    --#region read request body
+    --#region read request body and update shared_info
     local request_body_base64
-    if req_includes[INCLUDES.REQ_BODY] or resp_includes[INCLUDES.REQ_BODY] then
+    if req_flow_includes[INCLUDES.REQ_BODY] or resp_flow_includes[INCLUDES.REQ_BODY] then
         local request_body = request_handle:body()
         local request_body_str
         if request_body then
@@ -299,31 +305,38 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         end
         request_body_base64 = base64.encode(request_body_str)
     end
-    if resp_includes[INCLUDES.REQ_BODY] then
+    if resp_flow_includes[INCLUDES.REQ_BODY] then
         shared_info[REQUEST.REQ_BODY] = request_body_base64
     end
     --#endregion
 
-    --#region read request trailers
+    --#region read request trailers and update shared_info
     local request_trailers_table = {}
-    if req_includes[INCLUDES.REQ_TRAILERS] or resp_includes[INCLUDES.REQ_TRAILERS] then
+    if req_flow_includes[INCLUDES.REQ_TRAILERS] or resp_flow_includes[INCLUDES.REQ_TRAILERS] then
         local request_trailers = request_handle:trailers()
         for key, value in pairs(request_trailers) do
             request_trailers_table[key] = value
         end
     end
-    if resp_includes[INCLUDES.REQ_TRAILERS] then
+    if resp_flow_includes[INCLUDES.REQ_TRAILERS] then
         shared_info[REQUEST.REQ_TRAILERS] = request_trailers_table
     end
     --#endregion
 
-    include_request_info(req_includes, interceptor_request_body, request_headers_table, request_body_base64, request_trailers_table)
+    if skip_interceptor_call then
+        -- skip calling interceptor service by only setting the shared_info
+        -- this is useful when the request interceptor flow is disabled and only the response interceptor flow is enabled.
+        request_handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
+        return
+    end
+
+    -- include request details: request headers, body and trailers to the interceptor_request_body
+    include_request_info(req_flow_includes, interceptor_request_body, request_headers_table, request_body_base64, request_trailers_table)
 
     local interceptor_response_headers, interceptor_response_body_str = send_http_call(request_handle, interceptor_request_body, intercept_service)
     if check_interceptor_call_errors(request_handle, interceptor_response_headers, interceptor_response_body_str, shared_info, request_id, true) then
         return
     end
-
     local interceptor_response_body = json.decode(interceptor_response_body_str)
 
     handle_direct_respond(request_handle, interceptor_response_body, shared_info, request_id)
@@ -336,28 +349,31 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         shared_info[REQUEST.INTCPT_CONTEXT] = interceptor_response_body[RESPOSE.INTCPT_CONTEXT]
     end
 
-    request_handle:streamInfo():dynamicMetadata():set("envoy.filters.http.lua", "shared.info", shared_info)
+    request_handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
 end
 
 ---interceptor handler for response flow
 ---@param response_handle table - response_handle
 ---@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
----@param req_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean}
----@param resp_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
-function interceptor.handle_response_interceptor(response_handle, intercept_service, req_includes, resp_includes)
-    local shared_info = response_handle:streamInfo():dynamicMetadata():get("envoy.filters.http.lua")["shared.info"]
-    local request_id = shared_info[SHARED.REQUEST_ID] -- TODO: set this when request path is disabled also
-    if shared_info[RESPOSE.DIRECT_RESPOND] then
-        response_handle:logInfo("Ignoring response path intercept since direct responded for the request_id: " .. request_id)
+---@param resp_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
+function interceptor.handle_response_interceptor(response_handle, intercept_service, resp_flow_includes)
+    local meta = response_handle:streamInfo():dynamicMetadata():get(FILTER_NAME)
+    local shared_info = meta and meta[SHARED_INFO_META_KEY]
+    if not shared_info then
+        -- no shared info found, request interceptor flow is not executed (eg: enforcer validation failed)
+        -- TODO: (renuka) check again, if we want to go response flow if enforcer validation failed, have to set request info metadata from enforcer
         return
     end
-
-    response_handle:logInfo("Continue request_id: " .. request_id)
+    local request_id = shared_info[SHARED.REQUEST_ID]
+    if shared_info[RESPOSE.DIRECT_RESPOND] then
+        response_handle:logDebug("Ignoring response path intercept since direct responded for the request_id: " .. request_id)
+        return
+    end
 
     local interceptor_request_body = {}
 
     --#region read backend headers
-    if resp_includes[INCLUDES.RESP_HEADERS] then
+    if resp_flow_includes[INCLUDES.RESP_HEADERS] then
         local backend_headers = response_handle:headers()
         local backend_headers_table = {}
         for key, value in pairs(backend_headers) do
@@ -368,14 +384,14 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     --#endregion
 
     --#region read backend body
-    if resp_includes[INCLUDES.RESP_BODY] then
+    if resp_flow_includes[INCLUDES.RESP_BODY] then
         local request_body = response_handle:body():getBytes(0, response_handle:body():length())
         interceptor_request_body[REQUEST.RESP_BODY] = base64.encode(request_body)
     end
     --#endregion
 
     --#region read backend trailers
-    if resp_includes[INCLUDES.RESP_TRAILERS] then
+    if resp_flow_includes[INCLUDES.RESP_TRAILERS] then
         local backend_trailers = response_handle:trailers()
         local backend_trailers_table = {}
         for key, value in pairs(backend_trailers) do
@@ -385,11 +401,11 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     --#endregion
 
-    include_request_info(req_includes, interceptor_request_body, shared_info[REQUEST.REQ_HEADERS], shared_info[REQUEST.REQ_BODY], shared_info[REQUEST.REQ_TRAILERS])
+    include_request_info(resp_flow_includes, interceptor_request_body, shared_info[REQUEST.REQ_HEADERS], shared_info[REQUEST.REQ_BODY], shared_info[REQUEST.REQ_TRAILERS])
     interceptor_request_body[REQUEST.INTCPT_CONTEXT] = shared_info[REQUEST.INTCPT_CONTEXT]
 
-    --#region invocation context
-    if resp_includes[REQUEST.INV_CONTEXT] then
+    --#region set invocation context
+    if resp_flow_includes[REQUEST.INV_CONTEXT] then
         interceptor_request_body[REQUEST.INV_CONTEXT] = shared_info[REQUEST.INV_CONTEXT]
     end
     --#endregion

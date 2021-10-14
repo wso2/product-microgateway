@@ -28,8 +28,8 @@ type Interceptor struct {
 	Context              *InvocationContext
 	RequestExternalCall  *HTTPCallConfig
 	ResponseExternalCall *HTTPCallConfig
-	RequestBody          *RequestBodyInclusions
-	ResponseBody         *RequestBodyInclusions
+	ReqFlowInclude       *RequestInclusions
+	RespFlowInclude      *RequestInclusions
 }
 
 //HTTPCallConfig hold values used for external interceptor engine
@@ -40,8 +40,8 @@ type HTTPCallConfig struct {
 	Timeout     string
 }
 
-// RequestBodyInclusions represents which should be included in the request payload to the interceptor service
-type RequestBodyInclusions struct {
+// RequestInclusions represents which should be included in the request payload to the interceptor service
+type RequestInclusions struct {
 	InvocationContext bool
 	RequestHeaders    bool
 	RequestBody       bool
@@ -68,13 +68,12 @@ var (
 	// Note: this template only applies if request or response interceptor is enabled
 	commonTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
-
-local req_includes = {invocationContext={{.RequestBody.InvocationContext}}, requestHeaders={{.RequestBody.RequestHeaders}}, requestBody={{.RequestBody.RequestBody}}, requestTrailer={{.RequestBody.RequestTrailer}}}
-local resp_includes = {invocationContext={{.ResponseBody.InvocationContext}}, requestHeaders={{.ResponseBody.RequestHeaders}}, requestBody={{.ResponseBody.RequestBody}}, requestTrailer={{.ResponseBody.RequestTrailer}},
-			responseHeaders={{.ResponseBody.ResponseHeaders}}, responseBody={{.ResponseBody.ResponseBody}}, responseTrailers={{.ResponseBody.ResponseTrailers}}}
-local inv_context = nil
-{{if or .RequestBody.InvocationContext .ResponseBody.InvocationContext}}
-inv_context = {
+{{if .ResponseExternalCall.Enable}} {{/* resp_flow details are required in req flow if request info needed in resp flow */}}
+local resp_flow = {invocationContext={{.RespFlowInclude.InvocationContext}}, requestHeaders={{.RespFlowInclude.RequestHeaders}}, requestBody={{.RespFlowInclude.RequestBody}}, requestTrailer={{.RespFlowInclude.RequestTrailer}},
+			responseHeaders={{.RespFlowInclude.ResponseHeaders}}, responseBody={{.RespFlowInclude.ResponseBody}}, responseTrailers={{.RespFlowInclude.ResponseTrailers}}}
+{{else}}local resp_flow = {}{{end}} {{/* if resp_flow disabled no need req info in resp path */}}
+{{if or .ReqFlowInclude.InvocationContext .RespFlowInclude.InvocationContext}}
+local inv_context = {
 	basePath = "{{.Context.BasePath}}",
 	method = "{{.Context.Method}}",
 	apiName = "{{.Context.APIName}}",
@@ -84,14 +83,15 @@ inv_context = {
 	prodClusterName = "{{.Context.ProdClusterName}}",
 	sandClusterName = "{{.Context.SandClusterName}}"
 }
-{{end}}
+{{else}}local inv_context = nil{{end}}
 `
 	requestInterceptorTemplate = `
+local req_flow = {invocationContext={{.ReqFlowInclude.InvocationContext}}, requestHeaders={{.ReqFlowInclude.RequestHeaders}}, requestBody={{.ReqFlowInclude.RequestBody}}, requestTrailer={{.ReqFlowInclude.RequestTrailer}}}
 function envoy_on_request(request_handle)
     interceptor.handle_request_interceptor(
 		request_handle,
 		{cluster_name="{{.RequestExternalCall.ClusterName}}", resource_path="{{.RequestExternalCall.Path}}", timeout={{.RequestExternalCall.Timeout}}},
-		req_includes, resp_includes, inv_context
+		req_flow, resp_flow, inv_context
 	)
 end
 `
@@ -100,14 +100,18 @@ function envoy_on_response(response_handle)
     interceptor.handle_response_interceptor(
 		response_handle,
 		{cluster_name="{{.ResponseExternalCall.ClusterName}}", resource_path="{{.ResponseExternalCall.Path}}", timeout={{.ResponseExternalCall.Timeout}}},
-		req_includes, resp_includes
+		resp_flow
 	)
 end
 `
+	// defaultRequestInterceptorTemplate is the template that is applied when request flow is disabled
+	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
+	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow, inv_context, true)
 end
 `
+	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
 	defaultResponseInterceptorTemplate = `
 function envoy_on_response(response_handle)
 end
