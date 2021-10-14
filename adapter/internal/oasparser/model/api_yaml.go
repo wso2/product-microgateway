@@ -20,6 +20,7 @@ package model
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"os"
 	"strconv"
@@ -177,4 +178,43 @@ func generateHashValue(apiName string, apiVersion string) string {
 	endpointConfigSHValue := sha1.New()
 	endpointConfigSHValue.Write([]byte(apiName + ":" + apiVersion))
 	return hex.EncodeToString(endpointConfigSHValue.Sum(nil)[:])
+}
+
+// PopulateEndpointsInfo this will map sandbox and prod endpoint
+// This is done to fix the issue https://github.com/wso2/product-microgateway/issues/2288
+func PopulateEndpointsInfo(apiYaml APIYaml) APIYaml {
+	rawProdEndpoints := apiYaml.Data.EndpointConfig.RawProdEndpoints
+	if rawProdEndpoints != nil {
+		if val, ok := rawProdEndpoints.(map[string]interface{}); ok {
+			jsonString, _ := json.Marshal(val)
+			s := EndpointInfo{}
+			json.Unmarshal(jsonString, &s)
+			apiYaml.Data.EndpointConfig.ProductionEndpoints = []EndpointInfo{s}
+		} else if val, ok := rawProdEndpoints.([]interface{}); ok {
+			jsonString, _ := json.Marshal(val)
+			s := []EndpointInfo{}
+			json.Unmarshal(jsonString, &s)
+			apiYaml.Data.EndpointConfig.ProductionEndpoints = s
+		} else {
+			loggers.LoggerAPI.Warn("No production endpoints provided")
+		}
+	}
+	rawSandEndpoints := apiYaml.Data.EndpointConfig.RawSandboxEndpoints
+	if rawSandEndpoints != nil {
+		if val, ok := rawSandEndpoints.(map[string]interface{}); ok {
+			jsonString, _ := json.Marshal(val)
+			s := EndpointInfo{}
+			json.Unmarshal(jsonString, &s)
+			apiYaml.Data.EndpointConfig.SandBoxEndpoints = []EndpointInfo{s}
+
+		} else if val, ok := rawSandEndpoints.([]interface{}); ok {
+			jsonString, _ := json.Marshal(val)
+			s := []EndpointInfo{}
+			json.Unmarshal(jsonString, &s)
+			apiYaml.Data.EndpointConfig.SandBoxEndpoints = s
+		} else {
+			loggers.LoggerAPI.Warn("No sandbox endpoints provided")
+		}
+	}
+	return apiYaml
 }

@@ -152,7 +152,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 				loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
 				return apiProject, err
 			}
-			apiYaml = PopulateEndpointsInfo(apiYaml)
+			apiYaml = mgw.PopulateEndpointsInfo(apiYaml)
 
 			err = mgw.VerifyMandatoryFields(apiYaml)
 			if err != nil {
@@ -184,45 +184,6 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 	apiProject.UpstreamCerts = upstreamCerts
 	apiProject.InterceptorCerts = interceptorCerts
 	return apiProject, nil
-}
-
-// PopulateEndpointsInfo this will map sandbox and prod endpoint
-// This is done to fix the issue https://github.com/wso2/product-microgateway/issues/2288
-func PopulateEndpointsInfo(apiYaml mgw.APIYaml) mgw.APIYaml {
-	rawProdEndpoints := apiYaml.Data.EndpointConfig.RawProdEndpoints
-	if rawProdEndpoints != nil {
-		if val, ok := rawProdEndpoints.(map[string]interface{}); ok {
-			jsonString, _ := json.Marshal(val)
-			s := mgw.EndpointInfo{}
-			json.Unmarshal(jsonString, &s)
-			apiYaml.Data.EndpointConfig.ProductionEndpoints = []mgw.EndpointInfo{s}
-		} else if val, ok := rawProdEndpoints.([]interface{}); ok {
-			jsonString, _ := json.Marshal(val)
-			s := []mgw.EndpointInfo{}
-			json.Unmarshal(jsonString, &s)
-			apiYaml.Data.EndpointConfig.ProductionEndpoints = s
-		} else {
-			loggers.LoggerAPI.Warn("No production endpoints provided")
-		}
-	}
-	rawSandEndpoints := apiYaml.Data.EndpointConfig.RawSandboxEndpoints
-	if rawSandEndpoints != nil {
-		if val, ok := rawSandEndpoints.(map[string]interface{}); ok {
-			jsonString, _ := json.Marshal(val)
-			s := mgw.EndpointInfo{}
-			json.Unmarshal(jsonString, &s)
-			apiYaml.Data.EndpointConfig.SandBoxEndpoints = []mgw.EndpointInfo{s}
-
-		} else if val, ok := rawSandEndpoints.([]interface{}); ok {
-			jsonString, _ := json.Marshal(val)
-			s := []mgw.EndpointInfo{}
-			json.Unmarshal(jsonString, &s)
-			apiYaml.Data.EndpointConfig.SandBoxEndpoints = s
-		} else {
-			loggers.LoggerAPI.Warn("No sandbox endpoints provided")
-		}
-	}
-	return apiYaml
 }
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
