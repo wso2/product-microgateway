@@ -40,8 +40,10 @@ func TestMain(m *testing.M) {
 
 func TestEnvConfigAssignment(t *testing.T) {
 	conf, _ := config.ReadConfigs()
+	logconfig := config.ReadLogConfigs()
 	assert.Equal(t, "9401", conf.Adapter.Server.Port, "String value assignment from environment failed.")
 	assert.Equal(t, true, conf.Enforcer.JwtGenerator.Enable, "Boolean value assignment from environment failed.")
+	assert.Equal(t, true, conf.Adapter.Server.Enabled, "Boolean value assignment from environment failed.")
 	assert.Equal(t, time.Duration(25), conf.GlobalAdapter.RetryInterval, "Time.Duration value assignment from environment failed.")
 	assert.Equal(t, uint32(32768), conf.Analytics.Adapter.BufferSizeBytes, "Uint32 value assignment from environment failed.")
 	assert.Equal(t, int32(1800), conf.Enforcer.JwtIssuer.ValidityPeriod, "Int32 value assignment from environment failed.")
@@ -50,4 +52,7 @@ func TestEnvConfigAssignment(t *testing.T) {
 	assert.Equal(t, "test-token", authToken, "Map Value(String) assignment from environment failed.")
 	assert.Equal(t, "MGW-Test", conf.Enforcer.Security.TokenService[1].Name,
 		"String value assignement (within Struct Array) from environment failed.")
+	assert.Equal(t, "password", conf.Adapter.Server.Users[0].Password,
+		"$env{} resolution failed")
+	assert.Equal(t, "INFO", logconfig.LogLevel, "Logconfig log level mismatch")
 }

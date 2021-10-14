@@ -28,6 +28,10 @@ export CC_Enforcer_JwtIssuer_ValidityPeriod=1800
 export CC_Adapter_Consul_PollInterval=2
 export cc_analtyics_enforcer_configProperties_authToken="test-token"
 export cc_enforcer_security_tokenService_1_name=MGW-Test
+export adapter_admin_pwd="password"
+
+# Fault path test
+export CC_Adapter_Server_Enabled=string
 
 go clean -testcache
 go test -race -coverprofile=./target/coverage.txt -covermode=atomic ./...
