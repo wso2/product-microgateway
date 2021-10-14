@@ -94,6 +94,12 @@ var defaultConfig = &Config{
 				RouteTimeoutInSeconds:     60,
 				RouteIdleTimeoutInSeconds: 300,
 			},
+			Health: upstreamHealth{
+				Timeout:            1,
+				Interval:           10,
+				UnhealthyThreshold: 2,
+				HealthyThreshold:   2,
+			},
 		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{
@@ -177,17 +183,17 @@ var defaultConfig = &Config{
 		},
 		Tracing: tracing{
 			Enabled: false,
-			Type: "azure",
+			Type:    "azure",
 			ConfigProperties: map[string]string{
-				"connectionString":   "",
-				"instrumentationName": "CHOREO-CONNECT",
+				"connectionString":       "",
+				"instrumentationName":    "CHOREO-CONNECT",
 				"maximumTracesPerSecond": "2",
 			},
 		},
-        Metrics: metrics{
-            Enabled: false,
-            Type: "azure",
-        },
+		Metrics: metrics{
+			Enabled: false,
+			Type:    "azure",
+		},
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,
 			EnableHeaderConditions:             false,
@@ -269,8 +275,8 @@ var defaultConfig = &Config{
 		SkipSSLVerification: false,
 		BrokerConnectionParameters: brokerConnectionParameters{
 			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
-			ReconnectInterval:      5000, //in milli seconds
-			ReconnectRetryCount:    60,
+			ReconnectInterval:       5000, //in milli seconds
+			ReconnectRetryCount:     60,
 		},
 	},
 	GlobalAdapter: globalAdapter{

@@ -386,15 +386,16 @@ func createCluster(clusterName string, clusterDetails *model.EndpointCluster, up
 	return &cluster, addresses
 }
 
-//todo (amali) read from config
 func createHealthCheck() []*corev3.HealthCheck {
+	conf, _ := config.ReadConfigs()
 	return []*corev3.HealthCheck{
 		{
-			Timeout:            ptypes.DurationProto(1 * time.Second),
-			Interval:           ptypes.DurationProto(10 * time.Second),
-			UnhealthyThreshold: wrapperspb.UInt32(2),
-			HealthyThreshold:   wrapperspb.UInt32(2),
-			HealthChecker:      &corev3.HealthCheck_TcpHealthCheck_{},
+			Timeout:            ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
+			Interval:           ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
+			UnhealthyThreshold: wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.UnhealthyThreshold)),
+			HealthyThreshold:   wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.HealthyThreshold)),
+			// we only support tcp default healthcheck
+			HealthChecker: &corev3.HealthCheck_TcpHealthCheck_{},
 		},
 	}
 }
