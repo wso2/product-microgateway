@@ -42,6 +42,10 @@
             <source>target/mgw-wasm/mgw-websocket.wasm</source>
             <outputDirectory>wasm/websocket</outputDirectory>
         </file>
+        <file>
+            <source>../resources/security/ca-certificates.crt</source>
+            <outputDirectory>security/truststore</outputDirectory>
+        </file>
     </files>
     <fileSets>
       <fileSet>

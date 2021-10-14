@@ -23,16 +23,15 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	"github.com/wso2/product-microgateway/adapter/config"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/api"
 )
 
-// GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
+// GetRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
 // when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
-func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts []byte, interceptorCerts []byte,
+func GetRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts []byte, interceptorCerts []byte,
 	vHost string, organizationID string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	var routes []*routev3.Route
 	var clusters []*clusterv3.Cluster
@@ -92,29 +91,33 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArr
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition
 // along with the vhost to deploy the API.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity config.EndpointSecurity, vhost string) *api.Api {
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity mgw.APIEndpointSecurity, vhost string) *api.Api {
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
 
-	for _, ep := range mgwSwagger.GetProdEndpoints() {
-		prodEp := &api.Endpoint{
-			Basepath: ep.Basepath,
-			Host:     ep.Host,
-			Port:     ep.Port,
-			URLType:  ep.URLType,
+	if mgwSwagger.GetProdEndpoints() != nil {
+		for _, ep := range mgwSwagger.GetProdEndpoints().Endpoints {
+			prodEp := &api.Endpoint{
+				Basepath: ep.Basepath,
+				Host:     ep.Host,
+				Port:     ep.Port,
+				URLType:  ep.URLType,
+			}
+			prodUrls = append(prodUrls, prodEp)
 		}
-		prodUrls = append(prodUrls, prodEp)
 	}
 
-	for _, ep := range mgwSwagger.GetSandEndpoints() {
-		sandEp := &api.Endpoint{
-			Basepath: ep.Basepath,
-			Host:     ep.Host,
-			Port:     ep.Port,
-			URLType:  ep.URLType,
+	if mgwSwagger.GetSandEndpoints() != nil {
+		for _, ep := range mgwSwagger.GetSandEndpoints().Endpoints {
+			sandEp := &api.Endpoint{
+				Basepath: ep.Basepath,
+				Host:     ep.Host,
+				Port:     ep.Port,
+				URLType:  ep.URLType,
+			}
+			sandUrls = append(sandUrls, sandEp)
 		}
-		sandUrls = append(sandUrls, sandEp)
 	}
 
 	for _, res := range mgwSwagger.GetResources() {
@@ -132,16 +135,16 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 
 	endpointSecurityDetails := &api.EndpointSecurity{
 		SandBoxSecurityInfo: &api.SecurityInfo{
-			Username:         endpointSecurity.SandBox.Username,
-			Password:         endpointSecurity.SandBox.Password,
-			SecurityType:     endpointSecurity.SandBox.SecurityType,
-			Enabled:          endpointSecurity.SandBox.Enabled,
-			CustomParameters: endpointSecurity.SandBox.CustomParameters,
+			Username:         endpointSecurity.Sandbox.Username,
+			Password:         endpointSecurity.Sandbox.Password,
+			SecurityType:     endpointSecurity.Sandbox.Type,
+			Enabled:          endpointSecurity.Sandbox.Enabled,
+			CustomParameters: endpointSecurity.Sandbox.CustomParameters,
 		},
 		ProductionSecurityInfo: &api.SecurityInfo{
 			Username:         endpointSecurity.Production.Username,
 			Password:         endpointSecurity.Production.Password,
-			SecurityType:     endpointSecurity.Production.SecurityType,
+			SecurityType:     endpointSecurity.Production.Type,
 			Enabled:          endpointSecurity.Production.Enabled,
 			CustomParameters: endpointSecurity.Production.CustomParameters,
 		},
