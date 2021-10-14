@@ -219,6 +219,7 @@ func resolveEnvValueOfMap(field reflect.Value, currentTag string, resolveEnvTag 
 	for _, key := range field.MapKeys() {
 		if field.MapIndex(key).Kind() == reflect.String && key.Kind() == reflect.String {
 			variableName := currentTag + envVariableEntrySeparator + key.String()
+			variableName = strings.ReplaceAll(variableName, ".", "_")
 			variableKeyFromMap, exists := envVariableMap[envVariablePrefix+strings.ToUpper(variableName)]
 			if exists {
 				envValue := os.Getenv(variableKeyFromMap)
