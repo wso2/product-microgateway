@@ -25,8 +25,6 @@ private static final long serialVersionUID = 0L;
     methods_ = java.util.Collections.emptyList();
     summary_ = "";
     description_ = "";
-    productionUrls_ = java.util.Collections.emptyList();
-    sandboxUrls_ = java.util.Collections.emptyList();
     consumes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     schemes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -97,28 +95,36 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 50: {
-            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-              productionUrls_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Endpoint>();
-              mutable_bitField0_ |= 0x00000002;
+            org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder subBuilder = null;
+            if (productionEndpoints_ != null) {
+              subBuilder = productionEndpoints_.toBuilder();
             }
-            productionUrls_.add(
-                input.readMessage(org.wso2.choreo.connect.discovery.api.Endpoint.parser(), extensionRegistry));
+            productionEndpoints_ = input.readMessage(org.wso2.choreo.connect.discovery.api.EndpointCluster.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(productionEndpoints_);
+              productionEndpoints_ = subBuilder.buildPartial();
+            }
+
             break;
           }
           case 58: {
-            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-              sandboxUrls_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Endpoint>();
-              mutable_bitField0_ |= 0x00000004;
+            org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder subBuilder = null;
+            if (sandboxEndpoints_ != null) {
+              subBuilder = sandboxEndpoints_.toBuilder();
             }
-            sandboxUrls_.add(
-                input.readMessage(org.wso2.choreo.connect.discovery.api.Endpoint.parser(), extensionRegistry));
+            sandboxEndpoints_ = input.readMessage(org.wso2.choreo.connect.discovery.api.EndpointCluster.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(sandboxEndpoints_);
+              sandboxEndpoints_ = subBuilder.buildPartial();
+            }
+
             break;
           }
           case 66: {
-            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
               security_ = com.google.protobuf.MapField.newMapField(
                   SecurityDefaultEntryHolder.defaultEntry);
-              mutable_bitField0_ |= 0x00000008;
+              mutable_bitField0_ |= 0x00000002;
             }
             com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
             security__ = input.readMessage(
@@ -129,27 +135,27 @@ private static final long serialVersionUID = 0L;
           }
           case 74: {
             java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000010) != 0)) {
+            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
               consumes_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000010;
+              mutable_bitField0_ |= 0x00000004;
             }
             consumes_.add(s);
             break;
           }
           case 82: {
             java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000020) != 0)) {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
               schemes_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000020;
+              mutable_bitField0_ |= 0x00000008;
             }
             schemes_.add(s);
             break;
           }
           case 90: {
             java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000040) != 0)) {
+            if (!((mutable_bitField0_ & 0x00000010) != 0)) {
               tags_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000040;
+              mutable_bitField0_ |= 0x00000010;
             }
             tags_.add(s);
             break;
@@ -172,19 +178,13 @@ private static final long serialVersionUID = 0L;
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
         methods_ = java.util.Collections.unmodifiableList(methods_);
       }
-      if (((mutable_bitField0_ & 0x00000002) != 0)) {
-        productionUrls_ = java.util.Collections.unmodifiableList(productionUrls_);
-      }
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
-        sandboxUrls_ = java.util.Collections.unmodifiableList(sandboxUrls_);
-      }
-      if (((mutable_bitField0_ & 0x00000010) != 0)) {
         consumes_ = consumes_.getUnmodifiableView();
       }
-      if (((mutable_bitField0_ & 0x00000020) != 0)) {
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
         schemes_ = schemes_.getUnmodifiableView();
       }
-      if (((mutable_bitField0_ & 0x00000040) != 0)) {
+      if (((mutable_bitField0_ & 0x00000010) != 0)) {
         tags_ = tags_.getUnmodifiableView();
       }
       this.unknownFields = unknownFields.build();
@@ -408,84 +408,56 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int PRODUCTIONURLS_FIELD_NUMBER = 6;
-  private java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> productionUrls_;
+  public static final int PRODUCTIONENDPOINTS_FIELD_NUMBER = 6;
+  private org.wso2.choreo.connect.discovery.api.EndpointCluster productionEndpoints_;
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+   * @return Whether the productionEndpoints field is set.
    */
   @java.lang.Override
-  public java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> getProductionUrlsList() {
-    return productionUrls_;
+  public boolean hasProductionEndpoints() {
+    return productionEndpoints_ != null;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+   * @return The productionEndpoints.
    */
   @java.lang.Override
-  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-      getProductionUrlsOrBuilderList() {
-    return productionUrls_;
+  public org.wso2.choreo.connect.discovery.api.EndpointCluster getProductionEndpoints() {
+    return productionEndpoints_ == null ? org.wso2.choreo.connect.discovery.api.EndpointCluster.getDefaultInstance() : productionEndpoints_;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
    */
   @java.lang.Override
-  public int getProductionUrlsCount() {
-    return productionUrls_.size();
-  }
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.Endpoint getProductionUrls(int index) {
-    return productionUrls_.get(index);
-  }
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.EndpointOrBuilder getProductionUrlsOrBuilder(
-      int index) {
-    return productionUrls_.get(index);
+  public org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder getProductionEndpointsOrBuilder() {
+    return getProductionEndpoints();
   }
 
-  public static final int SANDBOXURLS_FIELD_NUMBER = 7;
-  private java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> sandboxUrls_;
+  public static final int SANDBOXENDPOINTS_FIELD_NUMBER = 7;
+  private org.wso2.choreo.connect.discovery.api.EndpointCluster sandboxEndpoints_;
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
+   * @return Whether the sandboxEndpoints field is set.
    */
   @java.lang.Override
-  public java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> getSandboxUrlsList() {
-    return sandboxUrls_;
+  public boolean hasSandboxEndpoints() {
+    return sandboxEndpoints_ != null;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
+   * @return The sandboxEndpoints.
    */
   @java.lang.Override
-  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-      getSandboxUrlsOrBuilderList() {
-    return sandboxUrls_;
+  public org.wso2.choreo.connect.discovery.api.EndpointCluster getSandboxEndpoints() {
+    return sandboxEndpoints_ == null ? org.wso2.choreo.connect.discovery.api.EndpointCluster.getDefaultInstance() : sandboxEndpoints_;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
    */
   @java.lang.Override
-  public int getSandboxUrlsCount() {
-    return sandboxUrls_.size();
-  }
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.Endpoint getSandboxUrls(int index) {
-    return sandboxUrls_.get(index);
-  }
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.EndpointOrBuilder getSandboxUrlsOrBuilder(
-      int index) {
-    return sandboxUrls_.get(index);
+  public org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder getSandboxEndpointsOrBuilder() {
+    return getSandboxEndpoints();
   }
 
   public static final int SECURITY_FIELD_NUMBER = 8;
@@ -703,11 +675,11 @@ private static final long serialVersionUID = 0L;
     if (!getDescriptionBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 5, description_);
     }
-    for (int i = 0; i < productionUrls_.size(); i++) {
-      output.writeMessage(6, productionUrls_.get(i));
+    if (productionEndpoints_ != null) {
+      output.writeMessage(6, getProductionEndpoints());
     }
-    for (int i = 0; i < sandboxUrls_.size(); i++) {
-      output.writeMessage(7, sandboxUrls_.get(i));
+    if (sandboxEndpoints_ != null) {
+      output.writeMessage(7, getSandboxEndpoints());
     }
     com.google.protobuf.GeneratedMessageV3
       .serializeStringMapTo(
@@ -749,13 +721,13 @@ private static final long serialVersionUID = 0L;
     if (!getDescriptionBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, description_);
     }
-    for (int i = 0; i < productionUrls_.size(); i++) {
+    if (productionEndpoints_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(6, productionUrls_.get(i));
+        .computeMessageSize(6, getProductionEndpoints());
     }
-    for (int i = 0; i < sandboxUrls_.size(); i++) {
+    if (sandboxEndpoints_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(7, sandboxUrls_.get(i));
+        .computeMessageSize(7, getSandboxEndpoints());
     }
     for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
          : internalGetSecurity().getMap().entrySet()) {
@@ -816,10 +788,16 @@ private static final long serialVersionUID = 0L;
         .equals(other.getSummary())) return false;
     if (!getDescription()
         .equals(other.getDescription())) return false;
-    if (!getProductionUrlsList()
-        .equals(other.getProductionUrlsList())) return false;
-    if (!getSandboxUrlsList()
-        .equals(other.getSandboxUrlsList())) return false;
+    if (hasProductionEndpoints() != other.hasProductionEndpoints()) return false;
+    if (hasProductionEndpoints()) {
+      if (!getProductionEndpoints()
+          .equals(other.getProductionEndpoints())) return false;
+    }
+    if (hasSandboxEndpoints() != other.hasSandboxEndpoints()) return false;
+    if (hasSandboxEndpoints()) {
+      if (!getSandboxEndpoints()
+          .equals(other.getSandboxEndpoints())) return false;
+    }
     if (!internalGetSecurity().equals(
         other.internalGetSecurity())) return false;
     if (!getConsumesList()
@@ -851,13 +829,13 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getSummary().hashCode();
     hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
     hash = (53 * hash) + getDescription().hashCode();
-    if (getProductionUrlsCount() > 0) {
-      hash = (37 * hash) + PRODUCTIONURLS_FIELD_NUMBER;
-      hash = (53 * hash) + getProductionUrlsList().hashCode();
+    if (hasProductionEndpoints()) {
+      hash = (37 * hash) + PRODUCTIONENDPOINTS_FIELD_NUMBER;
+      hash = (53 * hash) + getProductionEndpoints().hashCode();
     }
-    if (getSandboxUrlsCount() > 0) {
-      hash = (37 * hash) + SANDBOXURLS_FIELD_NUMBER;
-      hash = (53 * hash) + getSandboxUrlsList().hashCode();
+    if (hasSandboxEndpoints()) {
+      hash = (37 * hash) + SANDBOXENDPOINTS_FIELD_NUMBER;
+      hash = (53 * hash) + getSandboxEndpoints().hashCode();
     }
     if (!internalGetSecurity().getMap().isEmpty()) {
       hash = (37 * hash) + SECURITY_FIELD_NUMBER;
@@ -1030,8 +1008,6 @@ private static final long serialVersionUID = 0L;
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
         getMethodsFieldBuilder();
-        getProductionUrlsFieldBuilder();
-        getSandboxUrlsFieldBuilder();
       }
     }
     @java.lang.Override
@@ -1051,25 +1027,25 @@ private static final long serialVersionUID = 0L;
 
       description_ = "";
 
-      if (productionUrlsBuilder_ == null) {
-        productionUrls_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000002);
+      if (productionEndpointsBuilder_ == null) {
+        productionEndpoints_ = null;
       } else {
-        productionUrlsBuilder_.clear();
+        productionEndpoints_ = null;
+        productionEndpointsBuilder_ = null;
       }
-      if (sandboxUrlsBuilder_ == null) {
-        sandboxUrls_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
+      if (sandboxEndpointsBuilder_ == null) {
+        sandboxEndpoints_ = null;
       } else {
-        sandboxUrlsBuilder_.clear();
+        sandboxEndpoints_ = null;
+        sandboxEndpointsBuilder_ = null;
       }
       internalGetMutableSecurity().clear();
       consumes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000004);
       schemes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000020);
+      bitField0_ = (bitField0_ & ~0x00000008);
       tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000040);
+      bitField0_ = (bitField0_ & ~0x00000010);
       return this;
     }
 
@@ -1110,39 +1086,31 @@ private static final long serialVersionUID = 0L;
       }
       result.summary_ = summary_;
       result.description_ = description_;
-      if (productionUrlsBuilder_ == null) {
-        if (((bitField0_ & 0x00000002) != 0)) {
-          productionUrls_ = java.util.Collections.unmodifiableList(productionUrls_);
-          bitField0_ = (bitField0_ & ~0x00000002);
-        }
-        result.productionUrls_ = productionUrls_;
+      if (productionEndpointsBuilder_ == null) {
+        result.productionEndpoints_ = productionEndpoints_;
       } else {
-        result.productionUrls_ = productionUrlsBuilder_.build();
+        result.productionEndpoints_ = productionEndpointsBuilder_.build();
       }
-      if (sandboxUrlsBuilder_ == null) {
-        if (((bitField0_ & 0x00000004) != 0)) {
-          sandboxUrls_ = java.util.Collections.unmodifiableList(sandboxUrls_);
-          bitField0_ = (bitField0_ & ~0x00000004);
-        }
-        result.sandboxUrls_ = sandboxUrls_;
+      if (sandboxEndpointsBuilder_ == null) {
+        result.sandboxEndpoints_ = sandboxEndpoints_;
       } else {
-        result.sandboxUrls_ = sandboxUrlsBuilder_.build();
+        result.sandboxEndpoints_ = sandboxEndpointsBuilder_.build();
       }
       result.security_ = internalGetSecurity();
       result.security_.makeImmutable();
-      if (((bitField0_ & 0x00000010) != 0)) {
+      if (((bitField0_ & 0x00000004) != 0)) {
         consumes_ = consumes_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000004);
       }
       result.consumes_ = consumes_;
-      if (((bitField0_ & 0x00000020) != 0)) {
+      if (((bitField0_ & 0x00000008) != 0)) {
         schemes_ = schemes_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000008);
       }
       result.schemes_ = schemes_;
-      if (((bitField0_ & 0x00000040) != 0)) {
+      if (((bitField0_ & 0x00000010) != 0)) {
         tags_ = tags_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000010);
       }
       result.tags_ = tags_;
       onBuilt();
@@ -1235,64 +1203,18 @@ private static final long serialVersionUID = 0L;
         description_ = other.description_;
         onChanged();
       }
-      if (productionUrlsBuilder_ == null) {
-        if (!other.productionUrls_.isEmpty()) {
-          if (productionUrls_.isEmpty()) {
-            productionUrls_ = other.productionUrls_;
-            bitField0_ = (bitField0_ & ~0x00000002);
-          } else {
-            ensureProductionUrlsIsMutable();
-            productionUrls_.addAll(other.productionUrls_);
-          }
-          onChanged();
-        }
-      } else {
-        if (!other.productionUrls_.isEmpty()) {
-          if (productionUrlsBuilder_.isEmpty()) {
-            productionUrlsBuilder_.dispose();
-            productionUrlsBuilder_ = null;
-            productionUrls_ = other.productionUrls_;
-            bitField0_ = (bitField0_ & ~0x00000002);
-            productionUrlsBuilder_ = 
-              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                 getProductionUrlsFieldBuilder() : null;
-          } else {
-            productionUrlsBuilder_.addAllMessages(other.productionUrls_);
-          }
-        }
+      if (other.hasProductionEndpoints()) {
+        mergeProductionEndpoints(other.getProductionEndpoints());
       }
-      if (sandboxUrlsBuilder_ == null) {
-        if (!other.sandboxUrls_.isEmpty()) {
-          if (sandboxUrls_.isEmpty()) {
-            sandboxUrls_ = other.sandboxUrls_;
-            bitField0_ = (bitField0_ & ~0x00000004);
-          } else {
-            ensureSandboxUrlsIsMutable();
-            sandboxUrls_.addAll(other.sandboxUrls_);
-          }
-          onChanged();
-        }
-      } else {
-        if (!other.sandboxUrls_.isEmpty()) {
-          if (sandboxUrlsBuilder_.isEmpty()) {
-            sandboxUrlsBuilder_.dispose();
-            sandboxUrlsBuilder_ = null;
-            sandboxUrls_ = other.sandboxUrls_;
-            bitField0_ = (bitField0_ & ~0x00000004);
-            sandboxUrlsBuilder_ = 
-              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                 getSandboxUrlsFieldBuilder() : null;
-          } else {
-            sandboxUrlsBuilder_.addAllMessages(other.sandboxUrls_);
-          }
-        }
+      if (other.hasSandboxEndpoints()) {
+        mergeSandboxEndpoints(other.getSandboxEndpoints());
       }
       internalGetMutableSecurity().mergeFrom(
           other.internalGetSecurity());
       if (!other.consumes_.isEmpty()) {
         if (consumes_.isEmpty()) {
           consumes_ = other.consumes_;
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
           ensureConsumesIsMutable();
           consumes_.addAll(other.consumes_);
@@ -1302,7 +1224,7 @@ private static final long serialVersionUID = 0L;
       if (!other.schemes_.isEmpty()) {
         if (schemes_.isEmpty()) {
           schemes_ = other.schemes_;
-          bitField0_ = (bitField0_ & ~0x00000020);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           ensureSchemesIsMutable();
           schemes_.addAll(other.schemes_);
@@ -1312,7 +1234,7 @@ private static final long serialVersionUID = 0L;
       if (!other.tags_.isEmpty()) {
         if (tags_.isEmpty()) {
           tags_ = other.tags_;
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
           ensureTagsIsMutable();
           tags_.addAll(other.tags_);
@@ -1893,484 +1815,242 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> productionUrls_ =
-      java.util.Collections.emptyList();
-    private void ensureProductionUrlsIsMutable() {
-      if (!((bitField0_ & 0x00000002) != 0)) {
-        productionUrls_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Endpoint>(productionUrls_);
-        bitField0_ |= 0x00000002;
-       }
+    private org.wso2.choreo.connect.discovery.api.EndpointCluster productionEndpoints_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder> productionEndpointsBuilder_;
+    /**
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+     * @return Whether the productionEndpoints field is set.
+     */
+    public boolean hasProductionEndpoints() {
+      return productionEndpointsBuilder_ != null || productionEndpoints_ != null;
     }
+    /**
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+     * @return The productionEndpoints.
+     */
+    public org.wso2.choreo.connect.discovery.api.EndpointCluster getProductionEndpoints() {
+      if (productionEndpointsBuilder_ == null) {
+        return productionEndpoints_ == null ? org.wso2.choreo.connect.discovery.api.EndpointCluster.getDefaultInstance() : productionEndpoints_;
+      } else {
+        return productionEndpointsBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+     */
+    public Builder setProductionEndpoints(org.wso2.choreo.connect.discovery.api.EndpointCluster value) {
+      if (productionEndpointsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        productionEndpoints_ = value;
+        onChanged();
+      } else {
+        productionEndpointsBuilder_.setMessage(value);
+      }
 
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.Endpoint, org.wso2.choreo.connect.discovery.api.Endpoint.Builder, org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> productionUrlsBuilder_;
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+     */
+    public Builder setProductionEndpoints(
+        org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder builderForValue) {
+      if (productionEndpointsBuilder_ == null) {
+        productionEndpoints_ = builderForValue.build();
+        onChanged();
+      } else {
+        productionEndpointsBuilder_.setMessage(builderForValue.build());
+      }
 
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> getProductionUrlsList() {
-      if (productionUrlsBuilder_ == null) {
-        return java.util.Collections.unmodifiableList(productionUrls_);
-      } else {
-        return productionUrlsBuilder_.getMessageList();
-      }
+      return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
      */
-    public int getProductionUrlsCount() {
-      if (productionUrlsBuilder_ == null) {
-        return productionUrls_.size();
-      } else {
-        return productionUrlsBuilder_.getCount();
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint getProductionUrls(int index) {
-      if (productionUrlsBuilder_ == null) {
-        return productionUrls_.get(index);
-      } else {
-        return productionUrlsBuilder_.getMessage(index);
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public Builder setProductionUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint value) {
-      if (productionUrlsBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
+    public Builder mergeProductionEndpoints(org.wso2.choreo.connect.discovery.api.EndpointCluster value) {
+      if (productionEndpointsBuilder_ == null) {
+        if (productionEndpoints_ != null) {
+          productionEndpoints_ =
+            org.wso2.choreo.connect.discovery.api.EndpointCluster.newBuilder(productionEndpoints_).mergeFrom(value).buildPartial();
+        } else {
+          productionEndpoints_ = value;
         }
-        ensureProductionUrlsIsMutable();
-        productionUrls_.set(index, value);
         onChanged();
       } else {
-        productionUrlsBuilder_.setMessage(index, value);
+        productionEndpointsBuilder_.mergeFrom(value);
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
      */
-    public Builder setProductionUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint.Builder builderForValue) {
-      if (productionUrlsBuilder_ == null) {
-        ensureProductionUrlsIsMutable();
-        productionUrls_.set(index, builderForValue.build());
+    public Builder clearProductionEndpoints() {
+      if (productionEndpointsBuilder_ == null) {
+        productionEndpoints_ = null;
         onChanged();
       } else {
-        productionUrlsBuilder_.setMessage(index, builderForValue.build());
+        productionEndpoints_ = null;
+        productionEndpointsBuilder_ = null;
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
      */
-    public Builder addProductionUrls(org.wso2.choreo.connect.discovery.api.Endpoint value) {
-      if (productionUrlsBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureProductionUrlsIsMutable();
-        productionUrls_.add(value);
-        onChanged();
+    public org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder getProductionEndpointsBuilder() {
+      
+      onChanged();
+      return getProductionEndpointsFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder getProductionEndpointsOrBuilder() {
+      if (productionEndpointsBuilder_ != null) {
+        return productionEndpointsBuilder_.getMessageOrBuilder();
       } else {
-        productionUrlsBuilder_.addMessage(value);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public Builder addProductionUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint value) {
-      if (productionUrlsBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureProductionUrlsIsMutable();
-        productionUrls_.add(index, value);
-        onChanged();
-      } else {
-        productionUrlsBuilder_.addMessage(index, value);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public Builder addProductionUrls(
-        org.wso2.choreo.connect.discovery.api.Endpoint.Builder builderForValue) {
-      if (productionUrlsBuilder_ == null) {
-        ensureProductionUrlsIsMutable();
-        productionUrls_.add(builderForValue.build());
-        onChanged();
-      } else {
-        productionUrlsBuilder_.addMessage(builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public Builder addProductionUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint.Builder builderForValue) {
-      if (productionUrlsBuilder_ == null) {
-        ensureProductionUrlsIsMutable();
-        productionUrls_.add(index, builderForValue.build());
-        onChanged();
-      } else {
-        productionUrlsBuilder_.addMessage(index, builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public Builder addAllProductionUrls(
-        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.Endpoint> values) {
-      if (productionUrlsBuilder_ == null) {
-        ensureProductionUrlsIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, productionUrls_);
-        onChanged();
-      } else {
-        productionUrlsBuilder_.addAllMessages(values);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public Builder clearProductionUrls() {
-      if (productionUrlsBuilder_ == null) {
-        productionUrls_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000002);
-        onChanged();
-      } else {
-        productionUrlsBuilder_.clear();
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public Builder removeProductionUrls(int index) {
-      if (productionUrlsBuilder_ == null) {
-        ensureProductionUrlsIsMutable();
-        productionUrls_.remove(index);
-        onChanged();
-      } else {
-        productionUrlsBuilder_.remove(index);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint.Builder getProductionUrlsBuilder(
-        int index) {
-      return getProductionUrlsFieldBuilder().getBuilder(index);
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.EndpointOrBuilder getProductionUrlsOrBuilder(
-        int index) {
-      if (productionUrlsBuilder_ == null) {
-        return productionUrls_.get(index);  } else {
-        return productionUrlsBuilder_.getMessageOrBuilder(index);
+        return productionEndpoints_ == null ?
+            org.wso2.choreo.connect.discovery.api.EndpointCluster.getDefaultInstance() : productionEndpoints_;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
      */
-    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-         getProductionUrlsOrBuilderList() {
-      if (productionUrlsBuilder_ != null) {
-        return productionUrlsBuilder_.getMessageOrBuilderList();
-      } else {
-        return java.util.Collections.unmodifiableList(productionUrls_);
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint.Builder addProductionUrlsBuilder() {
-      return getProductionUrlsFieldBuilder().addBuilder(
-          org.wso2.choreo.connect.discovery.api.Endpoint.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint.Builder addProductionUrlsBuilder(
-        int index) {
-      return getProductionUrlsFieldBuilder().addBuilder(
-          index, org.wso2.choreo.connect.discovery.api.Endpoint.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-     */
-    public java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint.Builder> 
-         getProductionUrlsBuilderList() {
-      return getProductionUrlsFieldBuilder().getBuilderList();
-    }
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.Endpoint, org.wso2.choreo.connect.discovery.api.Endpoint.Builder, org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-        getProductionUrlsFieldBuilder() {
-      if (productionUrlsBuilder_ == null) {
-        productionUrlsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.api.Endpoint, org.wso2.choreo.connect.discovery.api.Endpoint.Builder, org.wso2.choreo.connect.discovery.api.EndpointOrBuilder>(
-                productionUrls_,
-                ((bitField0_ & 0x00000002) != 0),
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder> 
+        getProductionEndpointsFieldBuilder() {
+      if (productionEndpointsBuilder_ == null) {
+        productionEndpointsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder>(
+                getProductionEndpoints(),
                 getParentForChildren(),
                 isClean());
-        productionUrls_ = null;
+        productionEndpoints_ = null;
       }
-      return productionUrlsBuilder_;
+      return productionEndpointsBuilder_;
     }
 
-    private java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> sandboxUrls_ =
-      java.util.Collections.emptyList();
-    private void ensureSandboxUrlsIsMutable() {
-      if (!((bitField0_ & 0x00000004) != 0)) {
-        sandboxUrls_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Endpoint>(sandboxUrls_);
-        bitField0_ |= 0x00000004;
-       }
-    }
-
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.Endpoint, org.wso2.choreo.connect.discovery.api.Endpoint.Builder, org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> sandboxUrlsBuilder_;
-
+    private org.wso2.choreo.connect.discovery.api.EndpointCluster sandboxEndpoints_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder> sandboxEndpointsBuilder_;
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
+     * @return Whether the sandboxEndpoints field is set.
      */
-    public java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> getSandboxUrlsList() {
-      if (sandboxUrlsBuilder_ == null) {
-        return java.util.Collections.unmodifiableList(sandboxUrls_);
+    public boolean hasSandboxEndpoints() {
+      return sandboxEndpointsBuilder_ != null || sandboxEndpoints_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
+     * @return The sandboxEndpoints.
+     */
+    public org.wso2.choreo.connect.discovery.api.EndpointCluster getSandboxEndpoints() {
+      if (sandboxEndpointsBuilder_ == null) {
+        return sandboxEndpoints_ == null ? org.wso2.choreo.connect.discovery.api.EndpointCluster.getDefaultInstance() : sandboxEndpoints_;
       } else {
-        return sandboxUrlsBuilder_.getMessageList();
+        return sandboxEndpointsBuilder_.getMessage();
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
-    public int getSandboxUrlsCount() {
-      if (sandboxUrlsBuilder_ == null) {
-        return sandboxUrls_.size();
-      } else {
-        return sandboxUrlsBuilder_.getCount();
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint getSandboxUrls(int index) {
-      if (sandboxUrlsBuilder_ == null) {
-        return sandboxUrls_.get(index);
-      } else {
-        return sandboxUrlsBuilder_.getMessage(index);
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public Builder setSandboxUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint value) {
-      if (sandboxUrlsBuilder_ == null) {
+    public Builder setSandboxEndpoints(org.wso2.choreo.connect.discovery.api.EndpointCluster value) {
+      if (sandboxEndpointsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureSandboxUrlsIsMutable();
-        sandboxUrls_.set(index, value);
+        sandboxEndpoints_ = value;
         onChanged();
       } else {
-        sandboxUrlsBuilder_.setMessage(index, value);
+        sandboxEndpointsBuilder_.setMessage(value);
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
-    public Builder setSandboxUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint.Builder builderForValue) {
-      if (sandboxUrlsBuilder_ == null) {
-        ensureSandboxUrlsIsMutable();
-        sandboxUrls_.set(index, builderForValue.build());
+    public Builder setSandboxEndpoints(
+        org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder builderForValue) {
+      if (sandboxEndpointsBuilder_ == null) {
+        sandboxEndpoints_ = builderForValue.build();
         onChanged();
       } else {
-        sandboxUrlsBuilder_.setMessage(index, builderForValue.build());
+        sandboxEndpointsBuilder_.setMessage(builderForValue.build());
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
-    public Builder addSandboxUrls(org.wso2.choreo.connect.discovery.api.Endpoint value) {
-      if (sandboxUrlsBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
+    public Builder mergeSandboxEndpoints(org.wso2.choreo.connect.discovery.api.EndpointCluster value) {
+      if (sandboxEndpointsBuilder_ == null) {
+        if (sandboxEndpoints_ != null) {
+          sandboxEndpoints_ =
+            org.wso2.choreo.connect.discovery.api.EndpointCluster.newBuilder(sandboxEndpoints_).mergeFrom(value).buildPartial();
+        } else {
+          sandboxEndpoints_ = value;
         }
-        ensureSandboxUrlsIsMutable();
-        sandboxUrls_.add(value);
         onChanged();
       } else {
-        sandboxUrlsBuilder_.addMessage(value);
+        sandboxEndpointsBuilder_.mergeFrom(value);
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
-    public Builder addSandboxUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint value) {
-      if (sandboxUrlsBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureSandboxUrlsIsMutable();
-        sandboxUrls_.add(index, value);
+    public Builder clearSandboxEndpoints() {
+      if (sandboxEndpointsBuilder_ == null) {
+        sandboxEndpoints_ = null;
         onChanged();
       } else {
-        sandboxUrlsBuilder_.addMessage(index, value);
+        sandboxEndpoints_ = null;
+        sandboxEndpointsBuilder_ = null;
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
-    public Builder addSandboxUrls(
-        org.wso2.choreo.connect.discovery.api.Endpoint.Builder builderForValue) {
-      if (sandboxUrlsBuilder_ == null) {
-        ensureSandboxUrlsIsMutable();
-        sandboxUrls_.add(builderForValue.build());
-        onChanged();
+    public org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder getSandboxEndpointsBuilder() {
+      
+      onChanged();
+      return getSandboxEndpointsFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder getSandboxEndpointsOrBuilder() {
+      if (sandboxEndpointsBuilder_ != null) {
+        return sandboxEndpointsBuilder_.getMessageOrBuilder();
       } else {
-        sandboxUrlsBuilder_.addMessage(builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public Builder addSandboxUrls(
-        int index, org.wso2.choreo.connect.discovery.api.Endpoint.Builder builderForValue) {
-      if (sandboxUrlsBuilder_ == null) {
-        ensureSandboxUrlsIsMutable();
-        sandboxUrls_.add(index, builderForValue.build());
-        onChanged();
-      } else {
-        sandboxUrlsBuilder_.addMessage(index, builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public Builder addAllSandboxUrls(
-        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.Endpoint> values) {
-      if (sandboxUrlsBuilder_ == null) {
-        ensureSandboxUrlsIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, sandboxUrls_);
-        onChanged();
-      } else {
-        sandboxUrlsBuilder_.addAllMessages(values);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public Builder clearSandboxUrls() {
-      if (sandboxUrlsBuilder_ == null) {
-        sandboxUrls_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-      } else {
-        sandboxUrlsBuilder_.clear();
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public Builder removeSandboxUrls(int index) {
-      if (sandboxUrlsBuilder_ == null) {
-        ensureSandboxUrlsIsMutable();
-        sandboxUrls_.remove(index);
-        onChanged();
-      } else {
-        sandboxUrlsBuilder_.remove(index);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint.Builder getSandboxUrlsBuilder(
-        int index) {
-      return getSandboxUrlsFieldBuilder().getBuilder(index);
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.EndpointOrBuilder getSandboxUrlsOrBuilder(
-        int index) {
-      if (sandboxUrlsBuilder_ == null) {
-        return sandboxUrls_.get(index);  } else {
-        return sandboxUrlsBuilder_.getMessageOrBuilder(index);
+        return sandboxEndpoints_ == null ?
+            org.wso2.choreo.connect.discovery.api.EndpointCluster.getDefaultInstance() : sandboxEndpoints_;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
-    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-         getSandboxUrlsOrBuilderList() {
-      if (sandboxUrlsBuilder_ != null) {
-        return sandboxUrlsBuilder_.getMessageOrBuilderList();
-      } else {
-        return java.util.Collections.unmodifiableList(sandboxUrls_);
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint.Builder addSandboxUrlsBuilder() {
-      return getSandboxUrlsFieldBuilder().addBuilder(
-          org.wso2.choreo.connect.discovery.api.Endpoint.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public org.wso2.choreo.connect.discovery.api.Endpoint.Builder addSandboxUrlsBuilder(
-        int index) {
-      return getSandboxUrlsFieldBuilder().addBuilder(
-          index, org.wso2.choreo.connect.discovery.api.Endpoint.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-     */
-    public java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint.Builder> 
-         getSandboxUrlsBuilderList() {
-      return getSandboxUrlsFieldBuilder().getBuilderList();
-    }
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.Endpoint, org.wso2.choreo.connect.discovery.api.Endpoint.Builder, org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-        getSandboxUrlsFieldBuilder() {
-      if (sandboxUrlsBuilder_ == null) {
-        sandboxUrlsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.api.Endpoint, org.wso2.choreo.connect.discovery.api.Endpoint.Builder, org.wso2.choreo.connect.discovery.api.EndpointOrBuilder>(
-                sandboxUrls_,
-                ((bitField0_ & 0x00000004) != 0),
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder> 
+        getSandboxEndpointsFieldBuilder() {
+      if (sandboxEndpointsBuilder_ == null) {
+        sandboxEndpointsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder>(
+                getSandboxEndpoints(),
                 getParentForChildren(),
                 isClean());
-        sandboxUrls_ = null;
+        sandboxEndpoints_ = null;
       }
-      return sandboxUrlsBuilder_;
+      return sandboxEndpointsBuilder_;
     }
 
     private com.google.protobuf.MapField<
@@ -2503,9 +2183,9 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.LazyStringList consumes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     private void ensureConsumesIsMutable() {
-      if (!((bitField0_ & 0x00000010) != 0)) {
+      if (!((bitField0_ & 0x00000004) != 0)) {
         consumes_ = new com.google.protobuf.LazyStringArrayList(consumes_);
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000004;
        }
     }
     /**
@@ -2590,7 +2270,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearConsumes() {
       consumes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000004);
       onChanged();
       return this;
     }
@@ -2613,9 +2293,9 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.LazyStringList schemes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     private void ensureSchemesIsMutable() {
-      if (!((bitField0_ & 0x00000020) != 0)) {
+      if (!((bitField0_ & 0x00000008) != 0)) {
         schemes_ = new com.google.protobuf.LazyStringArrayList(schemes_);
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000008;
        }
     }
     /**
@@ -2700,7 +2380,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearSchemes() {
       schemes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000020);
+      bitField0_ = (bitField0_ & ~0x00000008);
       onChanged();
       return this;
     }
@@ -2723,9 +2403,9 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.LazyStringList tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     private void ensureTagsIsMutable() {
-      if (!((bitField0_ & 0x00000040) != 0)) {
+      if (!((bitField0_ & 0x00000010) != 0)) {
         tags_ = new com.google.protobuf.LazyStringArrayList(tags_);
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000010;
        }
     }
     /**
@@ -2810,7 +2490,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearTags() {
       tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000040);
+      bitField0_ = (bitField0_ & ~0x00000010);
       onChanged();
       return this;
     }

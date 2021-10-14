@@ -68,52 +68,34 @@ public interface ApiOrBuilder extends
       getDescriptionBytes();
 
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+   * @return Whether the productionEndpoints field is set.
    */
-  java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> 
-      getProductionUrlsList();
+  boolean hasProductionEndpoints();
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
+   * @return The productionEndpoints.
    */
-  org.wso2.choreo.connect.discovery.api.Endpoint getProductionUrls(int index);
+  org.wso2.choreo.connect.discovery.api.EndpointCluster getProductionEndpoints();
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
    */
-  int getProductionUrlsCount();
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-   */
-  java.util.List<? extends org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-      getProductionUrlsOrBuilderList();
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
-   */
-  org.wso2.choreo.connect.discovery.api.EndpointOrBuilder getProductionUrlsOrBuilder(
-      int index);
+  org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder getProductionEndpointsOrBuilder();
 
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
+   * @return Whether the sandboxEndpoints field is set.
    */
-  java.util.List<org.wso2.choreo.connect.discovery.api.Endpoint> 
-      getSandboxUrlsList();
+  boolean hasSandboxEndpoints();
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
+   * @return The sandboxEndpoints.
    */
-  org.wso2.choreo.connect.discovery.api.Endpoint getSandboxUrls(int index);
+  org.wso2.choreo.connect.discovery.api.EndpointCluster getSandboxEndpoints();
   /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
    */
-  int getSandboxUrlsCount();
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-   */
-  java.util.List<? extends org.wso2.choreo.connect.discovery.api.EndpointOrBuilder> 
-      getSandboxUrlsOrBuilderList();
-  /**
-   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
-   */
-  org.wso2.choreo.connect.discovery.api.EndpointOrBuilder getSandboxUrlsOrBuilder(
-      int index);
+  org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder getSandboxEndpointsOrBuilder();
 
   /**
    * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
