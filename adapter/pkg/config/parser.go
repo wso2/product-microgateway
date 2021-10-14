@@ -130,6 +130,9 @@ func ClearLogConfigInstance() {
 
 // ResolveConfigEnvValues looks for the string type config values which should be read from environment variables
 // and replace the respective config values from environment variable.
+// v - relect.Value of the root level struct
+// previousTag - the starting Tag corresponding to the root level struct
+// resolveEnvTag - true if $env{} annotation needs to be resolved at adapter level
 func ResolveConfigEnvValues(v reflect.Value, previousTag string, resolveEnvTag bool) {
 	s := v
 	for fieldNum := 0; fieldNum < s.NumField(); fieldNum++ {
@@ -162,7 +165,7 @@ func resolveEnvForReflectValue(field reflect.Value, currentTag string, resolveEn
 	case reflect.Int:
 		resolveEnvIntValue(currentTag, field)
 	case reflect.Float32:
-		resolveEnvFloat64Value(currentTag, field)
+		resolveEnvFloat32Value(currentTag, field)
 	case reflect.Uint:
 		resolveEnvUIntValue(currentTag, field)
 	case reflect.Map:
@@ -194,24 +197,134 @@ func getKind(val reflect.Value) reflect.Kind {
 	case kind >= reflect.Uint && kind <= reflect.Uint64:
 		return reflect.Uint
 	case kind >= reflect.Float32 && kind <= reflect.Float64:
-		return reflect.Float64
+		return reflect.Float32
 	default:
 		return kind
 	}
 }
 
 func resolveEnvValueOfArray(field reflect.Value, currentTag string, resolveEnvTag bool) {
+	var arrayElementType reflect.Kind
 	for index := 0; index < field.Len(); index++ {
+		arrayElementType = field.Index(index).Kind()
 		if field.Index(index).Kind() == reflect.Struct {
 			ResolveConfigEnvValues(field.Index(index).Addr().Elem(), currentTag+envVariableEntrySeparator+strconv.Itoa(index), resolveEnvTag)
 		} else if field.Index(index).Kind() == reflect.String && strings.Contains(field.Index(index).String(),
 			EnvConfigPrefix) && resolveEnvTag {
 			field.Index(index).SetString(ResolveEnvValue(field.Index(index).String()))
-			resolveEnvStringValue(currentTag+envVariableEntrySeparator+strconv.Itoa(index), field.Index(index))
-		} else {
-			resolveEnvForReflectValue(field.Index(index), currentTag+envVariableEntrySeparator+strconv.Itoa(index), resolveEnvTag)
 		}
 	}
+
+	if arrayElementType == reflect.Invalid {
+		indirectStr := reflect.Indirect(field)
+		valueSlice := reflect.MakeSlice(indirectStr.Type(), 1, 1)
+		arrayElementType = valueSlice.Index(0).Kind()
+	}
+
+	variableValue, exists := envVariableMap[strings.ToUpper(envVariablePrefix+currentTag)]
+	if exists {
+		elementArrayAsString := splitStringAndTrim(variableValue)
+		switch arrayElementType {
+		case reflect.String:
+			field.Set(reflect.ValueOf(elementArrayAsString))
+		case reflect.Int:
+			elementArrayAsInt := make([]int, len(elementArrayAsString))
+			var parseErr error
+			for index, stringElem := range elementArrayAsString {
+				elementArrayAsInt[index], parseErr = strconv.Atoi(stringElem)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an integer array", variableValue)
+					return
+				}
+			}
+			field.Set(reflect.ValueOf(elementArrayAsInt))
+		case reflect.Int32:
+			elementArrayAsInt := make([]int32, len(elementArrayAsString))
+			for index, stringElem := range elementArrayAsString {
+				int64Val, parseErr := strconv.ParseInt(stringElem, 10, 32)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an integer32 array", variableValue)
+					return
+				}
+				elementArrayAsInt[index] = int32(int64Val)
+			}
+			field.Set(reflect.ValueOf(elementArrayAsInt))
+		case reflect.Int64:
+			elementArrayAsInt := make([]int64, len(elementArrayAsString))
+			for index, stringElem := range elementArrayAsString {
+				int64Val, parseErr := strconv.ParseInt(stringElem, 10, 64)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an integer64 array", variableValue)
+					return
+				}
+				elementArrayAsInt[index] = int64Val
+			}
+			field.Set(reflect.ValueOf(elementArrayAsInt))
+		case reflect.Uint:
+			elementArrayAsUInt := make([]uint, len(elementArrayAsString))
+			for index, stringElem := range elementArrayAsString {
+				uint64val, parseErr := strconv.ParseUint(stringElem, 10, 32)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an unsigned integer array", variableValue)
+					return
+				}
+				elementArrayAsUInt[index] = uint(uint64val)
+			}
+			field.Set(reflect.ValueOf(elementArrayAsUInt))
+		case reflect.Uint32:
+			elementArrayAsUInt := make([]uint32, len(elementArrayAsString))
+			for index, stringElem := range elementArrayAsString {
+				uint64Val, parseErr := strconv.ParseUint(stringElem, 10, 32)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an unsigned integer32 array", variableValue)
+					return
+				}
+				elementArrayAsUInt[index] = uint32(uint64Val)
+			}
+			field.Set(reflect.ValueOf(elementArrayAsUInt))
+		case reflect.Uint64:
+			elementArrayAsInt := make([]uint64, len(elementArrayAsString))
+			for index, stringElem := range elementArrayAsString {
+				int64Val, parseErr := strconv.ParseUint(stringElem, 10, 64)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an unsigned integer64 array", variableValue)
+					return
+				}
+				elementArrayAsInt[index] = int64Val
+			}
+			field.Set(reflect.ValueOf(elementArrayAsInt))
+		case reflect.Float32:
+			elementArrayAsFloat := make([]float32, len(elementArrayAsString))
+			for index, stringElem := range elementArrayAsString {
+				float64Val, parseErr := strconv.ParseFloat(stringElem, 32)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an float32 array", variableValue)
+					return
+				}
+				elementArrayAsFloat[index] = float32(float64Val)
+			}
+			field.Set(reflect.ValueOf(elementArrayAsFloat))
+		case reflect.Float64:
+			elementArrayAsFloat := make([]float64, len(elementArrayAsString))
+			var parseErr error
+			for index, stringElem := range elementArrayAsString {
+				elementArrayAsFloat[index], parseErr = strconv.ParseFloat(stringElem, 64)
+				if parseErr != nil {
+					logger.Errorf("Error while parsing %s as an float64 array", variableValue)
+					return
+				}
+			}
+			field.Set(reflect.ValueOf(elementArrayAsFloat))
+		}
+	}
+}
+
+func splitStringAndTrim(input string) []string {
+	ElementArrayAsString := strings.Split(input, ",")
+	for index := 0; index < len(ElementArrayAsString); index++ {
+		ElementArrayAsString[index] = strings.TrimSpace(ElementArrayAsString[index])
+	}
+	return ElementArrayAsString
 }
 
 func resolveEnvValueOfMap(field reflect.Value, currentTag string, resolveEnvTag bool) {
@@ -220,32 +333,29 @@ func resolveEnvValueOfMap(field reflect.Value, currentTag string, resolveEnvTag 
 		if field.MapIndex(key).Kind() == reflect.String && key.Kind() == reflect.String {
 			variableName := currentTag + envVariableEntrySeparator + key.String()
 			variableName = strings.ReplaceAll(variableName, ".", "_")
-			variableKeyFromMap, exists := envVariableMap[envVariablePrefix+strings.ToUpper(variableName)]
+			variableValue, exists := envVariableMap[envVariablePrefix+strings.ToUpper(variableName)]
 			if exists {
-				envValue := os.Getenv(variableKeyFromMap)
-				field.SetMapIndex(reflect.ValueOf(key.String()), reflect.ValueOf(envValue))
+				field.SetMapIndex(reflect.ValueOf(key.String()), reflect.ValueOf(variableValue))
 			}
 		}
 	}
 }
 
 func resolveEnvStringValue(key string, value reflect.Value) {
-	variableKey, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
+	variableValue, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
 	if exists {
-		envValue := os.Getenv(variableKey)
-		value.SetString(envValue)
+		value.SetString(variableValue)
 	}
 }
 
 func resolveEnvBooleanValue(key string, value reflect.Value) {
 	var resolvedValue bool
 	var parseErr error
-	variableKey, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
+	variableValue, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
 	if exists {
-		envValue := os.Getenv(variableKey)
-		resolvedValue, parseErr = strconv.ParseBool(envValue)
+		resolvedValue, parseErr = strconv.ParseBool(variableValue)
 		if parseErr != nil {
-			logger.Errorf("Error while parsing %s as a boolean value. : %s", key, envValue)
+			logger.Errorf("Error while parsing %s as a boolean value.", key)
 			return
 		}
 		value.SetBool(resolvedValue)
@@ -255,12 +365,11 @@ func resolveEnvBooleanValue(key string, value reflect.Value) {
 func resolveEnvIntValue(key string, value reflect.Value) {
 	var resolvedValue int
 	var parseErr error
-	variableKey, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
+	variableValue, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
 	if exists {
-		envValue := os.Getenv(variableKey)
-		resolvedValue, parseErr = strconv.Atoi(envValue)
+		resolvedValue, parseErr = strconv.Atoi(variableValue)
 		if parseErr != nil {
-			logger.Errorf("Error while parsing %s as a int value. : %s", key, envValue)
+			logger.Errorf("Error while parsing %s as a int value. :", key)
 			return
 		}
 		value.SetInt(int64(resolvedValue))
@@ -270,27 +379,25 @@ func resolveEnvIntValue(key string, value reflect.Value) {
 func resolveEnvUIntValue(key string, value reflect.Value) {
 	var resolvedValue uint64
 	var parseErr error
-	variableKey, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
+	variableValue, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
 	if exists {
-		envValue := os.Getenv(variableKey)
-		resolvedValue, parseErr = strconv.ParseUint(envValue, 10, 32)
+		resolvedValue, parseErr = strconv.ParseUint(variableValue, 10, 32)
 		if parseErr != nil {
-			logger.Errorf("Error while parsing %s as a uint value. : %s", key, envValue)
+			logger.Errorf("Error while parsing %s as a uint value.", key)
 			return
 		}
 		value.SetUint(resolvedValue)
 	}
 }
 
-func resolveEnvFloat64Value(key string, value reflect.Value) {
+func resolveEnvFloat32Value(key string, value reflect.Value) {
 	var resolvedValue float64
 	var parseErr error
-	variableKey, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
+	variableValue, exists := envVariableMap[envVariablePrefix+strings.ToUpper(key)]
 	if exists {
-		envValue := os.Getenv(variableKey)
-		resolvedValue, parseErr = strconv.ParseFloat(envValue, 32)
+		resolvedValue, parseErr = strconv.ParseFloat(variableValue, 32)
 		if parseErr != nil {
-			logger.Errorf("Error while parsing %s as a float value. : %s", key, envValue)
+			logger.Errorf("Error while parsing %s as a float value.", key)
 			return
 		}
 		value.SetFloat(resolvedValue)
@@ -302,7 +409,8 @@ func extractEnvironmentVars() {
 	for _, variable := range envVariableArray {
 		if strings.HasPrefix(strings.ToUpper(variable), envVariablePrefix) {
 			formattedVariable := strings.Split(variable, "=")[0]
-			envVariableMap[strings.ToUpper(formattedVariable)] = formattedVariable
+			envVariableValue := os.Getenv(formattedVariable)
+			envVariableMap[strings.ToUpper(formattedVariable)] = envVariableValue
 		}
 	}
 }

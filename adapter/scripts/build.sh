@@ -30,6 +30,18 @@ export cc_analtyics_enforcer_configProperties_authToken="test-token"
 export cc_enforcer_security_tokenService_1_name=MGW-Test
 export adapter_admin_pwd="password"
 
+export cc_test_test_stringarray="foo2, bar2"
+export cc_test_test_intarray=1,3
+export cc_test_test_floatarray=1.2,2.4
+export cc_test_test_int32array=4
+export cc_test_test_int64array=21474836479
+export cc_test_test_float32val=1.5
+export cc_test_test_float64val=6.5
+export cc_test_test_uintarray=50
+export cc_test_test_uint32array=100
+export cc_test_test_uint64array=42949672959
+export cc_test_test_uintarray2=-50
+
 # Fault path test
 export CC_Adapter_Server_Enabled=string
 
