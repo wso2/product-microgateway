@@ -18,17 +18,17 @@ package model
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIYaml            APIYaml
-	Deployments        []Deployment
-	OpenAPIJsn         []byte
-	UpstreamCerts      []byte
-	InterceptorCerts   []byte
-	APIType            string              // read from api.yaml and formatted to upper case
-	APILifeCycleStatus string              // read from api.yaml and formatted to upper case
-	ProductionEndpoint string              // read from api.yaml or env variable
-	SandboxEndpoint    string              // read from api.yaml or env variable
-	OrganizationID     string              // read from api.yaml or config
-	EndpointSecurity   APIEndpointSecurity // derived from api.yaml or config
+	APIYaml             APIYaml
+	Deployments         []Deployment
+	OpenAPIJsn          []byte
+	UpstreamCerts       []byte
+	InterceptorCerts    []byte
+	APIType             string              // read from api.yaml and formatted to upper case
+	APILifeCycleStatus  string              // read from api.yaml and formatted to upper case
+	ProductionEndpoints []Endpoint          // read from env variable
+	SandboxEndpoints    []Endpoint          // read from env variable
+	OrganizationID      string              // read from api.yaml or config
+	EndpointSecurity    APIEndpointSecurity // derived from api.yaml or config
 }
 
 // EndpointSecurity contains parameters of endpoint security at api.json
@@ -84,8 +84,11 @@ type APIYaml struct {
 		SecurityScheme             []string `json:"securityScheme,omitempty"`
 		OrganizationID             string   `json:"organizationId,omitempty"`
 		EndpointConfig             struct {
-			EndpointType     string `json:"endpoint_type,omitempty"`
-			EndpointSecurity struct {
+			EndpointType                 string `json:"endpoint_type,omitempty"`
+			LoadBalanceAlgo              string `json:"algoCombo,omitempty"`
+			LoadBalanceSessionManagement string `json:"sessionManagement,omitempty"`
+			LoadBalanceSessionTimeOut    string `json:"sessionTimeOut,omitempty"`
+			EndpointSecurity             struct {
 				Production struct {
 					Password         string `json:"password,omitempty"`
 					Type             string `json:"type,omitempty"`
@@ -101,20 +104,21 @@ type APIYaml struct {
 					CustomParameters string `json:"customparameters,omitempty"`
 				} `json:"sandbox,omitempty"`
 			} `json:"endpoint_security,omitempty"`
-			ProductionEndpoints struct {
-				Endpoint string `json:"url,omitempty"`
-				Config   struct {
-					RetryDelay   string `json:"retryDelay,omitempty"`
-					RetryTimeOut string `json:"retryTimeOut,omitempty"`
-				} `json:"config,omitempty"`
-			} `json:"production_endpoints,omitempty"`
-			SandBoxEndpoints struct {
-				Endpoint string `json:"url,omitempty"`
-				Config   struct {
-					RetryDelay   string `json:"retryDelay,omitempty"`
-					RetryTimeOut string `json:"retryTimeOut,omitempty"`
-				} `json:"config,omitempty"`
-			} `json:"sandbox_endpoints,omitempty"`
+			RawProdEndpoints            interface{}    `json:"production_endpoints,omitempty"`
+			ProductionEndpoints         []EndpointInfo `json:"production_endpoint,omitempty"`
+			ProductionFailoverEndpoints []EndpointInfo `json:"production_failovers,omitempty"`
+			RawSandboxEndpoints         interface{}    `json:"sandbox_endpoints,omitempty"`
+			SandBoxEndpoints            []EndpointInfo `json:"sandbox_endpoint,omitempty"`
+			SandboxFailoverEndpoints    []EndpointInfo `json:"sandbox_failovers,omitempty"`
 		} `json:"endpointConfig,omitempty"`
 	} `json:"data"`
+}
+
+// EndpointInfo holds config values regards to the endpoint
+type EndpointInfo struct {
+	Endpoint string `json:"url,omitempty"`
+	Config   struct {
+		RetryDelay   string `json:"retryDelay,omitempty"`
+		RetryTimeOut string `json:"retryTimeOut,omitempty"`
+	} `json:"config,omitempty"`
 }

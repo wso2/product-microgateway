@@ -22,6 +22,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -51,8 +52,8 @@ func VerifyMandatoryFields(apiYaml APIYaml) error {
 		errMsg = errMsg + "API Context "
 	}
 
-	if apiYaml.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
-		apiYaml.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
+	if len(apiYaml.Data.EndpointConfig.ProductionEndpoints) < 1 &&
+		len(apiYaml.Data.EndpointConfig.SandBoxEndpoints) < 1 {
 		errMsg = errMsg + "API production and sandbox endpoints "
 	}
 
@@ -61,10 +62,15 @@ func VerifyMandatoryFields(apiYaml APIYaml) error {
 		return errors.New(errMsg)
 	}
 
-	if strings.HasPrefix(apiYaml.Data.EndpointConfig.ProductionEndpoints.Endpoint, "/") ||
-		strings.HasPrefix(apiYaml.Data.EndpointConfig.SandBoxEndpoints.Endpoint, "/") {
-		errMsg = "Relative urls are not supported for API production and sandbox endpoints"
-		return errors.New(errMsg)
+	for _, ep := range apiYaml.Data.EndpointConfig.ProductionEndpoints {
+		if strings.HasPrefix(ep.Endpoint, "/") || len(strings.TrimSpace(ep.Endpoint)) < 1 {
+			return errors.New("relative urls or empty values are not supported for API production endpoints")
+		}
+	}
+	for _, ep := range apiYaml.Data.EndpointConfig.SandBoxEndpoints {
+		if strings.HasPrefix(ep.Endpoint, "/") || len(strings.TrimSpace(ep.Endpoint)) < 1 {
+			return errors.New("relative urls or empty values are not supported for API sandbox endpoints")
+		}
 	}
 	return nil
 }
@@ -77,16 +83,11 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 	var apiHashValue string = generateHashValue(apiYaml.Data.Name, apiYaml.Data.Version)
 
 	endpointConfig := apiYaml.Data.EndpointConfig
-
-	// production Endpoints set
-	var productionEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_0",
-		endpointConfig.ProductionEndpoints.Endpoint)
-	apiProject.ProductionEndpoint = productionEndpoint
-
-	// sandbox Endpoints set
-	var sandboxEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_0",
-		endpointConfig.SandBoxEndpoints.Endpoint)
-	apiProject.SandboxEndpoint = sandboxEndpoint
+	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
+	if len(productionEndpoints) > 0 && len(sandboxEndpoints) > 0 {
+		apiProject.ProductionEndpoints = productionEndpoints
+		apiProject.SandboxEndpoints = sandboxEndpoints
+	}
 
 	// production Endpoint security
 	prodEpSecurity, _ := retrieveEndPointSecurityInfo("api_"+apiHashValue,
@@ -105,6 +106,37 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 	apiProject.OrganizationID = apiYaml.Data.OrganizationID
 
 	apiProject.EndpointSecurity = epSecurity
+}
+
+func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
+	var productionEndpoints []Endpoint
+	var sandboxEndpoints []Endpoint
+
+	i := 0
+	for {
+		var productionEndpointURL string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_"+strconv.Itoa(i), "")
+		if productionEndpointURL == "" {
+			break
+		}
+		productionEndpoint, err := getHostandBasepathandPort(productionEndpointURL)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURL, err.Error())
+		}
+		productionEndpoints = append(productionEndpoints, *productionEndpoint)
+
+		// sandbox Endpoints set
+		var sandboxEndpointURL string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_"+strconv.Itoa(i), "")
+		if sandboxEndpointURL == "" {
+			break
+		}
+		sandboxEndpoint, err := getHostandBasepathandPort(sandboxEndpointURL)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", sandboxEndpointURL, err.Error())
+		}
+		sandboxEndpoints = append(sandboxEndpoints, *sandboxEndpoint)
+		i = 1 + 1
+	}
+	return productionEndpoints, sandboxEndpoints
 }
 
 func retrieveEndPointSecurityInfo(value string, endPointSecurity EndpointSecurity,

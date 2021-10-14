@@ -279,21 +279,15 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	organizationID := apiProject.OrganizationID
 
 	if (mgwSwagger.GetProdEndpoints() == nil || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/") &&
-		apiProject.ProductionEndpoint != "" {
-
-		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiProject.ProductionEndpoint)
-		if productionEndpointErr != nil {
-			return nil, productionEndpointErr
-		}
+		len(apiProject.ProductionEndpoints) > 0 {
+		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiProject.ProductionEndpoints)
 	}
 
 	if (mgwSwagger.GetSandEndpoints() == nil || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/") &&
-		apiProject.SandboxEndpoint != "" {
+		len(apiProject.SandboxEndpoints) > 0 {
 
-		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiProject.SandboxEndpoint)
-		if sandboxEndpointErr != nil {
-			return nil, sandboxEndpointErr
-		}
+		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiProject.SandboxEndpoints)
+
 	}
 
 	validationErr := mgwSwagger.Validate()
