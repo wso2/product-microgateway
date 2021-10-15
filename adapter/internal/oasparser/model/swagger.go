@@ -19,6 +19,7 @@ package model
 
 import (
 	"errors"
+
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -65,7 +66,8 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		}
 		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
-			swagger.productionUrls = append(swagger.productionUrls, *endpoint)
+			productionEndpoints := append([]Endpoint{}, *endpoint)
+			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints)
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}
@@ -182,37 +184,33 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) error {
+func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIYaml) error {
 
-	data := apiData["data"].(map[string]interface{})
+	data := apiData.Data
 	// UUID in the generated api.yaml file is considerd as swagger.id
-	swagger.id = data["id"].(string)
+	swagger.id = data.ID
 	// Set apiType as WS for websockets
 	swagger.apiType = "WS"
 	// name and version in api.yaml corresponds to title and version respectively.
-	swagger.title = data["name"].(string)
-	swagger.version = data["version"].(string)
+	swagger.title = data.Name
+	swagger.version = data.Version
 	// context value in api.yaml is assigned as xWso2Basepath
-	swagger.xWso2Basepath = data["context"].(string) + "/" + swagger.version
+	swagger.xWso2Basepath = data.Context + "/" + swagger.version
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
-	endpointConfig := data["endpointConfig"].(map[string]interface{})
-	if endpointConfig["sandbox_endpoints"] != nil {
-		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
-		sandBoxURL := sandboxEndpoints["url"].(string)
-		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(sandBoxURL)
+	endpointConfig := data.EndpointConfig
+	if endpointConfig.SandBoxEndpoints.Endpoint != "" {
+		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.SandBoxEndpoints.Endpoint)
 		if err == nil {
-			swagger.sandboxUrls = append(swagger.sandboxUrls, *sandBoxEndpoint)
+			swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, []Endpoint{*sandBoxEndpoint})
 		} else {
 			return err
 		}
 	}
-	if endpointConfig["production_endpoints"] != nil {
-		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
-		productionURL := productionEndpoints["url"].(string)
-		productionEndpoint, err := getHostandBasepathandPortWebSocket(productionURL)
+	if endpointConfig.ProductionEndpoints.Endpoint != "" {
+		productionEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.ProductionEndpoints.Endpoint)
 		if err == nil {
-			swagger.productionUrls = append(swagger.productionUrls, *productionEndpoint)
+			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, []Endpoint{*productionEndpoint})
 		} else {
 			return err
 		}
