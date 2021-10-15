@@ -61,6 +61,9 @@ func NewReceiver() chan string {
 
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
+// Note :
+// 		Don't use toml tag for configuration properties as it may affect environment variable based
+// 		config resolution.
 type Config struct {
 	Adapter       adapter
 	Enforcer      enforcer
@@ -99,15 +102,15 @@ type envoy struct {
 	Connection                       connection
 }
 type upstreamTimeout struct {
-	RouteTimeoutInSeconds     time.Duration `toml:"routeTimeoutInSeconds"`
-	RouteIdleTimeoutInSeconds time.Duration `toml:"routeIdleTimeoutInSeconds"`
+	RouteTimeoutInSeconds     time.Duration
+	RouteIdleTimeoutInSeconds time.Duration
 }
 
 type connectionTimeouts struct {
-	RequestTimeoutInSeconds        time.Duration `toml:"requestTimeoutInSeconds"`
-	RequestHeadersTimeoutInSeconds time.Duration `toml:"requestHeadersTimeoutInSeconds"` // default disabled
-	StreamIdleTimeoutInSeconds     time.Duration `toml:"streamIdleTimeoutInSeconds"`     // Default 5 mins
-	IdleTimeoutInSeconds           time.Duration `toml:"idleTimeoutInSeconds"`           // default 1hr
+	RequestTimeoutInSeconds        time.Duration
+	RequestHeadersTimeoutInSeconds time.Duration // default disabled
+	StreamIdleTimeoutInSeconds     time.Duration // Default 5 mins
+	IdleTimeoutInSeconds           time.Duration // default 1hr
 }
 
 type connection struct {
@@ -136,7 +139,7 @@ type server struct {
 	// Port of the server
 	Port string
 	// APICTL Users
-	Users []APICtlUser `toml:"users"`
+	Users []APICtlUser
 	// Access token validity duration. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". eg: "2h45m"
 	TokenTTL string
 	// Private key to sign the token
@@ -190,12 +193,12 @@ type envoyUpstream struct {
 }
 
 type upstreamTLS struct {
-	MinVersion             string `toml:"minimumProtocolVersion"`
-	MaxVersion             string `toml:"maximumProtocolVersion"`
-	Ciphers                string `toml:"ciphers"`
-	CACrtPath              string `toml:"trustedCertPath"`
-	VerifyHostName         bool   `toml:"verifyHostName"`
-	DisableSSLVerification bool   `toml:"disableSslVerification"`
+	MinimumProtocolVersion string
+	MaximumProtocolVersion string
+	Ciphers                string
+	TrustedCertPath        string
+	VerifyHostName         bool
+	DisableSslVerification bool
 }
 
 type upstreamHealth struct {
@@ -226,8 +229,8 @@ type threadPool struct {
 }
 
 type keystore struct {
-	PrivateKeyLocation string `toml:"keyPath"`
-	PublicKeyLocation  string `toml:"certPath"`
+	KeyPath  string
+	CertPath string
 }
 
 type truststore struct {
@@ -245,20 +248,12 @@ type tokenService struct {
 	ClaimMapping         []claimMapping
 }
 
-type eventHub struct {
-	Enabled                 bool
-	ServiceURL              string
-	JmsConnectionParameters struct {
-		EventListeningEndpoints string `toml:"eventListeningEndpoints"`
-	} `toml:"jmsConnectionParameters"`
-}
-
 type throttlingConfig struct {
-	EnableGlobalEventPublishing        bool   `toml:"enableGlobalEventPublishing"`
-	EnableHeaderConditions             bool   `toml:"enableHeaderConditions"`
-	EnableQueryParamConditions         bool   `toml:"enableQueryParamConditions"`
-	EnableJwtClaimConditions           bool   `toml:"enableJwtClaimConditions"`
-	JmsConnectionInitialContextFactory string `toml:"jmsConnectionInitialContextFactory"`
+	EnableGlobalEventPublishing        bool
+	EnableHeaderConditions             bool
+	EnableQueryParamConditions         bool
+	EnableJwtClaimConditions           bool
+	JmsConnectionInitialContextFactory string
 	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
 	Publisher                          binaryPublisher
 }
@@ -272,9 +267,9 @@ type binaryPublisher struct {
 }
 
 type urlGroup struct {
-	ReceiverURLs []string `toml:"receiverURLs"`
-	AuthURLs     []string `toml:"authURLs"`
-	Type         string   `toml:"type"`
+	ReceiverURLs []string
+	AuthURLs     []string
+	Type         string
 }
 
 type publisherPool struct {
@@ -306,17 +301,17 @@ type binaryAgent struct {
 }
 
 type jwtGenerator struct {
-	Enable                bool   `toml:"enable"`
-	Encoding              string `toml:"encoding"`
-	ClaimDialect          string `toml:"claimDialect"`
-	ConvertDialect        bool   `toml:"convertDialect"`
-	Header                string `toml:"header"`
-	SigningAlgorithm      string `toml:"signingAlgorithm"`
-	EnableUserClaims      bool   `toml:"enableUserClaims"`
-	GatewayGeneratorImpl  string `toml:"gatewayGeneratorImpl"`
-	ClaimsExtractorImpl   string `toml:"claimsExtractorImpl"`
-	PublicCertificatePath string `toml:"publicCertificatePath"`
-	PrivateKeyPath        string `toml:"privateKeyPath"`
+	Enable                bool
+	Encoding              string
+	ClaimDialect          string
+	ConvertDialect        bool
+	Header                string
+	SigningAlgorithm      string
+	EnableUserClaims      bool
+	GatewayGeneratorImpl  string
+	ClaimsExtractorImpl   string
+	PublicCertificatePath string
+	PrivateKeyPath        string
 }
 
 type claimMapping struct {
@@ -325,68 +320,62 @@ type claimMapping struct {
 }
 
 type cache struct {
-	Enabled     bool  `toml:"enabled"`
-	MaximumSize int32 `toml:"maximumSize"`
-	ExpiryTime  int32 `toml:"expiryTime"`
+	Enabled     bool
+	MaximumSize int32
+	ExpiryTime  int32
 }
 
 type analytics struct {
-	Enabled  bool `toml:"enabled"`
+	Enabled  bool
 	Adapter  analyticsAdapter
 	Enforcer analyticsEnforcer
 }
 
 type tracing struct {
-	Enabled          bool              `toml:"enabled"`
-	Type             string            `toml:"type"`
-	ConfigProperties map[string]string `toml:"configProperties"`
+	Enabled          bool
+	Type             string
+	ConfigProperties map[string]string
 }
 
 type metrics struct {
-	Enabled bool   `toml:"enabled"`
-	Type    string `toml:"type"`
+	Enabled bool
+	Type    string
 }
 
 type analyticsAdapter struct {
-	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
-	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
-	GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
+	BufferFlushInterval time.Duration
+	BufferSizeBytes     uint32
+	GRPCRequestTimeout  time.Duration
 }
 
 type analyticsEnforcer struct {
 	// TODO: (VirajSalaka) convert it to map[string]{}interface
-	ConfigProperties    map[string]string
-	EnforcerLogReceiver authService `toml:"LogReceiver"`
-}
-
-type routerLogPublisher struct {
-	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
-	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
-	GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
+	ConfigProperties map[string]string
+	LogReceiver      authService
 }
 
 type authHeader struct {
-	EnableOutboundAuthHeader bool   `json:"enableOutboundAuthHeader"`
-	AuthorizationHeader      string `json:"authorizationHeader"`
-	TestConsoleHeaderName    string `json:"testConsoleHeaderName"`
+	EnableOutboundAuthHeader bool
+	AuthorizationHeader      string
+	TestConsoleHeaderName    string
 }
 
 type jwtIssuer struct {
-	Enabled               bool      `toml:"enabled"`
-	Issuer                string    `toml:"issuer"`
-	Encoding              string    `toml:"encoding"`
-	ClaimDialect          string    `toml:"claimDialect"`
-	SigningAlgorithm      string    `toml:"signingAlgorithm"`
-	PublicCertificatePath string    `toml:"publicCertificatePath"`
-	PrivateKeyPath        string    `toml:"privateKeyPath"`
-	ValidityPeriod        int32     `toml:"validityPeriod"`
-	JwtUsers              []JwtUser `toml:"jwtUser"`
+	Enabled               bool
+	Issuer                string
+	Encoding              string
+	ClaimDialect          string
+	SigningAlgorithm      string
+	PublicCertificatePath string
+	PrivateKeyPath        string
+	ValidityPeriod        int32
+	JwtUser               []JwtUser
 }
 
 // JwtUser represents allowed users to generate JWT tokens
 type JwtUser struct {
-	Username string `toml:"username"`
-	Password string `toml:"password"`
+	Username string
+	Password string
 }
 
 // APICtlUser represents registered APICtl Users
@@ -397,29 +386,29 @@ type APICtlUser struct {
 
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
-	Enabled                    bool                       `toml:"enabled"`
-	ServiceURL                 string                     `toml:"serviceUrl"`
-	Username                   string                     `toml:"username"`
-	Password                   string                     `toml:"password"`
-	SyncApisOnStartUp          bool                       `toml:"syncApisOnStartUp"`
-	EnvironmentLabels          []string                   `toml:"environmentLabels"`
-	RetryInterval              time.Duration              `toml:"retryInterval"`
-	SkipSSLVerification        bool                       `toml:"skipSSLVerification"`
-	BrokerConnectionParameters brokerConnectionParameters `toml:"brokerConnectionParameters"`
+	Enabled                    bool
+	ServiceURL                 string `toml:"serviceUrl"`
+	Username                   string
+	Password                   string
+	SyncApisOnStartUp          bool
+	EnvironmentLabels          []string
+	RetryInterval              time.Duration
+	SkipSSLVerification        bool
+	BrokerConnectionParameters brokerConnectionParameters
 }
 
 type globalAdapter struct {
-	Enabled       bool          `toml:"enabled"`
-	ServiceURL    string        `toml:"serviceUrl"`
-	LocalLabel    string        `toml:"localLabel"`
-	HostName      string        `toml:"overwriteHostName"`
-	RetryInterval time.Duration `toml:"retryInterval"`
+	Enabled           bool
+	ServiceURL        string `toml:"serviceUrl"`
+	LocalLabel        string
+	OverwriteHostName string
+	RetryInterval     time.Duration
 }
 
 type brokerConnectionParameters struct {
-	EventListeningEndpoints []string      `toml:"eventListeningEndpoints"`
-	ReconnectInterval       time.Duration `toml:"reconnectInterval"`
-	ReconnectRetryCount     int           `toml:"reconnectRetryCount"`
+	EventListeningEndpoints []string
+	ReconnectInterval       time.Duration
+	ReconnectRetryCount     int
 }
 
 // Configuration for Enforcer admin rest api

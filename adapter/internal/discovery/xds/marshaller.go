@@ -42,7 +42,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	jwtUsers := []*enforcer.JWTUser{}
-	for _, user := range config.Enforcer.JwtIssuer.JwtUsers {
+	for _, user := range config.Enforcer.JwtIssuer.JwtUser {
 		jwtUser := &enforcer.JWTUser{
 			Username: user.Username,
 			Password: user.Password,
@@ -79,27 +79,27 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	tracing := &enforcer.Tracing{
-		Enabled:		 	config.Enforcer.Tracing.Enabled,
-		Type:				config.Enforcer.Tracing.Type,
-		ConfigProperties:	config.Enforcer.Tracing.ConfigProperties,
+		Enabled:          config.Enforcer.Tracing.Enabled,
+		Type:             config.Enforcer.Tracing.Type,
+		ConfigProperties: config.Enforcer.Tracing.ConfigProperties,
 	}
 	metrics := &enforcer.Metrics{
-		Enabled:	config.Enforcer.Metrics.Enabled,
-		Type:		config.Enforcer.Metrics.Type,
+		Enabled: config.Enforcer.Metrics.Enabled,
+		Type:    config.Enforcer.Metrics.Type,
 	}
 	analytics := &enforcer.Analytics{
 		Enabled:          config.Analytics.Enabled,
 		ConfigProperties: config.Analytics.Enforcer.ConfigProperties,
 		Service: &enforcer.Service{
-			Port:           config.Analytics.Enforcer.EnforcerLogReceiver.Port,
-			MaxHeaderLimit: config.Analytics.Enforcer.EnforcerLogReceiver.MaxHeaderLimit,
-			KeepAliveTime:  config.Analytics.Enforcer.EnforcerLogReceiver.KeepAliveTime,
-			MaxMessageSize: config.Analytics.Enforcer.EnforcerLogReceiver.MaxMessageSize,
+			Port:           config.Analytics.Enforcer.LogReceiver.Port,
+			MaxHeaderLimit: config.Analytics.Enforcer.LogReceiver.MaxHeaderLimit,
+			KeepAliveTime:  config.Analytics.Enforcer.LogReceiver.KeepAliveTime,
+			MaxMessageSize: config.Analytics.Enforcer.LogReceiver.MaxMessageSize,
 			ThreadPool: &enforcer.ThreadPool{
-				CoreSize:      config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.CoreSize,
-				MaxSize:       config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.MaxSize,
-				QueueSize:     config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.QueueSize,
-				KeepAliveTime: config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.KeepAliveTime,
+				CoreSize:      config.Analytics.Enforcer.LogReceiver.ThreadPool.CoreSize,
+				MaxSize:       config.Analytics.Enforcer.LogReceiver.ThreadPool.MaxSize,
+				QueueSize:     config.Analytics.Enforcer.LogReceiver.ThreadPool.QueueSize,
+				KeepAliveTime: config.Analytics.Enforcer.LogReceiver.ThreadPool.KeepAliveTime,
 			},
 		},
 	}

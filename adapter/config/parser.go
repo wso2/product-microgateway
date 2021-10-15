@@ -86,10 +86,12 @@ func ReadConfigs() (*Config, error) {
 			logger.Fatal("Error parsing the configuration ", parseErr)
 			return
 		}
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem(), "Router", true)
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem(), "GlobalAdapter", true)
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Enforcer)).Elem(), "Enforcer", false)
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Analytics)).Elem(), "Analytics", false)
 	})
 	return adapterConfig, e
 }

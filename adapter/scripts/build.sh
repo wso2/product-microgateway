@@ -16,6 +16,34 @@
 # -----------------------------------------------------------------------
 
 export MGW_HOME=${PWD}/../resources
+
+# TODO: (VirajSalaka) remove this after go version migration
+# For unit tests
+export CC_ADAPTER_SERVER_PORT=9401
+export CC_Enforcer_JwtGenerator_Enable=true
+export CC_GlobalAdapter_RetryInterval=25
+export CC_Analytics_Adapter_bufferSizeBytes=32768
+export CC_Enforcer_JwtIssuer_ValidityPeriod=1800
+export CC_Adapter_Consul_PollInterval=2
+export cc_analytics_enforcer_configProperties_authToken="test-token"
+export cc_enforcer_security_tokenService_1_name=MGW-Test
+export adapter_admin_pwd="password"
+
+export cc_test_test_stringarray="foo2, bar2"
+export cc_test_test_intarray=1,3
+export cc_test_test_floatarray=1.2,2.4
+export cc_test_test_int32array=4
+export cc_test_test_int64array=21474836479
+export cc_test_test_float32val=1.5
+export cc_test_test_float64val=6.5
+export cc_test_test_uintarray=50
+export cc_test_test_uint32array=100
+export cc_test_test_uint64array=42949672959
+export cc_test_test_uintarray2=-50
+
+# Fault path test
+export CC_Adapter_Server_Enabled=string
+
 go clean -testcache
 go test -race -coverprofile=./target/coverage.txt -covermode=atomic ./...
 if [ $? -ne 0 ]; then 
