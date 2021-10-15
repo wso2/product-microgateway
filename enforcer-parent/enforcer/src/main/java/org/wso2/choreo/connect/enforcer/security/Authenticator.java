@@ -17,8 +17,8 @@
  */
 package org.wso2.choreo.connect.enforcer.security;
 
-import org.wso2.choreo.connect.commons.model.AuthenticationContext;
-import org.wso2.choreo.connect.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 
 /**

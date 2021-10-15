@@ -20,9 +20,9 @@ package org.wso2.choreo.connect.enforcer.security.jwt;
 
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
-import org.wso2.choreo.connect.commons.model.AuthenticationContext;
-import org.wso2.choreo.connect.commons.model.RequestContext;
-import org.wso2.choreo.connect.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;

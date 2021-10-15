@@ -24,7 +24,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.wso2.choreo.connect.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.throttle.PolicyConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.ThrottleCondition;
