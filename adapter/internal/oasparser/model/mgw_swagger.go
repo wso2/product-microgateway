@@ -17,6 +17,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -61,7 +62,7 @@ type EndpointCluster struct {
 	Endpoints    []Endpoint
 	// EndpointType enum {failover, loadbalance}. if any other value provided, consider as the default value; which is loadbalance
 	EndpointType string
-	EndpointConfig
+	Config       *EndpointConfig
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -87,22 +88,20 @@ type Endpoint struct {
 
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster
 type EndpointConfig struct {
-	RetryConfig
+	RetryConfig *RetryConfig `json:"retryConfig"`
 }
 
 // RetryConfig holds the parameters for retries done by cc to the EndpointCluster
 type RetryConfig struct {
-	Count            int32
-	IntervalInMillis int32
-	BackOffFactor    float32
-	StatusCodes      []string
+	Count       int32    `json:"count"`
+	StatusCodes []string `json:"statusCodes"`
 }
 
 // SecurityScheme represents the structure of an security scheme.
 type SecurityScheme struct {
 	// Arbitrary name used to define security scheme
 	// ex: default, x-api-key etc.
-	DefinitionName string 
+	DefinitionName string
 
 	// Type of the security scheme
 	// Possible values are apiKey, oauth2
@@ -112,7 +111,7 @@ type SecurityScheme struct {
 	// User can define a specific name for above types
 	Name string
 
-	// Location of the api key 
+	// Location of the api key
 	// Valid values are query, header
 	In string
 }
@@ -238,7 +237,7 @@ func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
 	return swagger.xWso2AuthHeader
 }
 
-// GetSecurityScheme returns the securityschemes of the API
+// GetSecurityScheme returns the securitySchemes of the API
 func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 	return swagger.securityScheme
 }
@@ -486,7 +485,11 @@ func getEndpoints(vendorExtensions map[string]interface{}, endpointName string) 
 				}
 			}
 			// Set Endpoint Config
-
+			if advanceEndpointConfig, found := endpointClusterMap[AdvanceEndpointConfig]; found {
+				var endpointConfig EndpointConfig
+				json.Unmarshal(advanceEndpointConfig.([]byte), &endpointConfig)
+				endpointCluster.Config = &endpointConfig
+			}
 			return &endpointCluster, nil
 		}
 		logger.LoggerOasparser.Errorf("%v OpenAPI extension does not adhere with the schema", endpointName)

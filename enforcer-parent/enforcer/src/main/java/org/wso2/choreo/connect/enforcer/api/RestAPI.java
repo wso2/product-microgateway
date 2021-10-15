@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
@@ -69,8 +70,9 @@ public class RestAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         String apiType = api.getApiType();
-        List<String> productionUrls = processEndpoints(api.getProductionUrlsList());
-        List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
+        EndpointCluster productionEndpoints = processEndpoints(api.getProductionEndpoints());
+        EndpointCluster sandboxEndpoints = processEndpoints(api.getSandboxEndpoints());
+        List<String> securitySchemes = api.getSecuritySchemeList();
         Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
         List<String> securitySchemeList = new ArrayList<>();
         List<ResourceConfig> resources = new ArrayList<>();
@@ -115,7 +117,7 @@ public class RestAPI implements API {
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
-                .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
+                .productionUrls(productionEndpoints).sandboxUrls(sandboxEndpoints)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).securitySchemeDefinitions(securitySchemeDefinitions).build();
 
@@ -123,17 +125,29 @@ public class RestAPI implements API {
         return basePath;
     }
 
-    private List<String> processEndpoints(List<Endpoint> endpoints) {
-        if (endpoints == null || endpoints.size() == 0) {
+    private EndpointCluster processEndpoints(org.wso2.choreo.connect.discovery.api.EndpointCluster rpcEndpointCluster) {
+        if (rpcEndpointCluster == null || rpcEndpointCluster.getUrlsCount() == 0) {
             return null;
         }
         List<String> urls = new ArrayList<>(1);
-        endpoints.forEach(endpoint -> {
+        rpcEndpointCluster.getUrlsList().forEach(endpoint -> {
             String url = endpoint.getURLType().toLowerCase() + "://" +
                     endpoint.getHost() + ":" + endpoint.getPort() + endpoint.getBasepath();
             urls.add(url);
         });
-        return urls;
+        EndpointCluster endpointCluster = new EndpointCluster();
+        endpointCluster.setUrls(urls);
+
+        if (rpcEndpointCluster.hasConfig()) {
+            EndpointClusterConfig endpointClusterConfig = rpcEndpointCluster.getConfig();
+            if (endpointClusterConfig.hasRetryConfig()) {
+                org.wso2.choreo.connect.discovery.api.RetryConfig rpcRetryConfig = endpointClusterConfig.getRetryConfig();
+                RetryConfig retryConfig = new RetryConfig(rpcRetryConfig.getCount(),
+                        rpcRetryConfig.getStatusCodesList().toArray(new String[0]));
+                endpointCluster.setRetryConfig(retryConfig);
+            }
+        }
+        return endpointCluster;
     }
 
     @Override
