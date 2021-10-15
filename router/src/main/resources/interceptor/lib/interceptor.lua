@@ -52,13 +52,14 @@ local INV_CONTEXT = {
     PROTOCOL = "protocol",
     SCHEME = "scheme",
     PATH = "path",
+    REQ_ID = "requestId",
     SOURCE = "source",
     DESTINATION = "destination",
     ENFORCER_DENIED = "enforcerDenied"
 }
 
 -- keys of the payload from the interceptor service
-local RESPOSE = {
+local RESPONSE = {
     DIRECT_RESPOND = "directRespond",
     HEADERS_TO_ADD = "headersToAdd",
     HEADERS_TO_REPLACE = "headersToReplace",
@@ -81,18 +82,18 @@ local SHARED_INFO_META_KEY = "shared.info"
 
 local function modify_headers(handle, interceptor_response_body)
     -- priority: headersToAdd, headersToReplace, headersToRemove
-    if interceptor_response_body[RESPOSE.HEADERS_TO_REMOVE] then
-        for _, key in ipairs(interceptor_response_body[RESPOSE.HEADERS_TO_REMOVE]) do
+    if interceptor_response_body[RESPONSE.HEADERS_TO_REMOVE] then
+        for _, key in ipairs(interceptor_response_body[RESPONSE.HEADERS_TO_REMOVE]) do
             handle:headers():remove(key)
         end
     end
-    if interceptor_response_body[RESPOSE.HEADERS_TO_REPLACE] then
-        for key, val in pairs(interceptor_response_body[RESPOSE.HEADERS_TO_REPLACE]) do
+    if interceptor_response_body[RESPONSE.HEADERS_TO_REPLACE] then
+        for key, val in pairs(interceptor_response_body[RESPONSE.HEADERS_TO_REPLACE]) do
             handle:headers():replace(key, val)
         end
     end
-    if interceptor_response_body[RESPOSE.HEADERS_TO_ADD] then
-        for key, val in pairs(interceptor_response_body[RESPOSE.HEADERS_TO_ADD]) do
+    if interceptor_response_body[RESPONSE.HEADERS_TO_ADD] then
+        for key, val in pairs(interceptor_response_body[RESPONSE.HEADERS_TO_ADD]) do
             handle:headers():add(key, val)
         end
     end
@@ -100,34 +101,35 @@ end
 
 local function modify_trailers(handle, interceptor_response_body)
     -- priority: trailersToAdd, trailersToReplace, trailersToRemove
-    if interceptor_response_body[RESPOSE.TRAILERS_TO_ADD] then
-        for _, key in ipairs(interceptor_response_body[RESPOSE.TRAILERS_TO_ADD]) do
+    if interceptor_response_body[RESPONSE.TRAILERS_TO_ADD] then
+        for _, key in ipairs(interceptor_response_body[RESPONSE.TRAILERS_TO_ADD]) do
             handle:trailers():remove(key)
         end
     end
-    if interceptor_response_body[RESPOSE.TRAILERS_TO_REPLACE] then
-        for key, val in pairs(interceptor_response_body[RESPOSE.TRAILERS_TO_REPLACE]) do
+    if interceptor_response_body[RESPONSE.TRAILERS_TO_REPLACE] then
+        for key, val in pairs(interceptor_response_body[RESPONSE.TRAILERS_TO_REPLACE]) do
             handle:trailers():replace(key, val)
         end
     end
-    if interceptor_response_body[RESPOSE.TRAILERS_TO_REMOVE] then
-        for key, val in pairs(interceptor_response_body[RESPOSE.TRAILERS_TO_REMOVE]) do
+    if interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE] then
+        for key, val in pairs(interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE]) do
             handle:trailers():add(key, val)
         end
     end
 end
 
-local function modify_body(handle, interceptor_response_body, request_id)
+local function modify_body(handle, interceptor_response_body, request_id, is_body_base64_encoded)
     -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
     if interceptor_response_body.body then
         handle:logDebug("Updating body for the request_id: " .. request_id)
-        local content_length = handle:body():setBytes(base64.decode(interceptor_response_body.body))
+        local body = is_body_base64_encoded and base64.decode(interceptor_response_body.body) or interceptor_response_body.body
+        local content_length = handle:body():setBytes(body)
         handle:headers():replace("content-length", content_length)
     end
 end
 
 local function direct_respond(handle, headers, body, shared_info)
-    shared_info[RESPOSE.DIRECT_RESPOND] = true
+    shared_info[RESPONSE.DIRECT_RESPOND] = true
     handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
     handle:respond(
         headers,
@@ -141,7 +143,7 @@ end
 ---@param body_str string
 ---@param request_id string
 ---@param is_request_flow boolean
----@return boolean - returns true if the rest of the flow should be terminated (do not continnue)
+---@return boolean - returns true if the rest of the interception flow should be terminated (do not continue interception flow)
 local function check_interceptor_call_errors(handle, headers, body_str, shared_info, request_id, is_request_flow)
     -- TODO: (renuka) check behaviour 100 continue and handle it
     if headers[STATUS] == "200" then -- success, continue flow
@@ -175,11 +177,11 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
     for key, _ in pairs(backend_headers) do
         headers_to_remove[key] = "" -- can not remove headers while iterating, hence adding first
     end
-    for key, _ in pairs(headers_to_remove) do -- remmove all headers from backend
+    for key, _ in pairs(headers_to_remove) do -- remove all headers from backend
         backend_headers:remove(key)
     end
     backend_headers:add(STATUS, "500")
-    modify_body(handle, {body = base64.encode(resp_body)}, request_id)
+    modify_body(handle, {body = resp_body}, request_id, false)
     return true
     --#endregion
 end
@@ -188,7 +190,7 @@ end
 ---@param handle table - request/response handler object
 ---@param interceptor_request_body table - request body for the interceptor service
 ---@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
----@return table - respose headers
+---@return table - response headers
 ---@return string - response body
 local function send_http_call(handle, interceptor_request_body, intercept_service)
     local headers, interceptor_response_body_str = handle:httpCall(
@@ -223,6 +225,8 @@ end
 
 local function include_invocation_context(handle, req_flow_includes, resp_flow_includes, inv_context, interceptor_request_body, shared_info, request_headers)
     if req_flow_includes[INCLUDES.INV_CONTEXT] or resp_flow_includes[INCLUDES.INV_CONTEXT] then
+        -- We first read from "x-forwarded-for" which is the actual client IP, when it comes to scenarios like the request is coming through a load balancer
+        -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For the header contains the original clients IP.
         local client_ip = request_headers:get("x-forwarded-for")
         if client_ip == nil or client_ip == "" then
             client_ip = handle:streamInfo():downstreamDirectRemoteAddress()
@@ -232,6 +236,7 @@ local function include_invocation_context(handle, req_flow_includes, resp_flow_i
         inv_context[INV_CONTEXT.PROTOCOL] = handle:streamInfo():protocol()
         inv_context[INV_CONTEXT.SCHEME] = request_headers:get(":scheme")
         inv_context[INV_CONTEXT.PATH] = request_headers:get(":path")
+        inv_context[INV_CONTEXT.REQ_ID] = request_headers:get("x-request-id")
         inv_context[INV_CONTEXT.SOURCE] = client_ip
         -- inv_context[INV_CONTEXT.DESTINATION] = handle:streamInfo():downstreamLocalAddress() -- TODO: (renuka) check this
         inv_context[INV_CONTEXT.ENFORCER_DENIED] = false
@@ -246,9 +251,9 @@ local function include_invocation_context(handle, req_flow_includes, resp_flow_i
 end
 
 local function handle_direct_respond(handle, interceptor_response_body, shared_info, request_id)
-    if interceptor_response_body[RESPOSE.DIRECT_RESPOND] then
+    if interceptor_response_body[RESPONSE.DIRECT_RESPOND] then
         handle:logDebug("Directly responding without calling the backend for request_id: " .. request_id)
-        local headers = interceptor_response_body[RESPOSE.HEADERS_TO_ADD] or {}
+        local headers = interceptor_response_body[RESPONSE.HEADERS_TO_ADD] or {}
         
         -- if interceptor_response_body.body is nil send empty, do not send client its payload back
         local body = interceptor_response_body.body or ""
@@ -341,13 +346,13 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     local interceptor_response_body = json.decode(interceptor_response_body_str)
 
     handle_direct_respond(request_handle, interceptor_response_body, shared_info, request_id)
-    modify_body(request_handle, interceptor_response_body, request_id)
+    modify_body(request_handle, interceptor_response_body, request_id, true)
     modify_headers(request_handle, interceptor_response_body)
     modify_trailers(request_handle, interceptor_response_body)
 
-    if interceptor_response_body[RESPOSE.INTCPT_CONTEXT] then
+    if interceptor_response_body[RESPONSE.INTCPT_CONTEXT] then
         request_handle:logDebug("Updating interceptor context for the request_id: " .. request_id)
-        shared_info[REQUEST.INTCPT_CONTEXT] = interceptor_response_body[RESPOSE.INTCPT_CONTEXT]
+        shared_info[REQUEST.INTCPT_CONTEXT] = interceptor_response_body[RESPONSE.INTCPT_CONTEXT]
     end
 
     request_handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
@@ -366,7 +371,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         return
     end
     local request_id = shared_info[SHARED.REQUEST_ID]
-    if shared_info[RESPOSE.DIRECT_RESPOND] then
+    if shared_info[RESPONSE.DIRECT_RESPOND] then
         response_handle:logDebug("Ignoring response path intercept since direct responded for the request_id: " .. request_id)
         return
     end
@@ -418,7 +423,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     local interceptor_response_body = json.decode(interceptor_response_body_str)
 
-    modify_body(response_handle, interceptor_response_body, request_id)
+    modify_body(response_handle, interceptor_response_body, request_id, true)
     modify_headers(response_handle, interceptor_response_body)
     modify_trailers(response_handle, interceptor_response_body)
 end

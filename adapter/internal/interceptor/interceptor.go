@@ -50,7 +50,8 @@ type RequestInclusions struct {
 	ResponseTrailers  bool
 }
 
-// InvocationContext represents invocation context of a request
+// InvocationContext represents static details of the invocation context of a request for the resource path
+// runtime details such as actual path will be populated from the lua script and set in the invocation context
 type InvocationContext struct {
 	BasePath        string
 	Method          string
