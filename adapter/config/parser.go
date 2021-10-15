@@ -92,18 +92,6 @@ func ReadConfigs() (*Config, error) {
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem(), "GlobalAdapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Enforcer)).Elem(), "Enforcer", false)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Analytics)).Elem(), "Analtyics", false)
-
-		// s := reflect.ValueOf(&adapterConfig.Adapter)
-		// reflect.Indirect(s).FieldByName("Server").FieldByName("Port").SetString("9845")
-		// result := map[string]interface{}{}
-
-		// err = mapstructure.Decode(&adapterConfig.Adapter.Server.Users[0], &result)
-		// if err != nil {
-		// 	panic(err)
-		// }
-
-		// logger.Infof("sdfsdfsfs : %v", result)
-		// .fieldByName("dfdf").SetInt(9091)
 	})
 	return adapterConfig, e
 }

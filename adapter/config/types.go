@@ -393,7 +393,7 @@ type globalAdapter struct {
 	Enabled           bool
 	ServiceURL        string `toml:"serviceUrl"`
 	LocalLabel        string
-	OverwriteHostName string `toml:"overwriteHostName"`
+	OverwriteHostName string
 	RetryInterval     time.Duration
 }
 
