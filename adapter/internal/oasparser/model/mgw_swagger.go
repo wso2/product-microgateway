@@ -17,6 +17,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -60,7 +61,7 @@ type EndpointCluster struct {
 	EndpointName string
 	Endpoints    []Endpoint
 	EndpointType string // enum allowing failover or loadbalance
-	EndpointConfig
+	Config       *EndpointConfig
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -86,15 +87,13 @@ type Endpoint struct {
 
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster
 type EndpointConfig struct {
-	RetryConfig
+	RetryConfig *RetryConfig `json:"retryConfig"`
 }
 
 // RetryConfig holds the parameters for retries done by cc to the EndpointCluster
 type RetryConfig struct {
-	Count            int32
-	IntervalInMillis int32
-	BackOffFactor    float32
-	StatusCodes      []string
+	Count       int32    `json:"count"`
+	StatusCodes []string `json:"statusCodes"`
 }
 
 // CorsConfig represents the API level Cors Configuration
@@ -488,7 +487,11 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName str
 				}
 			}
 			// Set Endpoint Config
-
+			if advanceEndpointConfig, found := endpointClusterMap[AdvanceEndpointConfig]; found {
+				var endpointConfig EndpointConfig
+				json.Unmarshal(advanceEndpointConfig.([]byte), &endpointConfig)
+				endpointCluster.Config = &endpointConfig
+			}
 			return &endpointCluster, nil
 		}
 		logger.LoggerOasparser.Error("x-wso2-production/sandbox-endpoints OpenAPI extension does not adhere with the schema")

@@ -19,8 +19,13 @@ package model
 
 // sub-property keys mentioned under x-wso2-production-endpoints
 const (
-	urls      string = "urls"
-	typeConst string = "type"
+	urls                  string = "urls"
+	typeConst             string = "type"
+	LoadBalance           string = "loadbalance"
+	AdvanceEndpointConfig string = "advanceEndpointConfig"
+	RetryConfigConst      string = "retryConfig"
+	CountConst            string = "count"
+	StatusCodesConst      string = "statusCodes"
 )
 
 // Constants for OpenAPI vendor extension keys
@@ -38,7 +43,6 @@ const (
 	xWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
 	DefaultSecurity      string = "default"
-	LoadBalance          string = "loadbalance"
 )
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor

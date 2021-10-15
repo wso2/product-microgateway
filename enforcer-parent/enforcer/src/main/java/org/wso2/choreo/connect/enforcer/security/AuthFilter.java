@@ -23,11 +23,13 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.commons.Filter;
 import org.wso2.choreo.connect.commons.model.APIConfig;
 import org.wso2.choreo.connect.commons.model.AuthenticationContext;
+import org.wso2.choreo.connect.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
@@ -179,9 +181,11 @@ public class AuthFilter implements Filter {
             if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getProdClusterHeader());
+                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getProductionEndpoints());
             } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
                 requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getSandClusterHeader());
+                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getSandboxEndpoints());
             } else {
                 if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -222,5 +226,18 @@ public class AuthFilter implements Filter {
             }
         }
         return challengeString.toString().trim();
+    }
+
+    private void addRetryConfigHeaders(RequestContext requestContext, EndpointCluster endpointCluster) {
+        if (endpointCluster != null) {
+            if (endpointCluster.getRetryConfig() != null) {
+                requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRY_ON,
+                        HttpConstants.HttpRouterHeaderValues.RETRIABLE_STATUS_CODES);
+                requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.MAX_RETRIES,
+                        Integer.toString(endpointCluster.getRetryConfig().getCount()));
+                requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
+                        String.join(",", endpointCluster.getRetryConfig().getStatusCodes()));
+            }
+        }
     }
 }
