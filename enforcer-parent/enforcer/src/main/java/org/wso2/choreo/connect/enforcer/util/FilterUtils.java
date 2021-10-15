@@ -338,11 +338,6 @@ public class FilterUtils {
         String apiVersion = requestContext.getMatchedAPI().getVersion();
         jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
-        if (jwtInfoDto.getJwtValidationInfo().getClaims() != null
-                && jwtInfoDto.getJwtValidationInfo().getClaims().get("sub") != null) {
-            String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get("sub");
-            jwtInfoDto.setSub(sub);
-        }
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
     }
