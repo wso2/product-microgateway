@@ -24,6 +24,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -67,11 +68,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		clusters  []*clusterv3.Cluster
 		endpoints []*corev3.Address
 
-		apiLevelEndpointProd    []model.Endpoint
+		apiLevelEndpointProd    *model.EndpointCluster
 		apilevelClusterProd     *clusterv3.Cluster
 		apiLevelClusterNameProd string
 
-		apiLevelEndpointSand    []model.Endpoint
+		apiLevelEndpointSand    *model.EndpointCluster
 		apilevelClusterSand     *clusterv3.Cluster
 		apiLevelClusterNameSand string
 
@@ -89,57 +90,59 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 
 	// check API level production endpoints available
 	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
-		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints().Endpoints
-		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
+		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
 		apiLevelClusterNameProd = strings.TrimSpace(organizationID + "_" + prodClustersConfigNamePrefix + vHost + "_" +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType,
-			upstreamCerts, timeout)
+		var apilevelAddressP []*corev3.Address
+		apilevelClusterProd, apilevelAddressP = createCluster(apiLevelClusterNameProd, apiLevelEndpointProd, upstreamCerts, timeout)
 		clusters = append(clusters, apilevelClusterProd)
-		endpoints = append(endpoints, apilevelAddressP)
-		apiEndpointBasePath = apiLevelEndpointProd[0].Basepath
+		endpoints = append(endpoints, apilevelAddressP...)
+		apiEndpointBasePath = apiLevelEndpointProd.Endpoints[0].Basepath
 
-		if apiLevelEndpointProd[0].ServiceDiscoveryString != "" {
+		// service discovery itself will be handling loadbancing etc.
+		// Therefore mutiple endpoint support is not needed, hence consider only.
+		serviceDiscoveryString := apiLevelEndpointProd.Endpoints[0].ServiceDiscoveryString
+		if serviceDiscoveryString != "" {
 			//add the api level cluster name to the ClusterConsulKeyMap
-			svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameProd] = apiLevelEndpointProd[0].ServiceDiscoveryString
+			svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameProd] = serviceDiscoveryString
 			logger.LoggerOasparser.Debugln("Consul cluster added for API level Production: ", apiLevelClusterNameProd, " ",
-				apiLevelEndpointProd[0].ServiceDiscoveryString)
+				serviceDiscoveryString)
 		}
 	} else {
 		logger.LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
-
 	// check API level sandbox endpoints availble
 	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
-		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints().Endpoints
-		if apiEndpointBasePath != apiLevelEndpointSand[0].Basepath && len(apiLevelEndpointProd) > 0 {
+		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
+		if apiLevelEndpointProd != nil && apiEndpointBasePath != apiLevelEndpointSand.Endpoints[0].Basepath {
 			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
 				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
 		} else {
-			apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
 			apiLevelClusterNameSand = strings.TrimSpace(organizationID + "_" + sandClustersConfigNamePrefix + vHost + "_" +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-			apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType,
-				upstreamCerts, timeout)
+			var apilevelAddressSand []*corev3.Address
+			apilevelClusterSand, apilevelAddressSand = createCluster(apiLevelClusterNameSand, apiLevelEndpointSand, upstreamCerts, timeout)
 			clusters = append(clusters, apilevelClusterSand)
-			endpoints = append(endpoints, apilevelAddressSand)
-			if apiLevelEndpointSand[0].ServiceDiscoveryString != "" {
+			endpoints = append(endpoints, apilevelAddressSand...)
+
+			serviceDiscoveryString := apiLevelEndpointSand.Endpoints[0].ServiceDiscoveryString
+			if serviceDiscoveryString != "" {
 				//add the api level cluster name to the ClusterConsulKeyMap
-				svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameSand] = apiLevelEndpointSand[0].ServiceDiscoveryString
+				svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameSand] = serviceDiscoveryString
 				logger.LoggerOasparser.Debugln("Consul cluster added for API level Sandbox: ", apiLevelClusterNameSand, " ",
-					apiLevelEndpointSand[0].ServiceDiscoveryString)
+					serviceDiscoveryString)
 			}
 		}
 	}
-
 	apiRequestInterceptor, err := mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor)
 	// if lua filter exists on api level, add cluster
 	if err == nil && apiRequestInterceptor.Enable {
 		logger.LoggerOasparser.Debugln("API level request interceptors found " + mgwSwagger.GetID())
 		apiRequestInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-
-		clusters = append(clusters, CreateLuaCluster(interceptorCerts, apiRequestInterceptor))
+		cluster, addresses := CreateLuaCluster(interceptorCerts, apiRequestInterceptor)
+		clusters = append(clusters, cluster)
+		endpoints = append(endpoints, addresses...)
 
 	}
 	apiResponseInterceptor, err = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor)
@@ -148,9 +151,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		logger.LoggerOasparser.Debugln("API level response interceptors found for " + mgwSwagger.GetID())
 		apiResponseInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		clusters = append(clusters, CreateLuaCluster(interceptorCerts, apiResponseInterceptor))
+		cluster, addresses := CreateLuaCluster(interceptorCerts, apiResponseInterceptor)
+		clusters = append(clusters, cluster)
+		endpoints = append(endpoints, addresses...)
 	}
-
 	// check if x-wso2-endpoints are available
 	xWso2Endpoints, err := mgwSwagger.GetXWso2Endpoints()
 	if err != nil {
@@ -161,13 +165,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			epClusterName := strings.TrimSpace(organizationID + "_" + endpointCluster.EndpointName + "_" +
 				xWso2EPClustersConfigNamePrefix + vHost + "_" +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-			//todo (amali) support multiple urls
-			address := createAddress(endpointCluster.Endpoints[0].Host, endpointCluster.Endpoints[0].Port)
-			epCluster := createCluster(address, epClusterName, endpointCluster.Endpoints[0].URLType, upstreamCerts, timeout)
+			epCluster, addresses := createCluster(epClusterName, endpointCluster, upstreamCerts, timeout)
 			clusters = append(clusters, epCluster)
+			endpoints = append(endpoints, addresses...)
 		}
 	}
-
 	for _, resource := range mgwSwagger.GetResources() {
 		resourceRequestInterceptor := apiRequestInterceptor
 		resourceResponseInterceptor := apiResponseInterceptor
@@ -181,28 +183,27 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 
 		// resource level check production endpoints
 		if resource.GetProdEndpoints() != nil && len(resource.GetProdEndpoints().Endpoints) > 0 {
-			endpointProd := resource.GetProdEndpoints().Endpoints
-			addressProd := createAddress(endpointProd[0].Host, endpointProd[0].Port)
-			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
+			endpointProd := resource.GetProdEndpoints()
 			clusterNameProd := strings.TrimSpace(apiLevelClusterNameProd + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
-			clusterProd := createCluster(addressProd, clusterNameProd, endpointProd[0].URLType, upstreamCerts, timeout)
+			clusterProd, addressProd := createCluster(clusterNameProd, endpointProd, upstreamCerts, timeout)
 			clusters = append(clusters, clusterProd)
 			clusterRefProd = clusterProd.GetName()
-			endpoints = append(endpoints, addressProd)
-			endpointBasepath = endpointProd[0].Basepath
+			endpoints = append(endpoints, addressProd...)
+			endpointBasepath = endpointProd.Endpoints[0].Basepath
 
 			//add to ClusterConsulKeyMap: resource level prod endpoints
-			if endpointProd[0].ServiceDiscoveryString != "" {
-				svcdiscovery.ClusterConsulKeyMap[clusterNameProd] = endpointProd[0].ServiceDiscoveryString
+			serviceDiscoveryString := endpointProd.Endpoints[0].ServiceDiscoveryString
+			if serviceDiscoveryString != "" {
+				svcdiscovery.ClusterConsulKeyMap[clusterNameProd] = serviceDiscoveryString
 				logger.LoggerOasparser.Debugln("Consul cluster added for Resource level Production:", clusterNameProd, " ",
-					endpointProd[0].ServiceDiscoveryString)
+					serviceDiscoveryString)
 			}
 
 			// API level check
 		} else if apilevelClusterProd != nil {
 			clusterRefProd = apilevelClusterProd.GetName()
-			endpointBasepath = apiLevelEndpointProd[0].Basepath
+			endpointBasepath = apiLevelEndpointProd.Endpoints[0].Basepath
 		} else {
 			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
 				apiTitle, apiVersion, resource.GetPath())
@@ -214,27 +215,26 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 
 		// resource level check sandbox endpoints
 		if resource.GetSandEndpoints() != nil && len(resource.GetSandEndpoints().Endpoints) > 0 {
-			endpointSand := resource.GetSandEndpoints().Endpoints
-			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
+			endpointSand := resource.GetSandEndpoints()
 			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
-			if endpointBasepath != endpointSand[0].Basepath {
+			if endpointBasepath != endpointSand.Endpoints[0].Basepath {
 				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath is different compared to production endpoint "+
 					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath())
 			} else {
-				// sandbox cluster is not created if the basepath component of the endpoint is different compared to production
-				// endpoints
-				clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].URLType, upstreamCerts, timeout)
+				// sandbox cluster is not created if the basepath component of the endpoint is different compared to production endpoints
+				clusterSand, addressSand := createCluster(clusterNameSand, endpointSand, upstreamCerts, timeout)
 				clusters = append(clusters, clusterSand)
-				endpoints = append(endpoints, addressSand)
+				endpoints = append(endpoints, addressSand...)
 				clusterRefSand = clusterSand.GetName()
 
 				//add to ClusterConsulKeyMap: resource level sand endpoints
-				if endpointSand[0].ServiceDiscoveryString != "" {
-					svcdiscovery.ClusterConsulKeyMap[clusterNameSand] = endpointSand[0].ServiceDiscoveryString
+				serviceDiscoveryString := endpointSand.Endpoints[0].ServiceDiscoveryString
+				if serviceDiscoveryString != "" {
+					svcdiscovery.ClusterConsulKeyMap[clusterNameSand] = serviceDiscoveryString
 					logger.LoggerOasparser.Debugln("Consul cluster added for API level Sandbox:", clusterNameSand, " ",
-						endpointSand[0].ServiceDiscoveryString)
+						serviceDiscoveryString)
 				}
 			}
 
@@ -242,12 +242,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			// Due to endpoint basePath restriction, the apiLevelEndpointSand may not be initialized.
 		} else if apilevelClusterSand != nil || apiLevelEndpointSand != nil {
 			endpointSand := apiLevelEndpointSand
-			if endpointBasepath != endpointSand[0].Basepath && clusterRefProd != "" {
+			if endpointBasepath != endpointSand.Endpoints[0].Basepath && clusterRefProd != "" {
 				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath of API is different compared to production endpoint "+
 					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath())
 			} else {
 				clusterRefSand = apilevelClusterSand.GetName()
-				endpointBasepath = endpointSand[0].Basepath
+				endpointBasepath = endpointSand.Endpoints[0].Basepath
 			}
 		} else {
 			logger.LoggerOasparser.Debugf("Sandbox environment endpoints are not available for the resource %v:%v-%v",
@@ -260,8 +260,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			resourceRequestInterceptor = reqInterceptorVal
 			resourceRequestInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
-
-			clusters = append(clusters, CreateLuaCluster(interceptorCerts, resourceRequestInterceptor))
+			cluster, addresses := CreateLuaCluster(interceptorCerts, resourceRequestInterceptor)
+			clusters = append(clusters, cluster)
+			endpoints = append(endpoints, addresses...)
 
 		}
 		respInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor)
@@ -270,7 +271,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			resourceResponseInterceptor = respInterceptorVal
 			resourceResponseInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
-			clusters = append(clusters, CreateLuaCluster(interceptorCerts, resourceResponseInterceptor))
+			cluster, addresses := CreateLuaCluster(interceptorCerts, resourceResponseInterceptor)
+			clusters = append(clusters, cluster)
+			endpoints = append(endpoints, addresses...)
 		}
 
 		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, vHost, endpointBasepath, clusterRefProd,
@@ -286,18 +289,85 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 }
 
 // CreateLuaCluster creates lua cluster configuration.
-func CreateLuaCluster(interceptorCerts []byte, endpoint model.InterceptEndpoint) *clusterv3.Cluster {
+func CreateLuaCluster(interceptorCerts []byte, endpoint model.InterceptEndpoint) (*clusterv3.Cluster, []*corev3.Address) {
 	logger.LoggerOasparser.Debug("creating a lua cluster ", endpoint.ClusterName)
-	luaAddress := createAddress(endpoint.Host, endpoint.Port)
-	return createCluster(luaAddress, endpoint.ClusterName, endpoint.URLType, interceptorCerts, endpoint.ClusterTimeout)
+	return createCluster(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout)
 }
 
 // createCluster creates cluster configuration. AddressConfiguration, cluster name and
 // urlType (http or https) is required to be provided.
-// timeout cluster timeout. provide -1 to read the cluster timeout value from configs
-func createCluster(address *corev3.Address, clusterName string, urlType string, upstreamCerts []byte,
-	timeout time.Duration) *clusterv3.Cluster {
-	logger.LoggerOasparser.Debug("creating a cluster....")
+// timeout cluster timeout
+func createCluster(clusterName string, clusterDetails *model.EndpointCluster, upstreamCerts []byte,
+	timeout time.Duration) (*clusterv3.Cluster, []*corev3.Address) {
+	// tls configs
+	var transportSocketMatches []*clusterv3.Cluster_TransportSocketMatch
+	// create loadbalanced/failover endpoints
+	var lbEPs []*endpointv3.LocalityLbEndpoints
+	// failover priority
+	priority := 0
+	// epType {loadbalance, failover}
+	epType := clusterDetails.EndpointType
+
+	addresses := []*corev3.Address{}
+
+	for i, ep := range clusterDetails.Endpoints {
+		// create addresses for endpoints
+		address := createAddress(ep.Host, ep.Port)
+		addresses = append(addresses, address)
+		// create tls configs
+		if strings.HasPrefix(ep.URLType, httpsURLType) || strings.HasPrefix(ep.URLType, wssURLType) {
+			upstreamtlsContext := createUpstreamTLSContext(upstreamCerts, address)
+			marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
+			if err != nil {
+				logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
+			} else {
+				transportSocketMatch := &clusterv3.Cluster_TransportSocketMatch{
+					Name: "ts" + strconv.Itoa(i),
+					Match: &structpb.Struct{
+						Fields: map[string]*structpb.Value{
+							"lb_id": structpb.NewStringValue(strconv.Itoa(i)),
+						},
+					},
+					TransportSocket: &corev3.TransportSocket{
+						Name: transportSocketName,
+						ConfigType: &corev3.TransportSocket_TypedConfig{
+							TypedConfig: marshalledTLSContext,
+						},
+					},
+				}
+				transportSocketMatches = append(transportSocketMatches, transportSocketMatch)
+			}
+		}
+
+		// create loadbalance / failover endpoints
+		localityLbEndpoints := &endpointv3.LocalityLbEndpoints{
+			Priority: uint32(priority),
+			LbEndpoints: []*endpointv3.LbEndpoint{
+				{
+					HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+						Endpoint: &endpointv3.Endpoint{
+							Address: address,
+						},
+					},
+					Metadata: &corev3.Metadata{
+						FilterMetadata: map[string]*structpb.Struct{
+							"envoy.transport_socket_match": {
+								Fields: map[string]*structpb.Value{
+									"lb_id": structpb.NewStringValue(strconv.Itoa(i)),
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		lbEPs = append(lbEPs, localityLbEndpoints)
+
+		// set priority for next endpoint
+		if strings.HasPrefix(epType, "failover") {
+			priority = priority + 1
+		}
+	}
 
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
@@ -307,37 +377,27 @@ func createCluster(address *corev3.Address, clusterName string, urlType string, 
 		LbPolicy:             clusterv3.Cluster_ROUND_ROBIN,
 		LoadAssignment: &endpointv3.ClusterLoadAssignment{
 			ClusterName: clusterName,
-			Endpoints: []*endpointv3.LocalityLbEndpoints{
-				{
-					LbEndpoints: []*endpointv3.LbEndpoint{
-						{
-							HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
-								Endpoint: &endpointv3.Endpoint{
-									Address: address,
-								},
-							},
-						},
-					},
-				},
-			},
+			Endpoints:   lbEPs,
+		},
+		// adding health check for cluster endpoints
+		HealthChecks:           createHealthCheck(),
+		TransportSocketMatches: transportSocketMatches,
+	}
+	return &cluster, addresses
+}
+
+func createHealthCheck() []*corev3.HealthCheck {
+	conf, _ := config.ReadConfigs()
+	return []*corev3.HealthCheck{
+		{
+			Timeout:            ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
+			Interval:           ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
+			UnhealthyThreshold: wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.UnhealthyThreshold)),
+			HealthyThreshold:   wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.HealthyThreshold)),
+			// we only support tcp default healthcheck
+			HealthChecker: &corev3.HealthCheck_TcpHealthCheck_{},
 		},
 	}
-	if strings.HasPrefix(urlType, httpsURLType) || strings.HasPrefix(urlType, wssURLType) {
-		upstreamtlsContext := createUpstreamTLSContext(upstreamCerts, address)
-		marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
-		if err != nil {
-			logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
-		} else {
-			upstreamTransportSocket := &corev3.TransportSocket{
-				Name: transportSocketName,
-				ConfigType: &corev3.TransportSocket_TypedConfig{
-					TypedConfig: marshalledTLSContext,
-				},
-			}
-			cluster.TransportSocket = upstreamTransportSocket
-		}
-	}
-	return &cluster
 }
 
 func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tlsv3.UpstreamTlsContext {
@@ -645,7 +705,7 @@ func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInte
 			Enable:      true,
 			ClusterName: requestInterceptor.ClusterName,
 			Path:        requestInterceptor.Path,
-			Timeout:     strconv.Itoa(requestInterceptor.RequestTimeout),
+			Timeout:     requestInterceptor.RequestTimeout.String(),
 		}
 	}
 	if responseInterceptor.Enable {
@@ -653,7 +713,7 @@ func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInte
 			Enable:      true,
 			ClusterName: responseInterceptor.ClusterName,
 			Path:        responseInterceptor.Path,
-			Timeout:     strconv.Itoa(responseInterceptor.RequestTimeout),
+			Timeout:     responseInterceptor.RequestTimeout.String(),
 		}
 	}
 	return interceptor.GetInterceptor(i)

@@ -30,7 +30,7 @@ const (
 	grpcAccessLogName          string = "envoy.http_grpc_access_log"
 	httpConManagerStartPrefix  string = "ingress_http"
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
-	luaPerRouteName       	   string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
+	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"
@@ -54,7 +54,7 @@ const (
 )
 
 const (
-	requestInterceptClustersNamePrefix string = "reqInterceptor_"
+	requestInterceptClustersNamePrefix  string = "reqInterceptor_"
 	responseInterceptClustersNamePrefix string = "resInterceptor_"
 )
 
@@ -78,7 +78,7 @@ const (
 	// upstreamServiceTimeHeader the header which is used to denote the upstream service time
 	upstreamServiceTimeHeader string = "x-envoy-upstream-service-time"
 	// xWso2requestInterceptor used to provide request interceptor details for api and resource level
-	xWso2requestInterceptor  string = "x-wso2-request-interceptor"
+	xWso2requestInterceptor string = "x-wso2-request-interceptor"
 	// xWso2responseInterceptor used to provide response interceptor details for api and resource level
 	xWso2responseInterceptor string = "x-wso2-response-interceptor"
 )

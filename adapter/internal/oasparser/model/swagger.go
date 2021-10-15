@@ -67,7 +67,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
-			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints)
+			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints, LoadBalance)
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}
@@ -199,22 +199,53 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIYaml) error {
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
-	if endpointConfig.SandBoxEndpoints.Endpoint != "" {
-		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.SandBoxEndpoints.Endpoint)
-		if err == nil {
-			swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, []Endpoint{*sandBoxEndpoint})
-		} else {
-			return err
+	if len(endpointConfig.SandBoxEndpoints) > 0 {
+		var endpoints []Endpoint
+		endpointType := LoadBalance
+		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
+			sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+			if err == nil {
+				endpoints = append(endpoints, *sandBoxEndpoint)
+			} else {
+				return err
+			}
 		}
-	}
-	if endpointConfig.ProductionEndpoints.Endpoint != "" {
-		productionEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.ProductionEndpoints.Endpoint)
-		if err == nil {
-			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, []Endpoint{*productionEndpoint})
-		} else {
-			return err
+		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
+			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
+				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+				if err == nil {
+					endpointType = FailOver
+					endpoints = append(endpoints, *failoverEndpoint)
+				} else {
+					return err
+				}
+			}
 		}
+		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, endpoints, endpointType)
 	}
-
+	if len(endpointConfig.ProductionEndpoints) > 0 {
+		var endpoints []Endpoint
+		endpointType := LoadBalance
+		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
+			prodEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+			if err == nil {
+				endpoints = append(endpoints, *prodEndpoint)
+			} else {
+				return err
+			}
+		}
+		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
+			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
+				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+				if err == nil {
+					endpointType = FailOver
+					endpoints = append(endpoints, *failoverEndpoint)
+				} else {
+					return err
+				}
+			}
+		}
+		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, endpoints, endpointType)
+	}
 	return nil
 }

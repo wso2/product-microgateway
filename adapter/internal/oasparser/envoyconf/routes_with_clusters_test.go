@@ -33,7 +33,7 @@ import (
 
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi.yaml"
-	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
+	commonTestForCreateRoutesWithClusters(t, openapiFilePath, false)
 	// TODO: (VirajSalaka) Additional tasks to test
 	// OpenAPI version 2
 }
@@ -41,13 +41,13 @@ func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsOnly(t *testing.T) {
 	// When the openapi endpoints are only mentioned via the extensions
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_only.yaml"
-	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
+	commonTestForCreateRoutesWithClusters(t, openapiFilePath, true)
 }
 
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
 	// When the openapi endpoints provided by servers object are overriden via the extensions
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
-	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
+	commonTestForCreateRoutesWithClusters(t, openapiFilePath, true)
 }
 
 func TestCreateRouteswithClustersWebsocketProdSand(t *testing.T) {
@@ -65,7 +65,9 @@ func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
 	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
 }
 
-func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string) {
+// commonTestForCreateRoutesWithClusters
+// testFailOver - if resource level has failover endpoints
+func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string, testFailOver bool) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi, err := operator.GetMgwSwagger(openapiByteArr)
@@ -79,24 +81,55 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	assert.Equal(t, apiLevelCluster.GetName(), "carbon.super_clusterProd_localhost_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
 	assert.Contains(t, pathLevelCluster.GetName(), "carbon.super_clusterProd_localhost_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
 
-	apiLevelClusterHost := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+	apiLevelClusterHost0 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
 		GetAddress().GetSocketAddress().GetAddress()
-	apiLevelClusterPort := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+	apiLevelClusterPort0 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
 		GetAddress().GetSocketAddress().GetPortValue()
-	assert.NotEmpty(t, apiLevelClusterHost, "API Level Cluster's assigned host should not be null")
-	assert.Equal(t, "apiLevelEndpoint", apiLevelClusterHost, "API Level Cluster's assigned host is incorrect.")
-	assert.NotEmpty(t, apiLevelClusterPort, "API Level Cluster's assigned port should not be null")
-	assert.Equal(t, uint32(80), apiLevelClusterPort, "API Level Cluster's assigned host is incorrect.")
-
-	pathLevelClusterHost := pathLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+	apiLevelClusterPriority0 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].Priority
+	apiLevelClusterHost1 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().
 		GetAddress().GetSocketAddress().GetAddress()
-	pathLevelClusterPort := pathLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+	apiLevelClusterPort1 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().
 		GetAddress().GetSocketAddress().GetPortValue()
-	assert.NotEmpty(t, pathLevelClusterHost, "Path Level Cluster's assigned host should not be null")
-	assert.Equal(t, "resourceLevelEndpoint", pathLevelClusterHost, "Path Level Cluster's assigned host is incorrect.")
-	assert.NotEmpty(t, pathLevelClusterPort, "Path Level Cluster's assigned port should not be null")
-	assert.Equal(t, uint32(443), pathLevelClusterPort, "Path Level Cluster's assigned host is incorrect.")
+	apiLevelClusterPriority1 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[1].Priority
 
+	assert.NotEmpty(t, apiLevelClusterHost0, "API Level Cluster's assigned host should not be null")
+	assert.Equal(t, "apiLevelEndpoint", apiLevelClusterHost0, "API Level Cluster's assigned host is incorrect.")
+	assert.NotEmpty(t, apiLevelClusterPort0, "API Level Cluster's assigned port should not be null")
+	assert.Equal(t, uint32(80), apiLevelClusterPort0, "API Level Cluster's assigned host is incorrect.")
+	assert.Equal(t, uint32(0), apiLevelClusterPriority0, "API Level Cluster's assigned Priority is incorrect.")
+
+	assert.NotEmpty(t, apiLevelClusterHost1, "API Level Cluster's second endpoint host should not be null")
+	assert.Equal(t, "apiLevelLBEndpoint", apiLevelClusterHost1, "API Level Cluster's second endpoint host is incorrect.")
+	assert.NotEmpty(t, apiLevelClusterPort1, "API Level Cluster's second endpoint port should not be null")
+	assert.Equal(t, uint32(8080), apiLevelClusterPort1, "API Level Cluster's second endpoint host is incorrect.")
+	assert.Equal(t, uint32(0), apiLevelClusterPriority1, "API Level Cluster's second endpoint Priority is incorrect.")
+
+	pathLevelClusterHost0 := pathLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetAddress()
+	pathLevelClusterPort0 := pathLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetPortValue()
+	pathLevelClusterPriority0 := pathLevelCluster.GetLoadAssignment().GetEndpoints()[0].Priority
+	pathLevelClusterHost1 := pathLevelCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetAddress()
+	pathLevelClusterPort1 := pathLevelCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetPortValue()
+	pathLevelClusterPriority1 := pathLevelCluster.GetLoadAssignment().GetEndpoints()[1].Priority
+
+	assert.NotEmpty(t, pathLevelClusterHost0, "Path Level Cluster's assigned host should not be null")
+	assert.Equal(t, "resourceLevelEndpoint", pathLevelClusterHost0, "Path Level Cluster's assigned host is incorrect.")
+	assert.NotEmpty(t, pathLevelClusterPort0, "Path Level Cluster's assigned port should not be null")
+	assert.Equal(t, uint32(443), pathLevelClusterPort0, "Path Level Cluster's assigned host is incorrect.")
+	assert.Equal(t, uint32(0), pathLevelClusterPriority0, "Path Level Cluster's assigned priority is incorrect.")
+
+	assert.NotEmpty(t, pathLevelClusterHost1, "Path Level Cluster's second endpoint host should not be null")
+	assert.Equal(t, "resourceLevelLBEndpoint", pathLevelClusterHost1, "Path Level Cluster's second endpoint host is incorrect.")
+	assert.NotEmpty(t, pathLevelClusterPort1, "Path Level Cluster's second endpoint port should not be null")
+	assert.Equal(t, uint32(8080), pathLevelClusterPort1, "Path Level Cluster's second endpoint host is incorrect.")
+	if testFailOver {
+		assert.Equal(t, uint32(1), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
+	} else {
+		assert.Equal(t, uint32(0), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
+	}
 	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")
 	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[0].GetMatch().GetSafeRegex().Regex)
 	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[1].GetMatch().GetSafeRegex().Regex)
@@ -125,6 +158,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 
 	var apiYaml model.APIYaml
 	err = json.Unmarshal(apiJsn, &apiYaml)
+	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
@@ -174,7 +208,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 		sandBoxCluster := clusters[0]
-		assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_sandbox1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_sandbox1.0", "Sandbox cluster name mismatch")
 
 		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -288,10 +322,78 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 
 	var apiYaml model.APIYaml
 	err = json.Unmarshal(apiJsn, &apiYaml)
+	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
 	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
+}
+
+func TestLoadBalancedCluster(t *testing.T) {
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/ws_api_loadbalance.yaml"
+	commonTestForClusterPrioritiesInWebSocketAPI(t, openapiFilePath)
+}
+func TestFailoverCluster(t *testing.T) {
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/ws_api_failover.yaml"
+	commonTestForClusterPrioritiesInWebSocketAPI(t, openapiFilePath)
+}
+
+// commonTestForClusterPriorities use to test loadbalance/failover in WS apis
+func commonTestForClusterPrioritiesInWebSocketAPI(t *testing.T, apiYamlFilePath string) {
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
+
+	var apiYaml model.APIYaml
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	apiYaml = model.PopulateEndpointsInfo(apiYaml)
+	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
+	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+
+	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+	productionCluster := clusters[0]
+	sandBoxCluster := clusters[1]
+
+	productionClusterHost0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	productionClusterPort0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+	productionClusterPriority0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].Priority
+	productionClusterHost1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	productionClusterPort1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+	productionClusterPriority1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].Priority
+
+	sandBoxClusterHost0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	sandBoxClusterPort0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+	sandBoxClusterPriority0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].Priority
+	sandBoxClusterHost1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	sandBoxClusterPort1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+	sandBoxClusterPriority1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].Priority
+
+	assert.Equal(t, "primary.websocket.org", productionClusterHost0, "Production endpoint host mismatch")
+	assert.Equal(t, uint32(443), productionClusterPort0, "Production endpoint port mismatch")
+	assert.Equal(t, uint32(0), productionClusterPriority0, "Production endpoint priority mismatch")
+
+	assert.Equal(t, "echo.websocket.org", productionClusterHost1, "Second production endpoint host mismatch")
+	assert.Equal(t, uint32(80), productionClusterPort1, "Second production endpoint port mismatch")
+
+	assert.Equal(t, sandBoxClusterHost0, "primary.websocket.org", "Sandbox cluster host mismatch")
+	assert.Equal(t, sandBoxClusterPort0, uint32(443), "Sandbox cluster port mismatch")
+	assert.Equal(t, uint32(0), sandBoxClusterPriority0, "Sandbox endpoint priority mismatch")
+
+	assert.Equal(t, sandBoxClusterHost1, "echo.websocket.org", "Sandbox cluster host mismatch")
+	assert.Equal(t, sandBoxClusterPort1, uint32(80), "Second sandbox cluster port mismatch")
+
+	if strings.HasSuffix(apiYamlFilePath, "ws_api_loadbalance.yaml") {
+		assert.Equal(t, uint32(0), productionClusterPriority1, "Second production endpoint port mismatch")
+		assert.Equal(t, uint32(0), sandBoxClusterPriority1, "Second sandbox endpoint priority mismatch")
+	}
+
+	if strings.HasSuffix(apiYamlFilePath, "ws_api_failover.yaml") {
+		assert.Equal(t, uint32(1), productionClusterPriority1, "Second production endpoint port mismatch")
+		assert.Equal(t, uint32(1), sandBoxClusterPriority1, "Second sandbox endpoint priority mismatch")
+	}
 }
