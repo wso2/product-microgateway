@@ -114,7 +114,7 @@ type InterceptEndpoint struct {
 	Path            string
 	ClusterName     string
 	ClusterTimeout  time.Duration
-	RequestTimeout  time.Duration
+	RequestTimeout  int
 	// Includes this is an enum allowing only values in
 	// {"request_headers", "request_body", "request_trailer", "response_headers", "response_body", "response_trailer",
 	//"invocation_context" }
@@ -637,7 +637,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	}
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
-	requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+	requestTimeoutV := int(conf.Envoy.ClusterTimeoutInSeconds)
 	pathV := "/"
 	var includesV []string
 
@@ -680,7 +680,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			if v, found := val[requestTimeout]; found {
 				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
 				if err == nil {
-					requestTimeoutV = time.Duration(p)
+					requestTimeoutV = int(p)
 				} else {
 					logger.LoggerOasparser.Error("Error reading interceptors port value", err)
 					return InterceptEndpoint{}, errors.New("error reading interceptors port value")

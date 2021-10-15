@@ -705,7 +705,7 @@ func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInte
 			Enable:      true,
 			ClusterName: requestInterceptor.ClusterName,
 			Path:        requestInterceptor.Path,
-			Timeout:     requestInterceptor.RequestTimeout.String(),
+			Timeout:     strconv.Itoa(requestInterceptor.RequestTimeout),
 		}
 	}
 	if responseInterceptor.Enable {
@@ -713,7 +713,7 @@ func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInte
 			Enable:      true,
 			ClusterName: responseInterceptor.ClusterName,
 			Path:        responseInterceptor.Path,
-			Timeout:     responseInterceptor.RequestTimeout.String(),
+			Timeout:     strconv.Itoa(responseInterceptor.RequestTimeout),
 		}
 	}
 	return interceptor.GetInterceptor(i)
