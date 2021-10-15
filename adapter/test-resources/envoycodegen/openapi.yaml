@@ -6,10 +6,12 @@ info:
     name: MIT
 servers:
   - url: http://apiLevelEndpoint
+  - url: http://apiLevelLBEndpoint:8080
 paths:
   /pets:
     servers:
         - url: https://resourceLevelEndpoint
+        - url: https://resourceLevelLBEndpoint:8080
     get:
       summary: List all pets
       operationId: listPets

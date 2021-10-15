@@ -57,7 +57,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := getXWso2Endpoints(item.inputVendorExtensions, item.inputEndpointName)
+		resultResources, err := getEndpoints(item.inputVendorExtensions, item.inputEndpointName)
 		assert.Nil(t, err, "Error should not be present when extracting endpoints from the vendor extension map")
 		assert.Equal(t, item.result, resultResources, item.message)
 	}

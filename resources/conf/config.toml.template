@@ -119,6 +119,16 @@
   # Disable SSL verification
   disableSslVerification = false
 
+# health configs for upstream clusters 
+[router.upstream.health]
+  #  time in seconds to wait for a health check response
+  timeout = 1
+  # interval between health checks in seconds.
+  interval = 10
+  # number of unhealthy health checks required before a host is marked unhealthy
+  unhealthyThreshold = 2
+  # number of healthy health checks required before a host is marked healthy
+  healthyThreshold = 2
 
 # Configure timeout settings related to routes. This will be applicable globally for all the routes in router.
 [router.upstream.timeouts]
