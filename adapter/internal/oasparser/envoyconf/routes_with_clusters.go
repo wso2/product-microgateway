@@ -724,7 +724,9 @@ func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInte
 		i.RequestExternalCall = &interceptor.HTTPCallConfig{
 			Enable:      true,
 			ClusterName: requestInterceptor.ClusterName,
-			Timeout:     requestInterceptor.RequestTimeout.String(),
+			// multiplying in seconds here because in configs we are directly getting config to time.Duration
+			// which is in nano seconds, so multiplying it in seconds here
+			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
 		}
 		i.ReqFlowInclude = requestInterceptor.Includes
 	}
@@ -732,7 +734,9 @@ func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInte
 		i.ResponseExternalCall = &interceptor.HTTPCallConfig{
 			Enable:      true,
 			ClusterName: responseInterceptor.ClusterName,
-			Timeout:     responseInterceptor.RequestTimeout.String(),
+			// multiplying in seconds here because in configs we are directly getting config to time.Duration
+			// which is in nano seconds, so multiplying it in seconds here
+			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
 		}
 		i.RespFlowInclude = responseInterceptor.Includes
 	}

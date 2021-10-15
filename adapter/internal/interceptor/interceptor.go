@@ -36,7 +36,7 @@ type Interceptor struct {
 type HTTPCallConfig struct {
 	Enable      bool
 	ClusterName string
-	Timeout     string
+	Timeout     string // in milli seconds
 }
 
 // RequestInclusions represents which should be included in the request payload to the interceptor service
