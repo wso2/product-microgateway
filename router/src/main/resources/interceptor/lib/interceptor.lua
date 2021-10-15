@@ -80,6 +80,100 @@ local STATUS = ":status"
 local FILTER_NAME = "envoy.filters.http.lua"
 local SHARED_INFO_META_KEY = "shared.info"
 
+local function direct_respond(handle, headers, body, shared_info)
+    shared_info[RESPONSE.DIRECT_RESPOND] = true
+    handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
+    handle:respond(
+        headers,
+        body
+    )
+end
+
+--- log error related to interceptor service
+---@param handle table
+---@param request_id string
+---@param is_request_flow boolean
+---@param message string
+local function log_interceptor_service_error(handle, request_id, is_request_flow, message)
+    local intercept_path = is_request_flow and "request" or "response"
+    handle:logErr('Invalid ' .. intercept_path .. ' interceptor service response, message: "' .. message .. '"' .. ', request_id: "' .. request_id .. '"')
+end
+
+--- respond error to the client
+---@param handle table
+---@param shared_info table
+---@param request_id string
+---@param error_info {error_message: string, error_description: string, error_code: string}
+---@param is_request_flow boolean
+local function respond_error(handle, shared_info, request_id, error_info, is_request_flow)
+    local resp_body = '{"error_message": "' .. error_info.error_message .. '", "error_description": "' .. error_info.error_description ..
+        '", "code": "' .. error_info.error_code .. '"}'
+    
+    --#region request flow
+    if is_request_flow then
+        direct_respond(
+            handle,
+            {[STATUS] = "500"},
+            resp_body,
+            shared_info
+        )
+        return
+    end
+    --#endregion
+
+    --#region response flow
+    local backend_headers = handle:headers()
+    local headers_to_remove = {}
+    for key, _ in pairs(backend_headers) do
+        headers_to_remove[key] = "" -- can not remove headers while iterating, hence adding first
+    end
+    for key, _ in pairs(headers_to_remove) do -- remove all headers from backend
+        backend_headers:remove(key)
+    end
+    backend_headers:add(STATUS, "500")
+    
+    local content_length = handle:body():setBytes(resp_body)
+    handle:headers():replace("content-length", content_length)
+    return
+    --#endregion
+end
+
+---comment
+---@param encoded_string any
+---@param handle any
+---@param request_id any
+---@param is_request_flow any
+---@return string - decoded string
+---@return boolean - true if error returned
+local function decode_string(decode_func, decode_func_desc, encoded_string, handle, shared_info, request_id, is_request_flow)
+    local status, decoded = pcall(decode_func, encoded_string)
+    if status then
+        return decoded, false
+    end
+
+    --#region if error base64 decoding
+    log_interceptor_service_error(
+        handle,
+        request_id,
+        is_request_flow,
+        'Invalid ' .. decode_func_desc .. ' encoded body from interceptor service, reason: "' .. decoded .. '"'
+    )
+    respond_error(handle, shared_info, request_id, {
+        error_message = "Internal Server Error",
+        error_description = "Internal Server Error",
+        error_code = "102518"
+    }, is_request_flow)
+    return "", true
+end
+
+local function base64_decode(encoded_string, handle, shared_info, request_id, is_request_flow)
+    return decode_string(base64.decode, "base64", encoded_string, handle, shared_info, request_id, is_request_flow)
+end
+
+local function json_decode(encoded_string, handle, shared_info, request_id, is_request_flow)
+    return decode_string(json.decode, "json", encoded_string, handle, shared_info, request_id, is_request_flow)
+end
+
 local function modify_headers(handle, interceptor_response_body)
     -- priority: headersToAdd, headersToReplace, headersToRemove
     if interceptor_response_body[RESPONSE.HEADERS_TO_REMOVE] then
@@ -118,23 +212,29 @@ local function modify_trailers(handle, interceptor_response_body)
     end
 end
 
-local function modify_body(handle, interceptor_response_body, request_id, is_body_base64_encoded)
+--- modify body
+---@param handle table
+---@param interceptor_response_body table
+---@param request_id string
+---@param shared_info table
+---@param is_request_flow boolean
+---@return boolean - return true if error
+local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_request_flow)
     -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
     if interceptor_response_body.body then
         handle:logDebug("Updating body for the request_id: " .. request_id)
-        local body = is_body_base64_encoded and base64.decode(interceptor_response_body.body) or interceptor_response_body.body
+
+        local body, err = base64_decode(interceptor_response_body.body, handle, shared_info, request_id, is_request_flow)
+        if err then
+            return true
+        end
+
         local content_length = handle:body():setBytes(body)
         handle:headers():replace("content-length", content_length)
+        return false
     end
-end
 
-local function direct_respond(handle, headers, body, shared_info)
-    shared_info[RESPONSE.DIRECT_RESPOND] = true
-    handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
-    handle:respond(
-        headers,
-        body
-    )
+    return false
 end
 
 --- check for errors from interceptor response and handle error with responding to client
@@ -153,37 +253,17 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
         return true
     end
 
-    local flow = is_request_flow and "request" or "response"
-    handle:logErr('Invalid ' .. flow .. ' interceptor service response, HTTP status_code: "' .. headers[STATUS] ..
-        '", message: "' .. body_str .. '"' .. ', request_id: "' .. request_id .. '"')
-    local resp_headers = {[STATUS] = "500"}
-    local resp_body = '{"error_message": "Internal Server Error", "error_description": "Internal Server Error", "code": "102517"}'
+    local message = 'HTTP status_code: "' .. headers[STATUS] ..'", response_body: "' .. body_str
+    log_interceptor_service_error(handle, request_id, is_request_flow, message)
     
-    --#region request flow
-    if is_request_flow then
-        direct_respond(
-            handle,
-            resp_headers,
-            resp_body,
-            shared_info
-        )
-        return true
-    end
-    --#endregion
-
-    --#region response flow
-    local backend_headers = handle:headers()
-    local headers_to_remove = {}
-    for key, _ in pairs(backend_headers) do
-        headers_to_remove[key] = "" -- can not remove headers while iterating, hence adding first
-    end
-    for key, _ in pairs(headers_to_remove) do -- remove all headers from backend
-        backend_headers:remove(key)
-    end
-    backend_headers:add(STATUS, "500")
-    modify_body(handle, {body = resp_body}, request_id, false)
+    respond_error(handle, shared_info, request_id, {
+            error_message = "Internal Server Error",
+            error_description = "Internal Server Error",
+            error_code = "102517"
+        },
+        is_request_flow
+    )
     return true
-    --#endregion
 end
 
 ---send an HTTP request to the interceptor
@@ -263,7 +343,12 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
             headers[STATUS] = headers[STATUS] or "200"
         end
 
-        direct_respond(handle, headers, base64.decode(body), shared_info)
+        local body, err = base64_decode(interceptor_response_body.body, handle, shared_info, request_id, true)
+        if err then
+            return
+        end
+
+        direct_respond(handle, headers, body, shared_info)
     end
 end
 
@@ -343,10 +428,17 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     if check_interceptor_call_errors(request_handle, interceptor_response_headers, interceptor_response_body_str, shared_info, request_id, true) then
         return
     end
-    local interceptor_response_body = json.decode(interceptor_response_body_str)
+
+    local interceptor_response_body, err = json_decode(interceptor_response_body_str, request_handle, shared_info, request_id, true)
+    if err then
+        return
+    end
 
     handle_direct_respond(request_handle, interceptor_response_body, shared_info, request_id)
-    modify_body(request_handle, interceptor_response_body, request_id, true)
+    if modify_body(request_handle, interceptor_response_body, request_id, shared_info, true) then
+        -- error thrown, exiting
+        return
+    end
     modify_headers(request_handle, interceptor_response_body)
     modify_trailers(request_handle, interceptor_response_body)
 
@@ -421,9 +513,16 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     if check_interceptor_call_errors(response_handle, interceptor_response_headers, interceptor_response_body_str, shared_info, request_id, false) then
         return
     end
-    local interceptor_response_body = json.decode(interceptor_response_body_str)
 
-    modify_body(response_handle, interceptor_response_body, request_id, true)
+    local interceptor_response_body, err = json_decode(interceptor_response_body_str, response_handle, shared_info, request_id, false)
+    if err then
+        return
+    end
+
+    if modify_body(response_handle, interceptor_response_body, request_id, shared_info, false) then
+        -- error thrown, exiting
+        return
+    end
     modify_headers(response_handle, interceptor_response_body)
     modify_trailers(response_handle, interceptor_response_body)
 end
