@@ -152,6 +152,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 				loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
 				return apiProject, err
 			}
+			apiYaml = mgw.PopulateEndpointsInfo(apiYaml)
 
 			err = mgw.VerifyMandatoryFields(apiYaml)
 			if err != nil {

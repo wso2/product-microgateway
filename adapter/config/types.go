@@ -189,6 +189,7 @@ type envoyUpstream struct {
 	// UpstreamTLS related Configuration
 	TLS      upstreamTLS
 	Timeouts upstreamTimeout
+	Health   upstreamHealth
 }
 
 type upstreamTLS struct {
@@ -198,6 +199,13 @@ type upstreamTLS struct {
 	TrustedCertPath        string
 	VerifyHostName         bool
 	DisableSslVerification bool
+}
+
+type upstreamHealth struct {
+	Timeout            int32 `toml:"timeout"`
+	Interval           int32 `toml:"interval"`
+	UnhealthyThreshold int32 `toml:"unhealthyThreshold"`
+	HealthyThreshold   int32 `toml:"healthyThreshold"`
 }
 
 type security struct {

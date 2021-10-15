@@ -6,16 +6,21 @@ info:
     name: MIT
 servers:
   - url: http://apiLevelEndpointServers
+  - url: http://apiLevelLBEndpointServers:8080
 x-wso2-production-endpoints:
     urls:
         - http://apiLevelEndpoint  
+        - http://apiLevelLBEndpoint:8080
 paths:
   /pets:
     x-wso2-production-endpoints:
-        urls:
-          - https://resourceLevelEndpoint
+      type: failover
+      urls:
+        - https://resourceLevelEndpoint
+        - https://resourceLevelLBEndpoint:8080
     servers:
         - url: https://resourceLevelEndpointServers
+        - url: https://resourceLevelLBEndpointServers:8080
     get:
       summary: List all pets
       operationId: listPets

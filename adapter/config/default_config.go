@@ -94,6 +94,12 @@ var defaultConfig = &Config{
 				RouteTimeoutInSeconds:     60,
 				RouteIdleTimeoutInSeconds: 300,
 			},
+			Health: upstreamHealth{
+				Timeout:            1,
+				Interval:           10,
+				UnhealthyThreshold: 2,
+				HealthyThreshold:   2,
+			},
 		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{
