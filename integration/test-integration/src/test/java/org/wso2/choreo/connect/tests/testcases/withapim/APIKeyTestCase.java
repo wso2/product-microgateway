@@ -27,7 +27,11 @@ import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.util.*;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
+import org.wso2.choreo.connect.tests.util.HttpClientRequest;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.*;
 
@@ -115,7 +119,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("x-api-key", TestConstant.INVALID_JWT_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(),
@@ -130,7 +134,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         // Sets header
         Map<String, String> headers = new HashMap<>();
         headers.put("x-api-key", tamperedAPIKey);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(),
@@ -145,7 +149,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         // Sets header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("x-api-key", TestConstant.EXPIRED_API_KEY_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");

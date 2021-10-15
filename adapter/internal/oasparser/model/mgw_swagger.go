@@ -101,20 +101,20 @@ type RetryConfig struct {
 // SecurityScheme represents the structure of an security scheme.
 type SecurityScheme struct {
 	// Arbitrary name used to define security scheme
-	DefinitionName string 
 	// ex: default, x-api-key etc.
+	DefinitionName string 
 
 	// Type of the security scheme
-	Type string
 	// Possible values are apiKey, oauth2
+	Type string
 
 	// Name of the security scheme
-	Name string
 	// User can define a specific name for above types
+	Name string
 
 	// Location of the api key 
-	In string 
 	// Valid values are query, header
+	In string
 }
 
 // CorsConfig represents the API level Cors Configuration
