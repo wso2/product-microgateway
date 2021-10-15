@@ -33,28 +33,28 @@ import (
 // endpoints, and sandbox endpoints. These values are populated from extensions/properties
 // mentioned under pathItem.
 type Resource struct {
-	path             string
-	methods          []Operation
-	description      string
-	consumes         []string
-	schemes          []string
-	tags             []string
-	summary          string
-	iD               string
-	productionUrls   []Endpoint
-	sandboxUrls      []Endpoint
-	security         []map[string][]string
-	vendorExtensions map[string]interface{}
+	path                string
+	methods             []Operation
+	description         string
+	consumes            []string
+	schemes             []string
+	tags                []string
+	summary             string
+	iD                  string
+	productionEndpoints *EndpointCluster
+	sandboxEndpoints    *EndpointCluster
+	security            []map[string][]string
+	vendorExtensions    map[string]interface{}
 }
 
-// GetProdEndpoints returns the production endpoints array of a given resource.
-func (resource *Resource) GetProdEndpoints() []Endpoint {
-	return resource.productionUrls
+// GetProdEndpoints returns the production endpoints object of a given resource.
+func (resource *Resource) GetProdEndpoints() *EndpointCluster {
+	return resource.productionEndpoints
 }
 
-// GetSandEndpoints returns the sandbox endpoints array of a given resource.
-func (resource *Resource) GetSandEndpoints() []Endpoint {
-	return resource.sandboxUrls
+// GetSandEndpoints returns the sandbox endpoints object of a given resource.
+func (resource *Resource) GetSandEndpoints() *EndpointCluster {
+	return resource.sandboxEndpoints
 }
 
 // GetPath returns the pathItem name (of openAPI definition) corresponding to a given resource
@@ -92,21 +92,22 @@ func (resource *Resource) GetMethodList() []string {
 
 // CreateDummyResourceForTests create an resource object which could be used for unit tests.
 func CreateDummyResourceForTests(path string, method []Operation, description string, consumes, schemes,
-	tags []string, summary, id string, productionUrls, sandboxUrls []Endpoint,
+	tags []string, summary, id string, productionEndpoints, sandboxEndpoints *EndpointCluster,
 	security []map[string][]string, vendorExtensions map[string]interface{}) Resource {
+
 	return Resource{
-		path:             path,
-		methods:          method,
-		description:      description,
-		consumes:         consumes,
-		schemes:          schemes,
-		tags:             tags,
-		summary:          summary,
-		iD:               id,
-		productionUrls:   productionUrls,
-		sandboxUrls:      sandboxUrls,
-		security:         security,
-		vendorExtensions: vendorExtensions,
+		path:                path,
+		methods:             method,
+		description:         description,
+		consumes:            consumes,
+		schemes:             schemes,
+		tags:                tags,
+		summary:             summary,
+		iD:                  id,
+		productionEndpoints: productionEndpoints,
+		sandboxEndpoints:    sandboxEndpoints,
+		security:            security,
+		vendorExtensions:    vendorExtensions,
 	}
 }
 
@@ -114,12 +115,16 @@ func CreateDummyResourceForTests(path string, method []Operation, description st
 // which could be used for unit tests.
 func CreateMinimalDummyResourceForTests(path string, methods []Operation, id string, productionUrls,
 	sandboxUrls []Endpoint) Resource {
+
+	prodEndpints := generateEndpointCluster(xWso2ProdEndpoints, productionUrls)
+	sandboxEndpints := generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls)
+
 	return Resource{
-		path:           path,
-		methods:        methods,
-		iD:             id,
-		productionUrls: productionUrls,
-		sandboxUrls:    sandboxUrls,
+		path:                path,
+		methods:             methods,
+		iD:                  id,
+		productionEndpoints: prodEndpints,
+		sandboxEndpoints:    sandboxEndpints,
 	}
 }
 

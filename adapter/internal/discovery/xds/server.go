@@ -22,16 +22,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
-	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
-	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
-	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -39,13 +33,19 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	oasParser "github.com/wso2/product-microgateway/adapter/internal/oasparser"
 	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
+	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
+	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 )
 
@@ -237,77 +237,80 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, error) {
-	var newLabels []string
+func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (*notifier.DeployedAPIRevision, error) {
 	var mgwSwagger mgw.MgwSwagger
-	var organizationID = apiContent.OrganizationID
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
+	var newLabels []string
+	apiYaml := apiProject.APIYaml.Data
 
-	if len(apiContent.Environments) == 0 {
-		apiContent.Environments = []string{config.DefaultGatewayName}
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic(fmt.Sprintf("Error encountered while applying API %v:%v to %v.", apiYaml.Name, apiYaml.Version, vHost))
+		}
+	}()
+
+	if len(environments) == 0 {
+		environments = []string{config.DefaultGatewayName}
 	}
 
-	if apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WEBHOOK {
-		mgwSwagger, err = operator.GetMgwSwagger(apiContent.APIDefinition)
+	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
+		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
-			return deployedRevision, err
+			return nil, err
 		}
+		mgwSwagger.SetSecurityScheme(apiYaml.SecurityScheme)
+		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
-		mgwSwagger.SetID(apiContent.UUID)
-		mgwSwagger.SetName(apiContent.Name)
-		mgwSwagger.SetVersion(apiContent.Version)
-		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
-		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
-		mgwSwagger.OrganizationID = organizationID
-	} else if apiContent.APIType == mgw.WS {
-		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+	} else if apiProject.APIType == mgw.WS {
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml)
 		if err != nil {
-			return deployedRevision, err
+			return nil, err
 		}
-		mgwSwagger.OrganizationID = organizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
+		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
+	}
+	mgwSwagger.SetID(apiYaml.ID)
+	mgwSwagger.SetName(apiYaml.Name)
+	mgwSwagger.SetVersion(apiYaml.Version)
+	mgwSwagger.OrganizationID = apiProject.OrganizationID
+	organizationID := apiProject.OrganizationID
+
+	if (mgwSwagger.GetProdEndpoints() == nil || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/") &&
+		apiProject.ProductionEndpoint != "" {
+
+		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiProject.ProductionEndpoint)
+		if productionEndpointErr != nil {
+			return nil, productionEndpointErr
+		}
 	}
 
-	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
-		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
+	if (mgwSwagger.GetSandEndpoints() == nil || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/") &&
+		apiProject.SandboxEndpoint != "" {
 
-		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
-		if productionEndpointErr != nil {
-			return deployedRevision, productionEndpointErr
-		}
-
-		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
+		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiProject.SandboxEndpoint)
 		if sandboxEndpointErr != nil {
-			return deployedRevision, sandboxEndpointErr
+			return nil, sandboxEndpointErr
 		}
 	}
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
-		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID)
-		return deployedRevision, validationErr
+		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s",
+			apiYaml.Name, apiYaml.Name, organizationID)
+		return nil, validationErr
 	}
 
-	uniqueIdentifier := apiContent.UUID
+	uniqueIdentifier := apiYaml.ID
 
 	if uniqueIdentifier == "" {
 		// If API is imported from apictl generate hash as the unique ID
-		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiContent.Name, apiContent.Version)
-		reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiContent.Name, apiContent.Version)] = uniqueIdentifier
+		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiYaml.Name, apiYaml.Version)
+		reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiYaml.Name, apiYaml.Version)] = uniqueIdentifier
 	}
-	apiIdentifier := GenerateIdentifierForAPIWithUUID(apiContent.VHost, uniqueIdentifier)
-	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
-	//TODO: (SuKSW) Update the existing API if the basepath already exists
-	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
-	// if exists {
-	// 	if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
-	// 		logger.LoggerXds.Infof("API %v already exists. No changes to apply.", apiIdentifier)
-	// 		return
-	// 	}
-	// }
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(vHost, uniqueIdentifier)
 
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
@@ -327,7 +330,7 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
-	newLabels = apiContent.Environments
+	newLabels = environments
 	logger.LoggerXds.Infof("Added/Updated the content for Organization : %v under OpenAPI Key : %v", organizationID, apiIdentifier)
 	logger.LoggerXds.Debugf("Newly added labels for Organization : %v for the OpenAPI Key : %v are %v", organizationID, apiIdentifier, newLabels)
 	oldLabels, _ := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
@@ -338,12 +341,12 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	} else {
 		openAPIEnvoyMap := make(map[string][]string)
 		openAPIEnvoyMap[apiIdentifier] = newLabels
-		orgIDOpenAPIEnvoyMap[apiContent.OrganizationID] = openAPIEnvoyMap
+		orgIDOpenAPIEnvoyMap[organizationID] = openAPIEnvoyMap
 	}
-	updateVhostInternalMaps(apiContent, newLabels)
+	updateVhostInternalMaps(apiYaml.ID, apiYaml.Name, apiYaml.Version, vHost, newLabels)
 
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
-		apiContent.InterceptorCerts, apiContent.VHost, organizationID)
+	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, apiProject.UpstreamCerts,
+		apiProject.InterceptorCerts, vHost, organizationID)
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes
@@ -370,12 +373,12 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	}
 
 	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
-		orgIDOpenAPIEnforcerApisMap[apiContent.OrganizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus,
-			apiContent.EndpointSecurity, apiContent.VHost)
+		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
+			apiProject.EndpointSecurity, vHost)
 	} else {
 		enforcerAPIMap := make(map[string]types.Resource)
-		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus,
-			apiContent.EndpointSecurity, apiContent.VHost)
+		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
+			apiProject.EndpointSecurity, vHost)
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 
@@ -383,11 +386,11 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if revisionStatus {
 		// send updated revision to control plane
-		deployedRevision = notifier.UpdateDeployedRevisions(apiContent.UUID, apiContent.RevisionID, apiContent.Environments,
-			apiContent.VHost)
+		deployedRevision = notifier.UpdateDeployedRevisions(apiYaml.ID, apiYaml.RevisionID, environments,
+			vHost)
 	}
 	if svcdiscovery.IsServiceDiscoveryEnabled {
-		startConsulServiceDiscovery(apiContent.OrganizationID) //consul service discovery starting point
+		startConsulServiceDiscovery(organizationID) //consul service discovery starting point
 	}
 	return deployedRevision, nil
 }

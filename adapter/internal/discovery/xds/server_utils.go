@@ -17,7 +17,6 @@
 package xds
 
 import (
-	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
@@ -42,35 +41,35 @@ func getEnvironmentsToBeDeleted(existingEnvs, deleteEnvs []string) (toBeDel []st
 	return
 }
 
-func updateVhostInternalMaps(apiContent config.APIContent, gwEnvs []string) {
+func updateVhostInternalMaps(uuid, name, version, vHost string, gwEnvs []string) {
 
-	uniqueIdentifier := apiContent.UUID
+	uniqueIdentifier := uuid
 
 	if uniqueIdentifier == "" {
 		// If API is imported from apictl, get the hash value of API name and version
-		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiContent.Name, apiContent.Version)
+		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(name, version)
 	}
 	// update internal map: apiToVhostsMap
 	if _, ok := apiToVhostsMap[uniqueIdentifier]; ok {
-		apiToVhostsMap[uniqueIdentifier][apiContent.VHost] = void
+		apiToVhostsMap[uniqueIdentifier][vHost] = void
 	} else {
-		apiToVhostsMap[uniqueIdentifier] = map[string]struct{}{apiContent.VHost: void}
+		apiToVhostsMap[uniqueIdentifier] = map[string]struct{}{vHost: void}
 	}
 
 	// update internal map: apiUUIDToGatewayToVhosts
-	if apiContent.UUID == "" {
+	if uuid == "" {
 		// may be deployed with API-CTL
 		logger.LoggerXds.Debug("No UUID defined, do not update vhosts internal maps with UUIDs")
 		return
 	}
-	logger.LoggerXds.Debugf("Updating Vhost internal map of API with UUID \"%v\" as %v.", apiContent.UUID, apiContent.VHost)
+	logger.LoggerXds.Debugf("Updating Vhost internal map of API with UUID \"%v\" as %v.", uuid, vHost)
 	var envToVhostMap map[string]string
-	if existingMap, ok := apiUUIDToGatewayToVhosts[apiContent.UUID]; ok {
-		logger.LoggerXds.Debugf("API with UUID \"%v\" already exist in vhosts internal map.", apiContent.UUID)
+	if existingMap, ok := apiUUIDToGatewayToVhosts[uuid]; ok {
+		logger.LoggerXds.Debugf("API with UUID \"%v\" already exist in vhosts internal map.", uuid)
 		envToVhostMap = existingMap
 	} else {
 		logger.LoggerXds.Debugf("API with UUID \"%v\" not exist in vhosts internal map and create new entry.",
-			apiContent.UUID)
+			uuid)
 		envToVhostMap = make(map[string]string)
 	}
 
@@ -78,7 +77,7 @@ func updateVhostInternalMaps(apiContent config.APIContent, gwEnvs []string) {
 	// only one vhost is supported for environment
 	// this map is only used for un-deploying APIs form APIM
 	for _, env := range gwEnvs {
-		envToVhostMap[env] = apiContent.VHost
+		envToVhostMap[env] = vHost
 	}
-	apiUUIDToGatewayToVhosts[apiContent.UUID] = envToVhostMap
+	apiUUIDToGatewayToVhosts[uuid] = envToVhostMap
 }
