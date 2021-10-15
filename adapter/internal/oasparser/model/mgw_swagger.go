@@ -114,7 +114,6 @@ type InterceptEndpoint struct {
 	Host           string
 	URLType        string
 	Port           uint32
-	Path           string
 	ClusterName    string
 	ClusterTimeout time.Duration
 	RequestTimeout int
@@ -651,14 +650,13 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
 	requestTimeoutV := 30
-	pathV := "/"
 	hostV := ""
 	portV := uint32(80)
 	includesV := &interceptor.RequestInclusions{}
 
 	var err error
 
-	if x, found := swagger.vendorExtensions[extensionName]; found {
+	if x, found := vendorExtensions[extensionName]; found {
 		if val, ok := x.(map[string]interface{}); ok {
 			//host mandatory
 			if v, found := val[host]; found {
@@ -701,10 +699,6 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}
-			// path optional
-			if v, found := val[path]; found {
-				pathV = v.(string)
-			}
 			//includes optional
 			if v, found := val[includes]; found {
 				includes := v.([]interface{})
@@ -737,7 +731,6 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				Port:           portV,
 				ClusterTimeout: clusterTimeoutV,
 				RequestTimeout: requestTimeoutV,
-				Path:           pathV,
 				Includes:       includesV,
 			}, err
 		}

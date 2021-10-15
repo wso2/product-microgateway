@@ -36,7 +36,6 @@ type Interceptor struct {
 type HTTPCallConfig struct {
 	Enable      bool
 	ClusterName string
-	Path        string
 	Timeout     string
 }
 
@@ -90,7 +89,7 @@ local req_flow = {invocationContext={{.ReqFlowInclude.InvocationContext}}, reque
 function envoy_on_request(request_handle)
     interceptor.handle_request_interceptor(
 		request_handle,
-		{cluster_name="{{.RequestExternalCall.ClusterName}}", resource_path="{{.RequestExternalCall.Path}}", timeout={{.RequestExternalCall.Timeout}}},
+		{cluster_name="{{.RequestExternalCall.ClusterName}}", timeout={{.RequestExternalCall.Timeout}}},
 		req_flow, resp_flow, inv_context
 	)
 end
@@ -99,7 +98,7 @@ end
 function envoy_on_response(response_handle)
     interceptor.handle_response_interceptor(
 		response_handle,
-		{cluster_name="{{.ResponseExternalCall.ClusterName}}", resource_path="{{.ResponseExternalCall.Path}}", timeout={{.ResponseExternalCall.Timeout}}},
+		{cluster_name="{{.ResponseExternalCall.ClusterName}}", timeout={{.ResponseExternalCall.Timeout}}},
 		resp_flow
 	)
 end
