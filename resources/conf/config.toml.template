@@ -126,7 +126,7 @@
   # interval between health checks in seconds.
   interval = 10
   # number of unhealthy health checks required before a host is marked unhealthy
-  unhealthyThreshold = 43
+  unhealthyThreshold = 2
   # number of healthy health checks required before a host is marked healthy
   healthyThreshold = 2
 
