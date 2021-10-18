@@ -32,12 +32,12 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.choreo.connect.commons.model.AuthenticationContext;
-import org.wso2.choreo.connect.commons.model.RequestContext;
-import org.wso2.choreo.connect.commons.model.ResourceConfig;
-import org.wso2.choreo.connect.commons.model.SecurityInfo;
-import org.wso2.choreo.connect.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.SecurityInfo;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -136,7 +136,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             if (requestMetaData.containsKey(APIConstants.API_SECURITY_API_KEY)) {
                 return  requestMetaData.get(apiKeyName);
             }
-            apiKey = getAPIKeyFromMap(queryParameters, apiKeyName);
         }
         return apiKey;
     }
@@ -366,7 +365,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             }
             if (api == null) {
                 log.debug("Subscription data not populated in APIKeyValidationInfoDTO for the API: " + name +
-                            ", version: " + version + ".");
+                        ", version: " + version + ".");
                 log.error("User's subscription details cannot obtain for the API : " + name + ".");
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.API_AUTH_FORBIDDEN,
