@@ -46,7 +46,7 @@ public final class EndpointClusterProto {
       "ndpointClusterConfig\"M\n\025EndpointClusterC" +
       "onfig\0224\n\013retryConfig\030\001 \001(\0132\037.wso2.discov" +
       "ery.api.RetryConfig\"1\n\013RetryConfig\022\r\n\005co" +
-      "unt\030\001 \001(\r\022\023\n\013statusCodes\030\002 \003(\tB~\n%org.ws" +
+      "unt\030\001 \001(\r\022\023\n\013statusCodes\030\002 \003(\rB~\n%org.ws" +
       "o2.choreo.connect.discovery.apiB\024Endpoin" +
       "tClusterProtoP\001Z=github.com/envoyproxy/g" +
       "o-control-plane/wso2/discovery/api;apib\006" +

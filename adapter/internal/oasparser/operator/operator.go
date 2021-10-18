@@ -74,7 +74,7 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 	err = mgwSwagger.SetXWso2Extensions()
 	if err != nil {
 		logger.LoggerOasparser.Error("Error occured while setting x-wso2 extensions for ",
-			mgwSwagger.GetTitle(), err)
+			mgwSwagger.GetTitle(), " ", err)
 		return mgwSwagger, err
 	}
 	return mgwSwagger, nil

@@ -20,11 +20,16 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.commons.Filter;
-import org.wso2.choreo.connect.commons.model.*;
+import org.wso2.choreo.connect.commons.model.APIConfig;
 import org.wso2.choreo.connect.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.commons.model.EndpointSecurity;
+import org.wso2.choreo.connect.commons.model.RequestContext;
+import org.wso2.choreo.connect.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.commons.model.RetryConfig;
-import org.wso2.choreo.connect.discovery.api.*;
+import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.EndpointClusterConfig;
+import org.wso2.choreo.connect.discovery.api.Operation;
+import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
@@ -115,9 +120,10 @@ public class RestAPI implements API {
         if (rpcEndpointCluster.hasConfig()) {
             EndpointClusterConfig endpointClusterConfig = rpcEndpointCluster.getConfig();
             if (endpointClusterConfig.hasRetryConfig()) {
-                org.wso2.choreo.connect.discovery.api.RetryConfig rpcRetryConfig = endpointClusterConfig.getRetryConfig();
+                org.wso2.choreo.connect.discovery.api.RetryConfig rpcRetryConfig
+                        = endpointClusterConfig.getRetryConfig();
                 RetryConfig retryConfig = new RetryConfig(rpcRetryConfig.getCount(),
-                        rpcRetryConfig.getStatusCodesList().toArray(new String[0]));
+                        rpcRetryConfig.getStatusCodesList().toArray(new Integer[0]));
                 endpointCluster.setRetryConfig(retryConfig);
             }
         }

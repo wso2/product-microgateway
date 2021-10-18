@@ -236,7 +236,7 @@ public class AuthFilter implements Filter {
                 requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.MAX_RETRIES,
                         Integer.toString(endpointCluster.getRetryConfig().getCount()));
                 requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
-                        String.join(",", endpointCluster.getRetryConfig().getStatusCodes()));
+                        StringUtils.join(endpointCluster.getRetryConfig().getStatusCodes(), ","));
             }
         }
     }
