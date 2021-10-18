@@ -14,7 +14,7 @@ services:
     volumes:
       - ./conf/deployment.toml:/home/wso2carbon/wso2am-4.0.0/repository/conf/deployment.toml
   router:
-    image: wso2/choreo-connect-router:1.0.0-m3-SNAPSHOT
+    image: wso2/choreo-connect-router:1.0.0-m3
     logging:
       options:
         max-size: "20m"
@@ -42,7 +42,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/choreo-connect-adapter:1.0.0-m3-SNAPSHOT
+    image: wso2/choreo-connect-adapter:1.0.0-m3
     logging:
       options:
         max-size: "20m"
@@ -65,7 +65,7 @@ services:
     links:
       - apim
   enforcer:
-    image: wso2/choreo-connect-enforcer:1.0.0-m3-SNAPSHOT
+    image: wso2/choreo-connect-enforcer:1.0.0-m3
     logging:
       options:
         max-size: "20m"
