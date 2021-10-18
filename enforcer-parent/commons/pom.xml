@@ -23,7 +23,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.choreo.connect.enforcer-commons</artifactId>
+    <artifactId>org.wso2.choreo.connect.enforcer.commons</artifactId>
     <name>Choreo Connect - Enforcer Commons</name>
 
     <properties>
@@ -82,7 +82,7 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <configuration>
-                    <onlyAnalyze>org.wso2.micro.gateway.filter.core.*</onlyAnalyze>
+                    <onlyAnalyze>org.wso2.choreo.connect.enforcer.commons.*</onlyAnalyze>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>

@@ -18,7 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.security;
 
-import org.wso2.choreo.connect.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;

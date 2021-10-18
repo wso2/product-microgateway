@@ -17,10 +17,10 @@
  */
 package org.wso2.choreo.connect.enforcer.api;
 
-import org.wso2.choreo.connect.commons.Filter;
-import org.wso2.choreo.connect.commons.model.APIConfig;
-import org.wso2.choreo.connect.commons.model.RequestContext;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 
 import java.util.List;
 

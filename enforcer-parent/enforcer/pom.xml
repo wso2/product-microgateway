@@ -103,7 +103,7 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <configuration>
-                    <onlyAnalyze>org.wso2.micro.gateway.filter.core.*</onlyAnalyze>
+                    <onlyAnalyze>org.wso2.choreo.connect.enforcer.*</onlyAnalyze>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>
@@ -458,7 +458,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
-            <artifactId>org.wso2.choreo.connect.enforcer-commons</artifactId>
+            <artifactId>org.wso2.choreo.connect.enforcer.commons</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

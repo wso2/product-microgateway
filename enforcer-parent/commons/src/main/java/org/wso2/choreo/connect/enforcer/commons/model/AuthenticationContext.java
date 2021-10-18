@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.commons.model;
+package org.wso2.choreo.connect.enforcer.commons.model;
 
 import java.util.List;
 

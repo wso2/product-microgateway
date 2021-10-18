@@ -20,7 +20,7 @@ package org.wso2.choreo.connect.enforcer.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;

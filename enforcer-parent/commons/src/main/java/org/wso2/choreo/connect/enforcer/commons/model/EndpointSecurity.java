@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.commons.model;
+package org.wso2.choreo.connect.enforcer.commons.model;
 
 /**
  * EndpointSecurity holds the EndpointSecurity configuration for an API.

@@ -15,10 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.commons;
+package org.wso2.choreo.connect.enforcer.commons;
 
-import org.wso2.choreo.connect.commons.model.APIConfig;
-import org.wso2.choreo.connect.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 
 /**
  * Filters are the request interceptors that applies API Management capabilities at the gateway layer. This is the

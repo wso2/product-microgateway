@@ -17,7 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.api;
 
-import org.wso2.choreo.connect.commons.model.SecurityInfo;
+import org.wso2.choreo.connect.enforcer.commons.model.SecurityInfo;
 
 /**
  * APIProcessUtils is used to convert the Endpoint Security DTO used in proto files into Enforcer specific

@@ -19,11 +19,11 @@ package org.wso2.choreo.connect.enforcer.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.commons.Filter;
-import org.wso2.choreo.connect.commons.model.APIConfig;
-import org.wso2.choreo.connect.commons.model.EndpointSecurity;
-import org.wso2.choreo.connect.commons.model.RequestContext;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
