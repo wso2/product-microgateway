@@ -581,8 +581,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	// from enhancer
 	// Even if the routing is based on direct cluster, these properties needs to be populated
 	// to validate the key type component in the token.
-	contextExtensions["prodClusterName"] = prodClusterName
-	contextExtensions["sandClusterName"] = sandClusterName
+	contextExtensions[prodClusterNameContextExtension] = prodClusterName
+	contextExtensions[sandClusterNameContextExtension] = sandClusterName
 
 	extAuthPerFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{
@@ -606,11 +606,23 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			Override: &lua.LuaPerRoute_Disabled{Disabled: true},
 		}
 	} else {
+		// read from contextExtensions map since, it is updated with correct values with conditions
+		// so, no need to change two places
+		iInvCtx := &interceptor.InvocationContext{
+			BasePath:        contextExtensions[basePathContextExtension],
+			Method:          contextExtensions[methodContextExtension],
+			APIName:         contextExtensions[apiNameContextExtension],
+			APIVersion:      contextExtensions[apiVersionContextExtension],
+			PathTemplate:    contextExtensions[pathContextExtension],
+			Vhost:           contextExtensions[vHostContextExtension],
+			ProdClusterName: contextExtensions[prodClusterNameContextExtension],
+			SandClusterName: contextExtensions[sandClusterNameContextExtension],
+		}
 		luaPerFilterConfig = lua.LuaPerRoute{
 			Override: &lua.LuaPerRoute_SourceCode{
 				SourceCode: &corev3.DataSource{
 					Specifier: &corev3.DataSource_InlineString{
-						InlineString: getInlineLuaScript(requestInterceptor, responseInterceptor),
+						InlineString: getInlineLuaScript(requestInterceptor, responseInterceptor, iInvCtx),
 					},
 				},
 			},
@@ -698,23 +710,35 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	return &router
 }
 
-func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInterceptor model.InterceptEndpoint) string {
-	i := interceptor.Interceptor{}
+func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInterceptor model.InterceptEndpoint,
+	requestContext *interceptor.InvocationContext) string {
+
+	i := &interceptor.Interceptor{
+		Context:              requestContext,
+		RequestExternalCall:  &interceptor.HTTPCallConfig{}, // assign default values ("false" if req flow disabled)
+		ResponseExternalCall: &interceptor.HTTPCallConfig{},
+		ReqFlowInclude:       &interceptor.RequestInclusions{}, // assign default values ("false" if headers not included req details)
+		RespFlowInclude:      &interceptor.RequestInclusions{},
+	}
 	if requestInterceptor.Enable {
-		i.RequestExternalCall = interceptor.HTTPCallConfig{
+		i.RequestExternalCall = &interceptor.HTTPCallConfig{
 			Enable:      true,
 			ClusterName: requestInterceptor.ClusterName,
-			Path:        requestInterceptor.Path,
-			Timeout:     requestInterceptor.RequestTimeout.String(),
+			// multiplying in seconds here because in configs we are directly getting config to time.Duration
+			// which is in nano seconds, so multiplying it in seconds here
+			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
 		}
+		i.ReqFlowInclude = requestInterceptor.Includes
 	}
 	if responseInterceptor.Enable {
-		i.ResponseExternalCall = interceptor.HTTPCallConfig{
+		i.ResponseExternalCall = &interceptor.HTTPCallConfig{
 			Enable:      true,
 			ClusterName: responseInterceptor.ClusterName,
-			Path:        responseInterceptor.Path,
-			Timeout:     responseInterceptor.RequestTimeout.String(),
+			// multiplying in seconds here because in configs we are directly getting config to time.Duration
+			// which is in nano seconds, so multiplying it in seconds here
+			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
 		}
+		i.RespFlowInclude = responseInterceptor.Includes
 	}
 	return interceptor.GetInterceptor(i)
 }

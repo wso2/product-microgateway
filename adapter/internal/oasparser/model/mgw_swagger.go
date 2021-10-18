@@ -26,6 +26,7 @@ import (
 
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 )
@@ -111,14 +112,13 @@ type CorsConfig struct {
 type InterceptEndpoint struct {
 	Enable          bool
 	EndpointCluster EndpointCluster
-	Path            string
 	ClusterName     string
 	ClusterTimeout  time.Duration
 	RequestTimeout  time.Duration
 	// Includes this is an enum allowing only values in
 	// {"request_headers", "request_body", "request_trailer", "response_headers", "response_body", "response_trailer",
 	//"invocation_context" }
-	Includes []string
+	Includes *interceptor.RequestInclusions
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -638,8 +638,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
 	requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
-	pathV := "/"
-	var includesV []string
+	includesV := &interceptor.RequestInclusions{}
 
 	var err error
 
@@ -686,19 +685,26 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}
-			// path optional
-			if v, found := val[path]; found {
-				pathV = v.(string)
-			}
 			//includes optional
 			if v, found := val[includes]; found {
 				includes := v.([]interface{})
 				if len(includes) > 0 {
 					for _, include := range includes {
 						switch include.(string) {
-						case "request_headers", "request_body", "request_trailer", "response_headers", "response_body",
-							"response_trailer", "invocation_context":
-							includesV = append(includesV, include.(string))
+						case "request_headers":
+							includesV.RequestHeaders = true
+						case "request_body":
+							includesV.RequestBody = true
+						case "request_trailers":
+							includesV.RequestTrailer = true
+						case "response_headers":
+							includesV.ResponseHeaders = true
+						case "response_body":
+							includesV.ResponseBody = true
+						case "response_trailers":
+							includesV.ResponseTrailers = true
+						case "invocation_context":
+							includesV.InvocationContext = true
 						}
 					}
 				}
@@ -709,7 +715,6 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				EndpointCluster: endpointCluster,
 				ClusterTimeout:  clusterTimeoutV,
 				RequestTimeout:  requestTimeoutV,
-				Path:            pathV,
 				Includes:        includesV,
 			}, err
 		}

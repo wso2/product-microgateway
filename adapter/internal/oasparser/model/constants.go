@@ -49,7 +49,6 @@ const (
 	scheme         string = "scheme"
 	clusterTimeout string = "clusterTimeout"
 	requestTimeout string = "requestTimeout"
-	path           string = "path"
 	includes       string = "includes"
 )
 
