@@ -21,6 +21,8 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"net/http"
+	// enable profiling endpoints
+	_ "net/http/pprof"
 	"strconv"
 	"strings"
 
@@ -225,6 +227,11 @@ func StartRestServer(config *config.Config) {
 			logger.LoggerAPI.Info("Rest server is shutdown. Update health status of RestService")
 			health.RestService.SetStatus(false)
 		}
+	}()
+
+	// expose new port for serving pprof based go profiling endpoints
+	go func() {
+		logger.LoggerAPI.Fatal(http.ListenAndServe("localhost:6060", nil))
 	}()
 
 	health.RestService.SetStatus(true)
