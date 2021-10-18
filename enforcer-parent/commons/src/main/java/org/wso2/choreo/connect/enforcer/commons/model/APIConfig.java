@@ -19,6 +19,7 @@ package org.wso2.choreo.connect.enforcer.commons.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * APIConfig contains the details related to the MatchedAPI for the inbound request.
@@ -31,6 +32,7 @@ public class APIConfig {
     private String apiType;
     private List<String> productionUrls;
     private List<String> sandboxUrls;
+    private Map<String, SecuritySchemaConfig> securitySchemeDefinitions;
     private String apiLifeCycleState;
     private String authorizationHeader;
     private EndpointSecurity endpointSecurity;
@@ -85,6 +87,13 @@ public class APIConfig {
      */
     public String getUuid() {
         return uuid;
+    }
+
+    /**
+     * @return API security definitions
+     */
+    public Map<String, SecuritySchemaConfig> getSecuritySchemeDefinitions() {
+        return securitySchemeDefinitions;
     }
 
     /**
@@ -198,6 +207,7 @@ public class APIConfig {
         private EndpointSecurity endpointSecurity;
         private String organizationId;
         private String uuid;
+        private Map<String, SecuritySchemaConfig> securitySchemeDefinitions;
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = "Unlimited";
@@ -283,6 +293,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder securitySchemeDefinitions(Map<String, SecuritySchemaConfig> securitySchemeDefinitions) {
+            this.securitySchemeDefinitions = securitySchemeDefinitions;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -301,6 +316,7 @@ public class APIConfig {
             apiConfig.disableSecurity = this.disableSecurity;
             apiConfig.organizationId = this.organizationId;
             apiConfig.uuid = this.uuid;
+            apiConfig.securitySchemeDefinitions = this.securitySchemeDefinitions;
             return apiConfig;
         }
     }

@@ -20,10 +20,12 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
@@ -35,7 +37,9 @@ import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Specific implementation for a WebSocket API type APIs. Contains 2 filter chains to process initial HTTP request and
@@ -61,7 +65,24 @@ public class WebSocketAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         String apiType = api.getApiType();
-        List<String> securitySchemes = api.getSecuritySchemeList();
+        Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
+        List<String> securitySchemeList = new ArrayList<>();
+
+        for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
+            if (securityScheme.getType() != null) {
+                String schemaType = securityScheme.getType();
+                SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
+                securitySchemaConfig.setDefinitionName(securityScheme.getDefinitionName());
+                securitySchemaConfig.setType(schemaType);
+                securitySchemaConfig.setName(securityScheme.getName());
+                securitySchemaConfig.setIn(securityScheme.getIn());
+                securitySchemes.put(schemaType, securitySchemaConfig);
+            }
+        }
+
+        for (String schemeName : securitySchemes.keySet()) {
+            securitySchemeList.add(schemeName);
+        }
 
         EndpointSecurity endpointSecurity = new EndpointSecurity();
         if (api.getEndpointSecurity().hasProductionSecurityInfo()) {
@@ -78,7 +99,7 @@ public class WebSocketAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(endpointSecurity)
+                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).build();
         initFilters();

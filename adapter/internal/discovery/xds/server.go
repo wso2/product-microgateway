@@ -40,6 +40,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	oasParser "github.com/wso2/product-microgateway/adapter/internal/oasparser"
 	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
@@ -243,6 +244,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	var err error
 	var newLabels []string
 	apiYaml := apiProject.APIYaml.Data
+	var schemes []model.SecurityScheme
 
 	// handle panic
 	defer func() {
@@ -260,7 +262,13 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		if err != nil {
 			return nil, err
 		}
-		mgwSwagger.SetSecurityScheme(apiYaml.SecurityScheme)
+		//set swagger file configs not available
+		if(mgwSwagger.GetSecurityScheme() == nil) {
+			for _, value := range apiYaml.SecurityScheme {
+				schemes = append(schemes, model.SecurityScheme{Type: value})
+			}
+			mgwSwagger.SetSecurityScheme(schemes)
+		}
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
 	} else if apiProject.APIType == mgw.WS {

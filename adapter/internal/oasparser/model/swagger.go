@@ -45,7 +45,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.resources = setResourcesSwagger(swagger2)
 	swagger.apiType = HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
-
+	swagger.securityScheme = setSecurityDefinitions(swagger2)
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
 	// If the schemes property is not mentioned at all, http will be assigned. (Only swagger 2 version has this property)
@@ -149,6 +149,17 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 		}
 	}
 	return SortResources(resources)
+}
+
+// Sets security definitions defined in swagger 2 format.
+func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
+	var securitySchemes []SecurityScheme
+	for key , val := range swagger2.SecurityDefinitions {
+		scheme := SecurityScheme{DefinitionName: key, Type: val.Type , Name: val.Name, In: val.In}
+		securitySchemes = append(securitySchemes, scheme)
+	}
+	logger.LoggerOasparser.Debugf("Security schemes in setSecurityDefinitions  %v:",securitySchemes)
+	return securitySchemes
 }
 
 // This methods adds x-wso2-disable-security vendor extension

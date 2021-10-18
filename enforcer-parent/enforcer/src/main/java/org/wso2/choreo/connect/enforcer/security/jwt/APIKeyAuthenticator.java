@@ -35,7 +35,9 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecurityInfo;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -51,6 +53,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -72,18 +75,67 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
+        boolean isAPIkeyProtected = getIsAPIKeyProtected(requestContext);
+        if (!isAPIkeyProtected) {
+            return  false;
+        }
         String apiKey = getAPIKeyFromRequest(requestContext);
         return isAPIKey(apiKey);
     }
 
+    private String getAPIKeyAllowedIn(RequestContext requestContext) {
+        String apiKeyLocation = "";
+        SecuritySchemaConfig securitySchemaConfig = FilterUtils.getAPIKeySchemeConfig(requestContext);
+        if (securitySchemaConfig != null) {
+            apiKeyLocation = securitySchemaConfig.getIn();
+        }
+        return apiKeyLocation;
+    }
+
+    private boolean getIsAPIKeyProtected(RequestContext requestContext) {
+        boolean isAPIKeyProtected = false;
+        List<ResourceConfig> resourceConfigList = requestContext.getMatchedAPI().getResources();
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
+                .getSecuritySchemeDefinitions();
+        for (int a = 0; a < resourceConfigList.size(); a++) {
+            ResourceConfig resourceConfig = resourceConfigList.get(a);
+            if (resourceConfig.getPath().equalsIgnoreCase(requestContext.getMatchedResourcePath().getPath()) &&
+                    resourceConfig.getMethod().name().equalsIgnoreCase(requestContext.getRequestMethod())) {
+                Map<String, List<String>> resourceSecuritySchemes = resourceConfig.getSecuritySchemas();
+                if (resourceSecuritySchemes.containsKey(FilterUtils.
+                        getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+                    isAPIKeyProtected = true;
+                }
+            }
+        }
+        return isAPIKeyProtected;
+    }
+
     // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
-        String apiKey;
-        Map<String, String> headers = requestContext.getHeaders();
-        apiKey = headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
-        if (StringUtils.isEmpty(apiKey)) {
+        String apiKeyName = FilterUtils.getAPIKeyName(requestContext);
+        String apiKey = "";
+        String apiKeyLocation = getAPIKeyAllowedIn(requestContext);
+        if (apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_HEADER)) {
+            Map<String, String> headers = requestContext.getHeaders();
+            apiKey = getAPIKeyFromMap(headers, apiKeyName);
+        }
+        if (StringUtils.isEmpty(apiKey) && apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_QUERY)) {
             Map<String, String> queryParameters = requestContext.getQueryParameters();
-            apiKey = queryParameters.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+            apiKey = getAPIKeyFromMap(queryParameters, apiKeyName);
+        }
+        return apiKey;
+    }
+
+    private String getAPIKeyFromMap(Map<String, String> requestMetaData, String apiKeyName) {
+        String apiKey = "";
+        if (requestMetaData.containsKey(apiKeyName)) {
+            return requestMetaData.get(apiKeyName);
+        }
+        if (StringUtils.isEmpty(apiKey)) {
+            if (requestMetaData.containsKey(APIConstants.API_SECURITY_API_KEY)) {
+                return  requestMetaData.get(apiKeyName);
+            }
         }
         return apiKey;
     }
@@ -313,7 +365,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             }
             if (api == null) {
                 log.debug("Subscription data not populated in APIKeyValidationInfoDTO for the API: " + name +
-                            ", version: " + version + ".");
+                        ", version: " + version + ".");
                 log.error("User's subscription details cannot obtain for the API : " + name + ".");
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.API_AUTH_FORBIDDEN,

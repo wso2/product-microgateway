@@ -5,7 +5,7 @@
 [enforcer]
 [enforcer.security]
 [enforcer.security.authHeader]
-  testConsoleHeaderName = "api_key"
+  testConsoleHeaderName = "x-api-key"
 
 [enforcer.jwtGenerator]
     enable = true

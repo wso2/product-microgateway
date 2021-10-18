@@ -31,7 +31,7 @@ private static final long serialVersionUID = 0L;
     basePath_ = "";
     tier_ = "";
     apiLifeCycleState_ = "";
-    securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    securityScheme_ = java.util.Collections.emptyList();
     authorizationHeader_ = "";
     vhost_ = "";
     organizationId_ = "";
@@ -144,12 +144,12 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 98: {
-            java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-              securityScheme_ = new com.google.protobuf.LazyStringArrayList();
+              securityScheme_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.SecurityScheme>();
               mutable_bitField0_ |= 0x00000008;
             }
-            securityScheme_.add(s);
+            securityScheme_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.api.SecurityScheme.parser(), extensionRegistry));
             break;
           }
           case 106: {
@@ -213,7 +213,7 @@ private static final long serialVersionUID = 0L;
         resources_ = java.util.Collections.unmodifiableList(resources_);
       }
       if (((mutable_bitField0_ & 0x00000008) != 0)) {
-        securityScheme_ = securityScheme_.getUnmodifiableView();
+        securityScheme_ = java.util.Collections.unmodifiableList(securityScheme_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -657,38 +657,43 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SECURITYSCHEME_FIELD_NUMBER = 12;
-  private com.google.protobuf.LazyStringList securityScheme_;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme> securityScheme_;
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @return A list containing the securityScheme.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
-  public com.google.protobuf.ProtocolStringList
-      getSecuritySchemeList() {
+  @java.lang.Override
+  public java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme> getSecuritySchemeList() {
     return securityScheme_;
   }
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @return The count of securityScheme.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> 
+      getSecuritySchemeOrBuilderList() {
+    return securityScheme_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+   */
+  @java.lang.Override
   public int getSecuritySchemeCount() {
     return securityScheme_.size();
   }
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @param index The index of the element to return.
-   * @return The securityScheme at the given index.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
-  public java.lang.String getSecurityScheme(int index) {
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.SecurityScheme getSecurityScheme(int index) {
     return securityScheme_.get(index);
   }
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the securityScheme at the given index.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
-  public com.google.protobuf.ByteString
-      getSecuritySchemeBytes(int index) {
-    return securityScheme_.getByteString(index);
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder getSecuritySchemeOrBuilder(
+      int index) {
+    return securityScheme_.get(index);
   }
 
   public static final int ENDPOINTSECURITY_FIELD_NUMBER = 13;
@@ -890,7 +895,7 @@ private static final long serialVersionUID = 0L;
       com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiLifeCycleState_);
     }
     for (int i = 0; i < securityScheme_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 12, securityScheme_.getRaw(i));
+      output.writeMessage(12, securityScheme_.get(i));
     }
     if (endpointSecurity_ != null) {
       output.writeMessage(13, getEndpointSecurity());
@@ -952,13 +957,9 @@ private static final long serialVersionUID = 0L;
     if (!getApiLifeCycleStateBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiLifeCycleState_);
     }
-    {
-      int dataSize = 0;
-      for (int i = 0; i < securityScheme_.size(); i++) {
-        dataSize += computeStringSizeNoTag(securityScheme_.getRaw(i));
-      }
-      size += dataSize;
-      size += 1 * getSecuritySchemeList().size();
+    for (int i = 0; i < securityScheme_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(12, securityScheme_.get(i));
     }
     if (endpointSecurity_ != null) {
       size += com.google.protobuf.CodedOutputStream
@@ -1220,6 +1221,7 @@ private static final long serialVersionUID = 0L;
         getProductionUrlsFieldBuilder();
         getSandboxUrlsFieldBuilder();
         getResourcesFieldBuilder();
+        getSecuritySchemeFieldBuilder();
       }
     }
     @java.lang.Override
@@ -1259,8 +1261,12 @@ private static final long serialVersionUID = 0L;
 
       apiLifeCycleState_ = "";
 
-      securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000008);
+      if (securitySchemeBuilder_ == null) {
+        securityScheme_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+      } else {
+        securitySchemeBuilder_.clear();
+      }
       if (endpointSecurityBuilder_ == null) {
         endpointSecurity_ = null;
       } else {
@@ -1337,11 +1343,15 @@ private static final long serialVersionUID = 0L;
       result.basePath_ = basePath_;
       result.tier_ = tier_;
       result.apiLifeCycleState_ = apiLifeCycleState_;
-      if (((bitField0_ & 0x00000008) != 0)) {
-        securityScheme_ = securityScheme_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000008);
+      if (securitySchemeBuilder_ == null) {
+        if (((bitField0_ & 0x00000008) != 0)) {
+          securityScheme_ = java.util.Collections.unmodifiableList(securityScheme_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.securityScheme_ = securityScheme_;
+      } else {
+        result.securityScheme_ = securitySchemeBuilder_.build();
       }
-      result.securityScheme_ = securityScheme_;
       if (endpointSecurityBuilder_ == null) {
         result.endpointSecurity_ = endpointSecurity_;
       } else {
@@ -1509,15 +1519,31 @@ private static final long serialVersionUID = 0L;
         apiLifeCycleState_ = other.apiLifeCycleState_;
         onChanged();
       }
-      if (!other.securityScheme_.isEmpty()) {
-        if (securityScheme_.isEmpty()) {
-          securityScheme_ = other.securityScheme_;
-          bitField0_ = (bitField0_ & ~0x00000008);
-        } else {
-          ensureSecuritySchemeIsMutable();
-          securityScheme_.addAll(other.securityScheme_);
+      if (securitySchemeBuilder_ == null) {
+        if (!other.securityScheme_.isEmpty()) {
+          if (securityScheme_.isEmpty()) {
+            securityScheme_ = other.securityScheme_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureSecuritySchemeIsMutable();
+            securityScheme_.addAll(other.securityScheme_);
+          }
+          onChanged();
         }
-        onChanged();
+      } else {
+        if (!other.securityScheme_.isEmpty()) {
+          if (securitySchemeBuilder_.isEmpty()) {
+            securitySchemeBuilder_.dispose();
+            securitySchemeBuilder_ = null;
+            securityScheme_ = other.securityScheme_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+            securitySchemeBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getSecuritySchemeFieldBuilder() : null;
+          } else {
+            securitySchemeBuilder_.addAllMessages(other.securityScheme_);
+          }
+        }
       }
       if (other.hasEndpointSecurity()) {
         mergeEndpointSecurity(other.getEndpointSecurity());
@@ -2895,114 +2921,244 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.LazyStringList securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme> securityScheme_ =
+      java.util.Collections.emptyList();
     private void ensureSecuritySchemeIsMutable() {
       if (!((bitField0_ & 0x00000008) != 0)) {
-        securityScheme_ = new com.google.protobuf.LazyStringArrayList(securityScheme_);
+        securityScheme_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.SecurityScheme>(securityScheme_);
         bitField0_ |= 0x00000008;
        }
     }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.SecurityScheme, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder, org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> securitySchemeBuilder_;
+
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @return A list containing the securityScheme.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
-    public com.google.protobuf.ProtocolStringList
-        getSecuritySchemeList() {
-      return securityScheme_.getUnmodifiableView();
+    public java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme> getSecuritySchemeList() {
+      if (securitySchemeBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(securityScheme_);
+      } else {
+        return securitySchemeBuilder_.getMessageList();
+      }
     }
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @return The count of securityScheme.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
     public int getSecuritySchemeCount() {
-      return securityScheme_.size();
+      if (securitySchemeBuilder_ == null) {
+        return securityScheme_.size();
+      } else {
+        return securitySchemeBuilder_.getCount();
+      }
     }
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @param index The index of the element to return.
-     * @return The securityScheme at the given index.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
-    public java.lang.String getSecurityScheme(int index) {
-      return securityScheme_.get(index);
+    public org.wso2.choreo.connect.discovery.api.SecurityScheme getSecurityScheme(int index) {
+      if (securitySchemeBuilder_ == null) {
+        return securityScheme_.get(index);
+      } else {
+        return securitySchemeBuilder_.getMessage(index);
+      }
     }
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the securityScheme at the given index.
-     */
-    public com.google.protobuf.ByteString
-        getSecuritySchemeBytes(int index) {
-      return securityScheme_.getByteString(index);
-    }
-    /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @param index The index to set the value at.
-     * @param value The securityScheme to set.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
     public Builder setSecurityScheme(
-        int index, java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureSecuritySchemeIsMutable();
-      securityScheme_.set(index, value);
-      onChanged();
+        int index, org.wso2.choreo.connect.discovery.api.SecurityScheme value) {
+      if (securitySchemeBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureSecuritySchemeIsMutable();
+        securityScheme_.set(index, value);
+        onChanged();
+      } else {
+        securitySchemeBuilder_.setMessage(index, value);
+      }
       return this;
     }
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @param value The securityScheme to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public Builder setSecurityScheme(
+        int index, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder builderForValue) {
+      if (securitySchemeBuilder_ == null) {
+        ensureSecuritySchemeIsMutable();
+        securityScheme_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        securitySchemeBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public Builder addSecurityScheme(org.wso2.choreo.connect.discovery.api.SecurityScheme value) {
+      if (securitySchemeBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureSecuritySchemeIsMutable();
+        securityScheme_.add(value);
+        onChanged();
+      } else {
+        securitySchemeBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
     public Builder addSecurityScheme(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureSecuritySchemeIsMutable();
-      securityScheme_.add(value);
-      onChanged();
+        int index, org.wso2.choreo.connect.discovery.api.SecurityScheme value) {
+      if (securitySchemeBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureSecuritySchemeIsMutable();
+        securityScheme_.add(index, value);
+        onChanged();
+      } else {
+        securitySchemeBuilder_.addMessage(index, value);
+      }
       return this;
     }
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @param values The securityScheme to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public Builder addSecurityScheme(
+        org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder builderForValue) {
+      if (securitySchemeBuilder_ == null) {
+        ensureSecuritySchemeIsMutable();
+        securityScheme_.add(builderForValue.build());
+        onChanged();
+      } else {
+        securitySchemeBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public Builder addSecurityScheme(
+        int index, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder builderForValue) {
+      if (securitySchemeBuilder_ == null) {
+        ensureSecuritySchemeIsMutable();
+        securityScheme_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        securitySchemeBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
     public Builder addAllSecurityScheme(
-        java.lang.Iterable<java.lang.String> values) {
-      ensureSecuritySchemeIsMutable();
-      com.google.protobuf.AbstractMessageLite.Builder.addAll(
-          values, securityScheme_);
-      onChanged();
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.SecurityScheme> values) {
+      if (securitySchemeBuilder_ == null) {
+        ensureSecuritySchemeIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, securityScheme_);
+        onChanged();
+      } else {
+        securitySchemeBuilder_.addAllMessages(values);
+      }
       return this;
     }
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
     public Builder clearSecurityScheme() {
-      securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000008);
-      onChanged();
+      if (securitySchemeBuilder_ == null) {
+        securityScheme_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+      } else {
+        securitySchemeBuilder_.clear();
+      }
       return this;
     }
     /**
-     * <code>repeated string securityScheme = 12;</code>
-     * @param value The bytes of the securityScheme to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
-    public Builder addSecuritySchemeBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      ensureSecuritySchemeIsMutable();
-      securityScheme_.add(value);
-      onChanged();
+    public Builder removeSecurityScheme(int index) {
+      if (securitySchemeBuilder_ == null) {
+        ensureSecuritySchemeIsMutable();
+        securityScheme_.remove(index);
+        onChanged();
+      } else {
+        securitySchemeBuilder_.remove(index);
+      }
       return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder getSecuritySchemeBuilder(
+        int index) {
+      return getSecuritySchemeFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder getSecuritySchemeOrBuilder(
+        int index) {
+      if (securitySchemeBuilder_ == null) {
+        return securityScheme_.get(index);  } else {
+        return securitySchemeBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> 
+         getSecuritySchemeOrBuilderList() {
+      if (securitySchemeBuilder_ != null) {
+        return securitySchemeBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(securityScheme_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder addSecuritySchemeBuilder() {
+      return getSecuritySchemeFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.api.SecurityScheme.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder addSecuritySchemeBuilder(
+        int index) {
+      return getSecuritySchemeFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.api.SecurityScheme.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder> 
+         getSecuritySchemeBuilderList() {
+      return getSecuritySchemeFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.SecurityScheme, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder, org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> 
+        getSecuritySchemeFieldBuilder() {
+      if (securitySchemeBuilder_ == null) {
+        securitySchemeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.SecurityScheme, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder, org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder>(
+                securityScheme_,
+                ((bitField0_ & 0x00000008) != 0),
+                getParentForChildren(),
+                isClean());
+        securityScheme_ = null;
+      }
+      return securitySchemeBuilder_;
     }
 
     private org.wso2.choreo.connect.discovery.api.EndpointSecurity endpointSecurity_;

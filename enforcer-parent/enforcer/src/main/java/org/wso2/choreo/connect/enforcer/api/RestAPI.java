@@ -23,12 +23,14 @@ import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Endpoint;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
+import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
@@ -69,13 +71,31 @@ public class RestAPI implements API {
         String apiType = api.getApiType();
         List<String> productionUrls = processEndpoints(api.getProductionUrlsList());
         List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
-        List<String> securitySchemes = api.getSecuritySchemeList();
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
+        List<String> securitySchemeList = new ArrayList<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
 
+        for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
+
+            if (securityScheme.getType() != null) {
+                String schemaType = securityScheme.getType();
+                SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
+                securitySchemaConfig.setDefinitionName(securityScheme.getDefinitionName());
+                securitySchemaConfig.setType(schemaType);
+                securitySchemaConfig.setName(securityScheme.getName());
+                securitySchemaConfig.setIn(securityScheme.getIn());
+                securitySchemeDefinitions.put(schemaType, securitySchemaConfig);
+            }
+        }
+
+        for (String schemeName : securitySchemeDefinitions.keySet()) {
+            securitySchemeList.add(schemeName);
+        }
+
         for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath());
+                ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
                 resources.add(resConfig);
             }
         }
@@ -94,10 +114,11 @@ public class RestAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(endpointSecurity)
+                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).build();
+                .organizationId(api.getOrganizationId()).securitySchemeDefinitions(securitySchemeDefinitions).build();
+
         initFilters();
         return basePath;
     }
@@ -171,7 +192,8 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    private ResourceConfig buildResource(Operation operation, String resPath) {
+    private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
+            SecuritySchemaConfig> securitySchemeDefinitions) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
@@ -182,6 +204,10 @@ public class RestAPI implements API {
             if (security != null && security.getScopesList().size() > 0) {
                 List<String> scopeList = new ArrayList<>(security.getScopesList());
                 securityMap.put(key, scopeList);
+            }
+            if (security != null && key.equalsIgnoreCase(FilterUtils.
+                    getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+                securityMap.put(key, new ArrayList<>());
             }
         }));
         resource.setSecuritySchemas(securityMap);
