@@ -320,6 +320,20 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+
+            httpServer.createContext(context + "/echo", exchange -> {
+                byte[] response;
+                JSONObject responseJSON = new JSONObject();
+                String requestBody = Utils.requestBodyToString(exchange);
+                responseJSON.put("body", requestBody);
+                responseJSON.put("headers", exchange.getRequestHeaders());
+                response = responseJSON.toString().getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {
