@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,6 +67,13 @@ public class MockBackEndServer extends Thread {
                     true, true);
             securedMockBackEndServer.start();
             mtlsMockBackEndServer.start();
+        }
+        if (Arrays.asList(args).contains("-interceptor-svc-enabled")) {
+            MockInterceptorServer mockInterceptorServer = new MockInterceptorServer(
+                    Constants.INTERCEPTOR_STATUS_SERVER_PORT,
+                    Constants.MTLS_INTERCEPTOR_HANDLER_SERVER_PORT
+            );
+            mockInterceptorServer.start();
         }
     }
 
@@ -324,7 +332,7 @@ public class MockBackEndServer extends Thread {
         httpServer.stop(0);
     }
 
-    private SSLContext getSslContext() throws Exception {
+    private static SSLContext getSslContext() throws Exception {
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
         // initialise the keystore
