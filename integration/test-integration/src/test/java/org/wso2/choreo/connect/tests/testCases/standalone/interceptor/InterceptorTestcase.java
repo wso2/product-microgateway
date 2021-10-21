@@ -56,8 +56,8 @@ public class InterceptorTestcase {
         HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/clear-status"));
     }
 
-    @Test(description = "Test request body of interceptor service in request flow")
-    public void testRequestOfInterceptorServiceInRequestFlow() throws Exception {
+    @Test(description = "Test request body to interceptor service in request flow")
+    public void testRequestToInterceptorServiceInRequestFlowInterception() throws Exception {
         // setting client
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -65,13 +65,14 @@ public class InterceptorTestcase {
         headers.put("foo-update", "Header_to_be_updated");
         headers.put("foo-keep", "Header_to_be_kept");
         headers.put("content-type", "application/xml");
-        String body = "<student><name>Foo</name><age type=\"Y\">16</age></student";
+        String body = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 "/intercept-request/echo/123"), body, headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
 
+        // check which flows are invoked in interceptor service
         JSONObject status = new JSONObject(getInterceptorStatus());
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
@@ -92,7 +93,7 @@ public class InterceptorTestcase {
         // JSON request to XML backend
         // setting response body of interceptor service
         JSONObject interceptorRespBody = new JSONObject();
-        String updatedBody = "<student><name>Foo</name><age type=\"Y\">16</age></student";
+        String updatedBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
         interceptorRespBody.put("body", Base64.getEncoder().encodeToString(updatedBody.getBytes()));
         interceptorRespBody.put("headersToAdd", Collections.singletonMap("foo-add", "Header_newly_added"));
         Map<String, String> headersToReplace = new HashMap<>();
@@ -117,9 +118,14 @@ public class InterceptorTestcase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
 
+        // check which flows are invoked in interceptor service
+        JSONObject status = new JSONObject(getInterceptorStatus());
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+
         // test headers
         JSONObject backendResponse = new JSONObject(response.getData());
-        JSONObject respHeaders = backendResponse.getJSONObject("headers");
+        JSONObject respHeaders = backendResponse.getJSONObject("headers"); // headers key are capitalized from echo server
         Assert.assertFalse(respHeaders.has("Foo-remove"), "Failed to remove header");
         Assert.assertEquals(respHeaders.getJSONArray("Foo-add").getString(0), "Header_newly_added",
                 "Failed to add new header");
@@ -133,6 +139,50 @@ public class InterceptorTestcase {
                 "Failed to keep original header");
         // test body
         Assert.assertEquals(backendResponse.getString("body"), updatedBody);
+    }
+
+    @Test(description = "Direct respond when response interception is enabled")
+    public void directRespondWhenResponseInterceptionEnabled() throws Exception {
+        // JSON request to XML backend
+        // setting response body of interceptor service
+        JSONObject interceptorRespBody = new JSONObject();
+        String updatedBody = "{\"message\": \"This is direct responded\"}";
+        interceptorRespBody.put("directRespond", true);
+        interceptorRespBody.put("body", Base64.getEncoder().encodeToString(updatedBody.getBytes()));
+        // only headersToAdd is considered when direct respond
+        Map<String, String> headersToAdd = new HashMap<>();
+        headersToAdd.put("foo-add", "Header_newly_added");
+        headersToAdd.put("content-type", "application/json");
+        interceptorRespBody.put("headersToAdd", headersToAdd);
+        interceptorRespBody.put("headersToReplace", Collections.singletonMap("foo-ignored", "Header_not_added"));
+        setResponseOfInterceptor(interceptorRespBody.toString(), true);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put("foo-client-header", "Header_discard_when_respond");
+        headers.put("content-type", "application/json");
+        // this is not an echo server, so if request goes to backend it will respond with different payload.
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/intercept-request/pet/findByStatus/resp-intercept-enabled/direct-respond"), headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = new JSONObject(getInterceptorStatus());
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+
+        // test headers
+        Assert.assertFalse(response.getHeaders().containsKey("foo-client-header"), "Responding client headers back");
+        Assert.assertFalse(response.getHeaders().containsKey("foo-ignored"), "Should only support add headers");
+        Assert.assertEquals(response.getHeaders().get("foo-add"), "Header_newly_added",
+                "Failed to add new header");
+        Assert.assertEquals(response.getHeaders().get("content-type"), "application/json",
+                "Failed to replace header");
+        // test body
+        Assert.assertEquals(response.getData(), updatedBody);
     }
 
     private String getInterceptorStatus() throws Exception {

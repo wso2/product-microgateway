@@ -54,7 +54,7 @@ paths:
       responses:
         '200':
           description: successful operation
-  /echo/resource-level/{id}:
+  /echo/resp-intercept:
     # API level interceptor definition
     x-wso2-response-interceptor:
       host: mockBackend
@@ -62,7 +62,7 @@ paths:
       scheme: http
       includes:
         - request_headers
-    get:
+    post:
       summary: Echo Request
       description: Echo request back to the client
       operationId: echo
@@ -72,7 +72,14 @@ paths:
       responses:
         '200':
           description: successful operation
-  /pet/findByStatus:
+  /pet/findByStatus/resp-intercept-enabled/direct-respond:
+    # API level interceptor definition
+    x-wso2-response-interceptor:
+      host: mockBackend
+      port: 2371
+      scheme: http
+      includes:
+        - request_headers
     get:
       tags:
         - pet
