@@ -150,9 +150,9 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 98: {
-            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
               securityScheme_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.SecurityScheme>();
-              mutable_bitField0_ |= 0x00000008;
+              mutable_bitField0_ |= 0x00000002;
             }
             securityScheme_.add(
                 input.readMessage(org.wso2.choreo.connect.discovery.api.SecurityScheme.parser(), extensionRegistry));
@@ -212,7 +212,7 @@ private static final long serialVersionUID = 0L;
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
         resources_ = java.util.Collections.unmodifiableList(resources_);
       }
-      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+      if (((mutable_bitField0_ & 0x00000002) != 0)) {
         securityScheme_ = java.util.Collections.unmodifiableList(securityScheme_);
       }
       this.unknownFields = unknownFields.build();
@@ -641,7 +641,7 @@ private static final long serialVersionUID = 0L;
    * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
   @java.lang.Override
-  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder>
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> 
       getSecuritySchemeOrBuilderList() {
     return securityScheme_;
   }
@@ -1239,7 +1239,7 @@ private static final long serialVersionUID = 0L;
 
       if (securitySchemeBuilder_ == null) {
         securityScheme_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000002);
       } else {
         securitySchemeBuilder_.clear();
       }
@@ -1312,9 +1312,9 @@ private static final long serialVersionUID = 0L;
       result.tier_ = tier_;
       result.apiLifeCycleState_ = apiLifeCycleState_;
       if (securitySchemeBuilder_ == null) {
-        if (((bitField0_ & 0x00000008) != 0)) {
+        if (((bitField0_ & 0x00000002) != 0)) {
           securityScheme_ = java.util.Collections.unmodifiableList(securityScheme_);
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.securityScheme_ = securityScheme_;
       } else {
@@ -1445,7 +1445,7 @@ private static final long serialVersionUID = 0L;
         if (!other.securityScheme_.isEmpty()) {
           if (securityScheme_.isEmpty()) {
             securityScheme_ = other.securityScheme_;
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
             ensureSecuritySchemeIsMutable();
             securityScheme_.addAll(other.securityScheme_);
@@ -1458,8 +1458,8 @@ private static final long serialVersionUID = 0L;
             securitySchemeBuilder_.dispose();
             securitySchemeBuilder_ = null;
             securityScheme_ = other.securityScheme_;
-            bitField0_ = (bitField0_ & ~0x00000008);
-            securitySchemeBuilder_ =
+            bitField0_ = (bitField0_ & ~0x00000002);
+            securitySchemeBuilder_ = 
               com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                  getSecuritySchemeFieldBuilder() : null;
           } else {
@@ -1982,7 +1982,7 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
      */
     public org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder getProductionEndpointsBuilder() {
-
+      
       onChanged();
       return getProductionEndpointsFieldBuilder().getBuilder();
     }
@@ -2001,7 +2001,7 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.api.EndpointCluster productionEndpoints = 6;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder>
+        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder> 
         getProductionEndpointsFieldBuilder() {
       if (productionEndpointsBuilder_ == null) {
         productionEndpointsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -2101,7 +2101,7 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
     public org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder getSandboxEndpointsBuilder() {
-
+      
       onChanged();
       return getSandboxEndpointsFieldBuilder().getBuilder();
     }
@@ -2120,7 +2120,7 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.api.EndpointCluster sandboxEndpoints = 7;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder>
+        org.wso2.choreo.connect.discovery.api.EndpointCluster, org.wso2.choreo.connect.discovery.api.EndpointCluster.Builder, org.wso2.choreo.connect.discovery.api.EndpointClusterOrBuilder> 
         getSandboxEndpointsFieldBuilder() {
       if (sandboxEndpointsBuilder_ == null) {
         sandboxEndpointsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -2604,9 +2604,9 @@ private static final long serialVersionUID = 0L;
     private java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme> securityScheme_ =
       java.util.Collections.emptyList();
     private void ensureSecuritySchemeIsMutable() {
-      if (!((bitField0_ & 0x00000008) != 0)) {
+      if (!((bitField0_ & 0x00000002) != 0)) {
         securityScheme_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.SecurityScheme>(securityScheme_);
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000002;
        }
     }
 
@@ -2756,7 +2756,7 @@ private static final long serialVersionUID = 0L;
     public Builder clearSecurityScheme() {
       if (securitySchemeBuilder_ == null) {
         securityScheme_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
       } else {
         securitySchemeBuilder_.clear();
@@ -2796,7 +2796,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
-    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder>
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> 
          getSecuritySchemeOrBuilderList() {
       if (securitySchemeBuilder_ != null) {
         return securitySchemeBuilder_.getMessageOrBuilderList();
@@ -2822,18 +2822,18 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
      */
-    public java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder>
+    public java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder> 
          getSecuritySchemeBuilderList() {
       return getSecuritySchemeFieldBuilder().getBuilderList();
     }
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.SecurityScheme, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder, org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder>
+        org.wso2.choreo.connect.discovery.api.SecurityScheme, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder, org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> 
         getSecuritySchemeFieldBuilder() {
       if (securitySchemeBuilder_ == null) {
         securitySchemeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
             org.wso2.choreo.connect.discovery.api.SecurityScheme, org.wso2.choreo.connect.discovery.api.SecurityScheme.Builder, org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder>(
                 securityScheme_,
-                ((bitField0_ & 0x00000008) != 0),
+                ((bitField0_ & 0x00000002) != 0),
                 getParentForChildren(),
                 isClean());
         securityScheme_ = null;
