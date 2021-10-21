@@ -66,8 +66,7 @@ public class TimeOutTestCase {
                 "/v2/timeout/timeout70") , prodHeaders);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_REQUEST_TIMEOUT,"Response code mismatched");
-        Assert.assertEquals(response.getData(), "downstream duration timeout",
-                "Response message mismatch.");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_GATEWAY_TIMEOUT,"Response code mismatched");
+        Assert.assertTrue(response.getData().toLowerCase().contains("upstream request timeout"), "Response message mismatch.");
     }
 }
