@@ -71,13 +71,20 @@ public class RestAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         String apiType = api.getApiType();
-        EndpointCluster productionEndpoints = processEndpoints(api.getProductionEndpoints());
-        EndpointCluster sandboxEndpoints = processEndpoints(api.getSandboxEndpoints());
-        List<SecurityScheme> securitySchemes = api.getSecuritySchemeList();
+        Map<String, EndpointCluster> endpoints = new HashMap<>();
         Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
         List<String> securitySchemeList = new ArrayList<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
+
+        EndpointCluster productionEndpoints = processEndpoints(api.getProductionEndpoints());
+        EndpointCluster sandboxEndpoints = processEndpoints(api.getSandboxEndpoints());
+        if (productionEndpoints != null) {
+            endpoints.put(APIConstants.API_KEY_TYPE_PRODUCTION, productionEndpoints);
+        }
+        if (sandboxEndpoints != null) {
+            endpoints.put(APIConstants.API_KEY_TYPE_SANDBOX, sandboxEndpoints);
+        }
 
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
 
@@ -97,8 +104,29 @@ public class RestAPI implements API {
         }
 
         for (Resource res : api.getResourcesList()) {
+            Map<String, RetryConfig> resourceRetryConfigs = new HashMap();
+            EndpointCluster prodEndpointCluster = processEndpoints(res.getProductionEndpoints());
+            EndpointCluster sandEndpointCluster = processEndpoints(res.getSandboxEndpoints());
+            if (prodEndpointCluster != null) {
+                RetryConfig prodRetryConfig = prodEndpointCluster.getRetryConfig();
+                if (prodRetryConfig != null) {
+                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodRetryConfig);
+                }
+            }
+            if (sandEndpointCluster != null) {
+                RetryConfig sandRetryConfig = sandEndpointCluster.getRetryConfig();
+                if (sandRetryConfig != null) {
+                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_SANDBOX, sandRetryConfig);
+                }
+            }
+
+            if (resourceRetryConfigs.isEmpty()) {
+                resourceRetryConfigs = null;
+            }
+
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
+                resConfig.setRetryConfigs(resourceRetryConfigs);
                 resources.add(resConfig);
             }
         }
@@ -118,7 +146,7 @@ public class RestAPI implements API {
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
-                .productionUrls(productionEndpoints).sandboxUrls(sandboxEndpoints)
+                .endpoints(endpoints)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).securitySchemeDefinitions(securitySchemeDefinitions).build();
 

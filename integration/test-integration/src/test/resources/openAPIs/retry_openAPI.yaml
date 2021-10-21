@@ -25,24 +25,24 @@ x-wso2-production-endpoints:
     - http://mockBackend:2383/v2
   advanceEndpointConfig:
     retryConfig:
-      count: 3
+      count: 1
       statusCodes:
-        - 503
+        - 502
 x-wso2-sandbox-endpoints:
   urls:
     - http://mockBackend:2390/v2
   advanceEndpointConfig:
     retryConfig:
-      count: 3
+      count: 1
       statusCodes:
-        - 503
+        - 402
 paths:
-  /retry-three:
+  /retry-two:
     get:
       tags:
         - pet
       summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
+      description: 'This endpoint returns 503 for the first request'
       operationId: findPetsByStatus
       produces:
         - application/json
@@ -53,9 +53,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Pet'
-        '400':
-          description: Invalid status value
-  /retry-two:
+  /retry-three:
     x-wso2-production-endpoints:
       urls:
         - http://mockBackend:2383/v2
@@ -63,7 +61,7 @@ paths:
         retryConfig:
           count: 2
           statusCodes:
-            - 502
+            - 503
     x-wso2-sandbox-endpoints:
       urls:
         - http://mockBackend:2390/v2
@@ -71,12 +69,12 @@ paths:
         retryConfig:
           count: 2
           statusCodes:
-            - 502
+            - 403
     get:
       tags:
         - pet
       summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
+      description: 'This returns 503 for the first two requests'
       operationId: findPetsByStatus
       produces:
         - application/json
@@ -87,8 +85,22 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Pet'
-        '400':
-          description: Invalid status value
+  /retry-four:
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: 'This endpoint returns 504 for the first three requests'
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
 definitions:
   Pet:
     type: object
@@ -127,5 +139,3 @@ definitions:
           - available
           - pending
           - sold
-    xml:
-      name: Pet

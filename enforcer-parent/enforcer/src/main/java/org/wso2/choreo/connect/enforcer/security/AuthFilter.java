@@ -25,6 +25,8 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -40,6 +42,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -182,11 +185,11 @@ public class AuthFilter implements Filter {
             if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getProdClusterHeader());
-                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getProductionEndpoints());
+                addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
             } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
                 requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getSandClusterHeader());
-                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getSandboxEndpoints());
+                addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_SANDBOX);
             } else {
                 if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -229,16 +232,36 @@ public class AuthFilter implements Filter {
         return challengeString.toString().trim();
     }
 
-    private void addRetryConfigHeaders(RequestContext requestContext, EndpointCluster endpointCluster) {
-        if (endpointCluster != null) {
-            if (endpointCluster.getRetryConfig() != null) {
-                requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRY_ON,
-                        HttpConstants.HttpRouterHeaderValues.RETRIABLE_STATUS_CODES);
-                requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.MAX_RETRIES,
-                        Integer.toString(endpointCluster.getRetryConfig().getCount()));
-                requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
-                        StringUtils.join(endpointCluster.getRetryConfig().getStatusCodes(), ","));
+    private void addRetryHeaderConfig(RequestContext requestContext, String keyType) {
+        for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getResources()) {
+            if (resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
+                if (resourceConfig.getRetryConfigs() != null) {
+                    Map<String, RetryConfig> retryConfigMap = resourceConfig.getRetryConfigs();
+                    if (retryConfigMap.containsKey(keyType)) {
+                        addRetryConfigHeaders(requestContext, retryConfigMap.get(keyType));
+                        return;
+                        // If a retry config is defined at resource level for this specific key,
+                        // don't consider API level retry configs.
+                    }
+                }
+                break; // check only in the requested path
             }
         }
+        Map<String, EndpointCluster> apiLevelEndpoints = requestContext.getMatchedAPI().getEndpoints();
+        if (apiLevelEndpoints.containsKey(keyType)) {
+            RetryConfig apiLevelRetryConfig = apiLevelEndpoints.get(keyType).getRetryConfig();
+            if (apiLevelRetryConfig != null) {
+                addRetryConfigHeaders(requestContext, apiLevelRetryConfig);
+            }
+        }
+    }
+
+    private void addRetryConfigHeaders(RequestContext requestContext, RetryConfig retryConfig) {
+        requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRY_ON,
+                HttpConstants.HttpRouterHeaderValues.RETRIABLE_STATUS_CODES);
+        requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.MAX_RETRIES,
+                Integer.toString(retryConfig.getCount()));
+        requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
+                StringUtils.join(retryConfig.getStatusCodes(), ","));
     }
 }

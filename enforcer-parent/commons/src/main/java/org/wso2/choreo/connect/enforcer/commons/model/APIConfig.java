@@ -30,9 +30,8 @@ public class APIConfig {
     private String vhost;
     private String basePath;
     private String apiType;
-    private EndpointCluster productionEndpoints;
-    private EndpointCluster sandboxEndpoints;
-    private Map<String, SecuritySchemaConfig> securitySchemeDefinitions;
+    private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
+    private Map<String, SecuritySchemaConfig> securitySchemeDefinitions; // security scheme type -> config
     private String apiLifeCycleState;
     private String authorizationHeader;
     private EndpointSecurity endpointSecurity;
@@ -55,21 +54,13 @@ public class APIConfig {
     }
 
     /**
-     * getProductionEndpoints returns the production EndpointCluster object.
+     * getProductionEndpoints returns the map of EndpointCluster objects based on
+     * whether the key type is prod or sandbox.
      *
-     * @return getProductionEndpoints returns the production endpoint URLs
+     * @return getProductionEndpoints returns the map of EndpointClusters
      */
-    public EndpointCluster getProductionEndpoints() {
-        return productionEndpoints;
-    }
-
-    /**
-     * getSandboxEndpoints returns the production EndpointCluster object.
-     *
-     * @return the sandbox endpoint URLs
-     */
-    public EndpointCluster getSandboxEndpoints() {
-        return sandboxEndpoints;
+    public Map<String, EndpointCluster> getEndpoints() {
+        return endpoints;
     }
 
     /**
@@ -200,8 +191,7 @@ public class APIConfig {
         private String vhost;
         private String basePath;
         private String apiType;
-        private EndpointCluster productionEndpoints;
-        private EndpointCluster sandboxEndpoints;
+        private Map<String, EndpointCluster> endpoints;
         private String apiLifeCycleState;
         private String authorizationHeader;
         private EndpointSecurity endpointSecurity;
@@ -258,13 +248,8 @@ public class APIConfig {
             return this;
         }
 
-        public Builder productionUrls(EndpointCluster productionUrls) {
-            this.productionEndpoints = productionUrls;
-            return this;
-        }
-
-        public Builder sandboxUrls(EndpointCluster sandboxUrls) {
-            this.sandboxEndpoints = sandboxUrls;
+        public Builder endpoints(Map<String, EndpointCluster> endpoints) {
+            this.endpoints = endpoints;
             return this;
         }
 
@@ -307,8 +292,7 @@ public class APIConfig {
             apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
             apiConfig.apiType = this.apiType;
-            apiConfig.productionEndpoints = this.productionEndpoints;
-            apiConfig.sandboxEndpoints = this.sandboxEndpoints;
+            apiConfig.endpoints = this.endpoints;
             apiConfig.securitySchemes = this.securitySchemes;
             apiConfig.tier = this.tier;
             apiConfig.endpointSecurity = this.endpointSecurity;

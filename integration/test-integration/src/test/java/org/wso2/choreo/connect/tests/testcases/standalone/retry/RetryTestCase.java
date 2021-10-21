@@ -25,14 +25,37 @@ public class RetryTestCase {
         jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
-    @Test(description = "Invoke Production and Sandbox endpoints that returns success only after 3 retries")
+    @Test(description = "Test API Level retry for Production and Sandbox endpoints")
     public void testAPILevelRetryForProdAndSand() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-three") , prodHeaders);
+                "/retry1/retry-two") , prodHeaders);
         //TODO: Change the basepath in the OpenAPI definition to /retry when the issue
         // https://github.com/wso2/product-microgateway/issues/2308 is fixed
+
+        Assert.assertNotNull(prodResponse);
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
+                "Response message mismatch.");
+
+        Map<String, String> sandHeaders = new HashMap<String, String>();
+        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/retry1/retry-two"), sandHeaders);
+
+        Assert.assertNotNull(sandResponse);
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "Test Resource Level retry for Production and Sandbox endpoints")
+    public void testResourceLevelRetryForProdAndSand() throws Exception {
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/retry1/retry-three") , prodHeaders);
 
         Assert.assertNotNull(prodResponse);
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -50,26 +73,17 @@ public class RetryTestCase {
                 "Response message mismatch.");
     }
 
-    @Test(description = "Invoke Production and Sandbox endpoints that returns success only after 4 retries")
-    public void testResourceLevelRetryForProdAndSand() throws Exception {
+    @Test(description = "Invoke endpoint that requires more retries than configured for API or Resource")
+    public void testGlobalRetryConfigForProd() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-two") , prodHeaders);
+                "/retry1/retry-four"), prodHeaders);
 
         Assert.assertNotNull(prodResponse);
-        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
-                "Response message mismatch.");
-
-        Map<String, String> sandHeaders = new HashMap<String, String>();
-        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-two"), sandHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_GATEWAY_TIMEOUT,
+                "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.GATEWAY_ERROR,
                 "Response message mismatch.");
     }
 }
