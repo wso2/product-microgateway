@@ -18,8 +18,11 @@
 
 package org.wso2.choreo.connect.mockbackend;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.logging.Level;
@@ -29,6 +32,7 @@ public class MockSandboxServer extends Thread {
     private static final Logger logger = Logger.getLogger(MockSandboxServer.class.getName());
     private int backEndServerPort;
     private HttpServer httpServer;
+    private int retryCount = 0;
 
     public MockSandboxServer(int port) {
         backEndServerPort = port;
@@ -46,11 +50,33 @@ public class MockSandboxServer extends Thread {
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
+            });
+            httpServer.createContext(context + "/retry-three", exchange -> {
+                retryCount += 1;
+                if (retryCount < 3) {
+                    byte[] response = ResponseConstants.GATEWAY_ERROR.getBytes();
+                    exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                            Constants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAVAILABLE, response.length);
+                    exchange.close();
+                } else {
+                    byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                    respondOkWithBodyAndClose(response, exchange);
+                }
+            });
+            httpServer.createContext(context + "/retry-two", exchange -> {
+                retryCount += 1;
+                if (retryCount < 2) {
+                    byte[] response = ResponseConstants.GATEWAY_ERROR.getBytes();
+                    exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                            Constants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_GATEWAY, response.length);
+                    exchange.close();
+                } else {
+                    byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                    respondOkWithBodyAndClose(response, exchange);
+                }
             });
 
             httpServer.start();
@@ -58,5 +84,13 @@ public class MockSandboxServer extends Thread {
             logger.log(Level.SEVERE, "Error occurred while setting up sandbox server", ex);
 
         }
+    }
+
+    private void respondOkWithBodyAndClose(byte[] response, HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                Constants.CONTENT_TYPE_APPLICATION_JSON);
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
     }
 }

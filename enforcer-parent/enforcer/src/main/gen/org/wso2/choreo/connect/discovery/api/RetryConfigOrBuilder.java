@@ -14,27 +14,19 @@ public interface RetryConfigOrBuilder extends
   int getCount();
 
   /**
-   * <code>repeated string statusCodes = 2;</code>
+   * <code>repeated uint32 statusCodes = 2;</code>
    * @return A list containing the statusCodes.
    */
-  java.util.List<java.lang.String>
-      getStatusCodesList();
+  java.util.List<java.lang.Integer> getStatusCodesList();
   /**
-   * <code>repeated string statusCodes = 2;</code>
+   * <code>repeated uint32 statusCodes = 2;</code>
    * @return The count of statusCodes.
    */
   int getStatusCodesCount();
   /**
-   * <code>repeated string statusCodes = 2;</code>
+   * <code>repeated uint32 statusCodes = 2;</code>
    * @param index The index of the element to return.
    * @return The statusCodes at the given index.
    */
-  java.lang.String getStatusCodes(int index);
-  /**
-   * <code>repeated string statusCodes = 2;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the statusCodes at the given index.
-   */
-  com.google.protobuf.ByteString
-      getStatusCodesBytes(int index);
+  int getStatusCodes(int index);
 }

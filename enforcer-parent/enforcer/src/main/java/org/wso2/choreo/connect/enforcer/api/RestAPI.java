@@ -141,9 +141,10 @@ public class RestAPI implements API {
         if (rpcEndpointCluster.hasConfig()) {
             EndpointClusterConfig endpointClusterConfig = rpcEndpointCluster.getConfig();
             if (endpointClusterConfig.hasRetryConfig()) {
-                org.wso2.choreo.connect.discovery.api.RetryConfig rpcRetryConfig = endpointClusterConfig.getRetryConfig();
+                org.wso2.choreo.connect.discovery.api.RetryConfig rpcRetryConfig
+                        = endpointClusterConfig.getRetryConfig();
                 RetryConfig retryConfig = new RetryConfig(rpcRetryConfig.getCount(),
-                        rpcRetryConfig.getStatusCodesList().toArray(new String[0]));
+                        rpcRetryConfig.getStatusCodesList().toArray(new Integer[0]));
                 endpointCluster.setRetryConfig(retryConfig);
             }
         }

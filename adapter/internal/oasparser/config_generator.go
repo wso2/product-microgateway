@@ -121,7 +121,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 			resource.ProductionEndpoints = generateRPCEndpointCluster(res.GetProdEndpoints())
 		}
 		if res.GetSandEndpoints() != nil {
-			resource.SandboxEndpoints = generateRPCEndpointCluster(mgwSwagger.GetSandEndpoints())
+			resource.SandboxEndpoints = generateRPCEndpointCluster(res.GetSandEndpoints())
 		}
 		resources = append(resources, resource)
 	}

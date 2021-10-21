@@ -500,6 +500,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	resourceMethods := params.resourceMethods
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
+	prodRouteConfig := params.prodRouteConfig
+	sandRouteConfig := params.sandRouteConfig
 	endpointBasepath := params.endpointBasePath
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
@@ -686,6 +688,24 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		}
 		action.Route.ClusterSpecifier = directClusterSpecifier
 		logger.LoggerOasparser.Debugf("adding cluster: %v", sandClusterName)
+	}
+
+	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
+		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
+
+		commonRetryPolicy := &routev3.RetryPolicy{
+			RetryOn: "retriable-status-codes",
+			NumRetries: &wrapperspb.UInt32Value{
+				Value: 0,
+			},
+			RetriableStatusCodes: []uint32{504},
+			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
+				BaseInterval: &durationpb.Duration{
+					Nanos: 1000,
+				},
+			},
+		}
+		action.Route.RetryPolicy = commonRetryPolicy
 	}
 
 	if corsPolicy != nil {
@@ -1061,6 +1081,13 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
+	}
+
+	if swagger.GetProdEndpoints() != nil {
+		params.prodRouteConfig = swagger.GetProdEndpoints().Config
+	}
+	if swagger.GetSandEndpoints() != nil {
+		params.sandRouteConfig = swagger.GetSandEndpoints().Config
 	}
 	return params
 }

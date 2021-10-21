@@ -33,6 +33,8 @@ type routeCreateParams struct {
 	resourceMethods     []string
 	prodClusterName     string
 	sandClusterName     string
+	prodRouteConfig     *model.EndpointConfig
+	sandRouteConfig     *model.EndpointConfig
 	AuthHeader          string
 	requestInterceptor  model.InterceptEndpoint
 	responseInterceptor model.InterceptEndpoint

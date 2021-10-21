@@ -49,6 +49,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.vhost.VhostAPICtlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeOutTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.MalformedEndpointTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.retry.RetryTestCase"></class>
         </classes>
     </test>
     <test name="cc-with-backend-tls" preserve-order="true" parallel="false">

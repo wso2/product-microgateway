@@ -17,7 +17,6 @@
 package model
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -88,13 +87,13 @@ type Endpoint struct {
 
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster
 type EndpointConfig struct {
-	RetryConfig *RetryConfig `json:"retryConfig"`
+	RetryConfig *RetryConfig `mapstructure:"retryConfig"`
 }
 
 // RetryConfig holds the parameters for retries done by cc to the EndpointCluster
 type RetryConfig struct {
-	Count       int32    `json:"count"`
-	StatusCodes []string `json:"statusCodes"`
+	Count       int32    `mapstructure:"count"`
+	StatusCodes []uint32 `mapstructure:"statusCodes"`
 }
 
 // SecurityScheme represents the structure of an security scheme.
@@ -486,9 +485,17 @@ func getEndpoints(vendorExtensions map[string]interface{}, endpointName string) 
 			}
 			// Set Endpoint Config
 			if advanceEndpointConfig, found := endpointClusterMap[AdvanceEndpointConfig]; found {
-				var endpointConfig EndpointConfig
-				json.Unmarshal(advanceEndpointConfig.([]byte), &endpointConfig)
-				endpointCluster.Config = &endpointConfig
+				if configMap, ok := advanceEndpointConfig.(map[string]interface{}); ok {
+					var endpointConfig EndpointConfig
+					err := parser.Decode(configMap, &endpointConfig)
+					if err != nil {
+						println(err.Error())
+						return nil, errors.New("Invalid schema for advanceEndpointConfig in " + endpointName)
+					}
+					endpointCluster.Config = &endpointConfig
+				} else {
+					return nil, errors.New("Invalid structure for advanceEndpointConfig in " + endpointName)
+				}
 			}
 			return &endpointCluster, nil
 		}

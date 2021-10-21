@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.mockbackend;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
@@ -25,6 +26,7 @@ import com.sun.net.httpserver.HttpsServer;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -50,6 +52,7 @@ public class MockBackEndServer extends Thread {
     private static boolean retryDone = false;
     private boolean secured = false;
     private boolean mtlsEnabled = false;
+    private int retryCount = 0;
 
     public static void main(String[] args) {
         MockBackEndServer mockBackEndServer = new MockBackEndServer(Constants.MOCK_BACKEND_SERVER_PORT);
@@ -112,56 +115,32 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/pet/", exchange -> {
 
                 byte[] response = ResponseConstants.GET_PET_RESPONSE.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/pet/findByTags", exchange -> {
 
                 byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/pets/findByTags", exchange -> {
 
                 byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/store/inventory", exchange -> {
 
                 byte[] response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/pet/3", exchange -> {
 
                 byte[] response = ResponseConstants.RESPONSE_VALID_JWT_TRANSFORMER.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/store/order/1", exchange -> {
                 byte[] response;
@@ -207,11 +186,7 @@ public class MockBackEndServer extends Thread {
                 } else {
                     response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
                 }
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/jwttoken", exchange -> {
                 byte[] response;
@@ -225,11 +200,7 @@ public class MockBackEndServer extends Thread {
                 } else {
                     response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
                 }
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/removeauthheader", exchange -> {
                 byte[] response;
@@ -238,21 +209,13 @@ public class MockBackEndServer extends Thread {
                 } else {
                     response = ResponseConstants.INVALID_REMOVE_HEADER_RESPONSE.getBytes();
                 }
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             // For OpenAPI v3 related tests
             httpServer.createContext("/v3" + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/timeout70", exchange -> {
                 try {
@@ -262,11 +225,7 @@ public class MockBackEndServer extends Thread {
                     e.printStackTrace();
                 }
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/timeout15", exchange -> {
                 try {
@@ -276,48 +235,67 @@ public class MockBackEndServer extends Thread {
                     e.printStackTrace();
                 }
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
-                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                respondOkWithBodyAndClose(response, exchange);
+            });
+            httpServer.createContext(context + "/retry-three", exchange -> {
+                retryCount += 1;
+                if (retryCount < 3) {
+                    byte[] response = ResponseConstants.GATEWAY_ERROR.getBytes();
+                    exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                            Constants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAVAILABLE, response.length);
+                    exchange.close();
+                } else {
+                    byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                    respondOkWithBodyAndClose(response, exchange);
+                }
+            });
+            httpServer.createContext(context + "/retry-two", exchange -> {
+                retryCount += 1;
+                if (retryCount < 2) {
+                    byte[] response = ResponseConstants.GATEWAY_ERROR.getBytes();
+                    exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                            Constants.CONTENT_TYPE_APPLICATION_JSON);
+                    exchange.sendResponseHeaders(HttpURLConnection.HTTP_GATEWAY_TIMEOUT, response.length);
+                    exchange.close();
+                } else {
+                    byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                    respondOkWithBodyAndClose(response, exchange);
+                }
             });
             httpServer.createContext(context + "/headers", exchange -> {
-                byte[] response;
                 JSONObject responseJSON = new JSONObject();
                 exchange.getRequestHeaders().forEach((key,values) -> {
                     values.forEach(value -> {
                         responseJSON.put(key, value);
                     });
                 });
-                response = responseJSON.toString().getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                byte[] response = responseJSON.toString().getBytes();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.createContext(context + "/headers/23.api", exchange -> {
-                byte[] response;
                 JSONObject responseJSON = new JSONObject();
                 exchange.getRequestHeaders().forEach((key,values) -> {
                     values.forEach(value -> {
                         responseJSON.put(key, value);
                     });
                 });
-                response = responseJSON.toString().getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
+                byte[] response = responseJSON.toString().getBytes();
+                respondOkWithBodyAndClose(response, exchange);
             });
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Error occurred while setting up mock server", ex);
-
         }
+    }
+
+    private void respondOkWithBodyAndClose(byte[] response, HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                Constants.CONTENT_TYPE_APPLICATION_JSON);
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
     }
 
     public void stopIt() {

@@ -23,5 +23,5 @@ message EndpointClusterConfig {
 
 message RetryConfig {
     uint32 count = 1;
-    repeated string statusCodes = 2;
+    repeated uint32 statusCodes = 2;
 }
