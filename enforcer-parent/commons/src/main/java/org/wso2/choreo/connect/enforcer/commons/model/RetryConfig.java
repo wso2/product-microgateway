@@ -1,4 +1,4 @@
-package org.wso2.choreo.connect.commons.model;
+package org.wso2.choreo.connect.enforcer.commons.model;
 
 /**
  * The Retry configuration of the cluster which will be referred when setting the route headers
