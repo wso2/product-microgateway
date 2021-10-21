@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,10 +56,9 @@ public class InterceptorTestcase {
         HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/clear-status"));
     }
 
-    @Test(description = "Test request body of Interceptor Service in Request Flow")
+    @Test(description = "Test request body of interceptor service in request flow")
     public void testRequestOfInterceptorServiceInRequestFlow() throws Exception {
-
-        // Set header
+        // setting client
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         headers.put("foo-remove", "Header_to_be_deleted");
@@ -74,32 +74,91 @@ public class InterceptorTestcase {
 
         JSONObject status = new JSONObject(getInterceptorStatus());
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
-        checkHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
 
         JSONObject reqFlowBodyJSON = new JSONObject(status.getString(InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY));
         // invocation context
         // TODO: (renuka) change lua script: method -> supportedMethods and add current method from headers
-        checkInvocationContext(reqFlowBodyJSON, Arrays.asList("GET", "POST"), "POST", "/intercept-request/echo/123", "/echo/{id}");
+        testInvocationContext(reqFlowBodyJSON, Arrays.asList("GET", "POST"), "POST", "/intercept-request/echo/123", "/echo/{id}");
         // headers
         headers.remove(HttpHeaderNames.AUTHORIZATION.toString()); // check without auth header
-        checkHeaders(reqFlowBodyJSON,headers, false);
+        testInterceptorHeaders(reqFlowBodyJSON, headers, true);
         // body
-        checkBody(reqFlowBodyJSON, body, false);
+        testInterceptorBody(reqFlowBodyJSON, body, true);
+    }
+
+    @Test(description = "Test request body and headers to backend service with request flow interception")
+    public void testRequestToBackendServiceInRequestFlowInterception() throws Exception {
+        // JSON request to XML backend
+        // setting response body of interceptor service
+        JSONObject interceptorRespBody = new JSONObject();
+        String updatedBody = "<student><name>Foo</name><age type=\"Y\">16</age></student";
+        interceptorRespBody.put("body", Base64.getEncoder().encodeToString(updatedBody.getBytes()));
+        interceptorRespBody.put("headersToAdd", Collections.singletonMap("foo-add", "Header_newly_added"));
+        Map<String, String> headersToReplace = new HashMap<>();
+        headersToReplace.put("foo-update", "Header_Updated");
+        headersToReplace.put("foo-update-not-exist", "Header_Updated_New_Val");
+        headersToReplace.put("content-type", "application/xml");
+        interceptorRespBody.put("headersToReplace", headersToReplace);
+        interceptorRespBody.put("headersToRemove", Collections.singletonList("foo-remove"));
+        setResponseOfInterceptor(interceptorRespBody.toString(), true);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put("foo-remove", "Header_to_be_deleted");
+        headers.put("foo-update", "Header_to_be_updated");
+        headers.put("foo-keep", "Header_to_be_kept");
+        headers.put("content-type", "application/json");
+        String body = "{\"name\": \"foo\", \"age\": 16}";
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                "/intercept-request/echo/123"), body, headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        // test headers
+        JSONObject backendResponse = new JSONObject(response.getData());
+        JSONObject respHeaders = backendResponse.getJSONObject("headers");
+        Assert.assertFalse(respHeaders.has("Foo-remove"), "Failed to remove header");
+        Assert.assertEquals(respHeaders.getJSONArray("Foo-add").getString(0), "Header_newly_added",
+                "Failed to add new header");
+        Assert.assertEquals(respHeaders.getJSONArray("Foo-update").getString(0), "Header_Updated",
+                "Failed to replace header");
+        Assert.assertEquals(respHeaders.getJSONArray("Foo-update-not-exist").getString(0), "Header_Updated_New_Val",
+                "Failed to replace header");
+        Assert.assertEquals(respHeaders.getJSONArray("Content-type").getString(0), "application/xml",
+                "Failed to replace header");
+        Assert.assertEquals(respHeaders.getJSONArray("Foo-keep").getString(0), "Header_to_be_kept",
+                "Failed to keep original header");
+        // test body
+        Assert.assertEquals(backendResponse.getString("body"), updatedBody);
     }
 
     private String getInterceptorStatus() throws Exception {
         HttpResponse response = HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/status"));
         Assert.assertNotNull(response, "Invalid response from interceptor status");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         return response.getData();
     }
 
-    private void checkHandler(String actualHandler, InterceptorConstants.Handler expectedHandler) {
+    private void setResponseOfInterceptor(String responseBody, boolean isRequestFlow) throws Exception {
+        String servicePath = isRequestFlow ? "interceptor/request" : "interceptor/response";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", "application/json");
+        HttpResponse response = HttpClientRequest.doPost(Utils.getMockInterceptorManagerHttp(servicePath),
+                responseBody, headers);
+        Assert.assertNotNull(response, "Invalid response when updating response body of interceptor");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+    }
+
+    private void testInterceptorHandler(String actualHandler, InterceptorConstants.Handler expectedHandler) {
         Assert.assertEquals(actualHandler, expectedHandler.toString(),
                 String.format("Invalid interceptor handler, expected: %s, got: %s", expectedHandler, actualHandler)
         );
     }
 
-    private void checkInvocationContext(JSONObject bodyJSON, List<String> supportedMethods, String method, String path, String pathTemplate) {
+    private void testInvocationContext(JSONObject bodyJSON, List<String> supportedMethods, String method, String path, String pathTemplate) {
         JSONObject invocationCtx = bodyJSON.getJSONObject(INVOCATION_CONTEXT);
         Assert.assertNotNull(invocationCtx, "Interceptor invocation context not found");
 
@@ -117,8 +176,8 @@ public class InterceptorTestcase {
         Assert.assertEquals(Arrays.asList(invocationCtx.getString("method").split(" ")), supportedMethods, "HTTP supported method mismatch"); // TODO: change this
     }
 
-    private void checkHeaders(JSONObject bodyJSON, Map<String, String> expectedHeaders, boolean isResponseFlow) {
-        String jsonKey = isResponseFlow ? "responseHeaders" : "requestHeaders";
+    private void testInterceptorHeaders(JSONObject bodyJSON, Map<String, String> expectedHeaders, boolean isRequestFlow) {
+        String jsonKey = isRequestFlow ? "requestHeaders" : "responseHeaders";
         JSONObject headersJSON = bodyJSON.getJSONObject(jsonKey);
         expectedHeaders.forEach((key, value) -> {
             String actualVal = headersJSON.getString(key);
@@ -127,8 +186,8 @@ public class InterceptorTestcase {
         });
     }
 
-    private void checkBody(JSONObject bodyJSON, String expectedBody, boolean isResponseFlow) {
-        String jsonKey = isResponseFlow ? "responseBody" : "requestBody";
+    private void testInterceptorBody(JSONObject bodyJSON, String expectedBody, boolean isRequestFlow) {
+        String jsonKey = isRequestFlow ? "requestBody" : "responseBody";
         String base64EncodedBody = Base64.getEncoder().encodeToString(expectedBody.getBytes());
         Assert.assertEquals(bodyJSON.getString(jsonKey), base64EncodedBody, "Request body mismatch");
     }
