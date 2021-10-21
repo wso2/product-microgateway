@@ -181,11 +181,11 @@ public class AuthFilter implements Filter {
             if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getProdClusterHeader());
-                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getProductionEndpoints());
+//                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getProductionEndpoints());
             } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
                 requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getSandClusterHeader());
-                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getSandboxEndpoints());
+//                addRetryConfigHeaders(requestContext, requestContext.getMatchedAPI().getSandboxEndpoints());
             } else {
                 if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),

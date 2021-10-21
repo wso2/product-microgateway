@@ -47,27 +47,29 @@ public class CcWithDefaultConf {
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null, null);
-        ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null, null);
-        ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null, null);
-        ApictlUtils.createProject( "security_openAPI.yaml", "custom_authheader_petstore", null, null);
-        ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml");
-        ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
-        ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3", null, null);
-        ApictlUtils.createProject( "timeout_openAPI.yaml", "apictl_timeout_v3", null, null);
-        ApictlUtils.createProject( "malformed_endpoint_openAPI.yaml", "apictl_malformed_endpoint", null, null);
+//        ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null, null);
+//        ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null, null);
+//        ApictlUtils.createProject( "security_openAPI.yaml", "custom_authheader_petstore", null, null);
+//        ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml");
+//        ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
+//        ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3", null, null);
+//        ApictlUtils.createProject( "timeout_openAPI.yaml", "apictl_timeout_v3", null, null);
+//        ApictlUtils.createProject( "malformed_endpoint_openAPI.yaml", "apictl_malformed_endpoint", null, null);
+        ApictlUtils.createProject( "retry_openAPI.yaml", "apictl_retry", null, null);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
 
-        ApictlUtils.deployAPI("petstore", "test");
+//        ApictlUtils.deployAPI("petstore", "test");
         ApictlUtils.deployAPI("prod_and_sand_petstore", "test");
-        ApictlUtils.deployAPI("prod_petstore", "test");
-        ApictlUtils.deployAPI("sand_petstore", "test");
-        ApictlUtils.deployAPI("custom_authheader_petstore", "test");
-        ApictlUtils.deployAPI("vhost1_petstore", "test");
-        ApictlUtils.deployAPI("vhost2_petstore", "test");
-        ApictlUtils.deployAPI("apictl_petstore_v3", "test");
-        ApictlUtils.deployAPI("apictl_timeout_v3", "test");
+//        ApictlUtils.deployAPI("prod_petstore", "test");
+//        ApictlUtils.deployAPI("sand_petstore", "test");
+//        ApictlUtils.deployAPI("custom_authheader_petstore", "test");
+//        ApictlUtils.deployAPI("vhost1_petstore", "test");
+//        ApictlUtils.deployAPI("vhost2_petstore", "test");
+//        ApictlUtils.deployAPI("apictl_petstore_v3", "test");
+//        ApictlUtils.deployAPI("apictl_timeout_v3", "test");
+        ApictlUtils.deployAPI("apictl_retry", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

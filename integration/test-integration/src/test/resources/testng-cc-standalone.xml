@@ -37,40 +37,41 @@
     <test name="cc-with-default-config" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithDefaultConf"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaRestTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaRestTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>-->
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopeTest"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.InternalKeyTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.CustomAuthHeaderTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.QSGTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.OpenAPIV3TestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.vhost.VhostAPICtlTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeOutTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.MalformedEndpointTestCase"/>
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopeTest"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.InternalKeyTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.CustomAuthHeaderTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.QSGTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.OpenAPIV3TestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.vhost.VhostAPICtlTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeOutTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.MalformedEndpointTestCase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.retry.RetryTestCase"></class>
         </classes>
-    </test>
-    <test name="cc-with-backend-tls" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabled"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.backendtls.BackendTLSTestcase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
-        </classes>
-    </test>
-    <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>
-        </classes>
-    </test>
-    <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>
-        </classes>
+<!--    </test>-->
+<!--    <test name="cc-with-backend-tls" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabled"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.backendtls.BackendTLSTestcase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--    <test name="cc-with-jwt-config" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--    <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>-->
+<!--        </classes>-->
     </test>
 </suite>

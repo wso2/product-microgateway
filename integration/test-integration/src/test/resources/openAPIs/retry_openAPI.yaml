@@ -11,7 +11,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 host: 'mockBackend:2383'
 basePath: /v2
-x-wso2-basePath: /retry
+x-wso2-basePath: /retry1
 tags:
   - name: pet
     description: Everything about your Pets
@@ -25,7 +25,7 @@ x-wso2-production-endpoints:
     - http://mockBackend:2383/v2
   advanceEndpointConfig:
     retryConfig:
-      count: 3
+      count: 5
       statusCodes:
         - 503
 x-wso2-sandbox-endpoints:
@@ -33,7 +33,7 @@ x-wso2-sandbox-endpoints:
     - http://mockBackend:2390/v2
   advanceEndpointConfig:
     retryConfig:
-      count: 3
+      count: 5
       statusCodes:
         - 503
 paths:
