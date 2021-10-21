@@ -1,8 +1,16 @@
 package org.wso2.choreo.connect.mockbackend;
 
 public class InterceptorConstants {
-    public static final String HANDLE_NONE = "NONE";
-    public static final String HANDLE_REQUEST_ONLY = "REQUEST_ONLY";
-    public static final String HANDLE_RESPONSE_ONLY = "RESPONSE_ONLY";
-    public static final String HANDLE_BOTH = "BOTH";
+    public enum Handler {
+        NONE,
+        REQUEST_ONLY,
+        RESPONSE_ONLY,
+        BOTH
+    }
+
+    public static class StatusPayload {
+        public static final String HANDLER = "handler";
+        public static final String REQUEST_FLOW_REQUEST_BODY = "requestFlowRequestBody";
+        public static final String RESPONSE_FLOW_REQUEST_BODY = "responseFlowRequestBody";
+    }
 }

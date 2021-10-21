@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.wso2.choreo.connect.mockbackend.Constants;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import java.io.File;
@@ -400,6 +401,10 @@ public class Utils {
 
     public static String getDockerMockService2URLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://mockBackend:" + TestConstant.MOCK_SERVER2_PORT), servicePath).toString();
+    }
+
+    public static String getMockInterceptorManagerHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://localhost:" + Constants.INTERCEPTOR_STATUS_SERVER_PORT), servicePath).toString();
     }
 
     public static String getAPIMServiceURLHttps(String servicePath) throws MalformedURLException {

@@ -321,6 +321,7 @@ public class MockBackEndServer extends Thread {
                 exchange.close();
             });
 
+            // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor tests.
             httpServer.createContext(context + "/echo", exchange -> {
                 byte[] response;
                 JSONObject responseJSON = new JSONObject();

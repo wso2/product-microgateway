@@ -31,11 +31,11 @@ public class MockInterceptorServer extends Thread {
     private static final Logger logger = Logger.getLogger(MockInterceptorServer.class.getName());
     private final int serverPort;
     private final HandlerServer handlerServer;
-    private volatile String handler = "";
-    private volatile String requestFlowRequestBody = "";
-    private volatile String requestFlowResponseBody = "";
-    private volatile String responseFlowRequestBody = "";
-    private volatile String responseFlowResponseBody = "";
+    private volatile InterceptorConstants.Handler handler;
+    private volatile String requestFlowRequestBody;
+    private volatile String requestFlowResponseBody;
+    private volatile String responseFlowRequestBody;
+    private volatile String responseFlowResponseBody;
 
     public MockInterceptorServer(int managerPort, int handlerPort) {
         serverPort = managerPort;
@@ -44,11 +44,11 @@ public class MockInterceptorServer extends Thread {
     }
 
     private void clearStatus() {
-        handler = InterceptorConstants.HANDLE_NONE;
+        handler = InterceptorConstants.Handler.NONE;
         requestFlowRequestBody = "";
-        requestFlowResponseBody = "";
+        requestFlowResponseBody = "{}";
         responseFlowRequestBody = "";
-        responseFlowResponseBody = "";
+        responseFlowResponseBody = "{}";
     }
 
 
@@ -66,9 +66,9 @@ public class MockInterceptorServer extends Thread {
             // status
             httpServer.createContext(context + "/status", exchange -> {
                 JSONObject responseJSON = new JSONObject();
-                responseJSON.put("handler", handler);
-                responseJSON.put("requestFlowRequestBody", requestFlowRequestBody);
-                responseJSON.put("responseFlowRequestBody", responseFlowRequestBody);
+                responseJSON.put(InterceptorConstants.StatusPayload.HANDLER, handler);
+                responseJSON.put(InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY, requestFlowRequestBody);
+                responseJSON.put(InterceptorConstants.StatusPayload.RESPONSE_FLOW_REQUEST_BODY, responseFlowRequestBody);
 
                 byte[] response = responseJSON.toString().getBytes();
                 exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
@@ -136,12 +136,13 @@ public class MockInterceptorServer extends Thread {
                         return;
                     }
 
+                    logger.info("Called /handle-request of interceptor service");
                     requestFlowRequestBody = Utils.requestBodyToString(exchange);
                     // set which flow has handled by interceptor
-                    if (Arrays.asList(InterceptorConstants.HANDLE_NONE, InterceptorConstants.HANDLE_REQUEST_ONLY).contains(handler)) {
-                        handler = InterceptorConstants.HANDLE_REQUEST_ONLY;
+                    if (Arrays.asList(InterceptorConstants.Handler.NONE, InterceptorConstants.Handler.REQUEST_ONLY).contains(handler)) {
+                        handler = InterceptorConstants.Handler.REQUEST_ONLY;
                     } else {
-                        handler = InterceptorConstants.HANDLE_BOTH;
+                        handler = InterceptorConstants.Handler.BOTH;
                     }
 
                     byte[] response = requestFlowResponseBody.getBytes();
@@ -158,12 +159,13 @@ public class MockInterceptorServer extends Thread {
                         return;
                     }
 
+                    logger.info("Called /handle-response of interceptor service");
                     responseFlowRequestBody = Utils.requestBodyToString(exchange);
                     // set which flow has handled by interceptor
-                    if (Arrays.asList(InterceptorConstants.HANDLE_NONE, InterceptorConstants.HANDLE_RESPONSE_ONLY).contains(handler)) {
-                        handler = InterceptorConstants.HANDLE_RESPONSE_ONLY;
+                    if (Arrays.asList(InterceptorConstants.Handler.NONE, InterceptorConstants.Handler.REQUEST_ONLY).contains(handler)) {
+                        handler = InterceptorConstants.Handler.RESPONSE_ONLY;
                     } else {
-                        handler = InterceptorConstants.HANDLE_BOTH;
+                        handler = InterceptorConstants.Handler.BOTH;
                     }
 
                     byte[] response = responseFlowResponseBody.getBytes();
