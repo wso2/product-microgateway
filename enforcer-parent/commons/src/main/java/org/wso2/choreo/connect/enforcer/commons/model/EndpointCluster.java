@@ -1,7 +1,5 @@
 package org.wso2.choreo.connect.enforcer.commons.model;
 
-import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
-
 import java.util.List;
 
 /**
