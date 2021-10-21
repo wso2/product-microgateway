@@ -100,6 +100,11 @@ var defaultConfig = &Config{
 				UnhealthyThreshold: 2,
 				HealthyThreshold:   2,
 			},
+			Retry: upstreamRetry{
+				Count:            0,
+				IntervalInMillis: 25,
+				StatusCodes:      []uint32{504},
+			},
 		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{

@@ -272,14 +272,51 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
 // it is not populated by SetXWso2Extensions
-func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandboxEndpoints []Endpoint) {
+func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandboxEndpoints []Endpoint,
+	sandEndpointInfos []EndpointInfo) error {
+
 	swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxEndpoints, LoadBalance)
+	if sandEndpointInfos != nil && len(sandEndpointInfos) > 0 {
+		retryCount := sandEndpointInfos[0].Config.RetryTimeOut
+		if retryCount != "" {
+			count, err := strconv.ParseInt(retryCount, 10, 32)
+			if err != nil {
+				return err
+			}
+			conf, _ := config.ReadConfigs()
+			retryConfig := &RetryConfig{
+				Count:       int32(count),
+				StatusCodes: conf.Envoy.Upstream.Retry.StatusCodes,
+			}
+			swagger.sandboxEndpoints.Config.RetryConfig = retryConfig
+		}
+	}
+	return nil
 }
 
 // SetXWso2ProductionEndpointMgwSwagger set the MgwSwagger object with the productionEndpoint when
 // it is not populated by SetXWso2Extensions
-func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionEndpoints []Endpoint) {
+func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionEndpoints []Endpoint,
+	prodEndpointInfos []EndpointInfo) error {
+
 	swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints, LoadBalance)
+	if prodEndpointInfos != nil && len(prodEndpointInfos) > 0 {
+		retryCount := prodEndpointInfos[0].Config.RetryTimeOut
+		if retryCount != "" {
+			count, err := strconv.ParseInt(retryCount, 10, 32)
+			if err != nil {
+				return err
+			}
+			conf, _ := config.ReadConfigs()
+			statusCodes := conf.Envoy.Upstream.Retry.StatusCodes
+			retryConfig := &RetryConfig{
+				Count:       int32(count),
+				StatusCodes: statusCodes,
+			}
+			swagger.productionEndpoints.Config.RetryConfig = retryConfig
+		}
+	}
+	return nil
 }
 
 func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {

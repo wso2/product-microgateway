@@ -693,15 +693,16 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
 
+		retryConfig := config.Envoy.Upstream.Retry
 		commonRetryPolicy := &routev3.RetryPolicy{
 			RetryOn: "retriable-status-codes",
 			NumRetries: &wrapperspb.UInt32Value{
-				Value: 0,
+				Value: retryConfig.Count,
 			},
-			RetriableStatusCodes: []uint32{504},
+			RetriableStatusCodes: retryConfig.StatusCodes,
 			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
 				BaseInterval: &durationpb.Duration{
-					Nanos: 1000,
+					Nanos: int32(retryConfig.IntervalInMillis) * 1000,
 				},
 			},
 		}
