@@ -23,35 +23,20 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.InterceptorConstants;
-import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
-import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class InterceptorTestcase {
-    protected String jwtTokenProd;
-
-    private static final String INVOCATION_CONTEXT = "invocationContext";
-
-    @BeforeClass(description = "initialise the setup")
-    void start() throws Exception {
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
-    }
-
+public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
     @DataProvider(name = "requestBodyProvider")
     Object[][] requestBodyProvider() {
         String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
@@ -88,11 +73,6 @@ public class InterceptorTestcase {
         };
     }
 
-    @BeforeMethod(description = "clear the status of interceptor management service")
-    void clearInterceptorStatus() throws Exception {
-        HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/clear-status"));
-    }
-
     @Test(description = "Test request body to interceptor service in request flow")
     public void testRequestToInterceptorServiceInRequestFlowInterception() throws Exception {
         // setting client
@@ -104,7 +84,7 @@ public class InterceptorTestcase {
         headers.put("content-type", "application/xml");
         String body = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
-                "/intercept-request/echo/123"), body, headers);
+                basePath + "/echo/123"), body, headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -116,7 +96,7 @@ public class InterceptorTestcase {
 
         JSONObject reqFlowBodyJSON = new JSONObject(status.getString(InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY));
         // invocation context
-        testInvocationContext(reqFlowBodyJSON, Arrays.asList("GET", "POST"), "POST", "/intercept-request/echo/123", "/echo/{id}");
+        testInvocationContext(reqFlowBodyJSON, Arrays.asList("GET", "POST"), "POST", basePath + "/echo/123", "/echo/{id}");
         // headers
         headers.remove(HttpHeaderNames.AUTHORIZATION.toString()); // check without auth header
         testInterceptorHeaders(reqFlowBodyJSON, headers, true);
@@ -159,7 +139,7 @@ public class InterceptorTestcase {
         headers.put("foo-keep", "Header_to_be_kept");
         headers.put("content-type", "application/json");
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
-                "/intercept-request/echo/123"), clientReqBody, headers);
+                basePath + "/echo/123"), clientReqBody, headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -220,7 +200,7 @@ public class InterceptorTestcase {
         headers.put("content-type", "application/json");
         // this is not an echo server, so if request goes to backend it will respond with different payload.
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
-                "/intercept-request/pet/findByStatus/resp-intercept-enabled"), clientReqBody, headers);
+                basePath + "/pet/findByStatus/resp-intercept-enabled"), clientReqBody, headers);
 
         Assert.assertNotNull(response);
         if (StringUtils.isEmpty(clientRespBody)) {
@@ -251,66 +231,12 @@ public class InterceptorTestcase {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer INVALID-XXX-XXX-XXX-XXX-XXX-XXX-TOKEN");
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/intercept-request/pet/findByStatus/resp-intercept-enabled"), headers);
+                basePath + "/pet/findByStatus/resp-intercept-enabled"), headers);
         Assert.assertNotNull(response);
 
         // check which flows are invoked in interceptor service
         JSONObject status = new JSONObject(getInterceptorStatus());
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.NONE); // no interceptor handle the request
-    }
-
-    private String getInterceptorStatus() throws Exception {
-        HttpResponse response = HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/status"));
-        Assert.assertNotNull(response, "Invalid response from interceptor status");
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        return response.getData();
-    }
-
-    private void setResponseOfInterceptor(String responseBody, boolean isRequestFlow) throws Exception {
-        String servicePath = isRequestFlow ? "interceptor/request" : "interceptor/response";
-        Map<String, String> headers = new HashMap<>();
-        headers.put("content-type", "application/json");
-        HttpResponse response = HttpClientRequest.doPost(Utils.getMockInterceptorManagerHttp(servicePath),
-                responseBody, headers);
-        Assert.assertNotNull(response, "Invalid response when updating response body of interceptor");
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-    }
-
-    private void testInterceptorHandler(String actualHandler, InterceptorConstants.Handler expectedHandler) {
-        Assert.assertEquals(actualHandler, expectedHandler.toString(), "Invalid interceptor handler");
-    }
-
-    private void testInvocationContext(JSONObject bodyJSON, List<String> supportedMethods, String method, String path, String pathTemplate) {
-        JSONObject invocationCtx = bodyJSON.getJSONObject(INVOCATION_CONTEXT);
-        Assert.assertNotNull(invocationCtx, "Interceptor invocation context not found");
-
-        Assert.assertEquals(invocationCtx.getString("apiName"), "SwaggerPetstoreRequestIntercept", "API name mismatch");
-        Assert.assertEquals(invocationCtx.getString("apiVersion"), "1.0.5", "API version mismatch");
-        Assert.assertEquals(invocationCtx.getString("scheme"), "https", "Scheme mismatch");
-        Assert.assertEquals(invocationCtx.getString("vhost"), "localhost", "Vhost mismatch");
-        Assert.assertEquals(invocationCtx.getString("method"), method, "HTTP method mismatch");
-        Assert.assertEquals(invocationCtx.getString("path"), path, "Resource path mismatch");
-        Assert.assertEquals(invocationCtx.getString("pathTemplate"), pathTemplate, "Resource path template mismatch");
-        Assert.assertEquals(invocationCtx.getString("basePath"), "/intercept-request", "Base path mismatch");
-
-        Assert.assertTrue(StringUtils.isNotEmpty(invocationCtx.getString("source")), "Source not found");
-        Assert.assertTrue(StringUtils.isNotEmpty(invocationCtx.getString("requestId")), "Request ID not found");
-        Assert.assertEquals(Arrays.asList(invocationCtx.getString("supportedMethods").split(" ")), supportedMethods, "HTTP supported method mismatch");
-    }
-
-    private void testInterceptorHeaders(JSONObject bodyJSON, Map<String, String> expectedHeaders, boolean isRequestFlow) {
-        String jsonKey = isRequestFlow ? "requestHeaders" : "responseHeaders";
-        JSONObject headersJSON = bodyJSON.getJSONObject(jsonKey);
-        expectedHeaders.forEach((key, value) -> {
-            String actualVal = headersJSON.getString(key);
-            Assert.assertEquals(actualVal, value, String.format("Header mismatch for header key: %s", key));
-        });
-    }
-
-    private void testInterceptorBody(JSONObject bodyJSON, String expectedBody, boolean isRequestFlow) {
-        String jsonKey = isRequestFlow ? "requestBody" : "responseBody";
-        String base64EncodedBody = Base64.getEncoder().encodeToString(expectedBody.getBytes());
-        Assert.assertEquals(bodyJSON.getString(jsonKey), base64EncodedBody, "Request body mismatch");
     }
 }

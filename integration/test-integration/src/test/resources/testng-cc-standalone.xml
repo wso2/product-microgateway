@@ -56,7 +56,7 @@
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabled"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.backendtls.BackendTLSTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.standalone.interceptor.InterceptorTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
