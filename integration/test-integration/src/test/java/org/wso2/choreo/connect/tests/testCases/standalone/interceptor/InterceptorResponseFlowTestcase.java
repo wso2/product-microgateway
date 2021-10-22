@@ -65,11 +65,6 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         };
     }
 
-    @Test(description = "Test request body to interceptor service in request flow")
-    public void testRequestToInterceptorServiceInResponseFlowInterception() throws Exception {
-        testRequestToInterceptorService();
-    }
-
     @Test(
             description = "Test response body and headers to client with response flow interception",
             dataProvider = "requestBodyProvider"
@@ -112,7 +107,7 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // check which flows are invoked in interceptor service
-        JSONObject status = new JSONObject(getInterceptorStatus());
+        JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.RESPONSE_ONLY);
 
@@ -126,5 +121,55 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(respHeaders.get("foo-keep"), "Header_to_be_kept", "Failed to keep original header");
         // test body
         Assert.assertEquals(response.getData(), expectedRespToClient);
+    }
+
+    @Test(description = "Test updating response body when it is not included - invalid operation")
+    public void testInvalidOperationUpdateResponseBody() throws Exception {
+        // JSON request to XML backend
+        // setting response body of interceptor service
+        JSONObject interceptorRespBodyJSON = new JSONObject();
+        interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("INVALID-UPDATE-BODY".getBytes()));
+        setResponseOfInterceptor(interceptorRespBodyJSON.toString(), isRequestFlow);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                basePath + "/echo/both-intercept/resp-body-not-included"), "REQUEST-BODY", headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = getInterceptorStatus();
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.BOTH);
+
+        // test body: should be equal to the backend response
+        Assert.assertEquals(response.getData(), "REQUEST-BODY", "Response body mismatched");
+    }
+
+    @Test(description = "Test none JSON response body from interceptor service")
+    public void testNoneJSONBody() throws Exception {
+        // setting response body of interceptor service
+        setResponseOfInterceptor("<none>JSON</none>", isRequestFlow);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                basePath + "/echo/123"), "REQUEST-BODY", headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = getInterceptorStatus();
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.RESPONSE_ONLY);
+
+        // test error code
+        JSONObject respJSON = new JSONObject(response.getData());
+        Assert.assertEquals(respJSON.getString("code"), "102518", "Error code mismatched for base64 decode error");
     }
 }

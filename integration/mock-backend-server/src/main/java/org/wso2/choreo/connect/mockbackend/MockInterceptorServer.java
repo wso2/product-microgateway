@@ -162,7 +162,7 @@ public class MockInterceptorServer extends Thread {
                     logger.info("Called /handle-response of interceptor service");
                     responseFlowRequestBody = Utils.requestBodyToString(exchange);
                     // set which flow has handled by interceptor
-                    if (Arrays.asList(InterceptorConstants.Handler.NONE, InterceptorConstants.Handler.REQUEST_ONLY).contains(handler)) {
+                    if (Arrays.asList(InterceptorConstants.Handler.NONE, InterceptorConstants.Handler.RESPONSE_ONLY).contains(handler)) {
                         handler = InterceptorConstants.Handler.RESPONSE_ONLY;
                     } else {
                         handler = InterceptorConstants.Handler.BOTH;

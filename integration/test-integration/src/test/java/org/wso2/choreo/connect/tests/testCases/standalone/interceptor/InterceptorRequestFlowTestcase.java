@@ -82,11 +82,6 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         };
     }
 
-    @Test(description = "Test request body to interceptor service in request flow")
-    public void testRequestToInterceptorServiceInRequestFlowInterception() throws Exception {
-        testRequestToInterceptorService();
-    }
-
     @Test(
             description = "Test request body and headers to backend service with request flow interception",
             dataProvider = "requestBodyProvider"
@@ -129,7 +124,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // check which flows are invoked in interceptor service
-        JSONObject status = new JSONObject(getInterceptorStatus());
+        JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
 
@@ -181,14 +176,11 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
                 basePath + "/pet/findByStatus/resp-intercept-enabled"), clientReqBody, headers);
 
         Assert.assertNotNull(response);
-        if (StringUtils.isEmpty(clientRespBody)) {
-            Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NO_CONTENT, "Response code mismatched");
-        } else {
-            Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        }
+        int expectedRespCode = StringUtils.isEmpty(clientRespBody) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
+        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // check which flows are invoked in interceptor service
-        JSONObject status = new JSONObject(getInterceptorStatus());
+        JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
 
@@ -214,7 +206,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertNotNull(response);
 
         // check which flows are invoked in interceptor service
-        JSONObject status = new JSONObject(getInterceptorStatus());
+        JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.NONE); // no interceptor handle the request
     }

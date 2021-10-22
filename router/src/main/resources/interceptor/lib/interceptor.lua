@@ -234,11 +234,7 @@ local function modify_body(handle, interceptor_response_body, request_id, shared
                     is_request_flow,
                     'Invalid operation: "Update Body". Request|Response body should be added in includes section of OAS definition'
             )
-            respond_error(handle, shared_info, request_id, {
-                error_message = "Internal Server Error",
-                error_description = "Internal Server Error",
-                error_code = "102519"
-            }, is_request_flow)
+            -- can not respond_error because, can not update response body. Hence log only.
 
             return true
         end

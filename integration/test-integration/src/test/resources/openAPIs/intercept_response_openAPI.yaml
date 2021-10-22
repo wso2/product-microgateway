@@ -31,7 +31,8 @@ x-wso2-response-interceptor:
   includes:
     - request_headers
     - request_body
-    - response_body # TODO fix this without this
+    - response_headers
+    - response_body
     - invocation_context
 paths:
   /echo/{id}:
@@ -55,7 +56,7 @@ paths:
       responses:
         '200':
           description: successful operation
-  /echo/req-intercept:
+  /echo/both-intercept/resp-body-not-included:
     # API level interceptor definition
     x-wso2-request-interceptor:
       host: mockBackend
@@ -63,6 +64,13 @@ paths:
       scheme: http
       includes:
         - request_headers
+    x-wso2-response-interceptor: # override response interceptor
+      host: mockBackend
+      port: 2371
+      scheme: http
+      includes: # "response_body" is not included here
+        - request_headers
+        - request_body
     post:
       summary: Echo Request
       description: Echo request back to the client
