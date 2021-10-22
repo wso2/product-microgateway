@@ -72,7 +72,7 @@ paths:
       responses:
         '200':
           description: successful operation
-  /pet/findByStatus/resp-intercept-enabled/direct-respond:
+  /pet/findByStatus/resp-intercept-enabled:
     # API level interceptor definition
     x-wso2-response-interceptor:
       host: mockBackend

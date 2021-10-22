@@ -143,7 +143,6 @@ public class InterceptorTestcase {
 
     @Test(description = "Direct respond when response interception is enabled")
     public void directRespondWhenResponseInterceptionEnabled() throws Exception {
-        // JSON request to XML backend
         // setting response body of interceptor service
         JSONObject interceptorRespBody = new JSONObject();
         String updatedBody = "{\"message\": \"This is direct responded\"}";
@@ -164,7 +163,7 @@ public class InterceptorTestcase {
         headers.put("content-type", "application/json");
         // this is not an echo server, so if request goes to backend it will respond with different payload.
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/intercept-request/pet/findByStatus/resp-intercept-enabled/direct-respond"), headers);
+                "/intercept-request/pet/findByStatus/resp-intercept-enabled"), headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -185,6 +184,21 @@ public class InterceptorTestcase {
         Assert.assertEquals(response.getData(), updatedBody);
     }
 
+    @Test(description = "Enforcer denied request when response interceptor enabled")
+    public void enforcerDeniedRequestWhenResponseInterceptionEnabled() throws Exception {
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer INVALID-XXX-XXX-XXX-XXX-XXX-XXX-TOKEN");
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/intercept-request/pet/findByStatus/resp-intercept-enabled"), headers);
+        Assert.assertNotNull(response);
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = new JSONObject(getInterceptorStatus());
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.NONE); // no interceptor handle the request
+    }
+
     private String getInterceptorStatus() throws Exception {
         HttpResponse response = HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/status"));
         Assert.assertNotNull(response, "Invalid response from interceptor status");
@@ -203,9 +217,7 @@ public class InterceptorTestcase {
     }
 
     private void testInterceptorHandler(String actualHandler, InterceptorConstants.Handler expectedHandler) {
-        Assert.assertEquals(actualHandler, expectedHandler.toString(),
-                String.format("Invalid interceptor handler, expected: %s, got: %s", expectedHandler, actualHandler)
-        );
+        Assert.assertEquals(actualHandler, expectedHandler.toString(), "Invalid interceptor handler");
     }
 
     private void testInvocationContext(JSONObject bodyJSON, List<String> supportedMethods, String method, String path, String pathTemplate) {
@@ -231,8 +243,7 @@ public class InterceptorTestcase {
         JSONObject headersJSON = bodyJSON.getJSONObject(jsonKey);
         expectedHeaders.forEach((key, value) -> {
             String actualVal = headersJSON.getString(key);
-            Assert.assertEquals(actualVal, value, String.format(
-                    "Header mismatch for header key: %s, required: %s but found: %s", key, value, actualVal));
+            Assert.assertEquals(actualVal, value, String.format("Header mismatch for header key: %s", key));
         });
     }
 
