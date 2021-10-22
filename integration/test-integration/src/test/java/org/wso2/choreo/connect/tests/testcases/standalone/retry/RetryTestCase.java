@@ -77,6 +77,7 @@ public class RetryTestCase {
     public void testGlobalRetryConfigForProd() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        prodHeaders.put("x-envoy-max-retries", "10"); // check if external client headers are accepted
         HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/retry1/retry-four"), prodHeaders);
 

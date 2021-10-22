@@ -428,17 +428,26 @@ func (swagger *MgwSwagger) Validate() error {
 			swagger.title, swagger.version)
 		return errors.New("no endpoints are provided for the API")
 	}
-	if swagger.productionEndpoints != nil && len(swagger.productionEndpoints.Endpoints) > 0 {
-		err := swagger.productionEndpoints.Endpoints[0].validateEndpoint()
+	err := swagger.productionEndpoints.validateEndpointCluster("API level production")
+	if err != nil {
+		logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
+			swagger.title, swagger.version, err)
+		return err
+	}
+	err = swagger.sandboxEndpoints.validateEndpointCluster("API level sandbox")
+	if err != nil {
+		logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
+			swagger.title, swagger.version, err)
+		return err
+	}
+	for _, res := range swagger.resources {
+		err := res.productionEndpoints.validateEndpointCluster("Resource level production")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
 			return err
 		}
-	}
-
-	if swagger.sandboxEndpoints != nil && len(swagger.sandboxEndpoints.Endpoints) > 0 {
-		err := swagger.sandboxEndpoints.Endpoints[0].validateEndpoint()
+		err = res.sandboxEndpoints.validateEndpointCluster("Resource level sandbox")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
@@ -446,7 +455,7 @@ func (swagger *MgwSwagger) Validate() error {
 		}
 	}
 
-	err := swagger.validateBasePath()
+	err = swagger.validateBasePath()
 	if err != nil {
 		logger.LoggerOasparser.Errorf("Error while parsing the API %s:%s - %v", swagger.title, swagger.version, err)
 		return err
@@ -478,6 +487,40 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	urlString := endpoint.URLType + "://" + endpoint.Host
 	_, err := url.ParseRequestURI(urlString)
 	return err
+}
+
+func (retryConfig *RetryConfig) validateRetryConfig() error {
+	if retryConfig.Count > 10 || retryConfig.Count < 0 {
+		return errors.New("count in retry config must be in the range 0-10") //security measure
+	}
+	for _, statusCode := range retryConfig.StatusCodes {
+		if statusCode > 598 || statusCode < 401 {
+			return errors.New("status codes in the retry config must be in the range 401 - 598")
+		}
+	}
+	return nil
+}
+
+func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName string) error {
+	if endpointCluster != nil && len(endpointCluster.Endpoints) > 0 {
+		err := endpointCluster.Endpoints[0].validateEndpoint()
+		if err != nil {
+			logger.LoggerOasparser.Errorf("Error while parsing the %s endpoints. %v",
+				endpointName, err)
+			return err
+		}
+		if endpointCluster.Config != nil {
+			if endpointCluster.Config.RetryConfig != nil {
+				err = endpointCluster.Config.RetryConfig.validateRetryConfig()
+				if err != nil {
+					logger.LoggerOasparser.Errorf("Invalide retry config for %s endpoints. %v",
+						endpointName, err)
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // getEndpoints extracts and generate the EndpointCluster Object from any yaml map that has the following structure
