@@ -23,6 +23,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.InterceptorConstants;
@@ -37,6 +38,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
+    @BeforeClass
+    public void init() {
+        apiName = "SwaggerPetstoreRequestIntercept";
+        basePath = "/intercept-request";
+        expectedHandler = InterceptorConstants.Handler.REQUEST_ONLY;
+        statusBodyType = InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY;
+    }
+
     @DataProvider(name = "requestBodyProvider")
     Object[][] requestBodyProvider() {
         String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
@@ -75,33 +84,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
 
     @Test(description = "Test request body to interceptor service in request flow")
     public void testRequestToInterceptorServiceInRequestFlowInterception() throws Exception {
-        // setting client
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        headers.put("foo-remove", "Header_to_be_deleted");
-        headers.put("foo-update", "Header_to_be_updated");
-        headers.put("foo-keep", "Header_to_be_kept");
-        headers.put("content-type", "application/xml");
-        String body = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
-        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
-                basePath + "/echo/123"), body, headers);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-
-        // check which flows are invoked in interceptor service
-        JSONObject status = new JSONObject(getInterceptorStatus());
-        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
-        testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
-
-        JSONObject reqFlowBodyJSON = new JSONObject(status.getString(InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY));
-        // invocation context
-        testInvocationContext(reqFlowBodyJSON, Arrays.asList("GET", "POST"), "POST", basePath + "/echo/123", "/echo/{id}");
-        // headers
-        headers.remove(HttpHeaderNames.AUTHORIZATION.toString()); // check without auth header
-        testInterceptorHeaders(reqFlowBodyJSON, headers, true);
-        // body
-        testInterceptorBody(reqFlowBodyJSON, body, true);
+        testRequestToInterceptorService();
     }
 
     @Test(
@@ -126,7 +109,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Map<String, String> headersToReplace = new HashMap<>();
         headersToReplace.put("foo-update", "Header_Updated");
         headersToReplace.put("foo-update-not-exist", "Header_Updated_New_Val");
-        headersToReplace.put("content-type", "text/plain"); // sending text/plain, to support any content
+        headersToReplace.put("content-type", "application/xml");
         interceptorRespBodyJSON.put("headersToReplace", headersToReplace);
         interceptorRespBodyJSON.put("headersToRemove", Collections.singletonList("foo-remove"));
         setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
@@ -156,7 +139,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(respHeaders.get("foo-add"), "Header_newly_added", "Failed to add new header");
         Assert.assertEquals(respHeaders.get("foo-update"), "Header_Updated", "Failed to replace header");
         Assert.assertEquals(respHeaders.get("foo-update-not-exist"), "Header_Updated_New_Val", "Failed to replace header");
-        Assert.assertEquals(respHeaders.get("content-type"), "text/plain", "Failed to replace header");
+        Assert.assertEquals(respHeaders.get("content-type"), "application/xml", "Failed to replace header");
         Assert.assertEquals(respHeaders.get("foo-keep"), "Header_to_be_kept", "Failed to keep original header");
         // test body
         Assert.assertEquals(response.getData(), reqToBackend);
@@ -210,11 +193,12 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
 
         // test headers
-        Assert.assertFalse(response.getHeaders().containsKey("foo-client-header"), "Responding client headers back");
-        Assert.assertFalse(response.getHeaders().containsKey("foo-ignored"), "Should only support add headers");
-        Assert.assertEquals(response.getHeaders().get("foo-add"), "Header_newly_added",
+        Map<String, String> respHeaders = response.getHeaders();
+        Assert.assertFalse(respHeaders.containsKey("foo-client-header"), "Responding client headers back");
+        Assert.assertFalse(respHeaders.containsKey("foo-ignored"), "Should only support add headers");
+        Assert.assertEquals(respHeaders.get("foo-add"), "Header_newly_added",
                 "Failed to add new header");
-        Assert.assertEquals(response.getHeaders().get("content-type"), "application/json",
+        Assert.assertEquals(respHeaders.get("content-type"), "application/json",
                 "Failed to replace header");
         // test body
         Assert.assertEquals(response.getData(), clientRespBody);

@@ -322,7 +322,8 @@ public class MockBackEndServer extends Thread {
             });
 
             // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor tests.
-            // sent request headers in response headers
+            // sent request headers in response headers <- this is because in interceptor tests it is required to test
+            //                                             response flow headers to interceptor service
             // sent request body in response body
             httpServer.createContext(context + "/echo", exchange -> {
                 byte[] response;

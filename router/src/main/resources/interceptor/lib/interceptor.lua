@@ -152,7 +152,6 @@ local function decode_string(decode_func, decode_func_desc, encoded_string, hand
         return decoded, false
     end
 
-    --#region if error base64 decoding
     log_interceptor_service_error(
         handle,
         request_id,
@@ -218,12 +217,32 @@ end
 ---@param interceptor_response_body table
 ---@param request_id string
 ---@param shared_info table
+---@param is_buffered boolean
 ---@param is_request_flow boolean
 ---@return boolean - return true if error
-local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_request_flow)
+local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_buffered, is_request_flow)
     -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
     if interceptor_response_body.body then
         handle:logDebug("Updating body for the request_id: " .. request_id)
+
+        --#region handle error if body is not buffered before updating it
+        if not is_buffered then
+            -- invalid operation, body should buffered first before updating it
+            log_interceptor_service_error(
+                    handle,
+                    request_id,
+                    is_request_flow,
+                    'Invalid operation: "Update Body". Request|Response body should be added in includes section of OAS definition'
+            )
+            respond_error(handle, shared_info, request_id, {
+                error_message = "Internal Server Error",
+                error_description = "Internal Server Error",
+                error_code = "102519"
+            }, is_request_flow)
+
+            return true
+        end
+        --#endregion
 
         local body, err = base64_decode(interceptor_response_body.body, handle, shared_info, request_id, is_request_flow)
         if err then
@@ -233,7 +252,11 @@ local function modify_body(handle, interceptor_response_body, request_id, shared
         local content_length = handle:body():setBytes(body)
         handle:headers():replace("content-length", content_length)
         if not is_request_flow then
-            handle:headers():replace(STATUS, "204")
+            local status_code = "200"
+            if content_length == 0 then
+                status_code = "204"
+            end
+            handle:headers():replace(STATUS, status_code)
         end
         return false
     end
@@ -440,7 +463,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     end
 
     handle_direct_respond(request_handle, interceptor_response_body, shared_info, request_id)
-    if modify_body(request_handle, interceptor_response_body, request_id, shared_info, true) then
+    if modify_body(request_handle, interceptor_response_body, request_id, shared_info, req_flow_includes[INCLUDES.REQ_BODY], true) then
         -- error thrown, exiting
         return
     end
@@ -524,7 +547,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         return
     end
 
-    if modify_body(response_handle, interceptor_response_body, request_id, shared_info, false) then
+    if modify_body(response_handle, interceptor_response_body, request_id, shared_info, resp_flow_includes[INCLUDES.RESP_BODY], false) then
         -- error thrown, exiting
         return
     end
