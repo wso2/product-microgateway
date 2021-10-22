@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.InterceptorConstants;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
@@ -50,6 +51,23 @@ public class InterceptorTestcase {
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
+
+    @DataProvider(name = "requestBodyProvider")
+    Object[][] requestBodyProvider() {
+        String clientReqBody1 = "{\"name\": \"foo\", \"age\": 16}";
+        String interceptorRespBody1 = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
+
+        // {clientReqBody, interceptorRespBody, reqToBackend}
+        return new Object[][]{
+                // non empty body from interceptor - means update request to backend
+                {clientReqBody1, interceptorRespBody1, interceptorRespBody1},
+                // empty response from interceptor - means update request to backend as empty
+                {clientReqBody1, "", ""},
+                // no response from interceptor - means do not update request to backend
+                {clientReqBody1, null, clientReqBody1}
+        };
+    }
+
 
     @BeforeMethod(description = "clear the status of interceptor management service")
     void clearInterceptorStatus() throws Exception {
@@ -88,21 +106,27 @@ public class InterceptorTestcase {
         testInterceptorBody(reqFlowBodyJSON, body, true);
     }
 
-    @Test(description = "Test request body and headers to backend service with request flow interception")
-    public void testRequestToBackendServiceInRequestFlowInterception() throws Exception {
+    @Test(
+            description = "Test request body and headers to backend service with request flow interception",
+            dataProvider = "requestBodyProvider"
+    )
+    public void testRequestToBackendServiceInRequestFlowInterception(
+            String clientReqBody, String interceptorRespBody, String reqToBackend) throws Exception {
+
         // JSON request to XML backend
         // setting response body of interceptor service
-        JSONObject interceptorRespBody = new JSONObject();
-        String updatedBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
-        interceptorRespBody.put("body", Base64.getEncoder().encodeToString(updatedBody.getBytes()));
-        interceptorRespBody.put("headersToAdd", Collections.singletonMap("foo-add", "Header_newly_added"));
+        JSONObject interceptorRespBodyJSON = new JSONObject();
+        if (interceptorRespBody != null) { // if null, no body from interceptor service
+            interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString(interceptorRespBody.getBytes()));
+        }
+        interceptorRespBodyJSON.put("headersToAdd", Collections.singletonMap("foo-add", "Header_newly_added"));
         Map<String, String> headersToReplace = new HashMap<>();
         headersToReplace.put("foo-update", "Header_Updated");
         headersToReplace.put("foo-update-not-exist", "Header_Updated_New_Val");
         headersToReplace.put("content-type", "application/xml");
-        interceptorRespBody.put("headersToReplace", headersToReplace);
-        interceptorRespBody.put("headersToRemove", Collections.singletonList("foo-remove"));
-        setResponseOfInterceptor(interceptorRespBody.toString(), true);
+        interceptorRespBodyJSON.put("headersToReplace", headersToReplace);
+        interceptorRespBodyJSON.put("headersToRemove", Collections.singletonList("foo-remove"));
+        setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
 
         // setting client
         Map<String, String> headers = new HashMap<>();
@@ -111,9 +135,8 @@ public class InterceptorTestcase {
         headers.put("foo-update", "Header_to_be_updated");
         headers.put("foo-keep", "Header_to_be_kept");
         headers.put("content-type", "application/json");
-        String body = "{\"name\": \"foo\", \"age\": 16}";
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
-                "/intercept-request/echo/123"), body, headers);
+                "/intercept-request/echo/123"), clientReqBody, headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -138,7 +161,7 @@ public class InterceptorTestcase {
         Assert.assertEquals(respHeaders.getJSONArray("Foo-keep").getString(0), "Header_to_be_kept",
                 "Failed to keep original header");
         // test body
-        Assert.assertEquals(backendResponse.getString("body"), updatedBody);
+        Assert.assertEquals(backendResponse.getString("body"), reqToBackend);
     }
 
     @Test(description = "Direct respond when response interception is enabled")
