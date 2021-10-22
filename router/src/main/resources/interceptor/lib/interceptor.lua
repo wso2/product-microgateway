@@ -52,6 +52,7 @@ local INV_CONTEXT = {
     PROTOCOL = "protocol",
     SCHEME = "scheme",
     PATH = "path",
+    METHOD = "method",
     REQ_ID = "requestId",
     SOURCE = "source",
     DESTINATION = "destination",
@@ -316,6 +317,7 @@ local function include_invocation_context(handle, req_flow_includes, resp_flow_i
         inv_context[INV_CONTEXT.PROTOCOL] = handle:streamInfo():protocol()
         inv_context[INV_CONTEXT.SCHEME] = request_headers:get(":scheme")
         inv_context[INV_CONTEXT.PATH] = request_headers:get(":path")
+        inv_context[INV_CONTEXT.METHOD] = request_headers:get(":method")
         inv_context[INV_CONTEXT.REQ_ID] = request_headers:get("x-request-id")
         inv_context[INV_CONTEXT.SOURCE] = client_ip
         -- inv_context[INV_CONTEXT.DESTINATION] = handle:streamInfo():downstreamLocalAddress() -- TODO: (renuka) check this

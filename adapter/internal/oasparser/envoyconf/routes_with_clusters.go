@@ -609,14 +609,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		// read from contextExtensions map since, it is updated with correct values with conditions
 		// so, no need to change two places
 		iInvCtx := &interceptor.InvocationContext{
-			BasePath:        contextExtensions[basePathContextExtension],
-			Method:          contextExtensions[methodContextExtension],
-			APIName:         contextExtensions[apiNameContextExtension],
-			APIVersion:      contextExtensions[apiVersionContextExtension],
-			PathTemplate:    contextExtensions[pathContextExtension],
-			Vhost:           contextExtensions[vHostContextExtension],
-			ProdClusterName: contextExtensions[prodClusterNameContextExtension],
-			SandClusterName: contextExtensions[sandClusterNameContextExtension],
+			BasePath:         contextExtensions[basePathContextExtension],
+			SupportedMethods: contextExtensions[methodContextExtension],
+			APIName:          contextExtensions[apiNameContextExtension],
+			APIVersion:       contextExtensions[apiVersionContextExtension],
+			PathTemplate:     contextExtensions[pathContextExtension],
+			Vhost:            contextExtensions[vHostContextExtension],
+			ProdClusterName:  contextExtensions[prodClusterNameContextExtension],
+			SandClusterName:  contextExtensions[sandClusterNameContextExtension],
 		}
 		luaPerFilterConfig = lua.LuaPerRoute{
 			Override: &lua.LuaPerRoute_SourceCode{

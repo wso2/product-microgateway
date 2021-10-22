@@ -88,7 +88,6 @@ public class InterceptorTestcase {
         };
     }
 
-
     @BeforeMethod(description = "clear the status of interceptor management service")
     void clearInterceptorStatus() throws Exception {
         HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/clear-status"));
@@ -117,7 +116,6 @@ public class InterceptorTestcase {
 
         JSONObject reqFlowBodyJSON = new JSONObject(status.getString(InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY));
         // invocation context
-        // TODO: (renuka) change lua script: method -> supportedMethods and add current method from headers
         testInvocationContext(reqFlowBodyJSON, Arrays.asList("GET", "POST"), "POST", "/intercept-request/echo/123", "/echo/{id}");
         // headers
         headers.remove(HttpHeaderNames.AUTHORIZATION.toString()); // check without auth header
@@ -291,14 +289,14 @@ public class InterceptorTestcase {
         Assert.assertEquals(invocationCtx.getString("apiVersion"), "1.0.5", "API version mismatch");
         Assert.assertEquals(invocationCtx.getString("scheme"), "https", "Scheme mismatch");
         Assert.assertEquals(invocationCtx.getString("vhost"), "localhost", "Vhost mismatch");
-//        Assert.assertEquals(invocationCtx.getString("method"), method, "HTTP method mismatch");
+        Assert.assertEquals(invocationCtx.getString("method"), method, "HTTP method mismatch");
         Assert.assertEquals(invocationCtx.getString("path"), path, "Resource path mismatch");
         Assert.assertEquals(invocationCtx.getString("pathTemplate"), pathTemplate, "Resource path template mismatch");
         Assert.assertEquals(invocationCtx.getString("basePath"), "/intercept-request", "Base path mismatch");
 
         Assert.assertTrue(StringUtils.isNotEmpty(invocationCtx.getString("source")), "Source not found");
         Assert.assertTrue(StringUtils.isNotEmpty(invocationCtx.getString("requestId")), "Request ID not found");
-        Assert.assertEquals(Arrays.asList(invocationCtx.getString("method").split(" ")), supportedMethods, "HTTP supported method mismatch"); // TODO: change this
+        Assert.assertEquals(Arrays.asList(invocationCtx.getString("supportedMethods").split(" ")), supportedMethods, "HTTP supported method mismatch");
     }
 
     private void testInterceptorHeaders(JSONObject bodyJSON, Map<String, String> expectedHeaders, boolean isRequestFlow) {
