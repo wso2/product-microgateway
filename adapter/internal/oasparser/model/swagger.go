@@ -93,10 +93,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if applicationSecurity, found := pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
 					setApplicationSecurity(applicationSecurity, &pathItem.Get.Security)
 				}
-				// pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]
-				logger.LoggerOasparser.Infof("pathItem.Get.Security: %v %T", pathItem.Get.Security, pathItem.Get.Security);
-				logger.LoggerOasparser.Infof("Extensions: %v %T", pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity], 
-				pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]);
 				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
 					pathItem.Get.Extensions))
 				methodFound = true
@@ -184,17 +180,15 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 	if ok {
 		for key, value := range result {
 			if (key == "optional" && value != true) {
-				logger.LoggerOasparser.Infof("Inside optional check: %v value %v", key, value);
 				isApplicationSecurityOptional = false
 			}
 		}
 		if !isApplicationSecurityOptional {
-			if x, found := result["security-types"]; found {
-				logger.LoggerOasparser.Infof("Inside security map check: %T", x);
+			if _, found := result["security-types"]; found {
 				if val, ok := result["security-types"].([]interface{}); ok {
 					for _, mapValue := range val {
 						if mapValue == "api_key" {
-							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: "apiKey" , Name: mapValue.(string)}
+							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: "api_key" , Name: mapValue.(string)}
 							securitySchemes = append(securitySchemes, scheme)
 						}
 					}
@@ -207,7 +201,7 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 		scheme := SecurityScheme{DefinitionName: key, Type: val.Type , Name: val.Name, In: val.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
-	logger.LoggerOasparser.Infof("Security schemes in setSecurityDefinitions  %v:",securitySchemes)
+	logger.LoggerOasparser.Debugf("Security schemes in setSecurityDefinitions  %v:",securitySchemes)
 	return securitySchemes
 }
 
@@ -219,13 +213,13 @@ func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
 	}
 }
 
+// checks whether application level security given by (x-wso2-application-security extension)is optional or not
 func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool{
 	var isApplicationSecurityOptional = true
 	result, ok := applicationSecurity.(map[string]interface{})
 	if ok {
 		for key, value := range result {
 			if (key == "optional" && value != true) {
-				logger.LoggerOasparser.Infof("Inside optional check: %v value %v", key, value);
 				isApplicationSecurityOptional = false
 			}
 		}
@@ -233,16 +227,13 @@ func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool{
 	return isApplicationSecurityOptional
 }
 
+// sets application level security defined under the x-wso2-application-security extension.
 func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string){
-	logger.LoggerOasparser.Infof("Inside method: %v ", applicationSecurity);
-	logger.LoggerOasparser.Infof("Inside method2: %v ", *pathItemSecurity);
 	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(applicationSecurity)
 	result, ok := applicationSecurity.(map[string]interface{})
 	if ok && !isApplicationSecurityOptional{
-		if x, found := result["security-types"]; found {
-			logger.LoggerOasparser.Infof("Inside security map check: %T", x);
+		if _, found := result["security-types"]; found {
 			if val, ok := result["security-types"].([]interface{}); ok {
-				logger.LoggerOasparser.Infof("AAA");
 				for _, mapValue := range val {
 					if mapValue == "api_key" {
 						applicationAPIKeyMap := map[string][]string{

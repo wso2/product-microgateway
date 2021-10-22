@@ -554,8 +554,8 @@ public class FilterUtils {
      * @param requestContext Request context instance
      * @return String to identify API key
      */
-    public static String getAPIKeyName(RequestContext requestContext) {
-        SecuritySchemaConfig apiKeySecurityScheme = getAPIKeySchemeConfig(requestContext);
+    public static String getAPIKeyName(RequestContext requestContext, boolean isAppLevelAPIKey) {
+        SecuritySchemaConfig apiKeySecurityScheme = getAPIKeySchemeConfig(requestContext, isAppLevelAPIKey);
         String apiKeyNameInDefinition = "";
         if (apiKeySecurityScheme != null) {
             apiKeyNameInDefinition = apiKeySecurityScheme.getName();
@@ -566,11 +566,15 @@ public class FilterUtils {
     /**
      * Gives security scheme config relevant to API key.
      * @param requestContext Request context instance
+     * @param isAppLevelAPIKey boolean value to denote request is for api_key (Application level API key request)
      * @return Instance relevant to the security scheme config
      */
-    public static SecuritySchemaConfig getAPIKeySchemeConfig(RequestContext requestContext) {
+    public static SecuritySchemaConfig getAPIKeySchemeConfig(RequestContext requestContext, boolean isAppLevelAPIKey) {
         Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
+        if (isAppLevelAPIKey) {
+            return securitySchemeDefinitions.get(APIConstants.API_SECURITY_API_KEY);
+        }
         return  securitySchemeDefinitions.get(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME);
     }
 

@@ -68,7 +68,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
 
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-//        1.0.0/pet/1  //1.0.0/pet/findByStatus
+
         endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/1");
 
         // Obtain API keys
@@ -196,6 +196,18 @@ public class APIKeyTestCase extends ApimBaseTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("x-api-key", apiKeyForRefererTest);
         headers.put("referer", "http://www.abc.com");
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(),
+                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
+                "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the API Key considering x-wso2-application-security extension ")
+    public void invokeAPIKeyForAppLevel() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("api_key", apiKey);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);

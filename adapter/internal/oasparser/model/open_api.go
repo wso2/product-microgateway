@@ -69,9 +69,6 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	}
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
-	// for key, value := range swagger.vendorExtensions {
-	// 	logger.LoggerOasparser.Infof("VENDOR Extensions: %v value %v", key, value);
-	// }
 	swagger.securityScheme = setSecuritySchemesOpenAPI(swagger3)
 	swagger.resources, err = setResourcesOpenAPI(swagger3, &swagger.securityScheme)
 	if err != nil {
@@ -177,13 +174,8 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) ([]SecurityScheme) {
 	return securitySchemes
 }
 
-func getOperationLevelDetails(operation *openapi3.Operation, method string, securityschemes *[]SecurityScheme) Operation {
+func getOperationLevelDetails(operation *openapi3.Operation, method string, securitySchemes *[]SecurityScheme) Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
-	resolveResourceLevelSecurity(operation.ExtensionProps)
-
-	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(extensions[xWso2ApplicationSecurity])
-	logger.LoggerOasparser.Infof("Security schemes in  setSecuritySchemesOpenAPI method %v:",isApplicationSecurityOptional)
-
 
 	if operation.Security != nil || extensions[xWso2ApplicationSecurity] != nil {
 		var securityData []openapi3.SecurityRequirement = *(operation.Security)
@@ -191,47 +183,41 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 		for i, security := range securityData {
 			securityArray[i] = security
 		}
-		logger.LoggerOasparser.Infof("Security array length %v:", len(securityArray))
-		logger.LoggerOasparser.Infof("Security array %v", securityArray)
 		
 		result, ok := extensions[xWso2ApplicationSecurity].(map[string]interface{})
 		if ok {
-			if x, found := result["security-types"]; found {
-				logger.LoggerOasparser.Infof("Inside security map check Open API 3 Spec : %v %T",x, x);
+			if _, found := result["security-types"]; found {
 				if val, ok := result["security-types"].([]interface{}); ok {
-					logger.LoggerOasparser.Infof("AAA");
 					for _, mapValue := range val {
 						if mapValue == "api_key" {
 							applicationAPIKeyMap := map[string][]string{
 								mapValue.(string): {},
 							}
 							securityArray = append(securityArray, applicationAPIKeyMap)
+							checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes)
 						}
 					}
 				}
 			} 
 		}
-		checkAppSecurityAPIKeyInSecuritySchemes(securityschemes)
-		logger.LoggerOasparser.Infof("Security array length %v:", len(securityArray))
-		logger.LoggerOasparser.Infof("Security array %v", securityArray)
-
+		logger.LoggerOasparser.Debugf("Security array %v", securityArray)
 		return NewOperation(method, securityArray, extensions)
 	}
 
 	return NewOperation(method, nil, extensions)
 }
 
-
+// checks api_key is in the security scheme. If it's not in the security scheme, this
+// method adds api_key security scheme to work with Application level enabled API keys.
 func checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes *[]SecurityScheme) {
 	var isApplicationAPIKeyFound = false;
-	for key, val := range *securitySchemes {
-		logger.LoggerOasparser.Infof("checkAppSecurityAPIKeyInSecuritySchemes key %v: val %v", key, val)
+	for _, val := range *securitySchemes {
 		if val.DefinitionName == "api_key" {
 			isApplicationAPIKeyFound = true;
 		}
 	}
 	if !isApplicationAPIKeyFound {
-		scheme := SecurityScheme{DefinitionName: "api_key", Type: "apiKey", Name: "api_key"}
+		scheme := SecurityScheme{DefinitionName: "api_key", Type: "api_key", Name: "api_key"}
 		*securitySchemes = append(*securitySchemes, scheme)
 	}
 }
@@ -328,13 +314,6 @@ func resolveAPILevelDisableSecurity(vendorExtensions openapi3.ExtensionProps) (b
 		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
 	}
 	return false, false
-}
-
-func resolveResourceLevelSecurity(vendorExtensions openapi3.ExtensionProps) {
-	extensions := convertExtensibletoReadableFormat(vendorExtensions)
-	for key, value := range extensions {
-		logger.LoggerOasparser.Infof("VENDOR Extensions UP : %v value %v", key, value);
-	}
 }
 
 // This method add the disable security to given vendor extensions, if it's not present.

@@ -83,9 +83,10 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         return isAPIKey(apiKey);
     }
 
-    private String getAPIKeyAllowedIn(RequestContext requestContext) {
+    private String getAPIKeyAllowedIn(RequestContext requestContext, boolean isAppLevelAPIKeyRequest) {
         String apiKeyLocation = "";
-        SecuritySchemaConfig securitySchemaConfig = FilterUtils.getAPIKeySchemeConfig(requestContext);
+        SecuritySchemaConfig securitySchemaConfig = FilterUtils.getAPIKeySchemeConfig(requestContext,
+                isAppLevelAPIKeyRequest);
         if (securitySchemaConfig != null) {
             apiKeyLocation = securitySchemaConfig.getIn();
         }
@@ -102,8 +103,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             if (resourceConfig.getPath().equalsIgnoreCase(requestContext.getMatchedResourcePath().getPath()) &&
                     resourceConfig.getMethod().name().equalsIgnoreCase(requestContext.getRequestMethod())) {
                 Map<String, List<String>> resourceSecuritySchemes = resourceConfig.getSecuritySchemas();
-                if (resourceSecuritySchemes.containsKey(FilterUtils.
-                        getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+                if (resourceSecuritySchemes.containsKey(APIConstants.API_SECURITY_API_KEY) || resourceSecuritySchemes.
+                        containsKey(FilterUtils.getAPIKeyArbitraryName(securitySchemeDefinitions))) {
                     isAPIKeyProtected = true;
                 }
             }
@@ -113,18 +114,33 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
-        String apiKeyName = FilterUtils.getAPIKeyName(requestContext);
+        boolean isAppLevelSecurityRequest = getIsAppLevelSecurityRequest(requestContext);
+        String apiKeyName = FilterUtils.getAPIKeyName(requestContext, isAppLevelSecurityRequest);
         String apiKey = "";
-        String apiKeyLocation = getAPIKeyAllowedIn(requestContext);
-        if (apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_HEADER)) {
+        String apiKeyLocation = getAPIKeyAllowedIn(requestContext, isAppLevelSecurityRequest);
+        if (apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_HEADER) || isAppLevelSecurityRequest) {
             Map<String, String> headers = requestContext.getHeaders();
             apiKey = getAPIKeyFromMap(headers, apiKeyName);
         }
-        if (StringUtils.isEmpty(apiKey) && apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_QUERY)) {
+        if ((isAppLevelSecurityRequest && StringUtils.isEmpty(apiKey)) || (StringUtils.isEmpty(apiKey) &&
+                apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_QUERY))) {
             Map<String, String> queryParameters = requestContext.getQueryParameters();
             apiKey = getAPIKeyFromMap(queryParameters, apiKeyName);
         }
         return apiKey;
+    }
+
+    private boolean getIsAppLevelSecurityRequest(RequestContext requestContext) {
+        boolean isApplicationLevelSecurityRequest = false;
+        Map<String, String> headers = requestContext.getHeaders();
+        Map<String, String> queryParams = requestContext.getQueryParameters();
+        if (headers.containsKey(APIConstants.API_SECURITY_API_KEY)) {
+            isApplicationLevelSecurityRequest = true;
+        } else if (queryParams.containsKey(APIConstants.API_SECURITY_API_KEY)) {
+            isApplicationLevelSecurityRequest = true;
+        }
+        return isApplicationLevelSecurityRequest;
+
     }
 
     private String getAPIKeyFromMap(Map<String, String> requestMetaData, String apiKeyName) {

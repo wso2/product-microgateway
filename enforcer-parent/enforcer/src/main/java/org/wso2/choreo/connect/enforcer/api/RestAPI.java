@@ -253,6 +253,9 @@ public class RestAPI implements API {
                     getAPIKeyArbitraryName(securitySchemeDefinitions))) {
                 securityMap.put(key, new ArrayList<>());
             }
+            if (security != null && key.equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
+                securityMap.put(key, new ArrayList<>());
+            }
         }));
         resource.setSecuritySchemas(securityMap);
         return resource;

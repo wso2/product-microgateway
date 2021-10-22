@@ -55,6 +55,10 @@ paths:
           description: Pet not found
       security:
         - api_key: []
+      x-wso2-application-security:
+        security-types:
+          - api_key
+        optional: false
   /jwtheader:
     get:
       summary: Get the status of the backend header
@@ -214,3 +218,6 @@ definitions:
 externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'
+x-wso2-application-security:
+  security-types:
+    - api_key
