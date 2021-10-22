@@ -343,12 +343,12 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
             headers[STATUS] = headers[STATUS] or "200"
         end
 
-        local body, err = base64_decode(interceptor_response_body.body, handle, shared_info, request_id, true)
+        local decoded_body, err = base64_decode(body, handle, shared_info, request_id, true)
         if err then
             return
         end
 
-        direct_respond(handle, headers, body, shared_info)
+        direct_respond(handle, headers, decoded_body, shared_info)
     end
 end
 

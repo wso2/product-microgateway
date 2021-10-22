@@ -80,7 +80,7 @@ paths:
       scheme: http
       includes:
         - request_headers
-    get:
+    post:
       tags:
         - pet
       summary: Finds Pets by status
