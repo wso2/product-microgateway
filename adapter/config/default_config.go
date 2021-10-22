@@ -101,7 +101,7 @@ var defaultConfig = &Config{
 				HealthyThreshold:   2,
 			},
 			Retry: upstreamRetry{
-				MaxConfigurableCount: 5,
+				MaxRetryCount:        5,
 				BaseIntervalInMillis: 25,
 				StatusCodes:          []uint32{504},
 			},

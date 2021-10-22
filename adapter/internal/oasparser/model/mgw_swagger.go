@@ -491,7 +491,7 @@ func (endpoint *Endpoint) validateEndpoint() error {
 
 func (retryConfig *RetryConfig) validateRetryConfig() error {
 	conf, _ := config.ReadConfigs()
-	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxConfigurableCount
+	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxRetryCount
 	if retryConfig.Count > int32(maxConfigurableCount) || retryConfig.Count < 0 {
 		logger.LoggerOasparser.Errorf("Retry count for the API must be within the range 0 - %v."+
 			"Reconfiguring retry count as %v", maxConfigurableCount, maxConfigurableCount)

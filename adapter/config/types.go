@@ -210,7 +210,7 @@ type upstreamHealth struct {
 }
 
 type upstreamRetry struct {
-	MaxConfigurableCount uint32
+	MaxRetryCount        uint32
 	BaseIntervalInMillis uint32
 	StatusCodes          []uint32
 }
