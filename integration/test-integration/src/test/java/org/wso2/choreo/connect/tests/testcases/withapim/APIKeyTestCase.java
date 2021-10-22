@@ -82,7 +82,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         apiKeyForIPTest = ipTestAPIKeyDTO.getApikey();
 
         APIKeyDTO refererTestAPIKeyDTO = storeRestClient.generateAPIKeys(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
-                -1, null, "www.abc.com");
+                -1, null, "http://www.abc.com");
         apiKeyForRefererTest = refererTestAPIKeyDTO.getApikey();
 
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
@@ -171,7 +171,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     public void invokeAPIKeyForIncorrectRefererTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("x-api-key", apiKeyForRefererTest);
-        headers.put("referer", "www.abcd.com");
+        headers.put("referer", "http://www.abcd.com");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
@@ -195,7 +195,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     public void invokeAPIKeyForRefererSuccessTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("x-api-key", apiKeyForRefererTest);
-        headers.put("referer", "www.abc.com");
+        headers.put("referer", "http://www.abc.com");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
