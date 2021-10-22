@@ -101,9 +101,9 @@ var defaultConfig = &Config{
 				HealthyThreshold:   2,
 			},
 			Retry: upstreamRetry{
-				Count:            0,
-				IntervalInMillis: 25,
-				StatusCodes:      []uint32{504},
+				MaxConfigurableCount: 5,
+				BaseIntervalInMillis: 25,
+				StatusCodes:          []uint32{504},
 			},
 		},
 		Connection: connection{

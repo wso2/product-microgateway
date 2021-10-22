@@ -227,6 +227,8 @@ public class MockBackEndServer extends Thread {
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+            // For retry tests
+            // Mock backend must be restarted if the retry tests are run again, against the already used resources.
             httpServer.createContext(context + "/retry-four", exchange -> {
                 retryCountEndpointFour += 1;
                 if (retryCountEndpointFour < 4) { // returns a x04 status

@@ -31,7 +31,6 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
-import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
@@ -257,11 +256,11 @@ public class AuthFilter implements Filter {
     }
 
     private void addRetryConfigHeaders(RequestContext requestContext, RetryConfig retryConfig) {
-        requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRY_ON,
-                HttpConstants.HttpRouterHeaderValues.RETRIABLE_STATUS_CODES);
-        requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.MAX_RETRIES,
+        requestContext.addOrModifyHeaders(AdapterConstants.HttpRouterHeaders.RETRY_ON,
+                AdapterConstants.HttpRouterHeaderValues.RETRIABLE_STATUS_CODES);
+        requestContext.addOrModifyHeaders(AdapterConstants.HttpRouterHeaders.MAX_RETRIES,
                 Integer.toString(retryConfig.getCount()));
-        requestContext.addOrModifyHeaders(HttpConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
+        requestContext.addOrModifyHeaders(AdapterConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
                 StringUtils.join(retryConfig.getStatusCodes(), ","));
     }
 }

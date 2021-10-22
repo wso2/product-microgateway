@@ -692,17 +692,20 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
-
+		// Retry configs are always added via headers. This is to update the
+		// default retry back-off base interval, which cannot be updated via headers.
 		retryConfig := config.Envoy.Upstream.Retry
 		commonRetryPolicy := &routev3.RetryPolicy{
-			RetryOn: "retriable-status-codes",
+			RetryOn: retryPolicyRetriableStatusCodes,
 			NumRetries: &wrapperspb.UInt32Value{
-				Value: retryConfig.Count,
+				Value: 0,
+				// If not set to 0, default value 1 will be
+				// applied to both prod and sandbox even if they are not set.
 			},
 			RetriableStatusCodes: retryConfig.StatusCodes,
 			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
 				BaseInterval: &durationpb.Duration{
-					Nanos: int32(retryConfig.IntervalInMillis) * 1000,
+					Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000,
 				},
 			},
 		}

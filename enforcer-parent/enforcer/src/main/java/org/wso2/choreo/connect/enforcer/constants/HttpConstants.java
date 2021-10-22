@@ -28,24 +28,4 @@ public class HttpConstants {
     public static final String X_REQUEST_ID_HEADER = "x-request-id";
     public static final String APPLICATION_JSON = "application/json";
     public static final String BASIC_LOWER = "basic";
-
-    /**
-     * Holds router http headers to configure retry, etc.
-     */
-    public static class HttpRouterHeaders {
-        public static final String RETRY_ON = "x-envoy-retry-on";
-        public static final String MAX_RETRIES = "x-envoy-max-retries";
-        public static final String RETRIABLE_STATUS_CODES = "x-envoy-retriable-status-codes";
-
-        private HttpRouterHeaders() {}
-    }
-
-    /**
-     * Holds router http headers to configure retry, etc.
-     */
-    public static class HttpRouterHeaderValues {
-        public static final String RETRIABLE_STATUS_CODES = "retriable-status-codes";
-
-        private HttpRouterHeaderValues() {}
-    }
 }

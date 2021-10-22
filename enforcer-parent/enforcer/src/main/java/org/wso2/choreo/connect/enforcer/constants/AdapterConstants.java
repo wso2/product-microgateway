@@ -31,4 +31,26 @@ public class AdapterConstants {
     public static final String SAND_CLUSTER_HEADER_KEY = "sandClusterName";
     // The common enforcer Label
     public static final String COMMON_ENFORCER_LABEL = "commonEnforcerLabel";
+
+    /**
+     * Key in a Key-Value pair of a router http header to configure retry, etc.
+     * These are Envoy specific constants are not used in Adapter, but correlates with route configs added at adapter.
+     */
+    public static class HttpRouterHeaders {
+        public static final String RETRY_ON = "x-envoy-retry-on";
+        public static final String MAX_RETRIES = "x-envoy-max-retries";
+        public static final String RETRIABLE_STATUS_CODES = "x-envoy-retriable-status-codes";
+
+        private HttpRouterHeaders() {}
+    }
+
+    /**
+     * Values in a Key-Value pair of a router http header to configure retry, etc.
+     * These are Envoy specific constants that correlates with the route config added at the adapter.
+     */
+    public static class HttpRouterHeaderValues {
+        public static final String RETRIABLE_STATUS_CODES = "retriable-status-codes";
+
+        private HttpRouterHeaderValues() {}
+    }
 }

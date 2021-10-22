@@ -210,9 +210,9 @@ type upstreamHealth struct {
 }
 
 type upstreamRetry struct {
-	Count            uint32   `toml:"count"`
-	IntervalInMillis uint32   `toml:"intervalInMillis"`
-	StatusCodes      []uint32 `toml:"statusCodes"`
+	MaxConfigurableCount uint32
+	BaseIntervalInMillis uint32
+	StatusCodes          []uint32
 }
 
 type security struct {

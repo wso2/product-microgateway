@@ -490,25 +490,41 @@ func (endpoint *Endpoint) validateEndpoint() error {
 }
 
 func (retryConfig *RetryConfig) validateRetryConfig() error {
-	if retryConfig.Count > 10 || retryConfig.Count < 0 {
-		return errors.New("count in retry config must be in the range 0-10") //security measure
+	conf, _ := config.ReadConfigs()
+	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxConfigurableCount
+	if retryConfig.Count > int32(maxConfigurableCount) || retryConfig.Count < 0 {
+		logger.LoggerOasparser.Errorf("Retry count for the API must be within the range 0 - %v."+
+			"Reconfiguring retry count as %v", maxConfigurableCount, maxConfigurableCount)
+		retryConfig.Count = int32(maxConfigurableCount)
 	}
+	var validStatusCodes []uint32
 	for _, statusCode := range retryConfig.StatusCodes {
 		if statusCode > 598 || statusCode < 401 {
-			return errors.New("status codes in the retry config must be in the range 401 - 598")
+			logger.LoggerOasparser.Errorf("Given status code for the API retry config is invalid." +
+				"Must be in the range 401 - 598. Dropping the status code.")
+		} else {
+			validStatusCodes = append(validStatusCodes, statusCode)
 		}
 	}
+	if len(validStatusCodes) < 1 {
+		validStatusCodes = append(validStatusCodes, conf.Envoy.Upstream.Retry.StatusCodes...)
+	}
+	retryConfig.StatusCodes = validStatusCodes
 	return nil
 }
 
 func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName string) error {
 	if endpointCluster != nil && len(endpointCluster.Endpoints) > 0 {
-		err := endpointCluster.Endpoints[0].validateEndpoint()
-		if err != nil {
-			logger.LoggerOasparser.Errorf("Error while parsing the %s endpoints. %v",
-				endpointName, err)
-			return err
+		var err error
+		for _, endpoint := range endpointCluster.Endpoints {
+			err = endpoint.validateEndpoint()
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while parsing the %s endpoints. %v",
+					endpointName, err)
+				return err
+			}
 		}
+
 		if endpointCluster.Config != nil {
 			if endpointCluster.Config.RetryConfig != nil {
 				err = endpointCluster.Config.RetryConfig.validateRetryConfig()

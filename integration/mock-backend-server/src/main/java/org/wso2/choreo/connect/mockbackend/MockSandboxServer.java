@@ -34,6 +34,7 @@ public class MockSandboxServer extends Thread {
     private HttpServer httpServer;
     private int retryCountEndpointTwo = 0;
     private int retryCountEndpointThree = 0;
+    private int retryCountEndpointSeven = 0;
 
     public MockSandboxServer(int port) {
         backEndServerPort = port;
@@ -51,6 +52,18 @@ public class MockSandboxServer extends Thread {
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
                 byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            // For retry tests
+            // Mock backend must be restarted if the retry tests are run again, against the already used resources.
+            httpServer.createContext(context + "/retry-seven", exchange -> {
+                retryCountEndpointSeven += 1;
+                if (retryCountEndpointSeven < 7) { // returns a x04 status
+                    byte[] response = ResponseConstants.GATEWAY_ERROR.getBytes();
+                    respondWithBodyAndClose(HttpURLConnection.HTTP_GATEWAY_TIMEOUT, response, exchange);
+                } else {
+                    byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                    respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+                }
             });
             httpServer.createContext(context + "/retry-three", exchange -> {
                 retryCountEndpointThree += 1;

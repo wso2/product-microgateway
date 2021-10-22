@@ -70,6 +70,7 @@ const (
 	apiNameContextExtension         string = "name"
 	prodClusterNameContextExtension string = "prodClusterName"
 	sandClusterNameContextExtension string = "sandClusterName"
+	retryPolicyRetriableStatusCodes string = "retriable-status-codes"
 )
 
 const (

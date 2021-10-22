@@ -101,6 +101,31 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Pet'
+  /retry-seven:
+    x-wso2-sandbox-endpoints:
+      urls:
+        - http://mockBackend:2390/v2
+      advanceEndpointConfig:
+        retryConfig:
+          count: 10
+          statusCodes:
+            - 201
+            - 202
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: 'This endpoint returns 504 for the first three requests'
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
 definitions:
   Pet:
     type: object
