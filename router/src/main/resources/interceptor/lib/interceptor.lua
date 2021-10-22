@@ -232,6 +232,9 @@ local function modify_body(handle, interceptor_response_body, request_id, shared
 
         local content_length = handle:body():setBytes(body)
         handle:headers():replace("content-length", content_length)
+        if not is_request_flow then
+            handle:headers():replace(STATUS, "204")
+        end
         return false
     end
 

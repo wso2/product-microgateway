@@ -322,16 +322,15 @@ public class MockBackEndServer extends Thread {
             });
 
             // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor tests.
+            // sent request headers in response headers
+            // sent request body in response body
             httpServer.createContext(context + "/echo", exchange -> {
                 byte[] response;
-                JSONObject responseJSON = new JSONObject();
                 String requestBody = Utils.requestBodyToString(exchange);
-                responseJSON.put("body", requestBody);
-                responseJSON.put("headers", exchange.getRequestHeaders());
-                response = responseJSON.toString().getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
-                        Constants.CONTENT_TYPE_APPLICATION_JSON);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                response = requestBody.getBytes();
+                exchange.getResponseHeaders().putAll(exchange.getRequestHeaders());
+                int respCode = response.length == 0 ? HttpURLConnection.HTTP_NO_CONTENT : HttpURLConnection.HTTP_OK;
+                exchange.sendResponseHeaders(respCode, response.length);
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });

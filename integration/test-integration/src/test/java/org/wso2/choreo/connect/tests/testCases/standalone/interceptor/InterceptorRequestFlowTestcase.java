@@ -126,7 +126,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Map<String, String> headersToReplace = new HashMap<>();
         headersToReplace.put("foo-update", "Header_Updated");
         headersToReplace.put("foo-update-not-exist", "Header_Updated_New_Val");
-        headersToReplace.put("content-type", "application/xml");
+        headersToReplace.put("content-type", "text/plain"); // sending text/plain, to support any content
         interceptorRespBodyJSON.put("headersToReplace", headersToReplace);
         interceptorRespBodyJSON.put("headersToRemove", Collections.singletonList("foo-remove"));
         setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
@@ -142,7 +142,8 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
                 basePath + "/echo/123"), clientReqBody, headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        int expectedRespCode = StringUtils.isEmpty(reqToBackend) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
+        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // check which flows are invoked in interceptor service
         JSONObject status = new JSONObject(getInterceptorStatus());
@@ -150,21 +151,15 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
 
         // test headers
-        JSONObject backendResponse = new JSONObject(response.getData());
-        JSONObject respHeaders = backendResponse.getJSONObject("headers"); // headers key are capitalized from echo server
-        Assert.assertFalse(respHeaders.has("Foo-remove"), "Failed to remove header");
-        Assert.assertEquals(respHeaders.getJSONArray("Foo-add").getString(0), "Header_newly_added",
-                "Failed to add new header");
-        Assert.assertEquals(respHeaders.getJSONArray("Foo-update").getString(0), "Header_Updated",
-                "Failed to replace header");
-        Assert.assertEquals(respHeaders.getJSONArray("Foo-update-not-exist").getString(0), "Header_Updated_New_Val",
-                "Failed to replace header");
-        Assert.assertEquals(respHeaders.getJSONArray("Content-type").getString(0), "application/xml",
-                "Failed to replace header");
-        Assert.assertEquals(respHeaders.getJSONArray("Foo-keep").getString(0), "Header_to_be_kept",
-                "Failed to keep original header");
+        Map<String, String> respHeaders = response.getHeaders();
+        Assert.assertFalse(respHeaders.containsKey("foo-remove"), "Failed to remove header");
+        Assert.assertEquals(respHeaders.get("foo-add"), "Header_newly_added", "Failed to add new header");
+        Assert.assertEquals(respHeaders.get("foo-update"), "Header_Updated", "Failed to replace header");
+        Assert.assertEquals(respHeaders.get("foo-update-not-exist"), "Header_Updated_New_Val", "Failed to replace header");
+        Assert.assertEquals(respHeaders.get("content-type"), "text/plain", "Failed to replace header");
+        Assert.assertEquals(respHeaders.get("foo-keep"), "Header_to_be_kept", "Failed to keep original header");
         // test body
-        Assert.assertEquals(backendResponse.getString("body"), reqToBackend);
+        Assert.assertEquals(response.getData(), reqToBackend);
     }
 
     @Test(
