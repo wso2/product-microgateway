@@ -90,6 +90,13 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
 				}
+				if applicationSecurity, found := pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
+					setApplicationSecurity(applicationSecurity, &pathItem.Get.Security)
+				}
+				// pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]
+				logger.LoggerOasparser.Infof("pathItem.Get.Security: %v %T", pathItem.Get.Security, pathItem.Get.Security);
+				logger.LoggerOasparser.Infof("Extensions: %v %T", pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity], 
+				pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]);
 				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
 					pathItem.Get.Extensions))
 				methodFound = true
@@ -97,6 +104,9 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if pathItem.Post != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
+				}
+				if applicationSecurity, found := pathItem.Post.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
+					setApplicationSecurity(applicationSecurity, &pathItem.Post.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security,
 					pathItem.Post.Extensions))
@@ -106,6 +116,9 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
 				}
+				if applicationSecurity, found := pathItem.Put.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
+					setApplicationSecurity(applicationSecurity, &pathItem.Put.Security)
+				}
 				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security,
 					pathItem.Put.Extensions))
 				methodFound = true
@@ -113,6 +126,9 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if pathItem.Delete != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
+				}
+				if applicationSecurity, found := pathItem.Delete.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
+					setApplicationSecurity(applicationSecurity, &pathItem.Delete.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security,
 					pathItem.Delete.Extensions))
@@ -122,6 +138,9 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
 				}
+				if applicationSecurity, found := pathItem.Head.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
+					setApplicationSecurity(applicationSecurity, &pathItem.Head.Security)
+				}
 				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security,
 					pathItem.Head.Extensions))
 				methodFound = true
@@ -130,6 +149,9 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
+				if applicationSecurity, found := pathItem.Patch.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
+					setApplicationSecurity(applicationSecurity, &pathItem.Patch.Security)
+				}
 				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security,
 					pathItem.Patch.Extensions))
 				methodFound = true
@@ -137,6 +159,9 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if pathItem.Options != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
+				}
+				if applicationSecurity, found := pathItem.Options.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
+					setApplicationSecurity(applicationSecurity, &pathItem.Options.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
 					pathItem.Options.Extensions))
@@ -154,11 +179,35 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 // Sets security definitions defined in swagger 2 format.
 func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 	var securitySchemes []SecurityScheme
+	var isApplicationSecurityOptional = true
+	result, ok := swagger2.Extensions[xWso2ApplicationSecurity].(map[string]interface{})
+	if ok {
+		for key, value := range result {
+			if (key == "optional" && value != true) {
+				logger.LoggerOasparser.Infof("Inside optional check: %v value %v", key, value);
+				isApplicationSecurityOptional = false
+			}
+		}
+		if !isApplicationSecurityOptional {
+			if x, found := result["security-types"]; found {
+				logger.LoggerOasparser.Infof("Inside security map check: %T", x);
+				if val, ok := result["security-types"].([]interface{}); ok {
+					for _, mapValue := range val {
+						if mapValue == "api_key" {
+							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: "apiKey" , Name: mapValue.(string)}
+							securitySchemes = append(securitySchemes, scheme)
+						}
+					}
+				}
+			} 
+		}
+	}
+
 	for key , val := range swagger2.SecurityDefinitions {
 		scheme := SecurityScheme{DefinitionName: key, Type: val.Type , Name: val.Name, In: val.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
-	logger.LoggerOasparser.Debugf("Security schemes in setSecurityDefinitions  %v:",securitySchemes)
+	logger.LoggerOasparser.Infof("Security schemes in setSecurityDefinitions  %v:",securitySchemes)
 	return securitySchemes
 }
 
@@ -167,6 +216,43 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
 	if _, found := v.Extensions.GetBool(xWso2DisableSecurity); !found {
 		v.AddExtension(xWso2DisableSecurity, enable)
+	}
+}
+
+func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool{
+	var isApplicationSecurityOptional = true
+	result, ok := applicationSecurity.(map[string]interface{})
+	if ok {
+		for key, value := range result {
+			if (key == "optional" && value != true) {
+				logger.LoggerOasparser.Infof("Inside optional check: %v value %v", key, value);
+				isApplicationSecurityOptional = false
+			}
+		}
+	}
+	return isApplicationSecurityOptional
+}
+
+func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string){
+	logger.LoggerOasparser.Infof("Inside method: %v ", applicationSecurity);
+	logger.LoggerOasparser.Infof("Inside method2: %v ", *pathItemSecurity);
+	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(applicationSecurity)
+	result, ok := applicationSecurity.(map[string]interface{})
+	if ok && !isApplicationSecurityOptional{
+		if x, found := result["security-types"]; found {
+			logger.LoggerOasparser.Infof("Inside security map check: %T", x);
+			if val, ok := result["security-types"].([]interface{}); ok {
+				logger.LoggerOasparser.Infof("AAA");
+				for _, mapValue := range val {
+					if mapValue == "api_key" {
+						applicationAPIKeyMap := map[string][]string{
+							mapValue.(string): {},
+						}
+						*pathItemSecurity = append(*pathItemSecurity, applicationAPIKeyMap)
+					}
+				}
+			}
+		} 
 	}
 }
 
