@@ -128,7 +128,7 @@ public class MockInterceptorServer extends Thread {
                 HttpServer httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0);
 
                 // TODO: (renuka) do we want a versioning in interceptors
-                String context = "";
+                String context = "/api/v1";
                 // handle request
                 httpServer.createContext(context + "/handle-request", exchange -> {
                     if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
