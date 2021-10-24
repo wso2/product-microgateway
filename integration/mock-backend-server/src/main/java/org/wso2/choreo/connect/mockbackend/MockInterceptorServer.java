@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -126,8 +126,6 @@ public class MockInterceptorServer extends Thread {
 
             try {
                 HttpServer httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0);
-
-                // TODO: (renuka) do we want a versioning in interceptors
                 String context = "/api/v1";
                 // handle request
                 httpServer.createContext(context + "/handle-request", exchange -> {

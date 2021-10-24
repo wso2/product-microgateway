@@ -149,10 +149,10 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(response.getData(), "REQUEST-BODY", "Response body mismatched");
     }
 
-    @Test(description = "Test none JSON response body from interceptor service")
-    public void testNoneJSONBody() throws Exception {
+    @Test(description = "Test non JSON response body from interceptor service")
+    public void testNonJSONBody() throws Exception {
         // setting response body of interceptor service
-        setResponseOfInterceptor("<none>JSON</none>", isRequestFlow);
+        setResponseOfInterceptor("<non>JSON</non>", isRequestFlow);
 
         // setting client
         Map<String, String> headers = new HashMap<>();
