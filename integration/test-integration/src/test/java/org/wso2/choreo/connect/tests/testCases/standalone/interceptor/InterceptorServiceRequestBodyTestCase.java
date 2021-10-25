@@ -69,21 +69,54 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
 
         String statusBodyType = isRequestFlow ? InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY :
                 InterceptorConstants.StatusPayload.RESPONSE_FLOW_REQUEST_BODY;
-        JSONObject interceptRespBodyJSON = new JSONObject(status.getString(statusBodyType));
+        JSONObject interceptReqBodyJSON = new JSONObject(status.getString(statusBodyType));
 
         // invocation context
-        testInvocationContext(interceptRespBodyJSON, apiName, basePath, Arrays.asList("GET", "POST"), "POST",
+        testInvocationContext(interceptReqBodyJSON, apiName, basePath, Arrays.asList("GET", "POST"), "POST",
                 basePath + "/echo/123", "/echo/{id}");
 
         // headers
         headers.remove(HttpHeaderNames.AUTHORIZATION.toString()); // check without auth header
-        testInterceptorHeaders(interceptRespBodyJSON, headers, true);
+        testInterceptorHeaders(interceptReqBodyJSON, headers, true);
         if (!isRequestFlow) { // check both request and response headers in response flow
-            testInterceptorHeaders(interceptRespBodyJSON, headers, false);
+            testInterceptorHeaders(interceptReqBodyJSON, headers, false);
         }
 
         // body
-        testInterceptorBody(interceptRespBodyJSON, body, isRequestFlow);
+        testInterceptorBody(interceptReqBodyJSON, body, isRequestFlow);
+    }
+
+    @Test(description = "Test updating response body when it is not included - invalid operation")
+    public void testInterceptorContext() throws Exception {
+        // JSON request to XML backend
+        // setting response body of interceptor service
+        JSONObject interceptorReqBodyJSON = new JSONObject();
+        JSONObject interceptorContext = new JSONObject();
+        interceptorContext.put("foo-key1", "foo-val1");
+        interceptorContext.put("foo-key2", "foo-val2");
+        interceptorReqBodyJSON.put("interceptorContext", interceptorContext.toString());
+        setResponseOfInterceptor(interceptorReqBodyJSON.toString(), true);
+
+        // setting client
+        String basePath = "/intercept-response";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                basePath + "/pet/findByStatus/interceptor-context"), "REQUEST-BODY", headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = getInterceptorStatus();
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.BOTH);
+
+        // test interceptor context
+        String respFlowReqBody = status.getString(InterceptorConstants.StatusPayload.RESPONSE_FLOW_REQUEST_BODY);
+        JSONObject contextFromRespFlow = new JSONObject(new JSONObject(respFlowReqBody).getString(INTERCEPTOR_CONTEXT));
+        Assert.assertEquals(contextFromRespFlow.getString("foo-key1"), "foo-val1", "Interceptor context read by interceptor service is not matching");
+        Assert.assertEquals(contextFromRespFlow.getString("foo-key2"), "foo-val2", "Interceptor context read by interceptor service is not matching");
     }
 
     void testInvocationContext(JSONObject bodyJSON, String apiName, String basePath, List<String> supportedMethods,

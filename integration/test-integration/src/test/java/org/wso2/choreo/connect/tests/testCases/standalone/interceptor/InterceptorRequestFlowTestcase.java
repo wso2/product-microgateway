@@ -51,7 +51,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
         String interceptorRespBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
 
-        // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, reqToBackend}
+        // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, expectedBody}
         return new Object[][]{
                 // non empty body from interceptor - means update request to backend
                 {clientReqBody, interceptorRespBody, false, interceptorRespBody},
@@ -87,7 +87,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
             dataProvider = "requestBodyProvider"
     )
     public void testRequestToBackendServiceInRequestFlowInterception(
-            String clientReqBody, String interceptorRespBody, boolean isOmitInterceptorRespBody, String reqToBackend)
+            String clientReqBody, String interceptorRespBody, boolean isOmitInterceptorRespBody, String expectedBody)
             throws Exception {
 
         // JSON request to XML backend
@@ -120,7 +120,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
                 basePath + "/echo/123"), clientReqBody, headers);
 
         Assert.assertNotNull(response);
-        int expectedRespCode = StringUtils.isEmpty(reqToBackend) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
+        int expectedRespCode = StringUtils.isEmpty(expectedBody) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
         Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // check which flows are invoked in interceptor service
@@ -137,7 +137,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(respHeaders.get("content-type"), "application/xml", "Failed to replace header");
         Assert.assertEquals(respHeaders.get("foo-keep"), "Header_to_be_kept", "Failed to keep original header");
         // test body
-        Assert.assertEquals(response.getData(), reqToBackend);
+        Assert.assertEquals(response.getData(), expectedBody);
     }
 
     @Test(

@@ -121,6 +121,29 @@ paths:
               $ref: '#/definitions/Pet'
         '400':
           description: Invalid status value
+  /pet/findByStatus/interceptor-context:
+    x-wso2-request-interceptor:
+      host: mockBackend
+      port: 2371
+      scheme: http
+      includes:
+        - request_headers
+    x-wso2-response-interceptor:
+      host: mockBackend
+      port: 2371
+      scheme: http
+      includes:
+        - request_headers
+    post:
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: successful operation
   /pet/findByStatus/headers-only:
     x-wso2-response-interceptor:
       host: mockBackend

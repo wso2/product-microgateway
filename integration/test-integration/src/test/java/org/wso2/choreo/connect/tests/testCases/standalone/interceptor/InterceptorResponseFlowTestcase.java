@@ -128,7 +128,7 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         // JSON request to XML backend
         // setting response body of interceptor service
         JSONObject interceptorRespBodyJSON = new JSONObject();
-        interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("INVALID-UPDATE-BODY".getBytes()));
+        interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("INVALID-UPDATE-BODY-OPERATION".getBytes()));
         setResponseOfInterceptor(interceptorRespBodyJSON.toString(), isRequestFlow);
 
         // setting client
@@ -170,6 +170,6 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
 
         // test error code
         JSONObject respJSON = new JSONObject(response.getData());
-        Assert.assertEquals(respJSON.getString("code"), "102518", "Error code mismatched for base64 decode error");
+        Assert.assertEquals(respJSON.getString("code"), "103501", "Error code mismatched for base64 decode error");
     }
 }

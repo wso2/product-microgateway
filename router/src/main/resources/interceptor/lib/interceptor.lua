@@ -161,7 +161,7 @@ local function decode_string(decode_func, decode_func_desc, encoded_string, hand
     respond_error(handle, shared_info, request_id, {
         error_message = "Internal Server Error",
         error_description = "Internal Server Error",
-        error_code = "102518"
+        error_code = "103501" -- Invalid encoded body from interceptor service
     }, is_request_flow)
     return "", true
 end
@@ -282,7 +282,7 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
     respond_error(handle, shared_info, request_id, {
             error_message = "Internal Server Error",
             error_description = "Internal Server Error",
-            error_code = "102517"
+            error_code = "103500" -- Interceptor service connect failure or invalid response status code
         },
         is_request_flow
     )

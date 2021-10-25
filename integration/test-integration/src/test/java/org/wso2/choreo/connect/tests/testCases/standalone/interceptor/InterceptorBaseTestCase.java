@@ -19,8 +19,6 @@
 package org.wso2.choreo.connect.tests.testCases.standalone.interceptor;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -28,20 +26,16 @@ import org.testng.annotations.BeforeMethod;
 import org.wso2.choreo.connect.mockbackend.InterceptorConstants;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
-import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class InterceptorBaseTestCase {
     static final String INVOCATION_CONTEXT = "invocationContext";
+    static final String INTERCEPTOR_CONTEXT = "interceptorContext";
 
     String jwtTokenProd;
     String apiName;

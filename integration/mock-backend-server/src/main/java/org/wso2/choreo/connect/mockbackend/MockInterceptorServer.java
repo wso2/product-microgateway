@@ -19,8 +19,14 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsParameters;
+import com.sun.net.httpserver.HttpsServer;
 import org.json.JSONObject;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.Arrays;

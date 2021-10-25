@@ -56,7 +56,7 @@ public class InterceptorServiceNotAvailableTestCase extends InterceptorBaseTestC
 
         // test error code
         JSONObject respJSON = new JSONObject(response.getData());
-        Assert.assertEquals(respJSON.getString("code"), "102517", "Error code mismatched for interceptor service not available");
+        Assert.assertEquals(respJSON.getString("code"), "103500", "Error code mismatched for interceptor service not available");
     }
 
     @Test(description = "Test response flow interceptor service not available and only headers are requested")
@@ -73,7 +73,7 @@ public class InterceptorServiceNotAvailableTestCase extends InterceptorBaseTestC
 
         // test error code
         // TODO: (renuka) we can't update response body, when it is not buffered, so direcly send response body to client
-        // Should return error code "102517" but return "102503" since interceptor service not available
+        // Should return error code "103500" but return "102503" since interceptor service not available
         JSONObject respJSON = new JSONObject(response.getData());
         Assert.assertEquals(respJSON.getString("code"), "102503", "Error code mismatched for upstream connect error");
     }
@@ -92,6 +92,6 @@ public class InterceptorServiceNotAvailableTestCase extends InterceptorBaseTestC
 
         // test error code
         JSONObject respJSON = new JSONObject(response.getData());
-        Assert.assertEquals(respJSON.getString("code"), "102517", "Error code mismatched for interceptor service not available");
+        Assert.assertEquals(respJSON.getString("code"), "103500", "Error code mismatched for interceptor service not available");
     }
 }
