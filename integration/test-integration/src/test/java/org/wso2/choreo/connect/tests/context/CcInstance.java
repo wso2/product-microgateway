@@ -26,6 +26,8 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Choreo Connect instance class.
@@ -43,7 +45,7 @@ public class CcInstance extends ChoreoConnectImpl {
      * @throws CCTestException if an error occurs while appending backend service to docker-compose file
      */
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile,
-                       boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl)
+                       boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs)
             throws IOException, CCTestException {
         createTmpMgwSetup();
         String targetDir = Utils.getTargetDirPath();
@@ -60,6 +62,19 @@ public class CcInstance extends ChoreoConnectImpl {
             Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH
                     + TestConstant.TEST_DOCKER_COMPOSE_DIR + File.separator + dockerComposeFile,
                     ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.DOCKER_COMPOSE_YAML_PATH);
+        }
+
+        for (String apiProjectPath: startupAPIs) {
+            String substring = apiProjectPath.substring(apiProjectPath.lastIndexOf(File.separator) + 1);
+            if (apiProjectPath.endsWith(".zip")) {
+                String fileName = substring;
+                Utils.copyFile(apiProjectPath, ccTempPath + TestConstant.DOCKER_COMPOSE_DIR +
+                        TestConstant.STARTUP_APIS_DIR + File.separator + fileName);
+            } else {
+                String dirName = substring;
+                Utils.copyDirectory(apiProjectPath, ccTempPath + TestConstant.DOCKER_COMPOSE_DIR +
+                        TestConstant.STARTUP_APIS_DIR + File.separator + dirName);
+            }
         }
         String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
                         + TestConstant.DOCKER_COMPOSE_YAML_PATH;
@@ -78,6 +93,7 @@ public class CcInstance extends ChoreoConnectImpl {
         String dockerComposeFile;
         String confFileName;
         String backendServiceFile;
+        List<String> startupAPIProjectFiles = new ArrayList<>();
         boolean withCustomJwtTransformer = false;
         boolean withAnalyticsMetricImpl = false;
 
@@ -101,9 +117,15 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
+        public Builder withStartupAPI(String filePath) {
+            this.startupAPIProjectFiles.add(filePath);
+            return this;
+        }
+
+
         public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
-                                this.withCustomJwtTransformer, this.withAnalyticsMetricImpl);
+                                this.withCustomJwtTransformer, this.withAnalyticsMetricImpl, this.startupAPIProjectFiles);
             return instance;
         }
     }

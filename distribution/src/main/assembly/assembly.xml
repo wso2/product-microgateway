@@ -58,6 +58,13 @@
                 <exclude>**/*</exclude>
             </excludes>
         </fileSet>
+        <fileSet>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/adapter/artifacts/apis
+            </outputDirectory>
+            <excludes>
+                <exclude>**/*</exclude>
+            </excludes>
+        </fileSet>
     </fileSets>
     <files>
         <file>

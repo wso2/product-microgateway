@@ -120,6 +120,8 @@ public class TestConstant {
             + "choreo-connect-with-apim";
     public static final String DROPINS_FOLDER_PATH = DOCKER_COMPOSE_DIR + File.separator
             + "resources" + File.separator + "enforcer" + File.separator + "dropins";
+    public static final String STARTUP_APIS_DIR = File.separator + "resources" + File.separator
+            + "adapter" + File.separator + "artifacts" + File.separator + "apis";
 
     public static final String HEALTH_ENDPOINT_RESPONSE = "{\"status\": \"healthy\"}";
 

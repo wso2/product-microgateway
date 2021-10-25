@@ -39,6 +39,7 @@ services:
       - ../resources/adapter/security:/home/wso2/security
       - ./conf/log_config.toml:/home/wso2/conf/log_config.toml
       - ./conf/config.toml:/home/wso2/conf/config.toml
+      - ../resources/adapter/artifacts/apis:/home/wso2/artifacts/apis
     environment:
       - ADAPTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem

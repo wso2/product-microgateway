@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
+import org.wso2.choreo.connect.tests.util.ZipDir;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,15 @@ public class CcWithDefaultConf {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ccInstance = new CcInstance.Builder().build();
+        ApictlUtils.createProject( "openAPI_startup_zipped.yaml", "openAPI_startup_zipped",
+                null, null);
+        ApictlUtils.createProject( "openAPI_startup.yaml", "openAPI_startup", null, null);
+        ZipDir.createZipFile(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH + "openAPI_startup_zipped");
+        ccInstance = new CcInstance.Builder()
+                .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH +
+                        "openAPI_startup_zipped.zip")
+                .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH + "openAPI_startup")
+                .build();
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());

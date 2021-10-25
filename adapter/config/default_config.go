@@ -57,6 +57,7 @@ var defaultConfig = &Config{
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
+		ArtifactsDirectory: "/home/wso2/artifacts",
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",

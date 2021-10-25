@@ -18,10 +18,8 @@
 
 package org.wso2.choreo.connect.tests.util;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.FileUtils;
-import org.awaitility.Awaitility;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -40,7 +38,6 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
