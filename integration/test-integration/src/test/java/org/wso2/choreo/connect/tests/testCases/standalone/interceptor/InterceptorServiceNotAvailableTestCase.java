@@ -23,7 +23,6 @@ import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.mockbackend.InterceptorConstants;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -72,7 +71,7 @@ public class InterceptorServiceNotAvailableTestCase extends InterceptorBaseTestC
         Assert.assertEquals(response.getResponseCode(), 500, "Response code mismatched");
 
         // test error code
-        // TODO: (renuka) we can't update response body, when it is not buffered, so direcly send response body to client
+        // We can't update response body, when it is not buffered, so directly send response body to client
         // Should return error code "103500" but return "102503" since interceptor service not available
         JSONObject respJSON = new JSONObject(response.getData());
         Assert.assertEquals(respJSON.getString("code"), "102503", "Error code mismatched for upstream connect error");

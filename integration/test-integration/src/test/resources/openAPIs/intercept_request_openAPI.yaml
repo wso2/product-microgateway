@@ -23,8 +23,7 @@ schemes:
 x-wso2-production-endpoints:
   urls:
     - https://mockBackend:2382/v2
-# API level interceptor definition
-x-wso2-request-interceptor:
+x-wso2-request-interceptor: # API level interceptor definition
   host: mockBackend
   port: 2371
   scheme: http
@@ -55,8 +54,7 @@ paths:
         '200':
           description: successful operation
   /echo/resp-intercept:
-    # API level interceptor definition
-    x-wso2-response-interceptor:
+    x-wso2-response-interceptor: # Resource level interceptor definition
       host: mockBackend
       port: 2371
       scheme: http
@@ -73,8 +71,7 @@ paths:
         '200':
           description: successful operation
   /pet/findByStatus/resp-intercept-enabled:
-    # API level interceptor definition
-    x-wso2-response-interceptor:
+    x-wso2-response-interceptor: # Resource level interceptor definition
       host: mockBackend
       port: 2371
       scheme: http
