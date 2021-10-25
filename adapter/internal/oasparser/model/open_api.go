@@ -189,7 +189,7 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 			if _, found := result[SecurityTypes]; found {
 				if val, ok := result[SecurityTypes].([]interface{}); ok {
 					for _, mapValue := range val {
-						if mapValue == ApiKeyInAppLevelSecurity {
+						if mapValue == APIKeyInAppLevelSecurity {
 							applicationAPIKeyMap := map[string][]string{
 								mapValue.(string): {},
 							}
@@ -212,12 +212,12 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 func checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes *[]SecurityScheme) {
 	var isApplicationAPIKeyFound = false;
 	for _, val := range *securitySchemes {
-		if val.DefinitionName == ApiKeyInAppLevelSecurity {
+		if val.DefinitionName == APIKeyInAppLevelSecurity {
 			isApplicationAPIKeyFound = true;
 		}
 	}
 	if !isApplicationAPIKeyFound {
-		scheme := SecurityScheme{DefinitionName: ApiKeyInAppLevelSecurity, Type: ApiKeyInAppLevelSecurity, Name: ApiKeyInAppLevelSecurity}
+		scheme := SecurityScheme{DefinitionName: APIKeyInAppLevelSecurity, Type: APIKeyInAppLevelSecurity, Name: APIKeyInAppLevelSecurity}
 		*securitySchemes = append(*securitySchemes, scheme)
 	}
 }

@@ -187,8 +187,8 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 			if _, found := result[SecurityTypes]; found {
 				if val, ok := result[SecurityTypes].([]interface{}); ok {
 					for _, mapValue := range val {
-						if mapValue == ApiKeyInAppLevelSecurity {
-							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: ApiKeyInAppLevelSecurity , Name: mapValue.(string)}
+						if mapValue == APIKeyInAppLevelSecurity {
+							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: APIKeyInAppLevelSecurity , Name: mapValue.(string)}
 							securitySchemes = append(securitySchemes, scheme)
 						}
 					}
@@ -235,7 +235,7 @@ func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[
 		if _, found := result[SecurityTypes]; found {
 			if val, ok := result[SecurityTypes].([]interface{}); ok {
 				for _, mapValue := range val {
-					if mapValue == ApiKeyInAppLevelSecurity {
+					if mapValue == APIKeyInAppLevelSecurity {
 						applicationAPIKeyMap := map[string][]string{
 							mapValue.(string): {},
 						}
