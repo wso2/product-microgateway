@@ -190,6 +190,7 @@ type envoyUpstream struct {
 	TLS      upstreamTLS
 	Timeouts upstreamTimeout
 	Health   upstreamHealth
+	Retry    upstreamRetry
 }
 
 type upstreamTLS struct {
@@ -206,6 +207,12 @@ type upstreamHealth struct {
 	Interval           int32 `toml:"interval"`
 	UnhealthyThreshold int32 `toml:"unhealthyThreshold"`
 	HealthyThreshold   int32 `toml:"healthyThreshold"`
+}
+
+type upstreamRetry struct {
+	MaxRetryCount        uint32
+	BaseIntervalInMillis uint32
+	StatusCodes          []uint32
 }
 
 type security struct {

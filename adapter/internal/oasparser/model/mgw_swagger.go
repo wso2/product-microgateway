@@ -61,7 +61,7 @@ type EndpointCluster struct {
 	Endpoints    []Endpoint
 	// EndpointType enum {failover, loadbalance}. if any other value provided, consider as the default value; which is loadbalance
 	EndpointType string
-	EndpointConfig
+	Config       *EndpointConfig
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -87,22 +87,20 @@ type Endpoint struct {
 
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster
 type EndpointConfig struct {
-	RetryConfig
+	RetryConfig *RetryConfig `mapstructure:"retryConfig"`
 }
 
 // RetryConfig holds the parameters for retries done by cc to the EndpointCluster
 type RetryConfig struct {
-	Count            int32
-	IntervalInMillis int32
-	BackOffFactor    float32
-	StatusCodes      []string
+	Count       int32    `mapstructure:"count"`
+	StatusCodes []uint32 `mapstructure:"statusCodes"`
 }
 
 // SecurityScheme represents the structure of an security scheme.
 type SecurityScheme struct {
 	// Arbitrary name used to define security scheme
 	// ex: default, x-api-key etc.
-	DefinitionName string 
+	DefinitionName string
 
 	// Type of the security scheme
 	// Possible values are apiKey, oauth2
@@ -112,7 +110,7 @@ type SecurityScheme struct {
 	// User can define a specific name for above types
 	Name string
 
-	// Location of the api key 
+	// Location of the api key
 	// Valid values are query, header
 	In string
 }
@@ -238,7 +236,7 @@ func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
 	return swagger.xWso2AuthHeader
 }
 
-// GetSecurityScheme returns the securityschemes of the API
+// GetSecurityScheme returns the securitySchemes of the API
 func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 	return swagger.securityScheme
 }
@@ -274,14 +272,51 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
 // it is not populated by SetXWso2Extensions
-func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandboxEndpoints []Endpoint) {
+func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandboxEndpoints []Endpoint,
+	sandEndpointInfos []EndpointInfo) error {
+
 	swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxEndpoints, LoadBalance)
+	if sandEndpointInfos != nil && len(sandEndpointInfos) > 0 {
+		retryCount := sandEndpointInfos[0].Config.RetryTimeOut
+		if retryCount != "" {
+			count, err := strconv.ParseInt(retryCount, 10, 32)
+			if err != nil {
+				return err
+			}
+			conf, _ := config.ReadConfigs()
+			retryConfig := &RetryConfig{
+				Count:       int32(count),
+				StatusCodes: conf.Envoy.Upstream.Retry.StatusCodes,
+			}
+			swagger.sandboxEndpoints.Config.RetryConfig = retryConfig
+		}
+	}
+	return nil
 }
 
 // SetXWso2ProductionEndpointMgwSwagger set the MgwSwagger object with the productionEndpoint when
 // it is not populated by SetXWso2Extensions
-func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionEndpoints []Endpoint) {
+func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionEndpoints []Endpoint,
+	prodEndpointInfos []EndpointInfo) error {
+
 	swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints, LoadBalance)
+	if prodEndpointInfos != nil && len(prodEndpointInfos) > 0 {
+		retryCount := prodEndpointInfos[0].Config.RetryTimeOut
+		if retryCount != "" {
+			count, err := strconv.ParseInt(retryCount, 10, 32)
+			if err != nil {
+				return err
+			}
+			conf, _ := config.ReadConfigs()
+			statusCodes := conf.Envoy.Upstream.Retry.StatusCodes
+			retryConfig := &RetryConfig{
+				Count:       int32(count),
+				StatusCodes: statusCodes,
+			}
+			swagger.productionEndpoints.Config.RetryConfig = retryConfig
+		}
+	}
+	return nil
 }
 
 func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {
@@ -393,17 +428,26 @@ func (swagger *MgwSwagger) Validate() error {
 			swagger.title, swagger.version)
 		return errors.New("no endpoints are provided for the API")
 	}
-	if swagger.productionEndpoints != nil && len(swagger.productionEndpoints.Endpoints) > 0 {
-		err := swagger.productionEndpoints.Endpoints[0].validateEndpoint()
+	err := swagger.productionEndpoints.validateEndpointCluster("API level production")
+	if err != nil {
+		logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
+			swagger.title, swagger.version, err)
+		return err
+	}
+	err = swagger.sandboxEndpoints.validateEndpointCluster("API level sandbox")
+	if err != nil {
+		logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
+			swagger.title, swagger.version, err)
+		return err
+	}
+	for _, res := range swagger.resources {
+		err := res.productionEndpoints.validateEndpointCluster("Resource level production")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
 			return err
 		}
-	}
-
-	if swagger.sandboxEndpoints != nil && len(swagger.sandboxEndpoints.Endpoints) > 0 {
-		err := swagger.sandboxEndpoints.Endpoints[0].validateEndpoint()
+		err = res.sandboxEndpoints.validateEndpointCluster("Resource level sandbox")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
@@ -411,7 +455,7 @@ func (swagger *MgwSwagger) Validate() error {
 		}
 	}
 
-	err := swagger.validateBasePath()
+	err = swagger.validateBasePath()
 	if err != nil {
 		logger.LoggerOasparser.Errorf("Error while parsing the API %s:%s - %v", swagger.title, swagger.version, err)
 		return err
@@ -443,6 +487,56 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	urlString := endpoint.URLType + "://" + endpoint.Host
 	_, err := url.ParseRequestURI(urlString)
 	return err
+}
+
+func (retryConfig *RetryConfig) validateRetryConfig() error {
+	conf, _ := config.ReadConfigs()
+	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxRetryCount
+	if retryConfig.Count > int32(maxConfigurableCount) || retryConfig.Count < 0 {
+		logger.LoggerOasparser.Errorf("Retry count for the API must be within the range 0 - %v."+
+			"Reconfiguring retry count as %v", maxConfigurableCount, maxConfigurableCount)
+		retryConfig.Count = int32(maxConfigurableCount)
+	}
+	var validStatusCodes []uint32
+	for _, statusCode := range retryConfig.StatusCodes {
+		if statusCode > 598 || statusCode < 401 {
+			logger.LoggerOasparser.Errorf("Given status code for the API retry config is invalid." +
+				"Must be in the range 401 - 598. Dropping the status code.")
+		} else {
+			validStatusCodes = append(validStatusCodes, statusCode)
+		}
+	}
+	if len(validStatusCodes) < 1 {
+		validStatusCodes = append(validStatusCodes, conf.Envoy.Upstream.Retry.StatusCodes...)
+	}
+	retryConfig.StatusCodes = validStatusCodes
+	return nil
+}
+
+func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName string) error {
+	if endpointCluster != nil && len(endpointCluster.Endpoints) > 0 {
+		var err error
+		for _, endpoint := range endpointCluster.Endpoints {
+			err = endpoint.validateEndpoint()
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while parsing the %s endpoints. %v",
+					endpointName, err)
+				return err
+			}
+		}
+
+		if endpointCluster.Config != nil {
+			if endpointCluster.Config.RetryConfig != nil {
+				err = endpointCluster.Config.RetryConfig.validateRetryConfig()
+				if err != nil {
+					logger.LoggerOasparser.Errorf("Invalide retry config for %s endpoints. %v",
+						endpointName, err)
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // getEndpoints extracts and generate the EndpointCluster Object from any yaml map that has the following structure
@@ -486,7 +580,19 @@ func getEndpoints(vendorExtensions map[string]interface{}, endpointName string) 
 				}
 			}
 			// Set Endpoint Config
-
+			if advanceEndpointConfig, found := endpointClusterMap[AdvanceEndpointConfig]; found {
+				if configMap, ok := advanceEndpointConfig.(map[string]interface{}); ok {
+					var endpointConfig EndpointConfig
+					err := parser.Decode(configMap, &endpointConfig)
+					if err != nil {
+						println(err.Error())
+						return nil, errors.New("Invalid schema for advanceEndpointConfig in " + endpointName)
+					}
+					endpointCluster.Config = &endpointConfig
+				} else {
+					return nil, errors.New("Invalid structure for advanceEndpointConfig in " + endpointName)
+				}
+			}
 			return &endpointCluster, nil
 		}
 		logger.LoggerOasparser.Errorf("%v OpenAPI extension does not adhere with the schema", endpointName)

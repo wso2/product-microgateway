@@ -20,16 +20,18 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
-import org.wso2.choreo.connect.discovery.api.Endpoint;
+import org.wso2.choreo.connect.discovery.api.EndpointClusterConfig;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
@@ -69,12 +71,20 @@ public class RestAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         String apiType = api.getApiType();
-        List<String> productionUrls = processEndpoints(api.getProductionUrlsList());
-        List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
+        Map<String, EndpointCluster> endpoints = new HashMap<>();
         Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
         List<String> securitySchemeList = new ArrayList<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
+
+        EndpointCluster productionEndpoints = processEndpoints(api.getProductionEndpoints());
+        EndpointCluster sandboxEndpoints = processEndpoints(api.getSandboxEndpoints());
+        if (productionEndpoints != null) {
+            endpoints.put(APIConstants.API_KEY_TYPE_PRODUCTION, productionEndpoints);
+        }
+        if (sandboxEndpoints != null) {
+            endpoints.put(APIConstants.API_KEY_TYPE_SANDBOX, sandboxEndpoints);
+        }
 
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
 
@@ -94,8 +104,29 @@ public class RestAPI implements API {
         }
 
         for (Resource res : api.getResourcesList()) {
+            Map<String, RetryConfig> resourceRetryConfigs = new HashMap();
+            EndpointCluster prodEndpointCluster = processEndpoints(res.getProductionEndpoints());
+            EndpointCluster sandEndpointCluster = processEndpoints(res.getSandboxEndpoints());
+            if (prodEndpointCluster != null) {
+                RetryConfig prodRetryConfig = prodEndpointCluster.getRetryConfig();
+                if (prodRetryConfig != null) {
+                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodRetryConfig);
+                }
+            }
+            if (sandEndpointCluster != null) {
+                RetryConfig sandRetryConfig = sandEndpointCluster.getRetryConfig();
+                if (sandRetryConfig != null) {
+                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_SANDBOX, sandRetryConfig);
+                }
+            }
+
+            if (resourceRetryConfigs.isEmpty()) {
+                resourceRetryConfigs = null;
+            }
+
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
+                resConfig.setRetryConfigs(resourceRetryConfigs);
                 resources.add(resConfig);
             }
         }
@@ -115,7 +146,7 @@ public class RestAPI implements API {
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
-                .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
+                .endpoints(endpoints)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).securitySchemeDefinitions(securitySchemeDefinitions).build();
 
@@ -123,17 +154,30 @@ public class RestAPI implements API {
         return basePath;
     }
 
-    private List<String> processEndpoints(List<Endpoint> endpoints) {
-        if (endpoints == null || endpoints.size() == 0) {
+    private EndpointCluster processEndpoints(org.wso2.choreo.connect.discovery.api.EndpointCluster rpcEndpointCluster) {
+        if (rpcEndpointCluster == null || rpcEndpointCluster.getUrlsCount() == 0) {
             return null;
         }
         List<String> urls = new ArrayList<>(1);
-        endpoints.forEach(endpoint -> {
+        rpcEndpointCluster.getUrlsList().forEach(endpoint -> {
             String url = endpoint.getURLType().toLowerCase() + "://" +
                     endpoint.getHost() + ":" + endpoint.getPort() + endpoint.getBasepath();
             urls.add(url);
         });
-        return urls;
+        EndpointCluster endpointCluster = new EndpointCluster();
+        endpointCluster.setUrls(urls);
+
+        if (rpcEndpointCluster.hasConfig()) {
+            EndpointClusterConfig endpointClusterConfig = rpcEndpointCluster.getConfig();
+            if (endpointClusterConfig.hasRetryConfig()) {
+                org.wso2.choreo.connect.discovery.api.RetryConfig rpcRetryConfig
+                        = endpointClusterConfig.getRetryConfig();
+                RetryConfig retryConfig = new RetryConfig(rpcRetryConfig.getCount(),
+                        rpcRetryConfig.getStatusCodesList().toArray(new Integer[0]));
+                endpointCluster.setRetryConfig(retryConfig);
+            }
+        }
+        return endpointCluster;
     }
 
     @Override

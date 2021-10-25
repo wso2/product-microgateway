@@ -1,0 +1,166 @@
+swagger: '2.0'
+info:
+  description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
+  version: 1.0.5
+  title: Swagger Petstore Retry
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: 'mockBackend:2383'
+basePath: /v2
+x-wso2-basePath: /retry1
+tags:
+  - name: pet
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+schemes:
+  - http
+x-wso2-production-endpoints:
+  urls:
+    - http://mockBackend:2383/v2
+  advanceEndpointConfig:
+    retryConfig:
+      count: 1
+      statusCodes:
+        - 502
+x-wso2-sandbox-endpoints:
+  urls:
+    - http://mockBackend:2390/v2
+  advanceEndpointConfig:
+    retryConfig:
+      count: 1
+      statusCodes:
+        - 402
+paths:
+  /retry-two:
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: 'This endpoint returns 503 for the first request'
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+  /retry-three:
+    x-wso2-production-endpoints:
+      urls:
+        - http://mockBackend:2383/v2
+      advanceEndpointConfig:
+        retryConfig:
+          count: 2
+          statusCodes:
+            - 503
+    x-wso2-sandbox-endpoints:
+      urls:
+        - http://mockBackend:2390/v2
+      advanceEndpointConfig:
+        retryConfig:
+          count: 2
+          statusCodes:
+            - 403
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: 'This returns 503 for the first two requests'
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+  /retry-four:
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: 'This endpoint returns 504 for the first three requests'
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+  /retry-seven:
+    x-wso2-sandbox-endpoints:
+      urls:
+        - http://mockBackend:2390/v2
+      advanceEndpointConfig:
+        retryConfig:
+          count: 10
+          statusCodes:
+            - 201
+            - 202
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: 'This endpoint returns 504 for the first three requests'
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+definitions:
+  Pet:
+    type: object
+    required:
+      - name
+      - photoUrls
+    properties:
+      id:
+        type: integer
+        format: int64
+      category:
+        $ref: '#/definitions/Category'
+      name:
+        type: string
+        example: doggie
+      photoUrls:
+        type: array
+        xml:
+          wrapped: true
+        items:
+          type: string
+          xml:
+            name: photoUrl
+      tags:
+        type: array
+        xml:
+          wrapped: true
+        items:
+          xml:
+            name: tag
+          $ref: '#/definitions/Tag'
+      status:
+        type: string
+        description: pet status in the store
+        enum:
+          - available
+          - pending
+          - sold
