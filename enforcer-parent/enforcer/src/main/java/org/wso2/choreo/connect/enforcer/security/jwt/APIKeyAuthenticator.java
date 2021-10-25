@@ -258,7 +258,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
                 AuthenticationContext authenticationContext = FilterUtils
                         .generateAuthenticationContext(requestContext, tokenIdentifier, validationInfo,
-                                apiKeyValidationInfoDTO, endUserToken, false);
+                                apiKeyValidationInfoDTO, endUserToken, apiKey, false);
 
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
@@ -559,6 +559,11 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     @Override
     public String getChallengeString() {
         return "";
+    }
+
+    @Override
+    public String getName() {
+        return "API Key";
     }
 
     @Override

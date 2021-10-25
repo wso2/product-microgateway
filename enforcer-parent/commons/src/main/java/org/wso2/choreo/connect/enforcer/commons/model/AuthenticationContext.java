@@ -47,6 +47,7 @@ public class AuthenticationContext {
     private String apiPublisher;
     private String apiVersion;
     private String apiUUID;
+    private String rawToken;
 
     public static final String UNKNOWN_VALUE = "__unknown__";
 
@@ -372,5 +373,17 @@ public class AuthenticationContext {
 
     public void setApiUUID(String apiUUID) {
         this.apiUUID = apiUUID;
+    }
+
+    /**
+     * Raw token used to authenticate the API
+     * @return Raw token
+     */
+    public String getRawToken() {
+        return rawToken;
+    }
+
+    public void setRawToken(String rawToken) {
+        this.rawToken = rawToken;
     }
 }

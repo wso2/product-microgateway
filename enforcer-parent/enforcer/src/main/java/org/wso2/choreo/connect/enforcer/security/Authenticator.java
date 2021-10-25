@@ -40,5 +40,12 @@ public interface Authenticator {
      */
     String getChallengeString();
 
+    /**
+     * Name of the authenticator.
+     * This is used in authentication context of interceptors.
+     * @return Authenticator name
+     */
+    String getName();
+
     int getPriority();
 }

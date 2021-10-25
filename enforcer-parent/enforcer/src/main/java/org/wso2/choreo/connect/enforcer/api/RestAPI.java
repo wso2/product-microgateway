@@ -200,8 +200,9 @@ public class RestAPI implements API {
             }
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
-                responseObject.setMetaDataMap(requestContext.getMetadataMap());
             }
+            // set metadata for interceptors
+            responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);

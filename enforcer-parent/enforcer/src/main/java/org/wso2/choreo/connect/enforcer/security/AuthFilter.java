@@ -128,6 +128,7 @@ public class AuthFilter implements Filter {
                 canAuthenticated = true;
                 AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
                 if (authenticateResponse.isAuthenticated() && !authenticateResponse.isContinueToNextAuthenticator()) {
+                    setInterceptorAuthContext(authenticator, requestContext);
                     return true;
                 }
             }
@@ -262,5 +263,13 @@ public class AuthFilter implements Filter {
                 Integer.toString(retryConfig.getCount()));
         requestContext.addOrModifyHeaders(AdapterConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
                 StringUtils.join(retryConfig.getStatusCodes(), ","));
+    }
+
+    private void setInterceptorAuthContext(Authenticator authenticator, RequestContext requestContext) {
+        // add auth context to metadata, lua script will add it to the auth context of the interceptor
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        requestContext.addMetadataToMap("tokenType", authenticator.getName());
+        requestContext.addMetadataToMap("token", authContext.getRawToken());
+        requestContext.addMetadataToMap("keyType", authContext.getKeyType());
     }
 }
