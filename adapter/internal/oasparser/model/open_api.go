@@ -186,10 +186,10 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 		
 		result, ok := extensions[xWso2ApplicationSecurity].(map[string]interface{})
 		if ok {
-			if _, found := result["security-types"]; found {
-				if val, ok := result["security-types"].([]interface{}); ok {
+			if _, found := result[SecurityTypes]; found {
+				if val, ok := result[SecurityTypes].([]interface{}); ok {
 					for _, mapValue := range val {
-						if mapValue == "api_key" {
+						if mapValue == ApiKeyInAppLevelSecurity {
 							applicationAPIKeyMap := map[string][]string{
 								mapValue.(string): {},
 							}
@@ -212,12 +212,12 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 func checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes *[]SecurityScheme) {
 	var isApplicationAPIKeyFound = false;
 	for _, val := range *securitySchemes {
-		if val.DefinitionName == "api_key" {
+		if val.DefinitionName == ApiKeyInAppLevelSecurity {
 			isApplicationAPIKeyFound = true;
 		}
 	}
 	if !isApplicationAPIKeyFound {
-		scheme := SecurityScheme{DefinitionName: "api_key", Type: "api_key", Name: "api_key"}
+		scheme := SecurityScheme{DefinitionName: ApiKeyInAppLevelSecurity, Type: ApiKeyInAppLevelSecurity, Name: ApiKeyInAppLevelSecurity}
 		*securitySchemes = append(*securitySchemes, scheme)
 	}
 }

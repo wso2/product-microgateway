@@ -179,16 +179,16 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 	result, ok := swagger2.Extensions[xWso2ApplicationSecurity].(map[string]interface{})
 	if ok {
 		for key, value := range result {
-			if (key == "optional" && value != true) {
+			if (key == Optional && value != true) {
 				isApplicationSecurityOptional = false
 			}
 		}
 		if !isApplicationSecurityOptional {
-			if _, found := result["security-types"]; found {
-				if val, ok := result["security-types"].([]interface{}); ok {
+			if _, found := result[SecurityTypes]; found {
+				if val, ok := result[SecurityTypes].([]interface{}); ok {
 					for _, mapValue := range val {
-						if mapValue == "api_key" {
-							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: "api_key" , Name: mapValue.(string)}
+						if mapValue == ApiKeyInAppLevelSecurity {
+							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: ApiKeyInAppLevelSecurity , Name: mapValue.(string)}
 							securitySchemes = append(securitySchemes, scheme)
 						}
 					}
@@ -232,10 +232,10 @@ func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[
 	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(applicationSecurity)
 	result, ok := applicationSecurity.(map[string]interface{})
 	if ok && !isApplicationSecurityOptional{
-		if _, found := result["security-types"]; found {
-			if val, ok := result["security-types"].([]interface{}); ok {
+		if _, found := result[SecurityTypes]; found {
+			if val, ok := result[SecurityTypes].([]interface{}); ok {
 				for _, mapValue := range val {
-					if mapValue == "api_key" {
+					if mapValue == ApiKeyInAppLevelSecurity {
 						applicationAPIKeyMap := map[string][]string{
 							mapValue.(string): {},
 						}
