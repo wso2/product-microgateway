@@ -176,6 +176,24 @@ paths:
       responses:
         '200':
           description: successful operation
+  /pet/findByStatus/update-status-code:
+    x-wso2-response-interceptor:
+      host: mockBackend
+      port: 2371
+      scheme: http
+      includes:
+        - request_headers
+        - response_body
+    post:
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: successful operation
 definitions:
   Pet:
     type: object

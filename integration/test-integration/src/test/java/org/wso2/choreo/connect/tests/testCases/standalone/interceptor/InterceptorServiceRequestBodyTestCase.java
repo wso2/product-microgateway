@@ -84,9 +84,14 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
 
         // body
         testInterceptorBody(interceptReqBodyJSON, body, isRequestFlow);
+
+        // status code only available in response flow
+        if (!isRequestFlow) {
+            Assert.assertEquals(interceptReqBodyJSON.getString(RESPONSE_CODE), "200", "Response code mismatched in request body");
+        }
     }
 
-    @Test(description = "Test updating response body when it is not included - invalid operation")
+    @Test(description = "Test interceptor context")
     public void testInterceptorContext() throws Exception {
         // JSON request to XML backend
         // setting response body of interceptor service

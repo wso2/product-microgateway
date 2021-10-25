@@ -73,7 +73,6 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
             String clientReqBody, String intRespBody, boolean isOmitIntRespBody, String expectedRespToClient)
             throws Exception {
 
-        // JSON request to XML backend
         // setting response body of interceptor service
         JSONObject interceptorRespBodyJSON = new JSONObject();
         if (!isOmitIntRespBody) {
@@ -123,9 +122,31 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(response.getData(), expectedRespToClient);
     }
 
+    @Test(description = "Test update response code")
+    public void testUpdateResponseCode() throws Exception {
+        // setting response body of interceptor service
+        JSONObject interceptorRespBodyJSON = new JSONObject();
+        interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("Not Found".getBytes()));
+        interceptorRespBodyJSON.put("responseCode", 404);
+        setResponseOfInterceptor(interceptorRespBodyJSON.toString(), isRequestFlow);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                basePath + "/pet/findByStatus/update-status-code"), "REQUEST-BODY", headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 404, "Response code mismatched");
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = getInterceptorStatus();
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.RESPONSE_ONLY);
+    }
+
     @Test(description = "Test updating response body when it is not included - invalid operation")
     public void testInvalidOperationUpdateResponseBody() throws Exception {
-        // JSON request to XML backend
         // setting response body of interceptor service
         JSONObject interceptorRespBodyJSON = new JSONObject();
         interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("INVALID-UPDATE-BODY-OPERATION".getBytes()));

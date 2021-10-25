@@ -42,6 +42,7 @@ local REQUEST = {
     REQ_TRAILERS = "requestTrailers",
     RESP_HEADERS = "responseHeaders",
     RESP_BODY = "responseBody",
+    RESP_CODE = "responseCode",
     RESP_TRAILERS = "responseTrailers",
     INTCPT_CONTEXT = "interceptorContext",
     INV_CONTEXT = "invocationContext"
@@ -62,6 +63,8 @@ local INV_CONTEXT = {
 -- keys of the payload from the interceptor service
 local RESPONSE = {
     DIRECT_RESPOND = "directRespond",
+    BODY = "body",
+    RESPONSE_CODE = "responseCode",
     HEADERS_TO_ADD = "headersToAdd",
     HEADERS_TO_REPLACE = "headersToReplace",
     HEADERS_TO_REMOVE = "headersToRemove",
@@ -222,7 +225,7 @@ end
 ---@return boolean - return true if error
 local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_buffered, is_request_flow)
     -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
-    if interceptor_response_body.body then
+    if interceptor_response_body[RESPONSE.BODY] then
         handle:logDebug("Updating body for the request_id: " .. request_id)
 
         --#region handle error if body is not buffered before updating it
@@ -240,7 +243,7 @@ local function modify_body(handle, interceptor_response_body, request_id, shared
         end
         --#endregion
 
-        local body, err = base64_decode(interceptor_response_body.body, handle, shared_info, request_id, is_request_flow)
+        local body, err = base64_decode(interceptor_response_body[RESPONSE.BODY], handle, shared_info, request_id, is_request_flow)
         if err then
             return true
         end
@@ -360,7 +363,7 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
         local headers = interceptor_response_body[RESPONSE.HEADERS_TO_ADD] or {}
         
         -- if interceptor_response_body.body is nil send empty, do not send client its payload back
-        local body = interceptor_response_body.body or ""
+        local body = interceptor_response_body[RESPONSE.BODY] or ""
         if body == "" then
             headers[STATUS] = headers[STATUS] or "204"
         else
@@ -523,6 +526,10 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     --#endregion
 
+    --#region status code
+    interceptor_request_body[REQUEST.RESP_CODE] = response_handle:headers():get(STATUS)
+    --#endregion
+
     include_request_info(resp_flow_includes, interceptor_request_body, shared_info[REQUEST.REQ_HEADERS], shared_info[REQUEST.REQ_BODY], shared_info[REQUEST.REQ_TRAILERS])
     interceptor_request_body[REQUEST.INTCPT_CONTEXT] = shared_info[REQUEST.INTCPT_CONTEXT]
 
@@ -549,6 +556,12 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     modify_headers(response_handle, interceptor_response_body)
     modify_trailers(response_handle, interceptor_response_body)
+
+    --#region status code
+    if interceptor_response_body[RESPONSE.RESPONSE_CODE] then
+        response_handle:headers():replace(STATUS, interceptor_response_body[RESPONSE.RESPONSE_CODE])
+    end
+    --#endregion
 end
 
 return interceptor
