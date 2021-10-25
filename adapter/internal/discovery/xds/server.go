@@ -263,7 +263,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 			return nil, err
 		}
 		//set swagger file configs not available
-		if(mgwSwagger.GetSecurityScheme() == nil) {
+		if mgwSwagger.GetSecurityScheme() == nil {
 			for _, value := range apiYaml.SecurityScheme {
 				schemes = append(schemes, model.SecurityScheme{Type: value})
 			}
@@ -288,14 +288,15 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	if (mgwSwagger.GetProdEndpoints() == nil || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/") &&
 		len(apiProject.ProductionEndpoints) > 0 {
-		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiProject.ProductionEndpoints)
+		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiProject.ProductionEndpoints,
+			apiYaml.EndpointConfig.ProductionEndpoints)
 	}
 
 	if (mgwSwagger.GetSandEndpoints() == nil || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/") &&
 		len(apiProject.SandboxEndpoints) > 0 {
 
-		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiProject.SandboxEndpoints)
-
+		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiProject.SandboxEndpoints,
+			apiYaml.EndpointConfig.SandBoxEndpoints)
 	}
 
 	validationErr := mgwSwagger.Validate()

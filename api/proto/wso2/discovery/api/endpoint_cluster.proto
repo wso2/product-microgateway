@@ -18,35 +18,26 @@ syntax = "proto3";
 
 package wso2.discovery.api;
 
-import "wso2/discovery/api/endpoint_cluster.proto";
-import "wso2/discovery/api/Resource.proto";
-import "wso2/discovery/api/endpoint_security.proto";
-import "wso2/discovery/api/security_scheme.proto";
+import "wso2/discovery/api/Endpoint.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
 option java_package = "org.wso2.choreo.connect.discovery.api";
-option java_outer_classname = "ApiProto";
+option java_outer_classname = "EndpointClusterProto";
 option java_multiple_files = true;
 
-// [#protodoc-title: Api]
+// [#protodoc-title: Endpoint]
 
-// API config model
-message Api {
-	string id = 1;
-	string title = 2;
-	string version = 3;
-	string apiType = 4;
-	string description = 5;
-	EndpointCluster productionEndpoints = 6;
-	EndpointCluster sandboxEndpoints = 7;
-	repeated Resource resources = 8;
-	string basePath = 9;
-	string tier = 10;
-	string apiLifeCycleState = 11;
-	repeated SecurityScheme securityScheme = 12;
-	EndpointSecurity endpointSecurity = 13;
-	string authorizationHeader = 14;
-	bool disableSecurity = 15;
-	string vhost = 16;
-	string organizationId = 17;
+// Holds endpoint URLs and the config
+message EndpointCluster {
+    repeated Endpoint urls = 1;
+	EndpointClusterConfig config = 2;
+}
+
+message EndpointClusterConfig {
+    RetryConfig retryConfig = 1;
+}
+
+message RetryConfig {
+    uint32 count = 1;
+    repeated uint32 statusCodes = 2;
 }
