@@ -15,6 +15,11 @@ paths:
       urls:
         - https://resourceLevelEndpoint
         - https://resourceLevelLBEndpoint:8080
+      advanceEndpointConfig:
+        circuitBreakers:
+          maxConnections: 2
+          maxRequests: 15
+          maxConnectionPools: -1
     get:
       summary: List all pets
       operationId: listPets

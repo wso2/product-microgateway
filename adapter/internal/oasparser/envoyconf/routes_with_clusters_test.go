@@ -29,6 +29,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
@@ -66,8 +67,8 @@ func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
 }
 
 // commonTestForCreateRoutesWithClusters
-// testFailOver - if resource level has failover endpoints
-func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string, testFailOver bool) {
+// withExtensions - if definition has endpoints x-wso2 extension
+func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string, withExtensions bool) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi, err := operator.GetMgwSwagger(openapiByteArr)
@@ -125,7 +126,18 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string,
 	assert.Equal(t, "resourceLevelLBEndpoint", pathLevelClusterHost1, "Path Level Cluster's second endpoint host is incorrect.")
 	assert.NotEmpty(t, pathLevelClusterPort1, "Path Level Cluster's second endpoint port should not be null")
 	assert.Equal(t, uint32(8080), pathLevelClusterPort1, "Path Level Cluster's second endpoint host is incorrect.")
-	if testFailOver {
+	if withExtensions {
+		pathLevelMaxConnections := pathLevelCluster.GetCircuitBreakers().Thresholds[0].MaxConnections
+		pathLevelMaxRequests := pathLevelCluster.GetCircuitBreakers().Thresholds[0].MaxRequests
+		pathLevelMaxConnectionPools := pathLevelCluster.GetCircuitBreakers().Thresholds[0].MaxConnectionPools
+
+		assert.Empty(t, apiLevelCluster.GetCircuitBreakers(), "API Level Cluster's circuit breaker should be empty.")
+
+		assert.Equal(t, wrapperspb.UInt32(2), pathLevelMaxConnections, "Path Level Cluster's max connection circuit breaker is incorrect.")
+		assert.Equal(t, wrapperspb.UInt32(15), pathLevelMaxRequests, "Path Level Cluster's max request circuit breaker is incorrect.")
+		// This is to check max connection pool circuit breaker has not set when the config value is -1
+		assert.Equal(t, (*wrapperspb.UInt32Value)(nil), pathLevelMaxConnectionPools, "Path Level Cluster's max connection pool circuit breaker is incorrect.")
+
 		assert.Equal(t, uint32(1), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
 	} else {
 		assert.Equal(t, uint32(0), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
