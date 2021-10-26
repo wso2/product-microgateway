@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import java.util.Date;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -266,6 +267,14 @@ public class MockBackEndServer extends Thread {
                     byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                     respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
                 }
+            });
+            httpServer.createContext(context + "/req-cb", exchange -> {
+                long start = new Date().getTime();
+                while(new Date().getTime() - start < 2000L){
+                    //do nothing and wait for 2 seconds
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
             httpServer.createContext(context + "/headers", exchange -> {
                 JSONObject responseJSON = new JSONObject();

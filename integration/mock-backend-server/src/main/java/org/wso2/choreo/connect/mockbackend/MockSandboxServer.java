@@ -25,6 +25,7 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,6 +85,14 @@ public class MockSandboxServer extends Thread {
                     byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
                     respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
                 }
+            });
+            httpServer.createContext(context + "/req-cb", exchange -> {
+                long start = new Date().getTime();
+                while (new Date().getTime() - start < 2000L) {
+                    //do nothing and wait for 2 seconds
+                }
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
             httpServer.start();
