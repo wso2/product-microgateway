@@ -57,6 +57,10 @@ local INV_CONTEXT = {
     REQ_ID = "requestId",
     SOURCE = "source",
     DESTINATION = "destination",
+    ORG_ID = "organizationId",
+    VHOST = "vhost",
+    API_NAME = "apiName",
+    API_VERSION = "apiVersion",
     ENFORCER_DENIED = "enforcerDenied",
     AUTH_CTX = "authenticationContext"
 }
@@ -80,11 +84,13 @@ local RESPONSE = {
     TRAILERS_TO_REPLACE = "trailersToReplace",
     TRAILERS_TO_REMOVE = "trailersToRemove",
     INTCPT_CONTEXT = "interceptorContext",
+    DYNAMIC_ENDPOINT = "dynamicEndpoint"
 }
 
 -- table of information shared between request and response flow
 local SHARED = {
-    REQUEST_ID = "requestId"
+    REQUEST_ID = "requestId",
+    ORG_ID = "organizationId"
 }
 
 -- envoy headers
@@ -224,6 +230,17 @@ local function modify_trailers(handle, interceptor_response_body)
     end
 end
 
+local function handle_dynamic_endpoint(handle, interceptor_response_body, inv_context, shared_info)
+    local dynamicEpName = interceptor_response_body[RESPONSE.DYNAMIC_ENDPOINT]
+    if dynamicEpName and dynamicEpName ~= "" then
+        handle:logDebug("dynamic endpoint found: " .. dynamicEpName)
+        -- template: <organizationID>_<EndpointName>_xwso2cluster_<vHost>_<API name><API version>
+        local endpoint = string.format("%s_%s_xwso2cluster_%s_%s%s", shared_info[SHARED.ORG_ID], dynamicEpName,
+            inv_context[INV_CONTEXT.VHOST], inv_context[INV_CONTEXT.API_NAME], inv_context[INV_CONTEXT.API_VERSION])
+        handle:headers():replace("x-wso2-cluster-header", endpoint)
+    end
+end
+
 --- modify body
 ---@param handle table
 ---@param interceptor_response_body table
@@ -340,6 +357,10 @@ end
 
 local function include_invocation_context(handle, req_flow_includes, resp_flow_includes, inv_context, interceptor_request_body, shared_info, request_headers)
     if req_flow_includes[INCLUDES.INV_CONTEXT] or resp_flow_includes[INCLUDES.INV_CONTEXT] then
+        -- remove organizationId from invocationContext, since it should not be sent to the interceptor service
+        shared_info[SHARED.ORG_ID] = inv_context[INV_CONTEXT.ORG_ID]
+        inv_context[INV_CONTEXT.ORG_ID] = nil
+
         -- We first read from "x-forwarded-for" which is the actual client IP, when it comes to scenarios like the request is coming through a load balancer
         -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For the header contains the original clients IP.
         local client_ip = request_headers:get("x-forwarded-for")
@@ -488,6 +509,10 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     end
     modify_headers(request_handle, interceptor_response_body)
     modify_trailers(request_handle, interceptor_response_body)
+    
+    --#region handle dynamic endpoint
+    handle_dynamic_endpoint(request_handle, interceptor_response_body, inv_context, shared_info)
+    --#endregion
 
     if interceptor_response_body[RESPONSE.INTCPT_CONTEXT] then
         request_handle:logDebug("Updating interceptor context for the request_id: " .. request_id)
