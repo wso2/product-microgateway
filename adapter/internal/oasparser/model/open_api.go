@@ -195,6 +195,7 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 							}
 							securityArray = append(securityArray, applicationAPIKeyMap)
 							checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes)
+							checkAPIKeyInOperationArray(&securityArray, securitySchemes)
 						}
 					}
 				}
@@ -205,6 +206,26 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 	}
 
 	return NewOperation(method, nil, extensions)
+}
+
+// checks API key in operation security array
+func checkAPIKeyInOperationArray(securityArray *[]map[string][]string, securitySchemes *[]SecurityScheme) {
+	logger.LoggerOasparser.Infof("Inside security scheme %v.", securitySchemes)
+	for _, val := range *securitySchemes {
+		if val.Type == APIKeyTypeInOAS {
+			for arrayKey, arrayVal := range *securityArray {
+				logger.LoggerOasparser.Infof("New method key %v. Value: %v", arrayKey, arrayVal)
+				if _, found := arrayVal[val.DefinitionName]; found {
+					*securityArray = removeAPIKeyFromOperationArray(*securityArray, arrayKey)
+				}
+			}
+		}
+	}
+}
+
+// removes element in the given index from operation security array
+func removeAPIKeyFromOperationArray(securityArray []map[string][]string, index int) []map[string][]string { 
+	return append(securityArray[:index], securityArray[index+1:]...)
 }
 
 // checks api_key is in the security scheme. If it's not in the security scheme, this

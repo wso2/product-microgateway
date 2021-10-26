@@ -42,10 +42,10 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		swagger.version = swagger2.Info.Version
 	}
 	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
-	swagger.resources = setResourcesSwagger(swagger2)
+	swagger.securityScheme = setSecurityDefinitions(swagger2)
+	swagger.resources = setResourcesSwagger(swagger2, &swagger.securityScheme)
 	swagger.apiType = HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
-	swagger.securityScheme = setSecurityDefinitions(swagger2)
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
 	// If the schemes property is not mentioned at all, http will be assigned. (Only swagger 2 version has this property)
@@ -76,7 +76,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
+func setResourcesSwagger(swagger2 spec.Swagger, securitySchemes *[]SecurityScheme) []Resource {
 	var resources []Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
@@ -91,7 +91,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
 				}
 				if applicationSecurity, found := pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Get.Security)
+					setApplicationSecurity(applicationSecurity, &pathItem.Get.Security, securitySchemes)
 				}
 				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
 					pathItem.Get.Extensions))
@@ -102,7 +102,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
 				}
 				if applicationSecurity, found := pathItem.Post.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Post.Security)
+					setApplicationSecurity(applicationSecurity, &pathItem.Post.Security, securitySchemes)
 				}
 				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security,
 					pathItem.Post.Extensions))
@@ -113,7 +113,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
 				}
 				if applicationSecurity, found := pathItem.Put.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Put.Security)
+					setApplicationSecurity(applicationSecurity, &pathItem.Put.Security, securitySchemes)
 				}
 				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security,
 					pathItem.Put.Extensions))
@@ -124,7 +124,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
 				if applicationSecurity, found := pathItem.Delete.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Delete.Security)
+					setApplicationSecurity(applicationSecurity, &pathItem.Delete.Security, securitySchemes)
 				}
 				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security,
 					pathItem.Delete.Extensions))
@@ -135,7 +135,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
 				}
 				if applicationSecurity, found := pathItem.Head.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Head.Security)
+					setApplicationSecurity(applicationSecurity, &pathItem.Head.Security, securitySchemes)
 				}
 				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security,
 					pathItem.Head.Extensions))
@@ -146,7 +146,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
 				if applicationSecurity, found := pathItem.Patch.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Patch.Security)
+					setApplicationSecurity(applicationSecurity, &pathItem.Patch.Security, securitySchemes)
 				}
 				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security,
 					pathItem.Patch.Extensions))
@@ -157,7 +157,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
 				if applicationSecurity, found := pathItem.Options.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Options.Security)
+					setApplicationSecurity(applicationSecurity, &pathItem.Options.Security, securitySchemes)
 				}
 				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
 					pathItem.Options.Extensions))
@@ -228,7 +228,7 @@ func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool{
 }
 
 // sets application level security defined under the x-wso2-application-security extension.
-func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string){
+func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string, securitySchemes *[]SecurityScheme){
 	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(applicationSecurity)
 	result, ok := applicationSecurity.(map[string]interface{})
 	if ok && !isApplicationSecurityOptional{
@@ -240,6 +240,7 @@ func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[
 							mapValue.(string): {},
 						}
 						*pathItemSecurity = append(*pathItemSecurity, applicationAPIKeyMap)
+						checkAPIKeyInOperationArray(pathItemSecurity, securitySchemes)
 					}
 				}
 			}

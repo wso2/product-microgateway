@@ -87,20 +87,16 @@ public class RestAPI implements API {
         }
 
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
-
             if (securityScheme.getType() != null) {
-                String schemaType = securityScheme.getType();
+                String definitionName = securityScheme.getDefinitionName();
                 SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
-                securitySchemaConfig.setDefinitionName(securityScheme.getDefinitionName());
-                securitySchemaConfig.setType(schemaType);
+                securitySchemaConfig.setDefinitionName(definitionName);
+                securitySchemaConfig.setType(securityScheme.getType());
                 securitySchemaConfig.setName(securityScheme.getName());
                 securitySchemaConfig.setIn(securityScheme.getIn());
-                securitySchemeDefinitions.put(schemaType, securitySchemaConfig);
+                securitySchemeDefinitions.put(definitionName, securitySchemaConfig);
+                securitySchemeList.add(securityScheme.getType());
             }
-        }
-
-        for (String schemeName : securitySchemeDefinitions.keySet()) {
-            securitySchemeList.add(schemeName);
         }
 
         for (Resource res : api.getResourcesList()) {
@@ -249,15 +245,14 @@ public class RestAPI implements API {
                 List<String> scopeList = new ArrayList<>(security.getScopesList());
                 securityMap.put(key, scopeList);
             }
-            if (security != null && key.equalsIgnoreCase(FilterUtils.
-                    getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+            if (security != null && FilterUtils.getAPIKeyDefinitionNames(securitySchemeDefinitions).contains(key)) {
                 securityMap.put(key, new ArrayList<>());
             }
             if (security != null && key.equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
                 securityMap.put(key, new ArrayList<>());
             }
         }));
-        resource.setSecuritySchemas(securityMap);
+     resource.setSecuritySchemas(securityMap);
         return resource;
     }
 

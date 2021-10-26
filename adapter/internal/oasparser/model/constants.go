@@ -44,11 +44,12 @@ const (
 	DefaultSecurity          string = "default"
 )
 
-// sub-property values/keys mentioned under x-wso2-application security extension
+// sub-property values and keys relevant for x-wso2-application security extension
 const (
 	Optional                 string = "optional"
 	SecurityTypes            string = "security-types"
 	APIKeyInAppLevelSecurity string = "api_key"
+	APIKeyTypeInOAS			 string = "apiKey"
 )
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
