@@ -161,11 +161,13 @@ public class AnalyticsFilter {
                 && authContext.getKeyType().equals(APIConstants.API_KEY_TYPE_SANDBOX)) {
             // keyType is sandbox but the sandbox endpoints are null this will result in authentication failure.
             // Hence null scenario is impossible to occur.
-            return requestContext.getMatchedAPI().getSandboxUrls() != null ?
-                    requestContext.getMatchedAPI().getSandboxUrls().get(0) : "";
+            return requestContext.getMatchedAPI().getEndpoints().containsKey(APIConstants.API_KEY_TYPE_SANDBOX) ?
+                    requestContext.getMatchedAPI().getEndpoints().get(APIConstants.API_KEY_TYPE_SANDBOX)
+                            .getUrls().get(0) : "";
         }
         // This does not cause problems at the moment Since the current microgateway supports only one URL
-        return requestContext.getMatchedAPI().getProductionUrls().get(0);
+        return requestContext.getMatchedAPI().getEndpoints().get(APIConstants.API_KEY_TYPE_PRODUCTION)
+                .getUrls().get(0);
     }
 
     public void handleFailureRequest(RequestContext requestContext) {

@@ -29,32 +29,33 @@ public final class ApiProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\034wso2/discovery/api/api.proto\022\022wso2.dis" +
-      "covery.api\032!wso2/discovery/api/Endpoint." +
-      "proto\032!wso2/discovery/api/Resource.proto" +
-      "\032*wso2/discovery/api/endpoint_security.p" +
-      "roto\032(wso2/discovery/api/security_scheme" +
-      ".proto\"\205\004\n\003Api\022\n\n\002id\030\001 \001(\t\022\r\n\005title\030\002 \001(" +
-      "\t\022\017\n\007version\030\003 \001(\t\022\017\n\007apiType\030\004 \001(\t\022\023\n\013d" +
-      "escription\030\005 \001(\t\0224\n\016productionUrls\030\006 \003(\013" +
-      "2\034.wso2.discovery.api.Endpoint\0221\n\013sandbo" +
-      "xUrls\030\007 \003(\0132\034.wso2.discovery.api.Endpoin" +
-      "t\022/\n\tresources\030\010 \003(\0132\034.wso2.discovery.ap" +
-      "i.Resource\022\020\n\010basePath\030\t \001(\t\022\014\n\004tier\030\n \001" +
-      "(\t\022\031\n\021apiLifeCycleState\030\013 \001(\t\022:\n\016securit" +
-      "yScheme\030\014 \003(\0132\".wso2.discovery.api.Secur" +
-      "ityScheme\022>\n\020endpointSecurity\030\r \001(\0132$.ws" +
-      "o2.discovery.api.EndpointSecurity\022\033\n\023aut" +
-      "horizationHeader\030\016 \001(\t\022\027\n\017disableSecurit" +
-      "y\030\017 \001(\010\022\r\n\005vhost\030\020 \001(\t\022\026\n\016organizationId" +
-      "\030\021 \001(\tBr\n%org.wso2.choreo.connect.discov" +
-      "ery.apiB\010ApiProtoP\001Z=github.com/envoypro" +
-      "xy/go-control-plane/wso2/discovery/api;a" +
-      "pib\006proto3"
+      "covery.api\032)wso2/discovery/api/endpoint_" +
+      "cluster.proto\032!wso2/discovery/api/Resour" +
+      "ce.proto\032*wso2/discovery/api/endpoint_se" +
+      "curity.proto\032(wso2/discovery/api/securit" +
+      "y_scheme.proto\"\235\004\n\003Api\022\n\n\002id\030\001 \001(\t\022\r\n\005ti" +
+      "tle\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\022\017\n\007apiType\030\004 " +
+      "\001(\t\022\023\n\013description\030\005 \001(\t\022@\n\023productionEn" +
+      "dpoints\030\006 \001(\0132#.wso2.discovery.api.Endpo" +
+      "intCluster\022=\n\020sandboxEndpoints\030\007 \001(\0132#.w" +
+      "so2.discovery.api.EndpointCluster\022/\n\tres" +
+      "ources\030\010 \003(\0132\034.wso2.discovery.api.Resour" +
+      "ce\022\020\n\010basePath\030\t \001(\t\022\014\n\004tier\030\n \001(\t\022\031\n\021ap" +
+      "iLifeCycleState\030\013 \001(\t\022:\n\016securityScheme\030" +
+      "\014 \003(\0132\".wso2.discovery.api.SecuritySchem" +
+      "e\022>\n\020endpointSecurity\030\r \001(\0132$.wso2.disco" +
+      "very.api.EndpointSecurity\022\033\n\023authorizati" +
+      "onHeader\030\016 \001(\t\022\027\n\017disableSecurity\030\017 \001(\010\022" +
+      "\r\n\005vhost\030\020 \001(\t\022\026\n\016organizationId\030\021 \001(\tBr" +
+      "\n%org.wso2.choreo.connect.discovery.apiB" +
+      "\010ApiProtoP\001Z=github.com/envoyproxy/go-co" +
+      "ntrol-plane/wso2/discovery/api;apib\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          org.wso2.choreo.connect.discovery.api.EndpointProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.api.ResourceProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.api.EndpointSecurityProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor(),
@@ -64,8 +65,8 @@ public final class ApiProto {
     internal_static_wso2_discovery_api_Api_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Api_descriptor,
-        new java.lang.String[] { "Id", "Title", "Version", "ApiType", "Description", "ProductionUrls", "SandboxUrls", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "EndpointSecurity", "AuthorizationHeader", "DisableSecurity", "Vhost", "OrganizationId", });
-    org.wso2.choreo.connect.discovery.api.EndpointProto.getDescriptor();
+        new java.lang.String[] { "Id", "Title", "Version", "ApiType", "Description", "ProductionEndpoints", "SandboxEndpoints", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "EndpointSecurity", "AuthorizationHeader", "DisableSecurity", "Vhost", "OrganizationId", });
+    org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.ResourceProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.EndpointSecurityProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor();

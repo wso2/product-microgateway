@@ -28,9 +28,24 @@ public class ResourceConfig {
 
     private String path;
     private HttpMethods method;
-    private Map<String, List<String>> securitySchemas = new HashMap();
+    private Map<String, List<String>> securitySchemas = new HashMap(); // security_schema_name -> schemas
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
+    private Map<String, RetryConfig> retryConfigs; // prod or sandbox -> retry config
+
+    /**
+     * ENUM to hold http operations.
+     */
+    public enum HttpMethods {
+        GET("get"), POST("post"), PUT("put"), DELETE("delete"), HEAD("head"),
+        PATCH("patch"), OPTIONS("options");
+
+        private String value;
+
+        private HttpMethods(String value) {
+            this.value = value;
+        }
+    }
 
     /**
      * Get the matching path Template for the request.
@@ -100,17 +115,17 @@ public class ResourceConfig {
     }
 
     /**
-     * ENUM to hold http operations.
+     * Get the resource level retry config map for the corresponding Resource
+     * where the map-key is either "PRODUCTION" or "SANDBOX".
+     *
+     * @return resource level retry config map
      */
-    public enum HttpMethods {
-        GET("get"), POST("post"), PUT("put"), DELETE("delete"), HEAD("head"),
-        PATCH("patch"), OPTIONS("options");
+    public Map<String, RetryConfig> getRetryConfigs() {
+        return retryConfigs;
+    }
 
-        private String value;
-
-        private HttpMethods(String value) {
-            this.value = value;
-        }
+    public void setRetryConfigs(Map<String, RetryConfig> retryConfigs) {
+        this.retryConfigs = retryConfigs;
     }
 }
 

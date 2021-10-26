@@ -93,8 +93,6 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArr
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition
 // along with the vhost to deploy the API.
 func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity mgw.APIEndpointSecurity, vhost string) *api.Api {
-	prodUrls := []*api.Endpoint{}
-	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
 	securitySchemes := []*api.SecurityScheme{}
 
@@ -109,30 +107,6 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		securitySchemes = append(securitySchemes, scheme)
 	}
 
-	if mgwSwagger.GetProdEndpoints() != nil {
-		for _, ep := range mgwSwagger.GetProdEndpoints().Endpoints {
-			prodEp := &api.Endpoint{
-				Basepath: ep.Basepath,
-				Host:     ep.Host,
-				Port:     ep.Port,
-				URLType:  ep.URLType,
-			}
-			prodUrls = append(prodUrls, prodEp)
-		}
-	}
-
-	if mgwSwagger.GetSandEndpoints() != nil {
-		for _, ep := range mgwSwagger.GetSandEndpoints().Endpoints {
-			sandEp := &api.Endpoint{
-				Basepath: ep.Basepath,
-				Host:     ep.Host,
-				Port:     ep.Port,
-				URLType:  ep.URLType,
-			}
-			sandUrls = append(sandUrls, sandEp)
-		}
-	}
-
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
@@ -142,6 +116,12 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 			Id:      res.GetID(),
 			Methods: operations,
 			Path:    res.GetPath(),
+		}
+		if res.GetProdEndpoints() != nil {
+			resource.ProductionEndpoints = generateRPCEndpointCluster(res.GetProdEndpoints())
+		}
+		if res.GetSandEndpoints() != nil {
+			resource.SandboxEndpoints = generateRPCEndpointCluster(res.GetSandEndpoints())
 		}
 		resources = append(resources, resource)
 	}
@@ -170,8 +150,8 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		BasePath:            mgwSwagger.GetXWso2Basepath(),
 		Version:             mgwSwagger.GetVersion(),
 		ApiType:             mgwSwagger.GetAPIType(),
-		ProductionUrls:      prodUrls,
-		SandboxUrls:         sandUrls,
+		ProductionEndpoints: generateRPCEndpointCluster(mgwSwagger.GetProdEndpoints()),
+		SandboxEndpoints:    generateRPCEndpointCluster(mgwSwagger.GetSandEndpoints()),
 		Resources:           resources,
 		ApiLifeCycleState:   lifeCycleState,
 		Tier:                mgwSwagger.GetXWso2ThrottlingTier(),
@@ -207,4 +187,38 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		DisableSecurity: operation.GetDisableSecurity(),
 	}
 	return &apiOperation
+}
+
+func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.EndpointCluster {
+	if inputEndpointCluster == nil || len(inputEndpointCluster.Endpoints) == 0 {
+		return nil
+	}
+	urls := []*api.Endpoint{}
+	for _, ep := range inputEndpointCluster.Endpoints {
+		endpoint := &api.Endpoint{
+			Basepath: ep.Basepath,
+			Host:     ep.Host,
+			Port:     ep.Port,
+			URLType:  ep.URLType,
+		}
+		urls = append(urls, endpoint)
+	}
+
+	endpoints := &api.EndpointCluster{
+		Urls: urls,
+	}
+	if inputEndpointCluster.Config != nil {
+		var retryConfig *api.RetryConfig
+		if inputEndpointCluster.Config.RetryConfig != nil {
+			inputRetryConfig := inputEndpointCluster.Config.RetryConfig
+			retryConfig = &api.RetryConfig{
+				Count:       uint32(inputRetryConfig.Count),
+				StatusCodes: inputRetryConfig.StatusCodes,
+			}
+		}
+		endpoints.Config = &api.EndpointClusterConfig{
+			RetryConfig: retryConfig,
+		}
+	}
+	return endpoints
 }

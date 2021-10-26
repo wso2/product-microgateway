@@ -46,7 +46,7 @@ public class ResponseConstants {
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
             "provided.\"}";
     public static final String AUTHZ_FAILURE_RESPONSE = "{\"fault\":\"Forbidden.\"}";
-
+    public static final String GATEWAY_ERROR = "{\"fault\":\"Gateway error.\"}";
 
     public static final String userResponse = "{ \"name\": \"john\" }";
 

@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.util;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
@@ -353,7 +354,11 @@ public class FilterUtils {
                 jwtInfoDto.setSub(sub);
             }
             if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
-                String[] organizations = (String[]) claims.get(JWTConstants.ORGANIZATIONS);
+                JSONArray orgArray = (JSONArray) claims.get(JWTConstants.ORGANIZATIONS);
+                String[] organizations = new String[orgArray.size()];
+                for (int i = 0; i < orgArray.size(); i++) {
+                    organizations[i] = orgArray.get(i).toString();
+                }
                 jwtInfoDto.setOrganizations(organizations);
             }
         }
