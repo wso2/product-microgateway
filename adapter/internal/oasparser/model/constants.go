@@ -49,7 +49,7 @@ const (
 	Optional                 string = "optional"
 	SecurityTypes            string = "security-types"
 	APIKeyInAppLevelSecurity string = "api_key"
-	APIKeyTypeInOAS			 string = "apiKey"
+	APIKeyTypeInOAS          string = "apiKey"
 )
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
