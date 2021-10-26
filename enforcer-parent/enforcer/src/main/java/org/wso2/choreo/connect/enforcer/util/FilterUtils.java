@@ -354,10 +354,10 @@ public class FilterUtils {
                 jwtInfoDto.setSub(sub);
             }
             if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
-                JSONArray organizationsJSONArray = (JSONArray) claims.get(JWTConstants.ORGANIZATIONS);
-                String[] organizations = new String[organizationsJSONArray.size()];
-                for (int i = 0; i < organizationsJSONArray.size(); i++) {
-                    organizations[i] = organizationsJSONArray.get(i).toString();
+                JSONArray orgArray = (JSONArray) claims.get(JWTConstants.ORGANIZATIONS);
+                String[] organizations = new String[orgArray.size()];
+                for (int i = 0; i < orgArray.size(); i++) {
+                    organizations[i] = orgArray.get(i).toString();
                 }
                 jwtInfoDto.setOrganizations(organizations);
             }
