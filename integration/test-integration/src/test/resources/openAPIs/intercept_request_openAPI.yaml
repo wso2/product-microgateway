@@ -23,6 +23,14 @@ schemes:
 x-wso2-production-endpoints:
   urls:
     - https://mockBackend:2382/v2
+x-wso2-sandbox-endpoints: # TODO: sandbox-endpoints should be removed after fix #2326 the issue of being sandbox required
+  urls:
+    - https://foo-this-should-be-removed:2382/v2
+x-wso2-endpoints:
+  - myDynamicEndpoint:
+      urls:
+        - http://mockBackend:2390 # issue: #2327 not supporting context paths as in prod endpoints, eg: https://mockBackend:2382/other-context-path "other-context-path" is not working
+      type: loadbalance
 x-wso2-request-interceptor: # API level interceptor definition
   host: mockBackend
   port: 2371
@@ -116,6 +124,17 @@ paths:
       scheme: http
       includes: # "request_body" not included
         - request_headers
+    post:
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: successful operation
+  /pet/findByStatus/dynamic-ep-echo: # for dynamic endpoint echo test
     post:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings

@@ -103,6 +103,9 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Map<String, String> headersToReplace = new HashMap<>();
         headersToReplace.put("foo-update", "Header_Updated");
         headersToReplace.put("foo-update-not-exist", "Header_Updated_New_Val");
+        headersToReplace.put("x-wso2-cluster-header", "foo-invalid-attempt"); // this header should be discarded
+        headersToReplace.put("x-wso2-foo-header", "foo-invalid-update"); // this header should be discarded
+        headersToReplace.put("x-envoy-foo-header", "foo-invalid-update"); // this header should be discarded
         headersToReplace.put("content-type", "application/xml");
         interceptorRespBodyJSON.put("headersToReplace", headersToReplace);
         interceptorRespBodyJSON.put("headersToRemove", Collections.singletonList("foo-remove"));
@@ -135,6 +138,11 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(respHeaders.get("foo-update-not-exist"), "Header_Updated_New_Val", "Failed to replace header");
         Assert.assertEquals(respHeaders.get("content-type"), "application/xml", "Failed to replace header");
         Assert.assertEquals(respHeaders.get("foo-keep"), "Header_to_be_kept", "Failed to keep original header");
+
+        // discarded headers
+        Assert.assertFalse(respHeaders.containsKey("x-wso2-foo-header"), "Failed to remove discarded header");
+        Assert.assertFalse(respHeaders.containsKey("x-envoy-foo-header"), "Failed to remove discarded header");
+
         // test body
         Assert.assertEquals(response.getData(), expectedBody);
     }
@@ -193,6 +201,31 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
                 "Failed to replace header");
         // test body
         Assert.assertEquals(response.getData(), clientRespBody);
+    }
+
+    @Test(description = "Test dynamic endpoints")
+    public void testDynamicEndpoints() throws Exception {
+        // setting response body of interceptor service
+        JSONObject interceptorRespBodyJSON = new JSONObject();
+        // test updating body is also work with dynamic endpoint
+        interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("UPDATED BODY".getBytes()));
+        interceptorRespBodyJSON.put("headersToReplace", Collections.singletonMap("x-wso2-cluster-header", "foo-invalid-attempt"));
+        interceptorRespBodyJSON.put("dynamicEndpoint", Collections.singletonMap("endpointName", "myDynamicEndpoint"));
+        setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                basePath + "/pet/findByStatus/dynamic-ep-echo"), "INITIAL BODY", headers);
+        Assert.assertNotNull(response);
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = getInterceptorStatus();
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+
+        Assert.assertEquals(response.getData(), "UPDATED BODY");
     }
 
     @Test(description = "Enforcer denied request when response interceptor enabled")

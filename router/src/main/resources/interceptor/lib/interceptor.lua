@@ -87,6 +87,10 @@ local RESPONSE = {
     DYNAMIC_ENDPOINT = "dynamicEndpoint"
 }
 
+local DYNAMIC_ENDPOINT = {
+    ENDPOINT_NAME = "endpointName"
+}
+
 -- table of information shared between request and response flow
 local SHARED = {
     REQUEST_ID = "requestId",
@@ -121,10 +125,9 @@ end
 --- respond error to the client
 ---@param handle table
 ---@param shared_info table
----@param request_id string
 ---@param error_info {error_message: string, error_description: string, error_code: string}
 ---@param is_request_flow boolean
-local function respond_error(handle, shared_info, request_id, error_info, is_request_flow)
+local function respond_error(handle, shared_info, error_info, is_request_flow)
     local resp_body = '{"error_message": "' .. error_info.error_message .. '", "error_description": "' .. error_info.error_description ..
         '", "code": "' .. error_info.error_code .. '"}'
 
@@ -176,7 +179,7 @@ local function decode_string(decode_func, decode_func_desc, encoded_string, hand
         is_request_flow,
         'Invalid ' .. decode_func_desc .. ' encoded body from interceptor service, reason: "' .. decoded .. '"'
     )
-    respond_error(handle, shared_info, request_id, {
+    respond_error(handle, shared_info, {
         error_message = "Internal Server Error",
         error_description = "Internal Server Error",
         error_code = "103501" -- Invalid encoded body from interceptor service
@@ -192,21 +195,37 @@ local function json_decode(encoded_string, handle, shared_info, request_id, is_r
     return decode_string(json.decode, "json", encoded_string, handle, shared_info, request_id, is_request_flow)
 end
 
+-- TODO: move to a util module
+local function is_starts_with(text, startsWith)
+    return string.sub(text, 1, string.len(startsWith)) == startsWith
+end
+
+local function is_valid_header(key)
+    local key_lower = string.lower(key)
+    return not is_starts_with(key_lower, "x-wso2") and not is_starts_with(key_lower, "x-envoy")
+end
+
 local function modify_headers(handle, interceptor_response_body)
     -- priority: headersToAdd, headersToReplace, headersToRemove
     if interceptor_response_body[RESPONSE.HEADERS_TO_REMOVE] then
         for _, key in ipairs(interceptor_response_body[RESPONSE.HEADERS_TO_REMOVE]) do
-            handle:headers():remove(key)
+            if is_valid_header(key) then
+                handle:headers():remove(key)
+            end
         end
     end
     if interceptor_response_body[RESPONSE.HEADERS_TO_REPLACE] then
         for key, val in pairs(interceptor_response_body[RESPONSE.HEADERS_TO_REPLACE]) do
-            handle:headers():replace(key, val)
+            if is_valid_header(key) then
+                handle:headers():replace(key, val)
+            end
         end
     end
     if interceptor_response_body[RESPONSE.HEADERS_TO_ADD] then
         for key, val in pairs(interceptor_response_body[RESPONSE.HEADERS_TO_ADD]) do
-            handle:headers():add(key, val)
+            if is_valid_header(key) then
+                handle:headers():add(key, val)
+            end
         end
     end
 end
@@ -231,8 +250,9 @@ local function modify_trailers(handle, interceptor_response_body)
 end
 
 local function handle_dynamic_endpoint(handle, interceptor_response_body, inv_context, shared_info)
-    local dynamicEpName = interceptor_response_body[RESPONSE.DYNAMIC_ENDPOINT]
-    if dynamicEpName and dynamicEpName ~= "" then
+    local dynamicEp = interceptor_response_body[RESPONSE.DYNAMIC_ENDPOINT]
+    if dynamicEp and dynamicEp[DYNAMIC_ENDPOINT.ENDPOINT_NAME] ~= "" then
+        local dynamicEpName = dynamicEp[DYNAMIC_ENDPOINT.ENDPOINT_NAME]
         handle:logDebug("dynamic endpoint found: " .. dynamicEpName)
         -- template: <organizationID>_<EndpointName>_xwso2cluster_<vHost>_<API name><API version>
         local endpoint = string.format("%s_%s_xwso2cluster_%s_%s%s", shared_info[SHARED.ORG_ID], dynamicEpName,
@@ -308,7 +328,7 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
     local message = 'HTTP status_code: "' .. headers[STATUS] ..'", response_body: "' .. body_str
     log_interceptor_service_error(handle, request_id, is_request_flow, message)
 
-    respond_error(handle, shared_info, request_id, {
+    respond_error(handle, shared_info, {
             error_message = "Internal Server Error",
             error_description = "Internal Server Error",
             error_code = "103500" -- Interceptor service connect failure or invalid response status code
@@ -502,6 +522,8 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         return
     end
 
+    --TODO: (renuka) validate response_body scheme, whether headersToAdd is a table or not (i.e. if it is an int then throw error)
+
     handle_direct_respond(request_handle, interceptor_response_body, shared_info, request_id)
     if modify_body(request_handle, interceptor_response_body, request_id, shared_info, req_flow_includes[INCLUDES.REQ_BODY], true) then
         -- error thrown, exiting
@@ -511,6 +533,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     modify_trailers(request_handle, interceptor_response_body)
     
     --#region handle dynamic endpoint
+    -- handle this after update headers, in case if user modify the header "x-wso2-cluster-header"
     handle_dynamic_endpoint(request_handle, interceptor_response_body, inv_context, shared_info)
     --#endregion
 
@@ -589,6 +612,8 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     if check_interceptor_call_errors(response_handle, interceptor_response_headers, interceptor_response_body_str, shared_info, request_id, false) then
         return
     end
+
+    --TODO: (renuka) validate response_body scheme, whether headersToAdd is a table or not (i.e. if it is an int then throw error)
 
     local interceptor_response_body, err = json_decode(interceptor_response_body_str, response_handle, shared_info, request_id, false)
     if err then
