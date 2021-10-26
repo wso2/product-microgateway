@@ -19,191 +19,9 @@ limitations under the License.
 -- @module interceptor
 local interceptor = {}
 
-local json = require 'home.wso2.interceptor.lib.json'
--- json library: https://github.com/rxi/json.lua
-local base64 = require 'home.wso2.interceptor.lib.base64'
--- base64 library: https://github.com/iskolbin/lbase64
-
--- keys of includes table
-local INCLUDES = {
-    INV_CONTEXT = "invocationContext",
-    REQ_HEADERS = "requestHeaders",
-    REQ_BODY = "requestBody",
-    REQ_TRAILERS = "requestTrailers",
-    RESP_HEADERS = "responseHeaders",
-    RESP_BODY = "responseBody",
-    RESP_TRAILERS = "responseTrailers"
-}
-
--- keys of the payload to the interceptor service
-local REQUEST = {
-    REQ_HEADERS = "requestHeaders",
-    REQ_BODY = "requestBody",
-    REQ_TRAILERS = "requestTrailers",
-    RESP_HEADERS = "responseHeaders",
-    RESP_BODY = "responseBody",
-    RESP_CODE = "responseCode",
-    RESP_TRAILERS = "responseTrailers",
-    INTCPT_CONTEXT = "interceptorContext",
-    INV_CONTEXT = "invocationContext"
-}
-
--- keys of the payload to the invocation context
-local INV_CONTEXT = {
-    PROTOCOL = "protocol",
-    SCHEME = "scheme",
-    PATH = "path",
-    METHOD = "method",
-    REQ_ID = "requestId",
-    SOURCE = "source",
-    DESTINATION = "destination",
-    ORG_ID = "organizationId",
-    VHOST = "vhost",
-    API_NAME = "apiName",
-    API_VERSION = "apiVersion",
-    ENFORCER_DENIED = "enforcerDenied",
-    AUTH_CTX = "authenticationContext"
-}
-
--- keys of the payload to the auth context
-local AUTH_CTX = {
-    TOKEN_TYPE = "tokenType", -- API Key|JWT Auth|Internal Key
-    TOKEN = "token", -- raw token
-    KEY_TYPE = "keyType" -- PRODUCTION|SANDBOX
-}
-
--- keys of the payload from the interceptor service
-local RESPONSE = {
-    DIRECT_RESPOND = "directRespond",
-    BODY = "body",
-    RESPONSE_CODE = "responseCode",
-    HEADERS_TO_ADD = "headersToAdd",
-    HEADERS_TO_REPLACE = "headersToReplace",
-    HEADERS_TO_REMOVE = "headersToRemove",
-    TRAILERS_TO_ADD = "trailersToAdd",
-    TRAILERS_TO_REPLACE = "trailersToReplace",
-    TRAILERS_TO_REMOVE = "trailersToRemove",
-    INTCPT_CONTEXT = "interceptorContext",
-    DYNAMIC_ENDPOINT = "dynamicEndpoint"
-}
-
-local DYNAMIC_ENDPOINT = {
-    ENDPOINT_NAME = "endpointName"
-}
-
--- table of information shared between request and response flow
-local SHARED = {
-    REQUEST_ID = "requestId",
-    ORG_ID = "organizationId"
-}
-
--- envoy headers
-local STATUS = ":status"
-local FILTER_NAME = "envoy.filters.http.lua"
-local EXT_AUTHZ_FILTER = "envoy.filters.http.ext_authz"
-local SHARED_INFO_META_KEY = "shared.info"
-
-local function direct_respond(handle, headers, body, shared_info)
-    shared_info[RESPONSE.DIRECT_RESPOND] = true
-    handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
-    handle:respond(
-        headers,
-        body
-    )
-end
-
---- log error related to interceptor service
----@param handle table
----@param request_id string
----@param is_request_flow boolean
----@param message string
-local function log_interceptor_service_error(handle, request_id, is_request_flow, message)
-    local intercept_path = is_request_flow and "request" or "response"
-    handle:logErr('Invalid ' .. intercept_path .. ' interceptor service response, message: "' .. message .. '"' .. ', request_id: "' .. request_id .. '"')
-end
-
---- respond error to the client
----@param handle table
----@param shared_info table
----@param error_info {error_message: string, error_description: string, error_code: string}
----@param is_request_flow boolean
-local function respond_error(handle, shared_info, error_info, is_request_flow)
-    local resp_body = '{"error_message": "' .. error_info.error_message .. '", "error_description": "' .. error_info.error_description ..
-        '", "code": "' .. error_info.error_code .. '"}'
-
-    --#region request flow
-    if is_request_flow then
-        direct_respond(
-            handle,
-            {[STATUS] = "500"},
-            resp_body,
-            shared_info
-        )
-        return
-    end
-    --#endregion
-
-    --#region response flow
-    local backend_headers = handle:headers()
-    local headers_to_remove = {}
-    for key, _ in pairs(backend_headers) do
-        headers_to_remove[key] = "" -- can not remove headers while iterating, hence adding first
-    end
-    for key, _ in pairs(headers_to_remove) do -- remove all headers from backend
-        backend_headers:remove(key)
-    end
-    backend_headers:add(STATUS, "500")
-
-    local content_length = handle:body():setBytes(resp_body)
-    handle:headers():replace("content-length", content_length)
-    return
-    --#endregion
-end
-
----comment
----@param encoded_string any
----@param handle any
----@param request_id any
----@param is_request_flow any
----@return string - decoded string
----@return boolean - true if error returned
-local function decode_string(decode_func, decode_func_desc, encoded_string, handle, shared_info, request_id, is_request_flow)
-    local status, decoded = pcall(decode_func, encoded_string)
-    if status then
-        return decoded, false
-    end
-
-    log_interceptor_service_error(
-        handle,
-        request_id,
-        is_request_flow,
-        'Invalid ' .. decode_func_desc .. ' encoded body from interceptor service, reason: "' .. decoded .. '"'
-    )
-    respond_error(handle, shared_info, {
-        error_message = "Internal Server Error",
-        error_description = "Internal Server Error",
-        error_code = "103501" -- Invalid encoded body from interceptor service
-    }, is_request_flow)
-    return "", true
-end
-
-local function base64_decode(encoded_string, handle, shared_info, request_id, is_request_flow)
-    return decode_string(base64.decode, "base64", encoded_string, handle, shared_info, request_id, is_request_flow)
-end
-
-local function json_decode(encoded_string, handle, shared_info, request_id, is_request_flow)
-    return decode_string(json.decode, "json", encoded_string, handle, shared_info, request_id, is_request_flow)
-end
-
--- TODO: move to a util module
-local function is_starts_with(text, startsWith)
-    return string.sub(text, 1, string.len(startsWith)) == startsWith
-end
-
-local function is_valid_header(key)
-    local key_lower = string.lower(key)
-    return not is_starts_with(key_lower, "x-wso2") and not is_starts_with(key_lower, "x-envoy")
-end
+require 'home.wso2.interceptor.lib.consts'
+require 'home.wso2.interceptor.lib.encoders'
+require 'home.wso2.interceptor.lib.utils'
 
 local function modify_headers(handle, interceptor_response_body)
     -- priority: headersToAdd, headersToReplace, headersToRemove
@@ -354,7 +172,7 @@ local function send_http_call(handle, interceptor_request_body, intercept_servic
             ["content-type"] = "application/json",
             ["accept"] = "application/json",
         },
-        json.encode(interceptor_request_body),
+        json_encode(interceptor_request_body),
         intercept_service["timeout"],
         false -- async false, wait for response from interceptor service
     )
@@ -481,7 +299,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         else
             request_body_str = ""
         end
-        request_body_base64 = base64.encode(request_body_str)
+        request_body_base64 = base64_encode(request_body_str)
     end
     if resp_flow_includes[INCLUDES.REQ_BODY] then
         shared_info[REQUEST.REQ_BODY] = request_body_base64
@@ -504,7 +322,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     if skip_interceptor_call then
         -- skip calling interceptor service by only setting the shared_info
         -- this is useful when the request interceptor flow is disabled and only the response interceptor flow is enabled.
-        request_handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
+        request_handle:streamInfo():dynamicMetadata():set(LUA_FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
         return
     end
 
@@ -542,7 +360,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         shared_info[REQUEST.INTCPT_CONTEXT] = interceptor_response_body[RESPONSE.INTCPT_CONTEXT]
     end
 
-    request_handle:streamInfo():dynamicMetadata():set(FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
+    request_handle:streamInfo():dynamicMetadata():set(LUA_FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
 end
 
 ---interceptor handler for response flow
@@ -550,7 +368,7 @@ end
 ---@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
 ---@param resp_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
 function interceptor.handle_response_interceptor(response_handle, intercept_service, resp_flow_includes)
-    local meta = response_handle:streamInfo():dynamicMetadata():get(FILTER_NAME)
+    local meta = response_handle:streamInfo():dynamicMetadata():get(LUA_FILTER_NAME)
     local shared_info = meta and meta[SHARED_INFO_META_KEY]
     if not shared_info then
         -- no shared info found, request interceptor flow is not executed (eg: enforcer validation failed)
@@ -579,7 +397,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     --#region read backend body
     if resp_flow_includes[INCLUDES.RESP_BODY] then
         local request_body = response_handle:body():getBytes(0, response_handle:body():length())
-        interceptor_request_body[REQUEST.RESP_BODY] = base64.encode(request_body)
+        interceptor_request_body[REQUEST.RESP_BODY] = base64_encode(request_body)
     end
     --#endregion
 
