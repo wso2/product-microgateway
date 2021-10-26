@@ -302,7 +302,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
 		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s",
-			apiYaml.Name, apiYaml.Name, organizationID)
+			apiYaml.Name, apiYaml.Version, organizationID)
 		return nil, validationErr
 	}
 

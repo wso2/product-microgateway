@@ -40,6 +40,7 @@ public class AdapterConstants {
         public static final String RETRY_ON = "x-envoy-retry-on";
         public static final String MAX_RETRIES = "x-envoy-max-retries";
         public static final String RETRIABLE_STATUS_CODES = "x-envoy-retriable-status-codes";
+        public static final String UPSTREAM_REQ_TIMEOUT_MS = "x-envoy-upstream-rq-timeout-ms";
 
         private HttpRouterHeaders() {}
     }

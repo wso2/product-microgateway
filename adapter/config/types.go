@@ -103,10 +103,6 @@ type envoy struct {
 	Upstream                         envoyUpstream
 	Connection                       connection
 }
-type upstreamTimeout struct {
-	RouteTimeoutInSeconds     time.Duration
-	RouteIdleTimeoutInSeconds time.Duration
-}
 
 type connectionTimeouts struct {
 	RequestTimeoutInSeconds        time.Duration
@@ -202,6 +198,12 @@ type upstreamTLS struct {
 	TrustedCertPath        string
 	VerifyHostName         bool
 	DisableSslVerification bool
+}
+
+type upstreamTimeout struct {
+	RouteTimeoutInSeconds     uint32
+	MaxRouteTimeoutInSeconds  uint32
+	RouteIdleTimeoutInSeconds uint32
 }
 
 type upstreamHealth struct {

@@ -92,6 +92,7 @@ var defaultConfig = &Config{
 				DisableSslVerification: false,
 			},
 			Timeouts: upstreamTimeout{
+				MaxRouteTimeoutInSeconds:  60,
 				RouteTimeoutInSeconds:     60,
 				RouteIdleTimeoutInSeconds: 300,
 			},

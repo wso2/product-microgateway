@@ -100,29 +100,19 @@ public class RestAPI implements API {
         }
 
         for (Resource res : api.getResourcesList()) {
-            Map<String, RetryConfig> resourceRetryConfigs = new HashMap();
+            Map<String, EndpointCluster> endpointClusterMap = new HashMap();
             EndpointCluster prodEndpointCluster = processEndpoints(res.getProductionEndpoints());
             EndpointCluster sandEndpointCluster = processEndpoints(res.getSandboxEndpoints());
             if (prodEndpointCluster != null) {
-                RetryConfig prodRetryConfig = prodEndpointCluster.getRetryConfig();
-                if (prodRetryConfig != null) {
-                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodRetryConfig);
-                }
+                endpointClusterMap.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodEndpointCluster);
             }
             if (sandEndpointCluster != null) {
-                RetryConfig sandRetryConfig = sandEndpointCluster.getRetryConfig();
-                if (sandRetryConfig != null) {
-                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_SANDBOX, sandRetryConfig);
-                }
-            }
-
-            if (resourceRetryConfigs.isEmpty()) {
-                resourceRetryConfigs = null;
+                endpointClusterMap.put(APIConstants.API_KEY_TYPE_SANDBOX, sandEndpointCluster);
             }
 
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
-                resConfig.setRetryConfigs(resourceRetryConfigs);
+                resConfig.setEndpoints(endpointClusterMap);
                 resources.add(resConfig);
             }
         }
@@ -171,6 +161,11 @@ public class RestAPI implements API {
                 RetryConfig retryConfig = new RetryConfig(rpcRetryConfig.getCount(),
                         rpcRetryConfig.getStatusCodesList().toArray(new Integer[0]));
                 endpointCluster.setRetryConfig(retryConfig);
+            }
+            if (endpointClusterConfig.hasTimeoutConfig()) {
+                org.wso2.choreo.connect.discovery.api.TimeoutConfig timeoutConfig
+                        = endpointClusterConfig.getTimeoutConfig();
+                endpointCluster.setRouteTimeoutInMillis(timeoutConfig.getRouteTimeoutInMillis());
             }
         }
         return endpointCluster;

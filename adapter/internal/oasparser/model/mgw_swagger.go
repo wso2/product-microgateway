@@ -88,6 +88,7 @@ type Endpoint struct {
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster
 type EndpointConfig struct {
 	RetryConfig     *RetryConfig     `mapstructure:"retryConfig"`
+	TimeoutInMillis uint32           `mapstructure:"timeoutInMillis"`
 	CircuitBreakers *CircuitBreakers `mapstructure:"circuitBreakers"`
 }
 
@@ -286,6 +287,16 @@ func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandboxEndpoints
 	sandEndpointInfos []EndpointInfo) error {
 
 	swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxEndpoints, LoadBalance)
+	// Set timeout
+	timeout := sandEndpointInfos[0].Config.ActionDuration
+	if timeout != "" {
+		routeTimeout, err := strconv.ParseInt(timeout, 10, 32)
+		if err != nil {
+			return err
+		}
+		swagger.sandboxEndpoints.Config.TimeoutInMillis = uint32(routeTimeout)
+	}
+	// retry
 	if sandEndpointInfos != nil && len(sandEndpointInfos) > 0 {
 		retryCount := sandEndpointInfos[0].Config.RetryTimeOut
 		if retryCount != "" {
@@ -311,6 +322,17 @@ func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionEndpoi
 
 	swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints, LoadBalance)
 	if prodEndpointInfos != nil && len(prodEndpointInfos) > 0 {
+		// Set timeout
+		timeout := prodEndpointInfos[0].Config.ActionDuration
+		if timeout != "" {
+			routeTimeout, err := strconv.ParseInt(timeout, 10, 32)
+			if err != nil {
+				return err
+			}
+			swagger.productionEndpoints.Config.TimeoutInMillis = uint32(routeTimeout)
+		}
+
+		// Set retry config
 		retryCount := prodEndpointInfos[0].Config.RetryTimeOut
 		if retryCount != "" {
 			count, err := strconv.ParseInt(retryCount, 10, 32)
@@ -499,7 +521,7 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	return err
 }
 
-func (retryConfig *RetryConfig) validateRetryConfig() error {
+func (retryConfig *RetryConfig) validateRetryConfig() {
 	conf, _ := config.ReadConfigs()
 	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxRetryCount
 	if retryConfig.Count > int32(maxConfigurableCount) || retryConfig.Count < 0 {
@@ -520,7 +542,6 @@ func (retryConfig *RetryConfig) validateRetryConfig() error {
 		validStatusCodes = append(validStatusCodes, conf.Envoy.Upstream.Retry.StatusCodes...)
 	}
 	retryConfig.StatusCodes = validStatusCodes
-	return nil
 }
 
 func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName string) error {
@@ -536,13 +557,15 @@ func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName str
 		}
 
 		if endpointCluster.Config != nil {
+			// Validate retry
 			if endpointCluster.Config.RetryConfig != nil {
-				err = endpointCluster.Config.RetryConfig.validateRetryConfig()
-				if err != nil {
-					logger.LoggerOasparser.Errorf("Invalide retry config for %s endpoints. %v",
-						endpointName, err)
-					return err
-				}
+				endpointCluster.Config.RetryConfig.validateRetryConfig()
+			}
+			// Validate timeout
+			conf, _ := config.ReadConfigs()
+			maxTimeoutInMillis := conf.Envoy.Upstream.Timeouts.MaxRouteTimeoutInSeconds * 1000
+			if endpointCluster.Config.TimeoutInMillis > maxTimeoutInMillis {
+				endpointCluster.Config.TimeoutInMillis = maxTimeoutInMillis
 			}
 		}
 	}
