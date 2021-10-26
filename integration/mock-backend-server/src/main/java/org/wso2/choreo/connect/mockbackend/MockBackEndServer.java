@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,6 +72,13 @@ public class MockBackEndServer extends Thread {
                     true, true);
             securedMockBackEndServer.start();
             mtlsMockBackEndServer.start();
+        }
+        if (Arrays.asList(args).contains("-interceptor-svc-enabled")) {
+            MockInterceptorServer mockInterceptorServer = new MockInterceptorServer(
+                    Constants.INTERCEPTOR_STATUS_SERVER_PORT,
+                    Constants.MTLS_INTERCEPTOR_HANDLER_SERVER_PORT
+            );
+            mockInterceptorServer.start();
         }
     }
 
@@ -279,6 +287,21 @@ public class MockBackEndServer extends Thread {
                 byte[] response = responseJSON.toString().getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+
+            // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor tests.
+            // sent request headers in response headers <- this is because in interceptor tests it is required to test
+            //                                             response flow headers to interceptor service
+            // sent request body in response body
+            httpServer.createContext(context + "/echo", exchange -> {
+                byte[] response;
+                String requestBody = Utils.requestBodyToString(exchange);
+                response = requestBody.getBytes();
+                exchange.getResponseHeaders().putAll(exchange.getRequestHeaders());
+                int respCode = response.length == 0 ? HttpURLConnection.HTTP_NO_CONTENT : HttpURLConnection.HTTP_OK;
+                exchange.sendResponseHeaders(respCode, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {
@@ -298,7 +321,7 @@ public class MockBackEndServer extends Thread {
         httpServer.stop(0);
     }
 
-    private SSLContext getSslContext() throws Exception {
+    private static SSLContext getSslContext() throws Exception {
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
         // initialise the keystore

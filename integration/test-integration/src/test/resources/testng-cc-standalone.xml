@@ -50,6 +50,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeOutTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.MalformedEndpointTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.retry.RetryTestCase"></class>
+            <class name="org.wso2.choreo.connect.tests.testCases.standalone.interceptor.InterceptorServiceNotAvailableTestCase"/>
         </classes>
     </test>
     <test name="cc-with-backend-tls" preserve-order="true" parallel="false">
@@ -57,6 +58,9 @@
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabled"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.backendtls.BackendTLSTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.standalone.interceptor.InterceptorResponseFlowTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">

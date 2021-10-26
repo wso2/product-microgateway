@@ -42,6 +42,7 @@ local REQUEST = {
     REQ_TRAILERS = "requestTrailers",
     RESP_HEADERS = "responseHeaders",
     RESP_BODY = "responseBody",
+    RESP_CODE = "responseCode",
     RESP_TRAILERS = "responseTrailers",
     INTCPT_CONTEXT = "interceptorContext",
     INV_CONTEXT = "invocationContext"
@@ -52,6 +53,7 @@ local INV_CONTEXT = {
     PROTOCOL = "protocol",
     SCHEME = "scheme",
     PATH = "path",
+    METHOD = "method",
     REQ_ID = "requestId",
     SOURCE = "source",
     DESTINATION = "destination",
@@ -61,6 +63,8 @@ local INV_CONTEXT = {
 -- keys of the payload from the interceptor service
 local RESPONSE = {
     DIRECT_RESPOND = "directRespond",
+    BODY = "body",
+    RESPONSE_CODE = "responseCode",
     HEADERS_TO_ADD = "headersToAdd",
     HEADERS_TO_REPLACE = "headersToReplace",
     HEADERS_TO_REMOVE = "headersToRemove",
@@ -151,7 +155,6 @@ local function decode_string(decode_func, decode_func_desc, encoded_string, hand
         return decoded, false
     end
 
-    --#region if error base64 decoding
     log_interceptor_service_error(
         handle,
         request_id,
@@ -161,7 +164,7 @@ local function decode_string(decode_func, decode_func_desc, encoded_string, hand
     respond_error(handle, shared_info, request_id, {
         error_message = "Internal Server Error",
         error_description = "Internal Server Error",
-        error_code = "102518"
+        error_code = "103501" -- Invalid encoded body from interceptor service
     }, is_request_flow)
     return "", true
 end
@@ -217,20 +220,43 @@ end
 ---@param interceptor_response_body table
 ---@param request_id string
 ---@param shared_info table
+---@param is_buffered boolean
 ---@param is_request_flow boolean
 ---@return boolean - return true if error
-local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_request_flow)
+local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_buffered, is_request_flow)
     -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
-    if interceptor_response_body.body then
+    if interceptor_response_body[RESPONSE.BODY] then
         handle:logDebug("Updating body for the request_id: " .. request_id)
 
-        local body, err = base64_decode(interceptor_response_body.body, handle, shared_info, request_id, is_request_flow)
+        --#region handle error if body is not buffered before updating it
+        if not is_buffered then
+            -- invalid operation, body should buffered first before updating it
+            log_interceptor_service_error(
+                    handle,
+                    request_id,
+                    is_request_flow,
+                    'Invalid operation: "Update Body". Request|Response body should be added in includes section of OAS definition'
+            )
+            -- can not respond_error because, can not update response body. Hence log only.
+
+            return true
+        end
+        --#endregion
+
+        local body, err = base64_decode(interceptor_response_body[RESPONSE.BODY], handle, shared_info, request_id, is_request_flow)
         if err then
             return true
         end
 
         local content_length = handle:body():setBytes(body)
         handle:headers():replace("content-length", content_length)
+        if not is_request_flow then
+            local status_code = "200"
+            if content_length == 0 then
+                status_code = "204"
+            end
+            handle:headers():replace(STATUS, status_code)
+        end
         return false
     end
 
@@ -259,7 +285,7 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
     respond_error(handle, shared_info, request_id, {
             error_message = "Internal Server Error",
             error_description = "Internal Server Error",
-            error_code = "102517"
+            error_code = "103500" -- Interceptor service connect failure or invalid response status code
         },
         is_request_flow
     )
@@ -316,6 +342,7 @@ local function include_invocation_context(handle, req_flow_includes, resp_flow_i
         inv_context[INV_CONTEXT.PROTOCOL] = handle:streamInfo():protocol()
         inv_context[INV_CONTEXT.SCHEME] = request_headers:get(":scheme")
         inv_context[INV_CONTEXT.PATH] = request_headers:get(":path")
+        inv_context[INV_CONTEXT.METHOD] = request_headers:get(":method")
         inv_context[INV_CONTEXT.REQ_ID] = request_headers:get("x-request-id")
         inv_context[INV_CONTEXT.SOURCE] = client_ip
         -- inv_context[INV_CONTEXT.DESTINATION] = handle:streamInfo():downstreamLocalAddress() -- TODO: (renuka) check this
@@ -336,19 +363,19 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
         local headers = interceptor_response_body[RESPONSE.HEADERS_TO_ADD] or {}
         
         -- if interceptor_response_body.body is nil send empty, do not send client its payload back
-        local body = interceptor_response_body.body or ""
+        local body = interceptor_response_body[RESPONSE.BODY] or ""
         if body == "" then
             headers[STATUS] = headers[STATUS] or "204"
         else
             headers[STATUS] = headers[STATUS] or "200"
         end
 
-        local body, err = base64_decode(interceptor_response_body.body, handle, shared_info, request_id, true)
+        local decoded_body, err = base64_decode(body, handle, shared_info, request_id, true)
         if err then
             return
         end
 
-        direct_respond(handle, headers, body, shared_info)
+        direct_respond(handle, headers, decoded_body, shared_info)
     end
 end
 
@@ -423,7 +450,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     -- include request details: request headers, body and trailers to the interceptor_request_body
     include_request_info(req_flow_includes, interceptor_request_body, request_headers_table, request_body_base64, request_trailers_table)
 
-    intercept_service.resource_path = "/handle-request"
+    intercept_service.resource_path = "/api/v1/handle-request"
     local interceptor_response_headers, interceptor_response_body_str = send_http_call(request_handle, interceptor_request_body, intercept_service)
     if check_interceptor_call_errors(request_handle, interceptor_response_headers, interceptor_response_body_str, shared_info, request_id, true) then
         return
@@ -435,7 +462,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     end
 
     handle_direct_respond(request_handle, interceptor_response_body, shared_info, request_id)
-    if modify_body(request_handle, interceptor_response_body, request_id, shared_info, true) then
+    if modify_body(request_handle, interceptor_response_body, request_id, shared_info, req_flow_includes[INCLUDES.REQ_BODY], true) then
         -- error thrown, exiting
         return
     end
@@ -499,6 +526,10 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     --#endregion
 
+    --#region status code
+    interceptor_request_body[REQUEST.RESP_CODE] = response_handle:headers():get(STATUS)
+    --#endregion
+
     include_request_info(resp_flow_includes, interceptor_request_body, shared_info[REQUEST.REQ_HEADERS], shared_info[REQUEST.REQ_BODY], shared_info[REQUEST.REQ_TRAILERS])
     interceptor_request_body[REQUEST.INTCPT_CONTEXT] = shared_info[REQUEST.INTCPT_CONTEXT]
 
@@ -508,7 +539,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     --#endregion
 
-    intercept_service.resource_path = "/handle-response"
+    intercept_service.resource_path = "/api/v1/handle-response"
     local interceptor_response_headers, interceptor_response_body_str = send_http_call(response_handle, interceptor_request_body, intercept_service)
     if check_interceptor_call_errors(response_handle, interceptor_response_headers, interceptor_response_body_str, shared_info, request_id, false) then
         return
@@ -519,12 +550,18 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         return
     end
 
-    if modify_body(response_handle, interceptor_response_body, request_id, shared_info, false) then
+    if modify_body(response_handle, interceptor_response_body, request_id, shared_info, resp_flow_includes[INCLUDES.RESP_BODY], false) then
         -- error thrown, exiting
         return
     end
     modify_headers(response_handle, interceptor_response_body)
     modify_trailers(response_handle, interceptor_response_body)
+
+    --#region status code
+    if interceptor_response_body[RESPONSE.RESPONSE_CODE] then
+        response_handle:headers():replace(STATUS, interceptor_response_body[RESPONSE.RESPONSE_CODE])
+    end
+    --#endregion
 end
 
 return interceptor
