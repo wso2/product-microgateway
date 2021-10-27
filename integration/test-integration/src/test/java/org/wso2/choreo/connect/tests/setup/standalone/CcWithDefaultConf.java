@@ -62,12 +62,13 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml");
         ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
         ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3", null, null);
-        ApictlUtils.createProject( "timeout_openAPI.yaml", "apictl_timeout_v3", null, null);
+        ApictlUtils.createProject( "timeout_global_openAPI.yaml", "timeout_global", null, null);
+        ApictlUtils.createProject( "timeout_endpoint_openAPI.yaml", "timeout_endpoint", null, null);
         ApictlUtils.createProject( "malformed_endpoint_openAPI.yaml", "apictl_malformed_endpoint", null, null);
-        ApictlUtils.createProject( "retry_openAPI.yaml", "apictl_retry", null, null);
+        ApictlUtils.createProject( "retry_openAPI.yaml", "retry", null, null);
         ApictlUtils.createProject( "intercept_request_openAPI.yaml", "intercept_request_default_setup_petstore", "backend_tls.crt", null);
         ApictlUtils.createProject( "intercept_response_openAPI.yaml", "intercept_response_default_setup_petstore", "backend_tls.crt", null);
-        ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "apictl_circuit_breakers", null, null);
+        ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "circuit_breakers", null, null);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -80,11 +81,12 @@ public class CcWithDefaultConf {
         ApictlUtils.deployAPI("vhost1_petstore", "test");
         ApictlUtils.deployAPI("vhost2_petstore", "test");
         ApictlUtils.deployAPI("apictl_petstore_v3", "test");
-        ApictlUtils.deployAPI("apictl_timeout_v3", "test");
-        ApictlUtils.deployAPI("apictl_retry", "test");
+        ApictlUtils.deployAPI("timeout_global", "test");
+        ApictlUtils.deployAPI("timeout_endpoint", "test");
+        ApictlUtils.deployAPI("retry", "test");
         ApictlUtils.deployAPI("intercept_request_default_setup_petstore", "test");
         ApictlUtils.deployAPI("intercept_response_default_setup_petstore", "test");
-        ApictlUtils.deployAPI("apictl_circuit_breakers", "test");
+        ApictlUtils.deployAPI("circuit_breakers", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

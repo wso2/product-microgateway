@@ -216,20 +216,41 @@ public class MockBackEndServer extends Thread {
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
-            httpServer.createContext(context + "/timeout70", exchange -> {
+            // For Timeout tests
+            httpServer.createContext(context + "/delay-62", exchange -> {
                 try {
-                    logger.info("Sleeping 70s...");
-                    Thread.sleep(70000);
+                    logger.info("Sleeping 62s...");
+                    Thread.sleep(62000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
-            httpServer.createContext(context + "/timeout15", exchange -> {
+            httpServer.createContext(context + "/delay-6", exchange -> {
                 try {
-                    logger.info("Sleeping 15s...");
-                    Thread.sleep(15000);
+                    logger.info("Sleeping 6s...");
+                    Thread.sleep(6000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/delay-4", exchange -> {
+                try {
+                    logger.info("Sleeping 4s...");
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/delay-3", exchange -> {
+                try {
+                    logger.info("Sleeping 3s...");
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
