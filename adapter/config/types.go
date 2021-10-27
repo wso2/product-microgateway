@@ -85,6 +85,8 @@ type adapter struct {
 	Keystore keystore
 	// Trusted Certificates
 	Truststore truststore
+	// Http client
+	HTTPClient httpClient
 }
 
 // Envoy Listener Component related configurations.
@@ -432,4 +434,8 @@ type management struct {
 type filter struct {
 	ClassName string
 	Position  int32
+}
+
+type httpClient struct {
+	RequestTimeOut time.Duration
 }

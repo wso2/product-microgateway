@@ -54,8 +54,8 @@ type APIDeployment struct {
 	Environments []GatewayLabel `json:"environments"`
 	// These properties are used by global Adapter
 	OrganizationID string `json:"organizationId"`
-	APIContext string `json:"apiContext"`
-	Version string `json:"version"`
+	APIContext     string `json:"apiContext"`
+	Version        string `json:"version"`
 }
 
 // GatewayLabel represents gateway environment name and VHost of an API project

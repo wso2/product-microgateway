@@ -57,6 +57,9 @@ var defaultConfig = &Config{
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
+		HTTPClient: httpClient{
+			RequestTimeOut: 30,
+		},
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
