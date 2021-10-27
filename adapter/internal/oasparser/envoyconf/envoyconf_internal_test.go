@@ -92,8 +92,8 @@ func TestCreateRoute(t *testing.T) {
 			Value: true,
 		},
 	}
-	clusterSpecifier := &routev3.RouteAction_Cluster{
-		Cluster: "resource_operation_id",
+	clusterSpecifier := &routev3.RouteAction_ClusterHeader{
+		ClusterHeader: clusterHeaderName,
 	}
 	regexRewriteWithXWso2BasePath := &envoy_type_matcherv3.RegexMatchAndSubstitute{
 		Pattern: &envoy_type_matcherv3.RegexMatcher{
@@ -176,16 +176,16 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 	routeWithProdEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
 		resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), prodClusterName, "", nil))
 	assert.NotNil(t, routeWithProdEp, "Route should not be null")
-	assert.NotNil(t, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name should not be null.")
-	assert.Empty(t, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Header should be empty.")
-	assert.Equal(t, prodClusterName, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name mismatch.")
+	assert.NotNil(t, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 
 	routeWithSandEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
 		resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), "", sandClusterName, nil))
 	assert.NotNil(t, routeWithSandEp, "Route should not be null")
-	assert.NotNil(t, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name should not be null.")
-	assert.Empty(t, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should be empty.")
-	assert.Equal(t, sandClusterName, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name mismatch.")
+	assert.NotNil(t, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 
 	routeWithProdSandEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
 		resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), prodClusterName, sandClusterName, nil))

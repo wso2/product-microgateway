@@ -697,25 +697,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		}
 	}
 
-	if prodClusterName != "" && sandClusterName != "" {
-		headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
-			ClusterHeader: clusterHeaderName,
-		}
-		action.Route.ClusterSpecifier = headerBasedClusterSpecifier
-		logger.LoggerOasparser.Debug("adding cluster header")
-	} else if prodClusterName != "" {
-		directClusterSpecifier := &routev3.RouteAction_Cluster{
-			Cluster: prodClusterName,
-		}
-		action.Route.ClusterSpecifier = directClusterSpecifier
-		logger.LoggerOasparser.Debugf("adding cluster: %v", prodClusterName)
-	} else {
-		directClusterSpecifier := &routev3.RouteAction_Cluster{
-			Cluster: sandClusterName,
-		}
-		action.Route.ClusterSpecifier = directClusterSpecifier
-		logger.LoggerOasparser.Debugf("adding cluster: %v", sandClusterName)
+	headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
+		ClusterHeader: clusterHeaderName,
 	}
+	action.Route.ClusterSpecifier = headerBasedClusterSpecifier
+	logger.LoggerOasparser.Debug("added header based cluster")
 
 	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {

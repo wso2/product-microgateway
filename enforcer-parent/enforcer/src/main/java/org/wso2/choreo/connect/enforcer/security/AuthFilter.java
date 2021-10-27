@@ -178,48 +178,32 @@ public class AuthFilter implements Filter {
         String keyType = authContext.getKeyType();
         if (StringUtils.isEmpty(authContext.getKeyType())) {
             keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
-        } 
+        }
 
-        // Header needs to be set only if the relevant cluster is available for the resource and the key type is
-        // matched.
-        if (requestContext.isClusterHeaderEnabled()) {
-            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
-                        requestContext.getProdClusterHeader());
-                addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
-            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
-                requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
-                        requestContext.getSandClusterHeader());
-                addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_SANDBOX);
-            } else {
-                if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            "Production key offered to the API with no production endpoint");
-                } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            "Sandbox key offered to the API with no sandbox endpoint");
-                }
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid key type.");
-            }
+        if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) &&
+                !StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
+            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                    requestContext.getProdClusterHeader());
+            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
+            addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
+        } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) &&
+                !StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
+            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                    requestContext.getSandClusterHeader());
+            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
+            addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_SANDBOX);
         } else {
-            // Even if the header flag is false, it is required to check if the relevant resource has a defined cluster
-            // based on environment. 
-            // If not it should provide authentication error.
-            // Always at least one of the cluster header values should be set.
-            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) && StringUtils
-                    .isEmpty(requestContext.getProdClusterHeader())) {
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Production key offered to the API with no production endpoint");
-            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) && StringUtils
-                    .isEmpty(requestContext.getSandClusterHeader())) {
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Sandbox key offered to the API with no sandbox endpoint");
-            }   
+            }
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid key type.");
         }
     }
 
