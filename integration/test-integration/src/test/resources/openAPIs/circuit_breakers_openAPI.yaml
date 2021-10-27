@@ -3,7 +3,8 @@ info:
   version: 1.0.0
   title: Circuit Breakers
   license:
-    name: MIT
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 servers:
   - url: http://mockBackend:2383/v3
 x-wso2-basePath: /circuit-breakers
@@ -19,7 +20,7 @@ x-wso2-sandbox-endpoints:
     - http://mockBackend:2390/v2
   advanceEndpointConfig:
     circuitBreakers:
-      maxPendingRequests: 1
+      maxRequests: 2
 paths:
   /req-cb:
     x-wso2-production-endpoints:
@@ -28,12 +29,6 @@ paths:
       advanceEndpointConfig:
         circuitBreakers:
           maxRequests: 1
-      x-wso2-sandbox-endpoints:
-        urls:
-          - http://mockBackend:2390/v2
-        advanceEndpointConfig:
-          circuitBreakers:
-            maxPendingRequests: 1
     get:
       summary: Info for a specific pet
       operationId: showPetById

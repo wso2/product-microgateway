@@ -30,6 +30,7 @@ import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -58,15 +59,15 @@ public class CircuitBreakersTestCase {
         }
     }
 
-    @Test(description = "Test max pending requests circuit breaker")
-    public void testMaxPendingRequest() throws Exception {
+    @Test(description = "Test max requests circuit breaker in api level")
+    public void testMaxRequestSand() throws Exception {
         ArrayList<Integer> responses = new ArrayList<>();
         ArrayList<Future<Integer>> reqs = executeConcurrentCalls(3, jwtTokenSand, "/circuit-breakers/req-cb");
         responses.add(reqs.get(0).get());
         responses.add(reqs.get(1).get());
         responses.add(reqs.get(2).get());
-        if (!responses.contains( HttpStatus.SC_OK)) {
-            Assert.fail("At least one request must get passed as Max pending requests is 1");
+        if (Collections.frequency(responses, HttpStatus.SC_OK) != 2) {
+            Assert.fail("Two request must get passed as Max requests is 2");
         }
         if (!responses.contains( HttpStatus.SC_SERVICE_UNAVAILABLE)) {
             Assert.fail("Max pending requests circuit breaker has not opened");
