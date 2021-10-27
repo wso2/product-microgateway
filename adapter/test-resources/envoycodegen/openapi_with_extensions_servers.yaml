@@ -18,6 +18,11 @@ paths:
       urls:
         - https://resourceLevelEndpoint
         - https://resourceLevelLBEndpoint:8080
+      advanceEndpointConfig:
+        circuitBreakers:
+          maxConnections: 2
+          maxRequests: 15
+          maxConnectionPools: -1
     servers:
         - url: https://resourceLevelEndpointServers
         - url: https://resourceLevelLBEndpointServers:8080

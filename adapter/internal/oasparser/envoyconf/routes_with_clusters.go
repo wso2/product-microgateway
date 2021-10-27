@@ -383,6 +383,32 @@ func createCluster(clusterName string, clusterDetails *model.EndpointCluster, up
 		HealthChecks:           createHealthCheck(),
 		TransportSocketMatches: transportSocketMatches,
 	}
+
+	if clusterDetails.Config != nil && clusterDetails.Config.CircuitBreakers != nil {
+		config := clusterDetails.Config.CircuitBreakers
+		thresholds := &clusterv3.CircuitBreakers_Thresholds{}
+		if config.MaxConnections > 0 {
+			thresholds.MaxConnections = wrapperspb.UInt32(uint32(config.MaxConnections))
+		}
+		if config.MaxConnectionPools > 0 {
+			thresholds.MaxConnectionPools = wrapperspb.UInt32(uint32(config.MaxConnectionPools))
+		}
+		if config.MaxPendingRequests > 0 {
+			thresholds.MaxPendingRequests = wrapperspb.UInt32(uint32(config.MaxPendingRequests))
+		}
+		if config.MaxRequests > 0 {
+			thresholds.MaxRequests = wrapperspb.UInt32(uint32(config.MaxRequests))
+		}
+		if config.MaxRetries > 0 {
+			thresholds.MaxRetries = wrapperspb.UInt32(uint32(config.MaxRetries))
+		}
+		cluster.CircuitBreakers = &clusterv3.CircuitBreakers{
+			Thresholds: []*clusterv3.CircuitBreakers_Thresholds{
+				thresholds,
+			},
+		}
+	}
+
 	return &cluster, addresses
 }
 

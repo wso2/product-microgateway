@@ -87,13 +87,23 @@ type Endpoint struct {
 
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster
 type EndpointConfig struct {
-	RetryConfig *RetryConfig `mapstructure:"retryConfig"`
+	RetryConfig     *RetryConfig     `mapstructure:"retryConfig"`
+	CircuitBreakers *CircuitBreakers `mapstructure:"circuitBreakers"`
 }
 
 // RetryConfig holds the parameters for retries done by cc to the EndpointCluster
 type RetryConfig struct {
 	Count       int32    `mapstructure:"count"`
 	StatusCodes []uint32 `mapstructure:"statusCodes"`
+}
+
+// CircuitBreakers holds the parameters for retries done by cc to the EndpointCluster
+type CircuitBreakers struct {
+	MaxConnections     int32 `mapstructure:"maxConnections"`
+	MaxRequests        int32 `mapstructure:"maxRequests"`
+	MaxPendingRequests int32 `mapstructure:"maxPendingRequests"`
+	MaxRetries         int32 `mapstructure:"maxRetries"`
+	MaxConnectionPools int32 `mapstructure:"maxConnectionPools"`
 }
 
 // SecurityScheme represents the structure of an security scheme.
@@ -585,7 +595,6 @@ func getEndpoints(vendorExtensions map[string]interface{}, endpointName string) 
 					var endpointConfig EndpointConfig
 					err := parser.Decode(configMap, &endpointConfig)
 					if err != nil {
-						println(err.Error())
 						return nil, errors.New("Invalid schema for advanceEndpointConfig in " + endpointName)
 					}
 					endpointCluster.Config = &endpointConfig
