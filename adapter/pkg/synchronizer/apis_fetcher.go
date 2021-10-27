@@ -51,6 +51,8 @@ const (
 	RuntimeArtifactEndpoint string = "internal/data/v1/runtime-artifacts"
 	// APIArtifactEndpoint represents the /retrieve-api-artifacts endpoint.
 	APIArtifactEndpoint string = "internal/data/v1/retrieve-api-artifacts"
+	// httpTimeout is for connection timeout of httpClient in seconds
+	httpTimeout time.Duration = 30
 )
 
 // FetchAPIs pulls the API artifact calling to the API manager
@@ -99,6 +101,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	// Configuring the http client
 	client := &http.Client{
 		Transport: tr,
+		Timeout:   httpTimeout * time.Second,
 	}
 
 	// Populating the payload body with API UUID list
