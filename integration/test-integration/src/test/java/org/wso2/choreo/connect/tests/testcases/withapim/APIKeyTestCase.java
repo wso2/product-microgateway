@@ -68,7 +68,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
 
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-//        1.0.0/pet/1  //1.0.0/pet/findByStatus
+
         endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/1");
 
         // Obtain API keys

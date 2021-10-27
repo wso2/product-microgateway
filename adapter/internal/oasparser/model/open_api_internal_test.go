@@ -82,6 +82,9 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 		result  []Resource
 		message string
 	}
+
+	securitySchemes := []SecurityScheme{}
+
 	dataItems := []setResourcesTestItem{
 		{
 			openapi3.Swagger{
@@ -115,7 +118,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := setResourcesOpenAPI(item.input)
+		resultResources, err := setResourcesOpenAPI(item.input, &securitySchemes)
 		assert.Nil(t, err, "No error should be encountered when setting resources")
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
