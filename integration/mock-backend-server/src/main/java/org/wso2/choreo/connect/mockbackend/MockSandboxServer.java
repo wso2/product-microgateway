@@ -87,9 +87,10 @@ public class MockSandboxServer extends Thread {
                 }
             });
             httpServer.createContext(context + "/req-cb", exchange -> {
-                long start = new Date().getTime();
-                while (new Date().getTime() - start < 2000L) {
-                    //do nothing and wait for 2 seconds
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Error occurred while thread sleep", e);
                 }
                 byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);

@@ -60,20 +60,15 @@ public class CircuitBreakersTestCase {
 
     @Test(description = "Test max pending requests circuit breaker")
     public void testMaxPendingRequest() throws Exception {
+        ArrayList<Integer> responses = new ArrayList<>();
         ArrayList<Future<Integer>> reqs = executeConcurrentCalls(3, jwtTokenSand, "/circuit-breakers/req-cb");
-        int firstResponse = reqs.get(0).get();
-        int secondResponse = reqs.get(1).get();
-        int thirdResponse = reqs.get(2).get();
-        if (HttpStatus.SC_SERVICE_UNAVAILABLE == firstResponse) {
-            Assert.assertEquals(firstResponse, HttpStatus.SC_OK, "Response code mismatched");
-            Assert.assertEquals(secondResponse, HttpStatus.SC_OK, "Response code mismatched");
-        } else if (HttpStatus.SC_SERVICE_UNAVAILABLE == secondResponse) {
-            Assert.assertEquals(firstResponse, HttpStatus.SC_OK, "Response code mismatched");
-            Assert.assertEquals(thirdResponse, HttpStatus.SC_OK, "Response code mismatched");
-        } else if (HttpStatus.SC_SERVICE_UNAVAILABLE == thirdResponse) {
-            Assert.assertEquals(firstResponse, HttpStatus.SC_OK, "Response code mismatched");
-            Assert.assertEquals(secondResponse, HttpStatus.SC_OK, "Response code mismatched");
-        } else {
+        responses.add(reqs.get(0).get());
+        responses.add(reqs.get(1).get());
+        responses.add(reqs.get(2).get());
+        if (!responses.contains( HttpStatus.SC_OK)) {
+            Assert.fail("At least one request must get passed as Max pending requests is 1");
+        }
+        if (!responses.contains( HttpStatus.SC_SERVICE_UNAVAILABLE)) {
             Assert.fail("Max pending requests circuit breaker has not opened");
         }
     }
