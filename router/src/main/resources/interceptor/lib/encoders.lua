@@ -42,7 +42,7 @@ local function decode_string(decode_func, decode_func_desc, encoded_string, hand
     respond_error(handle, shared_info, {
         error_message = "Internal Server Error",
         error_description = "Internal Server Error",
-        error_code = "103501" -- Invalid encoded body from interceptor service
+        error_code = ERROR_CODES.DECODE_ERROR
     }, is_request_flow)
     return "", true
 end

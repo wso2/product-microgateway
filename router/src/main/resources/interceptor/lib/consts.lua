@@ -87,6 +87,11 @@ SHARED = {
     ORG_ID = "organizationId"
 }
 
+ERROR_CODES = {
+    INVALID_RESPONSE_HTTP_CODE = "103500", -- Interceptor service connect failure or invalid response status code
+    DECODE_ERROR = "103501" -- Invalid encoded body from interceptor service
+}
+
 -- envoy headers
 STATUS = ":status"
 LUA_FILTER_NAME = "envoy.filters.http.lua"

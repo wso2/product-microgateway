@@ -149,7 +149,7 @@ local function check_interceptor_call_errors(handle, headers, body_str, shared_i
     respond_error(handle, shared_info, {
             error_message = "Internal Server Error",
             error_description = "Internal Server Error",
-            error_code = "103500" -- Interceptor service connect failure or invalid response status code
+            error_code = ERROR_CODES.INVALID_RESPONSE_HTTP_CODE
         },
         is_request_flow
     )
