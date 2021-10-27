@@ -227,10 +227,20 @@ public class MockBackEndServer extends Thread {
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
-            httpServer.createContext(context + "/delay-6", exchange -> {
+            httpServer.createContext(context + "/delay-8", exchange -> {
                 try {
-                    logger.info("Sleeping 6s...");
-                    Thread.sleep(6000);
+                    logger.info("Sleeping 8s...");
+                    Thread.sleep(8000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/delay-5", exchange -> {
+                try {
+                    logger.info("Sleeping 5s...");
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -241,16 +251,6 @@ public class MockBackEndServer extends Thread {
                 try {
                     logger.info("Sleeping 4s...");
                     Thread.sleep(4000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
-                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
-            });
-            httpServer.createContext(context + "/delay-3", exchange -> {
-                try {
-                    logger.info("Sleeping 3s...");
-                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -12,12 +12,12 @@ x-wso2-production-endpoints:
   urls:
     - http://mockBackend:2383/v2
   advanceEndpointConfig:
-    timeoutInMillis: 5000 # 5s API level timeout
+    timeoutInMillis: 7000 # 7s API level timeout
 x-wso2-sandbox-endpoints:
   urls:
     - http://mockBackend:2390/v2
   advanceEndpointConfig:
-    timeoutInMillis: 5000 # 5s API level timeout
+    timeoutInMillis: 7000 # 7s API level timeout
 
 paths:
   /pet/findByStatus:
@@ -25,12 +25,12 @@ paths:
       urls:
         - http://mockBackend:2383/v2
       advanceEndpointConfig:
-        timeoutInMillis: 2000 # 2s Resource level timeout
+        timeoutInMillis: 3000 # 3s Resource level timeout
     x-wso2-sandbox-endpoints:
       urls:
         - http://mockBackend:2390/v2
       advanceEndpointConfig:
-        timeoutInMillis: 2000 # 2s Resource level timeout
+        timeoutInMillis: 3000 # 3s Resource level timeout
     get:
       summary: Responds without a delay. Does not trigger any timeout.
       produces:
@@ -41,19 +41,19 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Pet'
-  /delay-3:
+  /delay-4:
     x-wso2-production-endpoints:
       urls:
         - http://mockBackend:2383/v2
       advanceEndpointConfig:
-        timeoutInMillis: 2000 # 2s Resource level timeout
+        timeoutInMillis: 3000 # 3s Resource level timeout
     x-wso2-sandbox-endpoints:
       urls:
         - http://mockBackend:2390/v2
       advanceEndpointConfig:
-        timeoutInMillis: 2000 # 2s Resource level timeout
+        timeoutInMillis: 3000 # 3s Resource level timeout
     get:
-      summary: Responds with a 3s delay. Triggers timeout due to resource level config.
+      summary: Responds with a 4s delay. Triggers timeout due to resource level config.
       produces:
         - application/json
       responses:
@@ -62,9 +62,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Pet'
-  /delay-4:
+  /delay-5:
     get:
-      summary: Responds with a 4s delay. Does not trigger any timeout.
+      summary: Responds with a 5s delay. Does not trigger any timeout.
       produces:
         - application/json
       responses:
@@ -73,9 +73,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Pet'
-  /delay-6:
+  /delay-8:
     get:
-      summary: Responds with a 6s delay. Triggers timeout due to API level config.
+      summary: Responds with a 8s delay. Triggers timeout due to API level config.
       produces:
         - application/json
       responses:

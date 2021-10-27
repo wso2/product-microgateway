@@ -42,10 +42,10 @@ public class TimeoutTestCase {
         sandboxToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
-    @Test(description = "Invoke endpoint of delay 6s when global timeout is 60s")
-    public void testGlobalTimeout_notTriggerTimeout_6s() throws Exception {
+    @Test(description = "Invoke endpoint of delay 8s when global timeout is 60s")
+    public void testGlobalTimeout_notTriggerTimeout_8s() throws Exception {
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/global-timeout/delay-6"), prodToken,
+                Utils.getServiceURLHttps("/global-timeout/delay-8"), prodToken,
                 HttpStatus.SC_OK, ResponseConstants.RESPONSE_BODY);
     }
 
@@ -56,29 +56,29 @@ public class TimeoutTestCase {
                 HttpStatus.SC_GATEWAY_TIMEOUT, ResponseConstants.UPSTREAM_TIMEOUT_ERROR);
     }
 
-    @Test(description = "Invoke endpoint of delay 4s when API level timeout is 5s")
+    @Test(description = "Invoke endpoint of delay 5s when API level timeout is 7s")
     public void testAPILevelTimeout_notTriggerTimeout_4s() throws Exception {
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/endpoint-timeout/delay-4"), prodToken,
+                Utils.getServiceURLHttps("/endpoint-timeout/delay-5"), prodToken,
                 HttpStatus.SC_OK, ResponseConstants.RESPONSE_BODY);
 
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/endpoint-timeout/delay-4"), sandboxToken,
+                Utils.getServiceURLHttps("/endpoint-timeout/delay-5"), sandboxToken,
                 HttpStatus.SC_OK, ResponseConstants.API_SANDBOX_RESPONSE);
     }
 
-    @Test(description = "Invoke endpoint of delay 6s when API level timeout is 5s")
-    public void testAPILevelTimeout_triggerTimeout_6s() throws Exception {
+    @Test(description = "Invoke endpoint of delay 8s when API level timeout is 7s")
+    public void testAPILevelTimeout_triggerTimeout_8s() throws Exception {
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/endpoint-timeout/delay-6"), prodToken,
+                Utils.getServiceURLHttps("/endpoint-timeout/delay-8"), prodToken,
                 HttpStatus.SC_GATEWAY_TIMEOUT, ResponseConstants.UPSTREAM_TIMEOUT_ERROR);
 
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/endpoint-timeout/delay-6"), sandboxToken,
+                Utils.getServiceURLHttps("/endpoint-timeout/delay-8"), sandboxToken,
                 HttpStatus.SC_GATEWAY_TIMEOUT, ResponseConstants.UPSTREAM_TIMEOUT_ERROR);
     }
 
-    @Test(description = "Invoke endpoint without delay when Resource level timeout is 2s")
+    @Test(description = "Invoke endpoint without delay when Resource level timeout is 3s")
     public void testResourceLevelTimeout_notTriggerTimeout_0s() throws Exception {
         invokeEndpointAndCheckStatusAndPayload(
                 Utils.getServiceURLHttps("/endpoint-timeout/pet/findByStatus"), prodToken,
@@ -89,14 +89,14 @@ public class TimeoutTestCase {
                 HttpStatus.SC_OK, ResponseConstants.API_SANDBOX_RESPONSE);
     }
 
-    @Test(description = "Invoke endpoint of delay 3s when Resource level timeout is 2s")
-    public void testResourceLevelTimeout_triggerTimeout_3s() throws Exception {
+    @Test(description = "Invoke endpoint of delay 4s when Resource level timeout is 3s")
+    public void testResourceLevelTimeout_triggerTimeout_4s() throws Exception {
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/endpoint-timeout/delay-3"), prodToken,
+                Utils.getServiceURLHttps("/endpoint-timeout/delay-4"), prodToken,
                 HttpStatus.SC_GATEWAY_TIMEOUT, ResponseConstants.UPSTREAM_TIMEOUT_ERROR);
 
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/endpoint-timeout/delay-3"), sandboxToken,
+                Utils.getServiceURLHttps("/endpoint-timeout/delay-4"), sandboxToken,
                 HttpStatus.SC_GATEWAY_TIMEOUT, ResponseConstants.UPSTREAM_TIMEOUT_ERROR);
     }
 

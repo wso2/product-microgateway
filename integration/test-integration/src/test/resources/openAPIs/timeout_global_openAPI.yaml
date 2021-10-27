@@ -25,9 +25,9 @@ paths:
         '200':
           schema:
             $ref: '#/definitions/Pet'
-  /delay-6:
+  /delay-8:
     get:
-      summary: Responds with a 6s delay
+      summary: Responds with a 8s delay
       produces:
         - application/json
       responses:
