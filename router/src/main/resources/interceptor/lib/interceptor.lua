@@ -242,9 +242,9 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
         -- if interceptor_response_body.body is nil send empty, do not send client its payload back
         local body = interceptor_response_body[RESPONSE.BODY] or ""
         if body == "" then
-            headers[STATUS] = headers[STATUS] or "204"
+            headers[STATUS] = interceptor_response_body[REQUEST.RESP_CODE] or "204"
         else
-            headers[STATUS] = headers[STATUS] or "200"
+            headers[STATUS] = interceptor_response_body[REQUEST.RESP_CODE] or "200"
         end
 
         local decoded_body, err = base64_decode(body, handle, shared_info, request_id, true)

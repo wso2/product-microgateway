@@ -203,6 +203,45 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(response.getData(), clientRespBody);
     }
 
+    @DataProvider(name = "directRespondProvider")
+    Object[][] directRespondProvider() {
+        // {interceptorRespBody}
+        return new Object[][]{
+                {"UPDATED BODY"},
+                {""},
+        };
+    }
+
+    @Test(
+            description = "Test direct respond with different response code",
+            dataProvider = "directRespondProvider"
+    )
+    public void testDirectRespondWithResponseCode(String interceptorRespBody) throws Exception {
+        // setting response body of interceptor service
+        JSONObject interceptorRespBodyJSON = new JSONObject();
+        // test updating body is also work with dynamic endpoint
+        interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString(interceptorRespBody.getBytes()));
+        interceptorRespBodyJSON.put("directRespond", true);
+        interceptorRespBodyJSON.put("responseCode", "201");
+        setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                basePath + "/pet/findByStatus/resp-intercept-enabled"), "INITIAL BODY", headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 201, "Response code mismatched");
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = getInterceptorStatus();
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+
+        Assert.assertEquals(response.getData(), interceptorRespBody);
+    }
+
     @Test(description = "Test dynamic endpoints")
     public void testDynamicEndpoints() throws Exception {
         // setting response body of interceptor service
