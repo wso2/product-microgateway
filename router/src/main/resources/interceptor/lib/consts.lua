@@ -52,7 +52,6 @@ INV_CONTEXT = {
     VHOST = "vhost",
     API_NAME = "apiName",
     API_VERSION = "apiVersion",
-    ENFORCER_DENIED = "enforcerDenied",
     AUTH_CTX = "authenticationContext"
 }
 

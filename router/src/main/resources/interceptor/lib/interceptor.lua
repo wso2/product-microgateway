@@ -213,8 +213,6 @@ local function include_invocation_context(handle, req_flow_includes, resp_flow_i
         inv_context[INV_CONTEXT.METHOD] = request_headers:get(":method")
         inv_context[INV_CONTEXT.REQ_ID] = request_headers:get("x-request-id")
         inv_context[INV_CONTEXT.SOURCE] = client_ip
-        -- inv_context[INV_CONTEXT.DESTINATION] = handle:streamInfo():downstreamLocalAddress() -- TODO: (renuka) check this
-        inv_context[INV_CONTEXT.ENFORCER_DENIED] = false
 
         --#region auth context
         local ext_authz_meta =  handle:streamInfo():dynamicMetadata():get(EXT_AUTHZ_FILTER)
