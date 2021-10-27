@@ -134,7 +134,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	skipSSL := conf.ControlPlane.SkipSSLVerification
 	retryInterval := conf.ControlPlane.RetryInterval
 	truststoreLocation := conf.Adapter.Truststore.Location
-	requestTimeOut := conf.Adapter.HTTPClient.RequestTimeOut
+	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 	//finalEnvs contains the actual envrionments that the adapter should update
 	var finalEnvs []string
 	if len(configuredEnvs) > 0 {

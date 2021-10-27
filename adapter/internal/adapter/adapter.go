@@ -290,7 +290,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	skipSSL := conf.ControlPlane.SkipSSLVerification
 	retryInterval := conf.ControlPlane.RetryInterval
 	truststoreLocation := conf.Adapter.Truststore.Location
-	requestTimeOut := conf.Adapter.HTTPClient.RequestTimeOut
+	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)

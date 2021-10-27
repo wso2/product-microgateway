@@ -57,9 +57,6 @@ var defaultConfig = &Config{
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
-		HTTPClient: httpClient{
-			RequestTimeOut: 30,
-		},
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
@@ -285,6 +282,9 @@ var defaultConfig = &Config{
 			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 			ReconnectInterval:       5000, //in milli seconds
 			ReconnectRetryCount:     60,
+		},
+		HTTPClient: httpClient{
+			RequestTimeOut: 30,
 		},
 	},
 	GlobalAdapter: globalAdapter{

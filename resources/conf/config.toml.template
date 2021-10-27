@@ -404,6 +404,9 @@ enable = true
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
     reconnectInterval = 5000
     reconnectRetryCount = 60
+  # HTTP client configuration.
+  [controlPlane.httpClient] 
+    RequestTimeOut = 30  
 
 # Global Adapter related configurations
 [globalAdapter]

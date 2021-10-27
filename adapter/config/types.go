@@ -85,8 +85,6 @@ type adapter struct {
 	Keystore keystore
 	// Trusted Certificates
 	Truststore truststore
-	// Http client
-	HTTPClient httpClient
 }
 
 // Envoy Listener Component related configurations.
@@ -404,6 +402,7 @@ type controlPlane struct {
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters
+	HTTPClient                 httpClient
 }
 
 type globalAdapter struct {
