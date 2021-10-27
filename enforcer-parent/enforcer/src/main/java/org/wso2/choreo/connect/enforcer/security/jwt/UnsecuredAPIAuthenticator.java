@@ -93,6 +93,11 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
         return "";
     }
 
+    @Override
+    public String getName() {
+        return "Unsecured";
+    }
+
     @Override public int getPriority() {
         return -20;
     }

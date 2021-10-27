@@ -128,7 +128,9 @@ public class OAuthAuthenticator implements Authenticator {
                 throw new SecurityException(e);
             }
 
-            return new AuthenticationContext();
+            AuthenticationContext authContext = new AuthenticationContext();
+            authContext.setRawToken(token);
+            return authContext;
         } finally {
             if (Utils.tracingEnabled()) {
                 oAuthSpanScope.close();
@@ -207,6 +209,11 @@ public class OAuthAuthenticator implements Authenticator {
 
     public String getChallengeString() {
         return "Bearer realm=\"WSO2 API Manager\"";
+    }
+
+    @Override
+    public String getName() {
+        return "OAuth";
     }
 
 

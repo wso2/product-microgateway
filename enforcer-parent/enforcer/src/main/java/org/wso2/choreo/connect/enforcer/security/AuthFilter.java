@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
+import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
@@ -128,6 +129,7 @@ public class AuthFilter implements Filter {
                 canAuthenticated = true;
                 AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
                 if (authenticateResponse.isAuthenticated() && !authenticateResponse.isContinueToNextAuthenticator()) {
+                    setInterceptorAuthContext(authenticator, requestContext);
                     return true;
                 }
             }
@@ -262,5 +264,13 @@ public class AuthFilter implements Filter {
                 Integer.toString(retryConfig.getCount()));
         requestContext.addOrModifyHeaders(AdapterConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
                 StringUtils.join(retryConfig.getStatusCodes(), ","));
+    }
+
+    private void setInterceptorAuthContext(Authenticator authenticator, RequestContext requestContext) {
+        // add auth context to metadata, lua script will add it to the auth context of the interceptor
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN_TYPE, authenticator.getName());
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN, authContext.getRawToken());
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE, authContext.getKeyType());
     }
 }

@@ -302,16 +302,8 @@ public class MockBackEndServer extends Thread {
             // sent request headers in response headers <- this is because in interceptor tests it is required to test
             //                                             response flow headers to interceptor service
             // sent request body in response body
-            httpServer.createContext(context + "/echo", exchange -> {
-                byte[] response;
-                String requestBody = Utils.requestBodyToString(exchange);
-                response = requestBody.getBytes();
-                exchange.getResponseHeaders().putAll(exchange.getRequestHeaders());
-                int respCode = response.length == 0 ? HttpURLConnection.HTTP_NO_CONTENT : HttpURLConnection.HTTP_OK;
-                exchange.sendResponseHeaders(respCode, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
-            });
+            httpServer.createContext(context + "/echo", Utils::echo);
+
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {

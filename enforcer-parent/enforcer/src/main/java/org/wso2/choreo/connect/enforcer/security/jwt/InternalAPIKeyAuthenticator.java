@@ -211,7 +211,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     }
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
                             requestContext.getMatchedAPI().getTier(),
-                            requestContext.getMatchedAPI().getUuid());
+                            requestContext.getMatchedAPI().getUuid(), internalKey);
                 } else {
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                     CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), internalKey);
@@ -239,6 +239,11 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
     @Override
     public String getChallengeString() {
         return "";
+    }
+
+    @Override
+    public String getName() {
+        return "Internal Key";
     }
 
     private String extractInternalKey(RequestContext requestContext) {

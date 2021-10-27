@@ -215,7 +215,8 @@ public class FilterUtils {
     public static AuthenticationContext generateAuthenticationContext(RequestContext requestContext, String jti,
                                                                       JWTValidationInfo jwtValidationInfo,
                                                                       APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
-                                                                      String endUserToken, boolean isOauth) {
+                                                                      String endUserToken, String rawToken,
+                                                                      boolean isOauth) {
 
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         authContext.setAuthenticated(true);
@@ -240,6 +241,7 @@ public class FilterUtils {
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
             authContext.setApiUUID(apiKeyValidationInfoDTO.getApiUUID());
+            authContext.setRawToken(rawToken);
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());
@@ -295,17 +297,19 @@ public class FilterUtils {
      * @param payload
      * @param api
      * @param apiLevelPolicy
+     * @param rawToken Raw token used to authenticate the request
      * @return
      * @throws java.text.ParseException
      */
     public static AuthenticationContext generateAuthenticationContext(String tokenIdentifier, JWTClaimsSet payload,
                                                                       JSONObject api, String apiLevelPolicy,
-                                                                      String apiUUID)
+                                                                      String apiUUID, String rawToken)
             throws java.text.ParseException {
 
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(tokenIdentifier);
+        authContext.setRawToken(rawToken);
         authContext.setUsername(payload.getSubject());
         if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
             authContext.setKeyType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));

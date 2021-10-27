@@ -27,6 +27,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
 public class Utils {
+    // echo sends request headers in response headers and request body in response body
+    public static void echo(HttpExchange exchange) throws IOException {
+        byte[] response;
+        String requestBody = Utils.requestBodyToString(exchange);
+        response = requestBody.getBytes();
+        exchange.getResponseHeaders().putAll(exchange.getRequestHeaders());
+        int respCode = response.length == 0 ? HttpURLConnection.HTTP_NO_CONTENT : HttpURLConnection.HTTP_OK;
+        exchange.sendResponseHeaders(respCode, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
+    }
+
     public static String requestBodyToString(HttpExchange exchange) throws IOException {
         InputStream inputStream = exchange.getRequestBody();
         InputStreamReader isReader = new InputStreamReader(inputStream);

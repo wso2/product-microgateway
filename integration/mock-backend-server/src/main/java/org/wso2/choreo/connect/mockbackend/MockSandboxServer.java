@@ -54,6 +54,10 @@ public class MockSandboxServer extends Thread {
                 byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+
+            // for interceptor dynamic endpoints test cases
+            httpServer.createContext(context + "/pet/findByStatus/dynamic-ep-echo", Utils::echo);
+
             // For retry tests
             // Mock backend must be restarted if the retry tests are run again, against the already used resources.
             httpServer.createContext(context + "/retry-seven", exchange -> {
