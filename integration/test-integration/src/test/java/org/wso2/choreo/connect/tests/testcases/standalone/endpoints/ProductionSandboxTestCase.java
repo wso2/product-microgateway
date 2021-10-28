@@ -87,7 +87,7 @@ public class ProductionSandboxTestCase {
         Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
         Assert.assertTrue(
-                prodResponse.getData().contains("Production key offered to the API with no production endpoint"));
+                prodResponse.getData().contains("Production key offered to an API with no production endpoint"));
     }
 
     @Test(description = "Invoke Production endpoint when production endpoints provided alone")
@@ -109,7 +109,7 @@ public class ProductionSandboxTestCase {
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
-        Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to the API with no sandbox endpoint"));
+        Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to an API with no sandbox endpoint"));
     }
 
     @Test(description = "x-wso2-cluster-header should be omitted from client request")

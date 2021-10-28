@@ -196,11 +196,11 @@ public class AuthFilter implements Filter {
             if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Production key offered to the API with no production endpoint");
+                        "Production key offered to an API with no production endpoint");
             } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Sandbox key offered to the API with no sandbox endpoint");
+                        "Sandbox key offered to an API with no sandbox endpoint");
             }
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid key type.");
