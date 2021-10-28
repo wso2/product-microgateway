@@ -1,0 +1,8 @@
+[container.image]
+repository="renukafernando"
+name="cc-xml-interceptor-sample"
+tag="v1.0.0"
+
+[[container.copy.files]]
+sourceFile="certs"
+target="/home/ballerina/certs"

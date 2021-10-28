@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+  legacy-xml-backend:
+    image: renukafernando/cc-legacy-xml-backend-sample:v1.0.0
+    ports:
+      - "9080:9080"
+    networks:
+      - choreo-connect_default
+  xml-interceptor:
+    image: renukafernando/cc-xml-interceptor-sample:v1.0.0
+    volumes:
+      - ./certs:/home/ballerina/certs
+    ports:
+      - "9081:9081"
+    networks:
+      - choreo-connect_default
+networks:
+  choreo-connect_default:
+    external: true
