@@ -217,10 +217,10 @@ public class MockBackEndServer extends Thread {
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
             // For Timeout tests
-            httpServer.createContext(context + "/delay-62", exchange -> {
+            httpServer.createContext(context + "/delay-17", exchange -> {
                 try {
-                    logger.info("Sleeping 62s...");
-                    Thread.sleep(62000);
+                    logger.info("Sleeping 17s...");
+                    Thread.sleep(17000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -16,9 +16,9 @@ x-wso2-basePath: /global-timeout
 schemes:
   - http
 paths:
-  /delay-62:
+  /delay-17:
     get:
-      summary: Responds with a 62s delay
+      summary: Responds with a 17s delay
       produces:
         - application/json
       responses:

@@ -42,17 +42,17 @@ public class TimeoutTestCase {
         sandboxToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
-    @Test(description = "Invoke endpoint of delay 8s when global timeout is 60s")
+    @Test(description = "Invoke endpoint of delay 8s when global timeout is 15s")
     public void testGlobalTimeout_notTriggerTimeout_8s() throws Exception {
         invokeEndpointAndCheckStatusAndPayload(
                 Utils.getServiceURLHttps("/global-timeout/delay-8"), prodToken,
                 HttpStatus.SC_OK, ResponseConstants.RESPONSE_BODY);
     }
 
-    @Test(description = "Invoke endpoint of delay 62s when global timeout is 60s")
-    public void testGlobalTimeout_triggerTimeout_62s() throws Exception {
+    @Test(description = "Invoke endpoint of delay 17s when global timeout is 15s")
+    public void testGlobalTimeout_triggerTimeout_17s() throws Exception {
         invokeEndpointAndCheckStatusAndPayload(
-                Utils.getServiceURLHttps("/global-timeout/delay-62"), prodToken,
+                Utils.getServiceURLHttps("/global-timeout/delay-17"), prodToken,
                 HttpStatus.SC_GATEWAY_TIMEOUT, ResponseConstants.UPSTREAM_TIMEOUT_ERROR);
     }
 

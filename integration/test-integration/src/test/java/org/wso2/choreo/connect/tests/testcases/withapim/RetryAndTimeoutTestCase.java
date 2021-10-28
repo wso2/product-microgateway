@@ -17,32 +17,32 @@
  */
 package org.wso2.choreo.connect.tests.testcases.withapim;
 
-    import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-    import com.google.common.net.HttpHeaders;
-    import org.json.simple.JSONArray;
-    import org.json.simple.JSONObject;
-    import org.testng.Assert;
-    import org.testng.annotations.BeforeClass;
-    import org.testng.annotations.Test;
-    import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
-    import org.wso2.am.integration.test.utils.bean.APIRequest;
-    import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
-    import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
-    import org.wso2.choreo.connect.tests.apim.dto.Application;
-    import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
-    import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-    import org.wso2.choreo.connect.tests.context.CCTestException;
-    import org.wso2.choreo.connect.tests.util.HttpResponse;
-    import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
-    import org.wso2.choreo.connect.tests.util.TestConstant;
-    import org.wso2.choreo.connect.tests.util.Utils;
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import com.google.common.net.HttpHeaders;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
+import org.wso2.am.integration.test.utils.bean.APIRequest;
+import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
+import org.wso2.choreo.connect.tests.apim.dto.Application;
+import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
+import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
+import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
-    import java.net.MalformedURLException;
-    import java.net.URL;
-    import java.util.ArrayList;
-    import java.util.HashMap;
-    import java.util.List;
-    import java.util.Map;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class RetryAndTimeoutTestCase extends ApimBaseTest {
     static final String RETRY_API_NAME = "RetryApi";
@@ -63,7 +63,7 @@ public class RetryAndTimeoutTestCase extends ApimBaseTest {
         //Create, deploy and publish API - only to specifically test events.
         // For other testcases the json is used to create APIs, Apps, Subscriptions
         JSONObject config = new JSONObject();
-        config.put("retryTimeOut", "2"); // Max retries allowed is 2
+        config.put("retryTimeOut", "3"); // Max retries allowed is 3
         config.put("actionDuration", "30000");
         config.put("actionSelect", "discard");
         config.put("factor", "");
@@ -83,16 +83,10 @@ public class RetryAndTimeoutTestCase extends ApimBaseTest {
 
         APIOperationsDTO apiOperation = new APIOperationsDTO();
         apiOperation.setVerb("GET");
-        apiOperation.setTarget("/retry-three");
+        apiOperation.setTarget("/retry-four");
         apiOperation.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
 
-        APIOperationsDTO apiOperationsDTO1 = new APIOperationsDTO();
-        apiOperationsDTO1.setVerb("GET");
-        apiOperationsDTO1.setTarget("/pet/findByStatus");
-        apiOperationsDTO1.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
         List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(apiOperationsDTO1);
         operationsDTOS.add(apiOperation);
 
         APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(RETRY_API_NAME, RETRY_API_CONTEXT,
@@ -110,13 +104,13 @@ public class RetryAndTimeoutTestCase extends ApimBaseTest {
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
                 new String[]{}, user, storeRestClient);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME*3, "Interrupted when waiting for the " +
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME*2, "Interrupted when waiting for the " +
                 "subscription to be deployed");
 
         //Invoke API
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        String endpoint = Utils.getServiceURLHttps(RETRY_API_CONTEXT + "/1.0.0/retry-three");
+        String endpoint = Utils.getServiceURLHttps(RETRY_API_CONTEXT + "/1.0.0/retry-four");
         HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,

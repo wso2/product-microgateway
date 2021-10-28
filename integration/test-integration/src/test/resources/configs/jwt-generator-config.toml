@@ -6,6 +6,11 @@
   exposeHeaders = ["X-Custom-Header"]
   allowCredentials = true
 
+[router.upstream.timeouts]
+  routeTimeoutInSeconds = 15
+  maxRouteTimeoutInSeconds = 60
+  routeIdleTimeoutInSeconds = 300
+
 [enforcer]
 [enforcer.jwtGenerator]
   enable = true
