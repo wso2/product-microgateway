@@ -170,7 +170,7 @@ idleTimeoutInSeconds = 3600
     className = "org.wso2.choreo.connect.custom.CCCustomFilter"
     # Position of the filter within final filter-chain
     position = 3
-    # Custom Configurations
+    # Filter specific custom configurations. Only `(string, string)` key-value pairs are accepted
     [enforcer.filters.configProperties]
         testConfig1 = "testValue1"
 
