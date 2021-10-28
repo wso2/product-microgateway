@@ -32,7 +32,6 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
