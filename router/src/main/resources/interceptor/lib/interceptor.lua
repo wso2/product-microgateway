@@ -241,11 +241,13 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
 
         -- if interceptor_response_body.body is nil send empty, do not send client its payload back
         local body = interceptor_response_body[RESPONSE.BODY] or ""
+        local status_code = interceptor_response_body[REQUEST.RESP_CODE]
         if body == "" then
-            headers[STATUS] = interceptor_response_body[REQUEST.RESP_CODE] or "204"
+            status_code = status_code or 204
         else
-            headers[STATUS] = interceptor_response_body[REQUEST.RESP_CODE] or "200"
+            status_code = status_code or 200
         end
+        headers[STATUS] = tostring(status_code)
 
         local decoded_body, err = base64_decode(body, handle, shared_info, request_id, true)
         if err then
@@ -411,7 +413,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     --#endregion
 
     --#region status code
-    interceptor_request_body[REQUEST.RESP_CODE] = response_handle:headers():get(STATUS)
+    interceptor_request_body[REQUEST.RESP_CODE] = tonumber(response_handle:headers():get(STATUS))
     --#endregion
 
     include_request_info(resp_flow_includes, interceptor_request_body, shared_info[REQUEST.REQ_HEADERS], shared_info[REQUEST.REQ_BODY], shared_info[REQUEST.REQ_TRAILERS])
@@ -445,7 +447,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
 
     --#region status code
     if interceptor_response_body[RESPONSE.RESPONSE_CODE] then
-        response_handle:headers():replace(STATUS, interceptor_response_body[RESPONSE.RESPONSE_CODE])
+        response_handle:headers():replace(STATUS, tostring(interceptor_response_body[RESPONSE.RESPONSE_CODE]))
     end
     --#endregion
 end

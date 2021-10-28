@@ -222,7 +222,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         // test updating body is also work with dynamic endpoint
         interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString(interceptorRespBody.getBytes()));
         interceptorRespBodyJSON.put("directRespond", true);
-        interceptorRespBodyJSON.put("responseCode", "201");
+        interceptorRespBodyJSON.put("responseCode", 202);
         setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
 
         // setting client
@@ -232,7 +232,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
                 basePath + "/pet/findByStatus/resp-intercept-enabled"), "INITIAL BODY", headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 201, "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), 202, "Response code mismatched");
 
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();

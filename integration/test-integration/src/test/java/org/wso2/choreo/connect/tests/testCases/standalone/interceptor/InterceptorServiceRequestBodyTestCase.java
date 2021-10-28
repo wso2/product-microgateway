@@ -88,7 +88,7 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
 
         // status code only available in response flow
         if (!isRequestFlow) {
-            Assert.assertEquals(interceptReqBodyJSON.getString(RESPONSE_CODE), "200", "Response code mismatched in request body");
+            Assert.assertEquals(interceptReqBodyJSON.getInt(RESPONSE_CODE), 200, "Response code mismatched in request body");
         }
     }
 
