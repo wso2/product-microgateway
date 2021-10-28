@@ -23,13 +23,10 @@ schemes:
 x-wso2-production-endpoints:
   urls:
     - https://mockBackend:2382/v2
-x-wso2-sandbox-endpoints: # TODO: sandbox-endpoints should be removed after fix #2326 the issue of being sandbox required
-  urls:
-    - https://foo-this-should-be-removed:2382/v2
 x-wso2-endpoints:
   - myDynamicEndpoint:
       urls:
-        - http://mockBackend:2390 # issue: #2327 not supporting context paths as in prod endpoints, eg: https://mockBackend:2382/other-context-path "other-context-path" is not working
+        - http://mockBackend:2390
       type: loadbalance
 x-wso2-request-interceptor: # API level interceptor definition
   host: mockBackend

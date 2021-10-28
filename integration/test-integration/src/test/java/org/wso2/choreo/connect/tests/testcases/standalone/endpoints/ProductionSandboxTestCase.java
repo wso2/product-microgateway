@@ -87,7 +87,7 @@ public class ProductionSandboxTestCase {
         Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
         Assert.assertTrue(
-                prodResponse.getData().contains("Production key offered to the API with no production endpoint"));
+                prodResponse.getData().contains("Production key offered to an API with no production endpoint"));
     }
 
     @Test(description = "Invoke Production endpoint when production endpoints provided alone")
@@ -109,6 +109,33 @@ public class ProductionSandboxTestCase {
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
-        Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to the API with no sandbox endpoint"));
+        Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to an API with no sandbox endpoint"));
     }
+
+    @Test(description = "x-wso2-cluster-header should be omitted from client request")
+    public void testHeaderNameSetByClient() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put("x-wso2-cluster-header", "carbon.super_clusterSand_localhost_SwaggerPetstoreProductionandSandbox1.0.5");
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/general/pet/findByStatus") , headers);
+
+        Assert.assertNotNull(response, "response should not be null");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.RESPONSE_BODY,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "x-wso2-cluster-header should be omitted from client request even when auth security disabled")
+    public void testHeaderNameSetByClientWhenNoSecurity() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-wso2-cluster-header", "carbon.super_clusterProd_localhost_SwaggerPetstore1.0.5");
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/general/pets/findByTags") , headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+                "The returned payload does not match with the expected payload");
+    }
+
 }

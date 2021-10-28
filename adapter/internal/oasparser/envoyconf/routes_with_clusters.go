@@ -161,6 +161,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		logger.LoggerOasparser.Errorf("Error while parsing x-wso2-endpoints in API %v %v : %v", apiTitle, apiVersion, err.Error())
 	}
 	if len(xWso2Endpoints) > 0 {
+		logger.LoggerOasparser.Debug("x-wso2-endpoints clusters found")
 		for _, endpointCluster := range xWso2Endpoints {
 			epClusterName := strings.TrimSpace(organizationID + "_" + endpointCluster.EndpointName + "_" +
 				xWso2EPClustersConfigNamePrefix + vHost + "_" +
@@ -697,25 +698,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		}
 	}
 
-	if prodClusterName != "" && sandClusterName != "" {
-		headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
-			ClusterHeader: clusterHeaderName,
-		}
-		action.Route.ClusterSpecifier = headerBasedClusterSpecifier
-		logger.LoggerOasparser.Debug("adding cluster header")
-	} else if prodClusterName != "" {
-		directClusterSpecifier := &routev3.RouteAction_Cluster{
-			Cluster: prodClusterName,
-		}
-		action.Route.ClusterSpecifier = directClusterSpecifier
-		logger.LoggerOasparser.Debugf("adding cluster: %v", prodClusterName)
-	} else {
-		directClusterSpecifier := &routev3.RouteAction_Cluster{
-			Cluster: sandClusterName,
-		}
-		action.Route.ClusterSpecifier = directClusterSpecifier
-		logger.LoggerOasparser.Debugf("adding cluster: %v", sandClusterName)
+	headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
+		ClusterHeader: clusterHeaderName,
 	}
+	action.Route.ClusterSpecifier = headerBasedClusterSpecifier
+	logger.LoggerOasparser.Debug("added header based cluster")
 
 	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
