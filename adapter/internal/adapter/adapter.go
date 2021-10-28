@@ -290,6 +290,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	skipSSL := conf.ControlPlane.SkipSSLVerification
 	retryInterval := conf.ControlPlane.RetryInterval
 	truststoreLocation := conf.Adapter.Truststore.Location
+	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)
@@ -297,10 +298,10 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Get API details.
 	if apiUUIDList == nil {
 		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.RuntimeArtifactEndpoint, true, nil)
+			sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut)
 	} else {
 		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.APIArtifactEndpoint, true, apiUUIDList)
+			sync.APIArtifactEndpoint, true, apiUUIDList, requestTimeOut)
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
@@ -323,7 +324,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
 			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true)
+				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.

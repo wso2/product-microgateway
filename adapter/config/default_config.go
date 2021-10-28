@@ -283,6 +283,9 @@ var defaultConfig = &Config{
 			ReconnectInterval:       5000, //in milli seconds
 			ReconnectRetryCount:     60,
 		},
+		HTTPClient: httpClient{
+			RequestTimeOut: 30,
+		},
 	},
 	GlobalAdapter: globalAdapter{
 		Enabled:           false,

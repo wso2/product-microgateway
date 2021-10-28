@@ -402,6 +402,7 @@ type controlPlane struct {
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters
+	HTTPClient                 httpClient
 }
 
 type globalAdapter struct {
@@ -432,4 +433,8 @@ type management struct {
 type filter struct {
 	ClassName string
 	Position  int32
+}
+
+type httpClient struct {
+	RequestTimeOut time.Duration
 }

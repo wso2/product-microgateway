@@ -51,6 +51,8 @@ const (
 	RuntimeArtifactEndpoint string = "internal/data/v1/runtime-artifacts"
 	// APIArtifactEndpoint represents the /retrieve-api-artifacts endpoint.
 	APIArtifactEndpoint string = "internal/data/v1/retrieve-api-artifacts"
+	// httpTimeout is for connection timeout of httpClient in seconds
+	httpTimeout time.Duration = 30
 )
 
 // FetchAPIs pulls the API artifact calling to the API manager
@@ -58,7 +60,7 @@ const (
 // returns a byte slice of that ZIP file.
 func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL string,
 	userName string, password string, skipSSL bool, truststoreLocation string,
-	resourceEndpoint string, sendType bool, apiUUIDList []string) {
+	resourceEndpoint string, sendType bool, apiUUIDList []string, requestTimeOut time.Duration) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
 	respSyncAPI := SyncAPIResponse{}
 	var (
@@ -99,6 +101,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	// Configuring the http client
 	client := &http.Client{
 		Transport: tr,
+		Timeout:   requestTimeOut * time.Second,
 	}
 
 	// Populating the payload body with API UUID list
@@ -193,7 +196,8 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 
 // RetryFetchingAPIs function keeps retrying to fetch APIs from runtime-artifact endpoint.
 func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName string, password string, skipSSL bool,
-	truststoreLocation string, retryInterval time.Duration, data SyncAPIResponse, endpoint string, sendType bool) {
+	truststoreLocation string, retryInterval time.Duration, data SyncAPIResponse, endpoint string, sendType bool,
+	requestTimeOut time.Duration) {
 	go func(d SyncAPIResponse) {
 		// Retry fetching from control plane after a configured time interval
 		if retryInterval == 0 {
@@ -204,7 +208,7 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName strin
 		time.Sleep(retryInterval * time.Second)
 		logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
 		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-			endpoint, sendType, nil)
+			endpoint, sendType, nil, requestTimeOut)
 	}(data)
 }
 
