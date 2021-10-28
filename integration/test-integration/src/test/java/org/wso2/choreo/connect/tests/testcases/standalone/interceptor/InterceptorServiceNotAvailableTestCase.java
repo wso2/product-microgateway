@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testCases.standalone.interceptor;
+package org.wso2.choreo.connect.tests.testcases.standalone.interceptor;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
