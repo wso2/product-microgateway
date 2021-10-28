@@ -56,7 +56,8 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
         headers.put("foo-one", "Foo One");
         headers.put("foo-two", "Foo Two");
         headers.put("content-type", "application/xml");
-        String body = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
+        // test unicode chars with base64 encode and decode
+        String body = "<student><name>නිමල් たいし</name><age type=\"Y\">16</age></student>";
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/echo/123"), body, headers);
 

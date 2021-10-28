@@ -47,7 +47,8 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
 
     @DataProvider(name = "requestBodyProvider")
     Object[][] requestBodyProvider() {
-        String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
+        // test unicode chars with base64 encode and decode
+        String clientReqBody = "{\"name\": \"නිමල් たいし\", \"age\": 16}";
         String interceptorRespBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
 
         // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, expectedBody}
@@ -65,7 +66,8 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
 
     @DataProvider(name = "directRespondRequestBodyProvider")
     Object[][] directRespondRequestBodyProvider() {
-        String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
+        // test unicode chars with base64 encode and decode
+        String clientReqBody = "{\"name\": \"නිමල් たいし\", \"age\": 16}";
         String interceptorRespBody = "{\"message\": \"This is direct responded\"}";
 
         // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, clientRespBody}
