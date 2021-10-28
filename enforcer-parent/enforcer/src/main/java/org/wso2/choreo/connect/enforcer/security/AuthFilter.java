@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -129,7 +130,7 @@ public class AuthFilter implements Filter {
                 canAuthenticated = true;
                 AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
                 if (authenticateResponse.isAuthenticated() && !authenticateResponse.isContinueToNextAuthenticator()) {
-                    setInterceptorAuthContext(authenticator, requestContext);
+                    setInterceptorAuthContextMetadata(authenticator, requestContext);
                     return true;
                 }
             }
@@ -266,11 +267,14 @@ public class AuthFilter implements Filter {
                 StringUtils.join(retryConfig.getStatusCodes(), ","));
     }
 
-    private void setInterceptorAuthContext(Authenticator authenticator, RequestContext requestContext) {
+    private void setInterceptorAuthContextMetadata(Authenticator authenticator, RequestContext requestContext) {
         // add auth context to metadata, lua script will add it to the auth context of the interceptor
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN_TYPE, authenticator.getName());
-        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN, authContext.getRawToken());
-        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE, authContext.getKeyType());
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN_TYPE,
+                Objects.toString(authenticator.getName(), ""));
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN,
+                Objects.toString(authContext.getRawToken(), ""));
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,
+                Objects.toString(authContext.getKeyType(), ""));
     }
 }
