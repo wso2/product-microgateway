@@ -33,6 +33,8 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 
+import java.util.Map;
+
 /**
  * Cors Filter for failed preflight requests.
  */
@@ -41,7 +43,7 @@ public class CorsFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(CorsFilter.class);
 
     @Override
-    public void init(APIConfig apiConfig) {
+    public void init(APIConfig apiConfig, Map<String, String> configProperties) {
     }
 
     @Override

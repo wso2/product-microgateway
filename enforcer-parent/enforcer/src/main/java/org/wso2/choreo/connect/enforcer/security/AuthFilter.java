@@ -52,7 +52,7 @@ public class AuthFilter implements Filter {
     private static final Logger log = LogManager.getLogger(AuthFilter.class);
 
     @Override
-    public void init(APIConfig apiConfig) {
+    public void init(APIConfig apiConfig, Map<String, String> configProperties) {
         initializeAuthenticators(apiConfig);
     }
 

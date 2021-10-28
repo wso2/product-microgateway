@@ -63,7 +63,7 @@ public class WebSocketThrottleFilter implements Filter {
                 .isGlobalPublishingEnabled();
     }
 
-    @Override public void init(APIConfig apiConfig) {
+    @Override public void init(APIConfig apiConfig, Map<String, String> configProperties) {
 
     }
 

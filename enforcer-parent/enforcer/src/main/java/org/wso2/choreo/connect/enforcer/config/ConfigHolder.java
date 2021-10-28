@@ -564,6 +564,7 @@ public class ConfigHolder {
             FilterDTO filterDTO = new FilterDTO();
             filterDTO.setClassName(filter.getClassName());
             filterDTO.setPosition(filter.getPosition());
+            filterDTO.setConfigProperties(filter.getConfigPropertiesMap());
             filterArray[index] = filterDTO;
             index++;
         }

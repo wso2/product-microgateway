@@ -168,8 +168,11 @@ idleTimeoutInSeconds = 3600
 [[enforcer.filters]]
     # ClassName of the filter
     className = "org.wso2.choreo.connect.custom.CCCustomFilter"
-    # Position of the filter within final filterchain
+    # Position of the filter within final filter-chain
     position = 3
+    # Custom Configurations
+    [enforcer.filters.configProperties]
+        testConfig1 = "testValue1"
 
 # The configurations of gRPC netty based server in Enforcer that handles the incoming requests in the Choreo Connect
 [enforcer.authService]

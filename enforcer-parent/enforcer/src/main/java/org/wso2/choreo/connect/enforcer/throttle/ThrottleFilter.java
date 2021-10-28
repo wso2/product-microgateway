@@ -63,7 +63,7 @@ public class ThrottleFilter implements Filter {
     }
 
     @Override
-    public void init(APIConfig apiConfig) {
+    public void init(APIConfig apiConfig, Map<String, String> configProperties) {
     }
 
     @Override

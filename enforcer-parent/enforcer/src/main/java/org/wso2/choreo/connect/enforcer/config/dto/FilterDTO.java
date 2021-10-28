@@ -18,12 +18,15 @@
 
 package org.wso2.choreo.connect.enforcer.config.dto;
 
+import java.util.Map;
+
 /**
  * Holds the configurations related to custom filters.
  */
 public class FilterDTO {
     private String className;
     private int position;
+    private Map<String, String> configProperties;
 
     public String getClassName() {
         return className;
@@ -39,5 +42,13 @@ public class FilterDTO {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public Map<String, String> getConfigProperties() {
+        return configProperties;
+    }
+
+    public void setConfigProperties(Map<String, String> configProperties) {
+        this.configProperties = configProperties;
     }
 }
