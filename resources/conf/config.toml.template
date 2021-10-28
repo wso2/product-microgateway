@@ -406,7 +406,7 @@ enable = true
     reconnectRetryCount = 60
   # HTTP client configuration.
   [controlPlane.httpClient] 
-    RequestTimeOut = 30  
+    requestTimeOut = 30
 
 # Global Adapter related configurations
 [globalAdapter]
