@@ -63,10 +63,6 @@ public class WebSocketThrottleFilter implements Filter {
                 .isGlobalPublishingEnabled();
     }
 
-    @Override public void init(APIConfig apiConfig, Map<String, String> configProperties) {
-
-    }
-
     @Override public boolean handleRequest(RequestContext requestContext) {
         TracingSpan wsSpan = null;
         Scope wsSpanScope = null;

@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public interface Filter {
 
-    void init(APIConfig apiConfig, Map<String, String> configProperties);
+    default void init(APIConfig apiConfig, Map<String, String> configProperties){};
 
     boolean handleRequest(RequestContext requestContext);
 }

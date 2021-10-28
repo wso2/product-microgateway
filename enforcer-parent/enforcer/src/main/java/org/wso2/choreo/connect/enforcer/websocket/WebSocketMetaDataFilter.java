@@ -32,7 +32,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -46,10 +45,6 @@ public class WebSocketMetaDataFilter implements Filter {
 
     private APIConfig apiConfig;
     private AuthenticationContext authenticationContext;
-
-    @Override public void init(APIConfig apiConfig, Map<String, String> configProperties) {
-        this.apiConfig = apiConfig;
-    }
 
     @Override public boolean handleRequest(RequestContext requestContext) {
         TracingSpan wsSpan = null;
