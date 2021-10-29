@@ -147,19 +147,6 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string,
 	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[1].GetMatch().GetSafeRegex().Regex)
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
-	routeRegexMatchesFound := false
-	// route entity creation is tested separately. In here, it checks the connection between the route and the cluster
-	for _, route := range routes {
-		if route.GetMatch().GetSafeRegex().Regex == "^/pets(\\?([^/]+))?$" {
-			routeRegexMatchesFound = true
-			assert.Equal(t, pathLevelCluster.GetName(), route.GetRoute().GetCluster(), "Path level cluster is not set correctly.")
-		}
-		if route.GetMatch().GetSafeRegex().Regex == "^/pets/([^/]+)(\\?([^/]+))?$" {
-			routeRegexMatchesFound = true
-			assert.Equal(t, apiLevelCluster.GetName(), route.GetRoute().GetCluster(), "API level cluster is not set correctly.")
-		}
-	}
-	assert.Equal(t, true, routeRegexMatchesFound, "Generated route regex is incorrect.")
 }
 
 func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string) {

@@ -2,6 +2,7 @@
 
 [adapter] # --------------------------------------------------------
 
+artifactsDirectory = "/home/wso2/artifacts"
 # Configurations required for configuring the deployment parameters that are used for identifying the Choreo Connect Adapter REST APIs
 [adapter.server]
   # Enable/Disable Choreo Connect Adapter REST API
@@ -409,7 +410,7 @@ enable = true
     reconnectRetryCount = 60
   # HTTP client configuration.
   [controlPlane.httpClient] 
-    RequestTimeOut = 30  
+    requestTimeOut = 30
 
 # Global Adapter related configurations
 [globalAdapter]

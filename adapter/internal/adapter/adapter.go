@@ -24,6 +24,7 @@ import (
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	"github.com/wso2/product-microgateway/adapter/internal/api"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
@@ -224,7 +225,6 @@ func Run(conf *config.Config) {
 		go restserver.StartRestServer(conf)
 	}
 
-	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
 	gaEnabled := conf.GlobalAdapter.Enabled
 	if gaEnabled {
 		go ga.InitGAClient()
@@ -253,6 +253,11 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
 	} else {
+		err := api.ProcessMountedAPIProjects()
+		if err != nil {
+			logger.LoggerMgw.Error("Readiness probe is not set as local api artifacts processing has failed.")
+			return
+		}
 		// We need to deploy the readiness probe when eventhub is disabled
 		xds.DeployReadinessAPI(envs)
 		logger.LoggerMgw.Info("Event hub disabled and hence deployed readiness probe")

@@ -183,7 +183,7 @@ public class FilterUtils {
         return domain;
     }
 
-    public static AuthenticationContext generateAuthenticationContext(RequestContext requestContext) {
+    public static AuthenticationContext generateAuthenticationContextForUnsecured(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         String clientIP = requestContext.getClientIp();
 
@@ -193,7 +193,11 @@ public class FilterUtils {
         authContext.setAuthenticated(true);
         authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
         authContext.setApiKey(clientIP);
-        authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        if (!StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        } else {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+        }
         // Setting end user as anonymous
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
         authContext.setApiTier(getAPILevelTier(requestContext));

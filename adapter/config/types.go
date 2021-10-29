@@ -85,6 +85,8 @@ type adapter struct {
 	Keystore keystore
 	// Trusted Certificates
 	Truststore truststore
+	// ArtifactsDirectory is the FilePath where the api artifacts are mounted
+	ArtifactsDirectory string
 }
 
 // Envoy Listener Component related configurations.
