@@ -40,7 +40,7 @@ var defaultConfig = &Config{
 			},
 		},
 		Consul: consul{
-			Enable:             false,
+			Enabled:            false,
 			URL:                "https://169.254.1.1:8501",
 			PollInterval:       5,
 			ACLToken:           "d3a2a719-4221-8c65-5212-58d4727427ac",
@@ -123,7 +123,8 @@ var defaultConfig = &Config{
 			Password: "admin",
 		},
 		RestServer: restServer{
-			Enable: true,
+			Enabled: true,
+			Enable:  true,
 		},
 		Security: security{
 			TokenService: []tokenService{
@@ -171,7 +172,7 @@ var defaultConfig = &Config{
 			},
 		},
 		JwtGenerator: jwtGenerator{
-			Enable:                false,
+			Enabled:               false,
 			Encoding:              "base64",
 			ClaimDialect:          "http://wso2.org/claims",
 			ConvertDialect:        false,
@@ -208,6 +209,7 @@ var defaultConfig = &Config{
 			EnableJwtClaimConditions:           false,
 			JmsConnectionInitialContextFactory: "org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
 			JmsConnectionProviderURL:           "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'",
+			JmsConnectionProviderURLDeprecated: UnassignedAsDeprecated,
 			Publisher: binaryPublisher{
 				Username: "admin",
 				Password: "$env{tm_admin_pwd}",
@@ -217,6 +219,7 @@ var defaultConfig = &Config{
 						AuthURLs:     []string{"ssl://apim:9711"},
 					},
 				},
+				URLGroupDeprecated: []urlGroup{},
 				Pool: publisherPool{
 					MaxIdleDataPublishingAgents:        1000,
 					InitIdleObjectDataPublishingAgents: 200,
@@ -273,13 +276,14 @@ var defaultConfig = &Config{
 		},
 	},
 	ControlPlane: controlPlane{
-		Enabled:             false,
-		ServiceURL:          "https://apim:9443/",
-		Username:            "admin",
-		Password:            "$env{cp_admin_pwd}",
-		EnvironmentLabels:   []string{"Default"},
-		RetryInterval:       5,
-		SkipSSLVerification: false,
+		Enabled:              false,
+		ServiceURL:           "https://apim:9443/",
+		ServiceURLDeprecated: UnassignedAsDeprecated,
+		Username:             "admin",
+		Password:             "$env{cp_admin_pwd}",
+		EnvironmentLabels:    []string{"Default"},
+		RetryInterval:        5,
+		SkipSSLVerification:  false,
 		BrokerConnectionParameters: brokerConnectionParameters{
 			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 			ReconnectInterval:       5000, //in milli seconds
@@ -290,11 +294,13 @@ var defaultConfig = &Config{
 		},
 	},
 	GlobalAdapter: globalAdapter{
-		Enabled:           false,
-		ServiceURL:        "global-adapter:18000",
-		OverwriteHostName: "",
-		LocalLabel:        "default",
-		RetryInterval:     5,
+		Enabled:              false,
+		ServiceURL:           "global-adapter:18000",
+		ServiceURLDeprecated: UnassignedAsDeprecated,
+		OverwriteHostName:    UnassignedAsDeprecated,
+		OverrideHostName:     "",
+		LocalLabel:           "default",
+		RetryInterval:        5,
 	},
 	Analytics: analytics{
 		Enabled: false,

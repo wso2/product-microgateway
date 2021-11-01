@@ -86,6 +86,8 @@ func ReadConfigs() (*Config, error) {
 			logger.Fatal("Error parsing the configuration ", parseErr)
 			return
 		}
+
+		adapterConfig.resolveDeprecatedProperties()
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem(), "Router", true)
@@ -161,4 +163,48 @@ func GetControlPlaneConnectedTenantDomain() string {
 		return tenantDomain[len(tenantDomain)-1]
 	}
 	return superTenantDomain
+}
+
+func (config *Config) resolveDeprecatedProperties() {
+	if config.ControlPlane.ServiceURLDeprecated != UnassignedAsDeprecated {
+		printDeprecatedWarningLog("controlPlane.serviceUrl", "controlPlane.serviceURL")
+		config.ControlPlane.ServiceURL = config.ControlPlane.ServiceURLDeprecated
+	}
+	if config.GlobalAdapter.ServiceURLDeprecated != UnassignedAsDeprecated {
+		printDeprecatedWarningLog("globalAdapter.serviceUrl", "globalAdapter.serviceURL")
+		config.GlobalAdapter.ServiceURL = config.GlobalAdapter.ServiceURLDeprecated
+	}
+	if config.Enforcer.Throttling.JmsConnectionProviderURLDeprecated != UnassignedAsDeprecated {
+		printDeprecatedWarningLog("enforcer.throttling.JmsConnectionProviderUrl", "enforcer.throttling.JmsConnectionProviderURL")
+		config.Enforcer.Throttling.JmsConnectionProviderURL = config.Enforcer.Throttling.JmsConnectionProviderURLDeprecated
+	}
+	if config.GlobalAdapter.OverwriteHostName != UnassignedAsDeprecated {
+		printDeprecatedWarningLog("globalAdapter.OverwriteHostName", "globalAdapter.OverrideHostName")
+		config.GlobalAdapter.OverrideHostName = config.GlobalAdapter.OverwriteHostName
+	}
+
+	if len(config.Enforcer.Throttling.Publisher.URLGroupDeprecated) > 0 {
+		printDeprecatedWarningLog("enforcer.throttling.publisher.urlGroup", "enforcer.throttling.publisher.URLGroup")
+		config.Enforcer.Throttling.Publisher.URLGroup = config.Enforcer.Throttling.Publisher.URLGroupDeprecated
+	}
+
+	// For boolean values, adapter check if the condition is changed by checking against the default value it is originally
+	// assigned.
+	if !config.Enforcer.RestServer.Enable {
+		printDeprecatedWarningLog("enforcer.restServer.enable", "enforcer.restServer.enabled")
+		config.Enforcer.RestServer.Enabled = config.Enforcer.RestServer.Enable
+	}
+	if config.Adapter.Consul.Enable {
+		printDeprecatedWarningLog("adapter.consul.enable", "adapter.consul.enabled")
+		config.Adapter.Consul.Enabled = config.Adapter.Consul.Enable
+	}
+	if config.Enforcer.JwtGenerator.Enable {
+		printDeprecatedWarningLog("enforcer.jwtGenerator.enable", "enforcer.jwtGenerator.enabled")
+		config.Enforcer.JwtGenerator.Enabled = config.Enforcer.JwtGenerator.Enable
+	}
+
+}
+
+func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {
+	logger.Warnf("%s is deprecated. Use %s instead", deprecatedTerm, currentTerm)
 }

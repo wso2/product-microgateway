@@ -79,7 +79,7 @@ func init() {
 	ServiceConsulMeshMap = make(map[string]bool)
 	//Read config
 	conf, errConfLoad = config.ReadConfigs()
-	IsServiceDiscoveryEnabled = conf.Adapter.Consul.Enable
+	IsServiceDiscoveryEnabled = conf.Adapter.Consul.Enabled
 	aclToken = strings.TrimSpace(aclToken)
 	mgwServiceName = conf.Adapter.Consul.MgwServiceName
 	MeshEnabled = conf.Adapter.Consul.ServiceMeshEnabled

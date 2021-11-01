@@ -56,11 +56,11 @@ data:
 
     [enforcer.throttling]
       enableGlobalEventPublishing = true
-      jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://wso2apim:5672'"
+      jmsConnectionProviderURL = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://wso2apim:5672'"
       [enforcer.throttling.publisher]
         username = "admin"
         password = "$env{tm_admin_pwd}"
-        [[enforcer.throttling.publisher.urlGroup]]
+        [[enforcer.throttling.publisher.URLGroup]]
           receiverURLs = ["tcp://wso2apim:9611"]
           authURLs = ["ssl://wso2apim:9711"]
 
@@ -90,7 +90,7 @@ data:
 
     [controlPlane]
       enabled = true
-      serviceUrl = "https://wso2apim:9443/"
+      serviceURL = "https://wso2apim:9443/"
       username = "admin"
       password = "$env{cp_admin_pwd}"
       environmentLabels = ["Default"]

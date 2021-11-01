@@ -55,7 +55,7 @@ func TestEnvConfigAssignment(t *testing.T) {
 	conf, _ := config.ReadConfigs()
 	logconfig := config.ReadLogConfigs()
 	assert.Equal(t, "9401", conf.Adapter.Server.Port, "String value assignment from environment failed.")
-	assert.Equal(t, true, conf.Enforcer.JwtGenerator.Enable, "Boolean value assignment from environment failed.")
+	assert.Equal(t, true, conf.Enforcer.JwtGenerator.Enabled, "Boolean value assignment from environment failed.")
 	assert.Equal(t, true, conf.Adapter.Server.Enabled, "Boolean value assignment from environment failed.")
 	assert.Equal(t, time.Duration(25), conf.GlobalAdapter.RetryInterval, "Time.Duration value assignment from environment failed.")
 	assert.Equal(t, uint32(32768), conf.Analytics.Adapter.BufferSizeBytes, "Uint32 value assignment from environment failed.")
