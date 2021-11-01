@@ -106,4 +106,22 @@ public class CustomFilterTestCase {
         JSONObject responseJSON = new JSONObject(response.getData());
         Assert.assertFalse(responseJSON.has("custom-remove-header"), "Header is not removed from the custom filter.");
     }
+
+    @Test(description = "Test custom configuration properties")
+    public void testFilterConfigProperties() throws Exception {
+
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
+                .doGet(Utils.getServiceURLHttps("/v2/headers"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+        JSONObject responseJSON = new JSONObject(response.getData());
+        Assert.assertNotNull(responseJSON.get("Fookey"), "Header is not attached from the custom filter based on " +
+                "custom config properties.");
+        String customHeaderValue = responseJSON.get("Fookey").toString();
+        Assert.assertEquals(customHeaderValue, "fooVal", "mismatch against the custom header attached " +
+                "from the filter base on custom config properties");
+    }
 }

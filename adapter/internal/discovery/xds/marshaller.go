@@ -117,8 +117,9 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 
 	for _, filterConfig := range config.Enforcer.Filters {
 		filter := &enforcer.Filter{
-			ClassName: filterConfig.ClassName,
-			Position:  filterConfig.Position,
+			ClassName:        filterConfig.ClassName,
+			Position:         filterConfig.Position,
+			ConfigProperties: filterConfig.ConfigProperties,
 		}
 		filters = append(filters, filter)
 	}

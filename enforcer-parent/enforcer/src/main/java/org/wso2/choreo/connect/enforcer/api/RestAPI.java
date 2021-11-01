@@ -261,12 +261,12 @@ public class RestAPI implements API {
         // TODO : re-vist the logic with apim prototype implemetation
 
         AuthFilter authFilter = new AuthFilter();
-        authFilter.init(apiConfig);
+        authFilter.init(apiConfig, null);
         this.filters.add(authFilter);
 
         // enable throttle filter
         ThrottleFilter throttleFilter = new ThrottleFilter();
-        throttleFilter.init(apiConfig);
+        throttleFilter.init(apiConfig, null);
         this.filters.add(throttleFilter);
 
         loadCustomFilters(apiConfig);
@@ -295,7 +295,7 @@ public class RestAPI implements API {
                     continue;
                 }
                 Filter filter = filterImplMap.get(filterDTO.getClassName());
-                filter.init(apiConfig);
+                filter.init(apiConfig, filterDTO.getConfigProperties());
                 // Since the position starts from 1
                 this.filters.add(filterDTO.getPosition() - 1, filter);
             } else {

@@ -46,10 +46,6 @@ public class WebSocketMetaDataFilter implements Filter {
     private APIConfig apiConfig;
     private AuthenticationContext authenticationContext;
 
-    @Override public void init(APIConfig apiConfig) {
-        this.apiConfig = apiConfig;
-    }
-
     @Override public boolean handleRequest(RequestContext requestContext) {
         TracingSpan wsSpan = null;
         Scope wsSpanScope = null;

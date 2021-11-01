@@ -43,6 +43,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -62,6 +63,19 @@ private static final long serialVersionUID = 0L;
           case 16: {
 
             position_ = input.readInt32();
+            break;
+          }
+          case 26: {
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              configProperties_ = com.google.protobuf.MapField.newMapField(
+                  ConfigPropertiesDefaultEntryHolder.defaultEntry);
+              mutable_bitField0_ |= 0x00000001;
+            }
+            com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+            configProperties__ = input.readMessage(
+                ConfigPropertiesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+            configProperties_.getMutableMap().put(
+                configProperties__.getKey(), configProperties__.getValue());
             break;
           }
           default: {
@@ -88,6 +102,18 @@ private static final long serialVersionUID = 0L;
     return org.wso2.choreo.connect.discovery.config.enforcer.FilterProto.internal_static_wso2_discovery_config_enforcer_Filter_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapField internalGetMapField(
+      int number) {
+    switch (number) {
+      case 3:
+        return internalGetConfigProperties();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -99,6 +125,10 @@ private static final long serialVersionUID = 0L;
   public static final int CLASSNAME_FIELD_NUMBER = 1;
   private volatile java.lang.Object className_;
   /**
+   * <pre>
+   * fully-qualified name of the filter containing class.
+   * </pre>
+   *
    * <code>string className = 1;</code>
    * @return The className.
    */
@@ -116,6 +146,10 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
+   * <pre>
+   * fully-qualified name of the filter containing class.
+   * </pre>
+   *
    * <code>string className = 1;</code>
    * @return The bytes for className.
    */
@@ -137,12 +171,113 @@ private static final long serialVersionUID = 0L;
   public static final int POSITION_FIELD_NUMBER = 2;
   private int position_;
   /**
+   * <pre>
+   * position in the filter chain.
+   * </pre>
+   *
    * <code>int32 position = 2;</code>
    * @return The position.
    */
   @java.lang.Override
   public int getPosition() {
     return position_;
+  }
+
+  public static final int CONFIGPROPERTIES_FIELD_NUMBER = 3;
+  private static final class ConfigPropertiesDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                org.wso2.choreo.connect.discovery.config.enforcer.FilterProto.internal_static_wso2_discovery_config_enforcer_Filter_ConfigPropertiesEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
+  }
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> configProperties_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetConfigProperties() {
+    if (configProperties_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          ConfigPropertiesDefaultEntryHolder.defaultEntry);
+    }
+    return configProperties_;
+  }
+
+  public int getConfigPropertiesCount() {
+    return internalGetConfigProperties().getMap().size();
+  }
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+
+  @java.lang.Override
+  public boolean containsConfigProperties(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    return internalGetConfigProperties().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getConfigPropertiesMap()} instead.
+   */
+  @java.lang.Override
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getConfigProperties() {
+    return getConfigPropertiesMap();
+  }
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.util.Map<java.lang.String, java.lang.String> getConfigPropertiesMap() {
+    return internalGetConfigProperties().getMap();
+  }
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getConfigPropertiesOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetConfigProperties().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getConfigPropertiesOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetConfigProperties().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
+    }
+    return map.get(key);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -165,6 +300,12 @@ private static final long serialVersionUID = 0L;
     if (position_ != 0) {
       output.writeInt32(2, position_);
     }
+    com.google.protobuf.GeneratedMessageV3
+      .serializeStringMapTo(
+        output,
+        internalGetConfigProperties(),
+        ConfigPropertiesDefaultEntryHolder.defaultEntry,
+        3);
     unknownFields.writeTo(output);
   }
 
@@ -180,6 +321,16 @@ private static final long serialVersionUID = 0L;
     if (position_ != 0) {
       size += com.google.protobuf.CodedOutputStream
         .computeInt32Size(2, position_);
+    }
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetConfigProperties().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      configProperties__ = ConfigPropertiesDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
+      size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, configProperties__);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -200,6 +351,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getClassName())) return false;
     if (getPosition()
         != other.getPosition()) return false;
+    if (!internalGetConfigProperties().equals(
+        other.internalGetConfigProperties())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -215,6 +368,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getClassName().hashCode();
     hash = (37 * hash) + POSITION_FIELD_NUMBER;
     hash = (53 * hash) + getPosition();
+    if (!internalGetConfigProperties().getMap().isEmpty()) {
+      hash = (37 * hash) + CONFIGPROPERTIES_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetConfigProperties().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -326,6 +483,28 @@ private static final long serialVersionUID = 0L;
       return org.wso2.choreo.connect.discovery.config.enforcer.FilterProto.internal_static_wso2_discovery_config_enforcer_Filter_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetConfigProperties();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMutableMapField(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetMutableConfigProperties();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -356,6 +535,7 @@ private static final long serialVersionUID = 0L;
 
       position_ = 0;
 
+      internalGetMutableConfigProperties().clear();
       return this;
     }
 
@@ -382,8 +562,11 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.config.enforcer.Filter buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.Filter result = new org.wso2.choreo.connect.discovery.config.enforcer.Filter(this);
+      int from_bitField0_ = bitField0_;
       result.className_ = className_;
       result.position_ = position_;
+      result.configProperties_ = internalGetConfigProperties();
+      result.configProperties_.makeImmutable();
       onBuilt();
       return result;
     }
@@ -439,6 +622,8 @@ private static final long serialVersionUID = 0L;
       if (other.getPosition() != 0) {
         setPosition(other.getPosition());
       }
+      internalGetMutableConfigProperties().mergeFrom(
+          other.internalGetConfigProperties());
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -467,9 +652,14 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private java.lang.Object className_ = "";
     /**
+     * <pre>
+     * fully-qualified name of the filter containing class.
+     * </pre>
+     *
      * <code>string className = 1;</code>
      * @return The className.
      */
@@ -486,6 +676,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * fully-qualified name of the filter containing class.
+     * </pre>
+     *
      * <code>string className = 1;</code>
      * @return The bytes for className.
      */
@@ -503,6 +697,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * fully-qualified name of the filter containing class.
+     * </pre>
+     *
      * <code>string className = 1;</code>
      * @param value The className to set.
      * @return This builder for chaining.
@@ -518,6 +716,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * fully-qualified name of the filter containing class.
+     * </pre>
+     *
      * <code>string className = 1;</code>
      * @return This builder for chaining.
      */
@@ -528,6 +730,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * fully-qualified name of the filter containing class.
+     * </pre>
+     *
      * <code>string className = 1;</code>
      * @param value The bytes for className to set.
      * @return This builder for chaining.
@@ -546,6 +752,10 @@ private static final long serialVersionUID = 0L;
 
     private int position_ ;
     /**
+     * <pre>
+     * position in the filter chain.
+     * </pre>
+     *
      * <code>int32 position = 2;</code>
      * @return The position.
      */
@@ -554,6 +764,10 @@ private static final long serialVersionUID = 0L;
       return position_;
     }
     /**
+     * <pre>
+     * position in the filter chain.
+     * </pre>
+     *
      * <code>int32 position = 2;</code>
      * @param value The position to set.
      * @return This builder for chaining.
@@ -565,6 +779,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * position in the filter chain.
+     * </pre>
+     *
      * <code>int32 position = 2;</code>
      * @return This builder for chaining.
      */
@@ -572,6 +790,162 @@ private static final long serialVersionUID = 0L;
       
       position_ = 0;
       onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> configProperties_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetConfigProperties() {
+      if (configProperties_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ConfigPropertiesDefaultEntryHolder.defaultEntry);
+      }
+      return configProperties_;
+    }
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetMutableConfigProperties() {
+      onChanged();;
+      if (configProperties_ == null) {
+        configProperties_ = com.google.protobuf.MapField.newMapField(
+            ConfigPropertiesDefaultEntryHolder.defaultEntry);
+      }
+      if (!configProperties_.isMutable()) {
+        configProperties_ = configProperties_.copy();
+      }
+      return configProperties_;
+    }
+
+    public int getConfigPropertiesCount() {
+      return internalGetConfigProperties().getMap().size();
+    }
+    /**
+     * <pre>
+     * Per Filter Configurations.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+
+    @java.lang.Override
+    public boolean containsConfigProperties(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetConfigProperties().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getConfigPropertiesMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getConfigProperties() {
+      return getConfigPropertiesMap();
+    }
+    /**
+     * <pre>
+     * Per Filter Configurations.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getConfigPropertiesMap() {
+      return internalGetConfigProperties().getMap();
+    }
+    /**
+     * <pre>
+     * Per Filter Configurations.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getConfigPropertiesOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigProperties().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Per Filter Configurations.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getConfigPropertiesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigProperties().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public Builder clearConfigProperties() {
+      internalGetMutableConfigProperties().getMutableMap()
+          .clear();
+      return this;
+    }
+    /**
+     * <pre>
+     * Per Filter Configurations.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+
+    public Builder removeConfigProperties(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableConfigProperties().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+    getMutableConfigProperties() {
+      return internalGetMutableConfigProperties().getMutableMap();
+    }
+    /**
+     * <pre>
+     * Per Filter Configurations.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+    public Builder putConfigProperties(
+        java.lang.String key,
+        java.lang.String value) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (value == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableConfigProperties().getMutableMap()
+          .put(key, value);
+      return this;
+    }
+    /**
+     * <pre>
+     * Per Filter Configurations.
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+
+    public Builder putAllConfigProperties(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableConfigProperties().getMutableMap()
+          .putAll(values);
       return this;
     }
     @java.lang.Override

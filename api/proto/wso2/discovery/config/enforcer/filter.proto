@@ -27,8 +27,10 @@ option java_multiple_files = true;
 
 // Filter model
 message Filter {
-
+    // fully-qualified name of the filter containing class.
     string className = 1;
-
+    // position in the filter chain.
     int32 position = 2;
+    // Per Filter Configurations.
+    map<string, string> configProperties = 3;
 }

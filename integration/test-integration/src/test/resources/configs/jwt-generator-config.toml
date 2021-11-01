@@ -17,6 +17,8 @@
 [[enforcer.filters]]
     className = "org.wso2.choreo.connect.tests.CustomFilter"
     position = 3
+    [enforcer.filters.configProperties]
+        fooKey = "fooVal"
  
 [enforcer.security]
 [[enforcer.security.tokenService]]

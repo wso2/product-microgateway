@@ -8,11 +8,19 @@ public interface FilterOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
+   * <pre>
+   * fully-qualified name of the filter containing class.
+   * </pre>
+   *
    * <code>string className = 1;</code>
    * @return The className.
    */
   java.lang.String getClassName();
   /**
+   * <pre>
+   * fully-qualified name of the filter containing class.
+   * </pre>
+   *
    * <code>string className = 1;</code>
    * @return The bytes for className.
    */
@@ -20,8 +28,66 @@ public interface FilterOrBuilder extends
       getClassNameBytes();
 
   /**
+   * <pre>
+   * position in the filter chain.
+   * </pre>
+   *
    * <code>int32 position = 2;</code>
    * @return The position.
    */
   int getPosition();
+
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  int getConfigPropertiesCount();
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  boolean containsConfigProperties(
+      java.lang.String key);
+  /**
+   * Use {@link #getConfigPropertiesMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getConfigProperties();
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getConfigPropertiesMap();
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+
+  java.lang.String getConfigPropertiesOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue);
+  /**
+   * <pre>
+   * Per Filter Configurations.
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+
+  java.lang.String getConfigPropertiesOrThrow(
+      java.lang.String key);
 }

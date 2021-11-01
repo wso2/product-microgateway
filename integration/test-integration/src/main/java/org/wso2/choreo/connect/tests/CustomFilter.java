@@ -28,10 +28,12 @@ import java.util.Map;
 
 public class CustomFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(CustomFilter.class);
+    private Map<String, String> configProperties;
 
     @Override
-    public void init(APIConfig apiConfig) {
+    public void init(APIConfig apiConfig, Map<String, String> configProperties) {
         log.info("Custom Filter is Initialized for the API. " + apiConfig.getName() + ":" + apiConfig.getVersion());
+        this.configProperties = configProperties;
     }
 
     @Override
@@ -52,6 +54,9 @@ public class CustomFilter implements Filter {
         if (requestContext.getHeaders().containsKey("custom-remove-header")) {
             requestContext.getRemoveHeaders().add("custom-remove-header");
             log.info("Custom-remove-header is added as a header.");
+        }
+        if (configProperties.containsKey("fooKey")) {
+            requestContext.addOrModifyHeaders("fooKey", configProperties.get("fooKey"));
         }
         log.info("Custom-header-1 is added as a header.");
         return true;

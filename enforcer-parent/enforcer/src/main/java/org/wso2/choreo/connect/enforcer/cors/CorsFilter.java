@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
-import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -39,10 +38,6 @@ import org.wso2.choreo.connect.enforcer.tracing.Utils;
 public class CorsFilter implements Filter {
 
     private static final Logger logger = LogManager.getLogger(CorsFilter.class);
-
-    @Override
-    public void init(APIConfig apiConfig) {
-    }
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {

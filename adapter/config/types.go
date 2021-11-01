@@ -433,8 +433,9 @@ type management struct {
 }
 
 type filter struct {
-	ClassName string
-	Position  int32
+	ClassName        string
+	Position         int32
+	ConfigProperties map[string]string
 }
 
 type httpClient struct {
