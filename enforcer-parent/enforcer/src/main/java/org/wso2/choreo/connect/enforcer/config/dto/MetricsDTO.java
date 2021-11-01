@@ -19,15 +19,13 @@
 
 package org.wso2.choreo.connect.enforcer.config.dto;
 
-import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
-
 /**
  * Holder meta data related to publishing metrics.
  */
 public class MetricsDTO {
 
-    private boolean isMetricsEnabled = ConfigDefaults.METRICS_ENABLED_VALUE;
-    private String metricsType = ConfigDefaults.METRICS_TYPE_VALUE;
+    private boolean isMetricsEnabled;
+    private String metricsType;
 
     public boolean isMetricsEnabled() {
         return isMetricsEnabled;

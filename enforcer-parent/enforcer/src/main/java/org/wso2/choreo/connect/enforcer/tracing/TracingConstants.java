@@ -64,4 +64,7 @@ public class TracingConstants {
     public static final String CONF_INSTRUMENTATION_NAME = "instrumentationName";
     public static final String CONF_EXPORTER_TIMEOUT = "timeout";
     public static final String CONF_ENDPOINT = "endpoint";
+    public static final int DEFAULT_MAX_TRACES_PER_SEC = 2;
+    public static final String DEFAULT_INSTRUMENTATION_NAME = "CHOREO-CONNECT";
+    public static final long DEFAULT_TRACING_READ_TIMEOUT = 15;
 }
