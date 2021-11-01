@@ -191,9 +191,9 @@ var defaultConfig = &Config{
 		},
 		Tracing: tracing{
 			Enabled: false,
-			Type:    "azure",
+			Type:    "jaeger",
 			ConfigProperties: map[string]string{
-				"connectionString":       "",
+				"endpoint":               "",
 				"instrumentationName":    "CHOREO-CONNECT",
 				"maximumTracesPerSecond": "2",
 			},

@@ -19,8 +19,6 @@
 
 package org.wso2.choreo.connect.enforcer.config.dto;
 
-import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
-
 import java.util.Map;
 
 /**
@@ -28,8 +26,8 @@ import java.util.Map;
  */
 public class TracingDTO {
 
-    private boolean isTracingEnabled = ConfigDefaults.TRACING_ENABLED_VALUE;
-    private String exporterType = ConfigDefaults.AZURE_TRACE_EXPORTER;
+    private boolean isTracingEnabled;
+    private String exporterType;
     private Map<String, String> configProperties;
 
     public boolean isTracingEnabled() {

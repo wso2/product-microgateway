@@ -28,7 +28,6 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
 import org.wso2.choreo.connect.enforcer.tracing.RateLimitingSampler;
 import org.wso2.choreo.connect.enforcer.tracing.TracerBuilder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
@@ -71,10 +70,11 @@ public class JaegerExporter implements TracerBuilder {
         Resource serviceNameResource =
                 Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, TracingConstants.SERVICE_NAME));
         String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
+        String instrumentName = properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
-                ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.parseInt(maxTracesPerSecondString);
-        String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME)) ?
-                ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
+                TracingConstants.DEFAULT_MAX_TRACES_PER_SEC : Integer.parseInt(maxTracesPerSecondString);
+        String instrumentationName = StringUtils.isEmpty(instrumentName) ?
+                TracingConstants.DEFAULT_INSTRUMENTATION_NAME : instrumentName;
 
         // Set to process the spans by the Jaeger Exporter
         SdkTracerProvider provider = SdkTracerProvider.builder()
