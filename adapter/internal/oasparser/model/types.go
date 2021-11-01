@@ -153,7 +153,8 @@ type APIYaml struct {
 type EndpointInfo struct {
 	Endpoint string `json:"url,omitempty"`
 	Config   struct {
-		RetryTimeOut string `json:"retryTimeOut,omitempty"`
+		ActionDuration string `json:"actionDuration,omitempty"`
+		RetryTimeOut   string `json:"retryTimeOut,omitempty"`
 	} `json:"config,omitempty"`
 }
 

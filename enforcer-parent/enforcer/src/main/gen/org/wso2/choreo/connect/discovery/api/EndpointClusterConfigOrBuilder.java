@@ -21,4 +21,19 @@ public interface EndpointClusterConfigOrBuilder extends
    * <code>.wso2.discovery.api.RetryConfig retryConfig = 1;</code>
    */
   org.wso2.choreo.connect.discovery.api.RetryConfigOrBuilder getRetryConfigOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+   * @return Whether the timeoutConfig field is set.
+   */
+  boolean hasTimeoutConfig();
+  /**
+   * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+   * @return The timeoutConfig.
+   */
+  org.wso2.choreo.connect.discovery.api.TimeoutConfig getTimeoutConfig();
+  /**
+   * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.TimeoutConfigOrBuilder getTimeoutConfigOrBuilder();
 }

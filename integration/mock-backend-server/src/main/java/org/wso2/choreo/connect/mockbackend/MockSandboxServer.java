@@ -58,6 +58,37 @@ public class MockSandboxServer extends Thread {
             // for interceptor dynamic endpoints test cases
             httpServer.createContext(context + "/pet/findByStatus/dynamic-ep-echo", Utils::echo);
 
+            // For Timeout tests
+            httpServer.createContext(context + "/delay-8", exchange -> {
+                try {
+                    logger.info("Sleeping 8s...");
+                    Thread.sleep(8000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/delay-5", exchange -> {
+                try {
+                    logger.info("Sleeping 5s...");
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/delay-4", exchange -> {
+                try {
+                    logger.info("Sleeping 4s...");
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
             // For retry tests
             // Mock backend must be restarted if the retry tests are run again, against the already used resources.
             httpServer.createContext(context + "/retry-seven", exchange -> {

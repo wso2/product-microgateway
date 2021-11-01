@@ -61,6 +61,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 18: {
+            org.wso2.choreo.connect.discovery.api.TimeoutConfig.Builder subBuilder = null;
+            if (timeoutConfig_ != null) {
+              subBuilder = timeoutConfig_.toBuilder();
+            }
+            timeoutConfig_ = input.readMessage(org.wso2.choreo.connect.discovery.api.TimeoutConfig.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(timeoutConfig_);
+              timeoutConfig_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -119,6 +132,32 @@ private static final long serialVersionUID = 0L;
     return getRetryConfig();
   }
 
+  public static final int TIMEOUTCONFIG_FIELD_NUMBER = 2;
+  private org.wso2.choreo.connect.discovery.api.TimeoutConfig timeoutConfig_;
+  /**
+   * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+   * @return Whether the timeoutConfig field is set.
+   */
+  @java.lang.Override
+  public boolean hasTimeoutConfig() {
+    return timeoutConfig_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+   * @return The timeoutConfig.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.TimeoutConfig getTimeoutConfig() {
+    return timeoutConfig_ == null ? org.wso2.choreo.connect.discovery.api.TimeoutConfig.getDefaultInstance() : timeoutConfig_;
+  }
+  /**
+   * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.TimeoutConfigOrBuilder getTimeoutConfigOrBuilder() {
+    return getTimeoutConfig();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -136,6 +175,9 @@ private static final long serialVersionUID = 0L;
     if (retryConfig_ != null) {
       output.writeMessage(1, getRetryConfig());
     }
+    if (timeoutConfig_ != null) {
+      output.writeMessage(2, getTimeoutConfig());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -148,6 +190,10 @@ private static final long serialVersionUID = 0L;
     if (retryConfig_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(1, getRetryConfig());
+    }
+    if (timeoutConfig_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(2, getTimeoutConfig());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -169,6 +215,11 @@ private static final long serialVersionUID = 0L;
       if (!getRetryConfig()
           .equals(other.getRetryConfig())) return false;
     }
+    if (hasTimeoutConfig() != other.hasTimeoutConfig()) return false;
+    if (hasTimeoutConfig()) {
+      if (!getTimeoutConfig()
+          .equals(other.getTimeoutConfig())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -183,6 +234,10 @@ private static final long serialVersionUID = 0L;
     if (hasRetryConfig()) {
       hash = (37 * hash) + RETRYCONFIG_FIELD_NUMBER;
       hash = (53 * hash) + getRetryConfig().hashCode();
+    }
+    if (hasTimeoutConfig()) {
+      hash = (37 * hash) + TIMEOUTCONFIG_FIELD_NUMBER;
+      hash = (53 * hash) + getTimeoutConfig().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -323,6 +378,12 @@ private static final long serialVersionUID = 0L;
         retryConfig_ = null;
         retryConfigBuilder_ = null;
       }
+      if (timeoutConfigBuilder_ == null) {
+        timeoutConfig_ = null;
+      } else {
+        timeoutConfig_ = null;
+        timeoutConfigBuilder_ = null;
+      }
       return this;
     }
 
@@ -353,6 +414,11 @@ private static final long serialVersionUID = 0L;
         result.retryConfig_ = retryConfig_;
       } else {
         result.retryConfig_ = retryConfigBuilder_.build();
+      }
+      if (timeoutConfigBuilder_ == null) {
+        result.timeoutConfig_ = timeoutConfig_;
+      } else {
+        result.timeoutConfig_ = timeoutConfigBuilder_.build();
       }
       onBuilt();
       return result;
@@ -404,6 +470,9 @@ private static final long serialVersionUID = 0L;
       if (other == org.wso2.choreo.connect.discovery.api.EndpointClusterConfig.getDefaultInstance()) return this;
       if (other.hasRetryConfig()) {
         mergeRetryConfig(other.getRetryConfig());
+      }
+      if (other.hasTimeoutConfig()) {
+        mergeTimeoutConfig(other.getTimeoutConfig());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -551,6 +620,125 @@ private static final long serialVersionUID = 0L;
         retryConfig_ = null;
       }
       return retryConfigBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.api.TimeoutConfig timeoutConfig_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.TimeoutConfig, org.wso2.choreo.connect.discovery.api.TimeoutConfig.Builder, org.wso2.choreo.connect.discovery.api.TimeoutConfigOrBuilder> timeoutConfigBuilder_;
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     * @return Whether the timeoutConfig field is set.
+     */
+    public boolean hasTimeoutConfig() {
+      return timeoutConfigBuilder_ != null || timeoutConfig_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     * @return The timeoutConfig.
+     */
+    public org.wso2.choreo.connect.discovery.api.TimeoutConfig getTimeoutConfig() {
+      if (timeoutConfigBuilder_ == null) {
+        return timeoutConfig_ == null ? org.wso2.choreo.connect.discovery.api.TimeoutConfig.getDefaultInstance() : timeoutConfig_;
+      } else {
+        return timeoutConfigBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     */
+    public Builder setTimeoutConfig(org.wso2.choreo.connect.discovery.api.TimeoutConfig value) {
+      if (timeoutConfigBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        timeoutConfig_ = value;
+        onChanged();
+      } else {
+        timeoutConfigBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     */
+    public Builder setTimeoutConfig(
+        org.wso2.choreo.connect.discovery.api.TimeoutConfig.Builder builderForValue) {
+      if (timeoutConfigBuilder_ == null) {
+        timeoutConfig_ = builderForValue.build();
+        onChanged();
+      } else {
+        timeoutConfigBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     */
+    public Builder mergeTimeoutConfig(org.wso2.choreo.connect.discovery.api.TimeoutConfig value) {
+      if (timeoutConfigBuilder_ == null) {
+        if (timeoutConfig_ != null) {
+          timeoutConfig_ =
+            org.wso2.choreo.connect.discovery.api.TimeoutConfig.newBuilder(timeoutConfig_).mergeFrom(value).buildPartial();
+        } else {
+          timeoutConfig_ = value;
+        }
+        onChanged();
+      } else {
+        timeoutConfigBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     */
+    public Builder clearTimeoutConfig() {
+      if (timeoutConfigBuilder_ == null) {
+        timeoutConfig_ = null;
+        onChanged();
+      } else {
+        timeoutConfig_ = null;
+        timeoutConfigBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.TimeoutConfig.Builder getTimeoutConfigBuilder() {
+      
+      onChanged();
+      return getTimeoutConfigFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.TimeoutConfigOrBuilder getTimeoutConfigOrBuilder() {
+      if (timeoutConfigBuilder_ != null) {
+        return timeoutConfigBuilder_.getMessageOrBuilder();
+      } else {
+        return timeoutConfig_ == null ?
+            org.wso2.choreo.connect.discovery.api.TimeoutConfig.getDefaultInstance() : timeoutConfig_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.TimeoutConfig timeoutConfig = 2;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.TimeoutConfig, org.wso2.choreo.connect.discovery.api.TimeoutConfig.Builder, org.wso2.choreo.connect.discovery.api.TimeoutConfigOrBuilder> 
+        getTimeoutConfigFieldBuilder() {
+      if (timeoutConfigBuilder_ == null) {
+        timeoutConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.TimeoutConfig, org.wso2.choreo.connect.discovery.api.TimeoutConfig.Builder, org.wso2.choreo.connect.discovery.api.TimeoutConfigOrBuilder>(
+                getTimeoutConfig(),
+                getParentForChildren(),
+                isClean());
+        timeoutConfig_ = null;
+      }
+      return timeoutConfigBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

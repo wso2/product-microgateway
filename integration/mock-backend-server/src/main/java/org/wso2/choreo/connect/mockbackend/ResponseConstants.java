@@ -47,6 +47,7 @@ public class ResponseConstants {
             "provided.\"}";
     public static final String AUTHZ_FAILURE_RESPONSE = "{\"fault\":\"Forbidden.\"}";
     public static final String GATEWAY_ERROR = "{\"fault\":\"Gateway error.\"}";
+    public static final String UPSTREAM_TIMEOUT_ERROR = "Upstream connection timeout";
 
     public static final String userResponse = "{ \"name\": \"john\" }";
 

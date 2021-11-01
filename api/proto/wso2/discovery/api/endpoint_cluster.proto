@@ -25,7 +25,7 @@ option java_package = "org.wso2.choreo.connect.discovery.api";
 option java_outer_classname = "EndpointClusterProto";
 option java_multiple_files = true;
 
-// [#protodoc-title: Endpoint]
+// [#protodoc-title: EndpointCluster]
 
 // Holds endpoint URLs and the config
 message EndpointCluster {
@@ -35,6 +35,11 @@ message EndpointCluster {
 
 message EndpointClusterConfig {
     RetryConfig retryConfig = 1;
+    TimeoutConfig timeoutConfig = 2;
+}
+
+message TimeoutConfig {
+  uint32 routeTimeoutInMillis = 1;
 }
 
 message RetryConfig {

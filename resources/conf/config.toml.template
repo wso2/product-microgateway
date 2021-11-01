@@ -133,10 +133,12 @@ artifactsDirectory = "/home/wso2/artifacts"
 
 # Configure timeout settings related to routes. This will be applicable globally for all the routes in router.
 [router.upstream.timeouts]
-# Specifies the upstream timeout for the route. If not specified, the default is 60s.
-routeTimeoutInSeconds = 60
-# Backend connection idle timeout. The amount of time the request’s stream may be idle.
-routeIdleTimeoutInSeconds = 300
+  # Upstream timeout for the route. If not specified, the default is 60s.
+  routeTimeoutInSeconds = 60
+  # Maximum upstream timeout allowed in an OpenAPI definition or API-M UI. A larger value will be replaced by this.
+  maxRouteTimeoutInSeconds = 60
+  # Backend connection idle timeout. The amount of time the request’s stream may be idle.
+  routeIdleTimeoutInSeconds = 300
 
 # Configs for the router when retrying upstream clusters
 [router.upstream.retry]
@@ -150,9 +152,9 @@ routeIdleTimeoutInSeconds = 300
 
 # Timeouts managed by the connection manager
 [router.connectionTimeout]
-# The amount of time that Envoy will wait for the entire request to be received
+# The amount of time that Envoy will wait for the entire request to be received. Time from client to upstream.
 requestTimeoutInSeconds = 0
-# The amount of time that Envoy will wait for the request headers to be received
+# The amount of time that Envoy will wait for the request headers to be received. Time from client to upstream.
 requestHeadersTimeoutInSeconds = 0 
 # The stream idle timeout for connections managed by the connection manager. This can be overriden by the `routeIdleTimeoutInSeconds`
 streamIdleTimeoutInSeconds = 300

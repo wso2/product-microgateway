@@ -288,21 +288,26 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	if (mgwSwagger.GetProdEndpoints() == nil || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/") &&
 		len(apiProject.ProductionEndpoints) > 0 {
-		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiProject.ProductionEndpoints,
-			apiYaml.EndpointConfig.ProductionEndpoints)
+		mgwSwagger.SetProductionEndpoints(apiProject.ProductionEndpoints)
+	}
+
+	if mgwSwagger.GetProdEndpoints() != nil {
+		mgwSwagger.GetProdEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.ProductionEndpoints)
 	}
 
 	if (mgwSwagger.GetSandEndpoints() == nil || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/") &&
 		len(apiProject.SandboxEndpoints) > 0 {
+		mgwSwagger.SetSandboxEndpoints(apiProject.SandboxEndpoints)
+	}
 
-		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiProject.SandboxEndpoints,
-			apiYaml.EndpointConfig.SandBoxEndpoints)
+	if mgwSwagger.GetSandEndpoints() != nil {
+		mgwSwagger.GetSandEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.SandBoxEndpoints)
 	}
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
 		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s",
-			apiYaml.Name, apiYaml.Name, organizationID)
+			apiYaml.Name, apiYaml.Version, organizationID)
 		return nil, validationErr
 	}
 

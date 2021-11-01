@@ -1,0 +1,102 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Endpoint Timeout
+  license:
+    name: MIT
+servers:
+  - url: http://mockBackend:2383/v3
+x-wso2-basePath: /endpoint-timeout
+
+x-wso2-production-endpoints:
+  urls:
+    - http://mockBackend:2383/v2
+  advanceEndpointConfig:
+    timeoutInMillis: 7000 # 7s API level timeout
+x-wso2-sandbox-endpoints:
+  urls:
+    - http://mockBackend:2390/v2
+  advanceEndpointConfig:
+    timeoutInMillis: 7000 # 7s API level timeout
+
+paths:
+  /pet/findByStatus:
+    x-wso2-production-endpoints:
+      urls:
+        - http://mockBackend:2383/v2
+      advanceEndpointConfig:
+        timeoutInMillis: 3000 # 3s Resource level timeout
+    x-wso2-sandbox-endpoints:
+      urls:
+        - http://mockBackend:2390/v2
+      advanceEndpointConfig:
+        timeoutInMillis: 3000 # 3s Resource level timeout
+    get:
+      summary: Responds without a delay. Does not trigger any timeout.
+      produces:
+        - application/json
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+  /delay-4:
+    x-wso2-production-endpoints:
+      urls:
+        - http://mockBackend:2383/v2
+      advanceEndpointConfig:
+        timeoutInMillis: 3000 # 3s Resource level timeout
+    x-wso2-sandbox-endpoints:
+      urls:
+        - http://mockBackend:2390/v2
+      advanceEndpointConfig:
+        timeoutInMillis: 3000 # 3s Resource level timeout
+    get:
+      summary: Responds with a 4s delay. Triggers timeout due to resource level config.
+      produces:
+        - application/json
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+  /delay-5:
+    get:
+      summary: Responds with a 5s delay. Does not trigger any timeout.
+      produces:
+        - application/json
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+  /delay-8:
+    get:
+      summary: Responds with a 8s delay. Triggers timeout due to API level config.
+      produces:
+        - application/json
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+
