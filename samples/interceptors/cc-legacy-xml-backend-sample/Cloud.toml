@@ -1,4 +1,0 @@
-[container.image]
-repository="renukafernando"
-name="cc-legacy-xml-backend-sample"
-tag="v1.0.0"

@@ -12,22 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: "3.7"
-services:
-  legacy-xml-backend:
-    image: wso2am/cc-sample-legacy-xml-backend:v1.0.0
-    ports:
-      - "9080:9080"
-    networks:
-      - choreo-connect_default
-  xml-interceptor:
-    image: wso2am/cc-sample-xml-interceptor:v1.0.0
-    # volumes: # mount certs if you want to change default certs
-    #   - ./certs:/home/ballerina/certs
-    ports:
-      - "9081:9081"
-    networks:
-      - choreo-connect_default
-networks:
-  choreo-connect_default:
-    external: true
+openapi: 3.0.0
+info:
+  description: This API contains operations related to online book store.
+  title: Book-Store
+  version: v1
+paths:
+  /books:
+    post:
+      responses:
+        "200":
+          description: successful operation
+x-wso2-basePath: /abc-stores
+x-wso2-production-endpoints:
+  urls:
+    - http://legacy-xml-backend:9080
+x-wso2-request-interceptor:
+  scheme: https
+  host: xml-interceptor
+  port: 9081
+  includes:
+    - request_body
+x-wso2-response-interceptor:
+  scheme: https
+  host: xml-interceptor
+  port: 9081

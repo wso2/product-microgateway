@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: "3.7"
-services:
-  legacy-xml-backend:
-    image: wso2am/cc-sample-legacy-xml-backend:v1.0.0
-    ports:
-      - "9080:9080"
-    networks:
-      - choreo-connect_default
-  xml-interceptor:
-    image: wso2am/cc-sample-xml-interceptor:v1.0.0
-    # volumes: # mount certs if you want to change default certs
-    #   - ./certs:/home/ballerina/certs
-    ports:
-      - "9081:9081"
-    networks:
-      - choreo-connect_default
-networks:
-  choreo-connect_default:
-    external: true
+set -ex
+DOMAIN=xml-interceptor
+
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd "${SCRIPT_DIR}"
+
+# interceptor certs
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 \
+    -subj "/O=${DOMAIN} Inc./CN=${DOMAIN}" \
+    -extensions SAN \
+    -config <(cat /etc/ssl/openssl.cnf \
+        <(printf "\n[SAN]\nsubjectAltName=DNS:${DOMAIN},DNS:localhost")) \
+    -keyout certs/interceptor.key \
+    -out certs/interceptor.crt
+
+# mg.pem
+cp ../../resources/security/mg.pem certs/
