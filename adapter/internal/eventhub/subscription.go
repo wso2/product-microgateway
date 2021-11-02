@@ -365,7 +365,8 @@ func retrieveSubscriptionDataFromChannel(response response) {
 			appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
 			ResourceMap := make(map[string]*types.ApplicationKeyMapping)
 			for index, keyMapping := range appKeyMappingList.List {
-				ResourceMap[keyMapping.ApplicationUUID] = &appKeyMappingList.List[index]
+				applicationKeyMappingReference := keyMapping.ConsumerKey + ":" + keyMapping.KeyManager
+				ResourceMap[applicationKeyMappingReference] = &appKeyMappingList.List[index]
 			}
 			ApplicationKeyMappingMap = ResourceMap
 			xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(ApplicationKeyMappingMap))
