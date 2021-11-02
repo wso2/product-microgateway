@@ -37,7 +37,6 @@
         </dependency>
     </dependencies>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>mock-backend-server</artifactId>
     <name>Choreo Connect - Mock-Backend-Server</name>
 
