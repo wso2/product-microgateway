@@ -10,6 +10,11 @@
     "tier": "Unlimited"
   },
   {
+    "apiName": "ExistingApi",
+    "appName": "ExistingApiApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "VHostAPI1",
     "appName": "VHostApp",
     "tier": "Unlimited"

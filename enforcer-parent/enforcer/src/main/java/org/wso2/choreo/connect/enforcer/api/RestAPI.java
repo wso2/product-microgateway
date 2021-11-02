@@ -123,7 +123,7 @@ public class RestAPI implements API {
                             api.getEndpointSecurity().getProductionSecurityInfo()));
         }
         if (api.getEndpointSecurity().hasSandBoxSecurityInfo()) {
-            endpointSecurity.setProductionSecurityInfo(
+            endpointSecurity.setSandBoxSecurityInfo(
                     APIProcessUtils.convertProtoEndpointSecurity(
                             api.getEndpointSecurity().getSandBoxSecurityInfo()));
         }

@@ -229,7 +229,7 @@ public class JWTAuthenticator implements Authenticator {
                             securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
                                     getSandBoxSecurityInfo();
                         }
-                        if (securityInfo.isEnabled() &&
+                        if (securityInfo != null && securityInfo.isEnabled() &&
                                 APIConstants.AUTHORIZATION_HEADER_BASIC.
                                         equalsIgnoreCase(securityInfo.getSecurityType())) {
                             requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT

@@ -12,6 +12,10 @@
     "throttleTier": "Unlimited"
   },
   {
+    "appName": "ExistingApiApp",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "VHostApp",
     "throttleTier": "Unlimited"
   },

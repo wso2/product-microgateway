@@ -36,6 +36,18 @@
     ]
   },
   {
+    "name": "ExistingApi",
+    "version": "1.0.0",
+    "context": "existing_api",
+    "operationsDTOS": [
+      {
+        "verb": "GET",
+        "target": "/pet/findByStatus",
+        "throttlingPolicy": "Unlimited"
+      }
+    ]
+  },
+  {
     "name": "SubscriptionValidationApi",
     "version": "1.0.0",
     "context": "subs_validation",
