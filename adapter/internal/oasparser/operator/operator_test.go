@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 func TestGetMgwSwagger(t *testing.T) {
@@ -118,7 +119,7 @@ x-wso2-production-endpoints:
 	}
 
 	for _, item := range dataItems {
-		resultMgwSagger, err := operator.GetMgwSwagger([]byte(item.inputSwagger))
+		resultMgwSagger, err := operator.GetMgwSwagger([]byte(item.inputSwagger), synchronizer.APIEnvProps{})
 		assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
 
 		assert.Equal(t, item.resultApiProdEndpoints, resultMgwSagger.GetProdEndpoints().Endpoints, item.message)
@@ -230,7 +231,7 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml, synchronizer.APIEnvProps{})
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, mgwSwagger.GetAPIType(), "WS", "API type for websocket mismatch")

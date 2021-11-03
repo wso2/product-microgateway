@@ -25,6 +25,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 	"gopkg.in/yaml.v2"
 )
@@ -54,6 +55,7 @@ const (
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
 	APIYaml             APIYaml
+	APIEnvProps         synchronizer.APIEnvProps
 	Deployments         []Deployment
 	OpenAPIJsn          []byte
 	UpstreamCerts       []byte
@@ -139,11 +141,11 @@ type APIYaml struct {
 					CustomParameters string `json:"customparameters,omitempty"`
 				} `json:"sandbox,omitempty"`
 			} `json:"endpoint_security,omitempty"`
-			RawProdEndpoints            interface{}    `json:"production_endpoints,omitempty"`
-			ProductionEndpoints         []EndpointInfo `json:"production_endpoint,omitempty"`
+			RawProdEndpoints            interface{} `json:"production_endpoints,omitempty"`
+			ProductionEndpoints         []EndpointInfo
 			ProductionFailoverEndpoints []EndpointInfo `json:"production_failovers,omitempty"`
 			RawSandboxEndpoints         interface{}    `json:"sandbox_endpoints,omitempty"`
-			SandBoxEndpoints            []EndpointInfo `json:"sandbox_endpoint,omitempty"`
+			SandBoxEndpoints            []EndpointInfo
 			SandboxFailoverEndpoints    []EndpointInfo `json:"sandbox_failovers,omitempty"`
 		} `json:"endpointConfig,omitempty"`
 	} `json:"data"`

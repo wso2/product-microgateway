@@ -60,9 +60,9 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	// apiFiles represents zipped API files fetched from API Manager
 	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
 	// Read deployments from deployment.json file
-	deploymentDescriptor, err := sync.ReadDeployments(zipReader)
+	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader, environments)
 	if err != nil {
-		logger.LoggerSync.Errorf("Error occured while reading deploymnt.json file %v", err.Error())
+		logger.LoggerSync.Errorf("Error occured while reading root files %v", err.Error())
 		return err
 	}
 
@@ -100,7 +100,8 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
+		apiEnvProp := getAPIEnvProps(envProps, file.Name)
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, apiEnvProp)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
@@ -113,6 +114,16 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
 	// Error nil for successful execution
 	return nil
+}
+
+func getAPIEnvProps(envProps map[string]sync.APIEnvProps, fileName string) sync.APIEnvProps {
+	for key, val := range envProps {
+		if strings.HasPrefix(fileName, key) {
+			logger.LoggerSync.Debugf("Environment properties belongs to API %v has found", key)
+			return val
+		}
+	}
+	return sync.APIEnvProps{}
 }
 
 // FetchAPIsFromControlPlane method pulls API data for a given APIs according to a

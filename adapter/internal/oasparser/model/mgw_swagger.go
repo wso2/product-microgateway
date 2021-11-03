@@ -29,6 +29,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 // MgwSwagger represents the object structure holding the information related to the
@@ -279,6 +280,56 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 
 	// Error nil for successful execution
 	return nil
+}
+
+// SetEnvProperties sets environment specific values
+func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
+	var productionUrls []Endpoint
+	prodURLType := LoadBalance
+	var sandboxUrls []Endpoint
+	sandURLType := LoadBalance
+
+	if len(envProps.ProductionEndpoints) > 0 {
+		logger.LoggerOasparser.Infof("Production endpoints are found in env properties")
+		for _, url := range envProps.ProductionEndpoints {
+			endpoint, err := getHostandBasepathandPort(url)
+			if err == nil {
+				productionUrls = append(productionUrls, *endpoint)
+			} else {
+				logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties")
+			}
+		}
+	}
+
+	if envProps.ProductionEndpointsType == FailOver {
+		prodURLType = FailOver
+	}
+
+	if len(productionUrls) > 0 {
+		logger.LoggerOasparser.Infof("Production endpoints is overridden by env properties")
+		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, prodURLType)
+	}
+
+	if len(envProps.SandBoxEndpoints) > 0 {
+		logger.LoggerOasparser.Infof("Sandbox endpoints are found in env properties")
+		for _, url := range envProps.SandBoxEndpoints {
+			endpoint, err := getHostandBasepathandPort(url)
+			if err == nil {
+				sandboxUrls = append(sandboxUrls, *endpoint)
+			} else {
+				logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties")
+			}
+		}
+	}
+
+	if envProps.SandBoxEndpointsType == FailOver {
+		sandURLType = FailOver
+	}
+
+	if len(sandboxUrls) > 0 {
+		logger.LoggerOasparser.Infof("Sandbox endpoints is overridden by env properties")
+		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls, sandURLType)
+	}
 }
 
 // SetSandboxEndpoints set the MgwSwagger object with the SandboxEndpoint when

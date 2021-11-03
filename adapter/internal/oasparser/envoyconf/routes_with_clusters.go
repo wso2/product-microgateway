@@ -115,8 +115,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
 		if apiLevelEndpointProd != nil && apiEndpointBasePath != apiLevelEndpointSand.Endpoints[0].Basepath {
-			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
-				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
+			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath %v is different compared to API level production endpoint basepath %v "+
+				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiLevelEndpointSand.Endpoints[0].Basepath, apiEndpointBasePath, apiTitle,
+				apiVersion)
 		} else {
 			apiLevelClusterNameSand = strings.TrimSpace(organizationID + "_" + sandClustersConfigNamePrefix + vHost + "_" +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())

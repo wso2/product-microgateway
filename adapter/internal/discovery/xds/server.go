@@ -258,7 +258,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
-		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn)
+		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn, apiProject.APIEnvProps)
 		if err != nil {
 			return nil, err
 		}
@@ -272,7 +272,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
 	} else if apiProject.APIType == mgw.WS {
-		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml, apiProject.APIEnvProps)
 		if err != nil {
 			return nil, err
 		}
