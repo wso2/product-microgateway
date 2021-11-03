@@ -70,7 +70,7 @@ spec:
             - name: XDS_MAX_RETRIES
               value: "3"
             - name: JAVA_OPTS
-              value: "-Dhttpclient.hostnameVerifier=AllowAll"
+              value: "-Dhttpclient.hostnameVerifier=AllowAll -Xms512m -Xmx512m"
             - name: apim_admin_pwd
               value: "admin"
             - name: enforcer_admin_pwd
@@ -83,11 +83,11 @@ spec:
               value: ""
           resources:
             requests:
-              memory: "250Mi"
-              cpu: "250m"
+              memory: "1000Mi"
+              cpu: "1000m"
             limits:
-              memory: "500Mi"
-              cpu: "500m"
+              memory: "1000Mi"
+              cpu: "1000m"
           ports:
             - containerPort: 8081
             - containerPort: 9001
@@ -145,11 +145,11 @@ spec:
               value: "/home/wso2/security/truststore/mg.pem"
           resources:
             requests:
-              memory: "250Mi"
-              cpu: "250m"
+              memory: "500Mi"
+              cpu: "1000m"
             limits:
               memory: "500Mi"
-              cpu: "500m"
+              cpu: "1000m"
           ports:
             - containerPort: 9000
             - containerPort: 9095
