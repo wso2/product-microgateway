@@ -55,6 +55,11 @@ public class CustomFilter implements Filter {
             requestContext.getRemoveHeaders().add("custom-remove-header");
             log.info("Custom-remove-header is added as a header.");
         }
+        if (requestContext.getHeaders().containsKey("custom-dynamic-endpoint")) {
+            String dynamicEpHeaderVal = requestContext.getHeaders().get("custom-dynamic-endpoint");
+            requestContext.addOrModifyHeaders("x-wso2-cluster-header", dynamicEpHeaderVal);
+            log.info("Update \"x-wso2-cluster-header\" value with " + dynamicEpHeaderVal);
+        }
         if (configProperties.containsKey("fooKey")) {
             requestContext.addOrModifyHeaders("fooKey", configProperties.get("fooKey"));
         }

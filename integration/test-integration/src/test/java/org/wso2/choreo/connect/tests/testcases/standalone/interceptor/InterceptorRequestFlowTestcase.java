@@ -219,7 +219,6 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
     public void testDirectRespondWithResponseCode(String interceptorRespBody) throws Exception {
         // setting response body of interceptor service
         JSONObject interceptorRespBodyJSON = new JSONObject();
-        // test updating body is also work with dynamic endpoint
         interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString(interceptorRespBody.getBytes()));
         interceptorRespBodyJSON.put("directRespond", true);
         interceptorRespBodyJSON.put("responseCode", 202);
