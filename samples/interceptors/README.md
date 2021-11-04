@@ -24,10 +24,7 @@ To learn about interceptors and for instructions on how to run it please head ov
 
     ```
     bal build --cloud=docker cc-sample-xml-interceptor/
-
-    
     ```
-
     Here, the requestBody is Base64 encoded.
 
 4. Start the services.
