@@ -301,7 +301,7 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 		}
 	}
 
-	if envProps.APIConfigs.ProductionEndpointsType == FailOver {
+	if strings.EqualFold(envProps.APIConfigs.ProductionEndpointsType, FailOver) {
 		prodURLType = FailOver
 	}
 
@@ -322,7 +322,7 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 		}
 	}
 
-	if envProps.APIConfigs.SandBoxEndpointsType == FailOver {
+	if strings.EqualFold(envProps.APIConfigs.SandBoxEndpointsType, FailOver) {
 		sandURLType = FailOver
 	}
 

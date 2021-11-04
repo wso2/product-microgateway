@@ -255,8 +255,7 @@ func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescri
 				return deploymentDescriptor, nil, err
 			}
 			logger.LoggerSync.Debugf("Parsing content of environment specific properties, content: %s", string(fileContent))
-			//todo(amali) only support one env at the moment
-			apiEnvProps, err := parseEnvProps(fileContent, environments[0])
+			apiEnvProps, err := parseEnvProps(fileContent)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while parsing environment specific properties : %v : %v",
 					file.Name, err.Error())
@@ -270,7 +269,7 @@ func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescri
 	return deploymentDescriptor, nil, nil
 }
 
-func parseEnvProps(data []byte, envName string) (map[string]map[string]APIEnvProps, error) {
+func parseEnvProps(data []byte) (map[string]map[string]APIEnvProps, error) {
 	var envPropsFile map[string]interface{}
 	envProps := make(map[string]map[string]APIEnvProps)
 	if err := json.Unmarshal(data, &envPropsFile); err != nil {
