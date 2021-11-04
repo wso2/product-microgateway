@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+mkdir certs
 set -ex
 DOMAIN=xml-interceptor
 

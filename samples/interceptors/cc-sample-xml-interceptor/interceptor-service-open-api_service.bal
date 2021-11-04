@@ -20,13 +20,13 @@ import ballerina/lang.value;
 
 listener http:Listener ep0 = new (9081, secureSocket = {
     key: {
-        certFile: "certs/interceptor.crt",
-        keyFile: "certs/interceptor.key"
+        certFile: "/home/ballerina/certs/interceptor.crt",
+        keyFile: "/home/ballerina/certs/interceptor.key"
     },
 
     mutualSsl: {
         verifyClient: http:REQUIRE,
-        cert: "certs/mg.pem"
+        cert: "/home/ballerina/certs/mg.pem"
     }
 });
 
