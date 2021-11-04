@@ -210,7 +210,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string, apiEnvProps synchronizer.APIEnvProps) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
+func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string, apiEnvProps map[string]synchronizer.APIEnvProps) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return nil, err

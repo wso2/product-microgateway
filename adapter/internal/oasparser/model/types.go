@@ -55,7 +55,7 @@ const (
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
 	APIYaml             APIYaml
-	APIEnvProps         synchronizer.APIEnvProps
+	APIEnvProps         map[string]synchronizer.APIEnvProps
 	Deployments         []Deployment
 	OpenAPIJsn          []byte
 	UpstreamCerts       []byte

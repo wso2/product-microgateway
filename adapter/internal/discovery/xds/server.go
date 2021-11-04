@@ -48,6 +48,7 @@ import (
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 var (
@@ -257,8 +258,15 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		environments = []string{config.DefaultGatewayName}
 	}
 
+	var apiEnvProps synchronizer.APIEnvProps
+
+	// TODO(amali) under the assumption vhost has one environment at the moment
+	if apiEnvPropsV, found := apiProject.APIEnvProps[environments[0]]; found {
+		apiEnvProps = apiEnvPropsV
+	}
+
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
-		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn, apiProject.APIEnvProps)
+		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn, apiEnvProps)
 		if err != nil {
 			return nil, err
 		}
@@ -272,7 +280,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
 	} else if apiProject.APIType == mgw.WS {
-		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml, apiProject.APIEnvProps)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml, apiEnvProps)
 		if err != nil {
 			return nil, err
 		}

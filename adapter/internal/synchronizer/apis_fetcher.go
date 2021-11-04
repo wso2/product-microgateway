@@ -116,14 +116,17 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	return nil
 }
 
-func getAPIEnvProps(envProps map[string]sync.APIEnvProps, fileName string) sync.APIEnvProps {
+func getAPIEnvProps(envProps map[string]sync.APIEnvProps, fileName string) map[string]sync.APIEnvProps {
+	//todo(amali)
+	apiEnvProps := make(map[string]sync.APIEnvProps)
 	for key, val := range envProps {
 		if strings.HasPrefix(fileName, key) {
 			logger.LoggerSync.Debugf("Environment properties belongs to API %v has found", key)
-			return val
+			apiEnvProps["Default"] = val
+			return apiEnvProps
 		}
 	}
-	return sync.APIEnvProps{}
+	return apiEnvProps
 }
 
 // FetchAPIsFromControlPlane method pulls API data for a given APIs according to a
