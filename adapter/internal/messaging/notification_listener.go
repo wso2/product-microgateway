@@ -165,6 +165,10 @@ func handleAPIEvents(data []byte, eventType string) {
 		if isLaterEvent(apiListTimeStampMap, apiEvent.UUID+":"+env, currentTimeStamp) {
 			return
 		}
+		if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
+			xds.UpdateXdsForDeleteAPI(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels)
+			return
+		}
 		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 			conf, _ := config.ReadConfigs()
 			configuredEnvs := conf.ControlPlane.EnvironmentLabels
@@ -173,37 +177,17 @@ func handleAPIEvents(data []byte, eventType string) {
 			}
 			for _, configuredEnv := range configuredEnvs {
 				if configuredEnv == env {
-					if _, ok := eh.APIListMap[env]; ok {
-						apiListOfEnv := eh.APIListMap[env].List
-						for i := range apiListOfEnv {
-							// If API is already found, it is a new revision deployement.
-							// Subscription relates details of an API does not change between new revisions
-							if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
-								logger.LoggerInternalMsg.Debugf("APIList for apiIId: %s is not updated as it already exists", apiEvent.UUID)
-								return
-							}
-						}
-						queryParamMap := make(map[string]string, 3)
-						queryParamMap[eh.GatewayLabelParam] = configuredEnv
-						queryParamMap[eh.ContextParam] = apiEvent.Context
-						queryParamMap[eh.VersionParam] = apiEvent.Version
-						go eh.InvokeService(eh.ApisEndpoint, eh.APIListMap[env], queryParamMap,
-							eh.APIListChannel, 0)
+					if xds.CheckIfAPIMetadataIsAlreadyAvailable(apiEvent.UUID, env) {
+						logger.LoggerInternalMsg.Debugf("API Metadata for api Id: %s is not updated as it already exists", apiEvent.UUID)
+						continue
 					}
-				}
-			}
-		} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels, apiEvent.TenantDomain)
-			logger.LoggerInternalMsg.Debugf("Undeployed API from router")
-			if _, ok := eh.APIListMap[env]; ok {
-				apiListOfEnv := eh.APIListMap[env].List
-				for i := range apiListOfEnv {
-					// TODO: (VirajSalaka) Use APIId once it is fixed from control plane
-					if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
-						eh.APIListMap[env].List = DeleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
-						xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
-						break
-					}
+					queryParamMap := make(map[string]string, 3)
+					queryParamMap[eh.GatewayLabelParam] = configuredEnv
+					queryParamMap[eh.ContextParam] = apiEvent.Context
+					queryParamMap[eh.VersionParam] = apiEvent.Version
+					var apiList *types.APIList
+					go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
+						eh.APIListChannel, 0)
 				}
 			}
 		}
@@ -229,27 +213,8 @@ func handleLifeCycleEvents(data []byte) {
 		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 	}
 	for _, configuredEnv := range configuredEnvs {
-		if _, ok := eh.APIListMap[configuredEnv]; ok {
-			apiListOfEnv := eh.APIListMap[configuredEnv].List
-			for i := range apiListOfEnv {
-				if apiEvent.UUID == apiListOfEnv[i].UUID && (apiListOfEnv[i].APIStatus == blockedStatus ||
-					apiEvent.APIStatus == blockedStatus) {
-					//If previous or current state is 'Blocked' only we update the xds. All other states are neglected at the gateway
-					logger.LoggerInternalMsg.Infof("Lifecycle state changed from %s to %s", apiListOfEnv[i].APIStatus, apiEvent.APIStatus)
-					apiListOfEnv[i].APIStatus = apiEvent.APIStatus
-					xds.UpdateEnforcerAPIList(configuredEnv, xds.MarshalAPIList(eh.APIListMap[configuredEnv]))
-					break
-				}
-			}
-		}
+		xds.UpdateXdsForLifeCycleChangeEvent(apiEvent.UUID, apiEvent.APIStatus, configuredEnv)
 	}
-}
-
-// DeleteAPIFromList when remove API From Gateway event happens
-func DeleteAPIFromList(apiList []types.API, indexToBeDeleted int, apiUUID string, label string) []types.API {
-	apiList[indexToBeDeleted] = apiList[len(apiList)-1]
-	logger.LoggerInternalMsg.Infof("API %s is deleted from APIList under Label %s", apiUUID, label)
-	return apiList[:len(apiList)-1]
 }
 
 // handleApplicationEvents to process application related events
@@ -274,7 +239,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
 			TimeStamp: applicationRegistrationEvent.TimeStamp, ApplicationUUID: applicationRegistrationEvent.ApplicationUUID}
 
-		applicationKeyMappingReference := applicationKeyMapping.ConsumerKey + ":" + applicationKeyMapping.KeyManager
+		applicationKeyMappingReference := xds.GetApplicationKeyMappingReference(&applicationKeyMapping)
 
 		if isLaterEvent(applicationKeyMappingTimeStampMap, fmt.Sprint(applicationKeyMappingReference),
 			applicationRegistrationEvent.TimeStamp) {
@@ -282,16 +247,10 @@ func handleApplicationEvents(data []byte, eventType string) {
 		}
 
 		if strings.EqualFold(removeApplicationKeyMapping, eventType) {
-			delete(eh.ApplicationKeyMappingMap, applicationKeyMappingReference)
-			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationKeyMappingReference %s is removed.",
-				applicationKeyMappingReference)
+			xds.UpdateXdsForApplicationKeyMappingEvent(&applicationKeyMapping, xds.DeleteEvent)
 		} else {
-			eh.ApplicationKeyMappingMap[applicationKeyMappingReference] = &applicationKeyMapping
-			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationKeyMappingReference %s is added.",
-				applicationKeyMappingReference)
+			xds.UpdateXdsForApplicationKeyMappingEvent(&applicationKeyMapping, xds.CreateEvent)
 		}
-
-		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(eh.ApplicationKeyMappingMap))
 	} else {
 		var applicationEvent msg.ApplicationEvent
 		appEventErr := json.Unmarshal([]byte(string(data)), &applicationEvent)
@@ -306,7 +265,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
-		application := types.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
+		app := types.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
 			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber,
 			Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType,
 			GroupIds: applicationEvent.GroupID, Attributes: nil,
@@ -317,16 +276,15 @@ func handleApplicationEvents(data []byte, eventType string) {
 		}
 
 		if applicationEvent.Event.Type == applicationCreate {
-			eh.ApplicationMap[application.UUID] = &application
-			logger.LoggerInternalMsg.Infof("Application %s is added.", applicationEvent.UUID)
+			xds.UpdateXdsForApplicationEvent(&app, xds.CreateEvent)
 		} else if applicationEvent.Event.Type == applicationUpdate {
-			eh.ApplicationMap[application.UUID] = &application
-			logger.LoggerInternalMsg.Infof("Application %s is updated.", applicationEvent.UUID)
+			xds.UpdateXdsForApplicationEvent(&app, xds.UpdateEvent)
 		} else if applicationEvent.Event.Type == applicationDelete {
-			delete(eh.ApplicationMap, application.UUID)
-			logger.LoggerInternalMsg.Infof("Application %s is deleted.", applicationEvent.UUID)
+			xds.UpdateXdsForApplicationEvent(&app, xds.DeleteEvent)
+		} else {
+			logger.LoggerInternalMsg.Warnf("Application Event Type is not recognized for the Event under "+
+				"Application UUID %s", app.UUID)
 		}
-		xds.UpdateEnforcerApplications(xds.MarshalApplicationMap(eh.ApplicationMap))
 	}
 }
 
@@ -353,16 +311,12 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		return
 	}
 	if subscriptionEvent.Event.Type == subscriptionCreate {
-		eh.SubscriptionMap[sub.SubscriptionID] = &sub
-		logger.LoggerInternalMsg.Infof("Subscription for %s:%s is added.", subscriptionEvent.APIUUID, subscriptionEvent.ApplicationUUID)
+		xds.UpdateXdsForSubscriptionEvent(&sub, xds.CreateEvent)
 	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
-		eh.SubscriptionMap[sub.SubscriptionID] = &sub
-		logger.LoggerInternalMsg.Infof("Subscription for %s:%s is updated.", subscriptionEvent.APIUUID, subscriptionEvent.ApplicationUUID)
+		xds.UpdateXdsForSubscriptionEvent(&sub, xds.UpdateEvent)
 	} else if subscriptionEvent.Event.Type == subscriptionDelete {
-		delete(eh.SubscriptionMap, sub.SubscriptionID)
-		logger.LoggerInternalMsg.Infof("Subscription for %s:%s is deleted.", subscriptionEvent.APIUUID, subscriptionEvent.ApplicationUUID)
+		xds.UpdateXdsForSubscriptionEvent(&sub, xds.DeleteEvent)
 	}
-	xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionMap(eh.SubscriptionMap))
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 }
 
@@ -388,16 +342,12 @@ func handlePolicyEvents(data []byte, eventType string) {
 			Name: policyEvent.PolicyName, QuotaType: policyEvent.QuotaType}
 
 		if policyEvent.Event.Type == policyCreate {
-			eh.ApplicationPolicyMap[applicationPolicy.ID] = &applicationPolicy
-			logger.LoggerInternalMsg.Infof("Application Policy: %s is added.", applicationPolicy.Name)
+			xds.UpdateXdsForApplicationPolicyEvent(&applicationPolicy, xds.CreateEvent)
 		} else if policyEvent.Event.Type == policyUpdate {
-			eh.ApplicationPolicyMap[applicationPolicy.ID] = &applicationPolicy
-			logger.LoggerInternalMsg.Infof("Application Policy: %s is updated.", applicationPolicy.Name)
+			xds.UpdateXdsForApplicationPolicyEvent(&applicationPolicy, xds.UpdateEvent)
 		} else if policyEvent.Event.Type == policyDelete {
-			delete(eh.ApplicationPolicyMap, policyEvent.PolicyID)
-			logger.LoggerInternalMsg.Infof("Application Policy: %s is deleted.", applicationPolicy.Name)
+			xds.UpdateXdsForApplicationPolicyEvent(&applicationPolicy, xds.DeleteEvent)
 		}
-		xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyMap(eh.ApplicationPolicyMap))
 
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent msg.SubscriptionPolicyEvent
@@ -415,16 +365,12 @@ func handlePolicyEvents(data []byte, eventType string) {
 			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
 
 		if subscriptionPolicyEvent.Event.Type == policyCreate {
-			eh.SubscriptionPolicyMap[subscriptionPolicy.ID] = &subscriptionPolicy
-			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is added.", subscriptionPolicy.Name)
+			xds.UpdateXdsForSubscriptionPolicyEvent(&subscriptionPolicy, xds.CreateEvent)
 		} else if subscriptionPolicyEvent.Event.Type == policyUpdate {
-			eh.SubscriptionPolicyMap[subscriptionPolicy.ID] = &subscriptionPolicy
-			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is updated.", subscriptionPolicy.Name)
+			xds.UpdateXdsForSubscriptionPolicyEvent(&subscriptionPolicy, xds.UpdateEvent)
 		} else if subscriptionPolicyEvent.Event.Type == policyDelete {
-			delete(eh.SubscriptionPolicyMap, subscriptionPolicy.ID)
-			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is deleted.", subscriptionPolicy.Name)
+			xds.UpdateXdsForSubscriptionPolicyEvent(&subscriptionPolicy, xds.DeleteEvent)
 		}
-		xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyMap(eh.SubscriptionPolicyMap))
 	}
 }
 

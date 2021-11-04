@@ -22,8 +22,8 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	msg "github.com/wso2/product-microgateway/adapter/internal/messaging"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 )
 
 //handleAPIEventsFromGA handles the API events from GA that are coming through the channel
@@ -35,44 +35,27 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 		if len(configuredEnvs) == 0 {
 			configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 		}
-		if event.IsDeployEvent {
-			go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs)
+		if !event.IsDeployEvent {
+			xds.UpdateXdsForDeleteAPI(event.APIUUID, event.OrganizationUUID, configuredEnvs)
+			continue
 		}
+
+		go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs)
+
 		for _, env := range configuredEnvs {
-			if event.IsDeployEvent {
-				if _, ok := eh.APIListMap[env]; ok {
-					apiListOfEnv := eh.APIListMap[env].List
-					for i := range apiListOfEnv {
-						// If API is already found, it is a new revision deployment.
-						// Subscription relates details of an API does not change between new revisions
-						if event.APIUUID == apiListOfEnv[i].UUID {
-							logger.LoggerGA.Debugf("APIList for API UUID: %s is not updated as it already "+
-								"exists", event.APIUUID)
-							return
-						}
-					}
-					queryParamMap := make(map[string]string, 2)
-					queryParamMap[eh.GatewayLabelParam] = env
-					queryParamMap[eh.APIUUIDParam] = event.APIUUID
-					logger.LoggerGA.Infof("Invoking the apis service endpoint")
-					go eh.InvokeService(eh.ApisEndpoint, eh.APIListMap[env], queryParamMap,
-						eh.APIListChannel, 0)
-				}
-			} else if !event.IsDeployEvent {
-				if _, ok := eh.APIListMap[env]; ok {
-					apiListOfEnv := eh.APIListMap[env].List
-					for i := range apiListOfEnv {
-						if event.APIUUID == apiListOfEnv[i].UUID {
-							xds.DeleteAPIWithAPIMEvent(event.APIUUID, apiListOfEnv[i].Name, apiListOfEnv[i].Version,
-								configuredEnvs, event.OrganizationUUID)
-							logger.LoggerGA.Debugf("Removed API from router")
-							eh.APIListMap[env].List = msg.DeleteAPIFromList(apiListOfEnv, i, event.APIUUID, env)
-							xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
-							break
-						}
-					}
-				}
+			if xds.CheckIfAPIMetadataIsAlreadyAvailable(event.APIUUID, env) {
+				logger.LoggerGA.Debugf("APIList for API UUID: %s is not updated as it already "+
+					"exists", event.APIUUID)
+				continue
 			}
+			queryParamMap := make(map[string]string, 2)
+			queryParamMap[eh.GatewayLabelParam] = env
+			queryParamMap[eh.APIUUIDParam] = event.APIUUID
+			logger.LoggerGA.Infof("Invoking the apis service endpoint")
+			// TODO: (VirajSalaka) fix
+			var apiList *types.APIList
+			go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
+				eh.APIListChannel, 0)
 		}
 	}
 }
