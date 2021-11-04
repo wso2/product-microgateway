@@ -73,6 +73,11 @@ public class StoreUtils {
                 new String[]{"PRODUCTION"}, user, storeRestClient);
     }
 
+    public static String generateUserAccessTokenProduction(String apimServiceURLHttps, String applicationId, User user,
+                                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
+        return generateUserAccessToken(apimServiceURLHttps, applicationId, user, storeRestClient);
+    }
+
     public static String generateUserAccessTokenSandbox(String apimServiceURLHttps, String applicationId, User user,
                                                  RestAPIStoreImpl storeRestClient) throws CCTestException {
         ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId,
