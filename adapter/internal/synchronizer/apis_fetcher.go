@@ -100,8 +100,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
-		apiEnvProp := getAPIEnvProps(envProps, file.Name)
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, apiEnvProp)
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
@@ -114,19 +113,6 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
 	// Error nil for successful execution
 	return nil
-}
-
-func getAPIEnvProps(envProps map[string]sync.APIEnvProps, fileName string) map[string]sync.APIEnvProps {
-	//todo(amali)
-	apiEnvProps := make(map[string]sync.APIEnvProps)
-	for key, val := range envProps {
-		if strings.HasPrefix(fileName, key) {
-			logger.LoggerSync.Debugf("Environment properties belongs to API %v has found", key)
-			apiEnvProps["Default"] = val
-			return apiEnvProps
-		}
-	}
-	return apiEnvProps
 }
 
 // FetchAPIsFromControlPlane method pulls API data for a given APIs according to a

@@ -217,7 +217,7 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName strin
 // ReadRootFiles function reads following files inside the root zip
 // deployment.json
 // env_properties.json
-func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescriptor, map[string]APIEnvProps, error) {
+func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescriptor, map[string]map[string]APIEnvProps, error) {
 	deploymentDescriptor := &DeploymentDescriptor{}
 	// Read the .zip files within the root apis.zip
 	for _, file := range reader.File {
@@ -254,7 +254,7 @@ func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescri
 				logger.LoggerSync.Errorf("Error reading environment specific properties: %v", err)
 				return deploymentDescriptor, nil, err
 			}
-
+			logger.LoggerSync.Debugf("Parsing content of environment specific properties, content: %s", string(fileContent))
 			//todo(amali) only support one env at the moment
 			apiEnvProps, err := parseEnvProps(fileContent, environments[0])
 			if err != nil {
@@ -270,32 +270,34 @@ func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescri
 	return deploymentDescriptor, nil, nil
 }
 
-func parseEnvProps(data []byte, envName string) (map[string]APIEnvProps, error) {
+func parseEnvProps(data []byte, envName string) (map[string]map[string]APIEnvProps, error) {
 	var envPropsFile map[string]interface{}
+	envProps := make(map[string]map[string]APIEnvProps)
 	if err := json.Unmarshal(data, &envPropsFile); err != nil {
 		logger.LoggerSync.Errorf("Error parsing Environment specific values: %v", err.Error())
 		return nil, err
 	}
 
-	if envsData, found := envPropsFile["environments"]; found {
-		if envs, ok := envsData.(map[string]interface{}); ok {
-			if envData, found := envs[envName]; found {
-				logger.LoggerSync.Debugf("Environment specific values found for the env : %v", envName)
-				if env, ok := envData.(map[string]interface{}); ok {
-					if envPropsData, found := env["configs"]; found {
-						var envProps map[string]APIEnvProps
-						if err := parser.Decode(envPropsData, &envProps); err != nil {
+	if apisData, found := envPropsFile["apis"]; found {
+		if apis, ok := apisData.(map[string]interface{}); ok {
+			for apiUUID, apiData := range apis {
+				apiProps := make(map[string]APIEnvProps)
+				if api, ok := apiData.(map[string]interface{}); ok {
+					var envProps APIEnvProps
+					for envLabel, envData := range api {
+						if err := parser.Decode(envData, &envProps); err != nil {
 							logger.LoggerSync.Debugf("Error parsing environment specific values: %v", err.Error())
 							return nil, err
 						}
-						return envProps, nil
+						apiProps[envLabel] = envProps
 					}
 				}
+				envProps[apiUUID] = apiProps
 			}
-		} else {
-			logger.LoggerSync.Errorf("Wrong environments format given for parsing environment specific values")
-			return nil, errors.New("wrong environments format given for parsing environment specific values")
+			return envProps, nil
 		}
+		logger.LoggerSync.Errorf("Wrong format given for parsing environment specific values")
+		return nil, errors.New("wrong format given for parsing environment specific values")
 	}
 	return nil, nil
 }

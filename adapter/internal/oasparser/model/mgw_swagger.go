@@ -289,9 +289,9 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 	var sandboxUrls []Endpoint
 	sandURLType := LoadBalance
 
-	if len(envProps.ProductionEndpoints) > 0 {
+	if len(envProps.APIConfigs.ProductionEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Production endpoints are found in env properties")
-		for _, url := range envProps.ProductionEndpoints {
+		for _, url := range envProps.APIConfigs.ProductionEndpoints {
 			endpoint, err := getHostandBasepathandPort(url)
 			if err == nil {
 				productionUrls = append(productionUrls, *endpoint)
@@ -301,7 +301,7 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 		}
 	}
 
-	if envProps.ProductionEndpointsType == FailOver {
+	if envProps.APIConfigs.ProductionEndpointsType == FailOver {
 		prodURLType = FailOver
 	}
 
@@ -310,9 +310,9 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, prodURLType)
 	}
 
-	if len(envProps.SandBoxEndpoints) > 0 {
+	if len(envProps.APIConfigs.SandBoxEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Sandbox endpoints are found in env properties")
-		for _, url := range envProps.SandBoxEndpoints {
+		for _, url := range envProps.APIConfigs.SandBoxEndpoints {
 			endpoint, err := getHostandBasepathandPort(url)
 			if err == nil {
 				sandboxUrls = append(sandboxUrls, *endpoint)
@@ -322,7 +322,7 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 		}
 	}
 
-	if envProps.SandBoxEndpointsType == FailOver {
+	if envProps.APIConfigs.SandBoxEndpointsType == FailOver {
 		sandURLType = FailOver
 	}
 
