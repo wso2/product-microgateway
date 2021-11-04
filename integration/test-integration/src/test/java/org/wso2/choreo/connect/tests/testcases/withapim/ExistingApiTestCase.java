@@ -49,7 +49,7 @@ public class ExistingApiTestCase extends ApimBaseTest {
     @Test
     public void testExistingApiWithProdKey() throws Exception {
         String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+        String accessToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
 
         Map<String, String> headers = new HashMap<>();
