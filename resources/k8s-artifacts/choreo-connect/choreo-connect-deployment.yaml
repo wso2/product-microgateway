@@ -70,7 +70,7 @@ spec:
             - name: XDS_MAX_RETRIES
               value: "3"
             - name: JAVA_OPTS
-              value: "-Dhttpclient.hostnameVerifier=AllowAll -Xms512m -Xmx512m"
+              value: "-Dhttpclient.hostnameVerifier=AllowAll -Xms512m -Xmx512m -XX:MaxRAMFraction=2"
             - name: apim_admin_pwd
               value: "admin"
             - name: enforcer_admin_pwd
