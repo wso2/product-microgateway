@@ -50,8 +50,8 @@ end
 
 local function modify_trailers(handle, interceptor_response_body)
     -- priority: trailersToAdd, trailersToReplace, trailersToRemove
-    if interceptor_response_body[RESPONSE.TRAILERS_TO_ADD] then
-        for _, key in ipairs(interceptor_response_body[RESPONSE.TRAILERS_TO_ADD]) do
+    if interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE] then
+        for _, key in ipairs(interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE]) do
             handle:trailers():remove(key)
         end
     end
@@ -60,8 +60,8 @@ local function modify_trailers(handle, interceptor_response_body)
             handle:trailers():replace(key, val)
         end
     end
-    if interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE] then
-        for key, val in pairs(interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE]) do
+    if interceptor_response_body[RESPONSE.TRAILERS_TO_ADD] then
+        for key, val in pairs(interceptor_response_body[RESPONSE.TRAILERS_TO_ADD]) do
             handle:trailers():add(key, val)
         end
     end
