@@ -40,12 +40,11 @@ public interface HandleRequestApi {
     @Operation(summary = "Handle Request", description = "", tags={ "Request" })
     @ApiResponses(value = { 
         @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RequestHandlerResponseBody.class))) })
-    @RequestMapping(value = "/handle-request",
+    @RequestMapping(value = "/api/v1/handle-request",
         produces = { "application/json" }, 
         consumes = { "application/json" }, 
         method = RequestMethod.POST)
-    ResponseEntity<RequestHandlerResponseBody> handleRequest(@Parameter(in = ParameterIn.DEFAULT, description = "Content of the request
-", schema=@Schema()) @Valid @RequestBody RequestHandlerRequestBody body);
+    ResponseEntity<RequestHandlerResponseBody> handleRequest(@Parameter(in = ParameterIn.DEFAULT, description = "Content of the request", schema=@Schema()) @Valid @RequestBody RequestHandlerRequestBody body);
 
 }
 

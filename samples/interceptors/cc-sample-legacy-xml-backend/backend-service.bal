@@ -26,7 +26,7 @@ service / on ep {
         if !(pwHeader is string && pwHeader == "admin") {
             resp.setXmlPayload(xml `<response>Error</response>`);
             resp.statusCode = 401;
-            check caller->respond(resp);
+            return caller->respond(resp);
         }
 
         xml xmlPayload = check request.getXmlPayload();
@@ -34,6 +34,6 @@ service / on ep {
 
         resp.setTextPayload("created", "text/plain");
         resp.statusCode = 200;
-        check caller->respond(resp);
+        return caller->respond(resp);
     }
 }

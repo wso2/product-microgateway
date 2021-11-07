@@ -12,10 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[package]
-org = "wso2am"
-name = "cc_sample_legacy_xml_backend"
-version = "1.0.0"
-
-[build-options]
-observabilityIncluded = false
+version: "3.7"
+services:
+  legacy-xml-backend:
+    image: wso2am/cc-sample-legacy-xml-backend:v1.0.0
+    ports:
+      - "9080:9080"
+    networks:
+      - choreo-connect_default
+  xml-interceptor:
+    image: wso2am/cc-sample-xml-interceptor-java:v1.0.0
+    ports:
+      - "9081:9081"
+    networks:
+      - choreo-connect_default
+networks:
+  choreo-connect_default:
+    external: true

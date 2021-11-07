@@ -89,6 +89,7 @@ end
 ---@return boolean - return true if error
 local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_buffered, is_request_flow)
     -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
+    -- request/response body should be buffered before modify the body https://github.com/envoyproxy/envoy/issues/13985#issuecomment-725724707
     if interceptor_response_body[RESPONSE.BODY] then
         handle:logDebug("Updating body for the request_id: " .. request_id)
 
