@@ -33,3 +33,6 @@ const (
 	// AnyType is used only by ADS
 	AnyType = ""
 )
+
+// Type is an alias to string which we expose to users of the snapshot API which accepts `resource.Type` resource URLs.
+type Type = string

@@ -29,6 +29,7 @@ import (
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/server/sotw/v3"
+	streamv3 "github.com/envoyproxy/go-control-plane/pkg/server/stream/v3"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 )
 
@@ -91,7 +92,15 @@ type watches struct {
 	responses     chan cache.Response
 	cancellations map[string]func()
 	nonces        map[string]string
-	terminations  map[string]chan struct{}
+}
+
+// Discovery response that is sent over GRPC stream
+// We need to record what resource names are already sent to a client
+// So if the client requests a new name we can respond back
+// regardless current snapshot version (even if it is not changed yet)
+type lastDiscoveryResponse struct {
+	nonce     string
+	resources map[string]struct{}
 }
 
 // Initialize all watches
@@ -100,7 +109,6 @@ func (values *watches) Init() {
 	values.responses = make(chan cache.Response, 11)
 	values.cancellations = make(map[string]func())
 	values.nonces = make(map[string]string)
-	values.terminations = make(map[string]chan struct{})
 }
 
 // Token response value used to signal a watch failure in muxed watches.
@@ -150,9 +158,6 @@ func (values *watches) Cancel() {
 			cancel()
 		}
 	}
-	for _, terminate := range values.terminations {
-		close(terminate)
-	}
 }
 
 // process handles a bi-di stream request
@@ -163,6 +168,9 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 	// unique nonce generator for req-resp pairs per xDS stream; the server
 	// ignores stale nonces. nonce is only modified within send() function.
 	var streamNonce int64
+
+	streamState := streamv3.NewStreamState(false, map[string]string{})
+	lastDiscoveryResponses := map[string]lastDiscoveryResponse{}
 
 	// a collection of stack allocated watches per request type
 	var values watches
@@ -175,7 +183,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 	}()
 
 	// sends a response by serializing to protobuf Any
-	send := func(resp cache.Response, typeURL string) (string, error) {
+	send := func(resp cache.Response) (string, error) {
 		if resp == nil {
 			return "", errors.New("missing response")
 		}
@@ -188,8 +196,18 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 		// increment nonce
 		streamNonce = streamNonce + 1
 		out.Nonce = strconv.FormatInt(streamNonce, 10)
+
+		lastResponse := lastDiscoveryResponse{
+			nonce:     out.Nonce,
+			resources: make(map[string]struct{}),
+		}
+		for _, r := range resp.GetRequest().ResourceNames {
+			lastResponse.resources[r] = struct{}{}
+		}
+		lastDiscoveryResponses[resp.GetRequest().TypeUrl] = lastResponse
+
 		if s.callbacks != nil {
-			s.callbacks.OnStreamResponse(streamID, resp.GetRequest(), out)
+			s.callbacks.OnStreamResponse(resp.GetContext(), streamID, resp.GetRequest(), out)
 		}
 		return out.Nonce, stream.Send(out)
 	}
@@ -212,7 +230,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "configs watch failed")
 			}
-			nonce, err := send(resp, resource.ConfigType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -222,7 +240,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "apis watch failed")
 			}
-			nonce, err := send(resp, resource.APIType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -232,7 +250,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "subscriptionList watch failed")
 			}
-			nonce, err := send(resp, resource.SubscriptionListType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -242,7 +260,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "apiList watch failed")
 			}
-			nonce, err := send(resp, resource.APIListType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -252,7 +270,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "applicationList watch failed")
 			}
-			nonce, err := send(resp, resource.ApplicationListType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -262,7 +280,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "applicationPolicyList watch failed")
 			}
-			nonce, err := send(resp, resource.ApplicationPolicyListType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -272,7 +290,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "subscriptionPolicyList watch failed")
 			}
-			nonce, err := send(resp, resource.SubscriptionPolicyListType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -282,7 +300,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "applicationKeyMappingList watch failed")
 			}
-			nonce, err := send(resp, resource.ApplicationKeyMappingListType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -292,7 +310,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "keyManagers watch failed")
 			}
-			nonce, err := send(resp, resource.KeyManagerType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -302,7 +320,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "revoked tokens watch failed")
 			}
-			nonce, err := send(resp, resource.RevokedTokensType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -312,7 +330,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "throttle data watch failed")
 			}
-			nonce, err := send(resp, resource.ThrottleDataType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -322,7 +340,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			if !more {
 				return status.Errorf(codes.Unavailable, "global adapter apis watch failed")
 			}
-			nonce, err := send(resp, resource.GAAPIType)
+			nonce, err := send(resp)
 			if err != nil {
 				return err
 			}
@@ -333,12 +351,12 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 				if resp == errorResponse {
 					return status.Errorf(codes.Unavailable, "resource watch failed")
 				}
-				typeUrl := resp.GetRequest().TypeUrl
-				nonce, err := send(resp, typeUrl)
+				typeURL := resp.GetRequest().TypeUrl
+				nonce, err := send(resp)
 				if err != nil {
 					return err
 				}
-				values.nonces[typeUrl] = nonce
+				values.nonces[typeURL] = nonce
 			}
 
 		case req, more := <-reqCh:
@@ -375,6 +393,13 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 				}
 			}
 
+			if lastResponse, ok := lastDiscoveryResponses[req.TypeUrl]; ok {
+				if lastResponse.nonce == "" || lastResponse.nonce == nonce {
+					// Let's record Resource names that a client has received.
+					streamState.SetKnownResourceNames(req.TypeUrl, lastResponse.resources)
+				}
+			}
+
 			// cancel existing watches to (re-)request a newer version
 			switch {
 			case req.TypeUrl == resource.ConfigType:
@@ -382,42 +407,48 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 					if values.configCancel != nil {
 						values.configCancel()
 					}
-					values.configs, values.configCancel = s.cache.CreateWatch(req)
+					values.configs = make(chan cache.Response, 1)
+					values.configCancel = s.cache.CreateWatch(req, streamState, values.configs)
 				}
 			case req.TypeUrl == resource.APIType:
 				if values.apiNonce == "" || values.apiNonce == nonce {
 					if values.apiCancel != nil {
 						values.apiCancel()
 					}
-					values.apis, values.apiCancel = s.cache.CreateWatch(req)
+					values.apis = make(chan cache.Response, 1)
+					values.apiCancel = s.cache.CreateWatch(req, streamState, values.apis)
 				}
 			case req.TypeUrl == resource.SubscriptionListType:
 				if values.subscriptionListNonce == "" || values.subscriptionListNonce == nonce {
 					if values.subscriptionListCancel != nil {
 						values.subscriptionListCancel()
 					}
-					values.subscriptionList, values.subscriptionListCancel = s.cache.CreateWatch(req)
+					values.subscriptionList = make(chan cache.Response, 1)
+					values.subscriptionListCancel = s.cache.CreateWatch(req, streamState, values.subscriptionList)
 				}
 			case req.TypeUrl == resource.APIListType:
 				if values.apiListNonce == "" || values.apiListNonce == nonce {
 					if values.apiListCancel != nil {
 						values.apiListCancel()
 					}
-					values.apiList, values.apiListCancel = s.cache.CreateWatch(req)
+					values.apiList = make(chan cache.Response, 1)
+					values.apiListCancel = s.cache.CreateWatch(req, streamState, values.apiList)
 				}
 			case req.TypeUrl == resource.ApplicationListType:
 				if values.applicationListNonce == "" || values.applicationListNonce == nonce {
 					if values.applicationListCancel != nil {
 						values.applicationListCancel()
 					}
-					values.applicationList, values.applicationListCancel = s.cache.CreateWatch(req)
+					values.applicationList = make(chan cache.Response, 1)
+					values.applicationListCancel = s.cache.CreateWatch(req, streamState, values.applicationList)
 				}
 			case req.TypeUrl == resource.ApplicationPolicyListType:
 				if values.applicationPolicyListNonce == "" || values.applicationPolicyListNonce == nonce {
 					if values.applicationPolicyListCancel != nil {
 						values.applicationPolicyListCancel()
 					}
-					values.applicationPolicyList, values.applicationPolicyListCancel = s.cache.CreateWatch(req)
+					values.applicationPolicyList = make(chan cache.Response, 1)
+					values.applicationPolicyListCancel = s.cache.CreateWatch(req, streamState, values.applicationPolicyList)
 				}
 
 			case req.TypeUrl == resource.SubscriptionPolicyListType:
@@ -425,81 +456,58 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 					if values.subscriptionPolicyListCancel != nil {
 						values.subscriptionPolicyListCancel()
 					}
-					values.subscriptionPolicyList, values.subscriptionPolicyListCancel = s.cache.CreateWatch(req)
+					values.subscriptionPolicyList = make(chan cache.Response, 1)
+					values.subscriptionPolicyListCancel = s.cache.CreateWatch(req, streamState, values.subscriptionPolicyList)
 				}
 			case req.TypeUrl == resource.ApplicationKeyMappingListType:
 				if values.applicationKeyMappingListNonce == "" || values.applicationKeyMappingListNonce == nonce {
 					if values.applicationKeyMappingListCancel != nil {
 						values.applicationKeyMappingListCancel()
 					}
-					values.applicationKeyMappingList, values.applicationKeyMappingListCancel = s.cache.CreateWatch(req)
+					values.applicationKeyMappingList = make(chan cache.Response, 1)
+					values.applicationKeyMappingListCancel = s.cache.CreateWatch(req, streamState, values.applicationKeyMappingList)
 				}
 			case req.TypeUrl == resource.KeyManagerType:
 				if values.keyManagerNonce == "" || values.keyManagerNonce == nonce {
 					if values.keyManagerCancel != nil {
 						values.keyManagerCancel()
 					}
-					values.keyManagers, values.keyManagerCancel = s.cache.CreateWatch(req)
+					values.keyManagers = make(chan cache.Response, 1)
+					values.keyManagerCancel = s.cache.CreateWatch(req, streamState, values.keyManagers)
 				}
 			case req.TypeUrl == resource.RevokedTokensType:
 				if values.revokedTokenNonce == "" || values.revokedTokenNonce == nonce {
 					if values.revokedTokenCancel != nil {
 						values.revokedTokenCancel()
 					}
-					values.revokedTokens, values.revokedTokenCancel = s.cache.CreateWatch(req)
+					values.revokedTokens = make(chan cache.Response, 1)
+					values.revokedTokenCancel = s.cache.CreateWatch(req, streamState, values.revokedTokens)
 				}
 			case req.TypeUrl == resource.ThrottleDataType:
 				if values.throttleDataNonce == "" || values.throttleDataNonce == nonce {
 					if values.throttleDataCancel != nil {
 						values.throttleDataCancel()
 					}
-					values.throttleData, values.throttleDataCancel = s.cache.CreateWatch(req)
+					values.throttleData = make(chan cache.Response, 1)
+					values.throttleDataCancel = s.cache.CreateWatch(req, streamState, values.throttleData)
 				}
 			case req.TypeUrl == resource.GAAPIType:
 				if values.gaApiNonce == "" || values.gaApiNonce == nonce {
 					if values.gaApiCancel != nil {
 						values.gaApiCancel()
 					}
-					values.gaAPIs, values.gaApiCancel = s.cache.CreateWatch(req)
+					values.gaAPIs = make(chan cache.Response, 1)
+					values.gaApiCancel = s.cache.CreateWatch(req, streamState, values.gaAPIs)
 				}
 			default:
-				typeUrl := req.TypeUrl
-				responseNonce, seen := values.nonces[typeUrl]
+				typeURL := req.TypeUrl
+				responseNonce, seen := values.nonces[typeURL]
 				if !seen || responseNonce == nonce {
-					// We must signal goroutine termination to prevent a race between the cancel closing the watch
-					// and the producer closing the watch.
-					if terminate, exists := values.terminations[typeUrl]; exists {
-						close(terminate)
-					}
-					if cancel, seen := values.cancellations[typeUrl]; seen && cancel != nil {
+
+					if cancel, seen := values.cancellations[typeURL]; seen && cancel != nil {
 						cancel()
 					}
-					var watch chan cache.Response
-					watch, values.cancellations[typeUrl] = s.cache.CreateWatch(req)
-					// Muxing watches across multiple type URLs onto a single channel requires spawning
-					// a go-routine. Golang does not allow selecting over a dynamic set of channels.
-					terminate := make(chan struct{})
-					values.terminations[typeUrl] = terminate
-					go func() {
-						select {
-						case resp, more := <-watch:
-							if more {
-								values.responses <- resp
-							} else {
-								// Check again if the watch is cancelled.
-								select {
-								case <-terminate: // do nothing
-								default:
-									// We cannot close the responses channel since it can be closed twice.
-									// Instead we send a fake error response.
-									values.responses <- errorResponse
-								}
-							}
-							break
-						case <-terminate:
-							break
-						}
-					}()
+					values.cancellations[typeURL] = s.cache.CreateWatch(req, streamState, values.responses)
 				}
 			}
 		}
@@ -510,30 +518,22 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 func (s *server) StreamHandler(stream sotw.Stream, typeURL string) error {
 	// a channel for receiving incoming requests
 	reqCh := make(chan *discovery.DiscoveryRequest)
-	reqStop := int32(0)
 	go func() {
+		defer close(reqCh)
 		for {
 			req, err := stream.Recv()
-			if atomic.LoadInt32(&reqStop) != 0 {
-				return
-			}
 			if err != nil {
-				close(reqCh)
 				return
 			}
 			select {
 			case reqCh <- req:
+			case <-stream.Context().Done():
+				return
 			case <-s.ctx.Done():
 				return
 			}
 		}
 	}()
 
-	err := s.process(stream, reqCh, typeURL)
-
-	// prevents writing to a closed channel if send failed on blocked recv
-	// TODO(kuat) figure out how to unblock recv through gRPC API
-	atomic.StoreInt32(&reqStop, 1)
-
-	return err
+	return s.process(stream, reqCh, typeURL)
 }

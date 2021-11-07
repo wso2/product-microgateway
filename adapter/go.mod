@@ -4,8 +4,7 @@ go 1.15
 
 require (
 	github.com/Azure/azure-service-bus-go v0.10.14
-	github.com/cncf/udpa/go v0.0.0-20201211205326-cc1b757b3edd // indirect
-	github.com/envoyproxy/go-control-plane v0.9.8
+	github.com/envoyproxy/go-control-plane v0.10.0
 	github.com/envoyproxy/protoc-gen-validate v0.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getkin/kin-openapi v0.8.0
@@ -17,7 +16,7 @@ require (
 	github.com/go-openapi/strfmt v0.19.6
 	github.com/go-openapi/swag v0.19.9
 	github.com/go-openapi/validate v0.19.11
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.0
 	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jessevdk/go-flags v1.4.0
@@ -26,12 +25,12 @@ require (
 	github.com/pelletier/go-toml v1.8.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e
-	google.golang.org/grpc v1.33.2
-	google.golang.org/protobuf v1.25.0
+	google.golang.org/grpc v1.36.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.3.0
 )

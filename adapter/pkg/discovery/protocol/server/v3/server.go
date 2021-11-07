@@ -19,8 +19,10 @@ import (
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	envoy_delta "github.com/envoyproxy/go-control-plane/pkg/server/delta/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/server/rest/v3"
 	envoy_sotw "github.com/envoyproxy/go-control-plane/pkg/server/sotw/v3"
+	streamv3 "github.com/envoyproxy/go-control-plane/pkg/server/stream/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
@@ -51,16 +53,18 @@ type Server interface {
 
 	rest.Server
 	envoy_sotw.Server
+	envoy_delta.Server
 }
 
 // NewServer creates handlers from a config watcher and callbacks.
 func NewServer(ctx context.Context, config cache.Cache, callbacks xdsv3.Callbacks) Server {
-	return NewServerAdvanced(rest.NewServer(config, callbacks), sotw.NewServer(ctx, config, callbacks))
+	// Delta server is not used. Hence the envoy default implementation is used.
+	return NewServerAdvanced(rest.NewServer(config, callbacks), sotw.NewServer(ctx, config, callbacks), envoy_delta.NewServer(ctx, config, callbacks))
 }
 
 // NewServerAdvanced creates new server object
-func NewServerAdvanced(restServer rest.Server, sotwServer envoy_sotw.Server) Server {
-	return &server{rest: restServer, sotw: sotwServer}
+func NewServerAdvanced(restServer rest.Server, sotwServer envoy_sotw.Server, deltaServer envoy_delta.Server) Server {
+	return &server{rest: restServer, sotw: sotwServer, delta: deltaServer}
 }
 
 type server struct {
@@ -76,8 +80,9 @@ type server struct {
 	keymgt.UnimplementedRevokedTokenDiscoveryServiceServer
 	throttle.UnimplementedThrottleDataDiscoveryServiceServer
 	ga.UnimplementedApiGADiscoveryServiceServer
-	rest rest.Server
-	sotw envoy_sotw.Server
+	rest  rest.Server
+	sotw  envoy_sotw.Server
+	delta envoy_delta.Server
 }
 
 func (s *server) StreamHandler(stream envoy_sotw.Stream, typeURL string) error {
@@ -175,4 +180,8 @@ func (s *server) FetchGAApis(ctx context.Context, req *discovery.DiscoveryReques
 	}
 	req.TypeUrl = resource.GAAPIType
 	return s.Fetch(ctx, req)
+}
+
+func (s *server) DeltaStreamHandler(stream streamv3.DeltaStream, typeURL string) error {
+	return s.delta.DeltaStreamHandler(stream, typeURL)
 }

@@ -18,6 +18,7 @@
 package xds
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"errors"
@@ -34,6 +35,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 
+	envoy_resource "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -47,6 +49,7 @@ import (
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
+	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 )
 
@@ -736,9 +739,19 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := envoy_cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
-	snap.Consistent()
-	err := cache.SetSnapshot(label, snap)
+	snap, err := envoy_cachev3.NewSnapshot(fmt.Sprint(version), map[envoy_resource.Type][]types.Resource{
+		envoy_resource.EndpointType: endpoints,
+		envoy_resource.ClusterType:  clusters,
+		envoy_resource.ListenerType: listeners,
+		envoy_resource.RouteType:    routes,
+	})
+	if err != nil {
+		logger.LoggerXds.Errorf("Error while updating the snapshot : %v", err.Error())
+		return false
+	}
+	err = snap.Consistent()
+	//TODO: (VirajSalaka) check
+	err = cache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Errorf("Error while updating the snapshot : %v", err.Error())
 		return false
@@ -753,10 +766,15 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	label := commonEnforcerLabel
 	configs := []types.Resource{MarshalConfig(configFile)}
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap, err := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.ConfigType: configs,
+	})
+	if err != nil {
+		logger.LoggerXds.Error(err)
+	}
 	snap.Consistent()
 
-	err := enforcerCache.SetSnapshot(label, snap)
+	err = enforcerCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -772,10 +790,12 @@ func UpdateEnforcerApis(label string, apis []types.Resource, version string) {
 		version = fmt.Sprint(rand.Intn(maxRandomInt))
 	}
 
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.APIType: apis,
+	})
 	snap.Consistent()
 
-	err := enforcerCache.SetSnapshot(label, snap)
+	err := enforcerCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -792,10 +812,12 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 
 	// TODO: (VirajSalaka) Decide if a map is required to keep version (just to avoid having the same version)
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.SubscriptionListType: subscriptionList,
+	})
 	snap.Consistent()
 
-	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
+	err := enforcerSubscriptionCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -811,10 +833,12 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	applicationList = append(applicationList, applications)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.ApplicationListType: applicationList,
+	})
 	snap.Consistent()
 
-	err := enforcerApplicationCache.SetSnapshot(label, snap)
+	err := enforcerApplicationCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -829,10 +853,12 @@ func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	apiList = append(apiList, apis)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil, nil, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.APIListType: apiList,
+	})
 	snap.Consistent()
 
-	err := enforcerAPICache.SetSnapshot(label, snap)
+	err := enforcerAPICache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -848,10 +874,12 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil, nil, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.ApplicationPolicyListType: applicationPolicyList,
+	})
 	snap.Consistent()
 
-	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
+	err := enforcerApplicationPolicyCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -867,10 +895,12 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil, nil, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.SubscriptionPolicyListType: subscriptionPolicyList,
+	})
 	snap.Consistent()
 
-	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
+	err := enforcerSubscriptionPolicyCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -886,10 +916,12 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList, nil, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.ApplicationKeyMappingListType: applicationKeyMappingList,
+	})
 	snap.Consistent()
 
-	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)
+	err := enforcerApplicationKeyMappingCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -1003,10 +1035,12 @@ func UpdateEnforcerKeyManagers(keyManagerConfigList []types.Resource) {
 	label := commonEnforcerLabel
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, keyManagerConfigList, nil, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.KeyManagerType: keyManagerConfigList,
+	})
 	snap.Consistent()
 
-	err := enforcerKeyManagerCache.SetSnapshot(label, snap)
+	err := enforcerKeyManagerCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -1023,10 +1057,12 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 	tokens = append(tokens, revokedTokens...)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, tokens, nil, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.RevokedTokensType: revokedTokens,
+	})
 	snap.Consistent()
 
-	err := enforcerRevokedTokensCache.SetSnapshot(label, snap)
+	err := enforcerRevokedTokensCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
@@ -1068,10 +1104,12 @@ func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 	data = append(data, t)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, data, nil)
+	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+		wso2_resource.ThrottleDataType: data,
+	})
 	snap.Consistent()
 
-	err := enforcerThrottleDataCache.SetSnapshot(label, snap)
+	err := enforcerThrottleDataCache.SetSnapshot(context.Background(), label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
