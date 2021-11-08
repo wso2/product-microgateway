@@ -233,8 +233,8 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 	envProps := synchronizer.APIEnvProps{
 		EnvID: "some id",
 		APIConfigs: synchronizer.APIConfigs{
-			ProductionEndpoints: []string{"ws://env.websocket.org:443"},
-			SandBoxEndpoints:    []string{"ws://env.websocket.org:443"},
+			ProductionEndpoint: "ws://env.websocket.org:443",
+			SandBoxEndpoint:    "ws://env.websocket.org:443",
 		},
 	}
 
@@ -451,10 +451,8 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 	envProps := synchronizer.APIEnvProps{
 		EnvID: "some id",
 		APIConfigs: synchronizer.APIConfigs{
-			ProductionEndpoints:     []string{"ws://env.prod.websocket.org:80", "wss://lbenv.prod.websocket.org:443"},
-			ProductionEndpointsType: "loadbalance",
-			SandBoxEndpoints:        []string{"ws://env.sand.websocket.org:80", "wss://lbenv.sand.websocket.org:443"},
-			SandBoxEndpointsType:    "failover",
+			ProductionEndpoint: "ws://env.prod.websocket.org:80",
+			SandBoxEndpoint:    "ws://env.sand.websocket.org:80",
 		},
 	}
 
@@ -477,31 +475,13 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 
 	productionClusterHost0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	productionClusterPort0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
-	productionClusterPriority0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].Priority
-	productionClusterHost1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
-	productionClusterPort1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
-	productionClusterPriority1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].Priority
 
 	sandBoxClusterHost0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	sandBoxClusterPort0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
-	sandBoxClusterPriority0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].Priority
-	sandBoxClusterHost1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
-	sandBoxClusterPort1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
-	sandBoxClusterPriority1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].Priority
 
 	assert.Equal(t, "env.prod.websocket.org", productionClusterHost0, "Production endpoint host mismatch")
 	assert.Equal(t, uint32(80), productionClusterPort0, "Production endpoint port mismatch")
-	assert.Equal(t, uint32(0), productionClusterPriority0, "Production endpoint priority mismatch")
-
-	assert.Equal(t, "lbenv.prod.websocket.org", productionClusterHost1, "Second production endpoint host mismatch")
-	assert.Equal(t, uint32(443), productionClusterPort1, "Second production endpoint port mismatch")
-	assert.Equal(t, uint32(0), productionClusterPriority1, "Second production endpoint port mismatch")
 
 	assert.Equal(t, sandBoxClusterHost0, "env.sand.websocket.org", "Sandbox cluster host mismatch")
 	assert.Equal(t, sandBoxClusterPort0, uint32(80), "Sandbox cluster port mismatch")
-	assert.Equal(t, uint32(0), sandBoxClusterPriority0, "Sandbox endpoint priority mismatch")
-
-	assert.Equal(t, sandBoxClusterHost1, "lbenv.sand.websocket.org", "Sandbox cluster host mismatch")
-	assert.Equal(t, sandBoxClusterPort1, uint32(443), "Second sandbox cluster port mismatch")
-	assert.Equal(t, uint32(1), sandBoxClusterPriority1, "Second sandbox endpoint priority mismatch")
 }

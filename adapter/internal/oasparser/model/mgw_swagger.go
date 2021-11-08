@@ -285,50 +285,36 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 // SetEnvProperties sets environment specific values
 func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 	var productionUrls []Endpoint
-	prodURLType := LoadBalance
 	var sandboxUrls []Endpoint
-	sandURLType := LoadBalance
 
-	if len(envProps.APIConfigs.ProductionEndpoints) > 0 {
+	if envProps.APIConfigs.ProductionEndpoint != "" {
 		logger.LoggerOasparser.Infof("Production endpoints are found in env properties")
-		for _, url := range envProps.APIConfigs.ProductionEndpoints {
-			endpoint, err := getHostandBasepathandPort(url)
-			if err == nil {
-				productionUrls = append(productionUrls, *endpoint)
-			} else {
-				logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties")
-			}
+		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.ProductionEndpoint)
+		if err == nil {
+			productionUrls = append(productionUrls, *endpoint)
+		} else {
+			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties")
 		}
-	}
-
-	if strings.EqualFold(envProps.APIConfigs.ProductionEndpointsType, FailOver) {
-		prodURLType = FailOver
 	}
 
 	if len(productionUrls) > 0 {
 		logger.LoggerOasparser.Infof("Production endpoints is overridden by env properties")
-		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, prodURLType)
+		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
 	}
 
-	if len(envProps.APIConfigs.SandBoxEndpoints) > 0 {
+	if envProps.APIConfigs.SandBoxEndpoint != "" {
 		logger.LoggerOasparser.Infof("Sandbox endpoints are found in env properties")
-		for _, url := range envProps.APIConfigs.SandBoxEndpoints {
-			endpoint, err := getHostandBasepathandPort(url)
-			if err == nil {
-				sandboxUrls = append(sandboxUrls, *endpoint)
-			} else {
-				logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties")
-			}
+		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.SandBoxEndpoint)
+		if err == nil {
+			sandboxUrls = append(sandboxUrls, *endpoint)
+		} else {
+			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties")
 		}
-	}
-
-	if strings.EqualFold(envProps.APIConfigs.SandBoxEndpointsType, FailOver) {
-		sandURLType = FailOver
 	}
 
 	if len(sandboxUrls) > 0 {
 		logger.LoggerOasparser.Infof("Sandbox endpoints is overridden by env properties")
-		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls, sandURLType)
+		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls, LoadBalance)
 	}
 }
 
