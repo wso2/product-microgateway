@@ -58,8 +58,8 @@ spec:
               value: "admin"
           resources:
             requests:
-              memory: "250Mi"
-              cpu: "250m"
+              memory: "500Mi"
+              cpu: "500m"
             limits:
               memory: "500Mi"
               cpu: "500m"
