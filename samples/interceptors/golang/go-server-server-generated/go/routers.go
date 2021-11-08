@@ -57,14 +57,14 @@ var routes = Routes{
 	Route{
 		"HandleRequest",
 		strings.ToUpper("Post"),
-		"/handle-request",
+		"/api/v1/handle-request",
 		HandleRequest,
 	},
 
 	Route{
 		"HandleResponse",
 		strings.ToUpper("Post"),
-		"/handle-response",
+		"/api/v1/handle-response",
 		HandleResponse,
 	},
 }

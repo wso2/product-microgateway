@@ -9,23 +9,36 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
 	"log"
 	"net/http"
 
-	// WARNING!
-	// Change this to a fully-qualified import path
-	// once you place this file into your project.
-	// For example,
-	//
-	//    sw "github.com/myname/myrepo/go"
-	//
-	sw "./go"
+	sw "example.com/intercept/go"
 )
 
 func main() {
-	log.Printf("Server started")
-
 	router := sw.NewRouter()
+	// load CA certificate file and add it to list of client CAs
+	caCertFile, err := ioutil.ReadFile("./certs/mg.pem")
+	if err != nil {
+		log.Fatalf("error reading CA certificate: %v", err)
+	}
+	certPool := x509.NewCertPool()
+	certPool.AppendCertsFromPEM(caCertFile)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	// serve on port 9090 of local host
+	server := http.Server{
+		Addr:    ":9081",
+		Handler: router,
+		TLSConfig: &tls.Config{
+			ClientAuth: tls.RequireAndVerifyClientCert,
+			ClientCAs:  certPool,
+			MinVersion: tls.VersionTLS11,
+		},
+	}
+
+	log.Printf("Server started")
+	log.Fatal(server.ListenAndServeTLS("certs/interceptor.crt", "certs/interceptor.key"))
 }
