@@ -43,8 +43,8 @@ To learn about interceptors and for instructions on how to run it please head ov
 
     ```
     curl https://localhost:9081/api/v1/handle-request \
-      -H 'content-type: application/json'
-      -H 'accept: application/json'
+      -H 'content-type: application/json' \
+      -H 'accept: application/json' \
       -d '{"requestBody": "eyJuYW1lIjoiVGhlIFByaXNvbmVyIn0K"}' \
       --cert certs/mg.pem \
       --key ../../resources/security/mg.key \
