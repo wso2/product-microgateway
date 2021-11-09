@@ -132,12 +132,15 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
         Logger adapterLogger = LoggerFactory.getLogger("Adapter");
         Logger routerLogger = LoggerFactory.getLogger("Router");
+        Logger mockBackendLogger = LoggerFactory.getLogger("MockBackend");
         Slf4jLogConsumer enforcerLogConsumer = new Slf4jLogConsumer(enforcerLogger);
         Slf4jLogConsumer adapterLogConsumer = new Slf4jLogConsumer(adapterLogger);
         Slf4jLogConsumer routerLogConsumer = new Slf4jLogConsumer(routerLogger);
+        Slf4jLogConsumer mockBackendLogConsumer = new Slf4jLogConsumer(mockBackendLogger);
         environment.withLogConsumer("enforcer", enforcerLogConsumer)
                 .withLogConsumer("adapter", adapterLogConsumer)
-                .withLogConsumer("router", routerLogConsumer);
+                .withLogConsumer("router", routerLogConsumer)
+                .withLogConsumer("mockBackend", mockBackendLogConsumer);
         if (Boolean.parseBoolean(System.getenv(ENFORCER_DEBUG_ENV))) {
             environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
         }

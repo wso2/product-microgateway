@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testcases.standalone.backendtls;
+package org.wso2.choreo.connect.tests.testcases.standalone.mtls;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -32,14 +32,14 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BackendTLSTestcase {
+public class MtlsFromRouterToBackendTestcase {
     protected String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         //TODO: (VirajSalaka) change the token
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
-                "write:pets", false);
+                "read:pets", false);
     }
 
     @Test(description = "Invoke HTTP endpoint")
@@ -68,7 +68,7 @@ public class BackendTLSTestcase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
-    @Test(description = "Test to check the JWT auth working")
+    @Test(description = "Invoke with MTLS endpoint")
     public void invokeMTLSEndpointSuccess() throws Exception {
 
         // Set header

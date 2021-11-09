@@ -37,7 +37,7 @@ public class CcWithBackendTlsAndCorsDisabled {
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
-        ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt", null);
+        ApictlUtils.createProject("mtls_from_router_to_backend_openAPI.yaml", "mtls_from_router_to_backend", "backend_tls.crt", null);
         ApictlUtils.createProject("intercept_request_openAPI.yaml", "intercept_request_petstore", "backend_tls.crt", null);
         ApictlUtils.createProject("intercept_response_openAPI.yaml", "intercept_response_petstore", "backend_tls.crt", null);
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null, null);
@@ -45,7 +45,7 @@ public class CcWithBackendTlsAndCorsDisabled {
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
 
-        ApictlUtils.deployAPI("backend_tsl_petstore", "test");
+        ApictlUtils.deployAPI("mtls_from_router_to_backend", "test");
         ApictlUtils.deployAPI("intercept_request_petstore", "test");
         ApictlUtils.deployAPI("intercept_response_petstore", "test");
         ApictlUtils.deployAPI("cors_petstore", "test");

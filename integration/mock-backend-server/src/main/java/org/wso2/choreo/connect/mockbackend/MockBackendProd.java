@@ -24,6 +24,8 @@ import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -31,96 +33,67 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
-import java.util.Date;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Mock HTTP server for testing Open API tests.
  */
-public class MockBackEndServer extends Thread {
+public class MockBackendProd extends Thread {
 
-    private static final Logger logger = Logger.getLogger(MockBackEndServer.class.getName());
+    private static final Logger log = LogManager.getLogger("MockBackend");
     private HttpServer httpServer;
-    private String backEndServerUrl;
-    private int backEndServerPort;
-    private static boolean retryDone = false;
+    private final int backendServerPort;
     private boolean secured = false;
     private boolean mtlsEnabled = false;
     private int retryCountEndpointTwo = 0;
     private int retryCountEndpointThree = 0;
     private int retryCountEndpointFour = 0;
 
-    public static void main(String[] args) {
-        MockBackEndServer mockBackEndServer = new MockBackEndServer(Constants.MOCK_BACKEND_SERVER_PORT);
-        MockSandboxServer mockSandboxServer = new MockSandboxServer(Constants.MOCK_SANDBOX_SERVER_PORT);
-        // TODO: (VirajSalaka) start analytics server only when it requires
-        MockAnalyticsServer mockAnalyticsServer = new MockAnalyticsServer(Constants.MOCK_ANALYTICS_SERVER_PORT);
-        mockBackEndServer.start();
-        mockSandboxServer.start();
-        mockAnalyticsServer.start();
-        if (args.length > 0 && args[0].equals("-tls-enabled")) {
-            MockBackEndServer securedMockBackEndServer = new MockBackEndServer(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
-                    true, false);
-            MockBackEndServer mtlsMockBackEndServer = new MockBackEndServer(Constants.MTLS_MOCK_BACKEND_SERVER_PORT,
-                    true, true);
-            securedMockBackEndServer.start();
-            mtlsMockBackEndServer.start();
-        }
-        if (Arrays.asList(args).contains("-interceptor-svc-enabled")) {
-            MockInterceptorServer mockInterceptorServer = new MockInterceptorServer(
-                    Constants.INTERCEPTOR_STATUS_SERVER_PORT,
-                    Constants.MTLS_INTERCEPTOR_HANDLER_SERVER_PORT
-            );
-            mockInterceptorServer.start();
-        }
+    public MockBackendProd(int port) {
+        this.backendServerPort = port;
     }
 
-    public MockBackEndServer(int port) {
-        this.backEndServerPort = port;
-    }
-
-    public MockBackEndServer(int port, boolean isSecured, boolean mtlsEnabled) {
+    public MockBackendProd(int port, boolean isSecured, boolean mtlsEnabled) {
         this.secured = isSecured;
-        this.backEndServerPort = port;
+        this.backendServerPort = port;
         this.mtlsEnabled = mtlsEnabled;
     }
 
     public void run() {
-
-        if (backEndServerPort < 0) {
+        if (backendServerPort < 0) {
             throw new RuntimeException("Server port is not defined");
         }
         try {
             if (this.secured) {
-                httpServer = HttpsServer.create(new InetSocketAddress(backEndServerPort), 0);
+                httpServer = HttpsServer.create(new InetSocketAddress(backendServerPort), 0);
                 ((HttpsServer)httpServer).setHttpsConfigurator(new HttpsConfigurator(getSslContext()) {
                     public void configure(HttpsParameters params) {
                         try {
                             // initialise the SSL context
                             SSLContext sslContext = SSLContext.getDefault();
                             SSLEngine engine = sslContext.createSSLEngine();
-                            params.setNeedClientAuth(mtlsEnabled);
-                            params.setCipherSuites(engine.getEnabledCipherSuites());
-                            params.setProtocols(engine.getEnabledProtocols());
                             // get the default parameters
-                            SSLParameters defaultSSLParameters = sslContext
+                            SSLParameters sslParameters = sslContext
                                     .getDefaultSSLParameters();
-                            params.setSSLParameters(defaultSSLParameters);
+                            sslParameters.setCipherSuites(engine.getEnabledCipherSuites());
+                            sslParameters.setNeedClientAuth(mtlsEnabled);
+                            sslParameters.setProtocols(engine.getEnabledProtocols());
+                            params.setSSLParameters(sslParameters);
                         } catch (Exception ex) {
-                            logger.severe("Failed to create HTTPS port");
+                            log.error("Failed to create HTTPS port");
                         }
                     }
                 });
             } else {
-                httpServer = HttpServer.create(new InetSocketAddress(backEndServerPort), 0);
+                httpServer = HttpServer.create(new InetSocketAddress(backendServerPort), 0);
             }
             String context = "/v2";
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
@@ -219,7 +192,7 @@ public class MockBackEndServer extends Thread {
             // For Timeout tests
             httpServer.createContext(context + "/delay-17", exchange -> {
                 try {
-                    logger.info("Sleeping 17s...");
+                    log.info("Sleeping 17s...");
                     Thread.sleep(17000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -229,7 +202,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/delay-8", exchange -> {
                 try {
-                    logger.info("Sleeping 8s...");
+                    log.info("Sleeping 8s...");
                     Thread.sleep(8000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -239,7 +212,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/delay-5", exchange -> {
                 try {
-                    logger.info("Sleeping 5s...");
+                    log.info("Sleeping 5s...");
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -249,7 +222,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/delay-4", exchange -> {
                 try {
-                    logger.info("Sleeping 4s...");
+                    log.info("Sleeping 4s...");
                     Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -293,7 +266,7 @@ public class MockBackEndServer extends Thread {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    logger.log(Level.SEVERE, "Error occurred while thread sleep", e);
+                    log.error("Error occurred while thread sleep", e);
                 }
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
@@ -326,9 +299,8 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(context + "/echo", Utils::echo);
 
             httpServer.start();
-            backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {
-            logger.log(Level.SEVERE, "Error occurred while setting up mock server", ex);
+            log.error("Error occurred while setting up mock server", ex);
         }
     }
 
@@ -347,23 +319,35 @@ public class MockBackEndServer extends Thread {
     private static SSLContext getSslContext() throws Exception {
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
-        // initialise the keystore
-        char[] password = "wso2carbon".toCharArray();
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        InputStream keyStoreIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("wso2carbon.jks");
-        keyStore.load(keyStoreIS, password);
-        // setup the key manager factory
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(keyStore, password);
-        // setup the trust manager factory
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-        KeyStore trustStore = KeyStore.getInstance("JKS");
-        InputStream trustStoreIS = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("client-truststore.jks");
-        trustStore.load(trustStoreIS, password);
-        tmf.init(trustStore);
-        // setup the HTTPS context and parameters
-        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+        sslContext.init(getKeyManagers(), getTrustManagers(), null);
         return sslContext;
+    }
+
+    private static KeyManager[] getKeyManagers() throws Exception {
+        String password = "backend";
+        InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("backendKeystore.pkcs12"); // Created using backendKeystore.pem
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(inputStream, password.toCharArray());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(keyStore, password.toCharArray());
+        return kmf.getKeyManagers();
+    }
+
+    private static TrustManager[] getTrustManagers() throws Exception {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("mg.pem");
+
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509Certificate caCert = (X509Certificate)cf.generateCertificate(inputStream);
+
+        TrustManagerFactory tmf = TrustManagerFactory
+                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        ks.load(null); // Don't need the KeyStore instance to come from a file.
+        ks.setCertificateEntry("caCert", caCert);
+
+        tmf.init(ks);
+        return tmf.getTrustManagers();
     }
 }

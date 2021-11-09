@@ -25,29 +25,26 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MockSandboxServer extends Thread {
-    private static final Logger logger = Logger.getLogger(MockSandboxServer.class.getName());
-    private int backEndServerPort;
-    private HttpServer httpServer;
+public class MockBackendSandbox extends Thread {
+    private static final Logger logger = Logger.getLogger(MockBackendSandbox.class.getName());
+    private final int backEndServerPort;
     private int retryCountEndpointTwo = 0;
     private int retryCountEndpointThree = 0;
     private int retryCountEndpointSeven = 0;
 
-    public MockSandboxServer(int port) {
+    public MockBackendSandbox(int port) {
         backEndServerPort = port;
     }
 
     public void run() {
-
         if (backEndServerPort < 0) {
             throw new RuntimeException("Server port is not defined");
         }
         try {
-            httpServer = HttpServer.create(new InetSocketAddress(backEndServerPort), 0);
+            HttpServer httpServer = HttpServer.create(new InetSocketAddress(backEndServerPort), 0);
             String context = "/v2";
 
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
