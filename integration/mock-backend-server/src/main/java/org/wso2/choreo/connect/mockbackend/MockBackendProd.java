@@ -27,21 +27,12 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Mock HTTP server for testing Open API tests.
@@ -74,15 +65,18 @@ public class MockBackendProd extends Thread {
         try {
             if (this.secured) {
                 httpServer = HttpsServer.create(new InetSocketAddress(backendServerPort), 0);
-                ((HttpsServer)httpServer).setHttpsConfigurator(new HttpsConfigurator(getSslContext()) {
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(
+                        Utils.getKeyManagers("backendKeystore.pkcs12", "backend"), // Created using backendKeystore.pem
+                        Utils.getTrustManagers(), null);
+
+                ((HttpsServer)httpServer).setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                     public void configure(HttpsParameters params) {
                         try {
-                            // initialise the SSL context
                             SSLContext sslContext = SSLContext.getDefault();
                             SSLEngine engine = sslContext.createSSLEngine();
-                            // get the default parameters
-                            SSLParameters sslParameters = sslContext
-                                    .getDefaultSSLParameters();
+
+                            SSLParameters sslParameters = sslContext.getDefaultSSLParameters();
                             sslParameters.setCipherSuites(engine.getEnabledCipherSuites());
                             sslParameters.setNeedClientAuth(mtlsEnabled);
                             sslParameters.setProtocols(engine.getEnabledProtocols());
@@ -314,40 +308,5 @@ public class MockBackendProd extends Thread {
 
     public void stopIt() {
         httpServer.stop(0);
-    }
-
-    private static SSLContext getSslContext() throws Exception {
-
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(getKeyManagers(), getTrustManagers(), null);
-        return sslContext;
-    }
-
-    private static KeyManager[] getKeyManagers() throws Exception {
-        String password = "backend";
-        InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("backendKeystore.pkcs12"); // Created using backendKeystore.pem
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        keyStore.load(inputStream, password.toCharArray());
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(keyStore, password.toCharArray());
-        return kmf.getKeyManagers();
-    }
-
-    private static TrustManager[] getTrustManagers() throws Exception {
-        InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("mg.pem");
-
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509Certificate caCert = (X509Certificate)cf.generateCertificate(inputStream);
-
-        TrustManagerFactory tmf = TrustManagerFactory
-                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(null); // Don't need the KeyStore instance to come from a file.
-        ks.setCertificateEntry("caCert", caCert);
-
-        tmf.init(ks);
-        return tmf.getTrustManagers();
     }
 }

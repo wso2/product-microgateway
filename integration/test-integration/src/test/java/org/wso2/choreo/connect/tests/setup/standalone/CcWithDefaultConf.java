@@ -42,9 +42,8 @@ public class CcWithDefaultConf {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ApictlUtils.createProject( "openAPI_startup_zipped.yaml", "openAPI_startup_zipped",
-                null, null);
-        ApictlUtils.createProject( "openAPI_startup.yaml", "openAPI_startup", null, null);
+        ApictlUtils.createProject( "openAPI_startup_zipped.yaml", "openAPI_startup_zipped");
+        ApictlUtils.createProject( "openAPI_startup.yaml", "openAPI_startup");
         ZipDir.createZipFile(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH + "openAPI_startup_zipped");
         ccInstance = new CcInstance.Builder()
                 .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH +
@@ -55,18 +54,18 @@ public class CcWithDefaultConf {
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
-        ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null, null);
-        ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null, null);
-        ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null, null);
-        ApictlUtils.createProject( "security_openAPI.yaml", "custom_authheader_petstore", null, null);
-        ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml");
-        ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
-        ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3", null, null);
-        ApictlUtils.createProject( "malformed_endpoint_openAPI.yaml", "apictl_malformed_endpoint", null, null);
-        ApictlUtils.createProject( "retry_openAPI.yaml", "retry", null, null);
-        ApictlUtils.createProject( "intercept_request_openAPI.yaml", "intercept_request_default_setup_petstore", "backend_tls.crt", null);
-        ApictlUtils.createProject( "intercept_response_openAPI.yaml", "intercept_response_default_setup_petstore", "backend_tls.crt", null);
-        ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "circuit_breakers", null, null);
+        ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore");
+        ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore");
+        ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore");
+        ApictlUtils.createProject( "security_openAPI.yaml", "custom_authheader_petstore");
+        ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml", null);
+        ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml", null);
+        ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3");
+        ApictlUtils.createProject( "malformed_endpoint_openAPI.yaml", "apictl_malformed_endpoint");
+        ApictlUtils.createProject( "retry_openAPI.yaml", "retry");
+        ApictlUtils.createProject( "intercept_request_openAPI.yaml", "intercept_request_default_setup_petstore", "backend_tls.crt", null, null);
+        ApictlUtils.createProject( "intercept_response_openAPI.yaml", "intercept_response_default_setup_petstore", "backend_tls.crt", null, null);
+        ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "circuit_breakers");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
