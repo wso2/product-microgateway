@@ -20,7 +20,7 @@ import ballerina/lang.value;
 
 listener http:Listener ep0 = new (9081, secureSocket = {
     key: {
-        certFile: "/home/ballerina/certs/interceptor.crt",
+        certFile: "/home/ballerina/certs/interceptor.pem",
         keyFile: "/home/ballerina/certs/interceptor.key"
     },
 

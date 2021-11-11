@@ -18,5 +18,5 @@ name="cc-sample-xml-interceptor"
 tag="v1.0.0"
 
 [[container.copy.files]]
-sourceFile="certs"
+sourceFile="../resources/certs"
 target="/home/ballerina/certs"

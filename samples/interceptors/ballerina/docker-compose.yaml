@@ -22,8 +22,6 @@ services:
       - choreo-connect_default
   xml-interceptor:
     image: wso2am/cc-sample-xml-interceptor:v1.0.0
-    # volumes: # mount certs if you want to change default certs
-    #   - ./certs:/home/ballerina/certs
     ports:
       - "9081:9081"
     networks:
