@@ -110,5 +110,5 @@ public type ResponseHandlerRequestBody record {
     Body responseBody?;
     InvocationContext invocationContext?;
     # Map (string-to-string dictionary) of key value pairs
-    InterceptorContext interceptorContext;
+    InterceptorContext interceptorContext?;
 };

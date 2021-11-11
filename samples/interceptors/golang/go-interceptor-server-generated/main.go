@@ -15,7 +15,7 @@ import (
 	"log"
 	"net/http"
 
-	sw "example.com/intercept/go"
+	sw "./go"
 )
 
 func main() {
@@ -40,5 +40,5 @@ func main() {
 	}
 
 	log.Printf("Server started")
-	log.Fatal(server.ListenAndServeTLS("certs/interceptor.crt", "certs/interceptor.key"))
+	log.Fatal(server.ListenAndServeTLS("certs/interceptor.pem", "certs/interceptor.key"))
 }

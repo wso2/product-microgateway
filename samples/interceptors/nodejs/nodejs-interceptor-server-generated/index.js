@@ -36,7 +36,7 @@ const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/op
 const app = expressAppConfig.getApp();
 
 const serverOptions = {
-    cert: fs.readFileSync('certs/interceptor.crt'),
+    cert: fs.readFileSync('certs/interceptor.pem'),
     key: fs.readFileSync('certs/interceptor.key'),
     requestCert: true,
     rejectUnauthorized: true,
