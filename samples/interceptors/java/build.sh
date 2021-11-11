@@ -3,7 +3,11 @@ set -ex
 IMAGE_NAME=wso2am/cc-sample-xml-interceptor-java
 VERSION=v1.0.0
 
-cd "spring-server-generated"
+SRC="spring-server-generated"
+
+# copy the keystore file from resources
+cp ../resources/interceptor.jks "${SRC}/src/main/resources/interceptor.jks"
+
+cd $SRC
 mvn clean package;
-mkdir -p target/dependency && (cd target/dependency || exit; jar -xf ../*.jar)
 docker build -t $IMAGE_NAME:$VERSION .

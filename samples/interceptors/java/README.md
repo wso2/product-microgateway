@@ -1,26 +1,24 @@
-# Sample Interceptor - Ballerina
+# Sample Interceptor - Java Spring
 
-The interceptor service is generated using the interceptor service Open API definition and `bal openapi` command.
-```sh
-bal new <SERVICE_NAME>
-bal openapi -i <INTERCEPTOR_SERVICE_OPEN_API> -o <SERVICE_NAME> --mode service
-```
+The interceptor service is generated using the interceptor service Open API definition.
+[Swagger Editor](https://editor.swagger.io/) is used to generate the spring service.
 
 ## Prerequisites
 - Docker
-- Ballerina Swan Lake Beta 3
+- Java 11
+- Maven
 
 ## Build and Test the sample
 
 1. Build the sample interceptor service.
    ```sh
-   bal build --cloud=docker cc-sample-xml-interceptor/
+   ./build.sh
    ```
    Here, the requestBody is Base64 encoded.
 
 2. Start the interceptor service.
    ```sh
-   docker run --name bal-interceptor -p 9081:9081 wso2am/cc-sample-xml-interceptor:v1.0.0
+   docker run --name java-interceptor -p 9081:9081 wso2am/cc-sample-xml-interceptor-java:v1.0.0
    ```
 
 3. Test the interceptor service.
@@ -40,5 +38,5 @@ bal openapi -i <INTERCEPTOR_SERVICE_OPEN_API> -o <SERVICE_NAME> --mode service
 
 4. Remove container
    ```sh
-   docker rm -f bal-interceptor
+   docker rm -f java-interceptor
    ```

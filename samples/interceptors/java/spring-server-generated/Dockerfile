@@ -4,7 +4,6 @@ USER wso2am:wso2am
 
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} interceptor-svc.jar
-#COPY keystore.p12 /app
 
 EXPOSE 9081
 ENTRYPOINT ["java","-jar","/interceptor-svc.jar"]
