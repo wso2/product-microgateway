@@ -54,6 +54,8 @@ const (
 )
 
 var (
+	// This set of variables are used just for Type resolution with reflect.
+	// Hence no value needs to be assigned.
 	subList           *types.SubscriptionList
 	appList           *types.ApplicationList
 	appKeyMappingList *types.ApplicationKeyMappingList
