@@ -239,9 +239,9 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 	}
 
 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
-	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v", apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
-	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v", apiYamlFilePath)
 
 	var apiYaml model.APIYaml
 	err = json.Unmarshal(apiJsn, &apiYaml)
@@ -267,7 +267,6 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 
 	assert.Equal(t, sandBoxClusterHost, "env.websocket.org", "Sandbox cluster host mismatch")
 	assert.Equal(t, sandBoxClusterPort, uint32(443), "Sandbox cluster port mismatch")
-
 	assert.Equal(t, 1, len(routes), "Number of routes incorrect")
 
 }

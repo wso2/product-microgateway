@@ -217,8 +217,9 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName strin
 // ReadRootFiles function reads following files inside the root zip
 // deployment.json
 // env_properties.json
-func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescriptor, map[string]map[string]APIEnvProps, error) {
+func ReadRootFiles(reader *zip.Reader) (*DeploymentDescriptor, map[string]map[string]APIEnvProps, error) {
 	deploymentDescriptor := &DeploymentDescriptor{}
+	apiEnvProps := make(map[string]map[string]APIEnvProps)
 	// Read the .zip files within the root apis.zip
 	for _, file := range reader.File {
 		// Open deployment descriptor file
@@ -226,47 +227,42 @@ func ReadRootFiles(reader *zip.Reader, environments []string) (*DeploymentDescri
 			logger.LoggerSync.Debugf("Start reading %v file", deploymentDescriptorFile)
 			f, err := file.Open()
 			if err != nil {
-				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
-				return deploymentDescriptor, nil, err
+				logger.LoggerSync.Error("Error reading deployment descriptor: ", err)
+				return deploymentDescriptor, apiEnvProps, err
 			}
 			data, err := ioutil.ReadAll(f)
 			_ = f.Close() // Close the file here (without defer)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
-				return deploymentDescriptor, nil, err
+				logger.LoggerSync.Error("Error reading deployment descriptor: ", err)
+				return deploymentDescriptor, apiEnvProps, err
 			}
 			logger.LoggerSync.Debugf("Parsing content of deployment descriptor, content: %s", string(data))
 			if err = json.Unmarshal(data, deploymentDescriptor); err != nil {
-				logger.LoggerSync.Errorf("Error parsing JSON content of deployment descriptor: %v", err)
-				return deploymentDescriptor, nil, err
+				logger.LoggerSync.Error("Error parsing JSON content of deployment descriptor: ", err)
+				return deploymentDescriptor, apiEnvProps, err
 			}
-		} else if len(environments) > 0 && strings.Contains(file.Name, envPropsFile) {
-			logger.LoggerSync.Debug("Reading environment specific properties of Environments")
-
+		} else if strings.EqualFold(file.Name, envPropsFile) {
+			logger.LoggerSync.Debugf("Start reading %v file", envPropsFile)
 			f, err := file.Open()
 			if err != nil {
-				logger.LoggerSync.Errorf("Error reading environment specific properties: %v", err)
-				return deploymentDescriptor, nil, err
+				logger.LoggerSync.Error("Error reading environment specific properties: ", err)
+				return deploymentDescriptor, apiEnvProps, err
 			}
-			fileContent, err := ioutil.ReadAll(f)
+			data, err := ioutil.ReadAll(f)
 			_ = f.Close() // Close the file here (without defer)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error reading environment specific properties: %v", err)
-				return deploymentDescriptor, nil, err
+				logger.LoggerSync.Error("Error reading environment specific properties: ", err)
+				return deploymentDescriptor, apiEnvProps, err
 			}
-			logger.LoggerSync.Debugf("Parsing content of environment specific properties, content: %s", string(fileContent))
-			apiEnvProps, err := parseEnvProps(fileContent)
-			if err != nil {
+			logger.LoggerSync.Debugf("Parsing content of environment specific properties, content: %s", string(data))
+			if apiEnvProps, err = parseEnvProps(data); err != nil {
 				logger.LoggerSync.Errorf("Error occurred while parsing environment specific properties : %v : %v",
 					file.Name, err.Error())
-				return deploymentDescriptor, nil, err
-			} else if apiEnvProps != nil {
-				return deploymentDescriptor, apiEnvProps, nil
+				return deploymentDescriptor, apiEnvProps, err
 			}
 		}
-
 	}
-	return deploymentDescriptor, nil, nil
+	return deploymentDescriptor, apiEnvProps, nil
 }
 
 func parseEnvProps(data []byte) (map[string]map[string]APIEnvProps, error) {
@@ -285,7 +281,7 @@ func parseEnvProps(data []byte) (map[string]map[string]APIEnvProps, error) {
 					var envProps APIEnvProps
 					for envLabel, envData := range api {
 						if err := parser.Decode(envData, &envProps); err != nil {
-							logger.LoggerSync.Debugf("Error parsing environment specific values: %v", err.Error())
+							logger.LoggerSync.Error("Error parsing environment specific values: ", err)
 							return nil, err
 						}
 						apiProps[envLabel] = envProps
@@ -295,7 +291,7 @@ func parseEnvProps(data []byte) (map[string]map[string]APIEnvProps, error) {
 			}
 			return envProps, nil
 		}
-		logger.LoggerSync.Errorf("Wrong format given for parsing environment specific values")
+		logger.LoggerSync.Error("Wrong format given for parsing environment specific values")
 		return nil, errors.New("wrong format given for parsing environment specific values")
 	}
 	return nil, nil

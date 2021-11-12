@@ -60,7 +60,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	// apiFiles represents zipped API files fetched from API Manager
 	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
 	// Read deployments from deployment.json file
-	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader, environments)
+	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader)
 	if err != nil {
 		logger.LoggerSync.Errorf("Error occured while reading root files %v", err.Error())
 		return err
