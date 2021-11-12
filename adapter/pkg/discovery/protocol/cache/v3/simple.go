@@ -63,7 +63,7 @@ type SnapshotCache interface {
 }
 
 type snapshotCache struct {
-	// watchCount and deltaWatchCount are atomic counters incremented for each watch respectively. They need to
+	// watchCount is an atomic counters incremented for sotw watch. They need to
 	// be the first fields in the struct to guarantee 64-bit alignment,
 	// which is a requirement for atomic operations on 64-bit operands to work on
 	// 32-bit machines.
@@ -132,7 +132,8 @@ func newSnapshotCache(ads bool, hash NodeHash, logger log.Logger) *snapshotCache
 //
 // The context provides a way to cancel the heartbeating routine, while the heartbeatInterval
 // parameter controls how often heartbeating occurs.
-// TODO: (VirajSalaka) remove ?
+//
+// Unused by the adapter at the moment.
 func NewSnapshotCacheWithHeartbeating(ctx context.Context, ads bool, hash NodeHash, logger log.Logger, heartbeatInterval time.Duration) SnapshotCache {
 	cache := newSnapshotCache(ads, hash, logger)
 	go func() {

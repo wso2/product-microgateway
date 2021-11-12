@@ -50,21 +50,21 @@ func NewSnapshot(version string, resources map[resource.Type][]types.Resource) (
 	return out, nil
 }
 
-// GetResources selects snapshot resources by type, returning the map of resources.
-func (s *Snapshot) GetResources(typeURL resource.Type) map[string]types.Resource {
-	resources := s.GetResourcesAndTTL(typeURL)
-	if resources == nil {
-		return nil
-	}
+// // GetResources selects snapshot resources by type, returning the map of resources.
+// func (s *Snapshot) GetResources(typeURL resource.Type) map[string]types.Resource {
+// 	resources := s.GetResourcesAndTTL(typeURL)
+// 	if resources == nil {
+// 		return nil
+// 	}
 
-	withoutTTL := make(map[string]types.Resource, len(resources))
+// 	withoutTTL := make(map[string]types.Resource, len(resources))
 
-	for k, v := range resources {
-		withoutTTL[k] = v.Resource
-	}
+// 	for k, v := range resources {
+// 		withoutTTL[k] = v.Resource
+// 	}
 
-	return withoutTTL
-}
+// 	return withoutTTL
+// }
 
 // GetResourcesAndTTL selects snapshot resources by type, returning the map of resources and the associated TTL.
 func (s *Snapshot) GetResourcesAndTTL(typeURL resource.Type) map[string]types.ResourceWithTTL {

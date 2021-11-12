@@ -59,38 +59,11 @@ func GetResponseType(typeURL string) types.ResponseType {
 	return types.UnknownType
 }
 
-// GetResponseTypeURL returns the type url for a valid enum.
-func GetResponseTypeURL(responseType types.ResponseType) (string, error) {
-	switch responseType {
-	case types.Config:
-		return resource.ConfigType, nil
-	case types.API:
-		return resource.APIType, nil
-	case types.SubscriptionList:
-		return resource.SubscriptionListType, nil
-	case types.ApplicationList:
-		return resource.ApplicationListType, nil
-	case types.ApplicationPolicyList:
-		return resource.ApplicationPolicyListType, nil
-	case types.SubscriptionPolicyList:
-		return resource.SubscriptionPolicyListType, nil
-	case types.ApplicationKeyMappingList:
-		return resource.ApplicationKeyMappingListType, nil
-	case types.KeyManagerConfig:
-		return resource.KeyManagerType, nil
-	case types.RevokedTokens:
-		return resource.RevokedTokensType, nil
-	case types.ThrottleData:
-		return resource.ThrottleDataType, nil
-	case types.GAAPI:
-		return resource.GAAPIType, nil
-	}
-
-	return "", fmt.Errorf("couldn't map response type to known resource type")
-}
-
 // GetResourceName returns the resource name for a valid xDS response type.
 func GetResourceName(res envoy_types.Resource) string {
+	// Since Applications, Subscriptions, API-Metadata, Application Policies and Subscription Policies
+	// are always maintained under a single list, there is no need to have separate key.
+	// (Compared to GAAPI and API)
 	switch v := res.(type) {
 	case *api.Api:
 		return fmt.Sprint(v.Vhost, v.BasePath, v.Version)
@@ -98,6 +71,16 @@ func GetResourceName(res envoy_types.Resource) string {
 		return "Config"
 	case *subscription.SubscriptionList:
 		return "Subscription"
+	case *subscription.ApplicationList:
+		return "Application"
+	case *subscription.ApplicationKeyMappingList:
+		return "ApplicationKeyMapping"
+	case *subscription.APIList:
+		return "APIList"
+	case *subscription.ApplicationPolicyList:
+		return "ApplicationPolicyList"
+	case *subscription.SubscriptionPolicyList:
+		return "SubscriptionPolicyList"
 	case *keymgt.KeyManagerConfig:
 		return fmt.Sprint(v.Name)
 	case *throttle.ThrottleData:
