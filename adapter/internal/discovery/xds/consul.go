@@ -50,7 +50,7 @@ func startConsulServiceDiscovery(organizationID string) {
 					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
 					return
 				}
-				logger.LoggerXds.Debugln(query)
+				logger.LoggerXds.Debugln("consul query values: ", query)
 				go getServiceDiscoveryData(query, cluster.Name, apiKey, organizationID)
 			}
 		}
@@ -71,27 +71,28 @@ func updateCertsForServiceMesh(organizationID string) {
 	//update each cluster with new certs
 	for _, clusters := range orgIDOpenAPIClustersMap[organizationID] {
 		for _, cluster := range clusters { //iterate through all clusters
-			if cluster.TransportSocket != nil { //has transport socket==> https/wss
-				if svcdiscovery.MeshCACert == "" || svcdiscovery.MeshServiceKey == "" || svcdiscovery.MeshServiceCert == "" {
-					logger.LoggerXds.Warn("Mesh certs are empty")
-					return
-				}
-				upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACert,
-					svcdiscovery.MeshServiceKey, svcdiscovery.MeshServiceCert)
-				marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
-				if err != nil {
-					logger.LoggerXds.Error("Internal Error while marshalling the upstream TLS Context.")
-				} else {
-					//envoy config
-					upstreamTransportSocket := &corev3.TransportSocket{
-						Name: transportSocketName,
-						ConfigType: &corev3.TransportSocket_TypedConfig{
-							TypedConfig: marshalledTLSContext,
-						},
-					}
-					cluster.TransportSocket = upstreamTransportSocket
-				}
+
+			if svcdiscovery.MeshCACert == "" || svcdiscovery.MeshServiceKey == "" || svcdiscovery.MeshServiceCert == "" {
+				logger.LoggerXds.Warn("Mesh certs are empty")
+				return
 			}
+			upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACert,
+				svcdiscovery.MeshServiceKey, svcdiscovery.MeshServiceCert)
+
+			marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
+			if err != nil {
+				logger.LoggerXds.Error("Internal Error while marshalling the upstream TLS Context.")
+			} else {
+				//envoy config
+				upstreamTransportSocket := &corev3.TransportSocket{
+					Name: transportSocketName,
+					ConfigType: &corev3.TransportSocket_TypedConfig{
+						TypedConfig: marshalledTLSContext,
+					},
+				}
+				cluster.TransportSocket = upstreamTransportSocket
+			}
+
 		}
 	}
 
@@ -130,6 +131,10 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
 				svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
 				updateCluster(apiKey, clusterName, organizationID, queryResultsList)
+			}
+
+			if svcdiscovery.MeshEnabled {
+				updateCertsForServiceMesh(organizationID)
 			}
 		}
 	}
