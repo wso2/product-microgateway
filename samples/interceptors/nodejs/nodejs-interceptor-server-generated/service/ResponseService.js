@@ -40,4 +40,3 @@ exports.handleResponse = function (body) {
         }
     });
 }
-

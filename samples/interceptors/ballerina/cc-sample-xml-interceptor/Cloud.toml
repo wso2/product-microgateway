@@ -14,7 +14,7 @@
 
 [container.image]
 repository="wso2am"
-name="cc-sample-xml-interceptor"
+name="cc-sample-xml-interceptor-ballerina"
 tag="v1.0.0"
 
 [[container.copy.files]]

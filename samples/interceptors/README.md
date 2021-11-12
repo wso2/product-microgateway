@@ -5,12 +5,12 @@ To learn about interceptors and for instructions on how to run it please head ov
 
 ## Samples
 
-- [Sample Backend](sample-backend)
-- Sample Interceptor Services
+- Sample Interceptor Service Implementations
   - [Ballerina](ballerina)
   - [Java](java)
   - [NodeJS](nodejs)
   - [Go](golang)
+- [Sample Backend](sample-backend)
 
 ## Sample Certs and Resources for Interceptors
 

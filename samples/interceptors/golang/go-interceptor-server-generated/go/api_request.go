@@ -35,7 +35,7 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := &RequestHandlerResponseBody{
-		HeadersToAdd: &map[string]string{
+		HeadersToReplace: &map[string]string{
 			"content-type": "application/xml",
 		},
 		Body: xmlBody,

@@ -36,7 +36,7 @@ exports.handleRequest = function (body) {
     return new Promise(function (resolve, reject) {
         let examples = {};
         examples['application/json'] = {
-            "headersToAdd": {
+            "headersToReplace": {
                 "content-type": "application/xml",
             },
             "body": xmlBodyBase64,
@@ -49,4 +49,3 @@ exports.handleRequest = function (body) {
         }
     });
 }
-
