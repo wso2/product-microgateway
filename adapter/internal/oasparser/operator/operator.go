@@ -29,13 +29,12 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
-	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 // GetMgwSwagger converts the openAPI v3 and v2 content
 // To MgwSwagger objects
 // TODO: (VirajSalaka) return the error and handle
-func GetMgwSwagger(apiContent []byte, envProp synchronizer.APIEnvProps) (model.MgwSwagger, error) {
+func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 	var mgwSwagger model.MgwSwagger
 
 	apiJsn, err := utills.ToJSON(apiContent)
@@ -78,7 +77,6 @@ func GetMgwSwagger(apiContent []byte, envProp synchronizer.APIEnvProps) (model.M
 			mgwSwagger.GetTitle(), " ", err)
 		return mgwSwagger, err
 	}
-	mgwSwagger.SetEnvProperties(envProp)
 	return mgwSwagger, nil
 }
 
@@ -149,13 +147,12 @@ func GetXWso2LabelsWebSocket(webSocketAPIDef model.MgwSwagger) []string {
 /*
 GetMgwSwaggerWebSocket returns a MgwSwagger for the web socket APIs
 */
-func GetMgwSwaggerWebSocket(apiData model.APIYaml, envProp synchronizer.APIEnvProps) (model.MgwSwagger, error) {
+func GetMgwSwaggerWebSocket(apiData model.APIYaml) (model.MgwSwagger, error) {
 	var mgwSwagger model.MgwSwagger
 	err := mgwSwagger.SetInfoSwaggerWebSocket(apiData)
 	if err != nil {
 		return mgwSwagger, err
 	}
-	mgwSwagger.SetEnvProperties(envProp)
 	return mgwSwagger, nil
 
 }
