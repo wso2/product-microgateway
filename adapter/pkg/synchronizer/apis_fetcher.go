@@ -267,9 +267,9 @@ func ReadRootFiles(reader *zip.Reader) (*DeploymentDescriptor, map[string]map[st
 
 func parseEnvProps(data []byte) (map[string]map[string]APIEnvProps, error) {
 	var envPropsFile map[string]interface{}
-	envProps := make(map[string]map[string]APIEnvProps)
+	envPropsMap := make(map[string]map[string]APIEnvProps)
 	if err := json.Unmarshal(data, &envPropsFile); err != nil {
-		logger.LoggerSync.Errorf("Error parsing Environment specific values: %v", err.Error())
+		logger.LoggerSync.Error("Error parsing Environment specific values: ", err)
 		return nil, err
 	}
 
@@ -287,9 +287,9 @@ func parseEnvProps(data []byte) (map[string]map[string]APIEnvProps, error) {
 						apiProps[envLabel] = envProps
 					}
 				}
-				envProps[apiUUID] = apiProps
+				envPropsMap[apiUUID] = apiProps
 			}
-			return envProps, nil
+			return envPropsMap, nil
 		}
 		logger.LoggerSync.Error("Wrong format given for parsing environment specific values")
 		return nil, errors.New("wrong format given for parsing environment specific values")

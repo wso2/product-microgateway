@@ -62,7 +62,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	// Read deployments from deployment.json file
 	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader)
 	if err != nil {
-		logger.LoggerSync.Errorf("Error occured while reading root files %v", err.Error())
+		logger.LoggerSync.Error("Error occured while reading root files ", err)
 		return err
 	}
 
