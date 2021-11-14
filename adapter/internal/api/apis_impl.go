@@ -34,6 +34,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 // API Controller related constants
@@ -209,12 +210,16 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
+func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string, apiEnvs map[string]map[string]synchronizer.APIEnvProps) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return nil, err
 	}
 	apiYaml := apiProject.APIYaml.Data
+	if apiEnvProps, found := apiEnvs[apiProject.APIYaml.Data.ID]; found {
+		loggers.LoggerAPI.Infof("Environment specific values found for the API %v ", apiProject.APIYaml.Data.ID)
+		apiProject.APIEnvProps = apiEnvProps
+	}
 
 	// handle panic
 	defer func() {
