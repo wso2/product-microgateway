@@ -48,6 +48,7 @@ import (
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 var (
@@ -257,6 +258,13 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		environments = []string{config.DefaultGatewayName}
 	}
 
+	var apiEnvProps synchronizer.APIEnvProps
+
+	// TODO(amali) under the assumption vhost has one environment at the moment
+	if apiEnvPropsV, found := apiProject.APIEnvProps[environments[0]]; found {
+		apiEnvProps = apiEnvPropsV
+	}
+
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
 		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
@@ -280,6 +288,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
+	mgwSwagger.SetEnvProperties(apiEnvProps)
 	mgwSwagger.SetID(apiYaml.ID)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)

@@ -24,6 +24,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -54,16 +55,19 @@ func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
 func TestCreateRouteswithClustersWebsocketProdSand(t *testing.T) {
 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api.yaml"
 	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
 }
 
 func TestCreateRouteswithClustersWebsocketProd(t *testing.T) {
 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_prod.yaml"
 	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
 }
 
 func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_sand.yaml"
 	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
 }
 
 // commonTestForCreateRoutesWithClusters
@@ -224,6 +228,49 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 
 }
 
+// this tests env props getting overriden for api.yaml provided values for websocket apis
+func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFilePath string) {
+	envProps := synchronizer.APIEnvProps{
+		EnvID: "some id",
+		APIConfigs: synchronizer.APIConfigs{
+			ProductionEndpoint: "ws://env.websocket.org:443",
+			SandBoxEndpoint:    "ws://env.websocket.org:443",
+		},
+	}
+
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v", apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v", apiYamlFilePath)
+
+	var apiYaml model.APIYaml
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	apiYaml = model.PopulateEndpointsInfo(apiYaml)
+	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
+	mgwSwagger.SetEnvProperties(envProps)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+
+	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+	productionCluster := clusters[0]
+	sandBoxCluster := clusters[1]
+
+	productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+	assert.Equal(t, productionClusterHost, "env.websocket.org", "Production cluster host mismatch")
+	assert.Equal(t, productionClusterPort, uint32(443), "Production cluster port mismatch")
+
+	sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+	assert.Equal(t, sandBoxClusterHost, "env.websocket.org", "Sandbox cluster host mismatch")
+	assert.Equal(t, sandBoxClusterPort, uint32(443), "Sandbox cluster port mismatch")
+	assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+
+}
+
 func TestCreateHealthEndpoint(t *testing.T) {
 	route := envoy.CreateHealthEndpoint()
 	assert.NotNil(t, route, "Health Endpoint Route should not be null.")
@@ -333,10 +380,12 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 func TestLoadBalancedCluster(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/ws_api_loadbalance.yaml"
 	commonTestForClusterPrioritiesInWebSocketAPI(t, openapiFilePath)
+	commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t, openapiFilePath)
 }
 func TestFailoverCluster(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/ws_api_failover.yaml"
 	commonTestForClusterPrioritiesInWebSocketAPI(t, openapiFilePath)
+	commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t, openapiFilePath)
 }
 
 // commonTestForClusterPriorities use to test loadbalance/failover in WS apis
@@ -367,10 +416,10 @@ func commonTestForClusterPrioritiesInWebSocketAPI(t *testing.T, apiYamlFilePath 
 
 	sandBoxClusterHost0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	sandBoxClusterPort0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
-	sandBoxClusterPriority0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].Priority
+	sandBoxClusterPriority0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].Priority
 	sandBoxClusterHost1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	sandBoxClusterPort1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
-	sandBoxClusterPriority1 := productionCluster.GetLoadAssignment().GetEndpoints()[1].Priority
+	sandBoxClusterPriority1 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[1].Priority
 
 	assert.Equal(t, "primary.websocket.org", productionClusterHost0, "Production endpoint host mismatch")
 	assert.Equal(t, uint32(443), productionClusterPort0, "Production endpoint port mismatch")
@@ -395,4 +444,45 @@ func commonTestForClusterPrioritiesInWebSocketAPI(t *testing.T, apiYamlFilePath 
 		assert.Equal(t, uint32(1), productionClusterPriority1, "Second production endpoint port mismatch")
 		assert.Equal(t, uint32(1), sandBoxClusterPriority1, "Second sandbox endpoint priority mismatch")
 	}
+}
+
+// commonTestForClusterPriorities use to test loadbalance/failover in WS apis
+func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiYamlFilePath string) {
+	envProps := synchronizer.APIEnvProps{
+		EnvID: "some id",
+		APIConfigs: synchronizer.APIConfigs{
+			ProductionEndpoint: "ws://env.prod.websocket.org:80",
+			SandBoxEndpoint:    "ws://env.sand.websocket.org:80",
+		},
+	}
+
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v", apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v", apiYamlFilePath)
+
+	var apiYaml model.APIYaml
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	apiYaml = model.PopulateEndpointsInfo(apiYaml)
+	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
+	mgwSwagger.SetEnvProperties(envProps)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
+	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+
+	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+	productionCluster := clusters[0]
+	sandBoxCluster := clusters[1]
+
+	productionClusterHost0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	productionClusterPort0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+	sandBoxClusterHost0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	sandBoxClusterPort0 := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+	assert.Equal(t, "env.prod.websocket.org", productionClusterHost0, "Production endpoint host mismatch")
+	assert.Equal(t, uint32(80), productionClusterPort0, "Production endpoint port mismatch")
+
+	assert.Equal(t, sandBoxClusterHost0, "env.sand.websocket.org", "Sandbox cluster host mismatch")
+	assert.Equal(t, sandBoxClusterPort0, uint32(80), "Sandbox cluster port mismatch")
 }

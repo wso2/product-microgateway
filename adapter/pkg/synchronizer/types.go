@@ -63,3 +63,15 @@ type GatewayLabel struct {
 	Name  string `json:"name"`
 	Vhost string `json:"vhost"`
 }
+
+// APIConfigs represents env properties belongs to the API
+type APIConfigs struct {
+	ProductionEndpoint string `mapstructure:"production_endpoint,omitempty"`
+	SandBoxEndpoint    string `mapstructure:"sandbox_endpoint,omitempty"`
+}
+
+// APIEnvProps represents env properties
+type APIEnvProps struct {
+	EnvID      string     `mapstructure:"envId,omitempty"`
+	APIConfigs APIConfigs `mapstructure:"configs,omitempty"`
+}
