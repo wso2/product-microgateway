@@ -1,42 +1,28 @@
-# Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 openapi: 3.0.0
-servers:
-  - url: "{interceptor_service_url}/api/v1"
-    variables:
-      interceptor_service_url:
-        default: https://interceptor-service:8443
-        description: interceptor_host assigned by the service provider
 info:
   title: Choreo-Connect Interceptor Service
   description: Interceptor Service
-  version: v1
   contact:
     name: WSO2
     url: http://wso2.com/products/api-manager/
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: v1
+servers:
+- url: "{interceptor_service_url}/api/v1"
+  variables:
+    interceptor_service_url:
+      description: interceptor_host assigned by the service provider
+      default: https://interceptor-service:8443
 tags:
-  - name: interceptor
-    description: Interceptor
+- name: interceptor
+  description: Interceptor
 paths:
-  "/handle-request":
+  /handle-request:
     post:
       tags:
-        - Request
+      - Request
       summary: Handle Request
       operationId: handleRequest
       requestBody:
@@ -45,19 +31,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RequestHandlerRequestBody"
+              $ref: '#/components/schemas/RequestHandlerRequestBody'
       responses:
-        200:
+        "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestHandlerResponseBody"
-
-  "/handle-response":
+                $ref: '#/components/schemas/RequestHandlerResponseBody'
+  /handle-response:
     post:
       tags:
-        - Response
+      - Response
       summary: Handle Response
       operationId: handleResponse
       requestBody:
@@ -66,15 +51,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ResponseHandlerRequestBody"
+              $ref: '#/components/schemas/ResponseHandlerRequestBody'
       responses:
-        200:
+        "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResponseHandlerResponseBody"
-
+                $ref: '#/components/schemas/ResponseHandlerResponseBody'
 components:
   schemas:
     RequestHandlerRequestBody:
@@ -82,13 +66,13 @@ components:
       type: object
       properties:
         requestHeaders:
-          $ref: "#/components/schemas/Headers"
+          $ref: '#/components/schemas/Headers'
         requestTrailers:
-          $ref: "#/components/schemas/Trailers"
+          $ref: '#/components/schemas/Trailers'
         requestBody:
-          $ref: "#/components/schemas/Body"
+          $ref: '#/components/schemas/Body'
         InvocationContext:
-          $ref: "#/components/schemas/InvocationContext"
+          $ref: '#/components/schemas/InvocationContext'
     RequestHandlerResponseBody:
       title: Response body of Request handler
       type: object
@@ -100,48 +84,68 @@ components:
           type: integer
           example: 200
         dynamicEndpoint:
-          $ref: "#/components/schemas/DynamicEndpoint"
+          $ref: '#/components/schemas/DynamicEndpoint'
         headersToAdd:
-          $ref: "#/components/schemas/Headers"
+          $ref: '#/components/schemas/Headers'
         headersToReplace:
-          $ref: "#/components/schemas/Headers"
+          $ref: '#/components/schemas/Headers'
         headersToRemove:
-          $ref: "#/components/schemas/HeaderKeys"
+          $ref: '#/components/schemas/HeaderKeys'
         trailersToAdd:
-          $ref: "#/components/schemas/Trailers"
+          $ref: '#/components/schemas/Trailers'
         trailersToReplace:
-          $ref: "#/components/schemas/Trailers"
+          $ref: '#/components/schemas/Trailers'
         trailersToRemove:
-          $ref: "#/components/schemas/HeaderKeys"
+          $ref: '#/components/schemas/HeaderKeys'
         body:
-          $ref: "#/components/schemas/Body"
+          $ref: '#/components/schemas/Body'
         interceptorContext:
-          $ref: "#/components/schemas/InterceptorContext"
+          $ref: '#/components/schemas/InterceptorContext'
+      example:
+        directRespond: false
+        headersToReplace: null
+        headersToAdd:
+          content-type: application/xml
+          content-length: "40"
+        interceptorContext:
+          key1: value1
+          key2: value2
+        headersToRemove:
+        - key1
+        - key2
+        trailersToRemove: null
+        trailersToAdd:
+          trailer1-key: value
+        dynamicEndpoint:
+          endpointName: my-dynamic-endpoint
+        body: PGhlbGxvPndvcmxkPC9oZWxsbz4K
+        responseCode: 200
+        trailersToReplace: null
     ResponseHandlerRequestBody:
       title: Request body of Response handler
+      required:
+      - responseCode
       type: object
       properties:
         responseCode:
           type: integer
           example: 200
         requestHeaders:
-          $ref: "#/components/schemas/Headers"
+          $ref: '#/components/schemas/Headers'
         requestTrailers:
-          $ref: "#/components/schemas/Trailers"
+          $ref: '#/components/schemas/Trailers'
         requestBody:
-          $ref: "#/components/schemas/Body"
+          $ref: '#/components/schemas/Body'
         responseHeaders:
-          $ref: "#/components/schemas/Headers"
+          $ref: '#/components/schemas/Headers'
         responseTrailers:
-          $ref: "#/components/schemas/Trailers"
+          $ref: '#/components/schemas/Trailers'
         responseBody:
-          $ref: "#/components/schemas/Body"
+          $ref: '#/components/schemas/Body'
         invocationContext:
-          $ref: "#/components/schemas/InvocationContext"
+          $ref: '#/components/schemas/InvocationContext'
         interceptorContext:
-          $ref: "#/components/schemas/InterceptorContext"
-      required:
-        - responseCode
+          $ref: '#/components/schemas/InterceptorContext'
     ResponseHandlerResponseBody:
       title: Response Body
       type: object
@@ -150,19 +154,33 @@ components:
           type: integer
           example: 200
         headersToAdd:
-          $ref: "#/components/schemas/Headers"
+          $ref: '#/components/schemas/Headers'
         headersToReplace:
-          $ref: "#/components/schemas/Headers"
+          $ref: '#/components/schemas/Headers'
         headersToRemove:
-          $ref: "#/components/schemas/HeaderKeys"
+          $ref: '#/components/schemas/HeaderKeys'
         trailersToAdd:
-          $ref: "#/components/schemas/Trailers"
+          $ref: '#/components/schemas/Trailers'
         trailersToReplace:
-          $ref: "#/components/schemas/Trailers"
+          $ref: '#/components/schemas/Trailers'
         trailersToRemove:
-          $ref: "#/components/schemas/HeaderKeys"
+          $ref: '#/components/schemas/HeaderKeys'
         body:
-          $ref: "#/components/schemas/Body"
+          $ref: '#/components/schemas/Body'
+      example:
+        headersToReplace: null
+        headersToAdd:
+          content-type: application/xml
+          content-length: "40"
+        headersToRemove:
+        - key1
+        - key2
+        trailersToRemove: null
+        trailersToAdd:
+          trailer1-key: value
+        body: PGhlbGxvPndvcmxkPC9oZWxsbz4K
+        responseCode: 200
+        trailersToReplace: null
     InvocationContext:
       title: Invocation context
       type: object
@@ -199,7 +217,7 @@ components:
           example: /petstore/pet/1
         pathTemplate:
           type: string
-          example: /pet/{petID}
+          example: "/pet/{petID}"
         source:
           type: string
           example: 192.168.8.332:8080
@@ -210,17 +228,7 @@ components:
           type: string
           example: ""
         authenticationContext:
-          type: object
-          properties:
-            tokenType:
-              type: string
-              example: JWT
-            token:
-              type: string
-              example: xxxxxx-xxxx-xxxxxx-xxxx
-            keyType:
-              type: string
-              example: PRODUCTION
+          $ref: '#/components/schemas/InvocationContext_authenticationContext'
     InterceptorContext:
       title: Interceptor Context
       type: object
@@ -231,6 +239,7 @@ components:
       example:
         key1: value1
         key2: value2
+      x-schema-name: InterceptorContext
     DynamicEndpoint:
       title: Dynamic endpoint
       type: object
@@ -238,6 +247,8 @@ components:
         endpointName:
           type: string
           example: my-dynamic-endpoint
+      example:
+        endpointName: my-dynamic-endpoint
     Headers:
       title: Headers
       type: object
@@ -248,6 +259,7 @@ components:
       example:
         content-type: application/xml
         content-length: "40"
+      x-schema-name: Headers
     Trailers:
       title: Trailers
       type: object
@@ -257,18 +269,32 @@ components:
         Map (string-to-string dictionary) of key value pairs of trailers
       example:
         trailer1-key: value
+      x-schema-name: Trailers
     HeaderKeys:
       title: HeaderKeys
       type: array
-      items:
-        type: string
       description: |
         Array of header keys
       example:
-        - key1
-        - key2
+      - key1
+      - key2
+      items:
+        type: string
+      x-schema-name: HeaderKeys
     Body:
       type: string
       description: |
         Base64 encoded body
       example: PGhlbGxvPndvcmxkPC9oZWxsbz4K
+    InvocationContext_authenticationContext:
+      type: object
+      properties:
+        tokenType:
+          type: string
+          example: JWT
+        token:
+          type: string
+          example: xxxxxx-xxxx-xxxxxx-xxxx
+        keyType:
+          type: string
+          example: PRODUCTION
