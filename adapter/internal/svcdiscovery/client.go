@@ -195,18 +195,22 @@ func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]U
 
 	//add query parameters
 	q := req.URL.Query()
-	q.Add(datacenter, dc) //datacenter
-	//q.Add(passing, passingVal) // health checks passing only todo remove comment
+	if dc != "" {
+		q.Add(datacenter, dc) //datacenter
+	}
+
 	if nc != "" { //namespace, an enterprise feature
 		q.Add(namespace, nc)
 	}
 	req.URL.RawQuery = q.Encode()
+	//set headers
+	req.Header.Set(consulTokenHeader, c.aclToken)
+
 	response, errHTTP := c.client.Do(req)
 	if errHTTP != nil {
 		return []Upstream{}, errHTTP
 	}
-	//set headers
-	req.Header.Set(consulTokenHeader, c.aclToken)
+
 	var results []result
 	body, errRead := ioutil.ReadAll(response.Body)
 	if errRead != nil {
@@ -246,12 +250,12 @@ func (c ConsulClient) getMeshUpstreams(path string) ([]Upstream, error) {
 	q := req.URL.Query()
 	//q.Add(passing, passingVal) // health checks passing only
 	req.URL.RawQuery = q.Encode()
+	//set headers
+	req.Header.Set(consulTokenHeader, c.aclToken)
 	response, errHTTP := c.client.Do(req)
 	if errHTTP != nil {
 		return []Upstream{}, errHTTP
 	}
-	//set headers
-	req.Header.Set(consulTokenHeader, c.aclToken)
 	var result []result
 	body, errRead := ioutil.ReadAll(response.Body)
 	if errRead != nil {
