@@ -20,6 +20,7 @@ const (
 	extAuthzClusterName     string = "ext-authz"
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
+	tracingClusterName      string = "wso2_cc_trace"
 )
 
 const (

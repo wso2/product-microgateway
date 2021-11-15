@@ -39,11 +39,10 @@ import (
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/wso2/product-microgateway/adapter/config"
-	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 
 	"strings"
@@ -274,7 +273,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			clusterNameSand, resourceRequestInterceptor, resourceResponseInterceptor, organizationID))
 		routes = append(routes, routeP)
 	}
-	if mgwSwagger.GetAPIType() == mgw.WS {
+	if mgwSwagger.GetAPIType() == model.WS {
 		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, basePath, apiLevelClusterNameProd,
 			apiLevelClusterNameSand, apiRequestInterceptor, apiResponseInterceptor, organizationID))
 		routes = append(routes, routesP)
@@ -296,6 +295,29 @@ func getClusterName(epPrefix string, organizationID string, vHost string, swagge
 func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.InterceptEndpoint) (*clusterv3.Cluster, []*corev3.Address, error) {
 	logger.LoggerOasparser.Debug("creating a lua cluster ", endpoint.ClusterName)
 	return processEndpoints(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout, endpoint.EndpointCluster.Endpoints[0].Basepath)
+}
+
+// CreateTracingCluster creates a cluster definition for router's tracing server.
+func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
+	epCluster := &model.EndpointCluster{
+		Endpoints: []model.Endpoint{
+			{
+				Host:    "",
+				URLType: "http",
+				Port:    uint32(80),
+			},
+		},
+	}
+	epAddr := conf.Envoy.Tracing.Address
+	epPath := conf.Envoy.Tracing.Endpoint
+	epPort := conf.Envoy.Tracing.Port
+	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
+
+	epCluster.Endpoints[0].Host = epAddr
+	epCluster.Endpoints[0].Port = uint32(epPort)
+	epCluster.Endpoints[0].Basepath = epPath
+
+	return processEndpoints(tracingClusterName, epCluster, nil, epTimeout, epPath)
 }
 
 // processEndpoints creates cluster configuration. AddressConfiguration, cluster name and
@@ -613,11 +635,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			Value: true,
 		},
 	}
-	if apiType == mgw.WS {
+	if apiType == model.WS {
 		decorator = &routev3.Decorator{
 			Operation: endpointBasepath,
 		}
-	} else if apiType == mgw.HTTP || apiType == mgw.WEBHOOK {
+	} else if apiType == model.HTTP || apiType == model.WEBHOOK {
 		decorator = &routev3.Decorator{
 			Operation: resourcePath,
 		}
@@ -1045,7 +1067,7 @@ func generateRegex(fullpath string) string {
 
 func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 	var upgradeConfig []*routev3.RouteAction_UpgradeConfig
-	if apiType == mgw.WS {
+	if apiType == model.WS {
 		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
 			UpgradeType: "websocket",
 			Enabled:     &wrappers.BoolValue{Value: true},
@@ -1156,7 +1178,7 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 // getMaxStreamDuration configures a maximum duration for a websocket route.
 func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration {
 	var maxStreamDuration *routev3.RouteAction_MaxStreamDuration = nil
-	if apiType == mgw.WS {
+	if apiType == model.WS {
 		maxStreamDuration = &routev3.RouteAction_MaxStreamDuration{
 			MaxStreamDuration: &durationpb.Duration{
 				Seconds: 60 * 60 * 24,
@@ -1168,7 +1190,7 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 
 func getDefaultResourceMethods(apiType string) []string {
 	var defaultResourceMethods []string = nil
-	if apiType == mgw.WS {
+	if apiType == model.WS {
 		defaultResourceMethods = []string{"GET"}
 	}
 	return defaultResourceMethods

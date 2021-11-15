@@ -92,6 +92,8 @@ var (
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
 	envoyListenerConfigMap map[string][]*listenerv3.Listener      // GW-Label -> Listener Configuration map
 	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // GW-Label -> Routes Configuration map
+	envoyClusterConfigMap  map[string][]*clusterv3.Cluster        // GW-Label -> Global Cluster Configuration map
+	envoyEndpointConfigMap map[string][]*corev3.Address           // GW-Label -> Global Endpoint Configuration map
 
 	// Common Enforcer Label as map key
 	enforcerConfigMap                map[string][]types.Resource
@@ -151,6 +153,8 @@ func init() {
 	envoyUpdateVersionMap = make(map[string]int64)
 	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
+	envoyClusterConfigMap = make(map[string][]*clusterv3.Cluster)
+	envoyEndpointConfigMap = make(map[string][]*corev3.Address)
 
 	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
 	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map
@@ -760,8 +764,17 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 		// If the routesConfig exists, the listener exists too
 		oasParser.UpdateRoutesConfig(routesConfig, vhostToRouteArrayMap)
 	}
+	clusterArray = append(clusterArray, envoyClusterConfigMap[label]...)
+	endpointArray = append(endpointArray, envoyEndpointConfigMap[label]...)
 	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listenerArray, routesConfig)
 	return endpoints, clusters, listeners, routeConfigs, apis
+}
+
+// GenerateGlobalClusters generates the globally available clusters and endpoints.
+func GenerateGlobalClusters(label string) {
+	clusters, endpoints := oasParser.GetGlobalClusters()
+	envoyClusterConfigMap[label] = clusters
+	envoyEndpointConfigMap[label] = endpoints
 }
 
 //use UpdateXdsCacheWithLock to avoid race conditions
