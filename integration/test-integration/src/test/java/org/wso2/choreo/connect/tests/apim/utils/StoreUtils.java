@@ -64,12 +64,29 @@ public class StoreUtils {
 
     public static String generateUserAccessToken(String apimServiceURLHttps, String applicationId, User user,
                                                  RestAPIStoreImpl storeRestClient) throws CCTestException {
-        ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId, storeRestClient);
+        ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId,
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for the " +
                 "Applications Registration event to be received by the CC");
         return StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 applicationKeyDTO.getConsumerKey(), applicationKeyDTO.getConsumerSecret(),
                 new String[]{"PRODUCTION"}, user, storeRestClient);
+    }
+
+    public static String generateUserAccessTokenProduction(String apimServiceURLHttps, String applicationId, User user,
+                                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
+        return generateUserAccessToken(apimServiceURLHttps, applicationId, user, storeRestClient);
+    }
+
+    public static String generateUserAccessTokenSandbox(String apimServiceURLHttps, String applicationId, User user,
+                                                 RestAPIStoreImpl storeRestClient) throws CCTestException {
+        ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId,
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.SANDBOX, storeRestClient);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for the " +
+                "Applications Registration event to be received by the CC");
+        return StoreUtils.generateUserAccessToken(apimServiceURLHttps,
+                applicationKeyDTO.getConsumerKey(), applicationKeyDTO.getConsumerSecret(),
+                new String[]{"SANDBOX"}, user, storeRestClient);
     }
 
     /**
@@ -140,7 +157,8 @@ public class StoreUtils {
     public static AppWithConsumerKey createApplicationWithKeys(Application app, RestAPIStoreImpl storeRestClient)
             throws CCTestException {
         String applicationId = createApplication(app, storeRestClient);
-        ApplicationKeyDTO applicationKeyDTO = generateKeysForApp(applicationId, storeRestClient);
+        ApplicationKeyDTO applicationKeyDTO = generateKeysForApp(applicationId,
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
         return new AppWithConsumerKey(applicationId, applicationKeyDTO.getConsumerKey(),
                 applicationKeyDTO.getConsumerSecret());
     }
@@ -171,21 +189,22 @@ public class StoreUtils {
      * @return an ApplicationKeyDTO object containing Consumer key and Secret
      * @throws CCTestException if an error occurs while generating keys
      */
-    public static ApplicationKeyDTO generateKeysForApp(String appId, RestAPIStoreImpl storeRestClient) throws CCTestException {
+    public static ApplicationKeyDTO generateKeysForApp(String appId,
+                                                       ApplicationKeyGenerateRequestDTO.KeyTypeEnum keyType,
+                                                       RestAPIStoreImpl storeRestClient) throws CCTestException {
         ArrayList<String> grantTypes = new ArrayList<>();
         grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.PASSWORD);
         grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.CLIENT_CREDENTIAL);
         ApplicationKeyDTO applicationKeyDTO;
         try {
             applicationKeyDTO = storeRestClient.generateKeys(appId,
-                    TestConstant.DEFAULT_TOKEN_VALIDITY_TIME, "",
-                    ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION,
-                    null, grantTypes);
+                    TestConstant.DEFAULT_TOKEN_VALIDITY_TIME, "", keyType, null, grantTypes);
         } catch (ApiException e) {
             throw new CCTestException("Error while generating consumer keys from APIM Store", e);
         }
         return applicationKeyDTO;
     }
+
 
     public static String getSubscriptionInfoString(String apiId, String applicationId, String tier) {
         return "API_Id:" + apiId + " Application_Id:" + applicationId + " Tier:" + tier;

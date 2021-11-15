@@ -38,12 +38,16 @@ public class CcWithBackendTlsAndCorsDisabled {
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt", null);
+        ApictlUtils.createProject("intercept_request_openAPI.yaml", "intercept_request_petstore", "backend_tls.crt", null);
+        ApictlUtils.createProject("intercept_response_openAPI.yaml", "intercept_response_petstore", "backend_tls.crt", null);
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null, null);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
 
         ApictlUtils.deployAPI("backend_tsl_petstore", "test");
+        ApictlUtils.deployAPI("intercept_request_petstore", "test");
+        ApictlUtils.deployAPI("intercept_response_petstore", "test");
         ApictlUtils.deployAPI("cors_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
     }

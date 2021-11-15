@@ -28,11 +28,11 @@
 
 [enforcer.throttling]
   enableGlobalEventPublishing = true
-  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
+  jmsConnectionProviderURL = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
   [enforcer.throttling.publisher]
     username = "admin"
     password = "$env{tm_admin_pwd}"
-    [[enforcer.throttling.publisher.urlGroup]]
+    [[enforcer.throttling.publisher.URLGroup]]
       receiverURLs = ["tcp://apim:9611"]
       authURLs = ["ssl://apim:9711"]
 
@@ -62,7 +62,7 @@
 
 [controlPlane]
   enabled = true
-  serviceUrl = "https://apim:9443/"
+  serviceURL = "https://apim:9443/"
   username = "admin"
   password = "$env{cp_admin_pwd}"
   environmentLabels = ["Default"]

@@ -60,9 +60,9 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	// apiFiles represents zipped API files fetched from API Manager
 	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
 	// Read deployments from deployment.json file
-	deploymentDescriptor, err := sync.ReadDeployments(zipReader)
+	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader)
 	if err != nil {
-		logger.LoggerSync.Errorf("Error occured while reading deploymnt.json file %v", err.Error())
+		logger.LoggerSync.Error("Error occured while reading root files ", err)
 		return err
 	}
 
@@ -100,7 +100,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
@@ -134,6 +134,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	skipSSL := conf.ControlPlane.SkipSSLVerification
 	retryInterval := conf.ControlPlane.RetryInterval
 	truststoreLocation := conf.Adapter.Truststore.Location
+	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 	//finalEnvs contains the actual envrionments that the adapter should update
 	var finalEnvs []string
 	if len(configuredEnvs) > 0 {
@@ -161,7 +162,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	c := make(chan sync.SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
 	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-		sync.RuntimeArtifactEndpoint, true, nil)
+		sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut)
 	for {
 		data := <-c
 		logger.LoggerSync.Debug("Receiving data for an environment")
@@ -180,7 +181,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true)
+				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)
 		}
 	}
 

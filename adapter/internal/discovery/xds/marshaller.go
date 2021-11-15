@@ -110,22 +110,23 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	restServer := &enforcer.RestServer{
-		Enable: config.Enforcer.RestServer.Enable,
+		Enable: config.Enforcer.RestServer.Enabled,
 	}
 
 	filters := []*enforcer.Filter{}
 
 	for _, filterConfig := range config.Enforcer.Filters {
 		filter := &enforcer.Filter{
-			ClassName: filterConfig.ClassName,
-			Position:  filterConfig.Position,
+			ClassName:        filterConfig.ClassName,
+			Position:         filterConfig.Position,
+			ConfigProperties: filterConfig.ConfigProperties,
 		}
 		filters = append(filters, filter)
 	}
 
 	return &enforcer.Config{
 		JwtGenerator: &enforcer.JWTGenerator{
-			Enable:                config.Enforcer.JwtGenerator.Enable,
+			Enable:                config.Enforcer.JwtGenerator.Enabled,
 			Encoding:              config.Enforcer.JwtGenerator.Encoding,
 			ClaimDialect:          config.Enforcer.JwtGenerator.ClaimDialect,
 			ConvertDialect:        config.Enforcer.JwtGenerator.ConvertDialect,

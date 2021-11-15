@@ -25,6 +25,11 @@ public final class EndpointClusterProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_api_EndpointClusterConfig_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_wso2_discovery_api_TimeoutConfig_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_wso2_discovery_api_TimeoutConfig_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_wso2_discovery_api_RetryConfig_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -43,14 +48,16 @@ public final class EndpointClusterProto {
       "api/Endpoint.proto\"x\n\017EndpointCluster\022*\n" +
       "\004urls\030\001 \003(\0132\034.wso2.discovery.api.Endpoin" +
       "t\0229\n\006config\030\002 \001(\0132).wso2.discovery.api.E" +
-      "ndpointClusterConfig\"M\n\025EndpointClusterC" +
-      "onfig\0224\n\013retryConfig\030\001 \001(\0132\037.wso2.discov" +
-      "ery.api.RetryConfig\"1\n\013RetryConfig\022\r\n\005co" +
-      "unt\030\001 \001(\r\022\023\n\013statusCodes\030\002 \003(\rB~\n%org.ws" +
-      "o2.choreo.connect.discovery.apiB\024Endpoin" +
-      "tClusterProtoP\001Z=github.com/envoyproxy/g" +
-      "o-control-plane/wso2/discovery/api;apib\006" +
-      "proto3"
+      "ndpointClusterConfig\"\207\001\n\025EndpointCluster" +
+      "Config\0224\n\013retryConfig\030\001 \001(\0132\037.wso2.disco" +
+      "very.api.RetryConfig\0228\n\rtimeoutConfig\030\002 " +
+      "\001(\0132!.wso2.discovery.api.TimeoutConfig\"-" +
+      "\n\rTimeoutConfig\022\034\n\024routeTimeoutInMillis\030" +
+      "\001 \001(\r\"1\n\013RetryConfig\022\r\n\005count\030\001 \001(\r\022\023\n\013s" +
+      "tatusCodes\030\002 \003(\rB~\n%org.wso2.choreo.conn" +
+      "ect.discovery.apiB\024EndpointClusterProtoP" +
+      "\001Z=github.com/envoyproxy/go-control-plan" +
+      "e/wso2/discovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -68,9 +75,15 @@ public final class EndpointClusterProto {
     internal_static_wso2_discovery_api_EndpointClusterConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_EndpointClusterConfig_descriptor,
-        new java.lang.String[] { "RetryConfig", });
-    internal_static_wso2_discovery_api_RetryConfig_descriptor =
+        new java.lang.String[] { "RetryConfig", "TimeoutConfig", });
+    internal_static_wso2_discovery_api_TimeoutConfig_descriptor =
       getDescriptor().getMessageTypes().get(2);
+    internal_static_wso2_discovery_api_TimeoutConfig_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_wso2_discovery_api_TimeoutConfig_descriptor,
+        new java.lang.String[] { "RouteTimeoutInMillis", });
+    internal_static_wso2_discovery_api_RetryConfig_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_wso2_discovery_api_RetryConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_RetryConfig_descriptor,

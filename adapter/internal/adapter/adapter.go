@@ -24,6 +24,7 @@ import (
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	"github.com/wso2/product-microgateway/adapter/internal/api"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
@@ -224,7 +225,6 @@ func Run(conf *config.Config) {
 		go restserver.StartRestServer(conf)
 	}
 
-	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
 	gaEnabled := conf.GlobalAdapter.Enabled
 	if gaEnabled {
 		go ga.InitGAClient()
@@ -253,6 +253,11 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
 	} else {
+		err := api.ProcessMountedAPIProjects()
+		if err != nil {
+			logger.LoggerMgw.Error("Readiness probe is not set as local api artifacts processing has failed.")
+			return
+		}
 		// We need to deploy the readiness probe when eventhub is disabled
 		xds.DeployReadinessAPI(envs)
 		logger.LoggerMgw.Info("Event hub disabled and hence deployed readiness probe")
@@ -290,6 +295,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	skipSSL := conf.ControlPlane.SkipSSLVerification
 	retryInterval := conf.ControlPlane.RetryInterval
 	truststoreLocation := conf.Adapter.Truststore.Location
+	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)
@@ -297,10 +303,10 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Get API details.
 	if apiUUIDList == nil {
 		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.RuntimeArtifactEndpoint, true, nil)
+			sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut)
 	} else {
 		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.APIArtifactEndpoint, true, apiUUIDList)
+			sync.APIArtifactEndpoint, true, apiUUIDList, requestTimeOut)
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
@@ -323,7 +329,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
 			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true)
+				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.

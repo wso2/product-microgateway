@@ -30,19 +30,21 @@ public class CcWithJwtConfig {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ApictlUtils.createProject( "global_cors_openAPI.yaml", "global_cors_petstore",
-                null, null);
+        ApictlUtils.createProject( "global_cors_openAPI.yaml", "global_cors_petstore", null, null);
+        ApictlUtils.createProject( "timeout_global_openAPI.yaml", "timeout_global", null, null);
+        ApictlUtils.createProject( "timeout_endpoint_openAPI.yaml", "timeout_endpoint", null, null);
 
         ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").build();
         ccInstance.start();
-        //TODO: (SuKSW) Check why this fails
-//        Awaitility.await().pollDelay(20, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
-//                .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
+
         ApictlUtils.deployAPI("petstore", "test");
         ApictlUtils.deployAPI("global_cors_petstore", "test");
+        ApictlUtils.deployAPI("timeout_global", "test");
+        ApictlUtils.deployAPI("timeout_endpoint", "test");
+
         TimeUnit.SECONDS.sleep(5);
     }
 

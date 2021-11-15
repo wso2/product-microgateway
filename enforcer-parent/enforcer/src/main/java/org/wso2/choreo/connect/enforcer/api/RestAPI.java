@@ -87,46 +87,32 @@ public class RestAPI implements API {
         }
 
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
-
             if (securityScheme.getType() != null) {
-                String schemaType = securityScheme.getType();
+                String definitionName = securityScheme.getDefinitionName();
                 SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
-                securitySchemaConfig.setDefinitionName(securityScheme.getDefinitionName());
-                securitySchemaConfig.setType(schemaType);
+                securitySchemaConfig.setDefinitionName(definitionName);
+                securitySchemaConfig.setType(securityScheme.getType());
                 securitySchemaConfig.setName(securityScheme.getName());
                 securitySchemaConfig.setIn(securityScheme.getIn());
-                securitySchemeDefinitions.put(schemaType, securitySchemaConfig);
+                securitySchemeDefinitions.put(definitionName, securitySchemaConfig);
+                securitySchemeList.add(securityScheme.getType());
             }
-        }
-
-        for (String schemeName : securitySchemeDefinitions.keySet()) {
-            securitySchemeList.add(schemeName);
         }
 
         for (Resource res : api.getResourcesList()) {
-            Map<String, RetryConfig> resourceRetryConfigs = new HashMap();
+            Map<String, EndpointCluster> endpointClusterMap = new HashMap();
             EndpointCluster prodEndpointCluster = processEndpoints(res.getProductionEndpoints());
             EndpointCluster sandEndpointCluster = processEndpoints(res.getSandboxEndpoints());
             if (prodEndpointCluster != null) {
-                RetryConfig prodRetryConfig = prodEndpointCluster.getRetryConfig();
-                if (prodRetryConfig != null) {
-                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodRetryConfig);
-                }
+                endpointClusterMap.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodEndpointCluster);
             }
             if (sandEndpointCluster != null) {
-                RetryConfig sandRetryConfig = sandEndpointCluster.getRetryConfig();
-                if (sandRetryConfig != null) {
-                    resourceRetryConfigs.put(APIConstants.API_KEY_TYPE_SANDBOX, sandRetryConfig);
-                }
-            }
-
-            if (resourceRetryConfigs.isEmpty()) {
-                resourceRetryConfigs = null;
+                endpointClusterMap.put(APIConstants.API_KEY_TYPE_SANDBOX, sandEndpointCluster);
             }
 
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
-                resConfig.setRetryConfigs(resourceRetryConfigs);
+                resConfig.setEndpoints(endpointClusterMap);
                 resources.add(resConfig);
             }
         }
@@ -137,7 +123,7 @@ public class RestAPI implements API {
                             api.getEndpointSecurity().getProductionSecurityInfo()));
         }
         if (api.getEndpointSecurity().hasSandBoxSecurityInfo()) {
-            endpointSecurity.setProductionSecurityInfo(
+            endpointSecurity.setSandBoxSecurityInfo(
                     APIProcessUtils.convertProtoEndpointSecurity(
                             api.getEndpointSecurity().getSandBoxSecurityInfo()));
         }
@@ -176,6 +162,11 @@ public class RestAPI implements API {
                         rpcRetryConfig.getStatusCodesList().toArray(new Integer[0]));
                 endpointCluster.setRetryConfig(retryConfig);
             }
+            if (endpointClusterConfig.hasTimeoutConfig()) {
+                org.wso2.choreo.connect.discovery.api.TimeoutConfig timeoutConfig
+                        = endpointClusterConfig.getTimeoutConfig();
+                endpointCluster.setRouteTimeoutInMillis(timeoutConfig.getRouteTimeoutInMillis());
+            }
         }
         return endpointCluster;
     }
@@ -200,8 +191,9 @@ public class RestAPI implements API {
             }
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
-                responseObject.setMetaDataMap(requestContext.getMetadataMap());
             }
+            // set metadata for interceptors
+            responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
@@ -249,12 +241,14 @@ public class RestAPI implements API {
                 List<String> scopeList = new ArrayList<>(security.getScopesList());
                 securityMap.put(key, scopeList);
             }
-            if (security != null && key.equalsIgnoreCase(FilterUtils.
-                    getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+            if (security != null && FilterUtils.getAPIKeyDefinitionNames(securitySchemeDefinitions).contains(key)) {
+                securityMap.put(key, new ArrayList<>());
+            }
+            if (security != null && key.equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
                 securityMap.put(key, new ArrayList<>());
             }
         }));
-        resource.setSecuritySchemas(securityMap);
+     resource.setSecuritySchemas(securityMap);
         return resource;
     }
 
@@ -262,12 +256,12 @@ public class RestAPI implements API {
         // TODO : re-vist the logic with apim prototype implemetation
 
         AuthFilter authFilter = new AuthFilter();
-        authFilter.init(apiConfig);
+        authFilter.init(apiConfig, null);
         this.filters.add(authFilter);
 
         // enable throttle filter
         ThrottleFilter throttleFilter = new ThrottleFilter();
-        throttleFilter.init(apiConfig);
+        throttleFilter.init(apiConfig, null);
         this.filters.add(throttleFilter);
 
         loadCustomFilters(apiConfig);
@@ -296,7 +290,7 @@ public class RestAPI implements API {
                     continue;
                 }
                 Filter filter = filterImplMap.get(filterDTO.getClassName());
-                filter.init(apiConfig);
+                filter.init(apiConfig, filterDTO.getConfigProperties());
                 // Since the position starts from 1
                 this.filters.add(filterDTO.getPosition() - 1, filter);
             } else {

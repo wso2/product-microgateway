@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
+import org.wso2.choreo.connect.tests.util.ZipDir;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,15 @@ public class CcWithDefaultConf {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ccInstance = new CcInstance.Builder().build();
+        ApictlUtils.createProject( "openAPI_startup_zipped.yaml", "openAPI_startup_zipped",
+                null, null);
+        ApictlUtils.createProject( "openAPI_startup.yaml", "openAPI_startup", null, null);
+        ZipDir.createZipFile(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH + "openAPI_startup_zipped");
+        ccInstance = new CcInstance.Builder()
+                .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH +
+                        "openAPI_startup_zipped.zip")
+                .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH + "openAPI_startup")
+                .build();
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
@@ -53,9 +62,11 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml");
         ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
         ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3", null, null);
-        ApictlUtils.createProject( "timeout_openAPI.yaml", "apictl_timeout_v3", null, null);
         ApictlUtils.createProject( "malformed_endpoint_openAPI.yaml", "apictl_malformed_endpoint", null, null);
-        ApictlUtils.createProject( "retry_openAPI.yaml", "apictl_retry", null, null);
+        ApictlUtils.createProject( "retry_openAPI.yaml", "retry", null, null);
+        ApictlUtils.createProject( "intercept_request_openAPI.yaml", "intercept_request_default_setup_petstore", "backend_tls.crt", null);
+        ApictlUtils.createProject( "intercept_response_openAPI.yaml", "intercept_response_default_setup_petstore", "backend_tls.crt", null);
+        ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "circuit_breakers", null, null);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -68,8 +79,10 @@ public class CcWithDefaultConf {
         ApictlUtils.deployAPI("vhost1_petstore", "test");
         ApictlUtils.deployAPI("vhost2_petstore", "test");
         ApictlUtils.deployAPI("apictl_petstore_v3", "test");
-        ApictlUtils.deployAPI("apictl_timeout_v3", "test");
-        ApictlUtils.deployAPI("apictl_retry", "test");
+        ApictlUtils.deployAPI("retry", "test");
+        ApictlUtils.deployAPI("intercept_request_default_setup_petstore", "test");
+        ApictlUtils.deployAPI("intercept_response_default_setup_petstore", "test");
+        ApictlUtils.deployAPI("circuit_breakers", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

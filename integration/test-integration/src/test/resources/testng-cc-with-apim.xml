@@ -56,8 +56,11 @@
        <classes>
            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyQueryParamTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyAppLevelTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.RetryAndTimeoutTestCase"/>
        </classes>
    </test>
     <test name="all-events-received-via-eventhub" parallel="false">

@@ -45,7 +45,7 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/choreo-connect-adapter:1.0.0-alpha-SNAPSHOT
+          image: wso2/choreo-connect-adapter:1.0.0-beta-SNAPSHOT
           imagePullPolicy: IfNotPresent
           env:
             - name: ADAPTER_PRIVATE_KEY_PATH
@@ -58,8 +58,8 @@ spec:
               value: "admin"
           resources:
             requests:
-              memory: "250Mi"
-              cpu: "250m"
+              memory: "500Mi"
+              cpu: "500m"
             limits:
               memory: "500Mi"
               cpu: "500m"

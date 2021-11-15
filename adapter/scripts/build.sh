@@ -20,7 +20,7 @@ export MGW_HOME=${PWD}/../resources
 # TODO: (VirajSalaka) remove this after go version migration
 # For unit tests
 export CC_ADAPTER_SERVER_PORT=9401
-export CC_Enforcer_JwtGenerator_Enable=true
+export CC_Enforcer_JwtGenerator_Enabled=true
 export CC_GlobalAdapter_RetryInterval=25
 export CC_Analytics_Adapter_bufferSizeBytes=32768
 export CC_Enforcer_JwtIssuer_ValidityPeriod=1800

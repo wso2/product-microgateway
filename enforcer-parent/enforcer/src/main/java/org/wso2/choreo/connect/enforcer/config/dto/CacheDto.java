@@ -18,15 +18,13 @@
 
 package org.wso2.choreo.connect.enforcer.config.dto;
 
-import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
-
 /**
  * Holds the configurations related to caching used for token validation.
  */
 public class CacheDto {
-    private boolean enabled = ConfigDefaults.CACHE_ENABLED_VALUE;
-    private int maximumSize = ConfigDefaults.CACHE_MAX_SIZE_VALUE;
-    private int expiryTime = ConfigDefaults.CACHE_EXPIRY_TIME_VALUE;
+    private boolean enabled;
+    private int maximumSize;
+    private int expiryTime;
 
     public boolean isEnabled() {
         return enabled;

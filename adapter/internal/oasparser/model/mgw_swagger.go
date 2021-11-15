@@ -29,6 +29,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 // MgwSwagger represents the object structure holding the information related to the
@@ -87,13 +88,24 @@ type Endpoint struct {
 
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster
 type EndpointConfig struct {
-	RetryConfig *RetryConfig `mapstructure:"retryConfig"`
+	RetryConfig     *RetryConfig     `mapstructure:"retryConfig"`
+	TimeoutInMillis uint32           `mapstructure:"timeoutInMillis"`
+	CircuitBreakers *CircuitBreakers `mapstructure:"circuitBreakers"`
 }
 
 // RetryConfig holds the parameters for retries done by cc to the EndpointCluster
 type RetryConfig struct {
 	Count       int32    `mapstructure:"count"`
 	StatusCodes []uint32 `mapstructure:"statusCodes"`
+}
+
+// CircuitBreakers holds the parameters for retries done by cc to the EndpointCluster
+type CircuitBreakers struct {
+	MaxConnections     int32 `mapstructure:"maxConnections"`
+	MaxRequests        int32 `mapstructure:"maxRequests"`
+	MaxPendingRequests int32 `mapstructure:"maxPendingRequests"`
+	MaxRetries         int32 `mapstructure:"maxRetries"`
+	MaxConnectionPools int32 `mapstructure:"maxConnectionPools"`
 }
 
 // SecurityScheme represents the structure of an security scheme.
@@ -270,53 +282,55 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	return nil
 }
 
-// SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
-// it is not populated by SetXWso2Extensions
-func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandboxEndpoints []Endpoint,
-	sandEndpointInfos []EndpointInfo) error {
+// SetEnvProperties sets environment specific values
+func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
+	var productionUrls []Endpoint
+	var sandboxUrls []Endpoint
 
-	swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxEndpoints, LoadBalance)
-	if sandEndpointInfos != nil && len(sandEndpointInfos) > 0 {
-		retryCount := sandEndpointInfos[0].Config.RetryTimeOut
-		if retryCount != "" {
-			count, err := strconv.ParseInt(retryCount, 10, 32)
-			if err != nil {
-				return err
-			}
-			conf, _ := config.ReadConfigs()
-			retryConfig := &RetryConfig{
-				Count:       int32(count),
-				StatusCodes: conf.Envoy.Upstream.Retry.StatusCodes,
-			}
-			swagger.sandboxEndpoints.Config.RetryConfig = retryConfig
+	if envProps.APIConfigs.ProductionEndpoint != "" {
+		logger.LoggerOasparser.Infof("Production endpoints are found in env properties for %v : %v",
+			swagger.title, swagger.version)
+		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.ProductionEndpoint)
+		if err == nil {
+			productionUrls = append(productionUrls, *endpoint)
+		} else {
+			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties for %v : %v",
+				swagger.title, swagger.version)
 		}
 	}
-	return nil
+
+	if len(productionUrls) > 0 {
+		logger.LoggerOasparser.Infof("Production endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
+		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
+	}
+
+	if envProps.APIConfigs.SandBoxEndpoint != "" {
+		logger.LoggerOasparser.Infof("Sandbox endpoints are found in env properties %v : %v", swagger.title, swagger.version)
+		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.SandBoxEndpoint)
+		if err == nil {
+			sandboxUrls = append(sandboxUrls, *endpoint)
+		} else {
+			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties %v : %v",
+				swagger.title, swagger.version)
+		}
+	}
+
+	if len(sandboxUrls) > 0 {
+		logger.LoggerOasparser.Infof("Sandbox endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
+		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls, LoadBalance)
+	}
 }
 
-// SetXWso2ProductionEndpointMgwSwagger set the MgwSwagger object with the productionEndpoint when
+// SetSandboxEndpoints set the MgwSwagger object with the SandboxEndpoint when
 // it is not populated by SetXWso2Extensions
-func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionEndpoints []Endpoint,
-	prodEndpointInfos []EndpointInfo) error {
+func (swagger *MgwSwagger) SetSandboxEndpoints(sandboxEndpoints []Endpoint) {
+	swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxEndpoints, LoadBalance)
+}
 
+// SetProductionEndpoints set the MgwSwagger object with the productionEndpoint when
+// it is not populated by SetXWso2Extensions
+func (swagger *MgwSwagger) SetProductionEndpoints(productionEndpoints []Endpoint) {
 	swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints, LoadBalance)
-	if prodEndpointInfos != nil && len(prodEndpointInfos) > 0 {
-		retryCount := prodEndpointInfos[0].Config.RetryTimeOut
-		if retryCount != "" {
-			count, err := strconv.ParseInt(retryCount, 10, 32)
-			if err != nil {
-				return err
-			}
-			conf, _ := config.ReadConfigs()
-			statusCodes := conf.Envoy.Upstream.Retry.StatusCodes
-			retryConfig := &RetryConfig{
-				Count:       int32(count),
-				StatusCodes: statusCodes,
-			}
-			swagger.productionEndpoints.Config.RetryConfig = retryConfig
-		}
-	}
-	return nil
 }
 
 func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {
@@ -385,6 +399,45 @@ func (swagger *MgwSwagger) GetXWso2Endpoints() ([]*EndpointCluster, error) {
 		return endpointClusters, errors.New("error while parsing x-wso2-endpoints extension")
 	}
 	return endpointClusters, nil
+}
+
+// SetEndpointsConfig set configs for Endpoints sent by api.yaml
+func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo) error {
+	if endpointInfos == nil || len(endpointInfos) == 0 {
+		return nil
+	}
+	if endpointCluster.Config == nil {
+		endpointCluster.Config = &EndpointConfig{}
+	}
+	// Set timeout
+	if endpointCluster.Config.TimeoutInMillis == 0 {
+		timeout := endpointInfos[0].Config.ActionDuration
+		if timeout != "" {
+			routeTimeout, err := strconv.ParseInt(timeout, 10, 32)
+			if err != nil {
+				return err
+			}
+			endpointCluster.Config.TimeoutInMillis = uint32(routeTimeout)
+		}
+	}
+
+	// retry
+	if endpointCluster.Config.RetryConfig == nil {
+		retryCount := endpointInfos[0].Config.RetryTimeOut
+		if retryCount != "" {
+			count, err := strconv.ParseInt(retryCount, 10, 32)
+			if err != nil {
+				return err
+			}
+			conf, _ := config.ReadConfigs()
+			retryConfig := &RetryConfig{
+				Count:       int32(count),
+				StatusCodes: conf.Envoy.Upstream.Retry.StatusCodes,
+			}
+			endpointCluster.Config.RetryConfig = retryConfig
+		}
+	}
+	return nil
 }
 
 func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
@@ -489,7 +542,7 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	return err
 }
 
-func (retryConfig *RetryConfig) validateRetryConfig() error {
+func (retryConfig *RetryConfig) validateRetryConfig() {
 	conf, _ := config.ReadConfigs()
 	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxRetryCount
 	if retryConfig.Count > int32(maxConfigurableCount) || retryConfig.Count < 0 {
@@ -510,7 +563,6 @@ func (retryConfig *RetryConfig) validateRetryConfig() error {
 		validStatusCodes = append(validStatusCodes, conf.Envoy.Upstream.Retry.StatusCodes...)
 	}
 	retryConfig.StatusCodes = validStatusCodes
-	return nil
 }
 
 func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName string) error {
@@ -526,13 +578,15 @@ func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName str
 		}
 
 		if endpointCluster.Config != nil {
+			// Validate retry
 			if endpointCluster.Config.RetryConfig != nil {
-				err = endpointCluster.Config.RetryConfig.validateRetryConfig()
-				if err != nil {
-					logger.LoggerOasparser.Errorf("Invalide retry config for %s endpoints. %v",
-						endpointName, err)
-					return err
-				}
+				endpointCluster.Config.RetryConfig.validateRetryConfig()
+			}
+			// Validate timeout
+			conf, _ := config.ReadConfigs()
+			maxTimeoutInMillis := conf.Envoy.Upstream.Timeouts.MaxRouteTimeoutInSeconds * 1000
+			if endpointCluster.Config.TimeoutInMillis > maxTimeoutInMillis {
+				endpointCluster.Config.TimeoutInMillis = maxTimeoutInMillis
 			}
 		}
 	}
@@ -585,7 +639,6 @@ func getEndpoints(vendorExtensions map[string]interface{}, endpointName string) 
 					var endpointConfig EndpointConfig
 					err := parser.Decode(configMap, &endpointConfig)
 					if err != nil {
-						println(err.Error())
 						return nil, errors.New("Invalid schema for advanceEndpointConfig in " + endpointName)
 					}
 					endpointCluster.Config = &endpointConfig

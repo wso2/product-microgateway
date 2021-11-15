@@ -184,17 +184,17 @@ public class WebSocketAPI implements API {
         this.filters.add(corsFilter);
         // Auth Filter
         AuthFilter authFilter = new AuthFilter();
-        authFilter.init(apiConfig);
+        authFilter.init(apiConfig, null);
         this.filters.add(authFilter);
         // Throttle Filter if throttling is enabled
         if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
             ThrottleFilter throttleFilter = new ThrottleFilter();
-            throttleFilter.init(apiConfig);
+            throttleFilter.init(apiConfig, null);
             this.filters.add(throttleFilter);
         }
         // WebSocketMetadata filter
         WebSocketMetaDataFilter metaDataFilter = new WebSocketMetaDataFilter();
-        metaDataFilter.init(apiConfig);
+        metaDataFilter.init(apiConfig, null);
         this.filters.add(metaDataFilter);
     }
 
@@ -204,7 +204,7 @@ public class WebSocketAPI implements API {
         // WebSocket analytics filter
         if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
             WebSocketThrottleFilter webSocketThrottleFilter = new WebSocketThrottleFilter();
-            webSocketThrottleFilter.init(apiConfig);
+            webSocketThrottleFilter.init(apiConfig, null);
             this.upgradeFilters.add(webSocketThrottleFilter);
         }
     }

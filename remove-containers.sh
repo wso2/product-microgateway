@@ -16,7 +16,7 @@
 # -----------------------------------------------------------------------
 
 # Just to assist developers by removing all the containers.
-micro_gw_version=1.0.0-alpha-SNAPSHOT
+micro_gw_version=1.0.0-beta-SNAPSHOT
 
 docker kill "$(docker ps -a | grep wso2/choreo-connect-enforcer:$micro_gw_version | awk '{print $1}')"
 docker rm "$(docker ps -a | grep wso2/choreo-connect-enforcer:$micro_gw_version | awk '{print $1}')"

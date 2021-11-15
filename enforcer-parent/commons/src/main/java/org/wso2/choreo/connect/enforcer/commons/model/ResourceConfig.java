@@ -31,7 +31,7 @@ public class ResourceConfig {
     private Map<String, List<String>> securitySchemas = new HashMap(); // security_schema_name -> schemas
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
-    private Map<String, RetryConfig> retryConfigs; // prod or sandbox -> retry config
+    private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
 
     /**
      * ENUM to hold http operations.
@@ -115,17 +115,18 @@ public class ResourceConfig {
     }
 
     /**
-     * Get the resource level retry config map for the corresponding Resource
+     * Get the resource level endpoint cluster map for the corresponding Resource
      * where the map-key is either "PRODUCTION" or "SANDBOX".
      *
-     * @return resource level retry config map
+     * @return resource level endpoint cluster map
      */
-    public Map<String, RetryConfig> getRetryConfigs() {
-        return retryConfigs;
+    public Map<String, EndpointCluster> getEndpoints() {
+        return endpoints;
     }
 
-    public void setRetryConfigs(Map<String, RetryConfig> retryConfigs) {
-        this.retryConfigs = retryConfigs;
+    public void setEndpoints(Map<String, EndpointCluster> endpoints) {
+        this.endpoints = endpoints;
     }
+
 }
 

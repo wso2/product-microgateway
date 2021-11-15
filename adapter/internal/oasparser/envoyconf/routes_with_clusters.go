@@ -109,14 +109,15 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 				serviceDiscoveryString)
 		}
 	} else {
-		logger.LoggerOasparser.Warn("API level Producton endpoints are not defined")
+		logger.LoggerOasparser.Warnf("API level Producton endpoints are not defined for %v : %v", apiTitle, apiVersion)
 	}
 	// check API level sandbox endpoints availble
 	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
 		if apiLevelEndpointProd != nil && apiEndpointBasePath != apiLevelEndpointSand.Endpoints[0].Basepath {
-			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
-				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
+			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath %v is different compared to API level production endpoint basepath %v "+
+				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiLevelEndpointSand.Endpoints[0].Basepath, apiEndpointBasePath, apiTitle,
+				apiVersion)
 		} else {
 			apiLevelClusterNameSand = strings.TrimSpace(organizationID + "_" + sandClustersConfigNamePrefix + vHost + "_" +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
@@ -137,7 +138,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	apiRequestInterceptor, err := mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor)
 	// if lua filter exists on api level, add cluster
 	if err == nil && apiRequestInterceptor.Enable {
-		logger.LoggerOasparser.Debugln("API level request interceptors found " + mgwSwagger.GetID())
+		logger.LoggerOasparser.Debugf("API level request interceptors found for %v : %v", apiTitle, apiVersion)
 		apiRequestInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		cluster, addresses := CreateLuaCluster(interceptorCerts, apiRequestInterceptor)
@@ -148,7 +149,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	apiResponseInterceptor, err = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor)
 	// if lua filter exists on api level, add cluster
 	if err == nil && apiResponseInterceptor.Enable {
-		logger.LoggerOasparser.Debugln("API level response interceptors found for " + mgwSwagger.GetID())
+		logger.LoggerOasparser.Debugf("API level response interceptors found for for %v : %v", apiTitle, apiVersion)
 		apiResponseInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		cluster, addresses := CreateLuaCluster(interceptorCerts, apiResponseInterceptor)
@@ -161,6 +162,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		logger.LoggerOasparser.Errorf("Error while parsing x-wso2-endpoints in API %v %v : %v", apiTitle, apiVersion, err.Error())
 	}
 	if len(xWso2Endpoints) > 0 {
+		logger.LoggerOasparser.Debugf("x-wso2-endpoints clusters found for %v : %v", apiTitle, apiVersion)
 		for _, endpointCluster := range xWso2Endpoints {
 			epClusterName := strings.TrimSpace(organizationID + "_" + endpointCluster.EndpointName + "_" +
 				xWso2EPClustersConfigNamePrefix + vHost + "_" +
@@ -256,7 +258,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 
 		reqInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor)
 		if err == nil && reqInterceptorVal.Enable {
-			logger.LoggerOasparser.Debugln("Resource level request interceptors found for " + resource.GetID())
+			logger.LoggerOasparser.Debugf("Resource level request interceptors found for %v:%v-%v", apiTitle, apiVersion, resource.GetPath())
 			resourceRequestInterceptor = reqInterceptorVal
 			resourceRequestInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
@@ -267,7 +269,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		}
 		respInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor)
 		if err == nil && respInterceptorVal.Enable {
-			logger.LoggerOasparser.Debugln("Resource level response interceptors found for " + resource.GetID())
+			logger.LoggerOasparser.Debugf("Resource level response interceptors found for %v:%v-%v"+apiTitle, apiVersion, resource.GetPath())
 			resourceResponseInterceptor = respInterceptorVal
 			resourceResponseInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
@@ -277,12 +279,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		}
 
 		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, vHost, endpointBasepath, clusterRefProd,
-			clusterRefSand, resourceRequestInterceptor, resourceResponseInterceptor))
+			clusterRefSand, resourceRequestInterceptor, resourceResponseInterceptor, organizationID))
 		routes = append(routes, routeP)
 	}
 	if mgwSwagger.GetAPIType() == mgw.WS {
 		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiEndpointBasePath, apilevelClusterProd.GetName(),
-			apilevelClusterSand.GetName(), apiRequestInterceptor, apiResponseInterceptor))
+			apilevelClusterSand.GetName(), apiRequestInterceptor, apiResponseInterceptor, organizationID))
 		routes = append(routes, routesP)
 	}
 	return routes, clusters, endpoints
@@ -383,6 +385,32 @@ func createCluster(clusterName string, clusterDetails *model.EndpointCluster, up
 		HealthChecks:           createHealthCheck(),
 		TransportSocketMatches: transportSocketMatches,
 	}
+
+	if clusterDetails.Config != nil && clusterDetails.Config.CircuitBreakers != nil {
+		config := clusterDetails.Config.CircuitBreakers
+		thresholds := &clusterv3.CircuitBreakers_Thresholds{}
+		if config.MaxConnections > 0 {
+			thresholds.MaxConnections = wrapperspb.UInt32(uint32(config.MaxConnections))
+		}
+		if config.MaxConnectionPools > 0 {
+			thresholds.MaxConnectionPools = wrapperspb.UInt32(uint32(config.MaxConnectionPools))
+		}
+		if config.MaxPendingRequests > 0 {
+			thresholds.MaxPendingRequests = wrapperspb.UInt32(uint32(config.MaxPendingRequests))
+		}
+		if config.MaxRequests > 0 {
+			thresholds.MaxRequests = wrapperspb.UInt32(uint32(config.MaxRequests))
+		}
+		if config.MaxRetries > 0 {
+			thresholds.MaxRetries = wrapperspb.UInt32(uint32(config.MaxRetries))
+		}
+		cluster.CircuitBreakers = &clusterv3.CircuitBreakers{
+			Thresholds: []*clusterv3.CircuitBreakers_Thresholds{
+				thresholds,
+			},
+		}
+	}
+
 	return &cluster, addresses
 }
 
@@ -611,14 +639,15 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		// read from contextExtensions map since, it is updated with correct values with conditions
 		// so, no need to change two places
 		iInvCtx := &interceptor.InvocationContext{
-			BasePath:        contextExtensions[basePathContextExtension],
-			Method:          contextExtensions[methodContextExtension],
-			APIName:         contextExtensions[apiNameContextExtension],
-			APIVersion:      contextExtensions[apiVersionContextExtension],
-			PathTemplate:    contextExtensions[pathContextExtension],
-			Vhost:           contextExtensions[vHostContextExtension],
-			ProdClusterName: contextExtensions[prodClusterNameContextExtension],
-			SandClusterName: contextExtensions[sandClusterNameContextExtension],
+			OrganizationID:   params.organizationID,
+			BasePath:         contextExtensions[basePathContextExtension],
+			SupportedMethods: contextExtensions[methodContextExtension],
+			APIName:          contextExtensions[apiNameContextExtension],
+			APIVersion:       contextExtensions[apiVersionContextExtension],
+			PathTemplate:     contextExtensions[pathContextExtension],
+			Vhost:            contextExtensions[vHostContextExtension],
+			ProdClusterName:  contextExtensions[prodClusterNameContextExtension],
+			SandClusterName:  contextExtensions[sandClusterNameContextExtension],
 		}
 		luaPerFilterConfig = lua.LuaPerRoute{
 			Override: &lua.LuaPerRoute_SourceCode{
@@ -658,8 +687,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           ptypes.DurationProto(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds * time.Second),
-				IdleTimeout:       ptypes.DurationProto(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds * time.Second),
+				Timeout:           ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
 	} else {
@@ -670,25 +699,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		}
 	}
 
-	if prodClusterName != "" && sandClusterName != "" {
-		headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
-			ClusterHeader: clusterHeaderName,
-		}
-		action.Route.ClusterSpecifier = headerBasedClusterSpecifier
-		logger.LoggerOasparser.Debug("adding cluster header")
-	} else if prodClusterName != "" {
-		directClusterSpecifier := &routev3.RouteAction_Cluster{
-			Cluster: prodClusterName,
-		}
-		action.Route.ClusterSpecifier = directClusterSpecifier
-		logger.LoggerOasparser.Debugf("adding cluster: %v", prodClusterName)
-	} else {
-		directClusterSpecifier := &routev3.RouteAction_Cluster{
-			Cluster: sandClusterName,
-		}
-		action.Route.ClusterSpecifier = directClusterSpecifier
-		logger.LoggerOasparser.Debugf("adding cluster: %v", sandClusterName)
+	headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
+		ClusterHeader: clusterHeaderName,
 	}
+	action.Route.ClusterSpecifier = headerBasedClusterSpecifier
+	logger.LoggerOasparser.Debug("added header based cluster")
 
 	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
@@ -1064,8 +1079,9 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 
 func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
 	prodClusterName string, sandClusterName string, requestInterceptor model.InterceptEndpoint,
-	responseInterceptor model.InterceptEndpoint) *routeCreateParams {
+	responseInterceptor model.InterceptEndpoint, organizationID string) *routeCreateParams {
 	params := &routeCreateParams{
+		organizationID:      organizationID,
 		title:               swagger.GetTitle(),
 		apiType:             swagger.GetAPIType(),
 		version:             swagger.GetVersion(),

@@ -19,6 +19,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
@@ -26,13 +27,19 @@ import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ExistingApiTestCase extends ApimBaseTest {
-    private static final String VHOST_API_ENDPOINT = "vhostApi1/1.0.0/pet/findByStatus";
+    private static final String API_NAME = "ExistingApi";
+    private static final String API_CONTEXT = "existing_api";
+    private static final String API_VERSION = "1.0.0";
+    private static final String APP_NAME = "ExistingApiApp";
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
@@ -40,14 +47,36 @@ public class ExistingApiTestCase extends ApimBaseTest {
     }
 
     @Test
-    public void testExistingApiWithSubscriptions() throws CCTestException {
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(VhostApimTestCase.APPLICATION_NAME);
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+    public void testExistingApiWithProdKey() throws Exception {
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
+        String accessToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
 
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
-        requestHeaders.put(HttpHeaderNames.HOST.toString(), "localhost");
-        VhostApimTestCase.testInvokeAPI(VHOST_API_ENDPOINT, requestHeaders, HttpStatus.SC_SUCCESS, ResponseConstants.RESPONSE_BODY);
+        Map<String, String> headers = new HashMap<>();
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        headers.put(HttpHeaderNames.HOST.toString(), "localhost");
+
+        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+                "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
+    }
+
+    @Test
+    public void testExistingApiWithSandboxKey() throws Exception {
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
+        String accessToken = StoreUtils.generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        headers.put(HttpHeaderNames.HOST.toString(), "localhost");
+
+        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+                "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
     }
 }

@@ -59,6 +59,11 @@ func NewReceiver() chan string {
 	return C
 }
 
+const (
+	//UnassignedAsDeprecated is used by the configurations which are deprecated.
+	UnassignedAsDeprecated string = "unassigned-as-deprecated"
+)
+
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
 // Note :
@@ -85,6 +90,8 @@ type adapter struct {
 	Keystore keystore
 	// Trusted Certificates
 	Truststore truststore
+	// ArtifactsDirectory is the FilePath where the api artifacts are mounted
+	ArtifactsDirectory string
 }
 
 // Envoy Listener Component related configurations.
@@ -100,10 +107,6 @@ type envoy struct {
 	Cors                             globalCors
 	Upstream                         envoyUpstream
 	Connection                       connection
-}
-type upstreamTimeout struct {
-	RouteTimeoutInSeconds     time.Duration
-	RouteIdleTimeoutInSeconds time.Duration
 }
 
 type connectionTimeouts struct {
@@ -154,8 +157,10 @@ type vhostMapping struct {
 }
 
 type consul struct {
-	// Enable whether consul service discovery should be enabled
+	// Deprecated: Use Enabled instead
 	Enable bool
+	// Enabled whether consul service discovery should be enabled
+	Enabled bool
 	// URL url of the consul client in format: http(s)://host:port
 	URL string
 	// PollInterval how frequently consul API should be polled to get updates (in seconds)
@@ -202,11 +207,17 @@ type upstreamTLS struct {
 	DisableSslVerification bool
 }
 
+type upstreamTimeout struct {
+	RouteTimeoutInSeconds     uint32
+	MaxRouteTimeoutInSeconds  uint32
+	RouteIdleTimeoutInSeconds uint32
+}
+
 type upstreamHealth struct {
-	Timeout            int32 `toml:"timeout"`
-	Interval           int32 `toml:"interval"`
-	UnhealthyThreshold int32 `toml:"unhealthyThreshold"`
-	HealthyThreshold   int32 `toml:"healthyThreshold"`
+	Timeout            int32
+	Interval           int32
+	UnhealthyThreshold int32
+	HealthyThreshold   int32
 }
 
 type upstreamRetry struct {
@@ -261,16 +272,20 @@ type throttlingConfig struct {
 	EnableQueryParamConditions         bool
 	EnableJwtClaimConditions           bool
 	JmsConnectionInitialContextFactory string
-	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
+	JmsConnectionProviderURL           string
+	// Deprecated: Use JmsConnectionProviderURL instead
+	JmsConnectionProviderURLDeprecated string `toml:"jmsConnectionProviderUrl"`
 	Publisher                          binaryPublisher
 }
 
 type binaryPublisher struct {
 	Username string
 	Password string
-	URLGroup []urlGroup `toml:"urlGroup"`
-	Pool     publisherPool
-	Agent    binaryAgent
+	URLGroup []urlGroup
+	// Deprecated: Use URLGroup instead
+	URLGroupDeprecated []urlGroup `toml:"urlGroup"`
+	Pool               publisherPool
+	Agent              binaryAgent
 }
 
 type urlGroup struct {
@@ -308,7 +323,9 @@ type binaryAgent struct {
 }
 
 type jwtGenerator struct {
+	// Deprecated: Use Enabled instead
 	Enable                bool
+	Enabled               bool
 	Encoding              string
 	ClaimDialect          string
 	ConvertDialect        bool
@@ -393,8 +410,10 @@ type APICtlUser struct {
 
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
-	Enabled                    bool
-	ServiceURL                 string `toml:"serviceUrl"`
+	Enabled    bool
+	ServiceURL string
+	// Deprecated: Use ServiceURL instead.
+	ServiceURLDeprecated       string `toml:"serviceUrl"`
 	Username                   string
 	Password                   string
 	SyncApisOnStartUp          bool
@@ -402,13 +421,18 @@ type controlPlane struct {
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters
+	HTTPClient                 httpClient
 }
 
 type globalAdapter struct {
-	Enabled           bool
-	ServiceURL        string `toml:"serviceUrl"`
-	LocalLabel        string
+	Enabled    bool
+	ServiceURL string
+	// Deprecated: Use ServiceURL instead.
+	ServiceURLDeprecated string `toml:"serviceUrl"`
+	LocalLabel           string
+	// Deprecated: Use OverrideHostName instead.
 	OverwriteHostName string
+	OverrideHostName  string
 	RetryInterval     time.Duration
 }
 
@@ -420,7 +444,9 @@ type brokerConnectionParameters struct {
 
 // Configuration for Enforcer admin rest api
 type restServer struct {
-	Enable bool
+	// Deprecated: Use Enabled Instead
+	Enable  bool
+	Enabled bool
 }
 
 // Enforcer admin credentials
@@ -430,6 +456,11 @@ type management struct {
 }
 
 type filter struct {
-	ClassName string
-	Position  int32
+	ClassName        string
+	Position         int32
+	ConfigProperties map[string]string
+}
+
+type httpClient struct {
+	RequestTimeOut time.Duration
 }

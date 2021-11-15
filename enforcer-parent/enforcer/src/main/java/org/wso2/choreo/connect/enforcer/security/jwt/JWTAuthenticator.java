@@ -229,7 +229,7 @@ public class JWTAuthenticator implements Authenticator {
                             securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
                                     getSandBoxSecurityInfo();
                         }
-                        if (securityInfo.isEnabled() &&
+                        if (securityInfo != null && securityInfo.isEnabled() &&
                                 APIConstants.AUTHORIZATION_HEADER_BASIC.
                                         equalsIgnoreCase(securityInfo.getSecurityType())) {
                             requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
@@ -276,7 +276,7 @@ public class JWTAuthenticator implements Authenticator {
 
                     AuthenticationContext authenticationContext = FilterUtils
                             .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
-                                    apiKeyValidationInfoDTO, endUserToken, true);
+                                    apiKeyValidationInfoDTO, endUserToken, jwtToken, true);
                     //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
                     if (claims.getClaim("keytype") != null) {
                         authenticationContext.setKeyType(claims.getClaim("keytype").toString());
@@ -304,6 +304,11 @@ public class JWTAuthenticator implements Authenticator {
     @Override
     public String getChallengeString() {
         return "Bearer realm=\"Choreo Connect\"";
+    }
+
+    @Override
+    public String getName() {
+        return "JWT";
     }
 
     private String retrieveAuthHeaderValue(RequestContext requestContext) {

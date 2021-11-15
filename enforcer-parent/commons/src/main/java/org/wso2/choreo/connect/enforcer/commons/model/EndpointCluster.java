@@ -24,6 +24,7 @@ import java.util.List;
 public class EndpointCluster {
     private List<String> urls;
     private RetryConfig retryConfig;
+    private Integer routeTimeoutInMillis;
 
     /**
      * @return URLs of the cluster
@@ -51,5 +52,19 @@ public class EndpointCluster {
      */
     public void setRetryConfig(RetryConfig retryConfig) {
         this.retryConfig = retryConfig;
+    }
+
+    /**
+     * @return Route timeout of the cluster
+     */
+    public Integer getRouteTimeoutInMillis() {
+        return routeTimeoutInMillis;
+    }
+
+    /**
+     * @param routeTimeoutInMillis Route timeout of the cluster
+     */
+    public void setRouteTimeoutInMillis(Integer routeTimeoutInMillis) {
+        this.routeTimeoutInMillis = routeTimeoutInMillis;
     }
 }

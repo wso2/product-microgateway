@@ -16,9 +16,46 @@
 
 package model
 
+import (
+	"encoding/json"
+	"errors"
+	"os"
+	"strings"
+
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"gopkg.in/yaml.v2"
+)
+
+const (
+	openAPIDir                 string = "Definitions"
+	openAPIFilename            string = "swagger."
+	apiYAMLFile                string = "api.yaml"
+	deploymentsYAMLFile        string = "deployment_environments.yaml"
+	apiJSONFile                string = "api.json"
+	endpointCertDir            string = "Endpoint-certificates"
+	interceptorCertDir         string = "Endpoint-certificates/interceptors"
+	crtExtension               string = ".crt"
+	pemExtension               string = ".pem"
+	apiTypeFilterKey           string = "type"
+	apiTypeYamlKey             string = "type"
+	lifeCycleStatus            string = "lifeCycleStatus"
+	securityScheme             string = "securityScheme"
+	endpointImplementationType string = "endpointImplementationType"
+	inlineEndpointType         string = "INLINE"
+	endpointSecurity           string = "endpoint_security"
+	production                 string = "production"
+	sandbox                    string = "sandbox"
+	zipExt                     string = ".zip"
+)
+
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
 	APIYaml             APIYaml
+	APIEnvProps         map[string]synchronizer.APIEnvProps
 	Deployments         []Deployment
 	OpenAPIJsn          []byte
 	UpstreamCerts       []byte
@@ -104,11 +141,11 @@ type APIYaml struct {
 					CustomParameters string `json:"customparameters,omitempty"`
 				} `json:"sandbox,omitempty"`
 			} `json:"endpoint_security,omitempty"`
-			RawProdEndpoints            interface{}    `json:"production_endpoints,omitempty"`
-			ProductionEndpoints         []EndpointInfo `json:"production_endpoint,omitempty"`
+			RawProdEndpoints            interface{} `json:"production_endpoints,omitempty"`
+			ProductionEndpoints         []EndpointInfo
 			ProductionFailoverEndpoints []EndpointInfo `json:"production_failovers,omitempty"`
 			RawSandboxEndpoints         interface{}    `json:"sandbox_endpoints,omitempty"`
-			SandBoxEndpoints            []EndpointInfo `json:"sandbox_endpoint,omitempty"`
+			SandBoxEndpoints            []EndpointInfo
 			SandboxFailoverEndpoints    []EndpointInfo `json:"sandbox_failovers,omitempty"`
 		} `json:"endpointConfig,omitempty"`
 	} `json:"data"`
@@ -118,6 +155,125 @@ type APIYaml struct {
 type EndpointInfo struct {
 	Endpoint string `json:"url,omitempty"`
 	Config   struct {
-		RetryTimeOut string `json:"retryTimeOut,omitempty"`
+		ActionDuration string `json:"actionDuration,omitempty"`
+		RetryTimeOut   string `json:"retryTimeOut,omitempty"`
 	} `json:"config,omitempty"`
+}
+
+// ValidateAPIType checks if the apiProject is properly assigned with the type.
+func (apiProject *ProjectAPI) ValidateAPIType() error {
+	var err error
+	if apiProject.APIYaml.Type == "" {
+		// If no api.yaml file is included in the zip folder, return with error.
+		err = errors.New("could not find api.yaml or api.json")
+		return err
+	} else if apiProject.APIType != HTTP && apiProject.APIType != WS && apiProject.APIType != WEBHOOK {
+		errMsg := "API type is not currently supported with Choreo Connect"
+		err = errors.New(errMsg)
+		return err
+	}
+	return nil
+}
+
+// ProcessFilesInsideProject process single file inside API Project and update the apiProject instance appropriately.
+func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, fileName string) (err error) {
+	newLineByteArray := []byte("\n")
+	if strings.Contains(fileName, deploymentsYAMLFile) {
+		loggers.LoggerAPI.Debug("Setting deployments of API")
+		deployments, err := parseDeployments(fileContent)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("Error occurred while parsing the deployment environments: %v %v",
+				fileName, err.Error())
+		}
+		apiProject.Deployments = deployments
+	}
+	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
+		loggers.LoggerAPI.Debugf("openAPI file : %v", fileName)
+		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
+		if conversionErr != nil {
+			loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
+			return conversionErr
+		}
+		apiProject.OpenAPIJsn = swaggerJsn
+		apiProject.APIType = HTTP
+	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
+		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
+		if !tlsutils.IsPublicCertificate(fileContent) {
+			loggers.LoggerAPI.Errorf("Provided interceptor certificate: %v is not in the PEM file format. ", fileName)
+			return errors.New("interceptor certificate Validation Error")
+		}
+		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, fileContent...)
+		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, newLineByteArray...)
+	} else if strings.Contains(fileName, endpointCertDir+string(os.PathSeparator)) &&
+		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
+		if !tlsutils.IsPublicCertificate(fileContent) {
+			loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", fileName)
+			// TODO: (VirajSalaka) Create standard error handling mechanism
+			return errors.New("certificate Validation Error")
+		}
+		apiProject.UpstreamCerts = append(apiProject.UpstreamCerts, fileContent...)
+		apiProject.UpstreamCerts = append(apiProject.UpstreamCerts, newLineByteArray...)
+	} else if (strings.Contains(fileName, apiYAMLFile) || strings.Contains(fileName, apiJSONFile)) &&
+		!strings.Contains(fileName, openAPIDir) {
+		loggers.LoggerAPI.Debugf("fileName : %v", fileName)
+		apiJsn, conversionErr := utills.ToJSON(fileContent)
+		if conversionErr != nil {
+			loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
+			return conversionErr
+		}
+		var apiYaml APIYaml
+		err = json.Unmarshal(apiJsn, &apiYaml)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
+			return err
+		}
+		apiYaml = PopulateEndpointsInfo(apiYaml)
+
+		err = VerifyMandatoryFields(apiYaml)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("%v", err)
+			return err
+		}
+
+		if apiYaml.Data.EndpointImplementationType == inlineEndpointType {
+			errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
+			loggers.LoggerAPI.Warnf(errmsg)
+			err = errors.New(errmsg)
+			return err
+		}
+		apiProject.APIYaml = apiYaml
+		ExtractAPIInformation(apiProject, apiYaml)
+	}
+	return nil
+}
+
+func parseDeployments(data []byte) ([]Deployment, error) {
+	// deployEnvsFromAPI represents deployments read from API Project
+	deployEnvsFromAPI := &DeploymentEnvironments{}
+	if err := yaml.Unmarshal(data, deployEnvsFromAPI); err != nil {
+		loggers.LoggerAPI.Errorf("Error parsing content of deployment environments: %v", err.Error())
+		return nil, err
+	}
+
+	deployments := make([]Deployment, 0, len(deployEnvsFromAPI.Data))
+	for _, deployFromAPI := range deployEnvsFromAPI.Data {
+		defaultVhost, exists, err := config.GetDefaultVhost(deployFromAPI.DeploymentEnvironment)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("Error reading default vhost of environment %v: %v",
+				deployFromAPI.DeploymentEnvironment, err.Error())
+			return nil, err
+		}
+		// if the environment is not configured, ignore it
+		if !exists {
+			continue
+		}
+
+		deployment := deployFromAPI
+		// if vhost is not defined with the API project use the default vhost from config
+		if deployFromAPI.DeploymentVhost == "" {
+			deployment.DeploymentVhost = defaultVhost
+		}
+		deployments = append(deployments, deployment)
+	}
+	return deployments, nil
 }

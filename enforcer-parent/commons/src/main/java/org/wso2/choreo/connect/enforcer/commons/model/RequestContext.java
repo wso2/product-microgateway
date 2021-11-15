@@ -34,6 +34,9 @@ import java.util.TreeMap;
  */
 public class RequestContext {
 
+    //constants
+    public static final String CLUSTER_HEADER = "x-wso2-cluster-header";
+
     private APIConfig matchedAPI;
     private String requestPath;
     private String requestMethod;
@@ -47,7 +50,6 @@ public class RequestContext {
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
     private String sandClusterHeader;
-    private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> addHeaders;
     private Map<String, String> metadataMap = new HashMap<>();
@@ -251,18 +253,6 @@ public class RequestContext {
     }
 
     /**
-     * This denotes that the router is performing header based routing.
-     *
-     * Returns true if both sandbox cluster header and prod cluster header is
-     * available.
-     *
-     * @return true if cluster-header is enabled.
-     */
-    public boolean isClusterHeaderEnabled() {
-        return clusterHeaderEnabled;
-    }
-
-    /**
      * If a certain header needs to be added/modified within the request from enforcer additionally,
      * those header-value pairs  should be added from here.
      *
@@ -431,14 +421,13 @@ public class RequestContext {
             requestContext.pathParameters = populatePathParameters(
                     matchedAPI.getBasePath(), requestPathTemplate, this.requestPath);
 
-            // Adapter assigns header based routing only if both type of endpoints are present.
-            if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
-                requestContext.clusterHeaderEnabled = true;
-            }
-
             if (this.webSocketFrameContext != null) {
                 requestContext.webSocketFrameContext = this.webSocketFrameContext;
             }
+
+            // sanitize wso2 added headers
+            // not allow client's to set cluster header manually
+            requestContext.removeHeaders.add(CLUSTER_HEADER);
 
             return requestContext;
         }

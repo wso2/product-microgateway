@@ -83,9 +83,11 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         return isAPIKey(apiKey);
     }
 
-    private String getAPIKeyAllowedIn(RequestContext requestContext) {
+    private String getAPIKeyAllowedIn(RequestContext requestContext, boolean isAppLevelAPIKeyRequest,
+                                      String apiKeyName) {
         String apiKeyLocation = "";
-        SecuritySchemaConfig securitySchemaConfig = FilterUtils.getAPIKeySchemeConfig(requestContext);
+        SecuritySchemaConfig securitySchemaConfig = FilterUtils.getAPIKeySchemeConfig(requestContext,
+                isAppLevelAPIKeyRequest, apiKeyName);
         if (securitySchemaConfig != null) {
             apiKeyLocation = securitySchemaConfig.getIn();
         }
@@ -102,8 +104,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             if (resourceConfig.getPath().equalsIgnoreCase(requestContext.getMatchedResourcePath().getPath()) &&
                     resourceConfig.getMethod().name().equalsIgnoreCase(requestContext.getRequestMethod())) {
                 Map<String, List<String>> resourceSecuritySchemes = resourceConfig.getSecuritySchemas();
-                if (resourceSecuritySchemes.containsKey(FilterUtils.
-                        getAPIKeyArbitraryName(securitySchemeDefinitions))) {
+                if (resourceSecuritySchemes.containsKey(APIConstants.API_SECURITY_API_KEY) ||
+                    getIsOASSecurityApplicable(securitySchemeDefinitions, resourceSecuritySchemes, requestContext)) {
                     isAPIKeyProtected = true;
                 }
             }
@@ -111,20 +113,51 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         return isAPIKeyProtected;
     }
 
+    private boolean getIsOASSecurityApplicable(Map<String, SecuritySchemaConfig> schemeMap,
+                                                       Map<String, List<String>> resourceSchemeMap,
+                                                       RequestContext requestContext) {
+        boolean isResourceSecurityApplicable = false;
+        for (SecuritySchemaConfig config : schemeMap.values()) {
+            if (config.getType().equals(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME) &&
+                    resourceSchemeMap.containsKey(config.getDefinitionName())) {
+                String apiKeyName = FilterUtils.getAPIKeyName(requestContext, false);
+                Map<String, String> headers = requestContext.getHeaders();
+                Map<String, String> queryParam = requestContext.getQueryParameters();
+                if (apiKeyName != null && config.getName().equalsIgnoreCase(apiKeyName) &&
+                        (headers.containsKey(apiKeyName) || queryParam.containsKey(apiKeyName))) {
+                    isResourceSecurityApplicable = true;
+                }
+            }
+        }
+        return isResourceSecurityApplicable;
+    }
+
     // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
-        String apiKeyName = FilterUtils.getAPIKeyName(requestContext);
+        boolean isAppLevelSecurityRequest = getIsAppLevelSecurityRequest(requestContext);
+        String apiKeyName = FilterUtils.getAPIKeyName(requestContext, isAppLevelSecurityRequest);
         String apiKey = "";
-        String apiKeyLocation = getAPIKeyAllowedIn(requestContext);
-        if (apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_HEADER)) {
+        String apiKeyLocation = getAPIKeyAllowedIn(requestContext, isAppLevelSecurityRequest, apiKeyName);
+        if (apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_HEADER) || isAppLevelSecurityRequest) {
             Map<String, String> headers = requestContext.getHeaders();
             apiKey = getAPIKeyFromMap(headers, apiKeyName);
         }
-        if (StringUtils.isEmpty(apiKey) && apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_QUERY)) {
+        if ((isAppLevelSecurityRequest && StringUtils.isEmpty(apiKey)) || (StringUtils.isEmpty(apiKey) &&
+                apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_QUERY))) {
             Map<String, String> queryParameters = requestContext.getQueryParameters();
             apiKey = getAPIKeyFromMap(queryParameters, apiKeyName);
         }
         return apiKey;
+    }
+
+    private boolean getIsAppLevelSecurityRequest(RequestContext requestContext) {
+        boolean isApplicationLevelSecurityRequest = false;
+        Map<String, SecuritySchemaConfig> securitySchemaConfigMap = requestContext.getMatchedAPI()
+                .getSecuritySchemeDefinitions();
+        if (securitySchemaConfigMap.containsKey(APIConstants.API_SECURITY_API_KEY)) {
+            isApplicationLevelSecurityRequest = true;
+        }
+        return isApplicationLevelSecurityRequest;
     }
 
     private String getAPIKeyFromMap(Map<String, String> requestMetaData, String apiKeyName) {
@@ -132,10 +165,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         if (requestMetaData.containsKey(apiKeyName)) {
             return requestMetaData.get(apiKeyName);
         }
-        if (StringUtils.isEmpty(apiKey)) {
-            if (requestMetaData.containsKey(APIConstants.API_SECURITY_API_KEY)) {
-                return  requestMetaData.get(apiKeyName);
-            }
+        if (StringUtils.isEmpty(apiKey) && requestMetaData.containsKey(APIConstants.API_SECURITY_API_KEY)) {
+            return  requestMetaData.get(apiKeyName);
         }
         return apiKey;
     }
@@ -258,7 +289,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
                 AuthenticationContext authenticationContext = FilterUtils
                         .generateAuthenticationContext(requestContext, tokenIdentifier, validationInfo,
-                                apiKeyValidationInfoDTO, endUserToken, false);
+                                apiKeyValidationInfoDTO, endUserToken, apiKey, false);
 
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
@@ -559,6 +590,11 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     @Override
     public String getChallengeString() {
         return "";
+    }
+
+    @Override
+    public String getName() {
+        return "API Key";
     }
 
     @Override

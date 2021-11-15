@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-alpha-SNAPSHOT</version>
+    <version>1.0.0-beta-SNAPSHOT</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>

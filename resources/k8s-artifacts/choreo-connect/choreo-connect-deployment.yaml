@@ -46,7 +46,7 @@ spec:
               name: log4j2-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/choreo-connect-enforcer:1.0.0-alpha-SNAPSHOT
+          image: wso2/choreo-connect-enforcer:1.0.0-beta-SNAPSHOT
           imagePullPolicy: IfNotPresent
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -70,7 +70,7 @@ spec:
             - name: XDS_MAX_RETRIES
               value: "3"
             - name: JAVA_OPTS
-              value: "-Dhttpclient.hostnameVerifier=AllowAll"
+              value: "-Dhttpclient.hostnameVerifier=AllowAll -Xms512m -Xmx512m -XX:MaxRAMFraction=2"
             - name: apim_admin_pwd
               value: "admin"
             - name: enforcer_admin_pwd
@@ -83,11 +83,11 @@ spec:
               value: ""
           resources:
             requests:
-              memory: "250Mi"
-              cpu: "250m"
+              memory: "1000Mi"
+              cpu: "1000m"
             limits:
-              memory: "500Mi"
-              cpu: "500m"
+              memory: "1000Mi"
+              cpu: "1000m"
           ports:
             - containerPort: 8081
             - containerPort: 9001
@@ -112,7 +112,7 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/choreo-connect-router:1.0.0-alpha-SNAPSHOT
+          image: wso2/choreo-connect-router:1.0.0-beta-SNAPSHOT
           imagePullPolicy: IfNotPresent
           env:
             - name: ROUTER_ADMIN_HOST
@@ -145,11 +145,11 @@ spec:
               value: "/home/wso2/security/truststore/mg.pem"
           resources:
             requests:
-              memory: "250Mi"
-              cpu: "250m"
+              memory: "500Mi"
+              cpu: "1000m"
             limits:
               memory: "500Mi"
-              cpu: "500m"
+              cpu: "1000m"
           ports:
             - containerPort: 9000
             - containerPort: 9095

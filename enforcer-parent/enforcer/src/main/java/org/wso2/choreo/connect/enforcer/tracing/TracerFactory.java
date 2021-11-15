@@ -65,8 +65,8 @@ public class TracerFactory {
 
         // Future tracer implementations can be initialized from here
         if (StringUtils.isEmpty(exporterType)) {
-            logger.warn("Tracer exporter type not defined, defaulting to Azure Trace Exporter");
-            exporterType = TracingConstants.AZURE_TRACE_EXPORTER;
+            logger.warn("Tracer exporter type not defined, defaulting to Jaeger Trace Exporter");
+            exporterType = TracingConstants.JAEGER_TRACE_EXPORTER;
         }
         if (exporterType.equalsIgnoreCase(TracingConstants.AZURE_TRACE_EXPORTER)) {
             this.tracer = AzureExporter.getInstance().initTracer(properties);

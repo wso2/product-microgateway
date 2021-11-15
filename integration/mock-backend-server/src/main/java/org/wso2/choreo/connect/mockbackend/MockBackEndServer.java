@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import java.util.Date;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,6 +73,13 @@ public class MockBackEndServer extends Thread {
                     true, true);
             securedMockBackEndServer.start();
             mtlsMockBackEndServer.start();
+        }
+        if (Arrays.asList(args).contains("-interceptor-svc-enabled")) {
+            MockInterceptorServer mockInterceptorServer = new MockInterceptorServer(
+                    Constants.INTERCEPTOR_STATUS_SERVER_PORT,
+                    Constants.MTLS_INTERCEPTOR_HANDLER_SERVER_PORT
+            );
+            mockInterceptorServer.start();
         }
     }
 
@@ -207,20 +216,41 @@ public class MockBackEndServer extends Thread {
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
-            httpServer.createContext(context + "/timeout70", exchange -> {
+            // For Timeout tests
+            httpServer.createContext(context + "/delay-17", exchange -> {
                 try {
-                    logger.info("Sleeping 70s...");
-                    Thread.sleep(70000);
+                    logger.info("Sleeping 17s...");
+                    Thread.sleep(17000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
-            httpServer.createContext(context + "/timeout15", exchange -> {
+            httpServer.createContext(context + "/delay-8", exchange -> {
                 try {
-                    logger.info("Sleeping 15s...");
-                    Thread.sleep(15000);
+                    logger.info("Sleeping 8s...");
+                    Thread.sleep(8000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/delay-5", exchange -> {
+                try {
+                    logger.info("Sleeping 5s...");
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/delay-4", exchange -> {
+                try {
+                    logger.info("Sleeping 4s...");
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -259,6 +289,15 @@ public class MockBackEndServer extends Thread {
                     respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
                 }
             });
+            httpServer.createContext(context + "/req-cb", exchange -> {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Error occurred while thread sleep", e);
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
             httpServer.createContext(context + "/headers", exchange -> {
                 JSONObject responseJSON = new JSONObject();
                 exchange.getRequestHeaders().forEach((key,values) -> {
@@ -279,6 +318,13 @@ public class MockBackEndServer extends Thread {
                 byte[] response = responseJSON.toString().getBytes();
                 respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+
+            // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor tests.
+            // sent request headers in response headers <- this is because in interceptor tests it is required to test
+            //                                             response flow headers to interceptor service
+            // sent request body in response body
+            httpServer.createContext(context + "/echo", Utils::echo);
+
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {
@@ -298,7 +344,7 @@ public class MockBackEndServer extends Thread {
         httpServer.stop(0);
     }
 
-    private SSLContext getSslContext() throws Exception {
+    private static SSLContext getSslContext() throws Exception {
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
         // initialise the keystore

@@ -1,8 +1,10 @@
       - "5006:5006"
   mockBackend:
     image: wso2/choreo-connect-mock-backend:latest
-    command: java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockBackEndServer -tls-enabled
+    command: java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockBackEndServer -tls-enabled -interceptor-svc-enabled
     ports:
+      - "2370:2370"
+      - "2371:2371" #Added this port for test debug purposes
       - "2383:2383"
       - "2399:2399"
     links:

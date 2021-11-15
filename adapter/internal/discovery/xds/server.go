@@ -48,6 +48,7 @@ import (
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 var (
@@ -257,6 +258,13 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		environments = []string{config.DefaultGatewayName}
 	}
 
+	var apiEnvProps synchronizer.APIEnvProps
+
+	// TODO(amali) under the assumption vhost has one environment at the moment
+	if apiEnvPropsV, found := apiProject.APIEnvProps[environments[0]]; found {
+		apiEnvProps = apiEnvPropsV
+	}
+
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
 		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
@@ -280,6 +288,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
+	mgwSwagger.SetEnvProperties(apiEnvProps)
 	mgwSwagger.SetID(apiYaml.ID)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
@@ -288,21 +297,26 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	if (mgwSwagger.GetProdEndpoints() == nil || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/") &&
 		len(apiProject.ProductionEndpoints) > 0 {
-		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiProject.ProductionEndpoints,
-			apiYaml.EndpointConfig.ProductionEndpoints)
+		mgwSwagger.SetProductionEndpoints(apiProject.ProductionEndpoints)
+	}
+
+	if mgwSwagger.GetProdEndpoints() != nil {
+		mgwSwagger.GetProdEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.ProductionEndpoints)
 	}
 
 	if (mgwSwagger.GetSandEndpoints() == nil || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/") &&
 		len(apiProject.SandboxEndpoints) > 0 {
+		mgwSwagger.SetSandboxEndpoints(apiProject.SandboxEndpoints)
+	}
 
-		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiProject.SandboxEndpoints,
-			apiYaml.EndpointConfig.SandBoxEndpoints)
+	if mgwSwagger.GetSandEndpoints() != nil {
+		mgwSwagger.GetSandEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.SandBoxEndpoints)
 	}
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
 		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s",
-			apiYaml.Name, apiYaml.Name, organizationID)
+			apiYaml.Name, apiYaml.Version, organizationID)
 		return nil, validationErr
 	}
 

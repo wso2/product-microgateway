@@ -34,6 +34,7 @@ import (
 	"strings"
 	"time"
 
+	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/pkg/auth"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
@@ -47,10 +48,13 @@ const (
 	// Authorization represent the authorization header string.
 	Authorization            string = "Authorization"
 	deploymentDescriptorFile string = "deployments.json"
+	envPropsFile             string = "env_properties.json"
 	// RuntimeArtifactEndpoint represents the /runtime-artifacts endpoint.
 	RuntimeArtifactEndpoint string = "internal/data/v1/runtime-artifacts"
 	// APIArtifactEndpoint represents the /retrieve-api-artifacts endpoint.
 	APIArtifactEndpoint string = "internal/data/v1/retrieve-api-artifacts"
+	// httpTimeout is for connection timeout of httpClient in seconds
+	httpTimeout time.Duration = 30
 )
 
 // FetchAPIs pulls the API artifact calling to the API manager
@@ -58,7 +62,7 @@ const (
 // returns a byte slice of that ZIP file.
 func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL string,
 	userName string, password string, skipSSL bool, truststoreLocation string,
-	resourceEndpoint string, sendType bool, apiUUIDList []string) {
+	resourceEndpoint string, sendType bool, apiUUIDList []string, requestTimeOut time.Duration) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
 	respSyncAPI := SyncAPIResponse{}
 	var (
@@ -99,6 +103,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	// Configuring the http client
 	client := &http.Client{
 		Transport: tr,
+		Timeout:   requestTimeOut * time.Second,
 	}
 
 	// Populating the payload body with API UUID list
@@ -193,7 +198,8 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 
 // RetryFetchingAPIs function keeps retrying to fetch APIs from runtime-artifact endpoint.
 func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName string, password string, skipSSL bool,
-	truststoreLocation string, retryInterval time.Duration, data SyncAPIResponse, endpoint string, sendType bool) {
+	truststoreLocation string, retryInterval time.Duration, data SyncAPIResponse, endpoint string, sendType bool,
+	requestTimeOut time.Duration) {
 	go func(d SyncAPIResponse) {
 		// Retry fetching from control plane after a configured time interval
 		if retryInterval == 0 {
@@ -204,13 +210,16 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName strin
 		time.Sleep(retryInterval * time.Second)
 		logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
 		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-			endpoint, sendType, nil)
+			endpoint, sendType, nil, requestTimeOut)
 	}(data)
 }
 
-// ReadDeployments function reads the deployment.json file inside the root zip.
-func ReadDeployments(reader *zip.Reader) (*DeploymentDescriptor, error) {
+// ReadRootFiles function reads following files inside the root zip
+// deployment.json
+// env_properties.json
+func ReadRootFiles(reader *zip.Reader) (*DeploymentDescriptor, map[string]map[string]APIEnvProps, error) {
 	deploymentDescriptor := &DeploymentDescriptor{}
+	apiEnvProps := make(map[string]map[string]APIEnvProps)
 	// Read the .zip files within the root apis.zip
 	for _, file := range reader.File {
 		// Open deployment descriptor file
@@ -218,21 +227,72 @@ func ReadDeployments(reader *zip.Reader) (*DeploymentDescriptor, error) {
 			logger.LoggerSync.Debugf("Start reading %v file", deploymentDescriptorFile)
 			f, err := file.Open()
 			if err != nil {
-				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
-				return deploymentDescriptor, err
+				logger.LoggerSync.Error("Error reading deployment descriptor: ", err)
+				return deploymentDescriptor, apiEnvProps, err
 			}
 			data, err := ioutil.ReadAll(f)
 			_ = f.Close() // Close the file here (without defer)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
-				return deploymentDescriptor, err
+				logger.LoggerSync.Error("Error reading deployment descriptor: ", err)
+				return deploymentDescriptor, apiEnvProps, err
 			}
 			logger.LoggerSync.Debugf("Parsing content of deployment descriptor, content: %s", string(data))
 			if err = json.Unmarshal(data, deploymentDescriptor); err != nil {
-				logger.LoggerSync.Errorf("Error parsing JSON content of deployment descriptor: %v", err)
-				return deploymentDescriptor, err
+				logger.LoggerSync.Error("Error parsing JSON content of deployment descriptor: ", err)
+				return deploymentDescriptor, apiEnvProps, err
+			}
+		} else if strings.EqualFold(file.Name, envPropsFile) {
+			logger.LoggerSync.Debugf("Start reading %v file", envPropsFile)
+			f, err := file.Open()
+			if err != nil {
+				logger.LoggerSync.Error("Error reading environment specific properties: ", err)
+				return deploymentDescriptor, apiEnvProps, err
+			}
+			data, err := ioutil.ReadAll(f)
+			_ = f.Close() // Close the file here (without defer)
+			if err != nil {
+				logger.LoggerSync.Error("Error reading environment specific properties: ", err)
+				return deploymentDescriptor, apiEnvProps, err
+			}
+			logger.LoggerSync.Debugf("Parsing content of environment specific properties, content: %s", string(data))
+			if apiEnvProps, err = parseEnvProps(data); err != nil {
+				logger.LoggerSync.Errorf("Error occurred while parsing environment specific properties : %v : %v",
+					file.Name, err.Error())
+				return deploymentDescriptor, apiEnvProps, err
 			}
 		}
 	}
-	return deploymentDescriptor, nil
+	return deploymentDescriptor, apiEnvProps, nil
+}
+
+func parseEnvProps(data []byte) (map[string]map[string]APIEnvProps, error) {
+	var envPropsFile map[string]interface{}
+	envPropsMap := make(map[string]map[string]APIEnvProps)
+	if err := json.Unmarshal(data, &envPropsFile); err != nil {
+		logger.LoggerSync.Error("Error parsing Environment specific values: ", err)
+		return nil, err
+	}
+
+	if apisData, found := envPropsFile["apis"]; found {
+		if apis, ok := apisData.(map[string]interface{}); ok {
+			for apiUUID, apiData := range apis {
+				apiProps := make(map[string]APIEnvProps)
+				if api, ok := apiData.(map[string]interface{}); ok {
+					var envProps APIEnvProps
+					for envLabel, envData := range api {
+						if err := parser.Decode(envData, &envProps); err != nil {
+							logger.LoggerSync.Error("Error parsing environment specific values: ", err)
+							return nil, err
+						}
+						apiProps[envLabel] = envProps
+					}
+				}
+				envPropsMap[apiUUID] = apiProps
+			}
+			return envPropsMap, nil
+		}
+		logger.LoggerSync.Error("Wrong format given for parsing environment specific values")
+		return nil, errors.New("wrong format given for parsing environment specific values")
+	}
+	return nil, nil
 }

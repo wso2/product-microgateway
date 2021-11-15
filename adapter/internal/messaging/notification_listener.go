@@ -102,14 +102,14 @@ func handleAzureNotification() {
 	}
 }
 
-func processNotificationEvent (conf *config.Config, notification *msg.EventNotification) error {
+func processNotificationEvent(conf *config.Config, notification *msg.EventNotification) error {
 	var eventType string
 	var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
 	if err != nil {
 		if _, ok := err.(base64.CorruptInputError); ok {
 			logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
 		}
-		logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v. " +
+		logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v. "+
 			"Hence dropping the event", err)
 		return err
 	}
@@ -274,19 +274,21 @@ func handleApplicationEvents(data []byte, eventType string) {
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
 			TimeStamp: applicationRegistrationEvent.TimeStamp, ApplicationUUID: applicationRegistrationEvent.ApplicationUUID}
 
-		if isLaterEvent(applicationKeyMappingTimeStampMap, fmt.Sprint(applicationRegistrationEvent.ApplicationID),
+		applicationKeyMappingReference := applicationKeyMapping.ConsumerKey + ":" + applicationKeyMapping.KeyManager
+
+		if isLaterEvent(applicationKeyMappingTimeStampMap, fmt.Sprint(applicationKeyMappingReference),
 			applicationRegistrationEvent.TimeStamp) {
 			return
 		}
 
 		if strings.EqualFold(removeApplicationKeyMapping, eventType) {
-			delete(eh.ApplicationKeyMappingMap, applicationKeyMapping.ApplicationUUID)
-			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationID %s is removed.",
-				applicationKeyMapping.ApplicationUUID)
+			delete(eh.ApplicationKeyMappingMap, applicationKeyMappingReference)
+			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationKeyMappingReference %s is removed.",
+				applicationKeyMappingReference)
 		} else {
-			eh.ApplicationKeyMappingMap[applicationKeyMapping.ApplicationUUID] = &applicationKeyMapping
-			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationID %s is added.",
-				applicationKeyMapping.ApplicationUUID)
+			eh.ApplicationKeyMappingMap[applicationKeyMappingReference] = &applicationKeyMapping
+			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationKeyMappingReference %s is added.",
+				applicationKeyMappingReference)
 		}
 
 		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(eh.ApplicationKeyMappingMap))
@@ -445,7 +447,7 @@ func belongsToTenant(tenantDomain string) bool {
 func parseNotificationJSONEvent(data []byte, notification *msg.EventNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling " +
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling "+
 			"notification event data %v. Hence dropping the event", unmarshalErr)
 	}
 	return unmarshalErr

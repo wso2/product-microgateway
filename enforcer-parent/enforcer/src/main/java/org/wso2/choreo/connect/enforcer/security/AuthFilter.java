@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
+import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -51,7 +53,7 @@ public class AuthFilter implements Filter {
     private static final Logger log = LogManager.getLogger(AuthFilter.class);
 
     @Override
-    public void init(APIConfig apiConfig) {
+    public void init(APIConfig apiConfig, Map<String, String> configProperties) {
         initializeAuthenticators(apiConfig);
     }
 
@@ -128,6 +130,7 @@ public class AuthFilter implements Filter {
                 canAuthenticated = true;
                 AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
                 if (authenticateResponse.isAuthenticated() && !authenticateResponse.isContinueToNextAuthenticator()) {
+                    setInterceptorAuthContextMetadata(authenticator, requestContext);
                     return true;
                 }
             }
@@ -176,48 +179,32 @@ public class AuthFilter implements Filter {
         String keyType = authContext.getKeyType();
         if (StringUtils.isEmpty(authContext.getKeyType())) {
             keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
-        } 
+        }
 
-        // Header needs to be set only if the relevant cluster is available for the resource and the key type is
-        // matched.
-        if (requestContext.isClusterHeaderEnabled()) {
-            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
-                        requestContext.getProdClusterHeader());
-                addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
-            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
-                requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
-                        requestContext.getSandClusterHeader());
-                addRetryHeaderConfig(requestContext, APIConstants.API_KEY_TYPE_SANDBOX);
-            } else {
-                if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            "Production key offered to the API with no production endpoint");
-                } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            "Sandbox key offered to the API with no sandbox endpoint");
-                }
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid key type.");
-            }
+        if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) &&
+                !StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
+            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                    requestContext.getProdClusterHeader());
+            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
+            addRouterHttpHeaders(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
+        } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) &&
+                !StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
+            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                    requestContext.getSandClusterHeader());
+            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
+            addRouterHttpHeaders(requestContext, APIConstants.API_KEY_TYPE_SANDBOX);
         } else {
-            // Even if the header flag is false, it is required to check if the relevant resource has a defined cluster
-            // based on environment. 
-            // If not it should provide authentication error.
-            // Always at least one of the cluster header values should be set.
-            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) && StringUtils
-                    .isEmpty(requestContext.getProdClusterHeader())) {
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Production key offered to the API with no production endpoint");
-            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) && StringUtils
-                    .isEmpty(requestContext.getSandClusterHeader())) {
+                        "Production key offered to an API with no production endpoint");
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Sandbox key offered to the API with no sandbox endpoint");
-            }   
+                        "Sandbox key offered to an API with no sandbox endpoint");
+            }
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid key type.");
         }
     }
 
@@ -231,27 +218,45 @@ public class AuthFilter implements Filter {
         return challengeString.toString().trim();
     }
 
-    private void addRetryHeaderConfig(RequestContext requestContext, String keyType) {
+    private void addRouterHttpHeaders(RequestContext requestContext, String keyType) {
+        // for both HTTP and WS
+        if (requestContext.getMatchedAPI().getEndpoints().containsKey(keyType)) {
+            addAPILevelRetryConfigHeaders(requestContext, keyType);
+            addAPILevelTimeoutHeaders(requestContext, keyType);
+        }
+
         for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getResources()) {
             if (resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
-                if (resourceConfig.getRetryConfigs() != null) {
-                    Map<String, RetryConfig> retryConfigMap = resourceConfig.getRetryConfigs();
-                    if (retryConfigMap.containsKey(keyType)) {
-                        addRetryConfigHeaders(requestContext, retryConfigMap.get(keyType));
-                        return;
-                        // If a retry config is defined at resource level for this specific key,
-                        // don't consider API level retry configs.
+                if (resourceConfig.getEndpoints().containsKey(keyType)) {
+                    EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
+
+                    // Apply resource level retry headers
+                    if (endpointCluster.getRetryConfig() != null) {
+                        addRetryConfigHeaders(requestContext, endpointCluster.getRetryConfig());
+                    }
+                    // Apply resource level timeout headers
+                    if (endpointCluster.getRouteTimeoutInMillis() != null) {
+                        addTimeoutHeaders(requestContext, endpointCluster.getRouteTimeoutInMillis());
                     }
                 }
-                break; // check only in the requested path
+                return; // check only in the requested path
             }
         }
-        Map<String, EndpointCluster> apiLevelEndpoints = requestContext.getMatchedAPI().getEndpoints();
-        if (apiLevelEndpoints.containsKey(keyType)) {
-            RetryConfig apiLevelRetryConfig = apiLevelEndpoints.get(keyType).getRetryConfig();
-            if (apiLevelRetryConfig != null) {
-                addRetryConfigHeaders(requestContext, apiLevelRetryConfig);
-            }
+    }
+
+    private void addAPILevelRetryConfigHeaders(RequestContext requestContext, String keyType) {
+        RetryConfig apiLevelRetryConfig =
+                requestContext.getMatchedAPI().getEndpoints().get(keyType).getRetryConfig();
+        if (apiLevelRetryConfig != null) {
+            addRetryConfigHeaders(requestContext, apiLevelRetryConfig);
+        }
+    }
+
+    private void addAPILevelTimeoutHeaders(RequestContext requestContext, String keyType) {
+        Integer apiLevelTimeout =
+                requestContext.getMatchedAPI().getEndpoints().get(keyType).getRouteTimeoutInMillis();
+        if (apiLevelTimeout != null) {
+            addTimeoutHeaders(requestContext, apiLevelTimeout);
         }
     }
 
@@ -262,5 +267,21 @@ public class AuthFilter implements Filter {
                 Integer.toString(retryConfig.getCount()));
         requestContext.addOrModifyHeaders(AdapterConstants.HttpRouterHeaders.RETRIABLE_STATUS_CODES,
                 StringUtils.join(retryConfig.getStatusCodes(), ","));
+    }
+
+    private void addTimeoutHeaders(RequestContext requestContext, Integer routeTimeoutInMillis) {
+        requestContext.addOrModifyHeaders(AdapterConstants.HttpRouterHeaders.UPSTREAM_REQ_TIMEOUT_MS,
+                Integer.toString(routeTimeoutInMillis));
+    }
+
+    private void setInterceptorAuthContextMetadata(Authenticator authenticator, RequestContext requestContext) {
+        // add auth context to metadata, lua script will add it to the auth context of the interceptor
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN_TYPE,
+                Objects.toString(authenticator.getName(), ""));
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN,
+                Objects.toString(authContext.getRawToken(), ""));
+        requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,
+                Objects.toString(authContext.getKeyType(), ""));
     }
 }

@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
   version: 1.0.5
-  title: Swagger Petstore BackendTLS
+  title: Swagger Petstore for API key in header
   termsOfService: 'http://swagger.io/terms/'
   contact:
     email: apiteam@swagger.io
@@ -54,33 +54,9 @@ paths:
         '404':
           description: Pet not found
       security:
-        - api_key: []
-  /jwtheader:
-    get:
-      summary: Get the status of the backend header
-      description: Identify backend JWT header
-      operationId: jwtheader
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid status value
-      security:
-        - petstore_auth: [ ]
-  /jwttoken:
-    get:
-      summary: Get the backend jwt token
-      description: Identify backend JWT token
-      operationId: jwttoken
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid status value
-      security:
-        - petstore_auth: [ ]
+        - APIKeyAuth: []
 securityDefinitions:
-  api_key:
+  APIKeyAuth:
     type: apiKey
     name: x-api-key
     in: header

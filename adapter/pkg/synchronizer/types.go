@@ -54,12 +54,24 @@ type APIDeployment struct {
 	Environments []GatewayLabel `json:"environments"`
 	// These properties are used by global Adapter
 	OrganizationID string `json:"organizationId"`
-	APIContext string `json:"apiContext"`
-	Version string `json:"version"`
+	APIContext     string `json:"apiContext"`
+	Version        string `json:"version"`
 }
 
 // GatewayLabel represents gateway environment name and VHost of an API project
 type GatewayLabel struct {
 	Name  string `json:"name"`
 	Vhost string `json:"vhost"`
+}
+
+// APIConfigs represents env properties belongs to the API
+type APIConfigs struct {
+	ProductionEndpoint string `mapstructure:"production_endpoint,omitempty"`
+	SandBoxEndpoint    string `mapstructure:"sandbox_endpoint,omitempty"`
+}
+
+// APIEnvProps represents env properties
+type APIEnvProps struct {
+	EnvID      string     `mapstructure:"envId,omitempty"`
+	APIConfigs APIConfigs `mapstructure:"configs,omitempty"`
 }

@@ -6,6 +6,11 @@
   exposeHeaders = ["X-Custom-Header"]
   allowCredentials = true
 
+[router.upstream.timeouts]
+  routeTimeoutInSeconds = 15
+  maxRouteTimeoutInSeconds = 60
+  routeIdleTimeoutInSeconds = 300
+
 [enforcer]
 [enforcer.jwtGenerator]
   enable = true
@@ -17,6 +22,8 @@
 [[enforcer.filters]]
     className = "org.wso2.choreo.connect.tests.CustomFilter"
     position = 3
+    [enforcer.filters.configProperties]
+        fooKey = "fooVal"
  
 [enforcer.security]
 [[enforcer.security.tokenService]]

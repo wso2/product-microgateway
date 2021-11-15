@@ -79,7 +79,7 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
                 throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
                         GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
             }
-            return FilterUtils.generateAuthenticationContext(requestContext);
+            return FilterUtils.generateAuthenticationContextForUnsecured(requestContext);
         } finally {
             if (Utils.tracingEnabled()) {
                 unsecuredApiAuthenticatorSpanScope.close();
@@ -91,6 +91,11 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
     @Override
     public String getChallengeString() {
         return "";
+    }
+
+    @Override
+    public String getName() {
+        return "Unsecured";
     }
 
     @Override public int getPriority() {

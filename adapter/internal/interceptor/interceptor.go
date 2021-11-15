@@ -53,14 +53,15 @@ type RequestInclusions struct {
 // InvocationContext represents static details of the invocation context of a request for the resource path
 // runtime details such as actual path will be populated from the lua script and set in the invocation context
 type InvocationContext struct {
-	BasePath        string
-	Method          string
-	APIName         string
-	APIVersion      string
-	PathTemplate    string
-	Vhost           string
-	ProdClusterName string
-	SandClusterName string
+	OrganizationID   string
+	BasePath         string
+	SupportedMethods string
+	APIName          string
+	APIVersion       string
+	PathTemplate     string
+	Vhost            string
+	ProdClusterName  string
+	SandClusterName  string
 }
 
 var (
@@ -74,8 +75,9 @@ local resp_flow = {invocationContext={{.RespFlowInclude.InvocationContext}}, req
 {{else}}local resp_flow = {}{{end}} {{/* if resp_flow disabled no need req info in resp path */}}
 {{if or .ReqFlowInclude.InvocationContext .RespFlowInclude.InvocationContext}}
 local inv_context = {
+	organizationId = "{{.Context.OrganizationID}}",
 	basePath = "{{.Context.BasePath}}",
-	method = "{{.Context.Method}}",
+	supportedMethods = "{{.Context.SupportedMethods}}",
 	apiName = "{{.Context.APIName}}",
 	apiVersion = "{{.Context.APIVersion}}",
 	pathTemplate = "{{.Context.PathTemplate}}",

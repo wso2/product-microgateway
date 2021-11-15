@@ -63,10 +63,6 @@ public class ThrottleFilter implements Filter {
     }
 
     @Override
-    public void init(APIConfig apiConfig) {
-    }
-
-    @Override
     public boolean handleRequest(RequestContext requestContext) {
 
         // If global throttle event publishing is disabled, throttle filter should be skipped.

@@ -19,6 +19,11 @@ public final class FilterProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_config_enforcer_Filter_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_wso2_discovery_config_enforcer_Filter_ConfigPropertiesEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_wso2_discovery_config_enforcer_Filter_ConfigPropertiesEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -29,13 +34,16 @@ public final class FilterProto {
   static {
     java.lang.String[] descriptorData = {
       "\n+wso2/discovery/config/enforcer/filter." +
-      "proto\022\036wso2.discovery.config.enforcer\"-\n" +
-      "\006Filter\022\021\n\tclassName\030\001 \001(\t\022\020\n\010position\030\002" +
-      " \001(\005B\222\001\n1org.wso2.choreo.connect.discove" +
-      "ry.config.enforcerB\013FilterProtoP\001ZNgithu" +
-      "b.com/envoyproxy/go-control-plane/wso2/d" +
-      "iscovery/config/enforcer;enforcerb\006proto" +
-      "3"
+      "proto\022\036wso2.discovery.config.enforcer\"\276\001" +
+      "\n\006Filter\022\021\n\tclassName\030\001 \001(\t\022\020\n\010position\030" +
+      "\002 \001(\005\022V\n\020configProperties\030\003 \003(\0132<.wso2.d" +
+      "iscovery.config.enforcer.Filter.ConfigPr" +
+      "opertiesEntry\0327\n\025ConfigPropertiesEntry\022\013" +
+      "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\222\001\n1org.w" +
+      "so2.choreo.connect.discovery.config.enfo" +
+      "rcerB\013FilterProtoP\001ZNgithub.com/envoypro" +
+      "xy/go-control-plane/wso2/discovery/confi" +
+      "g/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -46,7 +54,13 @@ public final class FilterProto {
     internal_static_wso2_discovery_config_enforcer_Filter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Filter_descriptor,
-        new java.lang.String[] { "ClassName", "Position", });
+        new java.lang.String[] { "ClassName", "Position", "ConfigProperties", });
+    internal_static_wso2_discovery_config_enforcer_Filter_ConfigPropertiesEntry_descriptor =
+      internal_static_wso2_discovery_config_enforcer_Filter_descriptor.getNestedTypes().get(0);
+    internal_static_wso2_discovery_config_enforcer_Filter_ConfigPropertiesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_wso2_discovery_config_enforcer_Filter_ConfigPropertiesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

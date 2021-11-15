@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -38,7 +39,7 @@ public class CustomFilterTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets", false);
         String certificatesTrustStorePath = HttpsClientRequest.class.getClassLoader()
                 .getResource("keystore/client-truststore.jks").getPath();
         System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);
@@ -105,5 +106,37 @@ public class CustomFilterTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         JSONObject responseJSON = new JSONObject(response.getData());
         Assert.assertFalse(responseJSON.has("custom-remove-header"), "Header is not removed from the custom filter.");
+    }
+
+    @Test(description = "Test custom configuration properties")
+    public void testFilterConfigProperties() throws Exception {
+
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
+                .doGet(Utils.getServiceURLHttps("/v2/headers"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+        JSONObject responseJSON = new JSONObject(response.getData());
+        Assert.assertNotNull(responseJSON.get("Fookey"), "Header is not attached from the custom filter based on " +
+                "custom config properties.");
+        String customHeaderValue = responseJSON.get("Fookey").toString();
+        Assert.assertEquals(customHeaderValue, "fooVal", "mismatch against the custom header attached " +
+                "from the filter base on custom config properties");
+    }
+
+    @Test(description = "Test dynamic endpoints for custom filter")
+    public void testDynamicEndpointWithinFilter() throws MalformedURLException, CCTestException {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        // template: <organizationID>_<EndpointName>_xwso2cluster_<vHost>_<API name><API version>
+        headers.put("Custom-dynamic-endpoint", "carbon.super_myDynamicEndpoint_xwso2cluster_localhost_SwaggerPetstore1.0.5");
+        org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
+                .doGet(Utils.getServiceURLHttps("/v2/pet/findByStatus"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.API_SANDBOX_RESPONSE, "Response body mismatched for dynamic endpoint");
     }
 }
