@@ -36,7 +36,7 @@ To learn about interceptors and for instructions on how to run it please head ov
    ```
    Sample response
    ```
-   {"directRespond":null,"responseCode":null,"dynamicEndpoint":null,"headersToAdd":null,"headersToReplace":{"content-type":"application/xml"},"headersToRemove":null,"trailersToAdd":null,"trailersToReplace":null,"trailersToRemove":null,"body":"PG5hbWU+VGhlIFByaXNvbmVyPC9uYW1lPg==","interceptorContext":null}
+   {"directRespond":null,"responseCode":null,"dynamicEndpoint":null,"headersToAdd":{"x-user":"admin"},"headersToReplace":{"content-type":"application/xml"},"headersToRemove":null,"trailersToAdd":null,"trailersToReplace":null,"trailersToRemove":null,"body":"PG5hbWU+VGhlIFByaXNvbmVyPC9uYW1lPg==","interceptorContext":null}
    ```
 
    ```sh

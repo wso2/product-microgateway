@@ -62,13 +62,19 @@ public class HandleRequestApiController implements HandleRequestApi {
             JSONObject json = new JSONObject(new String(decodeBytes));
             String xml = XML.toString(json);
 
+            Headers headersToAdd = new Headers();
+            headersToAdd.put("x-user", "admin");
+
             Headers headersToReplace = new Headers();
             headersToReplace.put("content-type", "application/xml");
 
             String encodedXmlBody = Base64.getEncoder().encodeToString(xml.getBytes());
-            return new ResponseEntity<RequestHandlerResponseBody>(new RequestHandlerResponseBody()
-                    .body(encodedXmlBody)
-                    .headersToReplace(headersToReplace), HttpStatus.OK);
+            return new ResponseEntity<RequestHandlerResponseBody>(
+                    new RequestHandlerResponseBody()
+                            .body(encodedXmlBody)
+                            .headersToReplace(headersToReplace)
+                            .headersToAdd(headersToAdd)
+                    , HttpStatus.OK);
         }
         return new ResponseEntity<RequestHandlerResponseBody>(HttpStatus.NOT_IMPLEMENTED);
     }

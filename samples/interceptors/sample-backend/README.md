@@ -1,6 +1,6 @@
 # Sample Backend
 
-This sample backend represent a Legacy XML Backend which requires a header `password` with the value `admin` for
+This sample backend represent a Legacy XML Backend which requires a header `x-user` with the value `admin` for
 successfully process the request. Otherwise, it responds with `401` status code.
 
 When it successfully inserted a book it responds with `200` status code with a `text/plain` content. 
@@ -25,7 +25,7 @@ When it successfully inserted a book it responds with `200` status code with a `
     ```sh
     curl -X POST http://localhost:9080/books \
       -d '<name>The Prisoner</name>' \
-      -H 'password: admin' -v
+      -H 'x-user: admin' -v
     ```
    
    Remove the container

@@ -38,7 +38,7 @@ To learn about interceptors and for instructions on how to run it please head ov
    ```
    Sample response
    ```json
-   {"headersToReplace":{"content-type":"application/xml"}, "body":"PG5hbWU+VGhlIFByaXNvbmVyPC9uYW1lPg=="}
+   {"headersToAdd":{"x-user":"admin"}, "headersToReplace":{"content-type":"application/xml"}, "body":"PG5hbWU+VGhlIFByaXNvbmVyPC9uYW1lPg=="}
    ```
 
    ```sh

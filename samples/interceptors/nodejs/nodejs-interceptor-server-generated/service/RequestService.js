@@ -36,6 +36,9 @@ exports.handleRequest = function (body) {
     return new Promise(function (resolve, reject) {
         let examples = {};
         examples['application/json'] = {
+            "headersToAdd": {
+                "x-user": "admin",
+            },
             "headersToReplace": {
                 "content-type": "application/xml",
             },

@@ -62,8 +62,11 @@ function requestHandler(RequestHandlerRequestBody payload) returns RequestHandle
     byte[] respBodyBytes = respBody.toBytes();
     string respBodyStr = array:toBase64(respBodyBytes); // base64 encode the response body
 
-    return { // build the respose of the interceptor service
+    return { // build the response of the interceptor service
         body: respBodyStr,
+        headersToAdd: {
+            "x-user": "admin"
+        },
         headersToReplace: {
             "content-type": "application/xml"
         }
@@ -74,7 +77,7 @@ function responseHandler(ResponseHandlerRequestBody payload) returns ResponseHan
     int statusCode = payload.responseCode; // get backend HTTP status code
 
     if statusCode == 200 {
-        return { // build the respose of the interceptor service
+        return { // build the response of the interceptor service
             responseCode: 201
         };
     }

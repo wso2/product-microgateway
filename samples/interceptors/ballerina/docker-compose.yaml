@@ -21,7 +21,7 @@ services:
     networks:
       - choreo-connect_default
   xml-interceptor:
-    image: wso2am/cc-sample-xml-interceptor:v1.0.0
+    image: wso2am/cc-sample-xml-interceptor-ballerina:v1.0.0
     ports:
       - "9081:9081"
     networks:

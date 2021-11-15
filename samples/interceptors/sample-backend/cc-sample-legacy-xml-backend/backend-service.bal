@@ -22,7 +22,7 @@ service / on ep {
         log:printInfo("Backend service is called");
         http:Response resp = new;
 
-        string|http:HeaderNotFoundError pwHeader = request.getHeader("password");
+        string|http:HeaderNotFoundError pwHeader = request.getHeader("x-user");
         if !(pwHeader is string && pwHeader == "admin") {
             resp.setXmlPayload(xml `<response>Error</response>`);
             resp.statusCode = 401;
