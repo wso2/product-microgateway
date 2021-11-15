@@ -38,7 +38,7 @@ public class QSGTestCase {
 
     @BeforeClass
     public void createApiProject() throws IOException, CCTestException {
-        ApictlUtils.createProject( "https://petstore.swagger.io/v2/swagger.json", "qsg_petstore", null, null);
+        ApictlUtils.createProject( "https://petstore.swagger.io/v2/swagger.json", "qsg_petstore");
     }
 
     @Test

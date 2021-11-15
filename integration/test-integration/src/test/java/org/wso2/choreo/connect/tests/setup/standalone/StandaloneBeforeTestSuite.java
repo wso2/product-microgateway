@@ -33,6 +33,6 @@ public class StandaloneBeforeTestSuite {
         Assert.assertEquals(versionByApictl, versionFromPomXml,"Expected apictl version is not downloaded");
 
         ApictlUtils.removeEnv("test");
-        ApictlUtils.createProject( "openAPI.yaml", "petstore", null, null);
+        ApictlUtils.createProject( "openAPI.yaml", "petstore");
     }
 }

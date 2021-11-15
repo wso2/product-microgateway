@@ -73,6 +73,9 @@
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/backend-service.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-with-tls-and-network.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                             </target>
                         </configuration>
                         <goals>

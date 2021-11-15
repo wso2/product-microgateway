@@ -26,7 +26,7 @@ x-wso2-production-endpoints:
 x-wso2-response-interceptor: # API level interceptor definition
   host: mockBackend
   port: 2371
-  scheme: http
+  scheme: https
   includes:
     - request_headers
     - request_body
@@ -59,13 +59,13 @@ paths:
     x-wso2-request-interceptor: # Resource level interceptor definition
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes:
         - request_headers
     x-wso2-response-interceptor: # Override response interceptor
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes: # "response_body" is not included here
         - request_headers
         - request_body
@@ -83,7 +83,7 @@ paths:
     x-wso2-request-interceptor: # Resource level interceptor definition
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes:
         - request_headers
     post:
@@ -122,13 +122,13 @@ paths:
     x-wso2-request-interceptor:
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes:
         - request_headers
     x-wso2-response-interceptor:
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes:
         - request_headers
     post:
@@ -145,7 +145,7 @@ paths:
     x-wso2-response-interceptor:
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes: # "response_body" not included
         - request_headers # "response_headers" also can be included here
     post:
@@ -162,7 +162,7 @@ paths:
     x-wso2-response-interceptor:
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes:
         - request_headers
         - response_body
@@ -180,7 +180,7 @@ paths:
     x-wso2-response-interceptor:
       host: mockBackend
       port: 2371
-      scheme: http
+      scheme: https
       includes:
         - request_headers
         - response_body
