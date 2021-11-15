@@ -22,4 +22,3 @@ SRC="nodejs-interceptor-server-generated"
 cp -r ../resources/certs "${SRC}/certs"
 cd $SRC
 docker build -t $IMAGE_NAME:$VERSION --build-arg CERT_DIR=certs .
-rm -rf certs
