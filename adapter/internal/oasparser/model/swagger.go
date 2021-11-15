@@ -67,7 +67,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
-			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints, LoadBalance)
+			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}
@@ -179,7 +179,7 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 	result, ok := swagger2.Extensions[xWso2ApplicationSecurity].(map[string]interface{})
 	if ok {
 		for key, value := range result {
-			if (key == Optional && value != true) {
+			if key == Optional && value != true {
 				isApplicationSecurityOptional = false
 			}
 		}
@@ -188,20 +188,20 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 				if val, ok := result[SecurityTypes].([]interface{}); ok {
 					for _, mapValue := range val {
 						if mapValue == APIKeyInAppLevelSecurity {
-							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: APIKeyInAppLevelSecurity , Name: mapValue.(string)}
+							scheme := SecurityScheme{DefinitionName: mapValue.(string), Type: APIKeyInAppLevelSecurity, Name: mapValue.(string)}
 							securitySchemes = append(securitySchemes, scheme)
 						}
 					}
 				}
-			} 
+			}
 		}
 	}
 
-	for key , val := range swagger2.SecurityDefinitions {
-		scheme := SecurityScheme{DefinitionName: key, Type: val.Type , Name: val.Name, In: val.In}
+	for key, val := range swagger2.SecurityDefinitions {
+		scheme := SecurityScheme{DefinitionName: key, Type: val.Type, Name: val.Name, In: val.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
-	logger.LoggerOasparser.Debugf("Security schemes in setSecurityDefinitions  %v:",securitySchemes)
+	logger.LoggerOasparser.Debugf("Security schemes in setSecurityDefinitions  %v:", securitySchemes)
 	return securitySchemes
 }
 
@@ -214,12 +214,12 @@ func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
 }
 
 // checks whether application level security given by (x-wso2-application-security extension)is optional or not
-func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool{
+func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool {
 	var isApplicationSecurityOptional = true
 	result, ok := applicationSecurity.(map[string]interface{})
 	if ok {
 		for key, value := range result {
-			if (key == "optional" && value != true) {
+			if key == "optional" && value != true {
 				isApplicationSecurityOptional = false
 			}
 		}
@@ -228,10 +228,10 @@ func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool{
 }
 
 // sets application level security defined under the x-wso2-application-security extension.
-func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string, securitySchemes *[]SecurityScheme){
+func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string, securitySchemes *[]SecurityScheme) {
 	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(applicationSecurity)
 	result, ok := applicationSecurity.(map[string]interface{})
-	if ok && !isApplicationSecurityOptional{
+	if ok && !isApplicationSecurityOptional {
 		if _, found := result[SecurityTypes]; found {
 			if val, ok := result[SecurityTypes].([]interface{}); ok {
 				for _, mapValue := range val {
@@ -244,7 +244,7 @@ func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[
 					}
 				}
 			}
-		} 
+		}
 	}
 }
 
@@ -310,7 +310,7 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIYaml) error {
 				}
 			}
 		}
-		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, endpoints, endpointType)
+		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
 	}
 	if len(endpointConfig.ProductionEndpoints) > 0 {
 		var endpoints []Endpoint
@@ -334,7 +334,7 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIYaml) error {
 				}
 			}
 		}
-		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, endpoints, endpointType)
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
 	}
 	return nil
 }

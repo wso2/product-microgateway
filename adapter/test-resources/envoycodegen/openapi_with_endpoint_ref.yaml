@@ -4,13 +4,13 @@ info:
   title: Swagger Petstore
   license:
     name: MIT
-x-wso2-production-endpoints:
-    urls:
+x-wso2-production-endpoints: '#/x-wso2-endpoints/my-api-endpoints'
+x-wso2-endpoints:
+  - my-api-endpoints:
+      urls:
         - http://apiLevelEndpoint
-        - http://apiLevelLBEndpoint:8080
-paths:
-  /pets:
-    x-wso2-production-endpoints:
+        - http://apiLevelLBEndpoint:8080 
+  - my-resource-endpoints:
       type: failover
       urls:
         - https://resourceLevelEndpoint
@@ -20,6 +20,9 @@ paths:
           maxConnections: 2
           maxRequests: 15
           maxConnectionPools: -1
+paths:
+  /pets:
+    x-wso2-production-endpoints: '#/x-wso2-endpoints/my-resource-endpoints'
     get:
       summary: List all pets
       operationId: listPets
@@ -121,3 +124,4 @@ components:
           format: int32
         message:
           type: string
+          

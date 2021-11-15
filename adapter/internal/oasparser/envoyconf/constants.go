@@ -47,15 +47,11 @@ const (
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
 
+//cluster prefixes
 const (
-	xWso2EPClustersConfigNamePrefix string = "xwso2cluster_"
-	sandClustersConfigNamePrefix    string = "clusterSand_"
-	prodClustersConfigNamePrefix    string = "clusterProd_"
-)
-
-const (
-	requestInterceptClustersNamePrefix  string = "reqInterceptor_"
-	responseInterceptClustersNamePrefix string = "resInterceptor_"
+	xWso2EPClustersConfigNamePrefix     string = "xwso2cluster"
+	requestInterceptClustersNamePrefix  string = "reqInterceptor"
+	responseInterceptClustersNamePrefix string = "resInterceptor"
 )
 
 // Context Extensions which are set in ExtAuthzPerRoute Config
