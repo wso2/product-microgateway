@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import com.sun.net.httpserver.HttpExchange;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -57,6 +58,14 @@ public class Utils {
             sb.append(str);
         }
         return sb.toString();
+    }
+
+    public static void respondWithBodyAndClose(int statusCode, byte[] response, HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                Constants.CONTENT_TYPE_APPLICATION_JSON);
+        exchange.sendResponseHeaders(statusCode, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
     }
 
     public static void send404NotFound(HttpExchange exchange) throws IOException {
