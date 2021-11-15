@@ -66,8 +66,8 @@ type GatewayLabel struct {
 
 // APIConfigs represents env properties belongs to the API
 type APIConfigs struct {
-	ProductionEndpoint string `mapstructure:"production_endpoint,omitempty"`
-	SandBoxEndpoint    string `mapstructure:"sandbox_endpoint,omitempty"`
+	ProductionEndpoint string `mapstructure:"productionEndpoint,omitempty"`
+	SandBoxEndpoint    string `mapstructure:"sandboxEndpoint,omitempty"`
 }
 
 // APIEnvProps represents env properties
