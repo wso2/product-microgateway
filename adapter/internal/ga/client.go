@@ -119,8 +119,10 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 		RootCAs:      certPool,
 	}
 	// This option is used if the calling IP and SAN of the certificate is different.
-	if conf.GlobalAdapter.OverwriteHostName != "" {
-		tlsConfig.ServerName = conf.GlobalAdapter.OverwriteHostName
+	if conf.GlobalAdapter.OverrideHostName != "" {
+		logger.LoggerGA.Infof("ServerName used for Global Adapter Hostname verification is %s",
+			conf.GlobalAdapter.OverrideHostName)
+		tlsConfig.ServerName = conf.GlobalAdapter.OverrideHostName
 	}
 	return credentials.NewTLS(tlsConfig)
 }
