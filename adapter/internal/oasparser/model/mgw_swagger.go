@@ -84,6 +84,7 @@ type Endpoint struct {
 	Port uint32
 	//ServiceDiscoveryQuery consul query for service discovery
 	ServiceDiscoveryString string
+	RawURL                 string
 }
 
 // EndpointConfig holds the configs such as timeout, retry, etc. for the EndpointCluster

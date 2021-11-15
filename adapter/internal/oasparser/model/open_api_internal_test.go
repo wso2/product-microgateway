@@ -146,6 +146,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Basepath: "/api/v2",
 				Port:     8000,
 				URLType:  "https",
+				RawURL:   "https://petstore.io:8000/api/v2",
 			},
 			message: "all the details are provided in the endpoint",
 		},
@@ -156,6 +157,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Basepath: "/api/v2",
 				Port:     8000,
 				URLType:  "https",
+				RawURL:   "https://petstore.io:8000/api/v2",
 			},
 			message: "when port is not provided", //here should find a way to readi configs in tests
 		},
@@ -166,6 +168,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Basepath: "/api/v2",
 				Port:     8000,
 				URLType:  "http",
+				RawURL:   "http://petstore.io:8000/api/v2",
 			},
 			message: "when protocol is not provided",
 		},
