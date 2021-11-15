@@ -29,9 +29,7 @@ x-wso2-endpoints:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
 x-wso2-request-interceptor: # API level interceptor definition
-  host: mockBackend
-  port: 2371
-  scheme: https
+  serviceURL: https://mockBackend:2371
   includes:
     - request_headers
     - request_body
@@ -60,9 +58,7 @@ paths:
           description: successful operation
   /echo/resp-intercept:
     x-wso2-response-interceptor: # Resource level interceptor definition
-      host: mockBackend
-      port: 2371
-      scheme: https
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
     post:
@@ -77,9 +73,7 @@ paths:
           description: successful operation
   /pet/findByStatus/resp-intercept-enabled:
     x-wso2-response-interceptor: # Resource level interceptor definition
-      host: mockBackend
-      port: 2371
-      scheme: https
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
     post:
@@ -116,9 +110,7 @@ paths:
           description: Invalid status value
   /pet/findByStatus/headers-only:
     x-wso2-request-interceptor:
-      host: mockBackend
-      port: 2371
-      scheme: https
+      serviceURL: https://mockBackend:2371
       includes: # "request_body" not included
         - request_headers
     post:
