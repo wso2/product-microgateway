@@ -77,6 +77,7 @@ func TestGetXWso2RefEndpoints(t *testing.T) {
 				Host:    "www.facebook.com",
 				Port:    80,
 				URLType: "https",
+				RawURL:  "https://www.facebook.com:80",
 			},
 		},
 		EndpointType: "loadbalance",
