@@ -76,6 +76,7 @@ type Config struct {
 	ControlPlane  controlPlane  `toml:"controlPlane"`
 	GlobalAdapter globalAdapter `toml:"globalAdapter"`
 	Analytics     analytics     `toml:"analytics"`
+	Tracing       tracing
 }
 
 // Adapter related Configurations
@@ -130,7 +131,6 @@ type enforcer struct {
 	Management   management
 	RestServer   restServer
 	Filters      []filter
-	Tracing      tracing
 	Metrics      metrics
 }
 
@@ -359,6 +359,11 @@ type tracing struct {
 	Enabled          bool
 	Type             string
 	ConfigProperties map[string]string
+	MaxPathLength    uint32
+	Address          string
+	Port             int
+	Endpoint         string
+	Verbose          bool
 }
 
 type metrics struct {

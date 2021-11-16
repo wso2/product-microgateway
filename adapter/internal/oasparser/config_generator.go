@@ -55,7 +55,7 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 	)
 	conf, _ := config.ReadConfigs()
 
-	if conf.Envoy.Tracing.Enabled {
+	if conf.Tracing.Enabled {
 		logger.LoggerOasparser.Debugln("Creating init cluster - Tracing")
 		if c, e, err := envoyconf.CreateTracingCluster(conf); err == nil {
 			clusters = append(clusters, c)

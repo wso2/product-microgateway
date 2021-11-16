@@ -308,9 +308,9 @@ func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Ad
 			},
 		},
 	}
-	epAddr := conf.Envoy.Tracing.Address
-	epPath := conf.Envoy.Tracing.Endpoint
-	epPort := conf.Envoy.Tracing.Port
+	epAddr := conf.Tracing.Address
+	epPath := conf.Tracing.Endpoint
+	epPort := conf.Tracing.Port
 	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
 
 	epCluster.Endpoints[0].Host = epAddr
