@@ -1,4 +1,4 @@
-version: "2.4"
+version: "3.7"
 services:
   apim:
     image: wso2/wso2am:4.0.0-alpine
@@ -47,9 +47,6 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
-    depends_on:
-      apim:
-        condition: service_healthy
     volumes:
       - ../resources/adapter/security:/home/wso2/security
       - ./conf/log_config.toml:/home/wso2/conf/log_config.toml
