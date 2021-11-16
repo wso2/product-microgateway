@@ -371,6 +371,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 				certMap[url] = certBytes
 				interceptCertMap[url] = certBytes
 				delete(apiProject.UpstreamCerts, certFile)
+			} else {
+				logger.LoggerXds.Errorf("Certificate file %v not found for the url %v", certFile, url)
 			}
 		}
 	}
