@@ -32,4 +32,4 @@ x-wso2-request-interceptor:
   includes:
     - request_body
 x-wso2-response-interceptor:
-  serviceURL: https:// xml-interceptor:9081
+  serviceURL: https://xml-interceptor:9081
