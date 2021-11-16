@@ -362,8 +362,29 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 	updateVhostInternalMaps(apiYaml.ID, apiYaml.Name, apiYaml.Version, vHost, newLabels)
 
-	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, apiProject.UpstreamCerts,
-		apiProject.InterceptorCerts, vHost, organizationID)
+	// create cert map for API
+	certMap := make(map[string][]byte)
+	interceptCertMap := make(map[string][]byte)
+	if len(apiProject.EndpointCerts) > 0 && len(apiProject.UpstreamCerts) > 0 {
+		for url, certFile := range apiProject.EndpointCerts {
+			if certBytes, found := apiProject.UpstreamCerts[certFile]; found {
+				certMap[url] = certBytes
+				interceptCertMap[url] = certBytes
+				delete(apiProject.UpstreamCerts, certFile)
+			} else {
+				logger.LoggerXds.Errorf("Certificate file %v not found for the url %v", certFile, url)
+			}
+		}
+	}
+	newLineByteArray := []byte("\n")
+	for _, certBytes := range apiProject.UpstreamCerts {
+		certMap["default"] = append(certMap["default"], certBytes...)
+		certMap["default"] = append(certMap["default"], newLineByteArray...)
+	}
+	interceptCertMap["default"] = apiProject.InterceptorCerts
+
+	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
+		interceptCertMap, vHost, organizationID)
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes

@@ -164,13 +164,13 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger, securityschemes *[]SecuritySc
 	return SortResources(resources), nil
 }
 
-func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) ([]SecurityScheme) {
+func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	var securitySchemes []SecurityScheme
 	for key, val := range openAPI.Components.SecuritySchemes {
 		scheme := SecurityScheme{DefinitionName: key, Type: val.Value.Type, Name: val.Value.Name, In: val.Value.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
-	logger.LoggerOasparser.Debugf("Security schemes in  setSecuritySchemesOpenAPI method %v:",securitySchemes)
+	logger.LoggerOasparser.Debugf("Security schemes in setSecuritySchemesOpenAPI method %v:", securitySchemes)
 	return securitySchemes
 }
 
@@ -183,7 +183,7 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 		for i, security := range securityData {
 			securityArray[i] = security
 		}
-		
+
 		result, ok := extensions[xWso2ApplicationSecurity].(map[string]interface{})
 		if ok {
 			if _, found := result[SecurityTypes]; found {
@@ -199,7 +199,7 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 						}
 					}
 				}
-			} 
+			}
 		}
 		logger.LoggerOasparser.Debugf("Security array %v", securityArray)
 		return NewOperation(method, securityArray, extensions)
@@ -224,17 +224,17 @@ func checkAPIKeyInOperationArray(securityArray *[]map[string][]string, securityS
 }
 
 // removes element in the given index from operation security array
-func removeAPIKeyFromOperationArray(securityArray []map[string][]string, index int) []map[string][]string { 
+func removeAPIKeyFromOperationArray(securityArray []map[string][]string, index int) []map[string][]string {
 	return append(securityArray[:index], securityArray[index+1:]...)
 }
 
 // checks api_key is in the security scheme. If it's not in the security scheme, this
 // method adds api_key security scheme to work with Application level enabled API keys.
 func checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes *[]SecurityScheme) {
-	var isApplicationAPIKeyFound = false;
+	var isApplicationAPIKeyFound = false
 	for _, val := range *securitySchemes {
 		if val.DefinitionName == APIKeyInAppLevelSecurity {
-			isApplicationAPIKeyFound = true;
+			isApplicationAPIKeyFound = true
 		}
 	}
 	if !isApplicationAPIKeyFound {
@@ -290,9 +290,11 @@ func getHostandBasepathandPort(rawURL string) (*Endpoint, error) {
 	urlType = "http"
 	if strings.HasPrefix(rawURL, "https://") {
 		urlType = "https"
+	} else if !strings.HasPrefix(rawURL, "http://") {
+		rawURL = "http://" + rawURL
 	}
 
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}, nil
+	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType, RawURL: rawURL}, nil
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3
@@ -402,6 +404,8 @@ func getHostandBasepathandPortWebSocket(rawURL string) (*Endpoint, error) {
 	urlType = "ws"
 	if strings.HasPrefix(rawURL, "wss://") {
 		urlType = "wss"
+	} else if !strings.HasPrefix(rawURL, "ws://") {
+		rawURL = "ws://" + rawURL
 	}
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}, nil
+	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType, RawURL: rawURL}, nil
 }

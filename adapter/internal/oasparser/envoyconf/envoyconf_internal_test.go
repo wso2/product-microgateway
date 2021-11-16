@@ -80,6 +80,7 @@ func TestCreateRoute(t *testing.T) {
 		Basepath: basePath,
 		URLType:  "http",
 		Port:     80,
+		RawURL:   "http://abc.com",
 	}
 	version := "1.0"
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []model.Operation{model.NewOperation("GET", nil, nil)},

@@ -61,7 +61,7 @@ import (
 //
 // First set of routes, clusters, addresses represents the production endpoints related
 // configurations. Next set represents the sandbox endpoints related configurations.
-func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte, interceptorCerts []byte, vHost string, organizationID string) (routesP []*routev3.Route,
+func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[string][]byte, interceptorCerts map[string][]byte, vHost string, organizationID string) (routesP []*routev3.Route,
 	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
 	var (
 		routes    []*routev3.Route
@@ -291,7 +291,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 }
 
 // CreateLuaCluster creates lua cluster configuration.
-func CreateLuaCluster(interceptorCerts []byte, endpoint model.InterceptEndpoint) (*clusterv3.Cluster, []*corev3.Address) {
+func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.InterceptEndpoint) (*clusterv3.Cluster, []*corev3.Address) {
 	logger.LoggerOasparser.Debug("creating a lua cluster ", endpoint.ClusterName)
 	return createCluster(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout)
 }
@@ -299,7 +299,7 @@ func CreateLuaCluster(interceptorCerts []byte, endpoint model.InterceptEndpoint)
 // createCluster creates cluster configuration. AddressConfiguration, cluster name and
 // urlType (http or https) is required to be provided.
 // timeout cluster timeout
-func createCluster(clusterName string, clusterDetails *model.EndpointCluster, upstreamCerts []byte,
+func createCluster(clusterName string, clusterDetails *model.EndpointCluster, upstreamCerts map[string][]byte,
 	timeout time.Duration) (*clusterv3.Cluster, []*corev3.Address) {
 	// tls configs
 	var transportSocketMatches []*clusterv3.Cluster_TransportSocketMatch
@@ -316,9 +316,31 @@ func createCluster(clusterName string, clusterDetails *model.EndpointCluster, up
 		// create addresses for endpoints
 		address := createAddress(ep.Host, ep.Port)
 		addresses = append(addresses, address)
+
+		// create loadbalance / failover endpoints
+		localityLbEndpoints := &endpointv3.LocalityLbEndpoints{
+			Priority: uint32(priority),
+			LbEndpoints: []*endpointv3.LbEndpoint{
+				{
+					HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+						Endpoint: &endpointv3.Endpoint{
+							Address: address,
+						},
+					},
+				},
+			},
+		}
+
 		// create tls configs
 		if strings.HasPrefix(ep.URLType, httpsURLType) || strings.HasPrefix(ep.URLType, wssURLType) {
-			upstreamtlsContext := createUpstreamTLSContext(upstreamCerts, address)
+			var epCert []byte
+			if cert, found := upstreamCerts[ep.RawURL]; found {
+				epCert = cert
+			} else if defaultCerts, found := upstreamCerts["default"]; found {
+				epCert = defaultCerts
+			}
+
+			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
 			marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
 			if err != nil {
 				logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
@@ -338,30 +360,16 @@ func createCluster(clusterName string, clusterDetails *model.EndpointCluster, up
 					},
 				}
 				transportSocketMatches = append(transportSocketMatches, transportSocketMatch)
-			}
-		}
-
-		// create loadbalance / failover endpoints
-		localityLbEndpoints := &endpointv3.LocalityLbEndpoints{
-			Priority: uint32(priority),
-			LbEndpoints: []*endpointv3.LbEndpoint{
-				{
-					HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
-						Endpoint: &endpointv3.Endpoint{
-							Address: address,
-						},
-					},
-					Metadata: &corev3.Metadata{
-						FilterMetadata: map[string]*structpb.Struct{
-							"envoy.transport_socket_match": {
-								Fields: map[string]*structpb.Value{
-									"lb_id": structpb.NewStringValue(strconv.Itoa(i)),
-								},
+				localityLbEndpoints.LbEndpoints[0].Metadata = &corev3.Metadata{
+					FilterMetadata: map[string]*structpb.Struct{
+						"envoy.transport_socket_match": {
+							Fields: map[string]*structpb.Value{
+								"lb_id": structpb.NewStringValue(strconv.Itoa(i)),
 							},
 						},
 					},
-				},
-			},
+				}
+			}
 		}
 		lbEPs = append(lbEPs, localityLbEndpoints)
 
