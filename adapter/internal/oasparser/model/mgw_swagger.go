@@ -803,45 +803,31 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 
 //GetInterceptor returns interceptors
 func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) (InterceptEndpoint, error) {
-	endpointCluster := EndpointCluster{
-		//only 1 endpoint supported for interceptor's endpoint cluster
-		Endpoints: []Endpoint{
-			{
-				Host:    "",
-				URLType: "http",
-				Port:    uint32(80),
-			},
-		},
-	}
+	var endpointCluster EndpointCluster
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
 	requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
 	includesV := &interceptor.RequestInclusions{}
 
-	var err error
-
 	if x, found := vendorExtensions[extensionName]; found {
 		if val, ok := x.(map[string]interface{}); ok {
-			//host mandatory
-			if v, found := val[host]; found {
-				endpointCluster.Endpoints[0].Host = v.(string)
-			} else {
-				logger.LoggerOasparser.Error("Error reading interceptors host value")
-				return InterceptEndpoint{}, errors.New("error reading interceptors host value")
-			}
-			// port mandatory
-			if v, found := val[port]; found {
-				p, err := strconv.ParseUint(fmt.Sprint(v), 10, 32)
-				if err == nil {
-					endpointCluster.Endpoints[0].Port = uint32(p)
-				} else {
-					logger.LoggerOasparser.Error("Error reading interceptors port value", err)
-					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
+			//serviceURL mandatory
+			if v, found := val[serviceURL]; found {
+				serviceURLV := v.(string)
+				endpoint, err := getHostandBasepathandPort(serviceURLV)
+				if err != nil {
+					logger.LoggerOasparser.Error("Error reading interceptors service url value", err)
+					return InterceptEndpoint{}, errors.New("error reading interceptors service url value")
 				}
-			}
-			//urlType optional
-			if v, found := val[scheme]; found {
-				endpointCluster.Endpoints[0].URLType = v.(string)
+				if endpoint.Basepath != "" {
+					logger.LoggerOasparser.Warnf("Interceptor serviceURL basepath is given as %v but it will be ignored",
+						endpoint.Basepath)
+				}
+				endpointCluster.Endpoints = []Endpoint{*endpoint}
+
+			} else {
+				logger.LoggerOasparser.Error("Error reading interceptors service url value")
+				return InterceptEndpoint{}, errors.New("error reading interceptors service url value")
 			}
 			//clusterTimeout optional
 			if v, found := val[clusterTimeout]; found {
@@ -849,8 +835,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				if err == nil {
 					clusterTimeoutV = time.Duration(p)
 				} else {
-					logger.LoggerOasparser.Error("Error reading interceptors port value", err)
-					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
+					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", clusterTimeout, err.Error())
 				}
 			}
 			//requestTimeout optional
@@ -859,8 +844,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				if err == nil {
 					requestTimeoutV = time.Duration(p)
 				} else {
-					logger.LoggerOasparser.Error("Error reading interceptors port value", err)
-					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
+					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", requestTimeout, err.Error())
 				}
 			}
 			//includes optional
@@ -894,7 +878,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				ClusterTimeout:  clusterTimeoutV,
 				RequestTimeout:  requestTimeoutV,
 				Includes:        includesV,
-			}, err
+			}, nil
 		}
 		return InterceptEndpoint{}, errors.New("error parsing response interceptors values to mgwSwagger")
 	}

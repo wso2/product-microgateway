@@ -54,9 +54,7 @@ const (
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
 const (
-	host           string = "host"
-	port           string = "port"
-	scheme         string = "scheme"
+	serviceURL     string = "serviceURL"
 	clusterTimeout string = "clusterTimeout"
 	requestTimeout string = "requestTimeout"
 	includes       string = "includes"
