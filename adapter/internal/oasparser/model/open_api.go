@@ -91,7 +91,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 			}
 		}
 		if productionUrls != nil && len(productionUrls) > 0 {
-			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
+			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 		}
 	}
 	return nil
@@ -154,7 +154,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger, securityschemes *[]SecuritySc
 
 				}
 				if productionUrls != nil && len(productionUrls) > 0 {
-					resource.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
+					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 				}
 			}
 			resources = append(resources, resource)

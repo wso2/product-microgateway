@@ -36,7 +36,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 			inputVendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 				"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80"}}},
 			result: &EndpointCluster{
-				EndpointName: "x-wso2-production-endpoints",
+				EndpointPrefix: "clusterProd",
 				Endpoints: []Endpoint{
 					{
 						Host:    "www.facebook.com",
@@ -58,10 +58,43 @@ func TestGetXWso2Endpoints(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := getEndpoints(item.inputVendorExtensions, item.inputEndpointName)
+		mgwSwag := MgwSwagger{}
+		resultResources, err := mgwSwag.getEndpoints(item.inputVendorExtensions, item.inputEndpointName)
 		assert.Nil(t, err, "Error should not be present when extracting endpoints from the vendor extension map")
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
+}
+
+func TestGetXWso2RefEndpoints(t *testing.T) {
+	xWso2EPVendorExtension := []interface{}{map[string]interface{}{
+		"myep": map[string]interface{}{
+			"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80"}}}}
+	prodEPRefVendorExtension := map[string]interface{}{"x-wso2-production-endpoints": "#/x-wso2-endpoints/myep"}
+	result := &EndpointCluster{
+		EndpointPrefix: "myep_xwso2cluster",
+		Endpoints: []Endpoint{
+			{
+				Host:    "www.facebook.com",
+				Port:    80,
+				URLType: "https",
+				RawURL:  "https://www.facebook.com:80",
+			},
+		},
+		EndpointType: "loadbalance",
+	}
+
+	mgwSwag := MgwSwagger{}
+	mgwSwag.vendorExtensions = make(map[string]interface{})
+	mgwSwag.vendorExtensions["x-wso2-endpoints"] = xWso2EPVendorExtension
+	err := mgwSwag.setXWso2Endpoints()
+	assert.Nil(t, err, "Error should not be present when extracting endpoints from the vendor extension map")
+	resultResources := mgwSwag.GetXWso2Endpoints()
+	epCluster, found := resultResources["myep"]
+	assert.Equal(t, true, found, "x-wso2-endpoints vendor extension has not read correctly")
+	assert.Equal(t, result, epCluster, "x-wso2-endpoints vendor extension has not read correctly")
+	resultEP, err := mgwSwag.getEndpoints(prodEPRefVendorExtension, "x-wso2-production-endpoints")
+	assert.Nil(t, err, "Error should not be present when extracting referenced prod endpoints")
+	assert.Equal(t, result, resultEP, "x-wso2-endpoints vendor extension has not read correctly")
 }
 
 func TestGetXWso2Basepath(t *testing.T) {
@@ -107,7 +140,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			},
 			result: MgwSwagger{
 				productionEndpoints: &EndpointCluster{
-					EndpointName: "x-wso2-production-endpoints",
+					EndpointPrefix: "clusterProd",
 					Endpoints: []Endpoint{
 						{
 							Host:     "www.facebook.com",
@@ -140,7 +173,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			},
 			result: MgwSwagger{
 				productionEndpoints: &EndpointCluster{
-					EndpointName: "x-wso2-production-endpoints",
+					EndpointPrefix: "clusterProd",
 					Endpoints: []Endpoint{
 						{
 							Host:     "www.facebook.com",
@@ -155,7 +188,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				resources: []Resource{
 					{
 						productionEndpoints: &EndpointCluster{
-							EndpointName: "x-wso2-production-endpoints",
+							EndpointPrefix: "clusterProd",
 							Endpoints: []Endpoint{
 								{
 									Host:     "resource.endpoint",
@@ -195,7 +228,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			},
 			result: MgwSwagger{
 				productionEndpoints: &EndpointCluster{
-					EndpointName: "x-wso2-production-endpoints",
+					EndpointPrefix: "clusterProd",
 					Endpoints: []Endpoint{
 						{
 							Host:     "www.youtube.com",
@@ -210,7 +243,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				resources: []Resource{
 					{
 						productionEndpoints: &EndpointCluster{
-							EndpointName: "x-wso2-production-endpoints",
+							EndpointPrefix: "clusterProd",
 							Endpoints: []Endpoint{
 								{
 									Host:     "resource.endpoint",
