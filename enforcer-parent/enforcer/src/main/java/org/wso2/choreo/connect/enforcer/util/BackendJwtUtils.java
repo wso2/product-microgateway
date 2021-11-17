@@ -168,7 +168,7 @@ public class BackendJwtUtils {
             JWTTransformer transformer = classIterator.next();
             Annotation[] annotations = transformer.getClass().getAnnotations();
             if (annotations.length == 0) {
-                log.debug("JWTTransformer is discarded as no annotations found. : " +
+                log.debug("JWTTransformer is discarded as no annotations found : {}",
                         transformer.getClass().getCanonicalName());
                 continue;
             }
@@ -177,12 +177,12 @@ public class BackendJwtUtils {
                     JwtTransformerAnnotation jwtTransformerAnnotation =
                             (JwtTransformerAnnotation) annotation;
                     if (jwtTransformerAnnotation.enabled()) {
-                        log.debug("JWTTransformer for the issuer : " + jwtTransformerAnnotation.issuer() +
-                                "is enabled.");
+                        log.debug("JWTTransformer for the issuer : {} is enabled.",
+                                jwtTransformerAnnotation.issuer());
                         jwtTransformersMap.put(jwtTransformerAnnotation.issuer(), transformer);
                     } else {
-                        log.debug("JWTTransformer for the issuer : " + jwtTransformerAnnotation.issuer() +
-                                "is disabled.");
+                        log.debug("JWTTransformer for the issuer : {} is disabled.",
+                                jwtTransformerAnnotation.issuer());
                     }
                 }
             }

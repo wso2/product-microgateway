@@ -24,8 +24,8 @@ import com.nimbusds.jwt.SignedJWT;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -60,7 +60,7 @@ import java.util.Map;
  */
 public class APIKeyAuthenticator extends APIKeyHandler {
 
-    private static final Log log = LogFactory.getLog(APIKeyAuthenticator.class);
+    private static final Logger log = LogManager.getLogger(APIKeyAuthenticator.class);
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
 
@@ -207,7 +207,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
             // Avoids using internal API keys, when internal key header or queryParam configured as api_key
             if (isInternalKey(payload)) {
-                log.error("Invalid API Key token type." + FilterUtils.getMaskedToken(splitToken[0]));
+                log.error("Invalid API Key token type. {} ", FilterUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
@@ -284,8 +284,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                 }
-                log.debug("Analytics data processing for API Key (jiti) " + tokenIdentifier +
-                        " was successful");
+                log.debug("Analytics data processing for API Key (jiti) {} was successful", tokenIdentifier);
                 return authenticationContext;
 
             }
@@ -356,16 +355,15 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         validationInfoDTO.setSubscriberTenantDomain(subTenant);
                     }
 
-                    log.debug("APIKeyValidationInfoDTO populated for API: " + name + ", " +
-                            "version: " + version + ".");
+                    log.debug("APIKeyValidationInfoDTO populated for API: {}, version: {}.", name, version);
 
                     break;
                 }
             }
             if (api == null) {
-                log.debug("Subscription data not populated in APIKeyValidationInfoDTO for the API: " + name +
-                        ", version: " + version + ".");
-                log.error("User's subscription details cannot obtain for the API : " + name + ".");
+                log.debug("Subscription data not populated in APIKeyValidationInfoDTO for the API: {}, version: {}.",
+                        name, version);
+                log.error("User's subscription details cannot obtain for the API : {}", name);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
@@ -394,8 +392,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     }
                 }
                 if (StringUtils.isNotEmpty(clientIP)) {
-                    log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
-                            " is not permitted for client with IP: " + clientIP);
+                    log.debug("Invocations to API: {}:{} is not permitted for client with IP: {}",
+                            apiContext, apiVersion, clientIP);
                 }
 
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
@@ -423,8 +421,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         }
                     }
                     if (StringUtils.isNotEmpty(referer)) {
-                        log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
-                                " is not permitted for referer: " + referer);
+                        log.debug("Invocations to API: {}:{} is not permitted for referer: {}",
+                                apiContext, apiVersion, referer);
                     }
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                             APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
@@ -488,7 +486,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             return new BigInteger(1, bytes);
         } catch (UnknownHostException e) {
             //ignore the error and log it
-            log.error("Error while parsing host IP " + ipAddress, e);
+            log.error("Error while parsing host IP {}", ipAddress, e);
         }
         return BigInteger.ZERO;
     }

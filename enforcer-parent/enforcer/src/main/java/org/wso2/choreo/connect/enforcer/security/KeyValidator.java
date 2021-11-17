@@ -108,11 +108,9 @@ public class KeyValidator {
 
     public static APIKeyValidationInfoDTO validateSubscription(String uuid, String apiContext, String apiVersion,
                                                          String consumerKey, String keyManager) {
-        if (log.isDebugEnabled()) {
-            log.debug("Before validating subscriptions");
-            log.debug("Validation Info : { uuid : " + uuid + " , context : " + apiContext +
-                    " , version : " + apiVersion + " , consumerKey : " + consumerKey + " }");
-        }
+        log.debug("Before validating subscriptions");
+        log.debug("Validation Info : { uuid : {}, context : {}, version : {}, consumerKey : {} }",
+                uuid, apiContext, apiVersion, consumerKey);
         String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         if (apiTenantDomain == null) {
             apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -136,9 +134,7 @@ public class KeyValidator {
                     if (app != null) {
                         sub = datastore.getSubscriptionById(app.getUUID(), api.getApiUUID());
                         if (sub != null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("All information is retrieved from the inmemory data store.");
-                            }
+                            log.debug("All information is retrieved from the inmemory data store.");
                         } else {
                             log.info(
                                     "Valid subscription not found for application : " + app.getName()
