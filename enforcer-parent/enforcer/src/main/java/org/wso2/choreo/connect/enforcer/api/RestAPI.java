@@ -20,7 +20,6 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
-import org.wso2.choreo.connect.discovery.api.EndpointClusterConfig;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
@@ -31,7 +30,6 @@ import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
@@ -77,8 +75,8 @@ public class RestAPI implements API {
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
 
-        EndpointCluster productionEndpoints = processEndpoints(api.getProductionEndpoints());
-        EndpointCluster sandboxEndpoints = processEndpoints(api.getSandboxEndpoints());
+        EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
+        EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
         if (productionEndpoints != null) {
             endpoints.put(APIConstants.API_KEY_TYPE_PRODUCTION, productionEndpoints);
         }
@@ -101,8 +99,8 @@ public class RestAPI implements API {
 
         for (Resource res : api.getResourcesList()) {
             Map<String, EndpointCluster> endpointClusterMap = new HashMap();
-            EndpointCluster prodEndpointCluster = processEndpoints(res.getProductionEndpoints());
-            EndpointCluster sandEndpointCluster = processEndpoints(res.getSandboxEndpoints());
+            EndpointCluster prodEndpointCluster = Utils.processEndpoints(res.getProductionEndpoints());
+            EndpointCluster sandEndpointCluster = Utils.processEndpoints(res.getSandboxEndpoints());
             if (prodEndpointCluster != null) {
                 endpointClusterMap.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodEndpointCluster);
             }
@@ -138,37 +136,6 @@ public class RestAPI implements API {
 
         initFilters();
         return basePath;
-    }
-
-    private EndpointCluster processEndpoints(org.wso2.choreo.connect.discovery.api.EndpointCluster rpcEndpointCluster) {
-        if (rpcEndpointCluster == null || rpcEndpointCluster.getUrlsCount() == 0) {
-            return null;
-        }
-        List<String> urls = new ArrayList<>(1);
-        rpcEndpointCluster.getUrlsList().forEach(endpoint -> {
-            String url = endpoint.getURLType().toLowerCase() + "://" +
-                    endpoint.getHost() + ":" + endpoint.getPort() + endpoint.getBasepath();
-            urls.add(url);
-        });
-        EndpointCluster endpointCluster = new EndpointCluster();
-        endpointCluster.setUrls(urls);
-
-        if (rpcEndpointCluster.hasConfig()) {
-            EndpointClusterConfig endpointClusterConfig = rpcEndpointCluster.getConfig();
-            if (endpointClusterConfig.hasRetryConfig()) {
-                org.wso2.choreo.connect.discovery.api.RetryConfig rpcRetryConfig
-                        = endpointClusterConfig.getRetryConfig();
-                RetryConfig retryConfig = new RetryConfig(rpcRetryConfig.getCount(),
-                        rpcRetryConfig.getStatusCodesList().toArray(new Integer[0]));
-                endpointCluster.setRetryConfig(retryConfig);
-            }
-            if (endpointClusterConfig.hasTimeoutConfig()) {
-                org.wso2.choreo.connect.discovery.api.TimeoutConfig timeoutConfig
-                        = endpointClusterConfig.getTimeoutConfig();
-                endpointCluster.setRouteTimeoutInMillis(timeoutConfig.getRouteTimeoutInMillis());
-            }
-        }
-        return endpointCluster;
     }
 
     @Override
