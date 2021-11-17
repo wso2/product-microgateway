@@ -359,11 +359,6 @@ type tracing struct {
 	Enabled          bool
 	Type             string
 	ConfigProperties map[string]string
-	MaxPathLength    uint32
-	Address          string
-	Port             int
-	Endpoint         string
-	Verbose          bool
 }
 
 type metrics struct {

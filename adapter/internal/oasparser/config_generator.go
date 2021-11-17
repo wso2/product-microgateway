@@ -55,11 +55,14 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 	)
 	conf, _ := config.ReadConfigs()
 
-	if conf.Tracing.Enabled {
-		logger.LoggerOasparser.Debugln("Creating init cluster - Tracing")
+	if conf.Tracing.Enabled && conf.Tracing.Type != "azure" {
+		logger.LoggerOasparser.Debugln("Creating global cluster - Tracing")
 		if c, e, err := envoyconf.CreateTracingCluster(conf); err == nil {
 			clusters = append(clusters, c)
 			endpoints = append(endpoints, e...)
+		} else {
+			logger.LoggerOasparser.Error("Failed to initialize tracer's cluster. Router tracing will be disabled. ", err)
+			conf.Tracing.Enabled = false
 		}
 	}
 

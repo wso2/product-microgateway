@@ -299,22 +299,34 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 
 // CreateTracingCluster creates a cluster definition for router's tracing server.
 func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
+	var epHost string
+	var epPort uint32
+	var epPath string
+	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
 	epCluster := &model.EndpointCluster{
 		Endpoints: []model.Endpoint{
 			{
 				Host:    "",
 				URLType: "http",
-				Port:    uint32(80),
+				Port:    uint32(9411),
 			},
 		},
 	}
-	epAddr := conf.Tracing.Address
-	epPath := conf.Tracing.Endpoint
-	epPort := conf.Tracing.Port
-	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
 
-	epCluster.Endpoints[0].Host = epAddr
-	epCluster.Endpoints[0].Port = uint32(epPort)
+	if epHost = conf.Tracing.ConfigProperties[tracerHost]; len(epHost) <= 0 {
+		return nil, nil, errors.New("Invalid host provided for tracing endpoint")
+	}
+	if epPath = conf.Tracing.ConfigProperties[tracerEndpoint]; len(epPath) <= 0 {
+		return nil, nil, errors.New("Invalid endpoint path provided for tracing endpoint")
+	}
+	if port, err := strconv.ParseUint(conf.Tracing.ConfigProperties[tracerPort], 10, 32); err == nil {
+		epPort = uint32(port)
+	} else {
+		return nil, nil, errors.New("Invalid port provided for tracing endpoint")
+	}
+
+	epCluster.Endpoints[0].Host = epHost
+	epCluster.Endpoints[0].Port = epPort
 	epCluster.Endpoints[0].Basepath = epPath
 
 	return processEndpoints(tracingClusterName, epCluster, nil, epTimeout, epPath)

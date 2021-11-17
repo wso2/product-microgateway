@@ -103,3 +103,13 @@ const (
 const (
 	defaultListenerHostAddress = "0.0.0.0"
 )
+
+// tracing configuration constants
+const (
+	tracerHost          = "host"
+	tracerPort          = "port"
+	tracerMaxPathLength = "maxPathLength"
+	tracerEndpoint      = "endpoint"
+	tracerTypeAzure     = "azure"
+	tracerNameZipkin    = "envoy.tracers.zipkin"
+)

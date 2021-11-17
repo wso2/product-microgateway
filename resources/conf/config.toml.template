@@ -389,10 +389,6 @@ enabled = true
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
 
-# Tracing configurations for Choreo Connect
-[enforcer.tracing]
-
-
 # Metrics configurations for Choreo Connect
 [enforcer.metrics]
   # Enable/Disable metrics in Choreo Connect
@@ -480,19 +476,48 @@ enabled = true
         queueSize = 1000
 
 # Tracing configurations for Choreo Connect
-[tracing]  # Enable/Disable tracing in Choreo Connect
+[tracing]
+  # Enable/Disable tracing in Choreo Connect
   enabled = false
   # Type of tracer exporter (e.g: azure, jaeger, zipkin)
-  type = "zipkin"
+  type = "jaeger"
+  # configurations for zipkin tracer type
   [tracing.configProperties]
-    # Exporter endpoint
-    endpoint = "http://jaeger:14268/api/traces"
-    # Instrumentation Name
-    instrumentationName = "CHOREO-CONNECT"
+    # maximum length of the request path to extract and include in the HttpUrl tag.
+    maxPathLength = "256"
+    # jaeger host
+    host = "jaeger"
+    # jaeger port
+    port = "14268"
+    # jaeger collector endpoint path
+    endpoint = "/api/traces"
+    # library Name to be tagged in traces (`otel.library.name`).
+    libraryName = "CHOREO-CONNECT"
     # Maximum number of sampled traces per second string
     maximumTracesPerSecond = "2"
-  maxPathLength = 256
-  address = "jaeger"
-  port = 14268
-  endpoint = "/api/traces"
-  verbose = true
+
+  # # Type of tracer exporter (e.g: azure, jaeger, zipkin)
+  # type = "zipkin"
+  # # configurations for zipkin tracer type
+  # [tracing.configProperties]
+  #   # maximum length of the request path to extract and include in the HttpUrl tag.
+  #   maxPathLength = "256"
+  #   # zipkin host
+  #   host = "zipkin"
+  #   # zipkin port
+  #   port = "9411"
+  #   # zipkin collector endpoint path
+  #   endpoint = "/api/v2/spans"
+  #   # library Name to be tagged in traces (`otel.library.name`).
+  #   libraryName = "CHOREO-CONNECT"
+  #   # Maximum number of sampled traces per second string
+  #   maximumTracesPerSecond = "2"
+  #   timeout = "15"
+
+  # type = "azure"
+  # [tracing.configProperties]
+  #   endpoint = ""
+  #   # Instrumentation Name
+  #   instrumentationName = "CHOREO-CONNECT"
+  #   # Maximum number of sampled traces per second string
+  #   maximumTracesPerSecond = "2"
