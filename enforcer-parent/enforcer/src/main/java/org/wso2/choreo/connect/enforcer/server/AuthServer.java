@@ -40,6 +40,7 @@ import org.wso2.choreo.connect.enforcer.grpc.ExtAuthService;
 import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
+import org.wso2.choreo.connect.enforcer.grpc.interceptors.OpenTelemetryInterceptor;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
@@ -82,13 +83,26 @@ public class AuthServer {
                 System.exit(1);
             }
 
-            // Load configurations
+            EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
             APIFactory.getInstance().init();
+
+            // Initialize tracing objects
+            if (enforcerConfig.getTracingConfig().isTracingEnabled()) {
+                try {
+                    TracerFactory.getInstance().init();
+                    logger.info("Tracing is enabled.");
+                } catch (TracingException e) {
+                    logger.error("Error enabling tracing", e);
+                    // prevent further tracing activation by disabling the config
+                    Utils.setTracingEnabled(false);
+                }
+            } else {
+                logger.debug("Tracing is disabled.");
+            }
 
             // Create a new server to listen on port 8081
             Server server = initServer();
 
-            EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
             // Enable global filters
             if (enforcerConfig.getAnalyticsConfig().isEnabled() ||
                     enforcerConfig.getMetricsConfig().isMetricsEnabled()) {
@@ -103,19 +117,6 @@ public class AuthServer {
                 }
             } else {
                 logger.debug("analytics filter is disabled.");
-            }
-
-            // Initialize tracing objects
-            if (enforcerConfig.getTracingConfig().isTracingEnabled()) {
-                try {
-                    TracerFactory.getInstance().initTracer();
-                    Utils.setTracingEnabled(true);
-                    logger.info("Tracing is enabled.");
-                } catch (TracingException e) {
-                    logger.error("Error enabling tracing", e);
-                }
-            } else {
-                logger.debug("Tracing is disabled.");
             }
 
             //Initialise cache objects
@@ -167,7 +168,8 @@ public class AuthServer {
         return NettyServerBuilder.forPort(authServerConfig.getPort())
                 .keepAliveTime(authServerConfig.getKeepAliveTime(), TimeUnit.SECONDS).bossEventLoopGroup(bossGroup)
                 .workerEventLoopGroup(workerGroup)
-                .addService(ServerInterceptors.intercept(new ExtAuthService(), new AccessLogInterceptor()))
+                .addService(ServerInterceptors.intercept(new ExtAuthService(), new OpenTelemetryInterceptor(),
+                        new AccessLogInterceptor()))
                 .addService(new HealthService())
                 .addService(ServerInterceptors.intercept(new WebSocketFrameService(), new AccessLogInterceptor()))
                 .maxInboundMessageSize(authServerConfig.getMaxMessageSize())

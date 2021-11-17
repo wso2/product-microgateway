@@ -19,7 +19,8 @@ package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorExporterBuilder;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorTraceExporter;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
@@ -53,11 +54,10 @@ public class AzureExporter implements TracerBuilder {
     }
 
     /**
-     * Initialize the tracer with AzureMonitorTraceExporter.
+     * Initialize the tracer SDK with AzureMonitorTraceExporter.
      */
     @Override
-    public Tracer initTracer(Map<String, String> properties) throws TracingException {
-
+    public OpenTelemetrySdk initSdk(Map<String, String> properties) throws TracingException {
         String connectionString = properties.get(TracingConstants.CONF_CONNECTION_STRING);
         if (StringUtils.isEmpty(connectionString)) {
             throw new TracingException("Error initializing Azure Trace Exporter. ConnectionString is null or empty.");
@@ -75,10 +75,11 @@ public class AzureExporter implements TracerBuilder {
                 .setSampler(new RateLimitingSampler(maxTracesPerSecond))
                 .addSpanProcessor(SimpleSpanProcessor.create(exporter)).build();
 
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
+        OpenTelemetrySdk ot = OpenTelemetrySdk.builder()
+                .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .setTracerProvider(tracerProvider).buildAndRegisterGlobal();
-        LOGGER.info("Tracer successfully initialized with Azure Trace Exporter.");
 
-        return openTelemetrySdk.getTracer(instrumentationName);
+        LOGGER.info("Trace SDK successfully initialized with Azure Trace Exporter.");
+        return ot;
     }
 }

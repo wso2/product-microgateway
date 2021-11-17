@@ -28,6 +28,7 @@ public class TracingConstants {
     public static final String JAEGER_TRACE_EXPORTER = "jaeger";
     public static final String ZIPKIN_TRACE_EXPORTER = "zipkin";
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
+    public static final String ENFORCER_START_SPAN = "Enforcer:Starting request verification";
     public static final String PUBLISH_THROTTLE_EVENT_SPAN = "ThrottleFilter:handleRequest():Publish non " +
             "throttled event";
     public static final String ANALYTICS_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Success Flow";

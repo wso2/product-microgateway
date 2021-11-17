@@ -18,8 +18,9 @@
 package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
+import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -58,10 +59,10 @@ public class ZipkinExporter implements TracerBuilder {
     }
 
     /**
-     * Initialize the tracer with {@link ZipkinExporter}.
+     * Initialize the tracer SDK with {@link ZipkinExporter}.
      */
     @Override
-    public Tracer initTracer(Map<String, String> properties) throws TracingException {
+    public OpenTelemetrySdk initSdk(Map<String, String> properties) throws TracingException {
         String ep;
         String host = properties.get(TracingConstants.CONF_HOST);
         String path = properties.get(TracingConstants.CONF_ENDPOINT);
@@ -96,9 +97,11 @@ public class ZipkinExporter implements TracerBuilder {
                 .setSampler(new RateLimitingSampler(maxTracesPerSecond))
                 .setResource(Resource.getDefault().merge(serviceNameResource))
                 .build();
-        OpenTelemetrySdk ot = OpenTelemetrySdk.builder().setTracerProvider(provider).buildAndRegisterGlobal();
+        OpenTelemetrySdk ot = OpenTelemetrySdk.builder().setTracerProvider(provider)
+                .setPropagators(ContextPropagators.create(B3Propagator.injectingMultiHeaders()))
+                .buildAndRegisterGlobal();
 
-        LOGGER.info("Tracer successfully initialized with Zipkin Trace Exporter.");
-        return ot.getTracer(instrumentationName);
+        LOGGER.info("Trace SDK successfully initialized with Zipkin Trace Exporter.");
+        return ot;
     }
 }

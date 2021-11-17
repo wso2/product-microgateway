@@ -52,20 +52,20 @@ public class ZipkinExporterTest {
 
     @Test
     public void testSuccessExporterInit() throws TracingException {
-        Tracer t = ZipkinExporter.getInstance().initTracer(okProps);
+        Tracer t = ZipkinExporter.getInstance().initSdk(okProps).getTracer(instrumentation);
         Assert.assertNotNull("Tracer can't be null", t);
     }
 
     @Test
     public void testInitWithInvalidPort() {
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
-                ZipkinExporter.getInstance().initTracer(badProps));
+                ZipkinExporter.getInstance().initSdk(badProps));
     }
 
     @Test
     public void testInitWithoutEP() {
         badProps.put(TracingConstants.CONF_HOST, "");
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
-                ZipkinExporter.getInstance().initTracer(badProps));
+                ZipkinExporter.getInstance().initSdk(badProps));
     }
 }
