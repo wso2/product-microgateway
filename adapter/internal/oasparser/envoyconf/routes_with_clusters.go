@@ -576,14 +576,18 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 	headerMatcherArray := routev3.HeaderMatcher{
 		Name: httpMethodHeader,
-		HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
-			SafeRegexMatch: &envoy_type_matcherv3.RegexMatcher{
-				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-						MaxProgramSize: nil,
+		HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
+			StringMatch: &envoy_type_matcherv3.StringMatcher{
+				MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
+					SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+								MaxProgramSize: nil,
+							},
+						},
+						Regex: "^(" + methodRegex + ")$",
 					},
 				},
-				Regex: "^(" + methodRegex + ")$",
 			},
 		},
 	}

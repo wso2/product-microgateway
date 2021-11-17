@@ -42,8 +42,12 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
 		LogFormat: &corev3.SubstitutionFormatString{
-			Format: &corev3.SubstitutionFormatString_TextFormat{
-				TextFormat: logConf.AccessLogs.Format,
+			Format: &corev3.SubstitutionFormatString_TextFormatSource{
+				TextFormatSource: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: logConf.AccessLogs.Format,
+					},
+				},
 			},
 		},
 	}
