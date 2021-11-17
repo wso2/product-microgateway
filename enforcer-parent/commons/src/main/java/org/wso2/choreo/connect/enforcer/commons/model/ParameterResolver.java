@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 class ParameterResolver {
 
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile("(\\{[a-zA-Z]+\\})");
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile("(\\{[a-zA-Z0-9]+[a-z-_A-Z0-9]*\\})");
     private static final Logger logger = LogManager.getLogger(ParameterResolver.class);
     private final List<String> parameterNames = new ArrayList<>();
     private final Pattern pattern;

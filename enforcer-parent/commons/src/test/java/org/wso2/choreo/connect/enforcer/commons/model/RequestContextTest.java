@@ -51,6 +51,24 @@ public class RequestContextTest {
     }
 
     @Test
+    public void testPathParametersWithHyphen() {
+        testPathParamValues("/v2/pet/12/status/available", "/v2", "/pet/{pet-Id}/status/{statusType}",
+                "pet-Id", "12");
+    }
+
+    @Test
+    public void testPathParametersWithUnderscore() {
+        testPathParamValues("/v2/pet/12/status/available", "/v2", "/pet/{pet_Id}/status/{statusType}",
+                "pet_Id", "12");
+    }
+
+    @Test
+    public void testPathParametersWithNumbers() {
+        testPathParamValues("/v2/pet/12/status/available", "/v2", "/pet/{petId2}/status/{statusType}",
+                "petId2", "12");
+    }
+
+    @Test
     public void testPathParameterGenerationWithWildcard() {
         testPathParamValues("/v2/pet/12/2/random/random2", "/v2", "/pet/{petId}/{imageId}/*",
                 "petId", "12");
