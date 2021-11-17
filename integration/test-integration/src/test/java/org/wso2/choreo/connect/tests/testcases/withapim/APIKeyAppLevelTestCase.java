@@ -18,6 +18,8 @@
 
 package org.wso2.choreo.connect.tests.testcases.withapim;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -53,8 +55,17 @@ public class APIKeyAppLevelTestCase extends ApimBaseTest {
         String targetDir = Utils.getTargetDirPath();
         String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "app_level_security_openAPI.yaml";
 
-        apiId = PublisherUtils.createAPIUsingOAS(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
-                SAMPLE_API_VERSION, user.getUserName(), filePath, publisherRestClient);
+        JSONArray securityScheme = new JSONArray();
+        securityScheme.put("oauth_basic_auth_api_key_mandatory");
+        securityScheme.put("api_key");
+
+        JSONObject apiProperties = new JSONObject();
+        apiProperties.put("name", SAMPLE_API_NAME);
+        apiProperties.put("context", "/" + SAMPLE_API_CONTEXT);
+        apiProperties.put("version", SAMPLE_API_VERSION);
+        apiProperties.put("provider", user.getUserName());
+        apiProperties.put("securityScheme", securityScheme);
+        apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
 
         publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
 
@@ -79,7 +90,7 @@ public class APIKeyAppLevelTestCase extends ApimBaseTest {
     @Test(description = "Test to check the API Key considering x-wso2-application-security extension ")
     public void invokeAPIKeyForAppLevel() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("api_key", apiKey);
+        headers.put("apikey", apiKey);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);

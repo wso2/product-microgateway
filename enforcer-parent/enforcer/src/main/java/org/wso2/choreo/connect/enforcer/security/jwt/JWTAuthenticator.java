@@ -17,9 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
-import com.google.common.cache.LoadingCache;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
 import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONArray;
@@ -31,25 +29,22 @@ import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
-import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
-import org.wso2.choreo.connect.enforcer.common.ReferenceHolder;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.SecurityInfo;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
-import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
+import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
@@ -58,10 +53,12 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
+import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
+import org.wso2.choreo.connect.enforcer.util.EndpointSecurityUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -74,12 +71,16 @@ import java.util.Set;
 public class JWTAuthenticator implements Authenticator {
 
     private static final Logger log = LogManager.getLogger(JWTAuthenticator.class);
-    private JWTValidator jwtValidator = new JWTValidator();
-    private boolean isGatewayTokenCacheEnabled;
+    private final JWTValidator jwtValidator = new JWTValidator();
+    private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
 
     public JWTAuthenticator() {
-        this.isGatewayTokenCacheEnabled = ConfigHolder.getInstance().getConfig().getCacheDto().isEnabled();
+        EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
+        this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
+        if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
+            this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
+        }
     }
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
@@ -131,7 +132,7 @@ public class JWTAuthenticator implements Authenticator {
                     Utils.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
-                signedJWTInfo = getSignedJwt(jwtToken);
+                signedJWTInfo = JWTUtils.getSignedJwt(jwtToken);
             } catch (ParseException | IllegalArgumentException e) {
                 log.error("Failed to decode the token header", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -218,28 +219,7 @@ public class JWTAuthenticator implements Authenticator {
                         }
                     }
 
-                    // set endpoint security
-                    SecurityInfo securityInfo;
-                    if (apiKeyValidationInfoDTO.getType() != null &&
-                            requestContext.getMatchedAPI().getEndpointSecurity() != null) {
-                        if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                            securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
-                                    getProductionSecurityInfo();
-                        } else {
-                            securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
-                                    getSandBoxSecurityInfo();
-                        }
-                        if (securityInfo != null && securityInfo.isEnabled() &&
-                                APIConstants.AUTHORIZATION_HEADER_BASIC.
-                                        equalsIgnoreCase(securityInfo.getSecurityType())) {
-                            requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
-                                    .toLowerCase());
-                            requestContext.addOrModifyHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                    APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
-                                            Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                                    ':' + securityInfo.getPassword()).getBytes()));
-                        }
-                    }
+                    // Validate scopes
                     Scope validateScopesSpanScope = null;
                     try {
                         if (Utils.tracingEnabled()) {
@@ -248,7 +228,6 @@ public class JWTAuthenticator implements Authenticator {
                             Utils.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID,
                                     ThreadContext.get(APIConstants.LOG_TRACE_ID));
                         }
-                        // Validate scopes
                         validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
                     } finally {
                         if (Utils.tracingEnabled()) {
@@ -257,21 +236,21 @@ public class JWTAuthenticator implements Authenticator {
                         }
                     }
                     log.debug("JWT authentication successful.");
+
+                    // Set endpoint security
+                    EndpointSecurityUtils.addEndpointSecurity(requestContext, apiKeyValidationInfoDTO);
+
+                    // Generate or get backend JWT
                     String endUserToken = null;
-
-                    // Get jwtConfigurationDto
-                    JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().
+                    JWTConfigurationDto backendJwtConfig = ConfigHolder.getInstance().getConfig().
                             getJwtConfigurationDto();
-                    if (jwtConfigurationDto.isEnabled()) {
-                        // Set ttl
-                        jwtConfigurationDto.setTtl(JWTUtil.getTTL());
-
-                        JWTInfoDto jwtInfoDto = FilterUtils
-                                .generateJWTInfoDto(null, validationInfo,
+                    if (backendJwtConfig.isEnabled()) {
+                        JWTInfoDto jwtInfoDto = FilterUtils.generateJWTInfoDto(null, validationInfo,
                                         apiKeyValidationInfoDTO, requestContext);
-                        endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
+                        endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, jwtTokenIdentifier,
+                                jwtInfoDto, isGatewayTokenCacheEnabled);
                         // Set generated jwt token as a response header
-                        requestContext.addOrModifyHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
+                        requestContext.addOrModifyHeaders(backendJwtConfig.getJwtHeader(), endUserToken);
                     }
 
                     AuthenticationContext authenticationContext = FilterUtils
@@ -321,62 +300,7 @@ public class JWTAuthenticator implements Authenticator {
         return 10;
     }
 
-    private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
-            throws APISecurityException {
-        log.debug("Inside generateAndRetrieveJWTToken");
 
-        String endUserToken = null;
-        boolean valid = false;
-        String jwtTokenCacheKey = jwtInfoDto.getApiContext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
-                .concat(tokenSignature);
-        JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
-        // Get the jwt generator class (Default jwt generator class)
-        //Todo: load the class from the configuration
-        jwtGenerator = JWTUtil.getApiMgtGatewayJWTGenerator();
-        if (jwtGenerator != null) {
-            jwtGenerator.setJWTConfigurationDto(jwtConfigurationDto);
-            if (isGatewayTokenCacheEnabled) {
-                try {
-                    Object token = CacheProvider.getGatewayJWTTokenCache().get(jwtTokenCacheKey);
-                    if (token != null && !JWTConstants.UNAVAILABLE.equals(token)) {
-                        endUserToken = (String) token;
-                        String[] splitToken = ((String) token).split("\\.");
-                        org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().
-                                decode(splitToken[1])));
-                        long exp = payload.getLong(JwtConstants.EXP);
-                        long timestampSkew = getTimeStampSkewInSeconds() * 1000;
-                        valid = (exp - System.currentTimeMillis() > timestampSkew);
-                    }
-                } catch (Exception e) {
-                    log.error("Error while getting token from the cache", e);
-                }
-
-                if (StringUtils.isEmpty(endUserToken) || !valid) {
-                    try {
-                        endUserToken = jwtGenerator.generateToken(jwtInfoDto);
-                        CacheProvider.getGatewayJWTTokenCache().put(jwtTokenCacheKey, endUserToken);
-                    } catch (JWTGeneratorException e) {
-                        log.error("Error while Generating Backend JWT", e);
-                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
-                    }
-                }
-            } else {
-                try {
-                    endUserToken = jwtGenerator.generateToken(jwtInfoDto);
-                } catch (JWTGeneratorException e) {
-                    log.error("Error while Generating Backend JWT", e);
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                            APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
-                }
-            }
-        } else {
-            log.debug("Error while loading JWTGenerator");
-        }
-        return endUserToken;
-    }
 
     /**
      * Validate scopes bound to the resource of the API being invoked against the scopes specified
@@ -392,15 +316,12 @@ public class JWTAuthenticator implements Authenticator {
     private void validateScopes(String apiContext, String apiVersion, ResourceConfig matchingResource,
             JWTValidationInfo jwtValidationInfo, SignedJWTInfo jwtToken) throws APISecurityException {
         try {
-            String tenantDomain = "carbon.super"; //TODO : Derive proper tenant domain.
-
-            // Generate TokenValidationContext
-            TokenValidationContext tokenValidationContext = new TokenValidationContext();
-
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
             Set<String> scopeSet = new HashSet<>();
             scopeSet.addAll(jwtValidationInfo.getScopes());
             apiKeyValidationInfoDTO.setScopes(scopeSet);
+
+            TokenValidationContext tokenValidationContext = new TokenValidationContext();
             tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
 
             tokenValidationContext.setAccessToken(jwtToken.getToken());
@@ -409,8 +330,7 @@ public class JWTAuthenticator implements Authenticator {
             tokenValidationContext.setContext(apiContext);
             tokenValidationContext.setVersion(apiVersion);
 
-            boolean valid = ReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain)
-                    .validateScopes(tokenValidationContext);
+            boolean valid = KeyValidator.validateScopes(tokenValidationContext);
             if (valid) {
                 if (log.isDebugEnabled()) {
                     log.debug("Scope validation successful for the resource: " + matchingResource.getPath());
@@ -436,19 +356,12 @@ public class JWTAuthenticator implements Authenticator {
         String apiContext = requestContext.getMatchedAPI().getBasePath();
         String apiVersion = requestContext.getMatchedAPI().getVersion();
         String uuid = requestContext.getMatchedAPI().getUuid();
-        return validateSubscriptionUsingKeyManager(uuid, apiContext, apiVersion, jwtValidationInfo);
-    }
-
-    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(String uuid, String apiContext,
-            String apiVersion, JWTValidationInfo jwtValidationInfo) throws APISecurityException {
-
-        String tenantDomain = "carbon.super"; //TODO : get correct tenant domain
 
         String consumerKey = jwtValidationInfo.getConsumerKey();
         String keyManager = jwtValidationInfo.getKeyManager();
+
         if (consumerKey != null && keyManager != null) {
-            return ReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain)
-                    .validateSubscription(uuid, apiContext, apiVersion, consumerKey, keyManager);
+            return KeyValidator.validateSubscription(uuid, apiContext, apiVersion, consumerKey, keyManager);
         }
         log.debug("Cannot call Key Manager to validate subscription. "
                 + "Payload of the token does not contain the Authorized party - the party to which the ID Token was "
@@ -636,7 +549,7 @@ public class JWTAuthenticator implements Authenticator {
      */
     private JWTValidationInfo checkTokenExpiration(String tokenIdentifier, JWTValidationInfo payload) {
 
-        long timestampSkew = getTimeStampSkewInSeconds();
+        long timestampSkew = FilterUtils.getTimeStampSkewInSeconds();
 
         Date now = new Date();
         Date exp = new Date(payload.getExpiryTime());
@@ -651,34 +564,6 @@ public class JWTAuthenticator implements Authenticator {
             return payload;
         }
         return payload;
-    }
-
-    protected long getTimeStampSkewInSeconds() {
-        //TODO : Read from config
-        return 5;
-    }
-
-    private SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
-        String signature = accessToken.split("\\.")[2];
-        SignedJWTInfo signedJWTInfo = null;
-        LoadingCache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
-        if (gatewaySignedJWTParseCache != null) {
-            Object cachedEntry = gatewaySignedJWTParseCache.getIfPresent(signature);
-            if (cachedEntry != null) {
-                signedJWTInfo = (SignedJWTInfo) cachedEntry;
-            }
-            if (signedJWTInfo == null  || !signedJWTInfo.getToken().equals(accessToken)) {
-                SignedJWT signedJWT = SignedJWT.parse(accessToken);
-                JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-                signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
-                gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
-            }
-        } else {
-            SignedJWT signedJWT = SignedJWT.parse(accessToken);
-            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
-        }
-        return signedJWTInfo;
     }
 
     private String getJWTTokenIdentifier(SignedJWTInfo signedJWTInfo) {

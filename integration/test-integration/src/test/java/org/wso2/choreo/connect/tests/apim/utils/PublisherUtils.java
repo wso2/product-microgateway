@@ -103,17 +103,15 @@ public class PublisherUtils {
     /**
      * Creates API using a given OAS file in publisher.
      *
-     * @param apiName Name for the API to be created
-     * @param apiContext API context for the API to be created
-     * @param apiVersion API version for the API to be created
-     * @param userName Username relevant to the user
+     * @param apiProperties API Properties containing apiName, apiContext, apiVersion,
+     *                      userName and other necessary params for the API to be created
      * @param filePath File path for the OAS file
      * @param publisherRestClient An instance of RestAPIPublisherImpl
      * @return API id as a string
      * @throws MalformedURLException
      * @throws ApiException
      */
-    public static String createAPIUsingOAS(String apiName, String apiContext, String apiVersion, String userName,
+    public static String createAPIUsingOAS(JSONObject apiProperties,
                                            String filePath, RestAPIPublisherImpl publisherRestClient)
                                            throws MalformedURLException, ApiException {
         File definition = new File(filePath);
@@ -128,11 +126,6 @@ public class PublisherUtils {
         List<String> tierList = new ArrayList<>();
         tierList.add(APIMIntegrationConstants.API_TIER.UNLIMITED);
 
-        JSONObject apiProperties = new JSONObject();
-        apiProperties.put("name", apiName);
-        apiProperties.put("context", "/" + apiContext);
-        apiProperties.put("version", apiVersion);
-        apiProperties.put("provider", userName);
         apiProperties.put("endpointConfig", endpointConfig);
         apiProperties.put("policies", tierList);
 

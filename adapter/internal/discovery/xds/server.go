@@ -270,14 +270,14 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		if err != nil {
 			return nil, err
 		}
-		//set swagger file configs not available
-		if mgwSwagger.GetSecurityScheme() == nil {
-			for _, value := range apiYaml.SecurityScheme {
-				schemes = append(schemes, model.SecurityScheme{Type: value})
+		schemes = mgwSwagger.GetSecurityScheme()
+		for _, value := range apiYaml.SecurityScheme {
+			if value == model.APIKeyInAppLevelSecurity {
+				schemes = append(schemes, model.SecurityScheme{DefinitionName: model.APIKeyInAppLevelSecurity,
+					Type: value, Name: model.APIKeyNameWithApim})
 			}
-			mgwSwagger.SetSecurityScheme(schemes)
 		}
-		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
+		mgwSwagger.SetSecurityScheme(schemes)
 
 	} else if apiProject.APIType == mgw.WS {
 		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml)

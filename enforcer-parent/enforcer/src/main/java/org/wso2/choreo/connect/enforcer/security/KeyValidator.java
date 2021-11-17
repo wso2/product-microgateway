@@ -46,30 +46,9 @@ import java.util.Set;
  * Does the subscription and scope validation.
  */
 public class KeyValidator {
-
     private static final Logger log = LogManager.getLogger(KeyValidator.class);
 
-    public APIKeyValidationInfoDTO validateSubscription(String uuid, String apiContext, String apiVersion,
-                                                        String consumerKey, String keyManager) {
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Before validating subscriptions");
-                log.debug("Validation Info : { uuid : " + uuid + " , context : " + apiContext +
-                        " , version : " + apiVersion + " , consumerKey : " + consumerKey + " }");
-            }
-            validateSubscriptionDetails(uuid, apiContext, apiVersion, consumerKey, keyManager, apiKeyValidationInfoDTO);
-            if (log.isDebugEnabled()) {
-                log.debug("After validating subscriptions");
-            }
-        } catch (EnforcerException e) {
-            log.error("Error Occurred while validating subscription.", e);
-        }
-        return apiKeyValidationInfoDTO;
-    }
-
-    public boolean validateScopes(TokenValidationContext validationContext) throws EnforcerException {
+    public static boolean validateScopes(TokenValidationContext validationContext) throws EnforcerException {
 
         if (validationContext.isCacheHit()) {
             return true;
@@ -127,31 +106,18 @@ public class KeyValidator {
         return scopesValidated;
     }
 
-    private boolean validateSubscriptionDetails(String uuid, String context, String version, String consumerKey,
-            String keyManager, APIKeyValidationInfoDTO infoDTO) throws EnforcerException {
-        boolean defaultVersionInvoked = false;
-        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
+    public static APIKeyValidationInfoDTO validateSubscription(String uuid, String apiContext, String apiVersion,
+                                                         String consumerKey, String keyManager) {
+        if (log.isDebugEnabled()) {
+            log.debug("Before validating subscriptions");
+            log.debug("Validation Info : { uuid : " + uuid + " , context : " + apiContext +
+                    " , version : " + apiVersion + " , consumerKey : " + consumerKey + " }");
+        }
+        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         if (apiTenantDomain == null) {
             apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        // Check if the api version has been prefixed with _default_
-        if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
-            defaultVersionInvoked = true;
-            // Remove the prefix from the version.
-            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
-        }
 
-        validateSubscriptionDetails(infoDTO, uuid, context, version, consumerKey, keyManager, defaultVersionInvoked);
-        return infoDTO.isAuthorized();
-    }
-
-    private APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String uuid,
-            String context, String version, String consumerKey, String keyManager, boolean defaultVersionInvoked) {
-        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
-        if (apiTenantDomain == null) {
-            apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        int tenantId = -1234; //TODO: get the correct tenant domain.
         API api = null;
         ApplicationKeyMapping key = null;
         Application app = null;
@@ -192,40 +158,41 @@ public class KeyValidator {
             log.error("Subscription data store is null for tenant domain " + apiTenantDomain);
         }
 
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
         if (api != null && app != null && key != null && sub != null) {
-            validate(infoDTO, apiTenantDomain, tenantId, datastore, api, key, app, sub, keyManager);
-        } else if (!infoDTO.isAuthorized() && infoDTO.getValidationStatus() == 0) {
+            validate(infoDTO, datastore, api, key, app, sub);
+        }
+        if (!infoDTO.isAuthorized() && infoDTO.getValidationStatus() == 0) {
             //Scenario where validation failed and message is not set
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         }
-
+        log.debug("After validating subscriptions");
         return infoDTO;
     }
 
-    private APIKeyValidationInfoDTO validate(APIKeyValidationInfoDTO infoDTO, String apiTenantDomain, int tenantId,
-            SubscriptionDataStore datastore, API api, ApplicationKeyMapping key, Application app, Subscription sub,
-            String keyManager) {
+    private static void validate(APIKeyValidationInfoDTO infoDTO, SubscriptionDataStore datastore,
+                                             API api, ApplicationKeyMapping key, Application app, Subscription sub) {
         String subscriptionStatus = sub.getSubscriptionState();
         String type = key.getKeyType();
         if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
             infoDTO.setAuthorized(false);
-            return infoDTO;
+            return;
         } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus)
                 || APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
             infoDTO.setAuthorized(false);
-            return infoDTO;
+            return;
         } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subscriptionStatus)
                 && !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
             infoDTO.setType(type);
             infoDTO.setAuthorized(false);
-            return infoDTO;
+            return;
         } else if (APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
             infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
             infoDTO.setAuthorized(false);
-            return infoDTO;
+            return;
         }
         infoDTO.setTier(sub.getPolicyId());
         infoDTO.setSubscriber(app.getSubName());
@@ -290,7 +257,6 @@ public class KeyValidator {
         // condition id list for all throttling tiers associated with this API.
         infoDTO.setThrottlingDataList(list);
         infoDTO.setAuthorized(true);
-        return infoDTO;
     }
 
     private boolean isResourcePathMatching(String resourceString, URLMapping urlMapping) {

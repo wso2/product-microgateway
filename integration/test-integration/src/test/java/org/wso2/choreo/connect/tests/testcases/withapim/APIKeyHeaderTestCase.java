@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.tests.testcases.withapim;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -57,8 +58,13 @@ public class APIKeyHeaderTestCase extends ApimBaseTest {
 
         String targetDir = Utils.getTargetDirPath();
         String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "api_key_openAPI.yaml";
-        apiId = PublisherUtils.createAPIUsingOAS(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
-                SAMPLE_API_VERSION, user.getUserName(), filePath, publisherRestClient);
+
+        JSONObject apiProperties = new JSONObject();
+        apiProperties.put("name", SAMPLE_API_NAME);
+        apiProperties.put("context", "/" + SAMPLE_API_CONTEXT);
+        apiProperties.put("version", SAMPLE_API_VERSION);
+        apiProperties.put("provider", user.getUserName());
+        apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
 
         publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
 

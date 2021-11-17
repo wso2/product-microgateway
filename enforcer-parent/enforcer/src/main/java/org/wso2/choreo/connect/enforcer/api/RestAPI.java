@@ -96,6 +96,7 @@ public class RestAPI implements API {
                 securitySchemaConfig.setIn(securityScheme.getIn());
                 securitySchemeDefinitions.put(definitionName, securitySchemaConfig);
                 securitySchemeList.add(securityScheme.getType());
+                // TODO: add two separate protos to hold the definitions and the schemes to apply at API level
             }
         }
 
