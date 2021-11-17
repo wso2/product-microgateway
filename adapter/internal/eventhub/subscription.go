@@ -273,7 +273,8 @@ func retrieveAPIList(response response, initialAPIUUIDListMap map[string]int) {
 					}
 				}
 
-				xds.UpdateXdsForDeployAPIs(apiListResponse, initialAPIUUIDListMap, response.GatewayLabel)
+				xds.UpdateEnforcerAPIList(response.GatewayLabel,
+					xds.MarshalAPIMetataAndReturnList(apiListResponse, initialAPIUUIDListMap, response.GatewayLabel))
 			default:
 				logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
 			}
@@ -293,23 +294,23 @@ func retrieveSubscriptionDataFromChannel(response response) {
 		case *types.SubscriptionList:
 			logger.LoggerSubscription.Debug("Received Subscription information.")
 			subList = newResponse.(*types.SubscriptionList)
-			xds.UpdateXdsForMultipleSubscriptions(subList)
+			xds.UpdateEnforcerSubscriptions(xds.MarshalMultipleSubscriptions(subList))
 		case *types.ApplicationList:
 			logger.LoggerSubscription.Debug("Received Application information.")
 			appList = newResponse.(*types.ApplicationList)
-			xds.UpdateXdsWithMultipleApplications(appList)
+			xds.UpdateEnforcerApplications(xds.MarshalMultipleApplications(appList))
 		case *types.ApplicationPolicyList:
 			logger.LoggerSubscription.Debug("Received Application Policy information.")
 			appPolicyList = newResponse.(*types.ApplicationPolicyList)
-			xds.UpdateXdsForMultipleApplicationPolicies(appPolicyList)
+			xds.UpdateEnforcerApplicationPolicies(xds.MarshalMultipleApplicationPolicies(appPolicyList))
 		case *types.SubscriptionPolicyList:
 			logger.LoggerSubscription.Debug("Received Subscription Policy information.")
 			subPolicyList = newResponse.(*types.SubscriptionPolicyList)
-			xds.UpdateXdsForMultipleSubscriptionPolicies(subPolicyList)
+			xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalMultipleSubscriptionPolicies(subPolicyList))
 		case *types.ApplicationKeyMappingList:
 			logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
 			appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
-			xds.UpdateXdsWithMultipleApplicationKeyMappings(appKeyMappingList)
+			xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalMultipleApplicationKeyMappings(appKeyMappingList))
 		default:
 			logger.LoggerSubscription.Debugf("Unknown type %T", t)
 		}

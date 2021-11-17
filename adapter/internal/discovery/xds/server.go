@@ -544,8 +544,8 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 	return nil
 }
 
-// deleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
-func deleteAPIWithAPIMEvent(uuid, organizationID string, environments []string) {
+// DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
+func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string) {
 	apiIdentifiers := make(map[string]struct{})
 
 	mutexForInternalMapUpdate.Lock()
@@ -782,8 +782,8 @@ func UpdateEnforcerApis(label string, apis []types.Resource, version string) {
 	logger.LoggerXds.Infof("New API cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// updateEnforcerSubscriptions sets new update to the enforcer's Subscriptions
-func updateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
+// UpdateEnforcerSubscriptions sets new update to the enforcer's Subscriptions
+func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	//TODO: (Dinusha) check this hardcoded value
 	logger.LoggerXds.Debug("Updating Enforcer Subscription Cache")
 	label := commonEnforcerLabel
@@ -803,8 +803,8 @@ func updateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	logger.LoggerXds.Infof("New Subscription cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// updateEnforcerApplications sets new update to the enforcer's Applications
-func updateEnforcerApplications(applications *subscription.ApplicationList) {
+// UpdateEnforcerApplications sets new update to the enforcer's Applications
+func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	logger.LoggerXds.Debug("Updating Enforcer Application Cache")
 	label := commonEnforcerLabel
 	applicationList := enforcerApplicationMap[label]
@@ -822,8 +822,8 @@ func updateEnforcerApplications(applications *subscription.ApplicationList) {
 	logger.LoggerXds.Infof("New Application cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// updateEnforcerAPIList sets new update to the enforcer's Apis
-func updateEnforcerAPIList(label string, apis *subscription.APIList) {
+// UpdateEnforcerAPIList sets new update to the enforcer's Apis
+func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	logger.LoggerXds.Debug("Updating Enforcer API Cache")
 	apiList := enforcerAPIListMap[label]
 	apiList = append(apiList, apis)
@@ -840,8 +840,8 @@ func updateEnforcerAPIList(label string, apis *subscription.APIList) {
 	logger.LoggerXds.Infof("New API List cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// updateEnforcerApplicationPolicies sets new update to the enforcer's Application Policies
-func updateEnforcerApplicationPolicies(applicationPolicies *subscription.ApplicationPolicyList) {
+// UpdateEnforcerApplicationPolicies sets new update to the enforcer's Application Policies
+func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.ApplicationPolicyList) {
 	logger.LoggerXds.Debug("Updating Enforcer Application Policy Cache")
 	label := commonEnforcerLabel
 	applicationPolicyList := enforcerApplicationPolicyMap[label]
@@ -859,8 +859,8 @@ func updateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 	logger.LoggerXds.Infof("New Application Policy cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// updateEnforcerSubscriptionPolicies sets new update to the enforcer's Subscription Policies
-func updateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.SubscriptionPolicyList) {
+// UpdateEnforcerSubscriptionPolicies sets new update to the enforcer's Subscription Policies
+func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.SubscriptionPolicyList) {
 	logger.LoggerXds.Debug("Updating Enforcer Subscription Policy Cache")
 	label := commonEnforcerLabel
 	subscriptionPolicyList := enforcerSubscriptionPolicyMap[label]
@@ -878,8 +878,8 @@ func updateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	logger.LoggerXds.Infof("New Subscription Policy cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// updateEnforcerApplicationKeyMappings sets new update to the enforcer's Application Key Mappings
-func updateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.ApplicationKeyMappingList) {
+// UpdateEnforcerApplicationKeyMappings sets new update to the enforcer's Application Key Mappings
+func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.ApplicationKeyMappingList) {
 	logger.LoggerXds.Debug("Updating Application Key Mapping Cache")
 	label := commonEnforcerLabel
 	applicationKeyMappingList := enforcerApplicationKeyMappingMap[label]

@@ -36,7 +36,10 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 			configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 		}
 		if !event.IsDeployEvent {
-			xds.UpdateXdsForDeleteAPI(event.APIUUID, event.OrganizationUUID, configuredEnvs)
+			xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, configuredEnvs)
+			for _, env := range configuredEnvs {
+				xds.DeleteAPIAndReturnList(event.APIUUID, event.OrganizationUUID, env)
+			}
 			continue
 		}
 
@@ -52,7 +55,6 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 			queryParamMap[eh.GatewayLabelParam] = env
 			queryParamMap[eh.APIUUIDParam] = event.APIUUID
 			logger.LoggerGA.Infof("Invoking the apis service endpoint")
-			// TODO: (VirajSalaka) fix
 			var apiList *types.APIList
 			go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
 				eh.APIListChannel, 0)

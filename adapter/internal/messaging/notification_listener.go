@@ -29,6 +29,7 @@ import (
 	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
@@ -168,7 +169,13 @@ func handleAPIEvents(data []byte, eventType string) {
 		// removeFromGateway event with multiple labels could only appear when the API is subjected
 		// to delete. Hence we could simply delete after checking against just one iteration.
 		if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			xds.UpdateXdsForDeleteAPI(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels)
+			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels)
+			for _, env := range apiEvent.GatewayLabels {
+				xdsAPIList := xds.DeleteAPIAndReturnList(apiEvent.UUID, apiEvent.TenantDomain, env)
+				if xdsAPIList != nil {
+					xds.UpdateEnforcerAPIList(env, xdsAPIList)
+				}
+			}
 			return
 		}
 		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
@@ -215,7 +222,10 @@ func handleLifeCycleEvents(data []byte) {
 		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 	}
 	for _, configuredEnv := range configuredEnvs {
-		xds.UpdateXdsForLifeCycleChangeEvent(apiEvent.UUID, apiEvent.APIStatus, configuredEnv)
+		xdsAPIList := xds.MarshalAPIForLifeCycleChangeEventAndReturnList(apiEvent.UUID, apiEvent.APIStatus, configuredEnv)
+		if xdsAPIList != nil {
+			xds.UpdateEnforcerAPIList(configuredEnv, xdsAPIList)
+		}
 	}
 }
 
@@ -248,11 +258,13 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
+		var appKeyMappingList *subscription.ApplicationKeyMappingList
 		if strings.EqualFold(removeApplicationKeyMapping, eventType) {
-			xds.UpdateXdsForApplicationKeyMappingEvent(&applicationKeyMapping, xds.DeleteEvent)
+			appKeyMappingList = xds.MarshalApplicationKeyMappingEventAndReturnList(&applicationKeyMapping, xds.DeleteEvent)
 		} else {
-			xds.UpdateXdsForApplicationKeyMappingEvent(&applicationKeyMapping, xds.CreateEvent)
+			appKeyMappingList = xds.MarshalApplicationKeyMappingEventAndReturnList(&applicationKeyMapping, xds.CreateEvent)
 		}
+		xds.UpdateEnforcerApplicationKeyMappings(appKeyMappingList)
 	} else {
 		var applicationEvent msg.ApplicationEvent
 		appEventErr := json.Unmarshal([]byte(string(data)), &applicationEvent)
@@ -277,16 +289,19 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
+		var appList *subscription.ApplicationList
 		if applicationEvent.Event.Type == applicationCreate {
-			xds.UpdateXdsForApplicationEvent(&app, xds.CreateEvent)
+			appList = xds.MarshalApplicationEventAndReturnList(&app, xds.CreateEvent)
 		} else if applicationEvent.Event.Type == applicationUpdate {
-			xds.UpdateXdsForApplicationEvent(&app, xds.UpdateEvent)
+			appList = xds.MarshalApplicationEventAndReturnList(&app, xds.UpdateEvent)
 		} else if applicationEvent.Event.Type == applicationDelete {
-			xds.UpdateXdsForApplicationEvent(&app, xds.DeleteEvent)
+			appList = xds.MarshalApplicationEventAndReturnList(&app, xds.DeleteEvent)
 		} else {
 			logger.LoggerInternalMsg.Warnf("Application Event Type is not recognized for the Event under "+
 				"Application UUID %s", app.UUID)
+			return
 		}
+		xds.UpdateEnforcerApplications(appList)
 	}
 }
 
@@ -312,14 +327,20 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	if isLaterEvent(subsriptionsListTimeStampMap, fmt.Sprint(subscriptionEvent.SubscriptionID), subscriptionEvent.TimeStamp) {
 		return
 	}
+	var subList *subscription.SubscriptionList
 	if subscriptionEvent.Event.Type == subscriptionCreate {
-		xds.UpdateXdsForSubscriptionEvent(&sub, xds.CreateEvent)
+		subList = xds.MarshalSubscriptionEventAndReturnList(&sub, xds.CreateEvent)
 	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
-		xds.UpdateXdsForSubscriptionEvent(&sub, xds.UpdateEvent)
+		subList = xds.MarshalSubscriptionEventAndReturnList(&sub, xds.UpdateEvent)
 	} else if subscriptionEvent.Event.Type == subscriptionDelete {
-		xds.UpdateXdsForSubscriptionEvent(&sub, xds.DeleteEvent)
+		subList = xds.MarshalSubscriptionEventAndReturnList(&sub, xds.DeleteEvent)
+	} else {
+		logger.LoggerInternalMsg.Warnf("Subscription Event Type is not recognized for the Event under "+
+			"Application UUID %s and API UUID %s", sub.ApplicationUUID, sub.APIUUID)
+		return
 	}
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
+	xds.UpdateEnforcerSubscriptions(subList)
 }
 
 // handlePolicyRelatedEvents to process policy related events
@@ -342,14 +363,19 @@ func handlePolicyEvents(data []byte, eventType string) {
 	if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
 		applicationPolicy := types.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: policyEvent.Event.TenantID,
 			Name: policyEvent.PolicyName, QuotaType: policyEvent.QuotaType}
-
+		var applicationPolicyList *subscription.ApplicationPolicyList
 		if policyEvent.Event.Type == policyCreate {
-			xds.UpdateXdsForApplicationPolicyEvent(&applicationPolicy, xds.CreateEvent)
+			applicationPolicyList = xds.MarshalApplicationPolicyEventAndReturnList(&applicationPolicy, xds.CreateEvent)
 		} else if policyEvent.Event.Type == policyUpdate {
-			xds.UpdateXdsForApplicationPolicyEvent(&applicationPolicy, xds.UpdateEvent)
+			applicationPolicyList = xds.MarshalApplicationPolicyEventAndReturnList(&applicationPolicy, xds.UpdateEvent)
 		} else if policyEvent.Event.Type == policyDelete {
-			xds.UpdateXdsForApplicationPolicyEvent(&applicationPolicy, xds.DeleteEvent)
+			applicationPolicyList = xds.MarshalApplicationPolicyEventAndReturnList(&applicationPolicy, xds.DeleteEvent)
+		} else {
+			logger.LoggerInternalMsg.Warnf("ApplicationPolicy Event Type is not recognized for the Event under "+
+				" policy name %s", policyEvent.PolicyName)
+			return
 		}
+		xds.UpdateEnforcerApplicationPolicies(applicationPolicyList)
 
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent msg.SubscriptionPolicyEvent
@@ -366,13 +392,19 @@ func handlePolicyEvents(data []byte, eventType string) {
 			RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
 			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
 
+		var subscriptionPolicyList *subscription.SubscriptionPolicyList
 		if subscriptionPolicyEvent.Event.Type == policyCreate {
-			xds.UpdateXdsForSubscriptionPolicyEvent(&subscriptionPolicy, xds.CreateEvent)
+			subscriptionPolicyList = xds.MarshalSubscriptionPolicyEventAndReturnList(&subscriptionPolicy, xds.CreateEvent)
 		} else if subscriptionPolicyEvent.Event.Type == policyUpdate {
-			xds.UpdateXdsForSubscriptionPolicyEvent(&subscriptionPolicy, xds.UpdateEvent)
+			subscriptionPolicyList = xds.MarshalSubscriptionPolicyEventAndReturnList(&subscriptionPolicy, xds.UpdateEvent)
 		} else if subscriptionPolicyEvent.Event.Type == policyDelete {
-			xds.UpdateXdsForSubscriptionPolicyEvent(&subscriptionPolicy, xds.DeleteEvent)
+			subscriptionPolicyList = xds.MarshalSubscriptionPolicyEventAndReturnList(&subscriptionPolicy, xds.DeleteEvent)
+		} else {
+			logger.LoggerInternalMsg.Warnf("SubscriptionPolicy Event Type is not recognized for the Event under "+
+				" policy name %s", policyEvent.PolicyName)
+			return
 		}
+		xds.UpdateEnforcerSubscriptionPolicies(subscriptionPolicyList)
 	}
 }
 

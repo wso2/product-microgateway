@@ -329,21 +329,22 @@ func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
 	return nil
 }
 
-// UpdateXdsWithMultipleApplications is used to update the applicationList during the startup where
-// multiple applications are pulled at once. In the end, XDS cache will be updated as well.
-func UpdateXdsWithMultipleApplications(appList *types.ApplicationList) {
+// MarshalMultipleApplications is used to update the applicationList during the startup where
+// multiple applications are pulled at once. And then it returns the ApplicationList.
+func MarshalMultipleApplications(appList *types.ApplicationList) *subscription.ApplicationList {
 	resourceMap := make(map[string]*subscription.Application)
 	for _, application := range appList.List {
 		applicationSub := marshalApplication(&application)
 		resourceMap[application.UUID] = applicationSub
 	}
 	ApplicationMap = resourceMap
-	updateEnforcerApplications(marshalApplicationMapToList(ApplicationMap))
+	return marshalApplicationMapToList(ApplicationMap)
 }
 
-// UpdateXdsForApplicationEvent handles the Application Event corresponding to the event received
-// from message broker. In the end, XDS cache will be updated as well.
-func UpdateXdsForApplicationEvent(application *types.Application, eventType EventType) {
+// MarshalApplicationEventAndReturnList handles the Application Event corresponding to the event received
+// from message broker. And then it returns the ApplicationList.
+func MarshalApplicationEventAndReturnList(application *types.Application,
+	eventType EventType) *subscription.ApplicationList {
 	if eventType == DeleteEvent {
 		delete(ApplicationMap, application.UUID)
 		logger.LoggerXds.Infof("Application %s is deleted.", application.UUID)
@@ -356,12 +357,12 @@ func UpdateXdsForApplicationEvent(application *types.Application, eventType Even
 			logger.LoggerXds.Infof("Application %s is updated.", application.UUID)
 		}
 	}
-	updateEnforcerApplications(marshalApplicationMapToList(ApplicationMap))
+	return marshalApplicationMapToList(ApplicationMap)
 }
 
-// UpdateXdsWithMultipleApplicationKeyMappings is used to update the application key mappings during the startup where
-// multiple key mappings are pulled at once. In the end, XDS cache will be updated as well.
-func UpdateXdsWithMultipleApplicationKeyMappings(keymappingList *types.ApplicationKeyMappingList) {
+// MarshalMultipleApplicationKeyMappings is used to update the application key mappings during the startup where
+// multiple key mappings are pulled at once. And then it returns the ApplicationKeyMappingList.
+func MarshalMultipleApplicationKeyMappings(keymappingList *types.ApplicationKeyMappingList) *subscription.ApplicationKeyMappingList {
 	resourceMap := make(map[string]*subscription.ApplicationKeyMapping)
 	for _, keyMapping := range keymappingList.List {
 		applicationKeyMappingReference := GetApplicationKeyMappingReference(&keyMapping)
@@ -369,12 +370,13 @@ func UpdateXdsWithMultipleApplicationKeyMappings(keymappingList *types.Applicati
 		resourceMap[applicationKeyMappingReference] = keyMappingSub
 	}
 	ApplicationKeyMappingMap = resourceMap
-	updateEnforcerApplicationKeyMappings(marshalKeyMappingMapToList(ApplicationKeyMappingMap))
+	return marshalKeyMappingMapToList(ApplicationKeyMappingMap)
 }
 
-// UpdateXdsForApplicationKeyMappingEvent handles the Application Key Mapping Event corresponding to the event received
-// from message broker. In the end, XDS cache will be updated as well.
-func UpdateXdsForApplicationKeyMappingEvent(keyMapping *types.ApplicationKeyMapping, eventType EventType) {
+// MarshalApplicationKeyMappingEventAndReturnList handles the Application Key Mapping Event corresponding to the event received
+// from message broker. And then it returns the ApplicationKeyMappingList.
+func MarshalApplicationKeyMappingEventAndReturnList(keyMapping *types.ApplicationKeyMapping,
+	eventType EventType) *subscription.ApplicationKeyMappingList {
 	applicationKeyMappingReference := GetApplicationKeyMappingReference(keyMapping)
 	if eventType == DeleteEvent {
 		delete(ApplicationKeyMappingMap, applicationKeyMappingReference)
@@ -386,23 +388,23 @@ func UpdateXdsForApplicationKeyMappingEvent(keyMapping *types.ApplicationKeyMapp
 		logger.LoggerXds.Infof("Application Key Mapping for the applicationKeyMappingReference %s is added.",
 			applicationKeyMappingReference)
 	}
-	updateEnforcerApplicationKeyMappings(marshalKeyMappingMapToList(ApplicationKeyMappingMap))
+	return marshalKeyMappingMapToList(ApplicationKeyMappingMap)
 }
 
-// UpdateXdsForMultipleSubscriptions is used to update the subscriptions during the startup where
-// multiple subscriptions are pulled at once. In the end, XDS cache will be updated as well.
-func UpdateXdsForMultipleSubscriptions(subscriptionsList *types.SubscriptionList) {
+// MarshalMultipleSubscriptions is used to update the subscriptions during the startup where
+// multiple subscriptions are pulled at once. And then it returns the SubscriptionList.
+func MarshalMultipleSubscriptions(subscriptionsList *types.SubscriptionList) *subscription.SubscriptionList {
 	resourceMap := make(map[int32]*subscription.Subscription)
 	for _, sb := range subscriptionsList.List {
 		resourceMap[sb.SubscriptionID] = marshalSubscription(&sb)
 	}
 	SubscriptionMap = resourceMap
-	updateEnforcerSubscriptions(marshalSubscriptionMapToList(SubscriptionMap))
+	return marshalSubscriptionMapToList(SubscriptionMap)
 }
 
-// UpdateXdsForSubscriptionEvent handles the Subscription Event corresponding to the event received
-// from message broker. In the end, XDS cache will be updated as well.
-func UpdateXdsForSubscriptionEvent(sub *types.Subscription, eventType EventType) {
+// MarshalSubscriptionEventAndReturnList handles the Subscription Event corresponding to the event received
+// from message broker. And then it returns the SubscriptionList.
+func MarshalSubscriptionEventAndReturnList(sub *types.Subscription, eventType EventType) *subscription.SubscriptionList {
 	if eventType == DeleteEvent {
 		delete(SubscriptionMap, sub.SubscriptionID)
 		logger.LoggerXds.Infof("Subscription for %s:%s is deleted.", sub.APIUUID, sub.ApplicationUUID)
@@ -415,12 +417,12 @@ func UpdateXdsForSubscriptionEvent(sub *types.Subscription, eventType EventType)
 			logger.LoggerXds.Infof("Subscription for %s:%s is added.", sub.APIUUID, sub.ApplicationUUID)
 		}
 	}
-	updateEnforcerSubscriptions(marshalSubscriptionMapToList(SubscriptionMap))
+	return marshalSubscriptionMapToList(SubscriptionMap)
 }
 
-// UpdateXdsForMultipleApplicationPolicies is used to update the applicationPolicies during the startup where
-// multiple application policies are pulled at once. In the end, XDS cache will be updated as well.
-func UpdateXdsForMultipleApplicationPolicies(policies *types.ApplicationPolicyList) {
+// MarshalMultipleApplicationPolicies is used to update the applicationPolicies during the startup where
+// multiple application policies are pulled at once. And then it returns the ApplicationPolicyList.
+func MarshalMultipleApplicationPolicies(policies *types.ApplicationPolicyList) *subscription.ApplicationPolicyList {
 	resourceMap := make(map[int32]*subscription.ApplicationPolicy)
 	for _, policy := range policies.List {
 		appPolicy := marshalApplicationPolicy(&policy)
@@ -428,12 +430,12 @@ func UpdateXdsForMultipleApplicationPolicies(policies *types.ApplicationPolicyLi
 		logger.LoggerXds.Infof("appPolicy Entry is added : %v", appPolicy)
 	}
 	ApplicationPolicyMap = resourceMap
-	updateEnforcerApplicationPolicies(marshalApplicationPolicyMapToList(ApplicationPolicyMap))
+	return marshalApplicationPolicyMapToList(ApplicationPolicyMap)
 }
 
-// UpdateXdsForApplicationPolicyEvent handles the Application Policy Event corresponding to the event received
-// from message broker. In the end, XDS cache will be updated as well.
-func UpdateXdsForApplicationPolicyEvent(policy *types.ApplicationPolicy, eventType EventType) {
+// MarshalApplicationPolicyEventAndReturnList handles the Application Policy Event corresponding to the event received
+// from message broker. And then it returns the ApplicationPolicyList.
+func MarshalApplicationPolicyEventAndReturnList(policy *types.ApplicationPolicy, eventType EventType) *subscription.ApplicationPolicyList {
 	if eventType == DeleteEvent {
 		delete(ApplicationPolicyMap, policy.ID)
 		logger.LoggerXds.Infof("Application Policy: %s is deleted.", policy.Name)
@@ -446,23 +448,23 @@ func UpdateXdsForApplicationPolicyEvent(policy *types.ApplicationPolicy, eventTy
 			logger.LoggerInternalMsg.Infof("Application Policy: %s is added.", appPolicy.Name)
 		}
 	}
-	updateEnforcerApplicationPolicies(marshalApplicationPolicyMapToList(ApplicationPolicyMap))
+	return marshalApplicationPolicyMapToList(ApplicationPolicyMap)
 }
 
-// UpdateXdsForMultipleSubscriptionPolicies is used to update the subscriptionPolicies during the startup where
-// multiple subscription policies are pulled at once. In the end, XDS cache will be updated as well.
-func UpdateXdsForMultipleSubscriptionPolicies(policies *types.SubscriptionPolicyList) {
+// MarshalMultipleSubscriptionPolicies is used to update the subscriptionPolicies during the startup where
+// multiple subscription policies are pulled at once. And then it returns the SubscriptionPolicyList.
+func MarshalMultipleSubscriptionPolicies(policies *types.SubscriptionPolicyList) *subscription.SubscriptionPolicyList {
 	resourceMap := make(map[int32]*subscription.SubscriptionPolicy)
 	for _, policy := range policies.List {
 		resourceMap[policy.ID] = marshalSubscriptionPolicy(&policy)
 	}
 	SubscriptionPolicyMap = resourceMap
-	updateEnforcerSubscriptionPolicies(marshalSubscriptionPolicyMapToList(SubscriptionPolicyMap))
+	return marshalSubscriptionPolicyMapToList(SubscriptionPolicyMap)
 }
 
-// UpdateXdsForSubscriptionPolicyEvent handles the Subscription Policy Event corresponding to the event received
-// from message broker. In the end, XDS cache will be updated as well.
-func UpdateXdsForSubscriptionPolicyEvent(policy *types.SubscriptionPolicy, eventType EventType) {
+// MarshalSubscriptionPolicyEventAndReturnList handles the Subscription Policy Event corresponding to the event received
+// from message broker. And then it returns the subscriptionPolicyList.
+func MarshalSubscriptionPolicyEventAndReturnList(policy *types.SubscriptionPolicy, eventType EventType) *subscription.SubscriptionPolicyList {
 	if eventType == DeleteEvent {
 		delete(ApplicationPolicyMap, policy.ID)
 		logger.LoggerXds.Infof("Application Policy: %s is deleted.", policy.Name)
@@ -475,15 +477,14 @@ func UpdateXdsForSubscriptionPolicyEvent(policy *types.SubscriptionPolicy, event
 			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is added.", subPolicy.Name)
 		}
 	}
-	updateEnforcerSubscriptionPolicies(marshalSubscriptionPolicyMapToList(SubscriptionPolicyMap))
+	return marshalSubscriptionPolicyMapToList(SubscriptionPolicyMap)
 }
 
-// UpdateXdsForDeployAPIs updates the internal APIListMap and update the XDS caches so that the APIs are
-// deployed in router and enforcer.
+// MarshalAPIMetataAndReturnList updates the internal APIListMap and returns the XDS compatible APIList.
 // apiList is the internal APIList object (For single API, this would contain a List with just one API)
 // initialAPIUUIDListMap is assigned during startup when global adapter is associated. This would be empty otherwise.
 // gatewayLabel is the environment.
-func UpdateXdsForDeployAPIs(apiList *types.APIList, initialAPIUUIDListMap map[string]int, gatewayLabel string) {
+func MarshalAPIMetataAndReturnList(apiList *types.APIList, initialAPIUUIDListMap map[string]int, gatewayLabel string) *subscription.APIList {
 
 	if APIListMap == nil {
 		APIListMap = make(map[string]map[string]*subscription.APIs)
@@ -503,42 +504,42 @@ func UpdateXdsForDeployAPIs(apiList *types.APIList, initialAPIUUIDListMap map[st
 		newAPI := marshalAPIMetadata(&api)
 		resourceMapForLabel[api.UUID] = newAPI
 	}
-	updateEnforcerAPIList(gatewayLabel, marshalAPIListMapToList(resourceMapForLabel))
+	return marshalAPIListMapToList(resourceMapForLabel)
 }
 
-// UpdateXdsForDeleteAPI removes the API from both router and Enforcer XDS caches.
-func UpdateXdsForDeleteAPI(apiUUID, organizationUUID string, gatewayLabels []string) {
-	deleteAPIWithAPIMEvent(apiUUID, organizationUUID, gatewayLabels)
-	for _, gatewayLabel := range gatewayLabels {
-		if _, ok := APIListMap[gatewayLabel]; !ok {
-			logger.LoggerXds.Debugf("No API Metadata is available under gateway Environment : %s", gatewayLabel)
-			continue
-		}
-		delete(APIListMap[gatewayLabel], apiUUID)
-		updateEnforcerAPIList(gatewayLabel, marshalAPIListMapToList(APIListMap[gatewayLabel]))
-	}
-}
-
-// UpdateXdsForLifeCycleChangeEvent updates the internal map's API instances lifecycle state only if
-// stored API Instance's or input status event is a blocked event.
-func UpdateXdsForLifeCycleChangeEvent(apiUUID, status, gatewayLabel string) {
+// DeleteAPIAndReturnList removes the API from internal maps and returns the marshalled API List.
+// If the apiUUID is not found in the internal map under the provided environment, then it would return a
+// nil value. Hence it is required to check if the return value is nil, prior to updating the XDS cache.
+func DeleteAPIAndReturnList(apiUUID, organizationUUID string, gatewayLabel string) *subscription.APIList {
 	if _, ok := APIListMap[gatewayLabel]; !ok {
 		logger.LoggerXds.Debugf("No API Metadata is available under gateway Environment : %s", gatewayLabel)
-		return
+		return nil
+	}
+	delete(APIListMap[gatewayLabel], apiUUID)
+	return marshalAPIListMapToList(APIListMap[gatewayLabel])
+}
+
+// MarshalAPIForLifeCycleChangeEventAndReturnList updates the internal map's API instances lifecycle state only if
+// stored API Instance's or input status event is a blocked event.
+// If no change is applied, it would return nil. Hence the XDS cache should not be updated.
+func MarshalAPIForLifeCycleChangeEventAndReturnList(apiUUID, status, gatewayLabel string) *subscription.APIList {
+	if _, ok := APIListMap[gatewayLabel]; !ok {
+		logger.LoggerXds.Debugf("No API Metadata is available under gateway Environment : %s", gatewayLabel)
+		return nil
 	}
 	if _, ok := APIListMap[gatewayLabel][apiUUID]; !ok {
 		logger.LoggerXds.Debugf("No API Metadata for API ID: %s is available under gateway Environment : %s",
 			apiUUID, gatewayLabel)
-		return
+		return nil
 	}
 	storedAPILCState := APIListMap[gatewayLabel][apiUUID].LcState
 
 	// Because the adapter only required to update the XDS if it is related to blocked state.
 	if !(storedAPILCState == blockedStatus || status == blockedStatus) {
-		return
+		return nil
 	}
 	APIListMap[gatewayLabel][apiUUID].LcState = status
-	updateEnforcerAPIList(gatewayLabel, marshalAPIListMapToList(APIListMap[gatewayLabel]))
+	return marshalAPIListMapToList(APIListMap[gatewayLabel])
 }
 
 func marshalSubscription(subscriptionInternal *types.Subscription) *subscription.Subscription {
