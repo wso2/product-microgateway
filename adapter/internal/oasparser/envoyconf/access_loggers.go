@@ -99,7 +99,7 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 	}
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marsheling gRPC access log configs. ", err)
+		logger.LoggerOasparser.Error("Error marshalling gRPC access log configs. ", err)
 		return nil
 	}
 

@@ -20,6 +20,7 @@ const (
 	extAuthzClusterName     string = "ext-authz"
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
+	tracingClusterName      string = "wso2_cc_trace"
 )
 
 const (
@@ -101,4 +102,13 @@ const (
 
 const (
 	defaultListenerHostAddress = "0.0.0.0"
+)
+
+// tracing configuration constants
+const (
+	tracerHost          = "host"
+	tracerPort          = "port"
+	tracerMaxPathLength = "maxPathLength"
+	tracerEndpoint      = "endpoint"
+	tracerNameZipkin    = "envoy.tracers.zipkin"
 )

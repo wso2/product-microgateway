@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ZipkinExporterTest {
+    private static final String instrumentation = "CC";
     private static Map<String, String> okProps;
     private static Map<String, String> badProps;
 
@@ -37,11 +38,15 @@ public class ZipkinExporterTest {
     public static void setup() {
         okProps = new HashMap<>();
         badProps = new HashMap<>();
-        okProps.put(TracingConstants.CONF_ENDPOINT, "http://localhost:9411/api/v2/span");
+        okProps.put(TracingConstants.CONF_HOST, "localhost");
+        okProps.put(TracingConstants.CONF_PORT, "9411");
+        okProps.put(TracingConstants.CONF_ENDPOINT, "/api/v2/span");
         okProps.put(TracingConstants.CONF_MAX_TRACES_PER_SEC, "3");
         okProps.put(TracingConstants.CONF_EXPORTER_TIMEOUT, "15");
-        okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, "CC");
-        badProps.put(TracingConstants.CONF_ENDPOINT, "localhost:9411");
+        okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, instrumentation);
+        badProps.put(TracingConstants.CONF_HOST, "localhost");
+        badProps.put(TracingConstants.CONF_PORT, "");
+        badProps.put(TracingConstants.CONF_ENDPOINT, "");
         GlobalOpenTelemetry.resetForTest();
     }
 
@@ -52,14 +57,14 @@ public class ZipkinExporterTest {
     }
 
     @Test
-    public void testInitWithInvalidEP() {
-        Assert.assertThrows("Incorrect exception was thrown", IllegalArgumentException.class, () ->
+    public void testInitWithInvalidPort() {
+        Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
                 ZipkinExporter.getInstance().initTracer(badProps));
     }
 
     @Test
     public void testInitWithoutEP() {
-        badProps.put(TracingConstants.CONF_ENDPOINT, "");
+        badProps.put(TracingConstants.CONF_HOST, "");
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
                 ZipkinExporter.getInstance().initTracer(badProps));
     }

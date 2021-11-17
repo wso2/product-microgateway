@@ -108,9 +108,9 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	tracing := &enforcer.Tracing{
-		Enabled:          config.Enforcer.Tracing.Enabled,
-		Type:             config.Enforcer.Tracing.Type,
-		ConfigProperties: config.Enforcer.Tracing.ConfigProperties,
+		Enabled:          config.Tracing.Enabled,
+		Type:             config.Tracing.Type,
+		ConfigProperties: config.Tracing.ConfigProperties,
 	}
 	metrics := &enforcer.Metrics{
 		Enabled: config.Enforcer.Metrics.Enabled,

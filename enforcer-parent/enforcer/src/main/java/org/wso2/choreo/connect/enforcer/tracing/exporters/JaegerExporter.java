@@ -28,11 +28,14 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.tracing.RateLimitingSampler;
 import org.wso2.choreo.connect.enforcer.tracing.TracerBuilder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -59,20 +62,25 @@ public class JaegerExporter implements TracerBuilder {
      */
     @Override
     public Tracer initTracer(Map<String, String> properties) throws TracingException {
-        String jaegerEp = properties.get(TracingConstants.CONF_ENDPOINT);
-
-        if (StringUtils.isEmpty(jaegerEp)) {
-            throw new TracingException("Error initializing Jaeger Trace Exporter. Jaeger endpoint is missing.");
+        String ep;
+        String host = properties.get(TracingConstants.CONF_HOST);
+        String path = properties.get(TracingConstants.CONF_ENDPOINT);
+        ConfigHolder conf = ConfigHolder.getInstance();
+        try {
+            int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
+            ep = new URL("http", host, port, path).toString();
+        } catch (MalformedURLException | NumberFormatException e) {
+            throw new TracingException("Couldn't initialize the zipkin exporter. Invalid endpoint definition", e);
         }
-        JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder()
-                .setEndpoint(jaegerEp)
-                .build();
+
+        JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder().setEndpoint(ep).build();
+        String serviceName = TracingConstants.SERVICE_NAME_PREFIX + '-' + conf.getEnvVarConfig().getEnforcerLabel();
         Resource serviceNameResource =
-                Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, TracingConstants.SERVICE_NAME));
+                Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
         String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
-        String instrumentName = properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
                 TracingConstants.DEFAULT_MAX_TRACES_PER_SEC : Integer.parseInt(maxTracesPerSecondString);
+        String instrumentName = properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
         String instrumentationName = StringUtils.isEmpty(instrumentName) ?
                 TracingConstants.DEFAULT_INSTRUMENTATION_NAME : instrumentName;
 
