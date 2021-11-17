@@ -110,6 +110,5 @@ const (
 	tracerPort          = "port"
 	tracerMaxPathLength = "maxPathLength"
 	tracerEndpoint      = "endpoint"
-	tracerTypeAzure     = "azure"
 	tracerNameZipkin    = "envoy.tracers.zipkin"
 )

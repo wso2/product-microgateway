@@ -32,6 +32,8 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/api"
 )
 
+const tracerTypeAzure = "azure"
+
 // GetRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
 // when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
 func GetRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts map[string][]byte, interceptorCerts map[string][]byte,
@@ -55,7 +57,7 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 	)
 	conf, _ := config.ReadConfigs()
 
-	if conf.Tracing.Enabled && conf.Tracing.Type != "azure" {
+	if conf.Tracing.Enabled && conf.Tracing.Type != tracerTypeAzure {
 		logger.LoggerOasparser.Debugln("Creating global cluster - Tracing")
 		if c, e, err := envoyconf.CreateTracingCluster(conf); err == nil {
 			clusters = append(clusters, c)
