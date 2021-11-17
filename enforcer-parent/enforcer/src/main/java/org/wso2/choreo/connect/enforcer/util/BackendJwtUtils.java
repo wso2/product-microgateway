@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 
 /**
- * Contains Util methods related to backend JWT generation
+ * Contains Util methods related to backend JWT generation.
  */
 public class BackendJwtUtils {
     private static final Logger log = LogManager.getLogger(BackendJwtUtils.class);

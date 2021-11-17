@@ -171,7 +171,6 @@ public abstract class APIKeyHandler implements Authenticator {
         jwtClaimsSetVerifier.setMaxClockSkew((int) FilterUtils.getTimeStampSkewInSeconds());
         try {
             jwtClaimsSetVerifier.verify(payload);
-            log.debug("{} is not expired. User: {}", keyType, payload.getSubject());
         } catch (BadJWTException e) {
             if ("Expired JWT".equals(e.getMessage())) {
                 log.debug("{} API key is expired.", keyType);
@@ -187,7 +186,6 @@ public abstract class APIKeyHandler implements Authenticator {
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
         }
-        log.debug("{} is not expired. User: {}", keyType, payload.getSubject());
         return false;
     }
 
@@ -222,14 +220,10 @@ public abstract class APIKeyHandler implements Authenticator {
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
                                 )) {
                     api = subscribedAPIsJSONObject;
-                    log.debug("User is subscribed to the API: {}, version: {}. Token: {}",
-                            apiContext, apiVersion, FilterUtils.getMaskedToken(splitToken[0]));
                     break;
                 }
             }
             if (api == null) {
-                log.debug("User is not subscribed to access the API: {} , version: {}. Token: {}",
-                        apiContext, apiVersion, FilterUtils.getMaskedToken(splitToken[0]));
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
