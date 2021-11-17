@@ -278,6 +278,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 			}
 		}
 		mgwSwagger.SetSecurityScheme(schemes)
+		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
 	} else if apiProject.APIType == mgw.WS {
 		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml)

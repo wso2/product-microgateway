@@ -122,15 +122,12 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             String apiKeyName = requestContext.getMatchedAPI().
                     getSecuritySchemeDefinitions().get(APIConstants.API_SECURITY_API_KEY).getName();
             if (requestContext.getHeaders().containsKey(apiKeyName)) {
-                log.info("getHeaders");
                 return requestContext.getHeaders().get(apiKeyName);
             }
             if (requestContext.getQueryParameters().containsKey(apiKeyName)) {
-                log.info("getQueryParameters");
                 return requestContext.getQueryParameters().get(apiKeyName);
             }
         } else {
-            log.info("not isAppLevelApiKeySecurityEnabled");
             apiKey = getAPIKey(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME, requestContext, true);
             if ("".equals(apiKey)) {
                 apiKey = getAPIKey(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME, requestContext, false);

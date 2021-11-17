@@ -164,11 +164,14 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                         Utils.setTag(verifyTokenWithoutCacheSpan, APIConstants.LOG_TRACE_ID,
                                 ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
-
-                    isVerified = verifyTokenWhenNotInCache(jwsHeader, signedJWT, splitToken, payload, "InternalKey");
-                    if (Utils.tracingEnabled()) {
-                        verifyTokenWithoutCacheSpanScope.close();
-                        Utils.finishSpan(verifyTokenWithoutCacheSpan);
+                    try {
+                        isVerified = verifyTokenWhenNotInCache(jwsHeader, signedJWT, splitToken, payload,
+                                "InternalKey");
+                    } finally {
+                        if (Utils.tracingEnabled()) {
+                            verifyTokenWithoutCacheSpanScope.close();
+                            Utils.finishSpan(verifyTokenWithoutCacheSpan);
+                        }
                     }
                 }
 
@@ -192,13 +195,16 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                         Utils.setTag(apiKeyValidateSubscriptionSpan, APIConstants.LOG_TRACE_ID,
                                 ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
-                    JSONObject api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
-                            false); //TODO: (suksw) Check on how to update this for internal key
-                    log.debug("Internal Key authentication successful.");
-
-                    if (Utils.tracingEnabled()) {
-                        apiKeyValidateSubscriptionSpanScope.close();
-                        Utils.finishSpan(apiKeyValidateSubscriptionSpan);
+                    JSONObject api; // kept outside to make this reachable for methods outside the try block
+                    try {
+                        api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
+                                false);
+                    } finally {
+                        log.debug("Internal Key authentication successful.");
+                        if (Utils.tracingEnabled()) {
+                            apiKeyValidateSubscriptionSpanScope.close();
+                            Utils.finishSpan(apiKeyValidateSubscriptionSpan);
+                        }
                     }
                     //Get APIKeyValidationInfoDTO for internal key with limited info
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
