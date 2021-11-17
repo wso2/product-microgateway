@@ -20,11 +20,13 @@ package envoyconf
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	envoy_config_trace_v3 "github.com/envoyproxy/go-control-plane/envoy/config/trace/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
@@ -112,6 +114,16 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 
 	if len(accessLogs) > 0 {
 		manager.AccessLog = accessLogs
+	}
+
+	if conf.Tracing.Enabled && conf.Tracing.Type != TracerTypeAzure {
+		if tracing, err := getTracing(conf); err == nil {
+			manager.Tracing = tracing
+			manager.GenerateRequestId = &wrappers.BoolValue{Value: conf.Tracing.Enabled}
+		} else {
+			logger.LoggerOasparser.Error("Failed to initialize tracing. Router tracing will be disabled", err)
+			conf.Tracing.Enabled = false
+		}
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
@@ -267,4 +279,41 @@ func generateTLSCert(privateKeyPath string, publicKeyPath string) *tlsv3.TlsCert
 		},
 	}
 	return &tlsCert
+}
+
+func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, error) {
+	var endpoint string
+	var maxPathLength uint32
+
+	if endpoint = conf.Tracing.ConfigProperties[tracerEndpoint]; len(endpoint) <= 0 {
+		return nil, errors.New("Invalid endpoint path provided for tracing endpoint")
+	}
+	if length, err := strconv.ParseUint(conf.Tracing.ConfigProperties[tracerMaxPathLength], 10, 32); err == nil {
+		maxPathLength = uint32(length)
+	} else {
+		return nil, errors.New("Invalid max path length provided for tracing endpoint")
+	}
+
+	providerConf := &envoy_config_trace_v3.ZipkinConfig{
+		CollectorCluster:         tracingClusterName,
+		CollectorEndpoint:        endpoint,
+		CollectorEndpointVersion: envoy_config_trace_v3.ZipkinConfig_HTTP_JSON,
+	}
+
+	typedConf, err := ptypes.MarshalAny(providerConf)
+	if err != nil {
+		return nil, err
+	}
+
+	tracing := &hcmv3.HttpConnectionManager_Tracing{
+		Provider: &envoy_config_trace_v3.Tracing_Http{
+			Name: tracerNameZipkin,
+			ConfigType: &envoy_config_trace_v3.Tracing_Http_TypedConfig{
+				TypedConfig: typedConf,
+			},
+		},
+		MaxPathTagLength: &wrappers.UInt32Value{Value: maxPathLength},
+	}
+
+	return tracing, nil
 }
