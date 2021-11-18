@@ -82,7 +82,7 @@ public class TLSUtils {
     }
 
     /**
-     * Add the certificates to the the truststore.
+     * Add the certificates to the truststore.
      *
      * @param filePath   Filepath of the corresponding certificate or directory containing the certificates
      * @param trustStore Keystore with trusted certificates

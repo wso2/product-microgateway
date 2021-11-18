@@ -26,12 +26,12 @@ import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import java.util.Base64;
 
 /**
- * Util methods related to backend endpoint security
+ * Util methods related to backend endpoint security.
  */
 public class EndpointSecurityUtils {
 
     /**
-     * Adds the backend endpoint security header to the given requestContext
+     * Adds the backend endpoint security header to the given requestContext.
      *
      * @param requestContext requestContext instance to add the backend endpoint security header
      * @param apiKeyValidationInfoDTO apiKeyValidationInfoDTO containing necessary info

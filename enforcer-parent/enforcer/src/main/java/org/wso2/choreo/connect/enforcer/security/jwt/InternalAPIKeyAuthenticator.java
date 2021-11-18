@@ -49,7 +49,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import java.text.ParseException;
 
 /**
- * Implements the authenticator interface to authenticate request using a Internal Key.
+ * Implements the authenticator interface to authenticate request using an Internal Key.
  */
 public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
