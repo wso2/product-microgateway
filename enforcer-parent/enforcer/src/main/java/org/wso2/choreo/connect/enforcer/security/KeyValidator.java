@@ -48,6 +48,13 @@ import java.util.Set;
 public class KeyValidator {
     private static final Logger log = LogManager.getLogger(KeyValidator.class);
 
+    /**
+     * Validate the scopes related to the given validationContext.
+     *
+     * @param validationContext the token validation context
+     * @return true is the scopes are valid
+     * @throws EnforcerException if key validation information not set
+     */
     public static boolean validateScopes(TokenValidationContext validationContext) throws EnforcerException {
 
         if (validationContext.isCacheHit()) {
@@ -106,6 +113,16 @@ public class KeyValidator {
         return scopesValidated;
     }
 
+    /**
+     * Validate subscriptions.
+     *
+     * @param uuid uuid of the API
+     * @param apiContext API context, used for logging purposes and to extract the tenant domain
+     * @param apiVersion API version, used for logging purposes
+     * @param consumerKey consumer key related to the token
+     * @param keyManager key manager related to the token
+     * @return validation information about the request
+     */
     public static APIKeyValidationInfoDTO validateSubscription(String uuid, String apiContext, String apiVersion,
                                                          String consumerKey, String keyManager) {
         log.debug("Before validating subscriptions");

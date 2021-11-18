@@ -51,7 +51,8 @@ public class BackendJwtUtils {
     private static volatile long ttl = -1L;
 
     /**
-     * Get Time to live
+     * Get Time to live.
+     *
      * @return -1L * 1000
      */
     public static long getTTL() {
@@ -59,7 +60,7 @@ public class BackendJwtUtils {
     }
 
     /**
-     * Generates or gets the Cached Backend JWT token
+     * Generates or gets the Cached Backend JWT token.
      *
      * @param jwtGenerator the jwtGenerator instance to use if generating the token
      * @param tokenSignature token signature to use in the cache key
@@ -123,9 +124,9 @@ public class BackendJwtUtils {
     }
 
     /**
-     * Load the specified backend JWT Generator
+     * Load the specified backend JWT Generator.
      *
-     * @return JWT Generator
+     * @return an instance of the JWT Generator given in the config
      */
     public static AbstractAPIMgtGatewayJWTGenerator getApiMgtGatewayJWTGenerator() {
         JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
@@ -151,7 +152,8 @@ public class BackendJwtUtils {
     }
 
     /**
-     * Load the specified JWT Transformers
+     * Load the specified JWT Transformers.
+     *
      * @return a map of JWT Transformers
      */
     public static Map<String, JWTTransformer> loadJWTTransformers() {

@@ -170,6 +170,13 @@ public class JWTUtils {
         return privateKey;
     }
 
+    /**
+     * Get the internal representation of the JWT.
+     *
+     * @param accessToken the raw access token
+     * @return the internal representation of the JWT
+     * @throws ParseException if an error occurs when decoding the JWT
+     */
     public static SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
         String signature = accessToken.split("\\.")[2];
         SignedJWTInfo signedJWTInfo = null;
@@ -194,6 +201,12 @@ public class JWTUtils {
         return signedJWTInfo;
     }
 
+    /**
+     * Check if the JWT token is expired.
+     *
+     * @param token the JWT token
+     * @return true if expired
+     */
     public static boolean isExpired(String token) {
         String[] splitToken = token.split("\\.");
         org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().

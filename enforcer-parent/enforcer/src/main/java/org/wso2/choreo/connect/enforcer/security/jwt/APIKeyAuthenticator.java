@@ -300,8 +300,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 "API key authentication failed.");
     }
 
-
-
     private APIKeyValidationInfoDTO getAPIKeyValidationDTO(RequestContext requestContext, JWTClaimsSet payload)
             throws ParseException, APISecurityException {
 
@@ -475,7 +473,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         }
         return false;
     }
-
 
     private BigInteger ipToBigInteger(String ipAddress) {
 
