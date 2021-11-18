@@ -562,72 +562,7 @@ public class FilterUtils {
         return authHeaderName.toLowerCase();
     }
 
-    /**
-     * Provides the name used to provide API key in the OAS definition.
-     *
-     * @param requestContext Request context instance
-     * @param isAppLevelAPIKey Indicates about App level API key requirement
-     * @return String used to provide API key
-     */
-    public static String getAPIKeyName(RequestContext requestContext, boolean isAppLevelAPIKey) {
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI().
-                getSecuritySchemeDefinitions();
-        String apiKeyNameInDefinition = "";
-        Map<String, String> headers = requestContext.getHeaders();
-        Map<String, String> queryParams = requestContext.getQueryParameters();
-        if (isAppLevelAPIKey) {
-            for (SecuritySchemaConfig config: securitySchemeDefinitions.values()) {
-                if (config.getType().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
-                    return config.getName().toLowerCase();
-                }
-            }
-        }
-        apiKeyNameInDefinition = getAPIKeyNameFromMap(headers, securitySchemeDefinitions);
-        if (apiKeyNameInDefinition.isEmpty()) {
-            apiKeyNameInDefinition = getAPIKeyNameFromMap(queryParams, securitySchemeDefinitions);
-        }
-        return apiKeyNameInDefinition;
-    }
 
-    private static String getAPIKeyNameFromMap(Map<String, String> dataMap,
-                                               Map<String, SecuritySchemaConfig> securitySchemeDefinitions) {
-        String apiKeyName = "";
-        for (SecuritySchemaConfig config: securitySchemeDefinitions.values()) {
-            if (config.getType().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME) &&
-                    dataMap.containsKey(config.getName().toLowerCase())) {
-                apiKeyName = config.getName().toLowerCase();
-            }
-        }
-        return apiKeyName;
-    }
-
-    /**
-     * Provides security scheme config relevant to the API request.
-     *
-     * @param requestContext   Request context instance
-     * @param isAppLevelAPIKey boolean value to denote request is for api_key (Application level API key request)
-     * @param apiKeyName       Name of the API key
-     * @return Instance relevant to the security scheme config
-     */
-    public static SecuritySchemaConfig getAPIKeySchemeConfig(RequestContext requestContext, boolean isAppLevelAPIKey,
-                                                             String apiKeyName) {
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI().
-                getSecuritySchemeDefinitions();
-        SecuritySchemaConfig securitySchemaConfig = null;
-        if (isAppLevelAPIKey) {
-            for (SecuritySchemaConfig config: securitySchemeDefinitions.values()) {
-                if (config.getType().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
-                    return config;
-                }
-            }
-        }
-        for (SecuritySchemaConfig config: securitySchemeDefinitions.values()) {
-            if (config.getName().equalsIgnoreCase(apiKeyName)) {
-                securitySchemaConfig = config;
-            }
-        }
-        return securitySchemaConfig;
-    }
 
     /**
      * Provides list of arbitrary names used to define API keys.
@@ -652,5 +587,10 @@ public class FilterUtils {
      */
     public static boolean isSkippedAnalyticsFaultEvent(String errorCode) {
         return SKIPPED_FAULT_CODES.contains(errorCode);
+    }
+
+    public static long getTimeStampSkewInSeconds() {
+        //TODO : Read from config
+        return 5;
     }
 }

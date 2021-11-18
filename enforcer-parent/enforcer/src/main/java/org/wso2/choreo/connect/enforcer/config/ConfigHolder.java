@@ -63,8 +63,9 @@ import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
-import org.wso2.choreo.connect.enforcer.security.jwt.JWTUtil;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
+import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
+import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -231,7 +232,7 @@ public class ConfigHolder {
                 issuerDto.addClaimMapping(map);
             }
             // Load jwt transformers map.
-            config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
+            config.setJwtTransformerMap(BackendJwtUtils.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias.isBlank()) {
                 if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(jwtIssuer.getName())) {
@@ -409,7 +410,7 @@ public class ConfigHolder {
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
         try {
             jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
-            jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
+            jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
         } catch (EnforcerException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);
         }
@@ -541,7 +542,7 @@ public class ConfigHolder {
         jwtIssuerConfigurationDto.setConsumerDialectUri(jwtIssuer.getClaimDialect());
         jwtIssuerConfigurationDto.setSignatureAlgorithm(jwtIssuer.getSigningAlgorithm());
         try {
-            jwtIssuerConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtIssuer.getPrivateKeyPath()));
+            jwtIssuerConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(jwtIssuer.getPrivateKeyPath()));
             jwtIssuerConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtIssuer.getPublicCertificatePath()));
         } catch (EnforcerException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);

@@ -22,23 +22,28 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.ThreadContext;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
+import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
@@ -50,9 +55,16 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
     private String securityParam;
+    private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
+    private final boolean isGatewayTokenCacheEnabled;
 
     public InternalAPIKeyAuthenticator(String securityParam) {
         this.securityParam = securityParam;
+        EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
+        this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
+        if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
+            this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
+        }
     }
 
     @Override
@@ -87,8 +99,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 // Remove internal key from outbound request
                 requestContext.getRemoveHeaders().add(securityParam);
 
-                getKeyNotFoundError(internalKey);
-
                 String[] splitToken = internalKey.split("\\.");
                 SignedJWT signedJWT = SignedJWT.parse(internalKey);
                 JWSHeader jwsHeader = signedJWT.getHeader();
@@ -115,7 +125,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
                         CacheProvider.getGatewayInternalKeyDataCache().getIfPresent(tokenIdentifier);
 
-                boolean isVerified = verifyTokenInCache(tokenIdentifier, internalKey, payload, splitToken,
+                boolean isVerified = isVerifiedApiKeyInCache(tokenIdentifier, internalKey, payload, splitToken,
                         "InternalKey", jwtTokenPayloadInfo);
                 Scope verifyTokenInCacheSpanScope = null;
                 if (jwtTokenPayloadInfo != null) {
@@ -147,7 +157,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 Scope verifyTokenWithoutCacheSpanScope = null;
                 // Verify token when it is not found in cache
                 if (!isVerified) {
-                    isVerified = verifyTokenNotInCache(jwsHeader, signedJWT, splitToken, payload, "InternalKey");
                     log.debug("Internal Key not found in the cache.");
                     if (Utils.tracingEnabled()) {
                         verifyTokenWithoutCacheSpan = Utils.startSpan(TracingConstants.VERIFY_TOKEN_SPAN, tracer);
@@ -155,24 +164,9 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                         Utils.setTag(verifyTokenWithoutCacheSpan, APIConstants.LOG_TRACE_ID,
                                 ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Internal Key not found in the cache.");
-                    }
-
-                    String alias = "";
-                    if (jwsHeader != null && StringUtils.isNotEmpty(jwsHeader.getKeyID())) {
-                        alias = jwsHeader.getKeyID();
-                    }
-
                     try {
-                        isVerified = JWTUtil.verifyTokenSignature(signedJWT, alias) &&
-                                !isJwtTokenExpired(payload, "InternalKey");
-                    } catch (EnforcerException e) {
-                        log.error("Internal Key authentication failed. " +
-                                FilterUtils.getMaskedToken(splitToken[0]));
-                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                        isVerified = verifyTokenWhenNotInCache(jwsHeader, signedJWT, splitToken, payload,
+                                "InternalKey");
                     } finally {
                         if (Utils.tracingEnabled()) {
                             verifyTokenWithoutCacheSpanScope.close();
@@ -201,18 +195,39 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                         Utils.setTag(apiKeyValidateSubscriptionSpan, APIConstants.LOG_TRACE_ID,
                                 ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
-                    JSONObject api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
-                            false);
-                    log.debug("Internal Key authentication successful.");
-
-                    if (Utils.tracingEnabled()) {
-                        apiKeyValidateSubscriptionSpanScope.close();
-                        Utils.finishSpan(apiKeyValidateSubscriptionSpan);
+                    JSONObject api; // kept outside to make this reachable for methods outside the try block
+                    try {
+                        api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
+                                false);
+                    } finally {
+                        log.debug("Internal Key authentication successful.");
+                        if (Utils.tracingEnabled()) {
+                            apiKeyValidateSubscriptionSpanScope.close();
+                            Utils.finishSpan(apiKeyValidateSubscriptionSpan);
+                        }
                     }
+                    //Get APIKeyValidationInfoDTO for internal key with limited info
+                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
+
+                    // Generate or get backend JWT
+                    JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().
+                            getConfig().getJwtConfigurationDto();
+                    if (jwtConfigurationDto.isEnabled()) {
+                        JWTValidationInfo validationInfo = new JWTValidationInfo();
+                        validationInfo.setUser(payload.getSubject());
+                        JWTInfoDto jwtInfoDto = FilterUtils
+                                .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
+                        String endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, tokenIdentifier,
+                                jwtInfoDto, isGatewayTokenCacheEnabled);
+                        // Set generated jwt token as a response header
+                        requestContext.addOrModifyHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
+                    }
+
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
                             requestContext.getMatchedAPI().getTier(),
                             requestContext.getMatchedAPI().getUuid(), internalKey);
                 } else {
+                    log.error("Internal Key authentication failed. " + FilterUtils.getMaskedToken(splitToken[0]));
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                     CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), internalKey);
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -236,6 +251,23 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
+    private APIKeyValidationInfoDTO getAPIKeyValidationDTO(RequestContext requestContext, JWTClaimsSet payload)
+            throws ParseException {
+
+        APIKeyValidationInfoDTO validationInfoDTO = new APIKeyValidationInfoDTO();
+        validationInfoDTO.setApiTier(requestContext.getMatchedAPI().getTier());
+        if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
+            validationInfoDTO.setType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
+        } else {
+            validationInfoDTO.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        }
+
+        //check whether name is assigned correctly (This was not populated in JWTAuthenticator)
+        validationInfoDTO.setApiName(requestContext.getMatchedAPI().getName());
+        validationInfoDTO.setApiVersion(requestContext.getMatchedAPI().getVersion());
+        return validationInfoDTO;
+    }
+
     @Override
     public String getChallengeString() {
         return "";
@@ -256,7 +288,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public int getPriority() {
-
         return -10;
     }
 }

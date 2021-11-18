@@ -112,21 +112,10 @@ type CircuitBreakers struct {
 
 // SecurityScheme represents the structure of an security scheme.
 type SecurityScheme struct {
-	// Arbitrary name used to define security scheme
-	// ex: default, x-api-key etc.
-	DefinitionName string
-
-	// Type of the security scheme
-	// Possible values are apiKey, oauth2
-	Type string
-
-	// Name of the security scheme
-	// User can define a specific name for above types
-	Name string
-
-	// Location of the api key
-	// Valid values are query, header
-	In string
+	DefinitionName string // Arbitrary name used to define the security scheme. ex: default, myApikey
+	Type           string // Type of the security scheme. Valid: apiKey, api_key, oauth2
+	Name           string // Used for API key. Name of header or query. ex: x-api-key, apikey
+	In             string // Where the api key found in. Valid: query, header
 }
 
 // CorsConfig represents the API level Cors Configuration

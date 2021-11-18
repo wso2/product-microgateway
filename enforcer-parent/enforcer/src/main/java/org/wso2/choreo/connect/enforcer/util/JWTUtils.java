@@ -16,12 +16,14 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.security.jwt;
+package org.wso2.choreo.connect.enforcer.util;
 
+import com.google.common.cache.LoadingCache;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -30,21 +32,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
-import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
-import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
-import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -59,19 +55,14 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.text.ParseException;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * Utility functions used for jwt authentication.
  */
-public class JWTUtil {
-
-    private static final Logger log = LogManager.getLogger(JWTUtil.class);
-    private static volatile long ttl = -1L;
+public class JWTUtils {
+    private static final Logger log = LogManager.getLogger(JWTUtils.class);
 
     /**
      * This method used to retrieve JWKS keys from endpoint.
@@ -179,66 +170,36 @@ public class JWTUtil {
         return privateKey;
     }
 
-    public static long getTTL() {
-        return ttl * 1000;
-    }
-
-    public static AbstractAPIMgtGatewayJWTGenerator getApiMgtGatewayJWTGenerator() {
-        JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
-        String classNameInConfig = jwtConfigurationDto.getGatewayJWTGeneratorImpl();
-        AbstractAPIMgtGatewayJWTGenerator jwtGenerator = null;
-
-        // Load default jwt generator class
-        if (classNameInConfig.equals(JWTConstants.DEFAULT_JWT_GENERATOR_CLASS_NAME)) {
-            jwtGenerator = new APIMgtGatewayJWTGeneratorImpl();
-            return jwtGenerator;
+    public static SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
+        String signature = accessToken.split("\\.")[2];
+        SignedJWTInfo signedJWTInfo = null;
+        //Check whether GatewaySignedJWTParseCache is correct
+        LoadingCache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
+        if (gatewaySignedJWTParseCache != null) {
+            Object cachedEntry = gatewaySignedJWTParseCache.getIfPresent(signature);
+            if (cachedEntry != null) {
+                signedJWTInfo = (SignedJWTInfo) cachedEntry;
+            }
+            if (signedJWTInfo == null  || !signedJWTInfo.getToken().equals(accessToken)) {
+                SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+                signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
+                gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
+            }
         } else {
-            Class<AbstractAPIMgtGatewayJWTGenerator> clazz;
-            try {
-                clazz = (Class<AbstractAPIMgtGatewayJWTGenerator>) Class.forName(classNameInConfig);
-                Constructor<AbstractAPIMgtGatewayJWTGenerator> constructor = clazz.getConstructor();
-                jwtGenerator = constructor.newInstance();
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
-                    | InstantiationException | InvocationTargetException | ClassCastException e) {
-                log.error("Error while generating AbstractAPIMgtGatewayJWTGenerator from the class", e);
-            }
+            SignedJWT signedJWT = SignedJWT.parse(accessToken);
+            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
         }
-        return jwtGenerator;
+        return signedJWTInfo;
     }
 
-    public static Map<String, JWTTransformer> loadJWTTransformers() {
-        ServiceLoader<JWTTransformer> loader = ServiceLoader.load(JWTTransformer.class);
-        Iterator<JWTTransformer> classIterator = loader.iterator();
-        Map<String, JWTTransformer> jwtTransformersMap = new HashMap<>();
-
-        if (!classIterator.hasNext()) {
-            log.debug("No JWTTransformers found.");
-            return jwtTransformersMap;
-        }
-
-        while (classIterator.hasNext()) {
-            JWTTransformer transformer = classIterator.next();
-            Annotation[] annotations = transformer.getClass().getAnnotations();
-            if (annotations.length == 0) {
-                log.debug("JWTTransformer is discarded as no annotations found. : " +
-                        transformer.getClass().getCanonicalName());
-                continue;
-            }
-            for (Annotation annotation : annotations) {
-                if (annotation instanceof JwtTransformerAnnotation) {
-                    JwtTransformerAnnotation jwtTransformerAnnotation =
-                            (JwtTransformerAnnotation) annotation;
-                    if (jwtTransformerAnnotation.enabled()) {
-                        log.debug("JWTTransformer for the issuer : " + jwtTransformerAnnotation.issuer() +
-                                "is enabled.");
-                        jwtTransformersMap.put(jwtTransformerAnnotation.issuer(), transformer);
-                    } else {
-                        log.debug("JWTTransformer for the issuer : " + jwtTransformerAnnotation.issuer() +
-                                "is disabled.");
-                    }
-                }
-            }
-        }
-        return jwtTransformersMap;
+    public static boolean isExpired(String token) {
+        String[] splitToken = token.split("\\.");
+        org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().
+                decode(splitToken[1])));
+        long exp = payload.getLong(JwtConstants.EXP);
+        long timestampSkew = FilterUtils.getTimeStampSkewInSeconds() * 1000;
+        return (exp - System.currentTimeMillis() < timestampSkew);
     }
 }

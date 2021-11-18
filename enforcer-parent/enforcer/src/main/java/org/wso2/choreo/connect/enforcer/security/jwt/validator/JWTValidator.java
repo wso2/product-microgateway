@@ -35,8 +35,8 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
-import org.wso2.choreo.connect.enforcer.security.jwt.JWTUtil;
 import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
+import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
@@ -131,7 +131,7 @@ public class JWTValidator {
                         RSAKey keyByKeyId = (RSAKey) jwkSet.getKeyByKeyId(keyID);
                         RSAPublicKey rsaPublicKey = keyByKeyId.toRSAPublicKey();
                         if (rsaPublicKey != null) {
-                            return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
+                            return JWTUtils.verifyTokenSignature(signedJWT, rsaPublicKey);
                         }
                     } else {
                         throw new EnforcerException("Key Algorithm not supported");
@@ -139,13 +139,13 @@ public class JWTValidator {
                 } else if (tokenIssuer.getCertificate() != null) {
                     logger.debug("Retrieve certificate from Token issuer and validating");
                     RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();
-                    return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
+                    return JWTUtils.verifyTokenSignature(signedJWT, rsaPublicKey);
                 } else {
                     //TODO: (VirajSalaka) Come up with a fix
-                    return JWTUtil.verifyTokenSignature(signedJWT, keyID);
+                    return JWTUtils.verifyTokenSignature(signedJWT, keyID);
                 }
             }
-            return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias);
+            return JWTUtils.verifyTokenSignature(signedJWT, certificateAlias);
         } catch (ParseException | JOSEException | IOException e) {
             throw new EnforcerException("JWT Signature verification failed", e);
         }
@@ -160,7 +160,7 @@ public class JWTValidator {
     }
 
     private JWKSet retrieveJWKSet() throws IOException, ParseException {
-        String jwksInfo = JWTUtil.retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
+        String jwksInfo = JWTUtils.retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
         jwkSet = JWKSet.parse(jwksInfo);
         return jwkSet;
     }

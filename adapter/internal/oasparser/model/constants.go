@@ -56,6 +56,7 @@ const (
 	Optional                 string = "optional"
 	SecurityTypes            string = "security-types"
 	APIKeyInAppLevelSecurity string = "api_key"
+	APIKeyNameWithApim       string = "apikey"
 	APIKeyTypeInOAS          string = "apiKey"
 )
 
