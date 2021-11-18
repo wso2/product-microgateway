@@ -119,6 +119,7 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArr
 func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity mgw.APIEndpointSecurity, vhost string) *api.Api {
 	resources := []*api.Resource{}
 	securitySchemes := []*api.SecurityScheme{}
+	securityList := []*api.SecurityList{}
 
 	logger.LoggerOasparser.Debugf("Security schemes in GetEnforcerAPI method %v:", mgwSwagger.GetSecurityScheme())
 	for _, securityScheme := range mgwSwagger.GetSecurityScheme() {
@@ -129,6 +130,20 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 			In:             securityScheme.In,
 		}
 		securitySchemes = append(securitySchemes, scheme)
+	}
+
+	for _, security := range mgwSwagger.GetSecurity() {
+		mapOfSecurity := make(map[string]*api.Scopes)
+		for key, scopes := range security {
+			scopeList := &api.Scopes{
+				Scopes: scopes,
+			}
+			mapOfSecurity[key] = scopeList
+		}
+		securityMap := &api.SecurityList{
+			ScopeList: mapOfSecurity,
+		}
+		securityList = append(securityList, securityMap)
 	}
 
 	for _, res := range mgwSwagger.GetResources() {
@@ -180,6 +195,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		ApiLifeCycleState:   lifeCycleState,
 		Tier:                mgwSwagger.GetXWso2ThrottlingTier(),
 		SecurityScheme:      securitySchemes,
+		Security:            securityList,
 		EndpointSecurity:    endpointSecurityDetails,
 		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),

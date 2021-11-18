@@ -22,6 +22,8 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
+import org.wso2.choreo.connect.discovery.api.Scopes;
+import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
@@ -71,7 +73,7 @@ public class RestAPI implements API {
         String apiType = api.getApiType();
         Map<String, EndpointCluster> endpoints = new HashMap<>();
         Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
-        List<String> securitySchemeList = new ArrayList<>();
+        Map<String, List<String>> securityScopesMap = new HashMap<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
 
@@ -93,8 +95,17 @@ public class RestAPI implements API {
                 securitySchemaConfig.setName(securityScheme.getName());
                 securitySchemaConfig.setIn(securityScheme.getIn());
                 securitySchemeDefinitions.put(definitionName, securitySchemaConfig);
-                securitySchemeList.add(securityScheme.getType());
-                // TODO: add two separate protos to hold the definitions and the schemes to apply at API level
+            }
+        }
+
+        for (SecurityList securityList : api.getSecurityList()) {
+            for (Map.Entry<String, Scopes> entry: securityList.getScopeListMap().entrySet()) {
+                securityScopesMap.put(entry.getKey(), entry.getValue().getScopesList());
+                // - api_key: [] <-- supported
+                // - default: [] <-- supported
+                // - api_key: []
+                //   oauth: [] <-- AND operation not supported. Only the first will be considered.
+                break;
             }
         }
 
@@ -129,11 +140,11 @@ public class RestAPI implements API {
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
-                .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
-                .endpoints(endpoints)
-                .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).securitySchemeDefinitions(securitySchemeDefinitions).build();
+                .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
+                .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
+                .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
+                .endpoints(endpoints).endpointSecurity(endpointSecurity)
+                .organizationId(api.getOrganizationId()).build();
 
         initFilters();
         return basePath;

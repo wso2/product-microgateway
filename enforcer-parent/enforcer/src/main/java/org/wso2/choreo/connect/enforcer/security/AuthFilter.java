@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -68,10 +69,12 @@ public class AuthFilter implements Filter {
         boolean isOAuthBasicAuthMandatory = false;
 
         // Set security conditions
-        if (apiConfig.getSecuritySchemas() == null) {
+        if (apiConfig.getApiSecurity() == null || apiConfig.getSecuritySchemeDefinitions() == null) {
             isOAuthProtected = true;
         } else {
-            for (String apiSecurityLevel : apiConfig.getSecuritySchemas()) {
+            for (Map.Entry<String, SecuritySchemaConfig> securityDefinition :
+                    apiConfig.getSecuritySchemeDefinitions().entrySet()) {
+                String apiSecurityLevel = securityDefinition.getValue().getType();
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                     isOAuthProtected = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
@@ -84,7 +87,7 @@ public class AuthFilter implements Filter {
                         equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOAuthBasicAuthMandatory = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY) ||
-                           apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
+                        apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
                     isApiKeyProtected = true;
                 }
             }

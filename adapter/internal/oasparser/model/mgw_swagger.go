@@ -51,6 +51,7 @@ type MgwSwagger struct {
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
 	securityScheme      []SecurityScheme
+	security            []map[string][]string
 	xWso2ThrottlingTier string
 	xWso2AuthHeader     string
 	disableSecurity     bool
@@ -227,6 +228,11 @@ func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []SecurityScheme) {
 	swagger.securityScheme = securityScheme
 }
 
+// SetSecurity sets the API level security of the API
+func (swagger *MgwSwagger) SetSecurity(security []map[string][]string) {
+	swagger.security = security
+}
+
 // SetVersion sets the version of the API
 func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
@@ -247,6 +253,11 @@ func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
 // GetSecurityScheme returns the securitySchemes of the API
 func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 	return swagger.securityScheme
+}
+
+// GetSecurity returns the API level security of the API
+func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
+	return swagger.security
 }
 
 // SetXWso2Extensions set the MgwSwagger object with the properties
