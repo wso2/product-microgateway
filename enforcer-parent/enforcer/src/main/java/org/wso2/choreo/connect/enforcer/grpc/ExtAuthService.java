@@ -31,6 +31,7 @@ import io.envoyproxy.envoy.service.auth.v3.DeniedHttpResponse;
 import io.envoyproxy.envoy.service.auth.v3.OkHttpResponse;
 import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
@@ -41,6 +42,7 @@ import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingContextHolder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
@@ -64,8 +66,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                             request.getAttributes().getRequest().getHttp().getId());
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer =  Utils.getGlobalTracer();
+                Context parentContext = TracingContextHolder.getInstance().getContext();
                 // This span will be the parent span for all the filters
-                extAuthServiceSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, tracer);
+                extAuthServiceSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, parentContext, tracer);
                 extAuthServiceSpanScope = extAuthServiceSpan.getSpan().makeCurrent();
                 Utils.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             }
@@ -86,7 +89,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 metricsExporter.trackMetric("enforcerLatency", System.currentTimeMillis() - starTimestamp);
             }
         }
-
     }
 
     private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {

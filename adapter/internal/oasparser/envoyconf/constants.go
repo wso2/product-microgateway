@@ -111,4 +111,6 @@ const (
 	tracerMaxPathLength = "maxPathLength"
 	tracerEndpoint      = "endpoint"
 	tracerNameZipkin    = "envoy.tracers.zipkin"
+	// Azure tracer's name
+	TracerTypeAzure = "azure"
 )

@@ -19,6 +19,8 @@
 package org.wso2.choreo.connect.enforcer.tracing;
 
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.propagation.TextMapPropagator;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +41,7 @@ public class TracerFactory {
 
     private static final Logger logger = LogManager.getLogger(AuthServer.class);
     private Tracer tracer;
+    private TextMapPropagator textPropagator;
     private static TracerFactory tracerFactory;
 
     public static TracerFactory getInstance() {
@@ -52,11 +55,15 @@ public class TracerFactory {
         return tracerFactory;
     }
 
-    public void initTracer() throws TracingException {
-
+    public void init() throws TracingException {
+        OpenTelemetrySdk sdk = null;
         TracingDTO tracingConfig = ConfigHolder.getInstance().getConfig().getTracingConfig();
         String exporterType = tracingConfig.getExporterType();
         Map<String, String> properties = new HashMap<>(tracingConfig.getConfigProperties());
+        String instrumentName = properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
+        String instrumentationName = StringUtils.isEmpty(instrumentName) ?
+                TracingConstants.DEFAULT_INSTRUMENTATION_NAME : instrumentName;
+
         if (!properties.isEmpty()) {
             properties.replaceAll((k, v) -> Utils.replaceEnvRegex(v));
         } else {
@@ -69,21 +76,27 @@ public class TracerFactory {
             exporterType = TracingConstants.JAEGER_TRACE_EXPORTER;
         }
         if (exporterType.equalsIgnoreCase(TracingConstants.AZURE_TRACE_EXPORTER)) {
-            this.tracer = AzureExporter.getInstance().initTracer(properties);
+            sdk = AzureExporter.getInstance().initSdk(properties);
         } else if (TracingConstants.JAEGER_TRACE_EXPORTER.equalsIgnoreCase(exporterType)) {
-            this.tracer = JaegerExporter.getInstance().initTracer(properties);
+            sdk = JaegerExporter.getInstance().initSdk(properties);
         } else if (TracingConstants.ZIPKIN_TRACE_EXPORTER.equalsIgnoreCase(exporterType)) {
-            this.tracer = ZipkinExporter.getInstance().initTracer(properties);
+            sdk = ZipkinExporter.getInstance().initSdk(properties);
         } else {
-            logger.error("Tracer exporter type: {} not found!", exporterType);
+            throw new TracingException("Tracer exporter type: " + exporterType + "not found!");
         }
+
+        if (sdk == null) {
+            return;
+        }
+        this.tracer = sdk.getTracer(instrumentationName);
+        this.textPropagator = sdk.getPropagators().getTextMapPropagator();
+    }
+
+    public TextMapPropagator getTextPropagator() {
+        return textPropagator;
     }
 
     public Tracer getTracer() {
         return tracer;
-    }
-
-    public void setTracer(Tracer tracer) {
-        this.tracer = tracer;
     }
 }

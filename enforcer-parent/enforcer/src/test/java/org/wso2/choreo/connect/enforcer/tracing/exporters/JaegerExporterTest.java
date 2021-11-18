@@ -52,20 +52,20 @@ public class JaegerExporterTest {
 
     @Test
     public void testSuccessExporterInit() throws TracingException {
-        Tracer t = JaegerExporter.getInstance().initTracer(okProps);
+        Tracer t = JaegerExporter.getInstance().initSdk(okProps).getTracer(instrumentation);
         Assert.assertNotNull("Tracer can't be null", t);
     }
 
     @Test
     public void testInitWithInvalidPort() {
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
-                JaegerExporter.getInstance().initTracer(badProps));
+                JaegerExporter.getInstance().initSdk(badProps));
     }
 
     @Test
     public void testInitWithoutEP() {
         badProps.put(TracingConstants.CONF_HOST, "");
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
-                JaegerExporter.getInstance().initTracer(badProps));
+                JaegerExporter.getInstance().initSdk(badProps));
     }
 }
