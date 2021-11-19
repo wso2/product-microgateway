@@ -271,7 +271,7 @@ enabled = true
 
 # Configurations related to Authorization header
 [enforcer.security.authHeader]
-  # Remove authorization header from backend request
+  # Send the authorization header to the backend
   enableOutboundAuthHeader = false
   # Header name for the authorization token coming from the downstream client
   authorizationHeader = "authorization"
