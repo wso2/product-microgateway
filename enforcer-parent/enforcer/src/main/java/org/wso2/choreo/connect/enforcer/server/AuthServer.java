@@ -90,6 +90,7 @@ public class AuthServer {
             if (enforcerConfig.getTracingConfig().isTracingEnabled()) {
                 try {
                     TracerFactory.getInstance().init();
+                    Utils.setTracingEnabled(true);
                     logger.info("Tracing is enabled.");
                 } catch (TracingException e) {
                     logger.error("Error enabling tracing", e);
