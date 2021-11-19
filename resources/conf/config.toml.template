@@ -479,8 +479,8 @@ enabled = true
 [tracing]
   # Enable/Disable tracing in Choreo Connect
   enabled = false
-  # Type of tracer exporter (e.g: azure, jaeger, zipkin)
-  type = "jaeger"
+  # Type of tracer exporter (e.g: azure, zipkin). Use zipkin type for Jaeger as well.
+  type = "zipkin"
   # configurations for zipkin tracer type
   [tracing.configProperties]
     # maximum length of the request path to extract and include in the HttpUrl tag.
@@ -488,9 +488,9 @@ enabled = true
     # jaeger host
     host = "jaeger"
     # jaeger port
-    port = "14268"
+    port = "9411"
     # jaeger collector endpoint path
-    endpoint = "/api/traces"
+    endpoint = "/api/v2/spans"
     # library Name to be tagged in traces (`otel.library.name`).
     libraryName = "CHOREO-CONNECT"
     # Maximum number of sampled traces per second string
