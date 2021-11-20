@@ -44,6 +44,7 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
+import org.wso2.choreo.connect.enforcer.util.EndpointSecurityUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
@@ -208,6 +209,9 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     }
                     //Get APIKeyValidationInfoDTO for internal key with limited info
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
+
+                    // Sets endpoint security
+                    EndpointSecurityUtils.addEndpointSecurity(requestContext, apiKeyValidationInfoDTO);
 
                     // Generate or get backend JWT
                     JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().

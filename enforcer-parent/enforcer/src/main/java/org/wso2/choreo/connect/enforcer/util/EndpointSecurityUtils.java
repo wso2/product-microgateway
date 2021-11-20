@@ -56,7 +56,7 @@ public class EndpointSecurityUtils {
                 requestContext.addOrModifyHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                         APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
                                 Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                        ':' + securityInfo.getPassword()).getBytes()));
+                                        ':' + String.valueOf(securityInfo.getPassword())).getBytes()));
             }
         }
     }
