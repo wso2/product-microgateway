@@ -35,17 +35,19 @@ public class EndpointSecurityUtils {
      * @param requestContext requestContext instance to add the backend endpoint security header
      */
     public static void addEndpointSecurity(RequestContext requestContext) {
-        SecurityInfo securityInfo;
+        SecurityInfo securityInfo = null;
         String keyType = "";
         if (requestContext.getAuthenticationContext() != null) {
             keyType = requestContext.getAuthenticationContext().getKeyType();
         }
-        if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType)) {
-            securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
-                    getProductionSecurityInfo();
-        } else {
-            securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
-                    getSandBoxSecurityInfo();
+        if (requestContext.getMatchedAPI().getEndpointSecurity() != null) {
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType)) {
+                securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
+                        getProductionSecurityInfo();
+            } else {
+                securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
+                        getSandBoxSecurityInfo();
+            }
         }
         if (securityInfo != null && securityInfo.isEnabled() &&
                 APIConstants.AUTHORIZATION_HEADER_BASIC.
