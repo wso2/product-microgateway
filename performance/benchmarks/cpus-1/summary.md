@@ -3,7 +3,7 @@
 During each release, we execute various automated performance test scenarios and publish the results.
 
 | Test Scenarios | Description |
-| --- | --- |
+| -------------- | ----------- |
 | Invoke an API deployed in the API Manager via Choreo Connect. | A secured API, which directly invokes the backend through Choreo Connect using JWT tokens considering different user counts and message payload sizes. |
 
 Our test client is [Apache JMeter](https://jmeter.apache.org/index.html). We test each scenario for a fixed duration of
@@ -35,7 +35,7 @@ In addition to the above metrics, we measure the load average and several other 
 The following are the test parameters.
 
 | Test Parameter | Description | Values |
-| --- | --- | --- |
+| -------------- | ----------- | ------ |
 | Scenario Name | The name of the test scenario. | Refer to the above table. |
 | Heap Size | The amount of memory allocated to the application | 1024M |
 | Concurrent Users | The number of users accessing the application at the same time. | 10, 50, 100, 200, 500, 1000 |
@@ -65,7 +65,7 @@ The following are the measurements collected from each performance test conducte
 test parameters.
 
 | Measurement | Description |
-| --- | --- |
+| ----------- | ----------- |
 | Error % | Percentage of requests with errors |
 | Total requests | Number of requests happened during the testing period |
 | Average Response Time (ms) | The average response time of a set of results |
@@ -103,3 +103,4 @@ The following is the summary of performance test results collected for the measu
 |200             |100KiB              |751373        |159                       |1251.8                   |0      |0          |199.0362                 |233                                  |241                                  |277                                  |
 |500             |100KiB              |759492        |394                       |1265.7                   |0      |0          |498.6858                 |484                                  |507                                  |553                                  |
 |1000            |100KiB              |763591        |786                       |1263.5                   |0      |0          |993.111                  |892                                  |924                                  |996                                  |
+

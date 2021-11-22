@@ -35,7 +35,7 @@ In addition to the above metrics, we measure the load average and several other 
 The following are the test parameters.
 
 | Test Parameter | Description | Values |
-| --- | --- | --- |
+| -------------- | ----------- | ------ |
 | Scenario Name | The name of the test scenario. | Refer to the above table. |
 | Heap Size | The amount of memory allocated to the application | 1024M |
 | Concurrent Users | The number of users accessing the application at the same time. | 10, 50, 100, 200, 500, 1000 |
@@ -65,7 +65,7 @@ The following are the measurements collected from each performance test conducte
 test parameters.
 
 | Measurement | Description |
-| --- | --- |
+| ----------- | ----------- |
 | Error % | Percentage of requests with errors |
 | Total requests | Number of requests happened during the testing period |
 | Average Response Time (ms) | The average response time of a set of results |
@@ -103,3 +103,4 @@ The following is the summary of performance test results collected for the measu
 |200             |100KiB              |905439        |131                       |1508.4                   |0      |0          |197.6004                 |260                                  |301                                  |393                                  |
 |500             |100KiB              |894891        |334                       |1490.3                   |0      |0          |497.7602                 |505                                  |568                                  |739                                  |
 |1000            |100KiB              |929809        |645                       |1531                     |0      |0          |987.495                  |796                                  |886                                  |1118                                 |
+
