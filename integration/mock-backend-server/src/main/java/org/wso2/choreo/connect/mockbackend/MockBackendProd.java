@@ -291,6 +291,7 @@ public class MockBackendProd extends Thread {
             //                                             response flow headers to interceptor service
             // sent request body in response body
             httpServer.createContext(context + "/echo", Utils::echo);
+            httpServer.createContext(context + "/echo2", Utils::echo);
 
             httpServer.start();
         } catch (Exception ex) {
