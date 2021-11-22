@@ -107,7 +107,7 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo");
         HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint);
 
         // test headers
         Map<String, String> respHeaders = response.getHeaders();
