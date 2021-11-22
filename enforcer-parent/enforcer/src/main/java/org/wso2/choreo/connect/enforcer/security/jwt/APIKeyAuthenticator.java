@@ -43,7 +43,6 @@ import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
-import org.wso2.choreo.connect.enforcer.util.EndpointSecurityUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
@@ -250,9 +249,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
                 // Get APIKeyValidationInfoDTO
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
-
-                // Sets endpoint security
-                EndpointSecurityUtils.addEndpointSecurity(requestContext, apiKeyValidationInfoDTO);
 
                 // TODO: Add analytics data processing
 

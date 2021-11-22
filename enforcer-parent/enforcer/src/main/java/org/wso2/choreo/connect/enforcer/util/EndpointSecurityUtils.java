@@ -21,7 +21,6 @@ package org.wso2.choreo.connect.enforcer.util;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecurityInfo;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 
 import java.util.Base64;
 
@@ -34,30 +33,31 @@ public class EndpointSecurityUtils {
      * Adds the backend endpoint security header to the given requestContext.
      *
      * @param requestContext requestContext instance to add the backend endpoint security header
-     * @param apiKeyValidationInfoDTO apiKeyValidationInfoDTO containing necessary info
      */
-    public static void addEndpointSecurity(RequestContext requestContext,
-                                                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO) {
-        SecurityInfo securityInfo;
-        if (apiKeyValidationInfoDTO.getType() != null &&
-                requestContext.getMatchedAPI().getEndpointSecurity() != null) {
-            if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+    public static void addEndpointSecurity(RequestContext requestContext) {
+        SecurityInfo securityInfo = null;
+        String keyType = "";
+        if (requestContext.getAuthenticationContext() != null) {
+            keyType = requestContext.getAuthenticationContext().getKeyType();
+        }
+        if (requestContext.getMatchedAPI().getEndpointSecurity() != null) {
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType)) {
                 securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
                         getProductionSecurityInfo();
             } else {
                 securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
                         getSandBoxSecurityInfo();
             }
-            if (securityInfo != null && securityInfo.isEnabled() &&
-                    APIConstants.AUTHORIZATION_HEADER_BASIC.
-                            equalsIgnoreCase(securityInfo.getSecurityType())) {
-                requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
-                        .toLowerCase());
-                requestContext.addOrModifyHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                        APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
-                                Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                        ':' + String.valueOf(securityInfo.getPassword())).getBytes()));
-            }
+        }
+        if (securityInfo != null && securityInfo.isEnabled() &&
+                APIConstants.AUTHORIZATION_HEADER_BASIC.
+                        equalsIgnoreCase(securityInfo.getSecurityType())) {
+            requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
+                    .toLowerCase());
+            requestContext.addOrModifyHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                    APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
+                            Base64.getEncoder().encodeToString((securityInfo.getUsername() +
+                                    ':' + String.valueOf(securityInfo.getPassword())).getBytes()));
         }
     }
 }

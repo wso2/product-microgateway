@@ -81,8 +81,15 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         apiOperation.setTarget("/echo");
         apiOperation.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
 
+        APIOperationsDTO apiOperation2 = new APIOperationsDTO();
+        apiOperation2.setVerb("GET");
+        apiOperation2.setTarget("/echo2");
+        apiOperation2.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
+        apiOperation2.setAuthType("None");
+
         List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
         operationsDTOS.add(apiOperation);
+        operationsDTOS.add(apiOperation2);
 
         APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(API_NAME, API_CONTEXT,
                 API_VERSION, user.getUserName());
@@ -102,6 +109,7 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME * 2, "Interrupted when waiting for the " +
                 "subscription to be deployed");
 
+        //test 1 - jwt secured resource
         //Invoke API
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
@@ -111,6 +119,17 @@ public class BackendSecurityTestCase extends ApimBaseTest {
 
         // test headers
         Map<String, String> respHeaders = response.getHeaders();
+        Assert.assertTrue(respHeaders.containsKey("authorization"), "Backend did not receive auth header");
+        Assert.assertEquals(respHeaders.get("authorization"), "Basic YWRtaW46YWRtaW4=",
+                "backend basic auth header is incorrect");
+
+        //test 2 - invoke non secured resource
+        endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo2");
+        response = HttpsClientRequest.doGet(endpoint);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint);
+
+        // test headers
+        respHeaders = response.getHeaders();
         Assert.assertTrue(respHeaders.containsKey("authorization"), "Backend did not receive auth header");
         Assert.assertEquals(respHeaders.get("authorization"), "Basic YWRtaW46YWRtaW4=",
                 "backend basic auth header is incorrect");
