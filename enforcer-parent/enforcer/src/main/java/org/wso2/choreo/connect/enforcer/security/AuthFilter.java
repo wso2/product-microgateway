@@ -37,6 +37,7 @@ import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
+import org.wso2.choreo.connect.enforcer.util.EndpointSecurityUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
@@ -153,6 +154,8 @@ public class AuthFilter implements Filter {
             requestContext.setAuthenticationContext(authenticate);
             if (authenticate.isAuthenticated()) {
                 updateClusterHeaderAndCheckEnv(requestContext, authenticate);
+                // set backend security
+                EndpointSecurityUtils.addEndpointSecurity(requestContext);
                 return new AuthenticationResponse(true, false,
                         false);
             }
