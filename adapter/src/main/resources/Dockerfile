@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM alpine:3.13.5
+FROM alpine:3.14.3
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
 RUN apk update && apk upgrade --no-cache
 
