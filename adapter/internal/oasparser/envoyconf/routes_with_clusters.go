@@ -647,13 +647,13 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			Value: true,
 		},
 	}
-	if apiType == model.WS {
+	// route path could be empty only if there is no basePath for API or the endpoint available,
+	// and resourcePath is also an empty string.
+	// Empty check is added to run the gateway in failsafe mode, as if the decorator string is
+	// empty, the route configuration does not apply.
+	if strings.TrimSpace(routePath) != "" {
 		decorator = &routev3.Decorator{
-			Operation: endpointBasepath,
-		}
-	} else if apiType == model.HTTP || apiType == model.WEBHOOK {
-		decorator = &routev3.Decorator{
-			Operation: resourcePath,
+			Operation: vHost + ":" + routePath,
 		}
 	}
 
