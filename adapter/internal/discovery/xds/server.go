@@ -624,9 +624,9 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 
 	if len(existingLabels) != len(toBeDelEnvs) {
 		// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
+		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = toBeKeptEnvs
 		updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
 		logger.LoggerXds.Infof("Deleted API %v of Organization %v", apiIdentifier, organizationID)
-		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = toBeKeptEnvs
 		return nil
 	}
 
