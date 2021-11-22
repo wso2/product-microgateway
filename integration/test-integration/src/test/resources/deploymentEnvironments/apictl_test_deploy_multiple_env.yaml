@@ -1,0 +1,13 @@
+type: deployment_environments
+version: v4.0.0
+data:
+  - displayOnDevportal: true
+    deploymentEnvironment: US
+  - displayOnDevportal: true
+    deploymentVhost: localhost
+    deploymentEnvironment: US
+  - displayOnDevportal: true
+    deploymentEnvironment: Default
+  - displayOnDevportal: true
+    deploymentVhost: eu.wso2.com
+    deploymentEnvironment: Default
