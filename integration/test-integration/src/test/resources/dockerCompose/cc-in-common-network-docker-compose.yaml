@@ -25,6 +25,7 @@ services:
       - ENFORCER_HOST=enforcer
       - ENFORCER_PORT=8081
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
+      - CONCURRENCY=2
     volumes:
       - ../resources/router/security:/home/wso2/security
     ports:
