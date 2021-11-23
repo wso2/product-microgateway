@@ -4,7 +4,13 @@ enabled = false
 
 [enforcer]
 [enforcer.throttling]
-  enableGlobalEventPublishing = true
+  enableGlobalEventPublishing = false
 
 [controlPlane]
   skipSSLVerification=true
+
+[enforcer.metrics]
+  enabled = false
+
+[enforcer.tracing]
+  enabled = false

@@ -35,6 +35,7 @@ const (
 	openAPIFilename            string = "swagger."
 	apiYAMLFile                string = "api.yaml"
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
+	endpointCertFile           string = "endpoint_certificates."
 	apiJSONFile                string = "api.json"
 	endpointCertDir            string = "Endpoint-certificates"
 	interceptorCertDir         string = "Endpoint-certificates/interceptors"
@@ -58,7 +59,6 @@ type ProjectAPI struct {
 	APIEnvProps         map[string]synchronizer.APIEnvProps
 	Deployments         []Deployment
 	OpenAPIJsn          []byte
-	UpstreamCerts       []byte
 	InterceptorCerts    []byte
 	APIType             string              // read from api.yaml and formatted to upper case
 	APILifeCycleStatus  string              // read from api.yaml and formatted to upper case
@@ -66,6 +66,11 @@ type ProjectAPI struct {
 	SandboxEndpoints    []Endpoint          // read from env variable
 	OrganizationID      string              // read from api.yaml or config
 	EndpointSecurity    APIEndpointSecurity // derived from api.yaml or config
+
+	//UpstreamCerts cert filename -> cert bytes
+	UpstreamCerts map[string][]byte
+	//EndpointCerts url -> cert filename
+	EndpointCerts map[string]string
 }
 
 // EndpointSecurity contains parameters of endpoint security at api.json
@@ -85,8 +90,8 @@ type APIEndpointSecurity struct {
 
 // ApimMeta represents APIM meta information of files received from APIM
 type ApimMeta struct {
-	Type    string `yaml:"type"`
-	Version string `yaml:"version"`
+	Type    string `yaml:"type" json:"type"`
+	Version string `yaml:"version" json:"version"`
 }
 
 // DeploymentEnvironments represents content of deployment_environments.yaml file
@@ -101,6 +106,20 @@ type Deployment struct {
 	DisplayOnDevportal    bool   `yaml:"displayOnDevportal"`
 	DeploymentVhost       string `yaml:"deploymentVhost"`
 	DeploymentEnvironment string `yaml:"deploymentEnvironment"`
+}
+
+// EndpointCertificatesDetails represents content of endpoint_certificates.yaml file
+// of an API_CTL Project
+type EndpointCertificatesDetails struct {
+	ApimMeta
+	Data []EndpointCertificate `json:"data"`
+}
+
+// EndpointCertificate represents certificate information of an API_CTL project
+type EndpointCertificate struct {
+	Alias       string `json:"alias"`
+	Endpoint    string `json:"endpoint"`
+	Certificate string `json:"certificate"`
 }
 
 // APIYaml contains everything necessary to extract api.json/api.yaml file
@@ -204,15 +223,34 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, fileContent...)
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, newLineByteArray...)
-	} else if strings.Contains(fileName, endpointCertDir+string(os.PathSeparator)) &&
-		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
-		if !tlsutils.IsPublicCertificate(fileContent) {
-			loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", fileName)
-			// TODO: (VirajSalaka) Create standard error handling mechanism
-			return errors.New("certificate Validation Error")
+	} else if strings.Contains(fileName, endpointCertDir+string(os.PathSeparator)) {
+		if strings.Contains(fileName, endpointCertFile) {
+			epCertJSON, conversionErr := utills.ToJSON(fileContent)
+			if conversionErr != nil {
+				loggers.LoggerAPI.Errorf("Error converting %v file to json: %v", fileName, conversionErr.Error())
+				return conversionErr
+			}
+			endpointCertificates := &EndpointCertificatesDetails{}
+			err := json.Unmarshal(epCertJSON, endpointCertificates)
+			if err != nil {
+				loggers.LoggerAPI.Error("Error parsing content of endpoint certificates: ", err)
+			} else if endpointCertificates != nil && len(endpointCertificates.Data) > 0 {
+				for _, val := range endpointCertificates.Data {
+					apiProject.EndpointCerts[val.Endpoint] = val.Certificate
+				}
+			}
+		} else if strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension) {
+			if !tlsutils.IsPublicCertificate(fileContent) {
+				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", fileName)
+				// TODO: (VirajSalaka) Create standard error handling mechanism
+				return errors.New("certificate Validation Error")
+			}
+
+			if fileNameArray := strings.Split(fileName, string(os.PathSeparator)); len(fileNameArray) > 0 {
+				certFileName := fileNameArray[len(fileNameArray)-1]
+				apiProject.UpstreamCerts[certFileName] = fileContent
+			}
 		}
-		apiProject.UpstreamCerts = append(apiProject.UpstreamCerts, fileContent...)
-		apiProject.UpstreamCerts = append(apiProject.UpstreamCerts, newLineByteArray...)
 	} else if (strings.Contains(fileName, apiYAMLFile) || strings.Contains(fileName, apiJSONFile)) &&
 		!strings.Contains(fileName, openAPIDir) {
 		loggers.LoggerAPI.Debugf("fileName : %v", fileName)

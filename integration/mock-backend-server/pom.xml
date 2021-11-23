@@ -25,7 +25,11 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mock-backend-server</artifactId>
+    <name>Choreo Connect - Mock-Backend-Server</name>
     <version>1.0.0-beta-SNAPSHOT</version>
+
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -35,10 +39,11 @@
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
     </dependencies>
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>mock-backend-server</artifactId>
-    <name>Choreo Connect - Mock-Backend-Server</name>
 
     <build>
         <plugins>
@@ -73,7 +78,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>wso2/choreo-connect-mock-backend:latest</name>
+                            <name>wso2/choreo-connect-mock-backend:${project.version}</name>
                             <build>
                                 <contextDir>${project.basedir}/src/main/resources</contextDir>
                                 <assembly>

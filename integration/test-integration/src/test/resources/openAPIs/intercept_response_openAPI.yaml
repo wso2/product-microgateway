@@ -24,9 +24,7 @@ x-wso2-production-endpoints:
   urls:
     - https://mockBackend:2382/v2
 x-wso2-response-interceptor: # API level interceptor definition
-  host: mockBackend
-  port: 2371
-  scheme: http
+  serviceURL: https://mockBackend:2371
   includes:
     - request_headers
     - request_body
@@ -57,15 +55,11 @@ paths:
           description: successful operation
   /echo/both-intercept/resp-body-not-included:
     x-wso2-request-interceptor: # Resource level interceptor definition
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
     x-wso2-response-interceptor: # Override response interceptor
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes: # "response_body" is not included here
         - request_headers
         - request_body
@@ -81,9 +75,7 @@ paths:
           description: successful operation
   /pet/findByStatus/req-intercept-enabled:
     x-wso2-request-interceptor: # Resource level interceptor definition
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
     post:
@@ -120,15 +112,11 @@ paths:
           description: Invalid status value
   /pet/findByStatus/interceptor-context:
     x-wso2-request-interceptor:
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
     x-wso2-response-interceptor:
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
     post:
@@ -143,9 +131,7 @@ paths:
           description: successful operation
   /pet/findByStatus/headers-only:
     x-wso2-response-interceptor:
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes: # "response_body" not included
         - request_headers # "response_headers" also can be included here
     post:
@@ -160,9 +146,7 @@ paths:
           description: successful operation
   /pet/findByStatus/body-included:
     x-wso2-response-interceptor:
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
         - response_body
@@ -178,9 +162,7 @@ paths:
           description: successful operation
   /pet/findByStatus/update-status-code:
     x-wso2-response-interceptor:
-      host: mockBackend
-      port: 2371
-      scheme: http
+      serviceURL: https://mockBackend:2371
       includes:
         - request_headers
         - response_body

@@ -48,7 +48,7 @@ artifactsDirectory = "/home/wso2/artifacts"
   pollInterval = 5
   # Access Control Token generated using Consul
   # You should grant read access to services when creating the token
-  aclToken = "d3a2a719-4221-8c65-5212-58d4727427ac"
+  ACLToken = "d3a2a719-4221-8c65-5212-58d4727427ac"
   # Choreo Connect natively integrates with Consul service mesh
   # Therefore a service name is required to be defined inorder to grant access to other services in mesh
   # This only need to be defined if service mesh enabled in Consul

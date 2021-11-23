@@ -50,8 +50,8 @@ end
 
 local function modify_trailers(handle, interceptor_response_body)
     -- priority: trailersToAdd, trailersToReplace, trailersToRemove
-    if interceptor_response_body[RESPONSE.TRAILERS_TO_ADD] then
-        for _, key in ipairs(interceptor_response_body[RESPONSE.TRAILERS_TO_ADD]) do
+    if interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE] then
+        for _, key in ipairs(interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE]) do
             handle:trailers():remove(key)
         end
     end
@@ -60,8 +60,8 @@ local function modify_trailers(handle, interceptor_response_body)
             handle:trailers():replace(key, val)
         end
     end
-    if interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE] then
-        for key, val in pairs(interceptor_response_body[RESPONSE.TRAILERS_TO_REMOVE]) do
+    if interceptor_response_body[RESPONSE.TRAILERS_TO_ADD] then
+        for key, val in pairs(interceptor_response_body[RESPONSE.TRAILERS_TO_ADD]) do
             handle:trailers():add(key, val)
         end
     end
@@ -89,6 +89,7 @@ end
 ---@return boolean - return true if error
 local function modify_body(handle, interceptor_response_body, request_id, shared_info, is_buffered, is_request_flow)
     -- if "body" is not defined or null (i.e. {} or {"body": null}) do not update the body
+    -- request/response body should be buffered before modify the body https://github.com/envoyproxy/envoy/issues/13985#issuecomment-725724707
     if interceptor_response_body[RESPONSE.BODY] then
         handle:logDebug("Updating body for the request_id: " .. request_id)
 

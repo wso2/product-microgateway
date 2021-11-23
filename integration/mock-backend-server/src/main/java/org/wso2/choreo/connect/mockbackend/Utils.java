@@ -19,12 +19,20 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import com.sun.net.httpserver.HttpExchange;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 public class Utils {
     // echo sends request headers in response headers and request body in response body
@@ -52,6 +60,14 @@ public class Utils {
         return sb.toString();
     }
 
+    public static void respondWithBodyAndClose(int statusCode, byte[] response, HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                Constants.CONTENT_TYPE_APPLICATION_JSON);
+        exchange.sendResponseHeaders(statusCode, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
+    }
+
     public static void send404NotFound(HttpExchange exchange) throws IOException {
         byte[] response = "{\"status\":\"404 Resource Not Found\"}".getBytes();
         exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
@@ -65,5 +81,32 @@ public class Utils {
         exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
         exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
         exchange.getResponseBody().write(response);
+    }
+
+    public static TrustManager[] getTrustManagers() throws Exception {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("mg.pem");
+
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509Certificate caCert = (X509Certificate)cf.generateCertificate(inputStream);
+
+        TrustManagerFactory tmf = TrustManagerFactory
+                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        ks.load(null); // Don't need the KeyStore instance to come from a file.
+        ks.setCertificateEntry("caCert", caCert);
+
+        tmf.init(ks);
+        return tmf.getTrustManagers();
+    }
+    // TODO: close input streams
+    public static KeyManager[] getKeyManagers(String keystoreName, String password) throws Exception {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(keystoreName);
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(inputStream, password.toCharArray());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(keyStore, password.toCharArray());
+        return kmf.getKeyManagers();
     }
 }

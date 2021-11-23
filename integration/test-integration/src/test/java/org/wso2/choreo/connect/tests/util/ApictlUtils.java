@@ -48,6 +48,7 @@ public class ApictlUtils {
     public static final String SUCCESSFULLY_UNDEPLOYED_RESPONSE = "API undeployed";
 
     public static final String ENDPOINT_CERTIFICATES = "Endpoint-certificates";
+    public static final String INTERCEPTORS = "interceptors";
     public static final String DEPLOYMENT_ENVIRONMENTS_YAML = "deployment_environments.yaml";
 
     public static final String APICTL_PATH = File.separator + "apictl" + File.separator;
@@ -93,7 +94,7 @@ public class ApictlUtils {
      */
     public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, CCTestException {
         try {
-            createProject(openApiFile, apiProjectName, backendCert, null);
+            createProject(openApiFile, apiProjectName, backendCert, null, null);
         } catch (CCTestException e) {
             if (!e.getMessage().equals("Project already exists")) {
                 throw e;
@@ -110,13 +111,28 @@ public class ApictlUtils {
      *
      * @param openApiFile openAPI file to create the API project from
      * @param apiProjectName expected name of the project that gets created
-     * @param backendCert name of the backend cert file that should be included in the
-     *                    Endpoint-certificates folder in the API project
-     * @param deployEnvYamlFile deployment_environments.yaml file of API project
      * @throws IOException if the runtime fails to execute the apictl command
      * @throws CCTestException if apictl was unable to create the project
      */
-    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile)
+    public static void createProject(String openApiFile, String apiProjectName) throws IOException, CCTestException {
+        createProject(openApiFile, apiProjectName, null, null, null);
+    }
+
+    /**
+     * Create an API project - To be used before deploying an API via the apictl deploy command
+     *
+     * @param openApiFile openAPI file to create the API project from
+     * @param apiProjectName expected name of the project that gets created
+     * @param backendCert name of the backend cert file that should be included in the
+     *                    Endpoint-certificates folder of the API project
+     * @param deployEnvYamlFile deployment_environments.yaml file of API project
+     * @param interceptorCert name of the interceptor cert file that should be included in the
+     *                    Endpoint-certificates/interceptor folder of the API project
+     * @throws IOException if the runtime fails to execute the apictl command
+     * @throws CCTestException if apictl was unable to create the project
+     */
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
+                                     String interceptorCert)
             throws IOException, CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
@@ -150,6 +166,12 @@ public class ApictlUtils {
             Utils.copyFile(
                     targetDir + DEPLOYMENT_ENVIRONMENTS_YAML_PATH + deployEnvYamlFile,
                     projectPathToCreate + File.separator + DEPLOYMENT_ENVIRONMENTS_YAML);
+        }
+        if (interceptorCert != null) {
+            Utils.copyFile(
+                    targetDir + BACKEND_CERTS_PATH + interceptorCert,
+                    projectPathToCreate + File.separator + ENDPOINT_CERTIFICATES
+                            + File.separator + INTERCEPTORS + File.separator + "interceptor.crt");
         }
         log.info("Created API project " + apiProjectName);
     }

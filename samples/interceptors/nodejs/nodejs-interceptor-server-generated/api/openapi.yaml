@@ -1,0 +1,298 @@
+openapi: 3.0.0
+info:
+  title: Choreo-Connect Interceptor Service
+  description: Interceptor Service
+  contact:
+    name: WSO2
+    url: http://wso2.com/products/api-manager/
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: v1
+servers:
+- url: "{interceptor_service_url}/api/v1"
+  variables:
+    interceptor_service_url:
+      description: interceptor_host assigned by the service provider
+      default: https://interceptor-service:8443
+tags:
+- name: interceptor
+  description: Interceptor
+paths:
+  /handle-request:
+    post:
+      tags:
+      - Request
+      summary: Handle Request
+      operationId: handleRequest
+      requestBody:
+        description: |
+          Content of the request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestHandlerRequestBody'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestHandlerResponseBody'
+      x-swagger-router-controller: Request
+  /handle-response:
+    post:
+      tags:
+      - Response
+      summary: Handle Response
+      operationId: handleResponse
+      requestBody:
+        description: |
+          Content of the request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResponseHandlerRequestBody'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseHandlerResponseBody'
+      x-swagger-router-controller: Response
+components:
+  schemas:
+    RequestHandlerRequestBody:
+      title: Request body of Request handler
+      type: object
+      properties:
+        requestHeaders:
+          $ref: '#/components/schemas/Headers'
+        requestTrailers:
+          $ref: '#/components/schemas/Trailers'
+        requestBody:
+          $ref: '#/components/schemas/Body'
+        InvocationContext:
+          $ref: '#/components/schemas/InvocationContext'
+    RequestHandlerResponseBody:
+      title: Response body of Request handler
+      type: object
+      properties:
+        directRespond:
+          type: boolean
+          example: false
+        responseCode:
+          type: integer
+          example: 200
+        dynamicEndpoint:
+          $ref: '#/components/schemas/DynamicEndpoint'
+        headersToAdd:
+          $ref: '#/components/schemas/Headers'
+        headersToReplace:
+          $ref: '#/components/schemas/Headers'
+        headersToRemove:
+          $ref: '#/components/schemas/HeaderKeys'
+        trailersToAdd:
+          $ref: '#/components/schemas/Trailers'
+        trailersToReplace:
+          $ref: '#/components/schemas/Trailers'
+        trailersToRemove:
+          $ref: '#/components/schemas/HeaderKeys'
+        body:
+          $ref: '#/components/schemas/Body'
+        interceptorContext:
+          $ref: '#/components/schemas/InterceptorContext'
+      example:
+        directRespond: false
+        headersToReplace: null
+        headersToAdd:
+          content-type: application/xml
+          content-length: "40"
+        interceptorContext:
+          key1: value1
+          key2: value2
+        headersToRemove:
+        - key1
+        - key2
+        trailersToRemove: null
+        trailersToAdd:
+          trailer1-key: value
+        dynamicEndpoint:
+          endpointName: my-dynamic-endpoint
+        body: PGhlbGxvPndvcmxkPC9oZWxsbz4K
+        responseCode: 200
+        trailersToReplace: null
+    ResponseHandlerRequestBody:
+      title: Request body of Response handler
+      required:
+      - responseCode
+      type: object
+      properties:
+        responseCode:
+          type: integer
+          example: 200
+        requestHeaders:
+          $ref: '#/components/schemas/Headers'
+        requestTrailers:
+          $ref: '#/components/schemas/Trailers'
+        requestBody:
+          $ref: '#/components/schemas/Body'
+        responseHeaders:
+          $ref: '#/components/schemas/Headers'
+        responseTrailers:
+          $ref: '#/components/schemas/Trailers'
+        responseBody:
+          $ref: '#/components/schemas/Body'
+        invocationContext:
+          $ref: '#/components/schemas/InvocationContext'
+        interceptorContext:
+          $ref: '#/components/schemas/InterceptorContext'
+    ResponseHandlerResponseBody:
+      title: Response Body
+      type: object
+      properties:
+        responseCode:
+          type: integer
+          example: 200
+        headersToAdd:
+          $ref: '#/components/schemas/Headers'
+        headersToReplace:
+          $ref: '#/components/schemas/Headers'
+        headersToRemove:
+          $ref: '#/components/schemas/HeaderKeys'
+        trailersToAdd:
+          $ref: '#/components/schemas/Trailers'
+        trailersToReplace:
+          $ref: '#/components/schemas/Trailers'
+        trailersToRemove:
+          $ref: '#/components/schemas/HeaderKeys'
+        body:
+          $ref: '#/components/schemas/Body'
+      example:
+        headersToReplace: null
+        headersToAdd:
+          content-type: application/xml
+          content-length: "40"
+        headersToRemove:
+        - key1
+        - key2
+        trailersToRemove: null
+        trailersToAdd:
+          trailer1-key: value
+        body: PGhlbGxvPndvcmxkPC9oZWxsbz4K
+        responseCode: 200
+        trailersToReplace: null
+    InvocationContext:
+      title: Invocation context
+      type: object
+      properties:
+        requestId:
+          type: string
+          example: 75269e44-f797-4432-9906-cf39e68d6ab8
+        protocol:
+          type: string
+          example: HTTP/1.1
+        scheme:
+          type: string
+          example: https
+        apiName:
+          type: string
+          example: PetStore
+        apiVersion:
+          type: string
+          example: v1.0.0
+        vhost:
+          type: string
+          example: localhost
+        supportedMethods:
+          type: string
+          example: GET POST
+        method:
+          type: string
+          example: POST
+        basePath:
+          type: string
+          example: /petstore
+        path:
+          type: string
+          example: /petstore/pet/1
+        pathTemplate:
+          type: string
+          example: "/pet/{petID}"
+        source:
+          type: string
+          example: 192.168.8.332:8080
+        prodClusterName:
+          type: string
+          example: carbon.super_clusterProd_localhost_Online-Storev1.0.0
+        sandClusterName:
+          type: string
+          example: ""
+        authenticationContext:
+          $ref: '#/components/schemas/InvocationContext_authenticationContext'
+    InterceptorContext:
+      title: Interceptor Context
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Map (string-to-string dictionary) of key value pairs
+      example:
+        key1: value1
+        key2: value2
+    DynamicEndpoint:
+      title: Dynamic endpoint
+      type: object
+      properties:
+        endpointName:
+          type: string
+          example: my-dynamic-endpoint
+      example:
+        endpointName: my-dynamic-endpoint
+    Headers:
+      title: Headers
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Map (string-to-string dictionary) of key value pairs of headers
+      example:
+        content-type: application/xml
+        content-length: "40"
+    Trailers:
+      title: Trailers
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Map (string-to-string dictionary) of key value pairs of trailers
+      example:
+        trailer1-key: value
+    HeaderKeys:
+      title: HeaderKeys
+      type: array
+      description: |
+        Array of header keys
+      example:
+      - key1
+      - key2
+      items:
+        type: string
+    Body:
+      type: string
+      description: |
+        Base64 encoded body
+      example: PGhlbGxvPndvcmxkPC9oZWxsbz4K
+    InvocationContext_authenticationContext:
+      type: object
+      properties:
+        tokenType:
+          type: string
+          example: JWT
+        token:
+          type: string
+          example: xxxxxx-xxxx-xxxxxx-xxxx
+        keyType:
+          type: string
+          example: PRODUCTION

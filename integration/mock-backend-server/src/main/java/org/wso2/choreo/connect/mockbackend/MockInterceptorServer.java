@@ -19,17 +19,22 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsParameters;
+import com.sun.net.httpserver.HttpsServer;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
-
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MockInterceptorServer extends Thread {
-    private static final Logger logger = Logger.getLogger(MockInterceptorServer.class.getName());
-    private final int serverPort;
+    private static final Logger log = LogManager.getLogger(MockInterceptorServer.class.getName());
+    private final int statusServerPort;
     private final HandlerServer handlerServer;
     private volatile InterceptorConstants.Handler handler;
     private volatile String requestFlowRequestBody;
@@ -37,8 +42,8 @@ public class MockInterceptorServer extends Thread {
     private volatile String responseFlowRequestBody;
     private volatile String responseFlowResponseBody;
 
-    public MockInterceptorServer(int managerPort, int handlerPort) {
-        serverPort = managerPort;
+    public MockInterceptorServer(int interceptorStatusPort, int handlerPort) {
+        statusServerPort = interceptorStatusPort;
         handlerServer = new HandlerServer(handlerPort);
         clearStatus();
     }
@@ -54,17 +59,16 @@ public class MockInterceptorServer extends Thread {
 
     @Override
     public void run() {
-
-        if (serverPort < 0) {
+        if (statusServerPort < 0) {
             throw new RuntimeException("Server port is not defined");
         }
 
         try {
-            HttpServer httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0);
+            HttpServer managerHttpServer = HttpServer.create(new InetSocketAddress(statusServerPort), 0);
             String context = "/interceptor";
 
             // status
-            httpServer.createContext(context + "/status", exchange -> {
+            managerHttpServer.createContext(context + "/status", exchange -> {
                 JSONObject responseJSON = new JSONObject();
                 responseJSON.put(InterceptorConstants.StatusPayload.HANDLER, handler);
                 responseJSON.put(InterceptorConstants.StatusPayload.REQUEST_FLOW_REQUEST_BODY, requestFlowRequestBody);
@@ -78,29 +82,29 @@ public class MockInterceptorServer extends Thread {
             });
 
             // clear status
-            httpServer.createContext(context + "/clear-status", exchange -> {
+            managerHttpServer.createContext(context + "/clear-status", exchange -> {
                 clearStatus();
                 Utils.send200OK(exchange);
                 exchange.close();
             });
 
             // set response of request flow interceptor
-            httpServer.createContext(context + "/request", exchange -> {
+            managerHttpServer.createContext(context + "/request", exchange -> {
                 requestFlowResponseBody = Utils.requestBodyToString(exchange);
                 Utils.send200OK(exchange);
                 exchange.close();
             });
 
             // set response of response flow interceptor
-            httpServer.createContext(context + "/response", exchange -> {
+            managerHttpServer.createContext(context + "/response", exchange -> {
                 responseFlowResponseBody = Utils.requestBodyToString(exchange);
                 Utils.send200OK(exchange);
                 exchange.close();
             });
 
-            httpServer.start();
+            managerHttpServer.start();
         } catch (Exception ex) {
-            logger.log(Level.SEVERE, "Error occurred while setting up interceptor server", ex);
+            log.error("Error occurred while setting up interceptor server", ex);
         }
     }
 
@@ -111,21 +115,43 @@ public class MockInterceptorServer extends Thread {
     }
 
     private class HandlerServer extends Thread {
-        private final Logger logger = Logger.getLogger(HandlerServer.class.getName());
-        private final int serverPort;
+        private final Logger log = LogManager.getLogger(HandlerServer.class.getName());
+        private final int handlerServerPort;
 
         public HandlerServer(int port) {
-            serverPort = port;
+            handlerServerPort = port;
         }
 
         @Override
         public void run() {
-            if (serverPort < 0) {
+            if (handlerServerPort < 0) {
                 throw new RuntimeException("Server port is not defined");
             }
-
             try {
-                HttpServer httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0);
+                HttpServer httpServer = HttpsServer.create(new InetSocketAddress(handlerServerPort), 0);
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(
+                        Utils.getKeyManagers("interceptorKeystore.pkcs12", "interceptor"), // Created using interceptorKeystore.pem
+                        Utils.getTrustManagers(), null);
+
+                ((HttpsServer) httpServer).setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+                    public void configure(HttpsParameters params) {
+                        try {
+                            SSLContext sslContext = SSLContext.getDefault();
+                            SSLEngine engine = sslContext.createSSLEngine();
+
+                            SSLParameters sslParameters = sslContext
+                                    .getDefaultSSLParameters();
+                            sslParameters.setCipherSuites(engine.getEnabledCipherSuites());
+                            sslParameters.setNeedClientAuth(true);
+                            sslParameters.setProtocols(engine.getEnabledProtocols());
+                            params.setSSLParameters(sslParameters);
+                        } catch (Exception ex) {
+                            log.error("Failed to create HTTPS port");
+                        }
+                    }
+                });
+
                 String context = "/api/v1";
                 // handle request
                 httpServer.createContext(context + "/handle-request", exchange -> {
@@ -134,7 +160,7 @@ public class MockInterceptorServer extends Thread {
                         return;
                     }
 
-                    logger.info("Called /handle-request of interceptor service");
+                    log.info("Called /handle-request of interceptor service");
                     requestFlowRequestBody = Utils.requestBodyToString(exchange);
                     // set which flow has handled by interceptor
                     if (Arrays.asList(InterceptorConstants.Handler.NONE, InterceptorConstants.Handler.REQUEST_ONLY).contains(handler)) {
@@ -157,7 +183,7 @@ public class MockInterceptorServer extends Thread {
                         return;
                     }
 
-                    logger.info("Called /handle-response of interceptor service");
+                    log.info("Called /handle-response of interceptor service");
                     responseFlowRequestBody = Utils.requestBodyToString(exchange);
                     // set which flow has handled by interceptor
                     if (Arrays.asList(InterceptorConstants.Handler.NONE, InterceptorConstants.Handler.RESPONSE_ONLY).contains(handler)) {
@@ -175,7 +201,7 @@ public class MockInterceptorServer extends Thread {
 
                 httpServer.start();
             } catch (Exception ex) {
-                logger.log(Level.SEVERE, "Error occurred while setting up interceptor handler server", ex);
+                log.error("Error occurred while setting up interceptor handler server", ex);
             }
         }
     }

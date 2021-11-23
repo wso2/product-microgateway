@@ -142,7 +142,6 @@ components:
           $ref: "#/components/schemas/InterceptorContext"
       required:
         - responseCode
-        - interceptorContext
     ResponseHandlerResponseBody:
       title: Response Body
       type: object
