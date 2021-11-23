@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-  <assembly>
+<assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
     <id>router</id>
@@ -48,9 +48,13 @@
         </file>
     </files>
     <fileSets>
-      <fileSet>
-          <directory>../resources/router/security</directory>
-          <outputDirectory>security</outputDirectory>
-      </fileSet>
+        <fileSet>
+            <directory>../resources/router/security</directory>
+            <outputDirectory>security</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources/interceptor</directory>
+            <outputDirectory>interceptor</outputDirectory>
+        </fileSet>
     </fileSets>
 </assembly>
