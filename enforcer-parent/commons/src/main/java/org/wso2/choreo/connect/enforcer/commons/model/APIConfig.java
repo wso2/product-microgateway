@@ -150,7 +150,8 @@ public class APIConfig {
     /**
      * Security Schemas assigned for the corresponding API together with the scopes.
      * Items of the map currently does not support being applied as AND.
-     * Authenticators are applied as OR. In other words, authentication succeeds if at least one security scheme matches.
+     * Authenticators are applied as OR. In other words, authentication succeeds if
+     * at least one security scheme matches.
      *
      * @return array of security schemes and scopes assigned for the API.
      */
