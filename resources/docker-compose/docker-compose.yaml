@@ -20,6 +20,7 @@ services:
       - ENFORCER_PORT=8081
       - ENFORCER_ANALYTICS_RECEIVER_PORT=18090
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
+      - CONCURRENCY=2
     volumes:
       - ../resources/router/security:/home/wso2/security
     ports:
