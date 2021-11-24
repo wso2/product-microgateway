@@ -50,7 +50,6 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -136,18 +135,17 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     }
 
     private static String getAPIKey(String securitySchemeType, RequestContext requestContext, boolean isResourceLevel) {
-        Iterator<String> securitySchemesToApply;
+        Map<String, List<String>> securitySchemesToApply;
         if (isResourceLevel) {
-            securitySchemesToApply = requestContext.getMatchedResourcePath().getSecuritySchemas().keySet().iterator();
+            securitySchemesToApply = requestContext.getMatchedResourcePath().getSecuritySchemas();
         } else {
-            securitySchemesToApply = requestContext.getMatchedAPI().getSecuritySchemas().iterator();
+            securitySchemesToApply = requestContext.getMatchedAPI().getApiSecurity();
         }
 
         Map<String, SecuritySchemaConfig> securitySchemaDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
 
-        for (Iterator<String> it = securitySchemesToApply; it.hasNext(); ) {
-            String securitySchemeName = it.next();
+        for (String securitySchemeName : securitySchemesToApply.keySet()) {
             SecuritySchemaConfig securitySchemaDefinition = securitySchemaDefinitions.get(securitySchemeName);
 
             // We only need apiKey of the given type

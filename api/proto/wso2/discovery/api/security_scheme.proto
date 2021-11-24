@@ -16,3 +16,13 @@ message SecurityScheme {
   string name           = 3; // name of the security scheme
   string in             = 4; // location of the API key in request
 }
+
+// Represents a single security array item applied at the API level or the API operation level
+message SecurityList {
+  map<string, Scopes> scopeList = 1;
+}
+
+// Holds the list of scopes belongs to a particular security schema
+message Scopes {
+  repeated string scopes = 1;
+}

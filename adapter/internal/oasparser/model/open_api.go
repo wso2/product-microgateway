@@ -275,13 +275,13 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 	jsnRawExtensible := vendorExtensions.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ", err)
+		logger.LoggerOasparser.Error("Error marshalling vendor extensions: ", err)
 	}
 
 	var extensible map[string]interface{}
 	err = json.Unmarshal(b, &extensible)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error unmarsheling vendor extenstions:", err)
+		logger.LoggerOasparser.Error("Error unmarshalling vendor extensions: ", err)
 	}
 	return extensible
 }

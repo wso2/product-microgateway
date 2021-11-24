@@ -77,8 +77,8 @@ public class InternalKeyTestCase {
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertTrue(response.getData().contains("Unclassified Validation Failure"),
-                "Error response message mismatch");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
     // After invoking with original key, it is cached as a success token. But again using the tampered key should fail.

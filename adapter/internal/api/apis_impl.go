@@ -68,7 +68,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
+		loggers.LoggerAPI.Errorf("Error occurred while unzipping the apictl project. Error: %v", err.Error())
 		return apiProject, err
 	}
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
@@ -78,7 +78,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
 		unzippedFileBytes, err := readZipFile(file)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while reading the file : %v %v", file.Name, err.Error())
+			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
 			return apiProject, err
 		}
 		err = apiProject.ProcessFilesInsideProject(unzippedFileBytes, file.Name)
