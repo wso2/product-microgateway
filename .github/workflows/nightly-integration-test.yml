@@ -1,9 +1,48 @@
-name: PR Check - Integration Tests
+name: Choreo Connect Integration Tests - Nighly
 
-on: [push, pull_request]
-
+on:
+  schedule:
+    # every day at 8:25pm UTC (1:55am IST )
+    - cron:  '25 20 * * *'
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Person to greet'
+        required: true
+        default: 'Mona the Octocat'
+      home:
+        description: 'location'
+        required: false
+        default: 'The Octoverse'
 jobs:
+  check_continue:
+    runs-on: ubuntu-latest
+    name: Check continuing testing
+    outputs:
+      should_run: ${{ steps.should_run.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: should_run
+        continue-on-error: true
+        name: Check latest commit is less than a day
+        run: |
+          echo "Branch: " $(git rev-parse --abbrev-ref HEAD)
+          count=$(git rev-list --since="24 hours ago" --count HEAD)
+          echo "Commits count: $count"
+          echo "Commits:"
+          git rev-list --since="1 days ago" HEAD
+
+          if [ $count -gt 0 ]; then
+            echo "Should continue"
+            echo "::set-output name=should_run::true"
+          else
+            echo "No changes, do not continue"
+          echo "::set-output name=should_run::false"
+          fi
+
   build:
+    needs: check_continue
+    if: ${{ needs.check_continue.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -37,16 +76,26 @@ jobs:
         run: echo ${{ steps.extract-project-version.outputs.version }}
       - name: Build with Maven
         run: |
-          #export PATH="${HOME}/go/bin:${PATH}"
+          export PATH="${HOME}/go/bin:${PATH}"
           mvn clean install -PRelease -s .maven/settings.xml \
             -pl '!:integration' -pl '!:mock-backend-server' -pl '!:test-integration'
-      - name: Run integration tests
-        run: |
-          mvn clean install -PRelease -pl ':integration' -amd -s .maven/settings.xml
       - name: Build multi platform Ubuntu images
         run: |
           ./build-ubuntu-multi-platform-images.sh all
-          docker images
+      - name: Replace original images with Ubuntu images
+        run: |
+          TAG=${{ steps.extract-project-version.outputs.version }}
+          UBUNTU_TAG=${TAG}-ubuntu-linux_amd64
+          docker rmi \
+            wso2/choreo-connect-adapter:$TAG \
+            wso2/choreo-connect-enforcer:$TAG \
+            wso2/choreo-connect-router:$TAG
+          docker tag wso2/choreo-connect-adapter:$UBUNTU_TAG wso2/choreo-connect-adapter:$TAG
+          docker tag wso2/choreo-connect-enforcer:$UBUNTU_TAG wso2/choreo-connect-enforcer:$TAG
+          docker tag wso2/choreo-connect-router:$UBUNTU_TAG wso2/choreo-connect-router:$TAG
+      - name: Run integration tests for Ubuntu images
+        run: |
+          mvn clean install -pl ':integration' -amd -s .maven/settings.xml
       - name: Setup Trivy
         # Using custom Trivy instead of "aquasecurity/trivy-action@0.1.0" to customize the behaviour
         # Run Trivy scan for all images and fail if one failed
@@ -63,11 +112,6 @@ jobs:
           GREEN='\033[0;32m' # Green colour
           BOLD="\033[1m"
           NC='\033[0m' # No colour
-
-          printf "${GREEN}${BOLD}Default Alpine Images${NC}\n"
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-adapter:$TAG || EXIT_CODE=$?
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-enforcer:$TAG || EXIT_CODE=$?
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-router:$TAG || EXIT_CODE=$?
 
           printf "${GREEN}${BOLD}Ubuntu AMD Images${NC}\n"
           SUFFIX="-ubuntu-linux_amd64"

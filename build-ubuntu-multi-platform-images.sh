@@ -27,9 +27,9 @@ echo "Reading product version..."
 MVN_PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 echo "Product version: $MVN_PROJECT_VERSION"
 
-ADAPTER_IMAGE="renukafernando/choreo-connect-adapter:${MVN_PROJECT_VERSION}-ubuntu"
-ENFORCER_IMAGE="renukafernando/choreo-connect-enforcer:${MVN_PROJECT_VERSION}-ubuntu"
-ROUTER_IMAGE="renukafernando/choreo-connect-router:${MVN_PROJECT_VERSION}-ubuntu"
+ADAPTER_IMAGE="wso2/choreo-connect-adapter:${MVN_PROJECT_VERSION}-ubuntu"
+ENFORCER_IMAGE="wso2/choreo-connect-enforcer:${MVN_PROJECT_VERSION}-ubuntu"
+ROUTER_IMAGE="wso2/choreo-connect-router:${MVN_PROJECT_VERSION}-ubuntu"
 
 GREEN='\033[0;32m' # Green colour
 BOLD="\033[1m"
@@ -55,29 +55,36 @@ cp docker-ubuntu-build/target/buildx ~/.docker/cli-plugins
 docker buildx create --name cc-builder --use 2> /dev/null || docker buildx use cc-builder
 
 # build_images builds multi arch images of choreo connect components
+BUILT_IMAGES_ARR=()
 build_images() {
   platforms=$1 # eg: linux/amd64,linux/arm64
   image_suffix=$2 # suffix such as platform
   action=$3 # --push or --load
 
   # replace slashes
-  image_suffix=$(echo "$image_suffix" | tr "/" "-")
+  image_suffix=$(echo "$image_suffix" | tr "/" "_")
 
   ### adapter
-  echo "Building Adapter image..."
-  docker buildx build -t "${ADAPTER_IMAGE}${image_suffix}" --platform "$platforms" "${action}" \
+  adapter_img="${ADAPTER_IMAGE}${image_suffix}"
+  echo "Building Adapter image ($adapter_img)..."
+  docker buildx build -t "$adapter_img" --platform "$platforms" "${action}" \
     -f adapter/src/main/resources/Dockerfile.ubuntu \
     "adapter/target/docker/wso2/choreo-connect-adapter/${MVN_PROJECT_VERSION}/build/"
+  BUILT_IMAGES_ARR+=("$adapter_img")
   ### enforcer
-  echo "Building Enforcer image..."
-  docker buildx build -t "${ENFORCER_IMAGE}${image_suffix}" --platform "$platforms" "${action}" \
+  enforcer_img="${ENFORCER_IMAGE}${image_suffix}"
+  echo "Building Enforcer image ($enforcer_img)..."
+  docker buildx build -t "$enforcer_img" --platform "$platforms" "${action}" \
     -f enforcer-parent/enforcer/src/main/resources/Dockerfile.ubuntu \
     "enforcer-parent/enforcer/target/docker/wso2/choreo-connect-enforcer/${MVN_PROJECT_VERSION}/build"
+  BUILT_IMAGES_ARR+=("$enforcer_img")
   ### router
-  echo "Building Router image..."
-  docker buildx build -t "${ROUTER_IMAGE}${image_suffix}" --platform "$platforms" "${action}" \
+  router_img="${ROUTER_IMAGE}${image_suffix}"
+  echo "Building Router image ($router_img)..."
+  docker buildx build -t "$router_img" --platform "$platforms" "${action}" \
     -f router/src/main/resources/Dockerfile.ubuntu \
     "router/target/docker/wso2/choreo-connect-router/${MVN_PROJECT_VERSION}/build"
+  BUILT_IMAGES_ARR+=("$router_img")
 }
 
 if [ "$subcommand" = "push" ]; then
@@ -104,4 +111,10 @@ else
   build_images "$platform" "-${platform}" "--load"
 fi
 
+# log built images
+printf "${BOLD}Built images${NC}\n"
+for img in "${BUILT_IMAGES_ARR[@]}"
+do
+     echo $img
+done
 printf "${GREEN}${BOLD}Build success${NC}\n"
