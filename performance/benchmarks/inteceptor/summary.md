@@ -54,6 +54,7 @@ configuration details relevant to the Choreo Connect deployment.
 |Adapter       |500                          |500                      |500                        |500                    |
 |Enforcer      |1000                         |1000                     |1000                       |1000                   |
 |Router        |500                          |1000                     |500                        |1000                   |
+|Netty backend |4096                         |2000                     |6114                       |2000                   |
 
 
 The jmeter is configured such that the maximum waiting time for receiving a response to be 20 seconds.
