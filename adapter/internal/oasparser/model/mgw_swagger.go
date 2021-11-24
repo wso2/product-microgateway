@@ -526,7 +526,7 @@ func (swagger *MgwSwagger) validateBasePath() error {
 	if swagger.xWso2Basepath == "" {
 		return errors.New("empty Basepath is provided. Provide a non empty context either using the x-wso2-basePath extension," +
 			" or else 'basePath' (if OpenAPI v2) or a 'servers' entry (if OpenAPI v3)")
-	} else if match, _ := regexp.MatchString("^[/]+[a-zA-Z0-9~/_.-]+$", swagger.xWso2Basepath); !match {
+	} else if match, _ := regexp.MatchString("^[/][a-zA-Z0-9~/_.-]*$", swagger.xWso2Basepath); !match {
 		return errors.New("invalid basepath. Does not start with / or includes invalid characters")
 	}
 	return nil
