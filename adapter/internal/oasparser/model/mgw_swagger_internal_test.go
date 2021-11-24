@@ -275,3 +275,37 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateBasePath(t *testing.T) {
+	type getXWso2BasepathTestItem struct {
+		mgwSwagger MgwSwagger
+		errorNil   bool
+		message    string
+	}
+	dataItems := []getXWso2BasepathTestItem{
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: "/v1/base"},
+			errorNil:   true,
+			message:    "valid basepath",
+		},
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: "/ERROR-Hello%20W"},
+			errorNil:   false,
+			message:    "basepath must not include invalid characters",
+		},
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: "base"},
+			errorNil:   false,
+			message:    "basepath must start with /",
+		},
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: ""},
+			errorNil:   false,
+			message:    "basepath must not be empty",
+		},
+	}
+	for _, item := range dataItems {
+		err := item.mgwSwagger.validateBasePath()
+		assert.Equal(t, item.errorNil, err == nil, item.message)
+	}
+}
