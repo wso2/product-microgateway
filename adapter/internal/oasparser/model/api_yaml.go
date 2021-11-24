@@ -85,8 +85,12 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 
 	endpointConfig := apiYaml.Data.EndpointConfig
 	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
-	if len(productionEndpoints) > 0 && len(sandboxEndpoints) > 0 {
+	if len(productionEndpoints) > 0 {
+		loggers.LoggerAPI.Debugf("Applying production endpoints provided in env variables for API %v : %v", apiYaml.Data.Name, apiYaml.Data.Version)
 		apiProject.ProductionEndpoints = productionEndpoints
+	}
+	if len(sandboxEndpoints) > 0 {
+		loggers.LoggerAPI.Debugf("Applying sandbox endpoints provided in env variables for API %v : %v", apiYaml.Data.Name, apiYaml.Data.Version)
 		apiProject.SandboxEndpoints = sandboxEndpoints
 	}
 
@@ -112,31 +116,52 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 	var productionEndpoints []Endpoint
 	var sandboxEndpoints []Endpoint
-
+	// set production Endpoints
 	i := 0
 	for {
 		var productionEndpointURL string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_"+strconv.Itoa(i), "")
 		if productionEndpointURL == "" {
 			break
 		}
-		productionEndpoint, err := getHostandBasepathandPort(productionEndpointURL)
+		productionEndpointURLFormatted, err := strconv.Unquote(productionEndpointURL)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURL, err.Error())
+			loggers.LoggerAPI.Debugf("Unquoting string %v in env variables has failed. %v", productionEndpointURL, err.Error())
+			// unquoting has failed usually means it was unquoted and in correct format originally
+			productionEndpointURLFormatted = productionEndpointURL
 		}
-		productionEndpoints = append(productionEndpoints, *productionEndpoint)
 
-		// sandbox Endpoints set
-		var sandboxEndpointURL string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_"+strconv.Itoa(i), "")
+		productionEndpoint, err := getHostandBasepathandPort(productionEndpointURLFormatted)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURLFormatted, err.Error())
+		} else if productionEndpoint != nil {
+			productionEndpoints = append(productionEndpoints, *productionEndpoint)
+		}
+		i = i + 1
+	}
+
+	// set sandbox Endpoints
+	j := 0
+	for {
+		var sandboxEndpointURL string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_"+strconv.Itoa(j), "")
 		if sandboxEndpointURL == "" {
 			break
 		}
-		sandboxEndpoint, err := getHostandBasepathandPort(sandboxEndpointURL)
+		sandboxEndpointURLFormatted, err := strconv.Unquote(sandboxEndpointURL)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", sandboxEndpointURL, err.Error())
+			loggers.LoggerAPI.Debugf("Unquoting the string %v in env variables has failed. %v", sandboxEndpointURL, err.Error())
+			// unquoting has failed usually means it was unquoted and in correct format originally
+			sandboxEndpointURLFormatted = sandboxEndpointURL
 		}
-		sandboxEndpoints = append(sandboxEndpoints, *sandboxEndpoint)
-		i = 1 + 1
+
+		sandboxEndpoint, err := getHostandBasepathandPort(sandboxEndpointURLFormatted)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("error while reading sandbox endpoint : %v in env variables, %v", sandboxEndpointURLFormatted, err.Error())
+		} else if sandboxEndpoint != nil {
+			sandboxEndpoints = append(sandboxEndpoints, *sandboxEndpoint)
+		}
+		j = j + 1
 	}
+
 	return productionEndpoints, sandboxEndpoints
 }
 
