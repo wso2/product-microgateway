@@ -31,7 +31,10 @@ import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
+import org.wso2.choreo.connect.tests.common.model.API;
+import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
 import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.ArrayList;
@@ -97,6 +100,29 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
 
     @Test(description = "Test Subscription throttling")
     public void testSubscriptionLevelThrottling() throws Exception {
+        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, requestCount),
+                "Request not throttled by request count condition in subscription tier");
+    }
+
+    @Test(description = "Test Subscription throttling for self-contained token")
+    public void testSubscriptionLevelThrottlingSelfContainedToken() throws Exception {
+        API api = new API();
+        api.setName(super.SAMPLE_API_NAME);
+        api.setContext("/" + super.SAMPLE_API_CONTEXT + "/" + super.SAMPLE_API_VERSION);
+
+        api.setVersion(super.SAMPLE_API_VERSION);
+        api.setProvider("admin");
+
+        //Define application info
+        ApplicationDTO application = new ApplicationDTO();
+        application.setName("jwtApp");
+        application.setTier("Unlimited");
+        application.setId((int) (Math.random() * 1000));
+        String jwtToken = TokenUtil.getJWT(api, application, "15PerMin", TestConstant.KEY_TYPE_PRODUCTION,
+                3600, "write:pets", false);
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, requestCount),
                 "Request not throttled by request count condition in subscription tier");
     }
