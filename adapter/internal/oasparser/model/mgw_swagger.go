@@ -228,7 +228,15 @@ func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []SecurityScheme) {
 	swagger.securityScheme = securityScheme
 }
 
-// SetSecurity sets the API level security of the API
+// SetSecurity sets the API level security of the API. These refer to the security schemes
+// defined for the same API and would have the structure given below,
+//
+// security:
+//	- PetstoreAuth:
+// 		- 'write:pets'
+//		- 'read:pets'
+//	- ApiKeyAuth: []
+//
 func (swagger *MgwSwagger) SetSecurity(security []map[string][]string) {
 	swagger.security = security
 }
