@@ -329,11 +329,11 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 func (swagger *MgwSwagger) SetEnvVariables(apiHashValue string) {
 	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
 	if len(productionEndpoints) > 0 {
-		// logger.LoggerOasparser.Debugf("Applying production endpoints provided in env variables for API %v : %v", apiName, apiVersion)
+		logger.LoggerOasparser.Infof("Applying production endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
 		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
 	}
 	if len(sandboxEndpoints) > 0 {
-		// logger.LoggerOasparser.Debugf("Applying sandbox endpoints provided in env variables for API %v : %v", apiName, apiVersion)
+		logger.LoggerOasparser.Infof("Applying sandbox endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
 		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxEndpoints, LoadBalance)
 	}
 }

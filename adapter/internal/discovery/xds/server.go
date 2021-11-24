@@ -38,7 +38,6 @@ import (
 	envoy_resource "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
-	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	oasParser "github.com/wso2/product-microgateway/adapter/internal/oasparser"
@@ -437,21 +436,27 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 }
 
 func getEndpointSecurity(apiHashValue string, epSecurityFromYaml mgw.APIEndpointSecurity) mgw.APIEndpointSecurity {
-	if epSecurityFromYaml.Production.Type != "" && strings.EqualFold("BASIC", epSecurityFromYaml.Production.Type) {
-		epSecurityFromYaml.Production = mgw.RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "prod",
-			epSecurityFromYaml.Production)
-	} else {
-		loggers.LoggerAPI.Errorf("endpoint security type : %v is not currently supported with WSO2 Choreo Connect",
-			epSecurityFromYaml.Production.Type)
-		epSecurityFromYaml.Production = mgw.EndpointSecurity{}
+	if epSecurityFromYaml.Production.Enabled {
+		if epSecurityFromYaml.Production.Type != "" &&
+			strings.EqualFold("BASIC", epSecurityFromYaml.Production.Type) {
+			epSecurityFromYaml.Production = mgw.RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "prod",
+				epSecurityFromYaml.Production)
+		} else {
+			logger.LoggerXds.Errorf("endpoint security type : %v is not currently supported with WSO2 Choreo Connect",
+				epSecurityFromYaml.Production.Type)
+			epSecurityFromYaml.Production = mgw.EndpointSecurity{}
+		}
 	}
-	if epSecurityFromYaml.Sandbox.Type != "" && strings.EqualFold("BASIC", epSecurityFromYaml.Sandbox.Type) {
-		epSecurityFromYaml.Sandbox = mgw.RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "sand",
-			epSecurityFromYaml.Sandbox)
-	} else {
-		loggers.LoggerAPI.Errorf("endpoint security type : %v is not currently supported with WSO2 Choreo Connect",
-			epSecurityFromYaml.Sandbox.Type)
-		epSecurityFromYaml.Sandbox = mgw.EndpointSecurity{}
+	if epSecurityFromYaml.Sandbox.Enabled {
+		if epSecurityFromYaml.Sandbox.Type != "" &&
+			strings.EqualFold("BASIC", epSecurityFromYaml.Sandbox.Type) {
+			epSecurityFromYaml.Sandbox = mgw.RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "sand",
+				epSecurityFromYaml.Sandbox)
+		} else {
+			logger.LoggerXds.Errorf("endpoint security type : %v is not currently supported with WSO2 Choreo Connect",
+				epSecurityFromYaml.Sandbox.Type)
+			epSecurityFromYaml.Sandbox = mgw.EndpointSecurity{}
+		}
 	}
 	return epSecurityFromYaml
 }
