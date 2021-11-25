@@ -333,7 +333,7 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
-	mgwSwagger.SetEnvProperties(envProps)
+	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
@@ -551,7 +551,7 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
-	mgwSwagger.SetEnvProperties(envProps)
+	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
