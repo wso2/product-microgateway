@@ -38,16 +38,16 @@ The following are the test parameters.
 | -------------------- | --------------------------------------------------------------- | --------------------------- |
 | Scenario Name        | The name of the test scenario.                                  | Refer to the above table.   |
 | Heap Size            | The amount of memory allocated to the application               | 1024M                       |
-| Concurrent Users     | The number of users accessing the application at the same time. | 10, 50, 100, 200, 500, 1000 |
-| Message Size (Bytes) | The request payload size in Bytes.                              | 50, 1024, 10240, 102400     |
+| Concurrent Users     | The number of users accessing the application at the same time. | 100                         |
+| Message Size (Bytes) | The request payload size in Bytes.                              | 1024                        |
 | Back-end Delay (ms)  | The delay added by the back-end service.                        | 0                           |
 
 The duration of each test is **900 seconds**. The warm-up period is **300 seconds**.
 The measurement results are collected after the warm-up period.
 
 [AWS EKS cluster with **c5.xlarge** Amazon EC2 instances](https://aws.amazon.com/eks/?nc2=type_a) were used to deploy WSO2 Choreo Connect.
-When doing below test scenarios, `--cpus` option is provided as 1 and concurrency level for the router provided as 2. Below table includes
-configuration details relevant to the Choreo Connect deployment.
+When doing below test scenarios, `--cpus` option is provided as 1 and concurrency level for the router provided as 2. Replica count for the
+Choreo Connect deployment was one and for the interceptor it was two. Below table includes configuration details relevant to the Choreo Connect deployment.
 
 |Container Name|Requesting Memory Amount (Mi)|Requesting CPU Amount (m)|Limiting Memory Amount (Mi)|Limiting CPU Amount (m)|
 |--------------|-----------------------------|-------------------------|---------------------------|-----------------------|
@@ -55,7 +55,7 @@ configuration details relevant to the Choreo Connect deployment.
 |Enforcer      |1000                         |1000                     |1000                       |1000                   |
 |Router        |500                          |1000                     |500                        |1000                   |
 |Netty backend |4096                         |2000                     |6114                       |2000                   |
-
+|Interceptor   |500                          |1000                     |500                        |1000                   |
 
 The jmeter is configured such that the maximum waiting time for receiving a response to be 20 seconds.
 

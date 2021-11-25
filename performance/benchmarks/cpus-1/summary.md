@@ -46,8 +46,8 @@ The duration of each test is **900 seconds**. The warm-up period is **300 second
 The measurement results are collected after the warm-up period.
 
 [AWS EKS cluster with **c5.xlarge** Amazon EC2 instances](https://aws.amazon.com/eks/?nc2=type_a) were used to deploy WSO2 Choreo Connect.
-When doing below test scenarios, `--cpus` option is provided as 1 and concurrency level for the router provided as 2. Below table includes
-configuration details relevant to the Choreo Connect deployment.
+When doing below test scenarios, `--cpus` option is provided as 1 and concurrency level for the router provided as 2. Replica count for the
+Choreo Connect deployment was one. Below table includes configuration details relevant to the Choreo Connect deployment.
 
 |Container Name|Requesting Memory Amount (Mi)|Requesting CPU Amount (m)|Limiting Memory Amount (Mi)|Limiting CPU Amount (m)|
 |--------------|-----------------------------|-------------------------|---------------------------|-----------------------|
