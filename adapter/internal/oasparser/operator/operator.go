@@ -42,9 +42,9 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 		logger.LoggerOasparser.Error("Error converting api file to json", err)
 		return mgwSwagger, err
 	}
-	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
+	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
 
-	if swaggerVerison == "2" {
+	if swaggerVersion == "2" {
 		// map json to struct
 		var apiData2 spec.Swagger
 		err = json.Unmarshal(apiJsn, &apiData2)
@@ -57,15 +57,15 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 			}
 		}
 
-	} else if swaggerVerison == "3" {
+	} else if swaggerVersion == "3" {
 		// map json to struct
-		var apiData3 *openapi3.Swagger
+		var apiData3 openapi3.Swagger
 
 		err = json.Unmarshal(apiJsn, &apiData3)
 		if err != nil {
 			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		} else {
-			infoOpenAPIErr := mgwSwagger.SetInfoOpenAPI(*apiData3)
+			infoOpenAPIErr := mgwSwagger.SetInfoOpenAPI(apiData3)
 			if infoOpenAPIErr != nil {
 				return mgwSwagger, infoOpenAPIErr
 			}
@@ -89,8 +89,8 @@ func GetOpenAPIVersionAndJSONContent(apiContent []byte) (string, []byte, error) 
 		logger.LoggerOasparser.Error("Error converting api file to json:", err)
 		return "", apiContent, err
 	}
-	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
-	return swaggerVerison, apiJsn, nil
+	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+	return swaggerVersion, apiJsn, nil
 }
 
 // GetOpenAPIV3Struct converts the json content to the openAPIv3 struct
