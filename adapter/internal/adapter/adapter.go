@@ -153,7 +153,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 
 // Run starts the XDS server and Rest API server.
 func Run(conf *config.Config) {
-	sig := make(chan os.Signal)
+	sig := make(chan os.Signal, 2)
 	signal.Notify(sig, os.Interrupt)
 	// TODO: (VirajSalaka) Support the REST API Configuration via flags only if it is a valid requirement
 	flag.Parse()
