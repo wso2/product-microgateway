@@ -466,6 +466,11 @@
                 <version>${azure.messaging.eventhubs.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-core-http-okhttp</artifactId>
+                <version>${azure.core.http.okhttp.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
@@ -491,7 +496,7 @@
         <gson.version>2.8.6</gson.version>
         <guava.version>30.0-jre</guava.version>
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
-        <io.netty.version>4.1.63.Final</io.netty.version>
+        <io.netty.version>4.1.68.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
         <java.websocket.version>1.5.1</java.websocket.version>
         <json.smart.version>2.4.7</json.smart.version>
@@ -533,6 +538,7 @@
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.12.4</jackson.annotations.version>
         <applicationinsights.core.version>2.6.3</applicationinsights.core.version>
-        <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.4</azure.monitor.opentelemetry.exporter.version>
+        <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.5</azure.monitor.opentelemetry.exporter.version>
+        <azure.core.http.okhttp.version>1.2.5</azure.core.http.okhttp.version>
     </properties>
 </project>

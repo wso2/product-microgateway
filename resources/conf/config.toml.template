@@ -516,7 +516,7 @@ enabled = true
 
   # type = "azure"
   # [tracing.configProperties]
-  #   endpoint = ""
+  #   connectionString = ""
   #   # Instrumentation Name
   #   instrumentationName = "CHOREO-CONNECT"
   #   # Maximum number of sampled traces per second string

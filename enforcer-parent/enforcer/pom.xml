@@ -433,7 +433,15 @@
                     <groupId>io.opentelemetry</groupId>
                     <artifactId>opentelemetry-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.azure</groupId>
+                    <artifactId>azure-core-http-netty</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-core-http-okhttp</artifactId>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
