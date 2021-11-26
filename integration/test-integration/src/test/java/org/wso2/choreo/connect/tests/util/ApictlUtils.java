@@ -34,6 +34,7 @@ public class ApictlUtils {
     public static final String PASSWORD_FLAG = "-p";
     public static final String FILE_FLAG = "-f";
     public static final String ENV_FLAG = "-e";
+    public static final String GATEWAY_ENV_FLAG = "-g";
     public static final String VHOST_FLAG = "-t";
     public static final String OVERRIDE_FLAG = "-o";
     public static final String NAME_FLAG = "-n";
@@ -301,8 +302,29 @@ public class ApictlUtils {
      * @throws CCTestException if apictl was unable to undeploy the API
      */
     public static void undeployAPI(String apiName, String apiVersion, String mgwEnv, String vhost) throws CCTestException {
+        undeployAPI(apiName, apiVersion, mgwEnv, vhost, null);
+    }
+
+    /**
+     * Undeploy an API via apictl
+     *
+     * @param apiName name of the API (in api.yaml) to undeploy
+     * @param apiVersion version of the API
+     * @param mgwEnv name of the apictl mgw env the API was deployed
+     * @param vhost vhost of the API to be undeployed from
+     * @param gatewayEnv gatewayEnv of the API to be undeployed from
+     * @throws CCTestException if apictl was unable to undeploy the API
+     */
+    public static void undeployAPI(String apiName, String apiVersion, String mgwEnv, String vhost, String gatewayEnv)
+            throws CCTestException {
         String[] cmdArray = { MG, UNDEPLOY, API };
-        List<String> args = new ArrayList<>(Arrays.asList(NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv));
+        List<String> args = new ArrayList<>(Arrays.asList(NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG,
+                mgwEnv));
+        if (gatewayEnv != null ) {
+            args.add(GATEWAY_ENV_FLAG);
+            args.add(gatewayEnv);
+        }
+
         String loggedVhost = "<EMPTY_VHOST>";
         if (StringUtils.isNotEmpty(vhost)) {
             loggedVhost = vhost;

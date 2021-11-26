@@ -46,7 +46,7 @@ spec:
               name: log4j2-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/choreo-connect-enforcer:1.0.0-beta
+          image: wso2/choreo-connect-enforcer:1.0.0-beta2-SNAPSHOT
           imagePullPolicy: IfNotPresent
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -112,7 +112,7 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/choreo-connect-router:1.0.0-beta
+          image: wso2/choreo-connect-router:1.0.0-beta2-SNAPSHOT
           imagePullPolicy: IfNotPresent
           env:
             - name: ROUTER_ADMIN_HOST
@@ -143,6 +143,8 @@ spec:
               value: "18090"
             - name: ENFORCER_CA_CERT_PATH
               value: "/home/wso2/security/truststore/mg.pem"
+            - name: CONCURRENCY
+              value: "2"
           resources:
             requests:
               memory: "500Mi"

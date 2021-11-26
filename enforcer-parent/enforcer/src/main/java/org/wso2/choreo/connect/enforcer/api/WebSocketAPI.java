@@ -20,6 +20,8 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Scopes;
+import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
@@ -67,7 +69,7 @@ public class WebSocketAPI implements API {
         String version = api.getVersion();
         String apiType = api.getApiType();
         Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
-        List<String> securitySchemeList = new ArrayList<>();
+        Map<String, List<String>> apiSecurity = new HashMap<>();
         Map<String, EndpointCluster> endpoints = new HashMap<>();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
@@ -91,8 +93,15 @@ public class WebSocketAPI implements API {
             }
         }
 
-        for (String schemeName : securitySchemes.keySet()) {
-            securitySchemeList.add(schemeName);
+        for (SecurityList securityList : api.getSecurityList()) {
+            for (Map.Entry<String, Scopes> entry: securityList.getScopeListMap().entrySet()) {
+                apiSecurity.put(entry.getKey(), entry.getValue().getScopesList());
+                // - api_key: [] <-- supported
+                // - default: [] <-- supported
+                // - api_key: []
+                //   oauth: [] <-- AND operation not supported. Only the first will be considered.
+                break;
+            }
         }
 
         EndpointSecurity endpointSecurity = new EndpointSecurity();
@@ -110,7 +119,7 @@ public class WebSocketAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
+                .apiSecurity(apiSecurity).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).endpoints(endpoints).build();
         initFilters();

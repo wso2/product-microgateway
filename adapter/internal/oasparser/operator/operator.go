@@ -49,7 +49,7 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 		var apiData2 spec.Swagger
 		err = json.Unmarshal(apiJsn, &apiData2)
 		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		} else {
 			infoSwaggerErr := mgwSwagger.SetInfoSwagger(apiData2)
 			if infoSwaggerErr != nil {
@@ -63,7 +63,7 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 
 		err = json.Unmarshal(apiJsn, &apiData3)
 		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		} else {
 			infoOpenAPIErr := mgwSwagger.SetInfoOpenAPI(*apiData3)
 			if infoOpenAPIErr != nil {
@@ -73,7 +73,7 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 	}
 	err = mgwSwagger.SetXWso2Extensions()
 	if err != nil {
-		logger.LoggerOasparser.Error("Error occured while setting x-wso2 extensions for ",
+		logger.LoggerOasparser.Error("Error occurred while setting x-wso2 extensions for ",
 			mgwSwagger.GetTitle(), " ", err)
 		return mgwSwagger, err
 	}
@@ -100,7 +100,7 @@ func GetOpenAPIV3Struct(openAPIJson []byte) (openapi3.Swagger, error) {
 
 	err := json.Unmarshal(openAPIJson, &apiData3)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+		logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		return apiData3, err
 	}
 	return apiData3, nil
@@ -112,7 +112,7 @@ func GetOpenAPIV2Struct(openAPIJson []byte) (spec.Swagger, error) {
 	var apiData2 spec.Swagger
 	err := json.Unmarshal(openAPIJson, &apiData2)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+		logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		return apiData2, err
 	}
 	return apiData2, nil

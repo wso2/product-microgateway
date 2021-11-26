@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -51,6 +52,7 @@ type MgwSwagger struct {
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
 	securityScheme      []SecurityScheme
+	security            []map[string][]string
 	xWso2ThrottlingTier string
 	xWso2AuthHeader     string
 	disableSecurity     bool
@@ -227,6 +229,19 @@ func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []SecurityScheme) {
 	swagger.securityScheme = securityScheme
 }
 
+// SetSecurity sets the API level security of the API. These refer to the security schemes
+// defined for the same API and would have the structure given below,
+//
+// security:
+//	- PetstoreAuth:
+// 		- 'write:pets'
+//		- 'read:pets'
+//	- ApiKeyAuth: []
+//
+func (swagger *MgwSwagger) SetSecurity(security []map[string][]string) {
+	swagger.security = security
+}
+
 // SetVersion sets the version of the API
 func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
@@ -247,6 +262,11 @@ func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
 // GetSecurityScheme returns the securitySchemes of the API
 func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 	return swagger.securityScheme
+}
+
+// GetSecurity returns the API level security of the API
+func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
+	return swagger.security
 }
 
 // SetXWso2Extensions set the MgwSwagger object with the properties
@@ -286,8 +306,8 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	return nil
 }
 
-// SetEnvProperties sets environment specific values
-func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
+// SetEnvLabelProperties sets environment specific values
+func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvProps) {
 	var productionUrls []Endpoint
 	var sandboxUrls []Endpoint
 
@@ -305,7 +325,7 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 
 	if len(productionUrls) > 0 {
 		logger.LoggerOasparser.Infof("Production endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
-		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 	}
 
 	if envProps.APIConfigs.SandBoxEndpoint != "" {
@@ -321,7 +341,20 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 
 	if len(sandboxUrls) > 0 {
 		logger.LoggerOasparser.Infof("Sandbox endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
-		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls, LoadBalance)
+		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxUrls, LoadBalance)
+	}
+}
+
+// SetEnvVariables sets environment specific values to the mgwswagger
+func (swagger *MgwSwagger) SetEnvVariables(apiHashValue string) {
+	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
+	if len(productionEndpoints) > 0 {
+		logger.LoggerOasparser.Infof("Applying production endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
+	}
+	if len(sandboxEndpoints) > 0 {
+		logger.LoggerOasparser.Infof("Applying sandbox endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
+		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxEndpoints, LoadBalance)
 	}
 }
 
@@ -522,9 +555,11 @@ func (swagger *MgwSwagger) Validate() error {
 }
 
 func (swagger *MgwSwagger) validateBasePath() error {
-	if xWso2BasePath == "" {
-		return errors.New("empty Basepath is provided. Either use x-wso2-basePath extension or assign basePath (if OpenAPI v2 definition is used)" +
-			" / servers entry (if OpenAPI v3 definition is used) with non empty context")
+	if swagger.xWso2Basepath == "" {
+		return errors.New("empty Basepath is provided. Provide a non empty context either using the x-wso2-basePath extension," +
+			" or else 'basePath' (if OpenAPI v2) or a 'servers' entry (if OpenAPI v3)")
+	} else if match, _ := regexp.MatchString("^[/][a-zA-Z0-9~/_.-]*$", swagger.xWso2Basepath); !match {
+		return errors.New("invalid basepath. Does not start with / or includes invalid characters")
 	}
 	return nil
 }
