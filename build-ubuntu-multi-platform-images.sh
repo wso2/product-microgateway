@@ -66,21 +66,21 @@ build_images() {
 
   ### adapter
   adapter_img="${ADAPTER_IMAGE}${image_suffix}"
-  echo "Building Adapter image ($adapter_img)..."
+  printf "${GREEN}${BOLD}Building Adapter image ($adapter_img)...${NC}\n"
   docker buildx build -t "$adapter_img" --platform "$platforms" "${action}" \
     -f adapter/src/main/resources/Dockerfile.ubuntu \
     "adapter/target/docker/wso2/choreo-connect-adapter/${MVN_PROJECT_VERSION}/build/"
   BUILT_IMAGES_ARR+=("$adapter_img")
   ### enforcer
   enforcer_img="${ENFORCER_IMAGE}${image_suffix}"
-  echo "Building Enforcer image ($enforcer_img)..."
+  printf "${GREEN}${BOLD}Building Enforcer image ($enforcer_img)...${NC}\n"
   docker buildx build -t "$enforcer_img" --platform "$platforms" "${action}" \
     -f enforcer-parent/enforcer/src/main/resources/Dockerfile.ubuntu \
     "enforcer-parent/enforcer/target/docker/wso2/choreo-connect-enforcer/${MVN_PROJECT_VERSION}/build"
   BUILT_IMAGES_ARR+=("$enforcer_img")
   ### router
   router_img="${ROUTER_IMAGE}${image_suffix}"
-  echo "Building Router image ($router_img)..."
+  printf "${GREEN}${BOLD}Building Router image ($router_img)...${NC}\n"
   docker buildx build -t "$router_img" --platform "$platforms" "${action}" \
     -f router/src/main/resources/Dockerfile.ubuntu \
     "router/target/docker/wso2/choreo-connect-router/${MVN_PROJECT_VERSION}/build"

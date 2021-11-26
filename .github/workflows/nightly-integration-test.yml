@@ -5,15 +5,6 @@ on:
     # every day at 8:25pm UTC (1:55am IST )
     - cron:  '25 20 * * *'
   workflow_dispatch:
-    inputs:
-      name:
-        description: 'Person to greet'
-        required: true
-        default: 'Mona the Octocat'
-      home:
-        description: 'location'
-        required: false
-        default: 'The Octoverse'
 jobs:
   check_continue:
     runs-on: ubuntu-latest
@@ -108,6 +99,7 @@ jobs:
           TAG=${{ steps.extract-project-version.outputs.version }}
           SEVERITY="CRITICAL,HIGH,MEDIUM"
           EXIT_CODE=0
+          ARGS="--ignore-unfixed" # if the issues is fixed in a later version we can update it
 
           GREEN='\033[0;32m' # Green colour
           BOLD="\033[1m"
@@ -115,15 +107,15 @@ jobs:
 
           printf "${GREEN}${BOLD}Ubuntu AMD Images${NC}\n"
           SUFFIX="-ubuntu-linux_amd64"
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-adapter:${TAG}${SUFFIX} || EXIT_CODE=$?
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-enforcer:$TAG${SUFFIX} || EXIT_CODE=$?
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-router:$TAG${SUFFIX} || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-adapter:${TAG}${SUFFIX} || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-enforcer:$TAG${SUFFIX} || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-router:$TAG${SUFFIX} || EXIT_CODE=$?
 
           printf "${GREEN}${BOLD}Ubuntu ARM Images${NC}\n"
           SUFFIX="-ubuntu-linux_arm64"
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-adapter:${TAG}${SUFFIX} || EXIT_CODE=$?
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-enforcer:$TAG${SUFFIX} || EXIT_CODE=$?
-          trivy --exit-code 1 --severity "${SEVERITY}" wso2/choreo-connect-router:$TAG${SUFFIX} || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-adapter:${TAG}${SUFFIX} || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-enforcer:$TAG${SUFFIX} || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-router:$TAG${SUFFIX} || EXIT_CODE=$?
 
           # error if one of trivy scan failed
           exit $EXIT_CODE
