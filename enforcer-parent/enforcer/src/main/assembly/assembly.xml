@@ -61,6 +61,10 @@
             <outputDirectory>/</outputDirectory>
         </file>
         <file>
+            <source>target/grpc_health_probe-linux-arm64</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+        <file>
             <source>LICENSE.txt</source>
             <outputDirectory>/</outputDirectory>
         </file>

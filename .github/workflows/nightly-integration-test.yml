@@ -1,4 +1,4 @@
-name: Choreo Connect Integration Tests - Nighly
+name: Nighly Choreo Connect Integration Tests
 
 on:
   schedule:

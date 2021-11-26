@@ -25,6 +25,7 @@ ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=10500
 ARG MG_USER_HOME=/home/${MG_USER}
 ARG GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
+ARG TARGETARCH
 
 ENV ADAPTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
 ENV ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
@@ -42,7 +43,7 @@ RUN \
     && mkdir ${MG_USER_HOME}/logs && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME}/logs  \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
-COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
+COPY maven/grpc_health_probe-linux-${TARGETARCH} ${GRPC_HEALTH_PROBE_PATH}
 RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 
 WORKDIR ${MG_USER_HOME}
