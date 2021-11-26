@@ -25,6 +25,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -54,6 +55,7 @@ public class TLSUtils {
     private static final String X509 = "X.509";
     private static final String crtExtension = ".crt";
     private static final String pemExtension = ".pem";
+    private static final String endCertificateDelimiter = "-----END CERTIFICATE-----";
 
     /**
      * Read the certificate file and return the certificate.
@@ -62,7 +64,7 @@ public class TLSUtils {
      * @return Certificate
      */
     public static Certificate getCertificateFromFile(String filePath)
-            throws CertificateException, IOException {
+            throws CertificateException, IOException, EnforcerException {
         return getCertsFromFile(filePath, true).get(0);
     }
 
@@ -108,24 +110,36 @@ public class TLSUtils {
     }
 
     private static List<Certificate> getCertsFromFile(String filepath, boolean restrictToOne)
-            throws CertificateException, IOException {
-        try (FileInputStream fileInputStream = new FileInputStream(filepath);
-             BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream)) {
-            List<Certificate> certList = new ArrayList<>();
-            CertificateFactory cf = CertificateFactory.getInstance(X509);
-            int count = 0;
-            while (bufferedInputStream.available() > 0) {
-                if (count > 1 && restrictToOne) {
-                    log.warn("Provided PEM file contains more than one certificate. Hence proceeding with" +
-                            "the first certificate in the File");
-                    return certList;
-                }
-                Certificate cert = cf.generateCertificate(bufferedInputStream);
-                certList.add(cert);
-                count++;
-            }
-            return certList;
+            throws CertificateException, IOException, EnforcerException {
+        String content = new String(Files.readAllBytes(Paths.get(filepath)));
+
+        if (!content.contains(endCertificateDelimiter)) {
+            throw new EnforcerException("Content Provided within the certificate file:" + filepath + "is invalid.");
         }
+
+        int endIndex = content.lastIndexOf(endCertificateDelimiter) + 25;
+        // If there are any additional characters afterwards,
+        if (endIndex < content.length()) {
+            content = content.substring(0, endIndex);
+        }
+
+        List<Certificate> certList = new ArrayList<>();
+        CertificateFactory cf = CertificateFactory.getInstance(X509);
+        InputStream inputStream = new ByteArrayInputStream(content.getBytes());
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        int count = 1;
+        while (bufferedInputStream.available() > 0) {
+            if (count > 1 && restrictToOne) {
+                    log.warn("Provided PEM file " + filepath +
+                            "contains more than one certificate. Hence proceeding with" +
+                            "the first certificate in the File for the JWT configuraion related certificate.");
+                    return certList;
+            }
+            Certificate cert = cf.generateCertificate(bufferedInputStream);
+            certList.add(cert);
+            count++;
+        }
+        return certList;
     }
 
     private static void updateTruststoreWithMutlipleCertPem (KeyStore trustStore, String filePath) {
@@ -140,7 +154,7 @@ public class TLSUtils {
                 }
             });
             log.debug("Certificate Added to the truststore : " + filePath);
-        } catch (CertificateException | IOException e) {
+        } catch (CertificateException | IOException | EnforcerException e) {
             log.error("Error while adding certificates to the truststore.", e);
         }
     }
