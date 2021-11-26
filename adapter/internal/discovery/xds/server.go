@@ -503,7 +503,6 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 			}
 			deletedVhosts[vh] = void
 		}
-		delete(apiToVhostsMap, apiNameVersionHashedID)
 		return nil
 	}
 
@@ -622,15 +621,30 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 	toBeDelEnvs, toBeKeptEnvs := getEnvironmentsToBeDeleted(existingLabels, environments)
 
-	if len(existingLabels) != len(toBeDelEnvs) {
-		// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
-		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = toBeKeptEnvs
-		updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
-		logger.LoggerXds.Infof("Deleted API %v of Organization %v", apiIdentifier, organizationID)
-		return nil
-	}
+	for _, val := range toBeDelEnvs {
+		isAllowedToDelete := arrayContains(existingLabels, val)
+		if isAllowedToDelete {
+			// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
+			orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = toBeKeptEnvs
+			updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
+			existingLabels = orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
+			if len(existingLabels) != 0 {
+				return nil
+			}
+			logger.LoggerXds.Infof("API identifier: %v does not have any gateways. Hence deleting the API.", apiIdentifier)
+			cleanMapResources(apiIdentifier,organizationID,toBeDelEnvs)
+			return nil
+		}
+    }
 
 	//clean maps of routes, clusters, endpoints, enforcerAPIs
+	if (len(environments) == 0) {
+		cleanMapResources(apiIdentifier, organizationID, toBeDelEnvs)
+	}
+	return nil
+}
+
+func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs []string){
 	delete(orgIDOpenAPIRoutesMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIClustersMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)
@@ -645,7 +659,6 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	delete(orgIDAPIMgwSwaggerMap[organizationID], apiIdentifier) //delete mgwSwagger
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API %v of organization %v", apiIdentifier, organizationID)
-	return nil
 }
 
 func arrayContains(a []string, x string) bool {
