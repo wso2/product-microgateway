@@ -76,11 +76,17 @@ jobs:
       - name: Replace original images with Ubuntu images
         run: |
           TAG=${{ steps.extract-project-version.outputs.version }}
-          UBUNTU_TAG=${TAG}-ubuntu-linux_amd64
+          docker tag wso2/choreo-connect-adapter:$TAG wso2/choreo-connect-adapter:default-alpine
+          docker tag wso2/choreo-connect-enforcer:$TAG wso2/choreo-connect-enforcer:default-alpine
+          docker tag wso2/choreo-connect-router:$TAG wso2/choreo-connect-router:default-alpine
+
+          # Remove default images to make sure, ubuntu images are properly get replaced
           docker rmi \
             wso2/choreo-connect-adapter:$TAG \
             wso2/choreo-connect-enforcer:$TAG \
             wso2/choreo-connect-router:$TAG
+
+          UBUNTU_TAG=${TAG}-ubuntu-linux_amd64
           docker tag wso2/choreo-connect-adapter:$UBUNTU_TAG wso2/choreo-connect-adapter:$TAG
           docker tag wso2/choreo-connect-enforcer:$UBUNTU_TAG wso2/choreo-connect-enforcer:$TAG
           docker tag wso2/choreo-connect-router:$UBUNTU_TAG wso2/choreo-connect-router:$TAG
@@ -104,6 +110,11 @@ jobs:
           GREEN='\033[0;32m' # Green colour
           BOLD="\033[1m"
           NC='\033[0m' # No colour
+
+          printf "${GREEN}${BOLD}Default Alpine Images${NC}\n"
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-adapter:default-alpine || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-enforcer:default-alpine || EXIT_CODE=$?
+          trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-router:default-alpine || EXIT_CODE=$?
 
           printf "${GREEN}${BOLD}Ubuntu AMD Images${NC}\n"
           SUFFIX="-ubuntu-linux_amd64"
