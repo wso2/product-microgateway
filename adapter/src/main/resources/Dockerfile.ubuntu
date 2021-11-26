@@ -16,6 +16,7 @@
 
 FROM ubuntu:focal-20211006
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+RUN apt-get update && apt-get upgrade
 
 ENV LANG=C.UTF-8
 

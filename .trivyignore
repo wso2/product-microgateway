@@ -4,6 +4,7 @@ CVE-2021-37137
 
 # ubuntu image related issues - for multi platform images
 # not fixed versions yet for ubuntu related issues
+# Used trivy ignore unfixed issues instead to track, if one get fixed the build will get failed
 # CVE-2009-5155
 # CVE-2013-4235
 # CVE-2015-8985
