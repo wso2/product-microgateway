@@ -502,6 +502,14 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 				return err
 			}
 			deletedVhosts[vh] = void
+			
+			for val := range deletedVhosts {
+				existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
+				if val == vh && len(existingLabels) == 0 {
+					logger.LoggerXds.Infof("Vhost : %v  deleted since there is no gateways assigned to it.", vh)
+					delete(apiToVhostsMap[apiNameVersionHashedID],val)
+				}
+			}
 		}
 		return nil
 	}
