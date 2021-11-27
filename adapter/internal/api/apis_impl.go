@@ -205,9 +205,9 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		_, err := xds.UpdateAPI(vhost, apiProject, environments)
+		_, err = xds.UpdateAPI(vhost, apiProject, environments)
 		if err != nil {
-			return err
+			return
 		}
 	}
 	return nil
@@ -215,7 +215,11 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string, apiEnvs map[string]map[string]synchronizer.APIEnvProps) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
+func ApplyAPIProjectFromAPIM(
+	payload []byte,
+	vhostToEnvsMap map[string][]string,
+	apiEnvs map[string]map[string]synchronizer.APIEnvProps,
+) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return nil, err
