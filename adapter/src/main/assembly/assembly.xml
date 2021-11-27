@@ -49,7 +49,15 @@
             <outputDirectory>security/truststore</outputDirectory>
         </file>
         <file>
+            <source>src/main/resources/check_health.sh</source>
+            <outputDirectory/>
+        </file>
+        <file>
             <source>target/grpc_health_probe-linux-amd64</source>
+            <outputDirectory/>
+        </file>
+        <file>
+            <source>target/grpc_health_probe-linux-arm64</source>
             <outputDirectory/>
         </file>
         <file>

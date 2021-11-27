@@ -1,4 +1,4 @@
-name: Choreo Connect Integration Tests
+name: PR Check - Integration Tests
 
 on: [push, pull_request]
 
@@ -13,22 +13,37 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Setup Go environment
-        uses: actions/setup-go@v2.1.3
-      - name: Setup Pre Req
-        run: |
-          export DOCKER_COMPOSE_VERSION=1.23.2
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-          sudo apt-get update
-          sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-          sudo rm /usr/local/bin/docker-compose
-          curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-          chmod +x docker-compose
-          sudo mv docker-compose /usr/local/bin
-          docker pull testcontainers/ryuk:0.3.0
-          export `go env | grep GOPATH`
-          export PATH="${GOPATH}/bin:${PATH}"
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.15.x'
+      - name: Cache M2 Repo
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Cache Go Modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Extract Maven project version
+        run: echo ::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        id: extract-project-version
+      - name: Print Maven project version
+        run: echo ${{ steps.extract-project-version.outputs.version }}
       - name: Build with Maven
         run: |
-          export PATH="${HOME}/go/bin:${PATH}"
-          mvn clean install -PRelease -s .maven/settings.xml
+          #export PATH="${HOME}/go/bin:${PATH}"
+          mvn clean install -PRelease -s .maven/settings.xml \
+            -pl '!:integration' -pl '!:mock-backend-server' -pl '!:test-integration'
+      - name: Run integration tests
+        run: |
+          mvn clean install -PRelease -pl ':integration' -amd -s .maven/settings.xml
+      - name: Build multi platform Ubuntu images
+        run: |
+          ./build-ubuntu-multi-platform-images.sh all
+          docker images

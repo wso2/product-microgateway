@@ -33,7 +33,7 @@
         <fileSet>
             <!-- TODO: (VirajSalaka) Another option is to use the dependencySet option -->
             <directory>target</directory>
-            <outputDirectory></outputDirectory>
+            <outputDirectory/>
             <excludes>
                 <exclude>original*.jar</exclude>
             </excludes>
@@ -53,7 +53,15 @@
             <outputDirectory>security</outputDirectory>
         </file>
         <file>
+            <source>src/main/resources/check_health.sh</source>
+            <outputDirectory/>
+        </file>
+        <file>
             <source>target/grpc_health_probe-linux-amd64</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+        <file>
+            <source>target/grpc_health_probe-linux-arm64</source>
             <outputDirectory>/</outputDirectory>
         </file>
         <file>
