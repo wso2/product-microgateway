@@ -62,7 +62,7 @@ build_images() {
   action=$3 # --push or --load
 
   # replace slashes
-  image_suffix=$(echo "$image_suffix" | tr "/" "_")
+  image_suffix=$(echo "$image_suffix" | tr "/" "-")
 
   ### adapter
   adapter_img="${ADAPTER_IMAGE}${image_suffix}"

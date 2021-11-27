@@ -86,7 +86,7 @@ jobs:
             wso2/choreo-connect-enforcer:$TAG \
             wso2/choreo-connect-router:$TAG
 
-          UBUNTU_TAG=${TAG}-ubuntu-linux_amd64
+          UBUNTU_TAG=${TAG}-ubuntu-linux-amd64
           docker tag wso2/choreo-connect-adapter:$UBUNTU_TAG wso2/choreo-connect-adapter:$TAG
           docker tag wso2/choreo-connect-enforcer:$UBUNTU_TAG wso2/choreo-connect-enforcer:$TAG
           docker tag wso2/choreo-connect-router:$UBUNTU_TAG wso2/choreo-connect-router:$TAG
@@ -117,13 +117,13 @@ jobs:
           trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-router:default-alpine || EXIT_CODE=$?
 
           printf "${GREEN}${BOLD}Ubuntu AMD Images${NC}\n"
-          SUFFIX="-ubuntu-linux_amd64"
+          SUFFIX="-ubuntu-linux-amd64"
           trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-adapter:${TAG}${SUFFIX} || EXIT_CODE=$?
           trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-enforcer:$TAG${SUFFIX} || EXIT_CODE=$?
           trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-router:$TAG${SUFFIX} || EXIT_CODE=$?
 
           printf "${GREEN}${BOLD}Ubuntu ARM Images${NC}\n"
-          SUFFIX="-ubuntu-linux_arm64"
+          SUFFIX="-ubuntu-linux-arm64"
           trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-adapter:${TAG}${SUFFIX} || EXIT_CODE=$?
           trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-enforcer:$TAG${SUFFIX} || EXIT_CODE=$?
           trivy --exit-code 1 --severity "${SEVERITY}" $ARGS wso2/choreo-connect-router:$TAG${SUFFIX} || EXIT_CODE=$?
