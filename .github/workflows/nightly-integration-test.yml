@@ -33,7 +33,7 @@ jobs:
 
   build:
     needs: check_continue
-    if: ${{ needs.check_continue.outputs.should_run == 'true' }}
+    if: ${{ needs.check_continue.outputs.should_run != 'false' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
