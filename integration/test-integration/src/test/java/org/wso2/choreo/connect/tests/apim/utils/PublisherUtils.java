@@ -259,44 +259,25 @@ public class PublisherUtils {
      */
     public static String createAPIRevisionAndDeploy(String apiId, String vhost, RestAPIPublisherImpl publisherRestClient)
             throws ApiException, JSONException {
-        int HTTP_RESPONSE_CODE_OK = Response.Status.OK.getStatusCode();
-        int HTTP_RESPONSE_CODE_CREATED = Response.Status.CREATED.getStatusCode();
-        String revisionUUID = null;
+
         //Add the API Revision using the API publisher.
         APIRevisionRequest apiRevisionRequest = new APIRevisionRequest();
         apiRevisionRequest.setApiUUID(apiId);
         apiRevisionRequest.setDescription("Test Revision 1");
 
         HttpResponse apiRevisionResponse = publisherRestClient.addAPIRevision(apiRevisionRequest);
-
-        assertEquals(apiRevisionResponse.getResponseCode(), HTTP_RESPONSE_CODE_CREATED,
+        assertEquals(apiRevisionResponse.getResponseCode(), Response.Status.CREATED.getStatusCode(),
                 "Create API Response Code is invalid." + apiRevisionResponse.getData());
 
-        // Retrieve Revision Info
-        HttpResponse apiRevisionsGetResponse = publisherRestClient.getAPIRevisions(apiId, null);
-        assertEquals(apiRevisionsGetResponse.getResponseCode(), HTTP_RESPONSE_CODE_OK,
-                "Unable to retrieve revisions" + apiRevisionsGetResponse.getData());
-        List<JSONObject> revisionList = new ArrayList<>();
-        JSONObject jsonObject = new JSONObject(apiRevisionsGetResponse.getData());
+        // Read revision ID from response
+        JSONObject apiRevisionJsonObject = new JSONObject(apiRevisionResponse.getData());
+        String revisionUUID = apiRevisionJsonObject.getString("id");
 
-        JSONArray arrayList = jsonObject.getJSONArray("list");
-        for (int i = 0, l = arrayList.length(); i < l; i++) {
-            revisionList.add(arrayList.getJSONObject(i));
-        }
-        for (JSONObject revision : revisionList) {
-            revisionUUID = revision.getString("id");
-        }
-
-        // Deploy Revision to gateway
-        List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
-        APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionDeployRequest.setName("Default");
-        apiRevisionDeployRequest.setVhost(vhost);
-        apiRevisionDeployRequest.setDisplayOnDevportal(true);
-        apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
+        // Deploy API revision
+        List<APIRevisionDeployUndeployRequest> deployRequestList = getDeployRequestList("Default", vhost);
         HttpResponse apiRevisionsDeployResponse = publisherRestClient.deployAPIRevision(apiId, revisionUUID,
-                apiRevisionDeployRequestList);
-        assertEquals(apiRevisionsDeployResponse.getResponseCode(), HTTP_RESPONSE_CODE_CREATED,
+                deployRequestList);
+        assertEquals(apiRevisionsDeployResponse.getResponseCode(), Response.Status.CREATED.getStatusCode(),
                 "Unable to deploy API Revisions:" + apiRevisionsDeployResponse.getData());
         return revisionUUID;
     }
@@ -307,48 +288,40 @@ public class PublisherUtils {
      * @param apiId            - API UUID
      * @param publisherRestClient - Instance of APIPublisherRestClient
      */
-    public static String createAPIProductRevisionAndDeploy(String apiId, RestAPIPublisherImpl publisherRestClient)
-            throws ApiException, JSONException {
-        int HTTP_RESPONSE_CODE_OK = Response.Status.OK.getStatusCode();
-        int HTTP_RESPONSE_CODE_CREATED = Response.Status.CREATED.getStatusCode();
-        String revisionUUID = null;
+    public static String createAPIProductRevisionAndDeploy(String apiId, String vhost,
+           RestAPIPublisherImpl publisherRestClient) throws ApiException, JSONException {
+
         //Add the API Revision using the API publisher.
         APIRevisionRequest apiRevisionRequest = new APIRevisionRequest();
         apiRevisionRequest.setApiUUID(apiId);
         apiRevisionRequest.setDescription("Test Revision 1");
 
         HttpResponse apiRevisionResponse = publisherRestClient.addAPIProductRevision(apiRevisionRequest);
-
-        assertEquals(apiRevisionResponse.getResponseCode(), HTTP_RESPONSE_CODE_CREATED,
+        assertEquals(apiRevisionResponse.getResponseCode(), Response.Status.CREATED.getStatusCode(),
                 "Create API Response Code is invalid." + apiRevisionResponse.getData());
 
-        // Retrieve Revision Info
-        HttpResponse apiRevisionsGetResponse = publisherRestClient.getAPIRevisions(apiId, null);
-        assertEquals(apiRevisionsGetResponse.getResponseCode(), HTTP_RESPONSE_CODE_OK,
-                "Unable to retrieve revisions" + apiRevisionsGetResponse.getData());
-        List<JSONObject> revisionList = new ArrayList<>();
-        JSONObject jsonObject = new JSONObject(apiRevisionsGetResponse.getData());
+        // Read revision ID from response
+        JSONObject apiRevisionJsonObject = new JSONObject(apiRevisionResponse.getData());
+        String revisionUUID = apiRevisionJsonObject.getString("id");
 
-        JSONArray arrayList = jsonObject.getJSONArray("list");
-        for (int i = 0, l = arrayList.length(); i < l; i++) {
-            revisionList.add(arrayList.getJSONObject(i));
-        }
-        for (JSONObject revision : revisionList) {
-            revisionUUID = revision.getString("id");
-        }
+        // Deploy API Product revision
+        List<APIRevisionDeployUndeployRequest> deployRequestList = getDeployRequestList("Default", vhost);
+        HttpResponse deployResponse = publisherRestClient.deployAPIProductRevision(apiId, revisionUUID,
+                deployRequestList);
+        assertEquals(deployResponse.getResponseCode(), Response.Status.CREATED.getStatusCode(),
+                "Unable to deploy API Product Revisions:" + deployResponse.getData());
+        return revisionUUID;
+    }
 
+    private static List<APIRevisionDeployUndeployRequest> getDeployRequestList(String envName, String vhost) {
         // Deploy Revision to gateway
         List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionDeployRequest.setName("Default");
-        apiRevisionDeployRequest.setVhost("localhost");
+        apiRevisionDeployRequest.setName(envName);
+        apiRevisionDeployRequest.setVhost(vhost);
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
-        HttpResponse apiRevisionsDeployResponse = publisherRestClient.deployAPIProductRevision(apiId, revisionUUID,
-                apiRevisionDeployRequestList);
-        assertEquals(apiRevisionsDeployResponse.getResponseCode(), HTTP_RESPONSE_CODE_CREATED,
-                "Unable to deploy API Product Revisions:" + apiRevisionsDeployResponse.getData());
-        return revisionUUID;
+        return apiRevisionDeployRequestList;
     }
 
     /**
