@@ -646,7 +646,7 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
     }
 
 	//clean maps of routes, clusters, endpoints, enforcerAPIs
-	if (len(environments) == 0) {
+	if len(environments) == 0 {
 		cleanMapResources(apiIdentifier, organizationID, toBeDelEnvs)
 	}
 	return nil
