@@ -262,9 +262,6 @@ public class KeyValidator {
         infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
         infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
         infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
-        if (apiTier != null && apiTier.trim().length() > 0) {
-            infoDTO.setApiTier(apiTier);
-        }
         // We also need to set throttling data list associated with given API. This need to have
         // policy id and
         // condition id list for all throttling tiers associated with this API.

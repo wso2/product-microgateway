@@ -27,7 +27,6 @@ public class AuthenticationContext {
     private String username;
     private String applicationTier;
     private String tier;
-    private String apiTier;
     private boolean isContentAwareTierPresent;
     private String apiKey;
     private String keyType;
@@ -54,7 +53,6 @@ public class AuthenticationContext {
     public AuthenticationContext() {
         this.applicationId = UNKNOWN_VALUE;
         this.apiPublisher = UNKNOWN_VALUE;
-        this.apiTier = "";
         this.applicationId = UNKNOWN_VALUE;
         this.applicationName = UNKNOWN_VALUE;
         this.applicationTier = "Unlimited";
@@ -85,20 +83,6 @@ public class AuthenticationContext {
 
     public void setIsContentAware(boolean isContentAware) {
         this.isContentAwareTierPresent = isContentAware;
-    }
-
-    /**
-     * API Level throttling tier.
-     *
-     * @return API Level Throttling Tier.
-     */
-    public String getApiTier() {
-        return apiTier;
-    }
-
-
-    public void setApiTier(String apiTier) {
-        this.apiTier = apiTier;
     }
 
     /**

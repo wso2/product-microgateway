@@ -74,8 +74,6 @@ public class WebSocketMetaDataFilter implements Filter {
                     getNullableStringValue(authenticationContext.getApplicationTier()));
             requestContext.addMetadataToMap(MetadataConstants.TIER,
                     getNullableStringValue(authenticationContext.getTier()));
-            requestContext.addMetadataToMap(MetadataConstants.API_TIER,
-                    getNullableStringValue(authenticationContext.getApiTier()));
             requestContext.addMetadataToMap(MetadataConstants.CONTENT_AWARE_TIER_PRESENT,
                     getNullableStringValue(String.valueOf(authenticationContext.isContentAwareTierPresent())));
             requestContext.addMetadataToMap(MetadataConstants.API_KEY,

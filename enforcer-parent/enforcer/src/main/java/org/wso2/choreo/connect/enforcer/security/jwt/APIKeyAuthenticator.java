@@ -303,7 +303,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         String version = requestContext.getMatchedAPI().getVersion();
         JSONObject api = null;
 
-        validationInfoDTO.setApiTier(requestContext.getMatchedAPI().getTier());
         if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
             validationInfoDTO.setType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
         } else {
