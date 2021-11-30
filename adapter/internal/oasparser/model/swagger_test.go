@@ -44,7 +44,7 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	var apiYaml model.APIYaml
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiYaml)
+	mgwSwagger, err := operator.GetMgwSwaggerFromAPIYaml(apiYaml, model.WS)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 
 	dataItems := []setInfoSwaggerWebSocketTestItem{
@@ -85,7 +85,8 @@ func TestValidate(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_prod_sand_extensions.yaml"
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
-	mgwSwaggerForOpenapi, err := operator.GetMgwSwagger(openapiByteArr)
+	mgwSwaggerForOpenapi := model.MgwSwagger{}
+	err = mgwSwaggerForOpenapi.GetMgwSwagger(openapiByteArr)
 	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.Nil(t, err, "Validation Error should not be present when servers URL is properly provided.")
