@@ -49,9 +49,9 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
 	// If the schemes property is not mentioned at all, http will be assigned. (Only swagger 2 version has this property)
-	// If the productionEndpoints are already assigned from api.Yaml, productionEndpoints should not be
-	// updated with the Host Property.
-	if swagger2.Host != "" && swagger.productionEndpoints == nil {
+	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// an exception is made where host property is not processed when the API is prototyped.
+	if swagger2.Host != "" && !swagger.IsProtoTyped {
 		urlScheme := ""
 		for _, scheme := range swagger2.Schemes {
 			//TODO: (VirajSalaka) Introduce Constants
