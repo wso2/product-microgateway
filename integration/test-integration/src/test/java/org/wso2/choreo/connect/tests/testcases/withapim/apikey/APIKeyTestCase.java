@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testcases.withapim;
+package org.wso2.choreo.connect.tests.testcases.withapim.apikey;
 
 import org.apache.http.HttpStatus;
 import org.json.JSONArray;
