@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------
 
 FROM alpine:3.14.3
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
 

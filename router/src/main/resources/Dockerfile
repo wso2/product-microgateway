@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 FROM envoyproxy/envoy-alpine:v1.20.0
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
 

@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 FROM ubuntu:jammy-20211029
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 ### Ref Dockerfile: https://github.com/envoyproxy/envoy/blob/e385e016e941b6c2d91096b0b792aa6940d4b38c/ci/Dockerfile-envoy
 RUN apt-get update && apt-get upgrade -y \
