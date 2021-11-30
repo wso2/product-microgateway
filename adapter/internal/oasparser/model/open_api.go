@@ -77,9 +77,9 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.apiType = HTTP
 	var productionUrls []Endpoint
-	// If the productionEndpoints are already assigned from api.Yaml, the servers object will not
-	// be processed.
-	if isServerURLIsAvailable(swagger3.Servers) && swagger.productionEndpoints == nil {
+	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// an exception is made where servers url is not processed when the API is prototyped.
+	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsProtoTyped {
 		for _, serverEntry := range swagger3.Servers {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
