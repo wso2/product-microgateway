@@ -98,17 +98,31 @@ public class JWTAuthenticator implements Authenticator {
         Map<String, List<String>> resourceSecuritySchemes = requestContext.getMatchedResourcePath()
                 .getSecuritySchemas();
         // handle default security
-        boolean isDefault = true;
+        boolean notSpecified = true;
+        //check in resource level security
         for (String securityDefinitionName: resourceSecuritySchemes.keySet()) {
             if (securitySchemeDefinitions.containsKey(securityDefinitionName)) {
-                isDefault = false;
+                notSpecified = false;
                 SecuritySchemaConfig config = securitySchemeDefinitions.get(securityDefinitionName);
                 if (APIConstants.API_SECURITY_OAUTH2.equals(config.getType())) {
                     return true;
                 }
             }
         }
-        return isDefault;
+        if (notSpecified) {
+            // check in API level security
+            Map<String, List<String>> apiSecuritySchemes = requestContext.getMatchedAPI().getApiSecurity();
+            for (String securityDefinitionName : apiSecuritySchemes.keySet()) {
+                if (securitySchemeDefinitions.containsKey(securityDefinitionName)) {
+                    notSpecified = false;
+                    SecuritySchemaConfig config = securitySchemeDefinitions.get(securityDefinitionName);
+                    if (APIConstants.API_SECURITY_OAUTH2.equals(config.getType())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return notSpecified;
     }
 
     @Override
