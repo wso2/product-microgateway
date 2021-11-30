@@ -117,7 +117,7 @@ public class TLSUtils {
             throw new EnforcerException("Content Provided within the certificate file:" + filepath + "is invalid.");
         }
 
-        int endIndex = content.lastIndexOf(endCertificateDelimiter) + 25;
+        int endIndex = content.lastIndexOf(endCertificateDelimiter) + endCertificateDelimiter.length();
         // If there are any additional characters afterwards,
         if (endIndex < content.length()) {
             content = content.substring(0, endIndex);
