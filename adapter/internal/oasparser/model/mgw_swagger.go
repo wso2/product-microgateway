@@ -956,9 +956,9 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 		logger.LoggerOasparser.Error("Error converting api file to json", err)
 		return err
 	}
-	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
+	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
 
-	if swaggerVerison == "2" {
+	if swaggerVersion == "2" {
 		// map json to struct
 		var apiData2 spec.Swagger
 		err = json.Unmarshal(apiJsn, &apiData2)
@@ -971,15 +971,15 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			}
 		}
 
-	} else if swaggerVerison == "3" {
+	} else if swaggerVersion == "3" {
 		// map json to struct
-		var apiData3 *openapi3.Swagger
+		var apiData3 openapi3.Swagger
 
 		err = json.Unmarshal(apiJsn, &apiData3)
 		if err != nil {
 			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		} else {
-			infoOpenAPIErr := swagger.SetInfoOpenAPI(*apiData3)
+			infoOpenAPIErr := swagger.SetInfoOpenAPI(apiData3)
 			if infoOpenAPIErr != nil {
 				return infoOpenAPIErr
 			}

@@ -40,8 +40,8 @@ func GetOpenAPIVersionAndJSONContent(apiContent []byte) (string, []byte, error) 
 		logger.LoggerOasparser.Error("Error converting api file to json:", err)
 		return "", apiContent, err
 	}
-	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
-	return swaggerVerison, apiJsn, nil
+	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+	return swaggerVersion, apiJsn, nil
 }
 
 // GetOpenAPIV3Struct converts the json content to the openAPIv3 struct

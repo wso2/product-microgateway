@@ -57,11 +57,13 @@ import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 
 /**
@@ -208,6 +210,13 @@ public class JWTAuthenticator implements Authenticator {
                                                     + "API Subscription validation failed.");
                                 }
                             }
+                        } else {
+                            // In this case, the application related properties are populated so that analytics
+                            // could provide much better insights.
+                            // Since application notion becomes less meaningful with subscription validation disabled,
+                            // the application name would be populated under the convention "anon:<KM Reference>"
+                            updateApplicationNameForSubscriptionDisabledKM(apiKeyValidationInfoDTO,
+                                    issuerDto.getName());
                         }
                     } finally {
                         if (Utils.tracingEnabled()) {
@@ -274,6 +283,16 @@ public class JWTAuthenticator implements Authenticator {
             }
         }
 
+    }
+
+    private void updateApplicationNameForSubscriptionDisabledKM(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                                String kmReference) {
+        String applicationRef = APIConstants.ANONYMOUS_PREFIX + kmReference;
+        apiKeyValidationInfoDTO.setApplicationName(applicationRef);
+        apiKeyValidationInfoDTO.setApplicationId(
+                UUID.nameUUIDFromBytes(
+                        applicationRef.getBytes(StandardCharsets.UTF_8)).toString());
+        apiKeyValidationInfoDTO.setApplicationTier(APIConstants.UNLIMITED_TIER);
     }
 
     @Override

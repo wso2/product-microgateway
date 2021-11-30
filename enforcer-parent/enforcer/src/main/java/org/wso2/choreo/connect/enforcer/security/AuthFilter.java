@@ -231,21 +231,17 @@ public class AuthFilter implements Filter {
             addAPILevelTimeoutHeaders(requestContext, keyType);
         }
 
-        for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getResources()) {
-            if (resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
-                if (resourceConfig.getEndpoints().containsKey(keyType)) {
-                    EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
+        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
+        if (resourceConfig.getEndpoints().containsKey(keyType)) {
+            EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
 
-                    // Apply resource level retry headers
-                    if (endpointCluster.getRetryConfig() != null) {
-                        addRetryConfigHeaders(requestContext, endpointCluster.getRetryConfig());
-                    }
-                    // Apply resource level timeout headers
-                    if (endpointCluster.getRouteTimeoutInMillis() != null) {
-                        addTimeoutHeaders(requestContext, endpointCluster.getRouteTimeoutInMillis());
-                    }
-                }
-                return; // check only in the requested path
+            // Apply resource level retry headers
+            if (endpointCluster.getRetryConfig() != null) {
+                addRetryConfigHeaders(requestContext, endpointCluster.getRetryConfig());
+            }
+            // Apply resource level timeout headers
+            if (endpointCluster.getRouteTimeoutInMillis() != null) {
+                addTimeoutHeaders(requestContext, endpointCluster.getRouteTimeoutInMillis());
             }
         }
     }
