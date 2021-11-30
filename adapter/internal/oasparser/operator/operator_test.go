@@ -235,7 +235,8 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerFromAPIYaml(apiYaml, model.WS)
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, mgwSwagger.GetAPIType(), "WS", "API type for websocket mismatch")

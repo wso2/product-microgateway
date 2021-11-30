@@ -994,14 +994,13 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 	return nil
 }
 
-//SetSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
+//PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetSwaggerFromAPIYaml(apiData APIYaml, apiType string) error {
+func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType string) error {
 
 	data := apiData.Data
 	// UUID in the generated api.yaml file is considerd as swagger.id
 	swagger.id = data.ID
-	// Set apiType as WS for websockets
 	swagger.apiType = apiType
 	// name and version in api.yaml corresponds to title and version respectively.
 	swagger.title = data.Name

@@ -29,7 +29,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -250,7 +249,8 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerFromAPIYaml(apiYaml, model.WS)
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
@@ -334,7 +334,8 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerFromAPIYaml(apiYaml, model.WS)
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
 	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
@@ -457,7 +458,8 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerFromAPIYaml(apiYaml, model.WS)
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
@@ -486,7 +488,8 @@ func commonTestForClusterPrioritiesInWebSocketAPI(t *testing.T, apiYamlFilePath 
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerFromAPIYaml(apiYaml, model.WS)
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
@@ -552,7 +555,8 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	mgwSwagger, err := operator.GetMgwSwaggerFromAPIYaml(apiYaml, model.WS)
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
 	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")

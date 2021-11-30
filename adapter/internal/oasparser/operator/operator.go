@@ -94,16 +94,3 @@ to pass labels. Currently value "DefaultGatewayName" is returned
 func GetXWso2LabelsWebSocket(webSocketAPIDef model.MgwSwagger) []string {
 	return []string{config.DefaultGatewayName}
 }
-
-/*
-GetMgwSwaggerFromAPIYaml returns a MgwSwagger for the APIs using the API.Yaml file.
-*/
-func GetMgwSwaggerFromAPIYaml(apiData model.APIYaml, apiType string) (model.MgwSwagger, error) {
-	var mgwSwagger model.MgwSwagger
-	err := mgwSwagger.SetSwaggerFromAPIYaml(apiData, apiType)
-	if err != nil {
-		return mgwSwagger, err
-	}
-	return mgwSwagger, nil
-
-}

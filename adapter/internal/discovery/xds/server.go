@@ -44,7 +44,6 @@ import (
 	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
@@ -271,7 +270,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		apiEnvProps = apiEnvPropsV
 	}
 
-	mgwSwagger, err = operator.GetMgwSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
 	if err != nil {
 		return nil, err
 	}
