@@ -14,9 +14,10 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM ubuntu:focal-20211006
+FROM ubuntu:jammy-20211029
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
-RUN apt-get update && apt-get upgrade
+
+RUN apt-get update && apt-get upgrade -y
 
 ENV LANG=C.UTF-8
 

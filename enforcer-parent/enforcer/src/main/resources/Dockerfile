@@ -15,9 +15,9 @@
 # -----------------------------------------------------------------------
 
 FROM adoptopenjdk/openjdk11:jre-11.0.13_8-alpine
-RUN apk update && apk upgrade --no-cache
+LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
 
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
+RUN apk update && apk upgrade --no-cache
 
 ENV LANG=C.UTF-8
 

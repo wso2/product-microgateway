@@ -13,8 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
-FROM envoyproxy/envoy:v1.20.0
-RUN apt-get update && apt-get upgrade
+FROM ubuntu:jammy-20211029
+LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+
+### Ref Dockerfile: https://github.com/envoyproxy/envoy/blob/e385e016e941b6c2d91096b0b792aa6940d4b38c/ci/Dockerfile-envoy
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install --no-install-recommends -y ca-certificates \
+    && apt-get autoremove -y && apt-get clean \
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=envoyproxy/envoy:v1.20.0 /usr/local/bin/ /usr/local/bin/
+RUN chown root:root /usr/local/bin/su-exec && adduser --group --system envoy
+### End Ref
 
 ENV LANG=C.UTF-8
 
