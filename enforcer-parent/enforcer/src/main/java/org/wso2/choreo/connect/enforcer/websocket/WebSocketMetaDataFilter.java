@@ -45,7 +45,6 @@ public class WebSocketMetaDataFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
 
     private APIConfig apiConfig;
-    private AuthenticationContext authenticationContext;
 
     @Override
     public void init(APIConfig apiConfig, Map<String, String> configProperties) {
@@ -64,7 +63,7 @@ public class WebSocketMetaDataFilter implements Filter {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
 
             }
-            this.authenticationContext = requestContext.getAuthenticationContext();
+            AuthenticationContext authenticationContext = requestContext.getAuthenticationContext();
             requestContext.addMetadataToMap(MetadataConstants.GRPC_STREAM_ID, UUID.randomUUID().toString());
             requestContext.addMetadataToMap(MetadataConstants.REQUEST_ID,
                     getNullableStringValue(requestContext.getRequestID()));
@@ -74,6 +73,8 @@ public class WebSocketMetaDataFilter implements Filter {
                     getNullableStringValue(authenticationContext.getApplicationTier()));
             requestContext.addMetadataToMap(MetadataConstants.TIER,
                     getNullableStringValue(authenticationContext.getTier()));
+            requestContext.addMetadataToMap(MetadataConstants.API_TIER,
+                    getNullableStringValue(requestContext.getMatchedAPI().getTier()));
             requestContext.addMetadataToMap(MetadataConstants.CONTENT_AWARE_TIER_PRESENT,
                     getNullableStringValue(String.valueOf(authenticationContext.isContentAwareTierPresent())));
             requestContext.addMetadataToMap(MetadataConstants.API_KEY,
