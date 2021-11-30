@@ -39,9 +39,11 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
@@ -201,6 +203,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
             String apiVersion = requestContext.getMatchedAPI().getVersion();
             String apiContext = requestContext.getMatchedAPI().getBasePath();
+            String apiUuid = requestContext.getMatchedAPI().getUuid();
 
             // Avoids using internal API keys, when internal key header or queryParam configured as api_key
             if (isInternalKey(payload)) {
@@ -240,13 +243,27 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 }
 
                 validateAPIKeyRestrictions(payload, requestContext, apiContext, apiVersion);
+                APIKeyValidationInfoDTO validationInfoDto =
+                        KeyValidator.validateSubscription(apiUuid, apiContext, payload);
 
-                validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
+                if (!validationInfoDto.isAuthorized()) {
+                    if (GeneralErrorCodeConstants.API_BLOCKED_CODE == validationInfoDto
+                            .getValidationStatus()) {
+                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
+                                .getCode(), validationInfoDto.getValidationStatus(),
+                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                    }
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                            validationInfoDto.getValidationStatus(),
+                            "User is NOT authorized to access the Resource. "
+                                    + "API Subscription validation failed.");
+                }
 
                 log.debug("API Key authentication successful.");
-
-                // Get APIKeyValidationInfoDTO
-                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
 
                 // TODO: Add analytics data processing
 
@@ -262,8 +279,10 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().
                         getConfig().getJwtConfigurationDto();
                 if (jwtConfigurationDto.isEnabled()) {
+                    // TODO: (suksw) Ask if it is okay for this infoDTO to be different from the actual infoDTO
+                    APIKeyValidationInfoDTO infoDtoForBackendJWT = getAPIKeyValidationDTO(requestContext, payload);
                     JWTInfoDto jwtInfoDto = FilterUtils
-                            .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
+                            .generateJWTInfoDto(null, validationInfo, infoDtoForBackendJWT, requestContext);
                     endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, tokenIdentifier,
                             jwtInfoDto, isGatewayTokenCacheEnabled);
                     // Set generated jwt token as a response header
@@ -274,7 +293,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
                 AuthenticationContext authenticationContext = FilterUtils
                         .generateAuthenticationContext(requestContext, tokenIdentifier, validationInfo,
-                                apiKeyValidationInfoDTO, endUserToken, apiKey, false);
+                                validationInfoDto, endUserToken, apiKey, false);
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                 }
