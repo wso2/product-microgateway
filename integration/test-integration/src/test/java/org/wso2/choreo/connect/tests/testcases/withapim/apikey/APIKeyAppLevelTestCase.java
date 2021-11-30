@@ -49,7 +49,7 @@ public class APIKeyAppLevelTestCase extends ApimBaseTest {
     private String endpointURL;
     Map<String, String> headers = new HashMap<>();
 
-    @BeforeClass(description = "Initialise the setup for API key tests")
+    @BeforeClass(description = "Initialise the setup for API key App level test case")
     void start() throws Exception {
         super.initWithSuperTenant();
 
@@ -84,22 +84,21 @@ public class APIKeyAppLevelTestCase extends ApimBaseTest {
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
                 storeRestClient);
         apiKey = apiKeyDTO.getApikey();
+        headers.put("apikey", apiKey);
 
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
-    @Test(description = "Test to check the API Key considering x-wso2-application-security extension ")
+    @Test(description = "Invoke API which has API Key as the Application Level Security")
     public void testAPIKeyForAppLevel() throws Exception {
-        headers.put("apikey", apiKey);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endpointURL), headers);
-
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(),
                 com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
                 "Response code mismatched");
     }
 
-    @Test(description = "Send a request to a blocked  REST API and check 700700 error code is received", dependsOnMethods = "testAPIKeyForAppLevel")
+    @Test(description = "Invoke blocked API and check 700700 error code is received", dependsOnMethods = "testAPIKeyForAppLevel")
     public void testAPIKeyForBlockedStateAPI() throws CCTestException, InterruptedException {
         PublisherUtils.changeLCStateAPI(apiId, APILifeCycleAction.BLOCK.getAction(), publisherRestClient, false);
         Thread.sleep(3000);
@@ -111,7 +110,7 @@ public class APIKeyAppLevelTestCase extends ApimBaseTest {
                 "Response message mismatched. Expected the error code 700700, but Response Data: " + response.getData());
     }
 
-    @Test(description = "Re publish the blocked API and test", dependsOnMethods = "testAPIKeyForBlockedStateAPI")
+    @Test(description = "Re publish the blocked API and invoke API", dependsOnMethods = "testAPIKeyForBlockedStateAPI")
     public void testAPIKeyForRePublishedAPI() throws CCTestException, InterruptedException {
         PublisherUtils.changeLCStateAPI(apiId, APILifeCycleAction.RE_PUBLISH.getAction(), publisherRestClient, false);
         Thread.sleep(3000);

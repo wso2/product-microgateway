@@ -116,7 +116,7 @@ public class KeyValidator {
     }
 
     /**
-     * Validate subscriptions.
+     * Validate subscriptions for access tokens.
      *
      * @param uuid uuid of the API
      * @param apiContext API context, used for logging purposes and to extract the tenant domain
@@ -186,6 +186,14 @@ public class KeyValidator {
         return infoDTO;
     }
 
+    /**
+     * Validate subscriptions for API keys.
+     *
+     * @param apiUuid uuid of the API
+     * @param apiContext API context, used for logging purposes and to extract the tenant domain
+     * @param payload JWT claims set extracted from the API key
+     * @return validation information about the request
+     */
     public static APIKeyValidationInfoDTO validateSubscription(String apiUuid, String apiContext,
                                                                JWTClaimsSet payload) {
         log.debug("Before validating subscriptions with API key. API_uuid: {}, context: {}", apiUuid, apiContext);

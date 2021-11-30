@@ -1,11 +1,27 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.choreo.connect.tests.testcases.withapim.apikey;
 
-import com.google.common.net.HttpHeaders;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.clients.admin.ApiException;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
@@ -14,11 +30,9 @@ import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
-import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.testcases.withapim.throttle.ThrottlingBaseTestCase;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -83,7 +97,6 @@ public class APIKeySubLevelThrottleTestCase extends ApimBaseTest {
 
     @Test(description = "Test subscription level throttling for API Key")
     public void testSubscriptionLevelThrottlingForAPIKey() throws Exception {
-        // Create API Key
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
                 storeRestClient);
         String apiKey = apiKeyDTO.getApikey();
