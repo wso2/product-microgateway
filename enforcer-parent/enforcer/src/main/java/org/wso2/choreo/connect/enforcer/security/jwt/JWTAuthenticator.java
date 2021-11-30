@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
@@ -60,6 +61,7 @@ import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,11 +85,30 @@ public class JWTAuthenticator implements Authenticator {
     }
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        String jwt = retrieveAuthHeaderValue(requestContext);
-        if (jwt != null && jwt.split("\\.").length == 3) {
-            return true;
+        if (isJWTEnabled(requestContext)) {
+            String jwt = retrieveAuthHeaderValue(requestContext);
+            return jwt != null && jwt.split("\\.").length == 3;
         }
         return false;
+    }
+
+    private boolean isJWTEnabled(RequestContext requestContext) {
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
+                .getSecuritySchemeDefinitions();
+        Map<String, List<String>> resourceSecuritySchemes = requestContext.getMatchedResourcePath()
+                .getSecuritySchemas();
+        // handle default security
+        boolean isDefault = true;
+        for (String securityDefinitionName: resourceSecuritySchemes.keySet()) {
+            if (securitySchemeDefinitions.containsKey(securityDefinitionName)) {
+                isDefault = false;
+                SecuritySchemaConfig config = securitySchemeDefinitions.get(securityDefinitionName);
+                if (APIConstants.API_SECURITY_OAUTH2.equals(config.getType())) {
+                    return true;
+                }
+            }
+        }
+        return isDefault;
     }
 
     @Override
