@@ -105,7 +105,7 @@ jobs:
           TAG=${{ steps.extract-project-version.outputs.version }}
           SEVERITY="CRITICAL,HIGH,MEDIUM"
           EXIT_CODE=0
-          ARGS="--ignore-unfixed" # if the issues is fixed in a later version we can update it
+          ARGS="" # "--ignore-unfixed" if the issues is fixed in a later version we can update it
 
           GREEN='\033[0;32m' # Green colour
           BOLD="\033[1m"
