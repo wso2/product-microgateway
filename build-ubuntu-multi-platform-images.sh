@@ -57,6 +57,8 @@ chmod a+x docker-ubuntu-build/target/buildx
 mkdir -p ~/.docker/cli-plugins
 cp docker-ubuntu-build/target/buildx ~/.docker/cli-plugins
 
+# QEMU user mode emulation binaries
+docker run --rm --privileged multiarch/qemu-user-static:6.1.0-8 --reset -p yes
 # create build instance and use it
 docker buildx create --name cc-builder --use 2> /dev/null || docker buildx use cc-builder
 
@@ -116,6 +118,8 @@ else
   fi
   build_images "$platform" "-${platform}" "--load"
 fi
+
+docker buildx rm cc-builder
 
 # log built images
 printf "${BOLD}Built images${NC}\n"
