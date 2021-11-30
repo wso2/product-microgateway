@@ -1,0 +1,32 @@
+openapi: 3.0.1
+info:
+  title: HttpbinAPI
+  version: v1.0.0
+servers:
+  -
+    url: http://httpbin
+security:
+  -
+    default: []
+paths:
+  /get:
+    get:
+      parameters: []
+      responses:
+        "200":
+          description: ok
+  /anything:
+    get:
+      parameters: []
+      responses:
+        "200":
+          description: ok
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://test.com
+          scopes: {}
+x-wso2-basePath: /httpbin/api/v1.0.0
