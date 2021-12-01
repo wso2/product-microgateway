@@ -52,7 +52,6 @@ import java.util.Map;
  */
 public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
-    private ExtendedTokenIssuerDto tokenIssuer;
     private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
 
@@ -66,13 +65,13 @@ public class JWTValidator {
         Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
 
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
-            this.tokenIssuer = tokenIssuers.get(issuer);
+            ExtendedTokenIssuerDto tokenIssuer = tokenIssuers.get(issuer);
             this.jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
             if (this.jwtTransformer == null) {
                 this.jwtTransformer = new DefaultJWTTransformer();
             }
             this.jwtTransformer.loadConfiguration(tokenIssuer);
-            return validateToken(signedJWTInfo);
+            return validateToken(signedJWTInfo, tokenIssuer);
         }
         jwtValidationInfo.setValid(false);
         jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
@@ -80,12 +79,12 @@ public class JWTValidator {
         return jwtValidationInfo;
     }
 
-    private JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws EnforcerException {
-
+    private JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo, ExtendedTokenIssuerDto tokenIssuer)
+            throws EnforcerException {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         boolean state;
         try {
-            state = validateSignature(signedJWTInfo.getSignedJWT());
+            state = validateSignature(signedJWTInfo.getSignedJWT(), tokenIssuer);
             if (state) {
                 JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
                 state = validateTokenExpiry(jwtClaimsSet);
@@ -95,7 +94,7 @@ public class JWTValidator {
                     JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
                     createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
                     jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
-                    jwtValidationInfo.setKeyManager(this.tokenIssuer.getName());
+                    jwtValidationInfo.setKeyManager(tokenIssuer.getName());
                     return jwtValidationInfo;
                 } else {
                     jwtValidationInfo.setValid(false);
@@ -112,20 +111,20 @@ public class JWTValidator {
         }
     }
 
-    protected boolean validateSignature(SignedJWT signedJWT) throws EnforcerException {
-
-        String certificateAlias = this.tokenIssuer.getCertificateAlias();
+    protected boolean validateSignature(SignedJWT signedJWT, ExtendedTokenIssuerDto tokenIssuer)
+            throws EnforcerException {
         try {
+            String certificateAlias = tokenIssuer.getCertificateAlias();
             String keyID = signedJWT.getHeader().getKeyID();
             if (StringUtils.isNotEmpty(keyID)) {
                 if (tokenIssuer.getJwksConfigurationDTO().isEnabled() && StringUtils
                         .isNotEmpty(tokenIssuer.getJwksConfigurationDTO().getUrl())) {
                     // Check JWKSet Available in Cache
                     if (jwkSet == null) {
-                        jwkSet = retrieveJWKSet();
+                        jwkSet = retrieveJWKSet(tokenIssuer);
                     }
                     if (jwkSet.getKeyByKeyId(keyID) == null) {
-                        jwkSet = retrieveJWKSet();
+                        jwkSet = retrieveJWKSet(tokenIssuer);
                     }
                     if (jwkSet.getKeyByKeyId(keyID) instanceof RSAKey) {
                         RSAKey keyByKeyId = (RSAKey) jwkSet.getKeyByKeyId(keyID);
@@ -159,7 +158,7 @@ public class JWTValidator {
         return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
     }
 
-    private JWKSet retrieveJWKSet() throws IOException, ParseException {
+    private JWKSet retrieveJWKSet(ExtendedTokenIssuerDto tokenIssuer) throws IOException, ParseException {
         String jwksInfo = JWTUtils.retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
         jwkSet = JWKSet.parse(jwksInfo);
         return jwkSet;
