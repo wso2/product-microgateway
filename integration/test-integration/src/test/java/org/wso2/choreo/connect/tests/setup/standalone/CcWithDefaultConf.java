@@ -68,7 +68,7 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "intercept_request_openAPI.yaml", "intercept_request_default_setup_petstore", "backend_tls.crt", null, null);
         ApictlUtils.createProject( "intercept_response_openAPI.yaml", "intercept_response_default_setup_petstore", "backend_tls.crt", null, null);
         ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "circuit_breakers");
-        ApictlUtils.createProject( "api_key_query_param_openAPI.yaml", "apikey");
+        ApictlUtils.createProject( "api_key_swagger_security_openAPI.yaml", "apikey");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");

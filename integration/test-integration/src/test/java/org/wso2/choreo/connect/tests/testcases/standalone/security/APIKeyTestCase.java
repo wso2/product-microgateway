@@ -18,9 +18,12 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.security;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.common.model.API;
+import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
 import org.wso2.choreo.connect.tests.util.*;
 
 import java.util.HashMap;
@@ -45,15 +48,64 @@ public class APIKeyTestCase extends ApimBaseTest {
                     "weXA0WnOMK4nvKZtrSQmWTIH-RlfJGR07FZRfFeQi3OfQuOR6puYHBx946PqAbIGj5t2IhmaQl_Bun66AJwkd2nalO2bx" +
                     "pNEHoTWCtuHN2zVpQ==";
 
-    //Invoke API by including the API key as a query parameter
     @Test(description = "Test to check the API Key in query param is working")
     public void invokeAPIKeyInQueryParamSuccessTest() throws Exception {
-        Map<String, String> headers = new HashMap<>();
         HttpResponse response = HttpClientRequest.doGet(
-                Utils.getServiceURLHttps("/apiKey/1.0.0/pet/1" + "?x-api-key=" + testAPIKey), headers);
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pet/1?x-api-key=" + testAPIKey));
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the API Key in query param is working and not work for header")
+    public void invokeAPIKeyInHeaderParamFailTest() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-api-key", testAPIKey);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pet/1"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the API Key in api level")
+    public void invokeAPIKeyAPILevelTest() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-api-key-header", testAPIKey);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pet/findByTags"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the API Key fails for only oauth2 secured resource")
+    public void invokeAPIKeyOauth2Test() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-api-key-header", testAPIKey);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pets/findByTags"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the oauth2 secured resource")
+    public void invokeOauth2Test() throws Exception {
+        API api = new API();
+        api.setName("APIKeyTestAPI");
+        api.setContext("/apiKey/1.0.0");
+        api.setVersion("1.0.0");
+        api.setProvider("admin");
+
+        //Define application info
+        ApplicationDTO application = new ApplicationDTO();
+        application.setName("APIKeyTestApp");
+        application.setTier("Unlimited");
+        application.setId(88);
+        String jwtToken = TokenUtil.getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
+                3600, "write:pets", false);
+        Map<String, String> headers = new HashMap<>();
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pets/findByTags"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 }
