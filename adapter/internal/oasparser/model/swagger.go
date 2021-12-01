@@ -43,6 +43,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	}
 	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
 	swagger.securityScheme = setSecurityDefinitions(swagger2)
+	swagger.security = swagger2.Security
 	swagger.resources = setResourcesSwagger(swagger2)
 	swagger.apiType = HTTP
 	swagger.xWso2Basepath = swagger2.BasePath

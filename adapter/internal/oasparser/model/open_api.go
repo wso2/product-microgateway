@@ -70,6 +70,9 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.securityScheme = setSecuritySchemesOpenAPI(swagger3)
+	for _, security := range swagger3.Security {
+		swagger.security = append(swagger.security, security)
+	}
 	swagger.resources, err = setResourcesOpenAPI(swagger3)
 	if err != nil {
 		return err

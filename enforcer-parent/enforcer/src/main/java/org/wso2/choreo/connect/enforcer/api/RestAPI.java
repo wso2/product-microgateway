@@ -121,7 +121,7 @@ public class RestAPI implements API {
             }
 
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
+                ResourceConfig resConfig = buildResource(operation, res.getPath());
                 resConfig.setEndpoints(endpointClusterMap);
                 resources.add(resConfig);
             }
@@ -207,8 +207,7 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
-            SecuritySchemaConfig> securitySchemeDefinitions) {
+    private ResourceConfig buildResource(Operation operation, String resPath) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
@@ -216,15 +215,10 @@ public class RestAPI implements API {
         resource.setDisableSecurity(operation.getDisableSecurity());
         Map<String, List<String>> securityMap = new HashMap<>();
         operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
+            securityMap.put(key, new ArrayList<>());
             if (security != null && security.getScopesList().size() > 0) {
                 List<String> scopeList = new ArrayList<>(security.getScopesList());
-                securityMap.put(key, scopeList);
-            }
-            if (security != null && FilterUtils.getAPIKeyDefinitionNames(securitySchemeDefinitions).contains(key)) {
-                securityMap.put(key, new ArrayList<>());
-            }
-            if (security != null && key.equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
-                securityMap.put(key, new ArrayList<>());
+                securityMap.replace(key, scopeList);
             }
         }));
      resource.setSecuritySchemas(securityMap);

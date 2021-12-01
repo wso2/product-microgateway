@@ -75,7 +75,7 @@ public class AuthFilter implements Filter {
             for (Map.Entry<String, SecuritySchemaConfig> securityDefinition :
                     apiConfig.getSecuritySchemeDefinitions().entrySet()) {
                 String apiSecurityLevel = securityDefinition.getValue().getType();
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH2)) {
                     isOAuthProtected = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                     isMutualSSLProtected = true;
