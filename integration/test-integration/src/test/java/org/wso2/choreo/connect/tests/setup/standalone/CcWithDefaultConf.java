@@ -68,6 +68,7 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "intercept_request_openAPI.yaml", "intercept_request_default_setup_petstore", "backend_tls.crt", null, null);
         ApictlUtils.createProject( "intercept_response_openAPI.yaml", "intercept_response_default_setup_petstore", "backend_tls.crt", null, null);
         ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "circuit_breakers");
+        ApictlUtils.createProject( "disable_security_openAPI.yaml", "disable_security");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -85,6 +86,7 @@ public class CcWithDefaultConf {
         ApictlUtils.deployAPI("intercept_request_default_setup_petstore", "test");
         ApictlUtils.deployAPI("intercept_response_default_setup_petstore", "test");
         ApictlUtils.deployAPI("circuit_breakers", "test");
+        ApictlUtils.deployAPI("disable_security", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

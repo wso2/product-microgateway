@@ -81,9 +81,17 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
 	// resourve level, if it's not present at resource level using "addResourceLevelDisableSecurity"
-	disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
 	if swagger2.Paths != nil {
 		for path, pathItem := range swagger2.Paths.Paths {
+			disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
+			// Checks for resource level security, if security is disabled in resource level,
+			// below code segment will override above two variable values (disableSecurity & found)
+			disableResourceLevelSecurity, foundInResourceLevel := pathItem.Extensions.GetBool(xWso2DisableSecurity)
+			if foundInResourceLevel {
+				logger.LoggerOasparser.Debugf("x-wso2-disable-security extension is available in the resource %v.", path)
+				disableSecurity = disableResourceLevelSecurity
+				found = foundInResourceLevel
+			}
 			var methodsArray []Operation
 			methodFound := false
 			if pathItem.Get != nil {
