@@ -575,7 +575,7 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 }
 
 // DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
-func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, organizationID string) {
+func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, organizationID string, revisionUUID string) {
 	apiIdentifiers := make(map[string]struct{})
 
 	mutexForInternalMapUpdate.Lock()
@@ -598,6 +598,9 @@ func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, o
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
+				if revisionUUID != "" {
+					notifier.SendRevisionUndeploy(uuid, revisionUUID, environment)
+				}
 			}
 		}
 	}

@@ -193,7 +193,7 @@ func handleAPIEvents(data []byte, eventType string) {
 				}
 			}
 		} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels, apiEvent.TenantDomain)
+			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels, apiEvent.TenantDomain, "")
 			logger.LoggerInternalMsg.Debugf("Undeployed API from router")
 			if _, ok := eh.APIListMap[env]; ok {
 				apiListOfEnv := eh.APIListMap[env].List

@@ -64,7 +64,7 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 					for i := range apiListOfEnv {
 						if event.APIUUID == apiListOfEnv[i].UUID {
 							xds.DeleteAPIWithAPIMEvent(event.APIUUID, apiListOfEnv[i].Name, apiListOfEnv[i].Version,
-								configuredEnvs, event.OrganizationUUID)
+								configuredEnvs, event.OrganizationUUID, event.RevisionUUID)
 							logger.LoggerGA.Debugf("Removed API from router")
 							eh.APIListMap[env].List = msg.DeleteAPIFromList(apiListOfEnv, i, event.APIUUID, env)
 							xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
