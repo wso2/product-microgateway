@@ -49,6 +49,7 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -79,39 +80,38 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     }
 
     // Gets API key from request
-    private String getAPIKeyFromRequest(RequestContext requestContext) {
-        // check resource level
-        String apiKey = getAPIKey(requestContext, requestContext.getMatchedResourcePath().getSecuritySchemas());
-        // check api level
-        if ("".equals(apiKey)) {
-            apiKey = getAPIKey(requestContext, requestContext.getMatchedAPI().getApiSecurity());
-        }
-        return apiKey;
-    }
-
-    private static String getAPIKey(RequestContext requestContext, Map<String, List<String>> securitySchemesToApply) {
+    private static String getAPIKeyFromRequest(RequestContext requestContext) {
         Map<String, SecuritySchemaConfig> securitySchemaDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
-        for (String securityDefinitionName : securitySchemesToApply.keySet()) {
-            if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
-                SecuritySchemaConfig securitySchemaDefinition = securitySchemaDefinitions.get(securityDefinitionName);
-                if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
-                        securitySchemaDefinition.getType())) {
-                    // If Defined in openAPI definition (when not enabled at APIM App level),
-                    // key must exist in specified location
-                    if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(
-                            securitySchemaDefinition.getIn())) {
-                        if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
-                            return requestContext.getHeaders().get(securitySchemaDefinition.getName());
+        // check both resource level and api level security
+        List<Map<String, List<String>>> securityLists = Arrays.asList(requestContext.getMatchedResourcePath()
+                .getSecuritySchemas(), requestContext.getMatchedAPI().getApiSecurity());
+        for (Map<String, List<String>> securityList : securityLists) {
+            for (String securityDefinitionName : securityList.keySet()) {
+                if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
+                    SecuritySchemaConfig securitySchemaDefinition =
+                            securitySchemaDefinitions.get(securityDefinitionName);
+                    if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
+                            securitySchemaDefinition.getType())) {
+                        // If Defined in openAPI definition (when not enabled at APIM App level),
+                        // key must exist in specified location
+                        if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(
+                                securitySchemaDefinition.getIn())) {
+                            if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
+                                return requestContext.getHeaders().get(securitySchemaDefinition.getName());
+                            }
                         }
-                    }
-                    if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(
-                            securitySchemaDefinition.getIn())) {
-                        if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
-                            return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
+                        if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(
+                                securitySchemaDefinition.getIn())) {
+                            if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
+                                return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
+                            }
                         }
                     }
                 }
+            }
+            if (securityList.size() > 0) {
+                return "";
             }
         }
         return "";
