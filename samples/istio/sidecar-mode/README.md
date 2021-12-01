@@ -73,10 +73,10 @@ kubectl label namespace default istio-injection=enabled
     istio-ingressgateway   LoadBalancer   10.99.243.134   localhost     15021:32643/TCP,80:30653/TCP,443:30717/TCP   145m
     ```
 
-  Use the EXTERNAL-IP which is localhost as the ingress gateway host and 443 as the ingress gateway port.
+  Use the EXTERNAL-IP as the ingress gateway host which is `localhost` and `443` as the ingress gateway port
   
 
-- Add an /etc/host entry for Choreo Connect and WSO2 API Manager
+- Add an `/etc/host` entry for Choreo Connect and WSO2 API Manager
 
     ```
     127.0.0.1  apim.wso2.com gw.wso2.com

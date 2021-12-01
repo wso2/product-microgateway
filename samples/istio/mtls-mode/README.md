@@ -56,11 +56,11 @@ kubectl label namespace default istio-injection=enabled
     NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                      AGE
     istio-ingressgateway   LoadBalancer   10.99.243.134   localhost     15021:32643/TCP,80:30653/TCP,443:30717/TCP   145m
     ```
-  
-    Use the EXTERNAL-IP which is localhost as the ingress gateway host and 443 as the ingress gateway port.
+
+  Use the EXTERNAL-IP as the ingress gateway host which is `localhost` and `443` as the ingress gateway port.
 
 
-- Add an /etc/host entry for the ingress gateway
+- Add an `/etc/host` entry for the ingress gateway
 
     ```
     127.0.0.1 istio-ingressgateway.istio-system
@@ -70,9 +70,9 @@ kubectl label namespace default istio-injection=enabled
 
     Any of the following commands can be used.
     ```
-    curl -v -HHost:istio-ingressgateway.istio-system --resolve istio-ingressgateway.istio-system:443:localhost -k https://istio-ingressgateway.istio-system/httpbin/v1.0.0/get
+    curl -v -H 'Host:istio-ingressgateway.istio-system' --resolve istio-ingressgateway.istio-system:443:localhost -k https://istio-ingressgateway.istio-system/httpbin/v1.0.0/get
     
-    curl -v -HHost:istio-ingressgateway.istio-system --resolve istio-ingressgateway.istio-system:443:localhost --cacert server.crt https://istio-ingressgateway.istio-system/httpbin/v1.0.0/get
+    curl -v -H 'Host:istio-ingressgateway.istio-system' --resolve istio-ingressgateway.istio-system:443:localhost --cacert server.crt https://istio-ingressgateway.istio-system/httpbin/v1.0.0/get
     
     curl -v -k https://istio-ingressgateway.istio-system/httpbin/v1.0.0/get
     
@@ -121,7 +121,7 @@ kubectl label namespace default istio-injection=enabled
     kubectl apply -f gw_vs.yaml -n wso2
     ```
 
-- Add an /etc/host entry for Choreo Connect and WSO2 API Manager
+- Add an `/etc/host` entry for Choreo Connect and WSO2 API Manager
 
     ```
     127.0.0.1  apim.wso2.com gw.wso2.com
