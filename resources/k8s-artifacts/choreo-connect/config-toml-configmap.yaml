@@ -102,3 +102,4 @@ data:
 
     [enforcer.metrics]
       enabled = false
+
