@@ -75,43 +75,14 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        if (!isAPIKeyProtected(requestContext)) {
-            return false;
-        }
-        String apiKey = getAPIKeyFromRequest(requestContext);
-        return isAPIKey(apiKey);
-    }
-
-    private boolean isAPIKeyProtected(RequestContext requestContext) {
-        Map<String, SecuritySchemaConfig> schemeMap = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
-        Map<String, List<String>> resourceSchemeMap = requestContext.getMatchedResourcePath()
-                .getSecuritySchemas();
-        Map<String, List<String>> apiSchemeMap = requestContext.getMatchedAPI().getApiSecurity();
-        for (String securityDefinitionName : resourceSchemeMap.keySet()) {
-            if (schemeMap.containsKey(securityDefinitionName)) {
-                SecuritySchemaConfig config = schemeMap.get(securityDefinitionName);
-                if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equals(config.getType())) {
-                    return true;
-                }
-            }
-        }
-        if (resourceSchemeMap.isEmpty()) {
-            for (String securityDefinitionName : apiSchemeMap.keySet()) {
-                if (schemeMap.containsKey(securityDefinitionName)) {
-                    SecuritySchemaConfig config = schemeMap.get(securityDefinitionName);
-                    if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equals(config.getType())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return isAPIKey(getAPIKeyFromRequest(requestContext));
     }
 
     // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
+        // check resource level
         String apiKey = getAPIKey(requestContext, requestContext.getMatchedResourcePath().getSecuritySchemas());
+        // check api level
         if ("".equals(apiKey)) {
             apiKey = getAPIKey(requestContext, requestContext.getMatchedAPI().getApiSecurity());
         }
@@ -121,25 +92,24 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     private static String getAPIKey(RequestContext requestContext, Map<String, List<String>> securitySchemesToApply) {
         Map<String, SecuritySchemaConfig> securitySchemaDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
-
-        for (String securitySchemeName : securitySchemesToApply.keySet()) {
-            SecuritySchemaConfig securitySchemaDefinition = securitySchemaDefinitions.get(securitySchemeName);
-            // We only need apiKey of the given type
-            if (securitySchemaDefinition != null && APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
-                    securitySchemaDefinition.getType())) {
-
-                // If Defined in openAPI definition (when not enabled at APIM App level),
-                // key must exist in specified location
-                if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(
-                        securitySchemaDefinition.getIn())) {
-                    if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
-                        return requestContext.getHeaders().get(securitySchemaDefinition.getName());
+        for (String securityDefinitionName : securitySchemesToApply.keySet()) {
+            if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
+                SecuritySchemaConfig securitySchemaDefinition = securitySchemaDefinitions.get(securityDefinitionName);
+                if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
+                        securitySchemaDefinition.getType())) {
+                    // If Defined in openAPI definition (when not enabled at APIM App level),
+                    // key must exist in specified location
+                    if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(
+                            securitySchemaDefinition.getIn())) {
+                        if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
+                            return requestContext.getHeaders().get(securitySchemaDefinition.getName());
+                        }
                     }
-                }
-                if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(
-                        securitySchemaDefinition.getIn())) {
-                    if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
-                        return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
+                    if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(
+                            securitySchemaDefinition.getIn())) {
+                        if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
+                            return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
+                        }
                     }
                 }
             }
