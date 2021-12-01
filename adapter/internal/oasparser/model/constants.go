@@ -53,7 +53,6 @@ const (
 
 // sub-property values and keys relevant for x-wso2-application security extension
 const (
-	SecurityTypes             string = "security-types"
 	APIMAPIKeyType            string = "api_key"
 	APIKeyNameWithApim        string = "apikey"
 	APIKeyTypeInOAS           string = "apiKey"

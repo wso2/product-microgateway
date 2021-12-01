@@ -315,7 +315,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 			if !apikeyAdded {
 				overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
 					model.SecurityScheme{DefinitionName: model.APIMAPIKeyType,
-						Type: model.APIMAPIKeyType, Name: model.APIKeyNameWithApim})
+						Type: model.APIKeyTypeInOAS, Name: model.APIKeyNameWithApim})
 			}
 			mgwSwagger.SetSecurityScheme(overridenAPISecurityDefinitions)
 		}
@@ -593,12 +593,12 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 				return err
 			}
 			deletedVhosts[vh] = void
-			
+
 			for val := range deletedVhosts {
 				existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 				if val == vh && len(existingLabels) == 0 {
 					logger.LoggerXds.Infof("Vhost : %v  deleted since there is no gateways assigned to it.", vh)
-					delete(apiToVhostsMap[apiNameVersionHashedID],val)
+					delete(apiToVhostsMap[apiNameVersionHashedID], val)
 				}
 			}
 		}
@@ -731,10 +731,10 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 				return nil
 			}
 			logger.LoggerXds.Infof("API identifier: %v does not have any gateways. Hence deleting the API.", apiIdentifier)
-			cleanMapResources(apiIdentifier,organizationID,toBeDelEnvs)
+			cleanMapResources(apiIdentifier, organizationID, toBeDelEnvs)
 			return nil
 		}
-    }
+	}
 
 	//clean maps of routes, clusters, endpoints, enforcerAPIs
 	if len(environments) == 0 {
@@ -743,7 +743,7 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	return nil
 }
 
-func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs []string){
+func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs []string) {
 	delete(orgIDOpenAPIRoutesMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIClustersMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)

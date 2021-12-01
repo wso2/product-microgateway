@@ -86,27 +86,6 @@ func (resource *Resource) GetMethodList() []string {
 	return methodList
 }
 
-// CreateDummyResourceForTests create an resource object which could be used for unit tests.
-func CreateDummyResourceForTests(path string, method []Operation, description string, consumes, schemes,
-	tags []string, summary, id string, productionEndpoints, sandboxEndpoints *EndpointCluster,
-	security []map[string][]string, vendorExtensions map[string]interface{}) Resource {
-
-	return Resource{
-		path:                path,
-		methods:             method,
-		description:         description,
-		consumes:            consumes,
-		schemes:             schemes,
-		tags:                tags,
-		summary:             summary,
-		iD:                  id,
-		productionEndpoints: productionEndpoints,
-		sandboxEndpoints:    sandboxEndpoints,
-		security:            security,
-		vendorExtensions:    vendorExtensions,
-	}
-}
-
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values
 // which could be used for unit tests.
 func CreateMinimalDummyResourceForTests(path string, methods []*Operation, id string, productionUrls,
