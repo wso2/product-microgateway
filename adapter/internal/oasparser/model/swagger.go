@@ -171,28 +171,8 @@ func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
 	}
 }
 
-// checks whether application level security given by (x-wso2-application-security extension)is optional or not
-func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool {
-	var isApplicationSecurityOptional = true
-	result, ok := applicationSecurity.(map[string]interface{})
-	if ok {
-		for key, value := range result {
-			if key == "optional" && value != true {
-				isApplicationSecurityOptional = false
-			}
-		}
-	}
-	return isApplicationSecurityOptional
-}
-
-func getSwaggerOperationLevelDetails(operation *spec.Operation, method string) *Operation {
-	var securityData []map[string][]string = operation.Security
-	return NewOperation(method, securityData, operation.Extensions)
-}
-
 func setOperationSwagger(path string, methods []*Operation, pathItem spec.PathItem) Resource {
-	var resource Resource
-	resource = Resource{
+	return Resource{
 		path:    path,
 		methods: methods,
 		// TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
@@ -205,7 +185,6 @@ func setOperationSwagger(path string, methods []*Operation, pathItem spec.PathIt
 		//security:         operation.Security,
 		vendorExtensions: pathItem.VendorExtensible.Extensions,
 	}
-	return resource
 }
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets

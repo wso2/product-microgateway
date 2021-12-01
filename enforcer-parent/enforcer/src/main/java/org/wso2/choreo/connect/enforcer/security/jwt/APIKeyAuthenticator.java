@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
-import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
@@ -76,35 +75,34 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        boolean isAPIkeyProtected = getIsAPIKeyProtected(requestContext);
-        if (!isAPIkeyProtected) {
-            return  false;
+        if (!isAPIKeyProtected(requestContext)) {
+            return false;
         }
         String apiKey = getAPIKeyFromRequest(requestContext);
         return isAPIKey(apiKey);
     }
 
-    private boolean getIsAPIKeyProtected(RequestContext requestContext) {
-        boolean isAPIKeyProtected = false;
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
+    private boolean isAPIKeyProtected(RequestContext requestContext) {
+        Map<String, SecuritySchemaConfig> schemeMap = requestContext.getMatchedAPI()
                 .getSecuritySchemeDefinitions();
-
-        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
-        Map<String, List<String>> resourceSecuritySchemes = resourceConfig.getSecuritySchemas();
-        if (resourceSecuritySchemes.containsKey(APIConstants.API_SECURITY_API_KEY) ||
-                isResourceSecurityApplicable(securitySchemeDefinitions, resourceSecuritySchemes)) {
-            isAPIKeyProtected = true;
-        }
-        return isAPIKeyProtected;
-    }
-
-    private boolean isResourceSecurityApplicable(Map<String, SecuritySchemaConfig> schemeMap,
-                                                 Map<String, List<String>> resourceSchemeMap) {
-        for (String securityDefinitionName: resourceSchemeMap.keySet()) {
+        Map<String, List<String>> resourceSchemeMap = requestContext.getMatchedResourcePath()
+                .getSecuritySchemas();
+        Map<String, List<String>> apiSchemeMap = requestContext.getMatchedAPI().getApiSecurity();
+        for (String securityDefinitionName : resourceSchemeMap.keySet()) {
             if (schemeMap.containsKey(securityDefinitionName)) {
                 SecuritySchemaConfig config = schemeMap.get(securityDefinitionName);
                 if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equals(config.getType())) {
                     return true;
+                }
+            }
+        }
+        if (resourceSchemeMap.isEmpty()) {
+            for (String securityDefinitionName : apiSchemeMap.keySet()) {
+                if (schemeMap.containsKey(securityDefinitionName)) {
+                    SecuritySchemaConfig config = schemeMap.get(securityDefinitionName);
+                    if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equals(config.getType())) {
+                        return true;
+                    }
                 }
             }
         }
@@ -113,43 +111,21 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
-        boolean isAppLevelApiKeySecurityEnabled = isAppLevelApiKeySecurityEnabled(requestContext);
-        String apiKey = "";
-        if (isAppLevelApiKeySecurityEnabled) {
-            // If API key enabled at Application level via APIM, key can exist in header or query param
-            String apiKeyName = requestContext.getMatchedAPI().
-                    getSecuritySchemeDefinitions().get(APIConstants.API_SECURITY_API_KEY).getName();
-            if (requestContext.getHeaders().containsKey(apiKeyName)) {
-                return requestContext.getHeaders().get(apiKeyName);
-            }
-            if (requestContext.getQueryParameters().containsKey(apiKeyName)) {
-                return requestContext.getQueryParameters().get(apiKeyName);
-            }
-        } else {
-            apiKey = getAPIKey(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME, requestContext, true);
-            if ("".equals(apiKey)) {
-                apiKey = getAPIKey(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME, requestContext, false);
-            }
+        String apiKey = getAPIKey(requestContext, requestContext.getMatchedResourcePath().getSecuritySchemas());
+        if ("".equals(apiKey)) {
+            apiKey = getAPIKey(requestContext, requestContext.getMatchedAPI().getApiSecurity());
         }
         return apiKey;
     }
 
-    private static String getAPIKey(String securitySchemeType, RequestContext requestContext, boolean isResourceLevel) {
-        Map<String, List<String>> securitySchemesToApply;
-        if (isResourceLevel) {
-            securitySchemesToApply = requestContext.getMatchedResourcePath().getSecuritySchemas();
-        } else {
-            securitySchemesToApply = requestContext.getMatchedAPI().getApiSecurity();
-        }
-
+    private static String getAPIKey(RequestContext requestContext, Map<String, List<String>> securitySchemesToApply) {
         Map<String, SecuritySchemaConfig> securitySchemaDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
 
         for (String securitySchemeName : securitySchemesToApply.keySet()) {
             SecuritySchemaConfig securitySchemaDefinition = securitySchemaDefinitions.get(securitySchemeName);
-
             // We only need apiKey of the given type
-            if (securitySchemaDefinition != null && securitySchemeType.equalsIgnoreCase(
+            if (securitySchemaDefinition != null && APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
                     securitySchemaDefinition.getType())) {
 
                 // If Defined in openAPI definition (when not enabled at APIM App level),
@@ -169,18 +145,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             }
         }
         return "";
-    }
-
-    private boolean isAppLevelApiKeySecurityEnabled(RequestContext requestContext) {
-        // When API-Key security is enabled at app level, all three keys definitionName, type, name
-        // in SecuritySchemaConfig are equal to "api_key" and does not have a value for in.
-        // When API-Key security is set via definition, the type = "apiKey".
-        Map<String, SecuritySchemaConfig> securitySchemaConfigMap = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
-        if (securitySchemaConfigMap.containsKey(APIConstants.API_SECURITY_API_KEY)) {
-            return true;
-        }
-        return false;
     }
 
     @Override

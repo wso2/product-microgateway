@@ -276,47 +276,47 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		if err != nil {
 			return nil, err
 		}
-		// this will be used for APIM specific security config.
-		// This will enable folowing securities globally for the API, overriding swagger securities.
-		isOverrideSecurityByYaml := false
+		// the following will be used for APIM specific security config.
+		// it will enable folowing securities globally for the API, overriding swagger securities.
 		isYamlAPIKey := false
 		isYamlOauth := false
 		for _, value := range apiYaml.SecurityScheme {
 			if value == model.APIMAPIKeyType {
 				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
-				isOverrideSecurityByYaml = true
 				isYamlAPIKey = true
 			} else if value == model.APIMOauth2Type {
 				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
-				isOverrideSecurityByYaml = true
 				isYamlOauth = true
 			}
 		}
 
+		isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
 		apiSecurityDefinitionNames := []string{}
 		overridenAPISecurityDefinitions := []model.SecurityScheme{}
-		apikeyAdded := !isYamlAPIKey
 
+		if isYamlAPIKey {
+			//creating security definition for apikey in header in behalf of apim yaml security
+			overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
+				model.SecurityScheme{DefinitionName: model.APIMAPIKeyInHeader,
+					Type: model.APIKeyTypeInOAS, Name: model.APIKeyNameWithApim, In: model.APIKeyInHeaderOAS})
+
+			//creating security definition for apikey in query in behalf of apim yaml security
+			overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
+				model.SecurityScheme{DefinitionName: model.APIMAPIKeyInQuery,
+					Type: model.APIKeyTypeInOAS, Name: model.APIKeyNameWithApim, In: model.APIKeyInQueryOAS})
+		}
 		for _, securityDef := range mgwSwagger.GetSecurityScheme() {
-			if isYamlAPIKey && securityDef.DefinitionName == model.APIMAPIKeyType {
-				apikeyAdded = true
+			//read default oauth2 security with scopes when oauth2 enabled
+			if isYamlOauth && securityDef.DefinitionName == model.APIMDefaultOauth2Security {
 				overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, securityDef)
-				apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, model.APIMAPIKeyType)
-			} else if isYamlOauth && securityDef.DefinitionName == model.APIMDefaultOauth2Security {
-				overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, securityDef)
-				apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, model.APIMDefaultOauth2Security)
+				apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
 			} else if !isOverrideSecurityByYaml {
 				apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
 			}
 		}
 		if isOverrideSecurityByYaml {
-			logger.LoggerXds.Debugf("Security definitions is overriden according to api.yaml for API %v:%v",
+			logger.LoggerXds.Debugf("Security definitions are overriden according to api.yaml for API %v:%v",
 				apiYaml.Name, apiYaml.Version)
-			if !apikeyAdded {
-				overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
-					model.SecurityScheme{DefinitionName: model.APIMAPIKeyType,
-						Type: model.APIKeyTypeInOAS, Name: model.APIKeyNameWithApim})
-			}
 			mgwSwagger.SetSecurityScheme(overridenAPISecurityDefinitions)
 		}
 		logger.LoggerXds.Debugf("Security definitions for API %v:%v : %v",
@@ -334,8 +334,10 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 				}
 			}
 		}
+		// Adding api level security when api.yaml apikey security is provided
 		if isYamlAPIKey {
-			sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{model.APIMAPIKeyType: {}})
+			sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{model.APIMAPIKeyInHeader: {}})
+			sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{model.APIMAPIKeyInQuery: {}})
 		}
 		mgwSwagger.SetSecurity(sanitizedAPISecurity)
 
@@ -346,12 +348,17 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 				for _, security := range operation.GetSecurity() {
 					for securityDefName := range security {
 						if arrayContains(apiSecurityDefinitionNames, securityDefName) {
-							sanitizedAPISecurity = append(sanitizedAPISecurity, security)
+							sanitizedOperationSecurity = append(sanitizedOperationSecurity, security)
 						} else {
 							logger.LoggerXds.Debugf("A security definition for %v has not found in API %v:%v",
 								securityDefName, apiYaml.Name, apiYaml.Version)
 						}
 					}
+				}
+				// has do the following to enable apikey as well when default oauth2 security is in operation level
+				if isOverrideSecurityByYaml && isYamlOauth && isYamlAPIKey {
+					sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{model.APIMAPIKeyInHeader: {}})
+					sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{model.APIMAPIKeyInQuery: {}})
 				}
 				operation.SetSecurity(sanitizedOperationSecurity)
 			}

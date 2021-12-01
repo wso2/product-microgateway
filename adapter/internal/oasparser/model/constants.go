@@ -28,20 +28,19 @@ const (
 
 // Constants for OpenAPI vendor extension keys
 const (
-	xWso2ProdEndpoints       string = "x-wso2-production-endpoints"
-	xWso2SandbxEndpoints     string = "x-wso2-sandbox-endpoints"
-	xWso2endpoints           string = "x-wso2-endpoints"
-	xWso2BasePath            string = "x-wso2-basePath"
-	xWso2Label               string = "x-wso2-label"
-	xWso2Cors                string = "x-wso2-cors"
-	xThrottlingTier          string = "x-throttling-tier"
-	xWso2ThrottlingTier      string = "x-wso2-throttling-tier"
-	xAuthHeader              string = "x-wso2-auth-header"
-	xAuthType                string = "x-auth-type"
-	xWso2DisableSecurity     string = "x-wso2-disable-security"
-	xWso2ApplicationSecurity string = "x-wso2-application-security"
-	None                     string = "None"
-	DefaultSecurity          string = "default"
+	xWso2ProdEndpoints   string = "x-wso2-production-endpoints"
+	xWso2SandbxEndpoints string = "x-wso2-sandbox-endpoints"
+	xWso2endpoints       string = "x-wso2-endpoints"
+	xWso2BasePath        string = "x-wso2-basePath"
+	xWso2Label           string = "x-wso2-label"
+	xWso2Cors            string = "x-wso2-cors"
+	xThrottlingTier      string = "x-throttling-tier"
+	xWso2ThrottlingTier  string = "x-wso2-throttling-tier"
+	xAuthHeader          string = "x-wso2-auth-header"
+	xAuthType            string = "x-auth-type"
+	xWso2DisableSecurity string = "x-wso2-disable-security"
+	None                 string = "None"
+	DefaultSecurity      string = "default"
 )
 
 // cluster name prefixes
@@ -58,6 +57,10 @@ const (
 	APIKeyTypeInOAS           string = "apiKey"
 	APIMOauth2Type            string = "oauth2"
 	APIMDefaultOauth2Security string = "default"
+	APIKeyInHeaderOAS         string = "header"
+	APIKeyInQueryOAS          string = "query"
+	APIMAPIKeyInHeader        string = "api_key_header"
+	APIMAPIKeyInQuery         string = "api_key_query"
 )
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
