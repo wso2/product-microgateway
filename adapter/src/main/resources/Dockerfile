@@ -15,7 +15,8 @@
 # -----------------------------------------------------------------------
 
 FROM alpine:3.14.3
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
+
 RUN apk update && apk upgrade --no-cache
 
 ENV LANG=C.UTF-8
@@ -51,7 +52,7 @@ USER ${MG_USER}
 COPY maven/security security
 COPY maven/conf/config.toml conf/
 COPY maven/conf/log_config.toml conf/
-COPY maven/adapter-ubuntu adapter
+COPY maven/adapter-linux-amd64 adapter
 COPY maven/check_health.sh .
 COPY maven/LICENSE.txt .
 
