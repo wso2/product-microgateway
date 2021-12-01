@@ -152,3 +152,4 @@ kubectl label namespace default istio-injection=enabled
 
 
 - Productise and publish the API to the WSO2 Devportal for application developers.
+

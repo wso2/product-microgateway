@@ -18,3 +18,4 @@ DOMAIN=istio-ingressgateway.istio-system
 openssl genpkey -out server.key -algorithm RSA -pkeyopt rsa_keygen_bits:2048
 openssl req -x509 -new -key server.key -out server.crt -subj "/CN=${DOMAIN}" -reqexts SAN -extensions SAN \
 -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${DOMAIN}"))
+

@@ -51,3 +51,4 @@ spec:
     app: httpbin
   sessionAffinity: None
   type: ClusterIP
+

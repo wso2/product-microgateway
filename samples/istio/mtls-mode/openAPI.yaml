@@ -30,3 +30,4 @@ components:
           authorizationUrl: https://test.com
           scopes: {}
 x-wso2-basePath: /httpbin/api/v1.0.0
+
