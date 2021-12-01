@@ -48,7 +48,7 @@ type MgwSwagger struct {
 	productionEndpoints *EndpointCluster
 	sandboxEndpoints    *EndpointCluster
 	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []Resource
+	resources           []*Resource
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
 	securityScheme      []SecurityScheme
@@ -190,7 +190,7 @@ func (swagger *MgwSwagger) GetSandEndpoints() *EndpointCluster {
 }
 
 // GetResources returns the array of resources (openAPI path level info)
-func (swagger *MgwSwagger) GetResources() []Resource {
+func (swagger *MgwSwagger) GetResources() []*Resource {
 	return swagger.resources
 }
 

@@ -76,22 +76,19 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
-	var resources []Resource
+func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
+	var resources []*Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
 	// resourve level, if it's not present at resource level using "addResourceLevelDisableSecurity"
 	disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
 	if swagger2.Paths != nil {
 		for path, pathItem := range swagger2.Paths.Paths {
-			var methodsArray []Operation
+			var methodsArray []*Operation
 			methodFound := false
 			if pathItem.Get != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
-				}
-				if applicationSecurity, found := pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Get.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
 					pathItem.Get.Extensions))
@@ -101,9 +98,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Post.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Post.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security,
 					pathItem.Post.Extensions))
 				methodFound = true
@@ -111,9 +105,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if pathItem.Put != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
-				}
-				if applicationSecurity, found := pathItem.Put.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Put.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security,
 					pathItem.Put.Extensions))
@@ -123,9 +114,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Delete.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Delete.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security,
 					pathItem.Delete.Extensions))
 				methodFound = true
@@ -133,9 +121,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if pathItem.Head != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
-				}
-				if applicationSecurity, found := pathItem.Head.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Head.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security,
 					pathItem.Head.Extensions))
@@ -145,9 +130,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Patch.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Patch.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security,
 					pathItem.Patch.Extensions))
 				methodFound = true
@@ -156,16 +138,13 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Options.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Options.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
 					pathItem.Options.Extensions))
 				methodFound = true
 			}
 			if methodFound {
 				resource := setOperationSwagger(path, methodsArray, pathItem)
-				resources = append(resources, resource)
+				resources = append(resources, &resource)
 			}
 		}
 	}
@@ -206,32 +185,12 @@ func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool {
 	return isApplicationSecurityOptional
 }
 
-// sets application level security defined under the x-wso2-application-security extension.
-func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string) {
-	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(applicationSecurity)
-	result, ok := applicationSecurity.(map[string]interface{})
-	if ok && !isApplicationSecurityOptional {
-		if _, found := result[SecurityTypes]; found {
-			if val, ok := result[SecurityTypes].([]interface{}); ok {
-				for _, mapValue := range val {
-					if mapValue == APIKeyInAppLevelSecurity {
-						applicationAPIKeyMap := map[string][]string{
-							mapValue.(string): {},
-						}
-						*pathItemSecurity = append(*pathItemSecurity, applicationAPIKeyMap)
-					}
-				}
-			}
-		}
-	}
-}
-
-func getSwaggerOperationLevelDetails(operation *spec.Operation, method string) Operation {
+func getSwaggerOperationLevelDetails(operation *spec.Operation, method string) *Operation {
 	var securityData []map[string][]string = operation.Security
 	return NewOperation(method, securityData, operation.Extensions)
 }
 
-func setOperationSwagger(path string, methods []Operation, pathItem spec.PathItem) Resource {
+func setOperationSwagger(path string, methods []*Operation, pathItem spec.PathItem) Resource {
 	var resource Resource
 	resource = Resource{
 		path:    path,

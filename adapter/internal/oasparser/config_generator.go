@@ -149,7 +149,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
-			operations[i] = GetEnforcerAPIOperation(op)
+			operations[i] = GetEnforcerAPIOperation(*op)
 		}
 		resource := &api.Resource{
 			Id:      res.GetID(),

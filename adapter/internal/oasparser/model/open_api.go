@@ -97,7 +97,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	return nil
 }
 
-func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.PathItem) Resource {
+func setPathInfoOpenAPI(path string, methods []*Operation, pathItem *openapi3.PathItem) Resource {
 	var resource Resource
 	if pathItem != nil {
 		resource = Resource{
@@ -116,8 +116,8 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 	return resource
 }
 
-func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
-	var resources []Resource
+func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
+	var resources []*Resource
 
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
@@ -125,7 +125,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 	val, found := resolveAPILevelDisableSecurity(openAPI.ExtensionProps)
 	if openAPI.Paths != nil {
 		for path, pathItem := range openAPI.Paths {
-			methodsArray := make([]Operation, len(pathItem.Operations()))
+			methodsArray := make([]*Operation, len(pathItem.Operations()))
 			var arrayIndex int = 0
 			for httpMethod, operation := range pathItem.Operations() {
 				if operation != nil {
@@ -157,7 +157,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 				}
 			}
-			resources = append(resources, resource)
+			resources = append(resources, &resource)
 
 		}
 	}
@@ -174,36 +174,21 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	return securitySchemes
 }
 
-func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
+func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
 
-	if operation.Security != nil || extensions[xWso2ApplicationSecurity] != nil {
-		var securityData []openapi3.SecurityRequirement = *(operation.Security)
-		var securityArray = make([]map[string][]string, len(securityData))
-		for i, security := range securityData {
-			securityArray[i] = security
-		}
-
-		result, ok := extensions[xWso2ApplicationSecurity].(map[string]interface{})
-		if ok {
-			if _, found := result[SecurityTypes]; found {
-				if val, ok := result[SecurityTypes].([]interface{}); ok {
-					for _, mapValue := range val {
-						if mapValue == APIKeyInAppLevelSecurity {
-							applicationAPIKeyMap := map[string][]string{
-								mapValue.(string): {},
-							}
-							securityArray = append(securityArray, applicationAPIKeyMap)
-						}
-					}
-				}
-			}
-		}
-		logger.LoggerOasparser.Debugf("Security array %v", securityArray)
-		return NewOperation(method, securityArray, extensions)
+	if operation.Security == nil {
+		return NewOperation(method, nil, extensions)
 	}
 
-	return NewOperation(method, nil, extensions)
+	var securityData []openapi3.SecurityRequirement = *(operation.Security)
+	var securityArray = make([]map[string][]string, len(securityData))
+	for i, security := range securityData {
+		securityArray[i] = security
+	}
+	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
+	return NewOperation(method, securityArray, extensions)
+
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion

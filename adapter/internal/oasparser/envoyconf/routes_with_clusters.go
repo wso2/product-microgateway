@@ -269,7 +269,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
-		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, vHost, basePath, clusterNameProd,
+		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, basePath, clusterNameProd,
 			clusterNameSand, resourceRequestInterceptor, resourceResponseInterceptor, organizationID))
 		routes = append(routes, routeP)
 	}
