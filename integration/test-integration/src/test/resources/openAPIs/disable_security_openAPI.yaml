@@ -9,7 +9,7 @@ servers:
 x-wso2-production-endpoints:
   urls:
     - 'http://mockBackend:2383/v2'
-x-wso2-basePath: /v2
+x-wso2-basePath: /disable_security
 paths:
   /pet/findByStatus:
     get:

@@ -35,7 +35,7 @@ public class DisableSecurityTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/findByStatus") , headers);
+                "/disable_security/pet/findByStatus") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
@@ -47,7 +47,7 @@ public class DisableSecurityTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/") , headers);
+                "/disable_security/pet/") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -60,7 +60,7 @@ public class DisableSecurityTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/store/inventory") , headers);
+                "/disable_security/store/inventory") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
