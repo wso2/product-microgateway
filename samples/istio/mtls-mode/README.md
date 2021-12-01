@@ -2,6 +2,8 @@
 
 In this scenario, we deploy Choreo Connect as the edge gateway where it applies API Management for the microservices.
 
+![Alt text](mtls.jpg?raw=true "MTLS Mode")
+
 ### Installation Prerequisites
 
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)

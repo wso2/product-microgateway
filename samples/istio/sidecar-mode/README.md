@@ -2,6 +2,8 @@
 
 In this scenario, we deploy Choreo Connect within the Istio service mesh where it applies API Management for the microservices.
 
+![Alt text](sidecar.jpg?raw=true "Sidecar Mode")
+
 ### Installation Prerequisites
 
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
