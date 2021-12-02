@@ -838,17 +838,15 @@ func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
 // x-wso2-disable-security : true/false to enable and disable security.
 func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 	disableSecurity := false
-	isXWso2DisableSecurityAvailable := false
 	y, vExtAuthType := vendorExtensions[xAuthType]
 	z, vExtDisableSecurity := vendorExtensions[xWso2DisableSecurity]
 	if vExtDisableSecurity {
 		// If x-wso2-disable-security is present, then disableSecurity = val
 		if val, ok := z.(bool); ok {
 			disableSecurity = val
-			isXWso2DisableSecurityAvailable = val
 		}
 	} 
-	if vExtAuthType && !isXWso2DisableSecurityAvailable {
+	if vExtAuthType && !disableSecurity {
 		// If APIs are published through APIM, all resource levels contains x-auth-type
 		// vendor extension.
 		if val, ok := y.(string); ok {

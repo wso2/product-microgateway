@@ -90,7 +90,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if foundInResourceLevel {
 				logger.LoggerOasparser.Debugf("x-wso2-disable-security extension is available in the resource %v.", path)
 				disableSecurity = disableResourceLevelSecurity
-				found = foundInResourceLevel
+				found = true
 			}
 			var methodsArray []Operation
 			methodFound := false
