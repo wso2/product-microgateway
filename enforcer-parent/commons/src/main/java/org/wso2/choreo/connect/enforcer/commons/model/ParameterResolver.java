@@ -33,9 +33,11 @@ class ParameterResolver {
     private static final Logger logger = LogManager.getLogger(ParameterResolver.class);
     private final List<String> parameterNames = new ArrayList<>();
     private final Pattern pattern;
+    private String pathTemplate;
 
     public ParameterResolver(final String parameterTemplate) {
         // This formatting is required since /foo and /foo/ are considered to be equal
+        this.pathTemplate = parameterTemplate;
         String formattedPathParamTemplate = parameterTemplate.endsWith("/") ?
                 parameterTemplate.substring(0, parameterTemplate.length() - 1) : parameterTemplate;
         final Matcher matcher = PARAMETER_PATTERN.matcher(formattedPathParamTemplate);
@@ -52,7 +54,7 @@ class ParameterResolver {
         }
         String regex = Pattern.quote(matcher.replaceAll("_____PARAM_____"))
                 .replace("_____PARAM_____", "\\E([^/]*)\\Q");
-        regex = regex.endsWith("*\\E") ? regex.substring(0, regex.length() - 3) + "\\E(.*)" : regex;
+        regex = regex.endsWith("*\\E") ? regex.substring(0, regex.length() - 4) + "\\E[/]{0,1}(.*)" : regex;
         pattern = Pattern.compile(regex);
     }
 
@@ -63,7 +65,7 @@ class ParameterResolver {
         final Matcher matcher = pattern.matcher(formattedURI);
         if (!matcher.matches()) {
             // Unlikely to occur as this pair is already matched within router.
-            logger.error("PathTemplate and RawPath is mismatched.");
+            logger.debug("PathTemplate:" + pathTemplate + " and RawPath:" + uriString + " is mismatched.");
             return new HashMap<>();
         }
         final Map<String, String> map = new HashMap<>();
