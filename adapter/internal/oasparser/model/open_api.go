@@ -127,14 +127,18 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
 	// resource level if vendor ext is not present at each resource level.
-	val, found := resolveAPILevelDisableSecurity(openAPI.ExtensionProps)
+	val, found := resolveDisableSecurity(openAPI.ExtensionProps)
 	if openAPI.Paths != nil {
 		for path, pathItem := range openAPI.Paths {
+			// Checks for resource level security. (security is disabled in resource level using x-wso2-disable-security extension)
+			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity(pathItem.ExtensionProps)
 			methodsArray := make([]*Operation, len(pathItem.Operations()))
 			var arrayIndex int = 0
 			for httpMethod, operation := range pathItem.Operations() {
 				if operation != nil {
-					if found {
+					if foundInResourceLevel {
+						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, isResourceLvlSecurityDisabled)
+					} else if found {
 						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, val)
 					}
 					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
@@ -281,7 +285,7 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 // If found, it will return two bool values which are the following in order.
 // 1st bool represnt the value of the vendor extension.
 // 2nd bool represent if the vendor extension present.
-func resolveAPILevelDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
+func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
 	extensions := convertExtensibletoReadableFormat(vendorExtensions)
 	if y, found := extensions[xWso2DisableSecurity]; found {
 		if val, ok := y.(bool); ok {
@@ -294,7 +298,7 @@ func resolveAPILevelDisableSecurity(vendorExtensions openapi3.ExtensionProps) (b
 
 // This method add the disable security to given vendor extensions, if it's not present.
 func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, val bool) openapi3.ExtensionProps {
-	_, found := resolveAPILevelDisableSecurity(vendorExtensions)
+	_, found := resolveDisableSecurity(vendorExtensions)
 	if !found {
 		vendorExtensions.Extensions[xWso2DisableSecurity] = val
 	}

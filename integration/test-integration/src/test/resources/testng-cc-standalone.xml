@@ -53,6 +53,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.retry.RetryTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.circuitBreakers.CircuitBreakersTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceNotAvailableTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.extensions.DisableSecurityTestCase"/>
         </classes>
     </test>
     <test name="cc-with-backend-tls" preserve-order="true" parallel="false">
