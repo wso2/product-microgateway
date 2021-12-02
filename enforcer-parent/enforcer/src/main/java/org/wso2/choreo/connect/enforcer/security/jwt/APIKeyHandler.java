@@ -26,8 +26,8 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -37,13 +37,14 @@ import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
 /**
  * An abstract class which can be used to handle API keys.
  */
 public abstract class APIKeyHandler implements Authenticator {
 
-    private static final Log log = LogFactory.getLog(APIKeyHandler.class);
+    private static final Logger log = LogManager.getLogger(APIKeyHandler.class);
 
     /**
      * Checks whether a given string is an API key.
@@ -56,21 +57,6 @@ public abstract class APIKeyHandler implements Authenticator {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Validates API key string.
-     *
-     * @param apiKey - API key string
-     * @throws APISecurityException if empty string is given to the method
-     */
-    public void getKeyNotFoundError(String apiKey) throws APISecurityException {
-        if (StringUtils.isEmpty(apiKey)) {
-            log.error("Cannot find API key header");
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-        }
     }
 
     /**
@@ -96,11 +82,9 @@ public abstract class APIKeyHandler implements Authenticator {
      */
     public void checkInRevokedMap(String tokenIdentifier, String[] splitToken) throws APISecurityException {
         if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenIdentifier)) {
-            if (log.isDebugEnabled()) {
-                log.debug("API key retrieved from the revoked jwt token map. Token: "
-                        + FilterUtils.getMaskedToken(splitToken[0]));
-            }
-            log.error("Invalid API Key. " + FilterUtils.getMaskedToken(splitToken[0]));
+            log.debug("API key retrieved from the revoked jwt token map. Token: {}",
+                         FilterUtils.getMaskedToken(splitToken[0]));
+            log.error("Invalid API Key. {}", FilterUtils.getMaskedToken(splitToken[0]));
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
@@ -119,38 +103,28 @@ public abstract class APIKeyHandler implements Authenticator {
      * @return whether a given API key was in the cache or not
      * @throws APISecurityException if there is an error when checking the token in cache
      */
-    public boolean verifyTokenInCache(String tokenIdentifier, String apiKey, JWTClaimsSet payload,
-                                      String[] splitToken, String apiKeyType,
-                                      JWTTokenPayloadInfo jwtTokenPayloadInfo) throws APISecurityException {
+    public boolean isVerifiedApiKeyInCache(String tokenIdentifier, String apiKey, JWTClaimsSet payload,
+                                           String[] splitToken, String apiKeyType,
+                                           JWTTokenPayloadInfo jwtTokenPayloadInfo) throws APISecurityException {
         boolean isVerified = false;
-        boolean isInvalidInternalAPIKey = CacheProvider.getInvalidGatewayInternalKeyCache()
-                .getIfPresent(tokenIdentifier) != null &&
-                apiKey.equals(CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier));
-        boolean isInvalidAPIKey = CacheProvider.getInvalidGatewayAPIKeyCache()
-                .getIfPresent(tokenIdentifier) != null &&
-                apiKey.equals(CacheProvider.getInvalidGatewayAPIKeyCache().getIfPresent(tokenIdentifier));
         if (jwtTokenPayloadInfo != null) {
             String cachedToken = jwtTokenPayloadInfo.getAccessToken();
             isVerified = cachedToken.equals(apiKey) && !isJwtTokenExpired(payload, apiKeyType);
-        } else if (isInvalidInternalAPIKey || isInvalidAPIKey) {
-            getInvalidKeyInCacheError(splitToken);
+        } else {
+            boolean isInvalidInternalAPIKey = CacheProvider.getInvalidGatewayInternalKeyCache()
+                    .getIfPresent(tokenIdentifier) != null &&
+                    apiKey.equals(CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier));
+            boolean isInvalidAPIKey = CacheProvider.getInvalidGatewayAPIKeyCache()
+                    .getIfPresent(tokenIdentifier) != null &&
+                    apiKey.equals(CacheProvider.getInvalidGatewayAPIKeyCache().getIfPresent(tokenIdentifier));
+            if (isInvalidInternalAPIKey || isInvalidAPIKey) {
+                log.error("API key found in cache for invalid API keys. " + FilterUtils.getMaskedToken(splitToken[0]));
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            }
         }
         return isVerified;
-    }
-
-    /**
-     * Checks for API key in the invalid token cache.
-     *
-     * @param splitToken API key segments
-     * @throws APISecurityException when token is found in the invalid token cache
-     */
-    public void getInvalidKeyInCacheError(String[] splitToken) throws APISecurityException {
-        log.debug("API key retrieved from the invalid API key cache. "
-                + FilterUtils.getMaskedToken(splitToken[0]));
-        log.error("Invalid API key. " + FilterUtils.getMaskedToken(splitToken[0]));
-        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
     }
 
     /**
@@ -164,11 +138,10 @@ public abstract class APIKeyHandler implements Authenticator {
      * @return verification status if API key not found in the cache
      * @throws APISecurityException if the given API key is not in the cache and able to verify
      */
-    public boolean verifyTokenNotInCache(JWSHeader jwsHeader, SignedJWT signedJWT, String[] splitToken,
-                                         JWTClaimsSet payload, String apiKeyType) throws APISecurityException {
+    public boolean verifyTokenWhenNotInCache(JWSHeader jwsHeader, SignedJWT signedJWT, String[] splitToken,
+                                             JWTClaimsSet payload, String apiKeyType) throws APISecurityException {
         boolean isVerified = false;
-
-        log.debug(apiKeyType + " not found in the cache.");
+        log.debug("{} not found in the cache.", apiKeyType);
 
         String alias = "";
         if (jwsHeader != null && StringUtils.isNotEmpty(jwsHeader.getKeyID())) {
@@ -176,13 +149,11 @@ public abstract class APIKeyHandler implements Authenticator {
         }
 
         try {
-            isVerified = JWTUtil.verifyTokenSignature(signedJWT, alias) && !isJwtTokenExpired(payload, apiKeyType);
+            isVerified = JWTUtils.verifyTokenSignature(signedJWT, alias) && !isJwtTokenExpired(payload, apiKeyType);
         } catch (EnforcerException e) {
             log.error(apiKeyType + " authentication failed. " +
                     FilterUtils.getMaskedToken(splitToken[0]));
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            return false;
         }
         return isVerified;
     }
@@ -196,20 +167,13 @@ public abstract class APIKeyHandler implements Authenticator {
      * @throws APISecurityException when there is an error while checking API key expiry details.
      */
     public boolean isJwtTokenExpired(JWTClaimsSet payload, String keyType) throws APISecurityException {
-
-        int timestampSkew = (int) getTimeStampSkewInSeconds();
         DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
-        jwtClaimsSetVerifier.setMaxClockSkew(timestampSkew);
+        jwtClaimsSetVerifier.setMaxClockSkew((int) FilterUtils.getTimeStampSkewInSeconds());
         try {
             jwtClaimsSetVerifier.verify(payload);
-            if (log.isDebugEnabled()) {
-                log.debug(keyType + " is not expired. User: " + payload.getSubject());
-            }
         } catch (BadJWTException e) {
             if ("Expired JWT".equals(e.getMessage())) {
-                if (log.isDebugEnabled()) {
-                    log.debug(keyType + "API key is expired.");
-                }
+                log.debug("{} API key is expired.", keyType);
                 if (APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE.equals(keyType)) {
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                     CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), "carbon.super");
@@ -222,16 +186,10 @@ public abstract class APIKeyHandler implements Authenticator {
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug(keyType + " is not expired. User: " + payload.getSubject());
-        }
         return false;
     }
 
-    protected long getTimeStampSkewInSeconds() {
-        //TODO : Read from config
-        return 5;
-    }
+
 
     /**
      * Checks for API subscriptions.
@@ -262,26 +220,16 @@ public abstract class APIKeyHandler implements Authenticator {
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
                                 )) {
                     api = subscribedAPIsJSONObject;
-                    if (log.isDebugEnabled()) {
-                        log.debug("User is subscribed to the API: " + apiContext + ", " +
-                                "version: " + apiVersion + ". Token: " + FilterUtils.getMaskedToken(splitToken[0]));
-                    }
                     break;
                 }
             }
             if (api == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion + ". Token: " + FilterUtils.getMaskedToken(splitToken[0]));
-                }
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No subscription information found in the token.");
-            }
+            log.debug("No subscription information found in the token.");
             // we perform mandatory authentication for Api Keys
             if (!isOauth) {
                 log.error("User is not subscribed to access the API.");

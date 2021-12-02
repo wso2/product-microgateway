@@ -152,15 +152,15 @@ artifactsDirectory = "/home/wso2/artifacts"
 
 # Timeouts managed by the connection manager
 [router.connectionTimeout]
-# The amount of time that Envoy will wait for the entire request to be received. Time from client to upstream.
-requestTimeoutInSeconds = 0
-# The amount of time that Envoy will wait for the request headers to be received. Time from client to upstream.
-requestHeadersTimeoutInSeconds = 0 
-# The stream idle timeout for connections managed by the connection manager. This can be overriden by the `routeIdleTimeoutInSeconds`
-streamIdleTimeoutInSeconds = 300
-# The idle timeout for connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. 
-# If the connection is an HTTP/2 downstream connection a drain sequence will occur prior to closing the connection
-idleTimeoutInSeconds = 3600
+  # The amount of time that Envoy will wait for the entire request to be received. Time from client to upstream.
+  requestTimeoutInSeconds = 0
+  # The amount of time that Envoy will wait for the request headers to be received. Time from client to upstream.
+  requestHeadersTimeoutInSeconds = 0
+  # The stream idle timeout for connections managed by the connection manager. This can be overriden by the `routeIdleTimeoutInSeconds`
+  streamIdleTimeoutInSeconds = 300
+  # The idle timeout for connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. 
+  # If the connection is an HTTP/2 downstream connection a drain sequence will occur prior to closing the connection
+  idleTimeoutInSeconds = 3600
 
 [enforcer] # --------------------------------------------------------
 
@@ -271,7 +271,7 @@ enabled = true
 
 # Configurations related to Authorization header
 [enforcer.security.authHeader]
-  # Remove authorization header from backend request
+  # Send the authorization header to the backend
   enableOutboundAuthHeader = false
   # Header name for the authorization token coming from the downstream client
   authorizationHeader = "authorization"
@@ -389,20 +389,6 @@ enabled = true
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
 
-# Tracing configurations for Choreo Connect
-[enforcer.tracing]
-  # Enable/Disable tracing in Choreo Connect
-  enabled = false
-  # Type of tracer exporter (e.g: azure, jaeger, zipkin)
-  type = "jaeger"
-  [enforcer.tracing.configProperties]
-    # Exporter endpoint
-    endpoint = "http://jaeger:14268/api/traces"
-    # Instrumentation Name
-    instrumentationName = "CHOREO-CONNECT"
-    # Maximum number of sampled traces per second string
-    maximumTracesPerSecond = "2"
-
 # Metrics configurations for Choreo Connect
 [enforcer.metrics]
   # Enable/Disable metrics in Choreo Connect
@@ -488,3 +474,50 @@ enabled = true
         keepAliveTime = 600
         # Queue size of the worker threads
         queueSize = 1000
+
+# Tracing configurations for Choreo Connect
+[tracing]
+  # Enable/Disable tracing in Choreo Connect
+  enabled = false
+  # Type of tracer exporter (e.g: azure, zipkin). Use zipkin type for Jaeger as well.
+  type = "zipkin"
+  # configurations for zipkin tracer type
+  [tracing.configProperties]
+    # maximum length of the request path to extract and include in the HttpUrl tag.
+    maxPathLength = "256"
+    # jaeger host
+    host = "jaeger"
+    # jaeger port
+    port = "9411"
+    # jaeger collector endpoint path
+    endpoint = "/api/v2/spans"
+    # library Name to be tagged in traces (`otel.library.name`).
+    libraryName = "CHOREO-CONNECT"
+    # Maximum number of sampled traces per second string
+    maximumTracesPerSecond = "2"
+
+  # # Type of tracer exporter (e.g: azure, jaeger, zipkin)
+  # type = "zipkin"
+  # # configurations for zipkin tracer type
+  # [tracing.configProperties]
+  #   # maximum length of the request path to extract and include in the HttpUrl tag.
+  #   maxPathLength = "256"
+  #   # zipkin host
+  #   host = "zipkin"
+  #   # zipkin port
+  #   port = "9411"
+  #   # zipkin collector endpoint path
+  #   endpoint = "/api/v2/spans"
+  #   # library Name to be tagged in traces (`otel.library.name`).
+  #   libraryName = "CHOREO-CONNECT"
+  #   # Maximum number of sampled traces per second string
+  #   maximumTracesPerSecond = "2"
+  #   timeout = "15"
+
+  # type = "azure"
+  # [tracing.configProperties]
+  #   endpoint = ""
+  #   # Instrumentation Name
+  #   instrumentationName = "CHOREO-CONNECT"
+  #   # Maximum number of sampled traces per second string
+  #   maximumTracesPerSecond = "2"

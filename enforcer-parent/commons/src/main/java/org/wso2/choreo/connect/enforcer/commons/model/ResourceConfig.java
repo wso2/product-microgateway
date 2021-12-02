@@ -28,7 +28,7 @@ public class ResourceConfig {
 
     private String path;
     private HttpMethods method;
-    private Map<String, List<String>> securitySchemas = new HashMap(); // security_schema_name -> schemas
+    private Map<String, List<String>> securitySchemas = new HashMap(); // security_schema_name -> scopes
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
     private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster

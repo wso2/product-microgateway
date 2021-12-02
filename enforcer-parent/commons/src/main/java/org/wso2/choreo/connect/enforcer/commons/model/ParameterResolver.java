@@ -29,14 +29,16 @@ import java.util.regex.Pattern;
 
 class ParameterResolver {
 
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile("(\\{[a-zA-Z]+\\})");
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile("(\\{[a-zA-Z0-9]+[a-z-_A-Z0-9]*\\})");
     private static final Logger logger = LogManager.getLogger(ParameterResolver.class);
     private final List<String> parameterNames = new ArrayList<>();
     private final Pattern pattern;
 
     public ParameterResolver(final String parameterTemplate) {
-
-        final Matcher matcher = PARAMETER_PATTERN.matcher(parameterTemplate);
+        // This formatting is required since /foo and /foo/ are considered to be equal
+        String formattedPathParamTemplate = parameterTemplate.endsWith("/") ?
+                parameterTemplate.substring(0, parameterTemplate.length() - 1) : parameterTemplate;
+        final Matcher matcher = PARAMETER_PATTERN.matcher(formattedPathParamTemplate);
 
         while (matcher.find()) {
             if (matcher.groupCount() == 1) {
@@ -55,7 +57,10 @@ class ParameterResolver {
     }
 
     public Map<String, String> parametersByName(final String uriString) throws IllegalArgumentException {
-        final Matcher matcher = pattern.matcher(uriString);
+        // This formatting is required since /foo and /foo/ are considered to be equal
+        String formattedURI = uriString.endsWith("/") ?
+                uriString.substring(0, uriString.length() - 1) : uriString;
+        final Matcher matcher = pattern.matcher(formattedURI);
         if (!matcher.matches()) {
             // Unlikely to occur as this pair is already matched within router.
             logger.error("PathTemplate and RawPath is mismatched.");

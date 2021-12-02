@@ -189,15 +189,6 @@ var defaultConfig = &Config{
 			MaximumSize: 10000,
 			ExpiryTime:  15,
 		},
-		Tracing: tracing{
-			Enabled: false,
-			Type:    "jaeger",
-			ConfigProperties: map[string]string{
-				"endpoint":               "",
-				"instrumentationName":    "CHOREO-CONNECT",
-				"maximumTracesPerSecond": "2",
-			},
-		},
 		Metrics: metrics{
 			Enabled: false,
 			Type:    "azure",
@@ -326,6 +317,18 @@ var defaultConfig = &Config{
 					QueueSize:     1000,
 				},
 			},
+		},
+	},
+	Tracing: tracing{
+		Enabled: false,
+		Type:    "zipkin",
+		ConfigProperties: map[string]string{
+			"libraryName":            "CHOREO-CONNECT",
+			"maximumTracesPerSecond": "2",
+			"maxPathLength":          "256",
+			"host":                   "jaeger",
+			"port":                   "9411",
+			"endpoint":               "/api/v2/spans",
 		},
 	},
 }

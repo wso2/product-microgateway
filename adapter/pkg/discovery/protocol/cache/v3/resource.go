@@ -61,6 +61,9 @@ func GetResponseType(typeURL string) types.ResponseType {
 
 // GetResourceName returns the resource name for a valid xDS response type.
 func GetResourceName(res envoy_types.Resource) string {
+	// Since Applications, Subscriptions, API-Metadata, Application Policies and Subscription Policies
+	// are always maintained under a single list, there is no need to have separate key.
+	// (Compared to GAAPI and API)
 	switch v := res.(type) {
 	case *api.Api:
 		return fmt.Sprint(v.Vhost, v.BasePath, v.Version)
@@ -68,12 +71,24 @@ func GetResourceName(res envoy_types.Resource) string {
 		return "Config"
 	case *subscription.SubscriptionList:
 		return "Subscription"
+	case *subscription.ApplicationList:
+		return "Application"
+	case *subscription.ApplicationKeyMappingList:
+		return "ApplicationKeyMapping"
+	case *subscription.APIList:
+		return "APIList"
+	case *subscription.ApplicationPolicyList:
+		return "ApplicationPolicyList"
+	case *subscription.SubscriptionPolicyList:
+		return "SubscriptionPolicyList"
 	case *keymgt.KeyManagerConfig:
 		return fmt.Sprint(v.Name)
 	case *throttle.ThrottleData:
 		return "ThrottleData"
 	case *ga.Api:
 		return fmt.Sprint(v.ApiUUID)
+	case *keymgt.RevokedToken:
+		return fmt.Sprint(v.Jti)
 	default:
 		return ""
 	}

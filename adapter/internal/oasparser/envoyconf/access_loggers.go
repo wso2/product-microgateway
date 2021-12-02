@@ -42,8 +42,12 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
 		LogFormat: &corev3.SubstitutionFormatString{
-			Format: &corev3.SubstitutionFormatString_TextFormat{
-				TextFormat: logConf.AccessLogs.Format,
+			Format: &corev3.SubstitutionFormatString_TextFormatSource{
+				TextFormatSource: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: logConf.AccessLogs.Format,
+					},
+				},
 			},
 		},
 	}
@@ -95,7 +99,7 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 	}
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marsheling gRPC access log configs. ", err)
+		logger.LoggerOasparser.Error("Error marshalling gRPC access log configs. ", err)
 		return nil
 	}
 

@@ -15,27 +15,13 @@
 package cache
 
 import (
+	"errors"
+
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cache "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	wso2_types "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 )
-
-// IndexResourcesByName creates a map from the resource name to the resource.
-func IndexResourcesByName(items []types.Resource) map[string]types.Resource {
-	indexed := make(map[string]types.Resource, len(items))
-	for _, item := range items {
-		indexed[GetResourceName(item)] = item
-	}
-	return indexed
-}
-
-// NewResources creates a new resource group.
-func NewResources(version string, items []types.Resource) envoy_cache.Resources {
-	return envoy_cache.Resources{
-		Version: version,
-		Items:   IndexResourcesByName(items),
-	}
-}
 
 // Snapshot is an internally consistent snapshot of xDS resources.
 // Consistency is important for the convergence as different resource types
@@ -43,40 +29,45 @@ func NewResources(version string, items []types.Resource) envoy_cache.Resources 
 type Snapshot struct {
 	envoy_cache.Snapshot
 	Resources [wso2_types.UnknownType]envoy_cache.Resources
+	// Only used for delta XDS. Hence it remains unused for adapter implementation.
+	VersionMap map[string]map[string]string
 }
 
 // NewSnapshot creates a snapshot from response types and a version.
-func NewSnapshot(version string,
-	configs []types.Resource,
-	apis []types.Resource,
-	subcriptionList []types.Resource,
-	applicationList []types.Resource,
-	apiList []types.Resource,
-	applicationPolicyList []types.Resource,
-	subscriptionPolicyList []types.Resource,
-	applicationKeyMappingList []types.Resource,
-	keyManagerConfig []types.Resource,
-	revokedTokens []types.Resource,
-	throttleData []types.Resource,
-	gaAPIs []types.Resource) Snapshot {
+// The resources map is keyed off the type URL of a resource, followed by the slice of resource objects.
+func NewSnapshot(version string, resources map[resource.Type][]types.Resource) (Snapshot, error) {
 	out := Snapshot{}
-	out.Resources[wso2_types.Config] = NewResources(version, configs)
-	out.Resources[wso2_types.API] = NewResources(version, apis)
-	out.Resources[wso2_types.SubscriptionList] = NewResources(version, subcriptionList)
-	out.Resources[wso2_types.ApplicationList] = NewResources(version, applicationList)
-	out.Resources[wso2_types.APIList] = NewResources(version, apiList)
-	out.Resources[wso2_types.ApplicationPolicyList] = NewResources(version, applicationPolicyList)
-	out.Resources[wso2_types.SubscriptionPolicyList] = NewResources(version, subscriptionPolicyList)
-	out.Resources[wso2_types.ApplicationKeyMappingList] = NewResources(version, applicationKeyMappingList)
-	out.Resources[wso2_types.KeyManagerConfig] = NewResources(version, keyManagerConfig)
-	out.Resources[wso2_types.RevokedTokens] = NewResources(version, revokedTokens)
-	out.Resources[wso2_types.ThrottleData] = NewResources(version, throttleData)
-	out.Resources[wso2_types.GAAPI] = NewResources(version, gaAPIs)
-	return out
+
+	for typ, resource := range resources {
+		index := GetResponseType(typ)
+		if index == wso2_types.UnknownType {
+			return out, errors.New("unknown resource type: " + typ)
+		}
+
+		out.Resources[index] = NewResources(version, resource)
+	}
+
+	return out, nil
 }
 
-// GetResources selects snapshot resources by type.
-func (s *Snapshot) GetResources(typeURL string) map[string]types.Resource {
+// // GetResources selects snapshot resources by type, returning the map of resources.
+// func (s *Snapshot) GetResources(typeURL resource.Type) map[string]types.Resource {
+// 	resources := s.GetResourcesAndTTL(typeURL)
+// 	if resources == nil {
+// 		return nil
+// 	}
+
+// 	withoutTTL := make(map[string]types.Resource, len(resources))
+
+// 	for k, v := range resources {
+// 		withoutTTL[k] = v.Resource
+// 	}
+
+// 	return withoutTTL
+// }
+
+// GetResourcesAndTTL selects snapshot resources by type, returning the map of resources and the associated TTL.
+func (s *Snapshot) GetResourcesAndTTL(typeURL resource.Type) map[string]types.ResourceWithTTL {
 	if s == nil {
 		return nil
 	}
@@ -97,4 +88,30 @@ func (s *Snapshot) GetVersion(typeURL string) string {
 		return ""
 	}
 	return s.Resources[typ].Version
+}
+
+// IndexResourcesByName creates a map from the resource name to the resource.
+func IndexResourcesByName(items []types.ResourceWithTTL) map[string]types.ResourceWithTTL {
+	indexed := make(map[string]types.ResourceWithTTL)
+	for _, item := range items {
+		indexed[GetResourceName(item.Resource)] = item
+	}
+	return indexed
+}
+
+// NewResources creates a new resource group.
+func NewResources(version string, items []types.Resource) envoy_cache.Resources {
+	itemsWithTTL := []types.ResourceWithTTL{}
+	for _, item := range items {
+		itemsWithTTL = append(itemsWithTTL, types.ResourceWithTTL{Resource: item})
+	}
+	return NewResourcesWithTTL(version, itemsWithTTL)
+}
+
+// NewResourcesWithTTL creates a new resource group.
+func NewResourcesWithTTL(version string, items []types.ResourceWithTTL) envoy_cache.Resources {
+	return envoy_cache.Resources{
+		Version: version,
+		Items:   IndexResourcesByName(items),
+	}
 }

@@ -17,6 +17,8 @@
  */
 package org.wso2.choreo.connect.enforcer.commons.model;
 
+import java.util.Map;
+
 /**
  * SecurityInfo holds the backend security configurations for an endpoint.
  */
@@ -25,7 +27,7 @@ public class SecurityInfo {
     private String username;
     private boolean enabled;
     private String securityType;
-    private String customParameters;
+    private Map<String, String> customParameters;
 
     /**
      * Get the password for endpoint (Basic Auth)
@@ -91,11 +93,11 @@ public class SecurityInfo {
      *
      * @return security Type
      */
-    public String getCustomParameters() {
+    public Map<String, String> getCustomParameters() {
         return customParameters;
     }
 
-    public void setCustomParameters(String customParameters) {
+    public void setCustomParameters(Map<String, String> customParameters) {
         this.customParameters = customParameters;
     }
 }
