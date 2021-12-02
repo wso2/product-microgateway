@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
+import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
@@ -63,6 +64,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     private static final Logger log = LogManager.getLogger(APIKeyAuthenticator.class);
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
+    private boolean apiKeySubValidationEnabled = false;
 
     private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
@@ -73,6 +75,13 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
+        }
+        Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
+        for (ExtendedTokenIssuerDto tokenIssuer: tokenIssuers.values()) {
+            if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(tokenIssuer.getName())) {
+                apiKeySubValidationEnabled = tokenIssuer.isValidateSubscriptions();
+                break;
+            }
         }
     }
 
@@ -177,8 +186,12 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 }
 
                 validateAPIKeyRestrictions(payload, requestContext, apiContext, apiVersion);
-                APIKeyValidationInfoDTO validationInfoDto =
-                        KeyValidator.validateSubscription(apiUuid, apiContext, payload);
+                APIKeyValidationInfoDTO validationInfoDto;
+                if (apiKeySubValidationEnabled) {
+                    validationInfoDto = KeyValidator.validateSubscription(apiUuid, apiContext, payload);
+                } else {
+                    validationInfoDto = getAPIKeyValidationDTO(requestContext, payload);
+                }
 
                 if (!validationInfoDto.isAuthorized()) {
                     if (GeneralErrorCodeConstants.API_BLOCKED_CODE == validationInfoDto
@@ -252,8 +265,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
         APIKeyValidationInfoDTO validationInfoDTO = new APIKeyValidationInfoDTO();
         JSONObject app = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
-        String name = requestContext.getMatchedAPI().getName();
-        String version = requestContext.getMatchedAPI().getVersion();
         JSONObject api = null;
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
@@ -269,6 +280,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         }
 
         //check whether name is assigned correctly (This was not populated in JWTAuthenticator)
+        String name = requestContext.getMatchedAPI().getName();
+        String version = requestContext.getMatchedAPI().getVersion();
         validationInfoDTO.setApiName(name);
         validationInfoDTO.setApiVersion(version);
 
@@ -313,7 +326,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         }
-
         return validationInfoDTO;
     }
 

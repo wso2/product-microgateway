@@ -315,6 +315,7 @@ enabled = true
   # Provide unique name for the JWT issuer
   name = "APIM Publisher"
   issuer = "https://localhost:9443/publisher"
+  validateSubscription = false
   # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
   certificateAlias = ""
   # Certificate Filepath within Enforcer
