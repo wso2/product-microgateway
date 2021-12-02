@@ -311,7 +311,7 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			if arrayContains(apiSecurityDefinitionNames, securityDefName) {
 				sanitizedAPISecurity = append(sanitizedAPISecurity, security)
 			} else {
-				logger.LoggerXds.Debugf("A security definition for %v has not found in API %v:%v",
+				logger.LoggerXds.Warnf("A security definition for %v has not found in API %v:%v",
 					securityDefName, swagger.title, swagger.version)
 			}
 		}
@@ -332,7 +332,7 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 					if arrayContains(apiSecurityDefinitionNames, securityDefName) {
 						sanitizedOperationSecurity = append(sanitizedOperationSecurity, security)
 					} else {
-						logger.LoggerXds.Debugf("A security definition for %v has not found in API %v:%v",
+						logger.LoggerXds.Warnf("A security definition for %v has not found in API %v:%v",
 							securityDefName, swagger.title, swagger.version)
 					}
 				}

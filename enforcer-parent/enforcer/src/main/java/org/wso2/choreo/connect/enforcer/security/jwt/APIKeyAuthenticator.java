@@ -86,7 +86,9 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         // check both resource level and api level security
         List<Map<String, List<String>>> securityLists = Arrays.asList(requestContext.getMatchedResourcePath()
                 .getSecuritySchemas(), requestContext.getMatchedAPI().getApiSecurity());
+        // loop for resource security then api level
         for (Map<String, List<String>> securityList : securityLists) {
+            // loop over security and get definition for the matching security definition name
             for (String securityDefinitionName : securityList.keySet()) {
                 if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
                     SecuritySchemaConfig securitySchemaDefinition =
@@ -95,14 +97,12 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                             securitySchemaDefinition.getType())) {
                         // If Defined in openAPI definition (when not enabled at APIM App level),
                         // key must exist in specified location
-                        if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(
-                                securitySchemaDefinition.getIn())) {
+                        if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
                             if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
                                 return requestContext.getHeaders().get(securitySchemaDefinition.getName());
                             }
                         }
-                        if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(
-                                securitySchemaDefinition.getIn())) {
+                        if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
                             if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
                                 return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
                             }
