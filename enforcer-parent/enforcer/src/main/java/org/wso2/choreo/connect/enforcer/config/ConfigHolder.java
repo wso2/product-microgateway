@@ -249,7 +249,7 @@ public class ConfigHolder {
                     TLSUtils.convertCertificate(cert);
                     // Convert the certificate to a javax.security.cert.Certificate and set to issuerDto.
                     issuerDto.setCertificate(TLSUtils.convertCertificate(cert));
-                } catch (KeyStoreException | CertificateException | IOException e) {
+                } catch (KeyStoreException | CertificateException | IOException | EnforcerException e) {
                     logger.error("Error while adding certificates to the JWT related Truststore", e);
                     // Continue to avoid making a invalid issuer.
                     continue;

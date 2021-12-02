@@ -174,7 +174,15 @@ public class TokenUtil {
         subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
 
         JSONObject jwtTokenInfo = new JSONObject();
+
+        JSONObject tierDTO = new JSONObject();
+        tierDTO.put("stopOnQuotaReach", true);
+        JSONObject tierInfoDTO = new JSONObject();
+        tierInfoDTO.put(tier, tierDTO);
+
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
+        jwtTokenInfo.put("tierInfo", tierInfoDTO);
+
         if (isInternalKey) {
             return TokenUtil.getInternalKey(jwtTokenInfo, keyType, validityPeriod);
         }

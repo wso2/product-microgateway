@@ -58,7 +58,7 @@ public class APIConstants {
     public static final String TENANT_DOMAIN_SEPARATOR = "@";
 
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
-    public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
+    public static final String API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
     public static final String SWAGGER_API_KEY_AUTH_TYPE_NAME = "apiKey";

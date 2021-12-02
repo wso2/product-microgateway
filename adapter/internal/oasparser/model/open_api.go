@@ -70,6 +70,9 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.securityScheme = setSecuritySchemesOpenAPI(swagger3)
+	for _, security := range swagger3.Security {
+		swagger.security = append(swagger.security, security)
+	}
 	swagger.resources, err = setResourcesOpenAPI(swagger3)
 	if err != nil {
 		return err
@@ -77,7 +80,9 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.apiType = HTTP
 	var productionUrls []Endpoint
-	if isServerURLIsAvailable(swagger3.Servers) {
+	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// an exception is made where servers url is not processed when the API is prototyped.
+	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsProtoTyped {
 		for _, serverEntry := range swagger3.Servers {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
@@ -90,7 +95,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 				logger.LoggerOasparser.Errorf("error encountered when parsing the endpoint under openAPI servers object")
 			}
 		}
-		if productionUrls != nil && len(productionUrls) > 0 {
+		if len(productionUrls) > 0 {
 			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 		}
 	}

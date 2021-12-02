@@ -75,7 +75,7 @@ public class AuthFilter implements Filter {
             for (Map.Entry<String, SecuritySchemaConfig> securityDefinition :
                     apiConfig.getSecuritySchemeDefinitions().entrySet()) {
                 String apiSecurityLevel = securityDefinition.getValue().getType();
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH2)) {
                     isOAuthProtected = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                     isMutualSSLProtected = true;
@@ -124,6 +124,10 @@ public class AuthFilter implements Filter {
         // It is required to skip the auth Filter if the lifecycle status is prototype
         if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(
                 requestContext.getMatchedAPI().getApiLifeCycleState())) {
+            // For prototyped endpoints, only the production endpoints could be available.
+            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                    requestContext.getProdClusterHeader());
+            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
             return true;
         }
 
@@ -180,7 +184,6 @@ public class AuthFilter implements Filter {
      */
     private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
             throws APISecurityException {
-
         String keyType = authContext.getKeyType();
         if (StringUtils.isEmpty(authContext.getKeyType())) {
             keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
