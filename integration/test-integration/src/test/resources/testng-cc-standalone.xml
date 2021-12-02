@@ -42,7 +42,6 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopeTest"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.InternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.CustomAuthHeaderTestCase"/>
@@ -61,6 +60,7 @@
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabled"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
