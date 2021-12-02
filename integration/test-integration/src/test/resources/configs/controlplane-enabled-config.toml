@@ -13,6 +13,47 @@
     enableJwtClaimConditions = true
     jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
 
+[[enforcer.security.tokenService]]
+  # Provide unique name for the JWT issuer
+  name = "Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
+  certificateAlias = "wso2carbon"
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = true
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = "azp"
+  # Certificate Filepath within Enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Issuer 2
+[[enforcer.security.tokenService]]
+  # Provide unique name for the JWT issuer
+  name = "MGW"
+  issuer = "https://localhost:9095/testkey"
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
+  certificateAlias = "mgw"
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = ""
+  # Certificate Filepath within Enforcer
+  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+# Issuer 3
+[[enforcer.security.tokenService]]
+  # Provide unique name for the JWT issuer
+  name = "APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
+  certificateAlias = ""
+  # Certificate Filepath within Enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
 [controlPlane]
     enabled = true
     skipSSLVerification=true

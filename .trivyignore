@@ -1,7 +1,3 @@
-# azure monitor 1.0.0-beta5 needs to be released with upgraded netty
-CVE-2021-37136
-CVE-2021-37137
-
 # ubuntu image related issues - for multi platform images
 # not fixed versions yet for ubuntu related issues
 # Used trivy ignore unfixed issues instead to track, if one get fixed the build will get failed

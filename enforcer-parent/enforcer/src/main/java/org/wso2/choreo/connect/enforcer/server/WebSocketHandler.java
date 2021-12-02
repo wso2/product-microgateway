@@ -100,7 +100,6 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
         String username = extAuthMetadata.get(MetadataConstants.USERNAME);
         String appTier = extAuthMetadata.get(MetadataConstants.APP_TIER);
         String tier = extAuthMetadata.get(MetadataConstants.TIER);
-        String apiTier = extAuthMetadata.get(MetadataConstants.API_TIER);
         boolean isContentAwareTierPresent = Boolean.parseBoolean(extAuthMetadata
                 .get(MetadataConstants.CONTENT_AWARE_TIER_PRESENT));
         String apiKey = extAuthMetadata.get(MetadataConstants.API_KEY);
@@ -132,7 +131,6 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
         authenticationContext.setUsername(username);
         authenticationContext.setApplicationTier(appTier);
         authenticationContext.setTier(tier);
-        authenticationContext.setApiTier(apiTier);
         authenticationContext.setIsContentAware(isContentAwareTierPresent);
         authenticationContext.setApiKey(apiKey);
         authenticationContext.setKeyType(keyType);

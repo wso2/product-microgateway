@@ -34,16 +34,12 @@ import (
 // mentioned under pathItem.
 type Resource struct {
 	path                string
-	methods             []Operation
+	methods             []*Operation
 	description         string
-	consumes            []string
-	schemes             []string
-	tags                []string
 	summary             string
 	iD                  string
 	productionEndpoints *EndpointCluster
 	sandboxEndpoints    *EndpointCluster
-	security            []map[string][]string
 	vendorExtensions    map[string]interface{}
 }
 
@@ -70,7 +66,7 @@ func (resource *Resource) GetID() string {
 
 // GetMethod returns an array of http method  operations which are explicitly defined under
 // a given resource.
-func (resource *Resource) GetMethod() []Operation {
+func (resource *Resource) GetMethod() []*Operation {
 	return resource.methods
 }
 
@@ -90,30 +86,9 @@ func (resource *Resource) GetMethodList() []string {
 	return methodList
 }
 
-// CreateDummyResourceForTests create an resource object which could be used for unit tests.
-func CreateDummyResourceForTests(path string, method []Operation, description string, consumes, schemes,
-	tags []string, summary, id string, productionEndpoints, sandboxEndpoints *EndpointCluster,
-	security []map[string][]string, vendorExtensions map[string]interface{}) Resource {
-
-	return Resource{
-		path:                path,
-		methods:             method,
-		description:         description,
-		consumes:            consumes,
-		schemes:             schemes,
-		tags:                tags,
-		summary:             summary,
-		iD:                  id,
-		productionEndpoints: productionEndpoints,
-		sandboxEndpoints:    sandboxEndpoints,
-		security:            security,
-		vendorExtensions:    vendorExtensions,
-	}
-}
-
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values
 // which could be used for unit tests.
-func CreateMinimalDummyResourceForTests(path string, methods []Operation, id string, productionUrls,
+func CreateMinimalDummyResourceForTests(path string, methods []*Operation, id string, productionUrls,
 	sandboxUrls []Endpoint) Resource {
 
 	prodEndpints := generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
@@ -129,7 +104,7 @@ func CreateMinimalDummyResourceForTests(path string, methods []Operation, id str
 }
 
 // Custom sort implementation to sort the Resources based on the resource path
-type byPath []Resource
+type byPath []*Resource
 
 //Len Returns the length of the arry
 func (a byPath) Len() int { return len(a) }
@@ -186,7 +161,7 @@ func (a byPath) Less(i, j int) bool {
 func (a byPath) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 
 // SortResources Sort the list of resources provided based on the resource path.
-func SortResources(resources []Resource) []Resource {
+func SortResources(resources []*Resource) []*Resource {
 	sort.Sort(byPath(resources))
 	return resources
 }

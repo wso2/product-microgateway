@@ -259,7 +259,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
             throws ParseException {
 
         APIKeyValidationInfoDTO validationInfoDTO = new APIKeyValidationInfoDTO();
-        validationInfoDTO.setApiTier(requestContext.getMatchedAPI().getTier());
         if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
             validationInfoDTO.setType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
         } else {

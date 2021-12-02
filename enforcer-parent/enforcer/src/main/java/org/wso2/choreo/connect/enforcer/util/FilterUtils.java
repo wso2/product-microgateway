@@ -200,7 +200,6 @@ public class FilterUtils {
         }
         // Setting end user as anonymous
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-        authContext.setApiTier(getAPILevelTier(requestContext));
         authContext.setApplicationId(clientIP);
         authContext.setApplicationName(null);
         authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
@@ -228,7 +227,6 @@ public class FilterUtils {
         authContext.setUsername(jwtValidationInfo.getUser());
 
         if (apiKeyValidationInfoDTO != null) {
-            authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
@@ -320,7 +318,6 @@ public class FilterUtils {
         } else {
             authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         }
-        authContext.setApiTier(apiLevelPolicy);
         if (api != null) {
             authContext.setTier(APIConstants.UNLIMITED_TIER);
             authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
@@ -514,26 +511,6 @@ public class FilterUtils {
             return username + '@' + tenantDomain;
         }
         return username;
-    }
-
-    /**
-     * Get the API related throttling tier for auth context.
-     * If API level present, it will be returned. If not resource level
-     * would be returned. If both not present, UNLIMITED tier would be returned.
-     * @param requestContext Request context
-     * @return string format API tier.
-     */
-    public static String getAPILevelTier(RequestContext requestContext) {
-        String apiTier = requestContext.getMatchedAPI().getTier();
-        String resourceTier = requestContext.getMatchedResourcePath().getTier();
-
-        if (!apiTier.isEmpty() && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
-            return apiTier;
-        }
-        if (!resourceTier.isBlank()) {
-            return resourceTier;
-        }
-        return ThrottleConstants.UNLIMITED_TIER;
     }
 
     public static String getClientIp(Map<String, String> headers, String knownIp) {

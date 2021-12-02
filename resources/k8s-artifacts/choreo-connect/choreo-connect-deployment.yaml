@@ -30,10 +30,6 @@ spec:
       labels:
         app: choreo-connect-deployment
     spec:
-      initContainers:
-        - name: init-adapter-service
-          image: busybox:1.31
-          command: [ 'sh', '-c', 'echo -e "Checking for the availability of Adapter"; while ! nc -z adapter 18000; do sleep 1; printf "-"; done; echo -e "  >> Adapter has started";' ]
       containers:
         - name: choreo-connect-enforcer
           volumeMounts:
@@ -99,12 +95,12 @@ spec:
           livenessProbe:
             exec:
               command: [ "sh", "check_health.sh" ]
-            initialDelaySeconds: 10
+            initialDelaySeconds: 5
             periodSeconds: 30
           readinessProbe:
             exec:
               command: [ "sh", "check_health.sh" ]
-            initialDelaySeconds: 8
+            initialDelaySeconds: 5
             periodSeconds: 5
         - name: choreo-connect-router
           volumeMounts:
@@ -173,7 +169,6 @@ spec:
               httpHeaders:
                 - name: Host
                   value: gw.wso2.com
-            initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
             httpGet:
@@ -183,7 +178,6 @@ spec:
               httpHeaders:
                 - name: Host
                   value: gw.wso2.com
-            initialDelaySeconds: 20
             periodSeconds: 5
       volumes:
         - name: router-keystore-vol

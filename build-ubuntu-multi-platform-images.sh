@@ -117,6 +117,8 @@ else
   build_images "$platform" "-${platform}" "--load"
 fi
 
+docker buildx rm cc-builder
+
 # log built images
 printf "${BOLD}Built images${NC}\n"
 for img in "${BUILT_IMAGES_ARR[@]}"

@@ -84,7 +84,7 @@ func TestSetInfoSwagger(t *testing.T) {
 func TestSetResourcesSwagger(t *testing.T) {
 	type setResourcesTestItem struct {
 		input   spec.Swagger
-		result  []Resource
+		result  []*Resource
 		message string
 	}
 	dataItems := []setResourcesTestItem{
@@ -115,10 +115,10 @@ func TestSetResourcesSwagger(t *testing.T) {
 					},
 				},
 			},
-			[]Resource{
+			[]*Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []Operation{{"GET", nil, "", false}},
+					methods:     []*Operation{{"GET", nil, "", false}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",

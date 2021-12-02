@@ -44,7 +44,6 @@ import (
 	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
@@ -271,27 +270,32 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		apiEnvProps = apiEnvPropsV
 	}
 
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
+	if err != nil {
+		return nil, err
+	}
+
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
-		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn)
+		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
 			return nil, err
 		}
+		// the following will be used for APIM specific security config.
+		// it will enable folowing securities globally for the API, overriding swagger securities.
+		isYamlAPIKey := false
+		isYamlOauth := false
 		for _, value := range apiYaml.SecurityScheme {
-			if value == model.APIKeyInAppLevelSecurity {
-				schemes := append(mgwSwagger.GetSecurityScheme(), model.SecurityScheme{DefinitionName: model.APIKeyInAppLevelSecurity,
-					Type: value, Name: model.APIKeyNameWithApim})
-				security := append(mgwSwagger.GetSecurity(), map[string][]string{"api_key": {}})
-				mgwSwagger.SetSecurityScheme(schemes)
-				mgwSwagger.SetSecurity(security)
+			if value == model.APIMAPIKeyType {
+				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlAPIKey = true
+			} else if value == model.APIMOauth2Type {
+				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlOauth = true
 			}
 		}
+		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
-	} else if apiProject.APIType == mgw.WS {
-		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
@@ -522,8 +526,15 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 				return err
 			}
 			deletedVhosts[vh] = void
+
+			for val := range deletedVhosts {
+				existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
+				if val == vh && len(existingLabels) == 0 {
+					logger.LoggerXds.Infof("Vhost : %v  deleted since there is no gateways assigned to it.", vh)
+					delete(apiToVhostsMap[apiNameVersionHashedID], val)
+				}
+			}
 		}
-		delete(apiToVhostsMap, apiNameVersionHashedID)
 		return nil
 	}
 
@@ -642,15 +653,30 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 	toBeDelEnvs, toBeKeptEnvs := getEnvironmentsToBeDeleted(existingLabels, environments)
 
-	if len(existingLabels) != len(toBeDelEnvs) {
-		// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
-		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = toBeKeptEnvs
-		updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
-		logger.LoggerXds.Infof("Deleted API %v of Organization %v", apiIdentifier, organizationID)
-		return nil
+	for _, val := range toBeDelEnvs {
+		isAllowedToDelete := arrayContains(existingLabels, val)
+		if isAllowedToDelete {
+			// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
+			orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = toBeKeptEnvs
+			updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
+			existingLabels = orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
+			if len(existingLabels) != 0 {
+				return nil
+			}
+			logger.LoggerXds.Infof("API identifier: %v does not have any gateways. Hence deleting the API.", apiIdentifier)
+			cleanMapResources(apiIdentifier, organizationID, toBeDelEnvs)
+			return nil
+		}
 	}
 
 	//clean maps of routes, clusters, endpoints, enforcerAPIs
+	if len(environments) == 0 {
+		cleanMapResources(apiIdentifier, organizationID, toBeDelEnvs)
+	}
+	return nil
+}
+
+func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs []string) {
 	delete(orgIDOpenAPIRoutesMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIClustersMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)
@@ -665,7 +691,6 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	delete(orgIDAPIMgwSwaggerMap[organizationID], apiIdentifier) //delete mgwSwagger
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API %v of organization %v", apiIdentifier, organizationID)
-	return nil
 }
 
 func arrayContains(a []string, x string) bool {

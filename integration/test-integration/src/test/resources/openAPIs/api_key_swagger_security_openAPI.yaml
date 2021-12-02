@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
   description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
-  version: 1.0.5
-  title: Swagger Petstore  for API key as query parameter
+  version: 1.0.0
+  title: APIKey Test API
   termsOfService: 'http://swagger.io/terms/'
   contact:
     email: apiteam@swagger.io
@@ -11,6 +11,9 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 host: 'mockBackend:2383'
 basePath: /v2
+x-wso2-basePath: /apiKey/1.0.0
+security:
+  - APIKeyAuthHeader: []
 tags:
   - name: pet
     description: Everything about your Pets
@@ -55,11 +58,74 @@ paths:
           description: Pet not found
       security:
         - APIKeyAuth: []
+  '/pet/findByTags':
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by tags
+      description: 'Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.'
+      operationId: findPetByTags
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: tags
+          in: query
+          description: Tags to filter by
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+        '400':
+          description: Invalid tag value
+  '/pets/findByTags':
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by tags
+      description: 'Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.'
+      operationId: findPetsByTags
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: tags
+          in: query
+          description: Tags to filter by
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+        '400':
+          description: Invalid tag value
+      security:
+        - petstore_auth:
+            - write:pets
 securityDefinitions:
   APIKeyAuth:
     type: apiKey
     name: x-api-key
     in: query
+  APIKeyAuthHeader:
+    type: apiKey
+    name: x-api-key-header
+    in: header
   petstore_auth:
     type: oauth2
     authorizationUrl: 'http://mockBackend:2380/oauth/authorize'
