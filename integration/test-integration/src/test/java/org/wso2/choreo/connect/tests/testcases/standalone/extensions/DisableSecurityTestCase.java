@@ -66,4 +66,17 @@ public class DisableSecurityTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.STORE_INVENTORY_RESPONSE, "Response Body Mismatch.");
     }
+
+    @Test(description = "Test to check check disable security extension, x-auth-type is working in operation level")
+    public void invokeAPIWithDisabledSecurityInOperationLevelUsingXAuthTypeExtension() throws Exception {
+
+        // Set header
+        Map<String, String> headers = new HashMap<>();
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/disable_security/pet/findByTags") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE, "Response Body Mismatch.");
+    }
 }

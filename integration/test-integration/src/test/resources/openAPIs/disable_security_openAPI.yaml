@@ -50,12 +50,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
   /store/inventory:
     get:
       summary: Finds Pets by inventory
       operationId: findPetsByInventory
       x-wso2-disable-security: true
+      tags:
+        - pets
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /pet/findByTags:
+    get:
+      summary: Finds Pets by inventory
+      operationId: findPetsByInventory
+      x-auth-type: None
       tags:
         - pets
       responses:

@@ -88,7 +88,8 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			// below code segment will override above two variable values (disableSecurity & found)
 			disableResourceLevelSecurity, foundInResourceLevel := pathItem.Extensions.GetBool(xWso2DisableSecurity)
 			if foundInResourceLevel {
-				logger.LoggerOasparser.Debugf("x-wso2-disable-security extension is available in the resource %v.", path)
+				logger.LoggerOasparser.Infof("x-wso2-disable-security extension is available in the API: %v %v's resource %v.", 
+					swagger2.Info.Title, swagger2.Info.Version, path)
 				disableSecurity = disableResourceLevelSecurity
 				found = true
 			}
