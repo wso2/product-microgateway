@@ -178,6 +178,11 @@
             <destName>LICENSE-ENFORCER.txt</destName>
         </file>
         <file>
+            <source>../router/LICENSE.txt</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+            <destName>LICENSE-ROUTER.txt</destName>
+        </file>
+        <file>
             <source>../README.md</source>
             <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
         </file>
