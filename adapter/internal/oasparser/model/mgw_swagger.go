@@ -972,7 +972,7 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 		if val, ok := z.(bool); ok {
 			disableSecurity = val
 		}
-	} 
+	}
 	if vExtAuthType && !disableSecurity {
 		// If APIs are published through APIM, all resource levels contains x-auth-type
 		// vendor extension.
@@ -1207,6 +1207,5 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			}
 		}
 	}
-
 	return nil
 }

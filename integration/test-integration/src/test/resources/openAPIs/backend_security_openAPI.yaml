@@ -1,0 +1,55 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Backend Security
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: http://mockBackend:2383/v3
+x-wso2-basePath: /backend-security
+x-wso2-production-endpoints:
+  urls:
+    - http://mockBackend:2383/v2
+  securityConfig:
+    type: basic
+    username: admin
+    password: admin
+  advanceEndpointConfig:
+    circuitBreakers:
+      maxConnections: 5
+      maxRequests: 3
+x-wso2-sandbox-endpoints:
+  urls:
+    - http://mockBackend:2390/v2
+  securityConfig:
+    type: basic
+    username: guest
+    password: password
+paths:
+  /echo:
+    get:
+      summary: Echo request
+      operationId: echo
+      responses:
+        '200':
+          description: Expected response to a valid request
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

@@ -52,28 +52,31 @@ public class BackendSecurityTestCase extends ApimBaseTest {
     public static final String APP_NAME = "backendSecurityApp";
     private static final String API_VERSION = "1.0.0";
 
+    private String prodAccessToken;
+    private String sandAccessToken;
+
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
         super.initWithSuperTenant();
-    }
-
-    @Test
-    public void testBasicAuthSecuredBackend() throws CCTestException, MalformedURLException {
-
         JSONObject prodEndpoints = new JSONObject();
         prodEndpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
-        JSONObject productionSecurity = new JSONObject();
-        productionSecurity.put("type", "BASIC");
-        productionSecurity.put("username", "admin");
-        productionSecurity.put("password", "admin");
-        productionSecurity.put("enabled", true);
+        JSONObject sandEndpoints = new JSONObject();
+        sandEndpoints.put("url", new URL(Utils.getDockerMockService2URLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
+
+        JSONObject epsecurity = new JSONObject();
+        epsecurity.put("type", "BASIC");
+        epsecurity.put("username", "admin");
+        epsecurity.put("password", "admin");
+        epsecurity.put("enabled", true);
 
         JSONObject epSecurity = new JSONObject();
-        epSecurity.put("production", productionSecurity);
+        epSecurity.put("production", epsecurity);
+        epSecurity.put("sandbox", epsecurity);
 
         JSONObject endpointConfig = new JSONObject();
         endpointConfig.put("endpoint_type", "http");
         endpointConfig.put("production_endpoints", prodEndpoints);
+        endpointConfig.put("sandbox_endpoints", sandEndpoints);
         endpointConfig.put("endpoint_security", epSecurity);
 
         APIOperationsDTO apiOperation = new APIOperationsDTO();
@@ -103,16 +106,19 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         applicationId = appWithConsumerKey.getApplicationId();
 
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
+        prodAccessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
                 new String[]{}, user, storeRestClient);
+        sandAccessToken = StoreUtils.generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId, user,
+                storeRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME * 2, "Interrupted when waiting for the " +
                 "subscription to be deployed");
+    }
 
-        //test 1 - jwt secured resource
-        //Invoke API
+    @Test(description = "oauth2 secured resource backend basic auth")
+    public void testBasicAuthBackendForSecuredResource() throws CCTestException, MalformedURLException {
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + prodAccessToken);
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo");
         HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint);
@@ -122,14 +128,30 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         Assert.assertTrue(respHeaders.containsKey("authorization"), "Backend did not receive auth header");
         Assert.assertEquals(respHeaders.get("authorization"), "Basic YWRtaW46YWRtaW4=",
                 "backend basic auth header is incorrect");
+    }
 
-        //test 2 - invoke non secured resource
-        endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo2");
-        response = HttpsClientRequest.doGet(endpoint);
+    @Test(description = "oauth2 secured resource backend basic auth")
+    public void testBasicAuthBackendForSecuredResourceFromEnv() throws CCTestException, MalformedURLException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + sandAccessToken);
+        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo");
+        HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint);
 
         // test headers
-        respHeaders = response.getHeaders();
+        Map<String, String> respHeaders = response.getHeaders();
+        Assert.assertTrue(respHeaders.containsKey("authorization"), "Backend did not receive auth header");
+        Assert.assertEquals(respHeaders.get("authorization"), "Basic am9objpsb2Nr",
+                "backend basic auth header is incorrect " + sandAccessToken);
+    }
+
+    @Test(description = "test non secured resource with backend basic auth")
+    public void testBasicAuthBackendForNonSecuredResource() throws CCTestException, MalformedURLException {
+        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo2");
+        HttpResponse response = HttpsClientRequest.doGet(endpoint);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint);
+
+        Map<String, String> respHeaders = response.getHeaders();
         Assert.assertTrue(respHeaders.containsKey("authorization"), "Backend did not receive auth header");
         Assert.assertEquals(respHeaders.get("authorization"), "Basic YWRtaW46YWRtaW4=",
                 "backend basic auth header is incorrect");

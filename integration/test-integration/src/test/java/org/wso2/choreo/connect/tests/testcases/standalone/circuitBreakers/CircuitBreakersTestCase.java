@@ -37,8 +37,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 public class CircuitBreakersTestCase {
-    protected String jwtTokenProd;
-    protected String jwtTokenSand;
+    private String jwtTokenProd;
+    private String jwtTokenSand;
 
     @BeforeClass(description = "Get Prod and Sandbox tokens")
     void start() throws Exception {

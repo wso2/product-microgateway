@@ -34,16 +34,10 @@ func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 		if productionEndpointURL == "" {
 			break
 		}
-		productionEndpointURLFormatted, err := strconv.Unquote(productionEndpointURL)
-		if err != nil {
-			loggers.LoggerAPI.Debugf("Unquoting string %v in env variables has failed. %v", productionEndpointURL, err.Error())
-			// unquoting has failed usually means it was unquoted and in correct format originally
-			productionEndpointURLFormatted = productionEndpointURL
-		}
 
-		productionEndpoint, err := getHostandBasepathandPort(productionEndpointURLFormatted)
+		productionEndpoint, err := getHostandBasepathandPort(productionEndpointURL)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURLFormatted, err.Error())
+			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURL, err.Error())
 		} else if productionEndpoint != nil {
 			productionEndpoints = append(productionEndpoints, *productionEndpoint)
 		}
@@ -57,16 +51,10 @@ func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 		if sandboxEndpointURL == "" {
 			break
 		}
-		sandboxEndpointURLFormatted, err := strconv.Unquote(sandboxEndpointURL)
-		if err != nil {
-			loggers.LoggerAPI.Debugf("Unquoting the string %v in env variables has failed. %v", sandboxEndpointURL, err.Error())
-			// unquoting has failed usually means it was unquoted and in correct format originally
-			sandboxEndpointURLFormatted = sandboxEndpointURL
-		}
 
-		sandboxEndpoint, err := getHostandBasepathandPort(sandboxEndpointURLFormatted)
+		sandboxEndpoint, err := getHostandBasepathandPort(sandboxEndpointURL)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading sandbox endpoint : %v in env variables, %v", sandboxEndpointURLFormatted, err.Error())
+			loggers.LoggerAPI.Errorf("error while reading sandbox endpoint : %v in env variables, %v", sandboxEndpointURL, err.Error())
 		} else if sandboxEndpoint != nil {
 			sandboxEndpoints = append(sandboxEndpoints, *sandboxEndpoint)
 		}
@@ -90,7 +78,13 @@ func resolveEnvValueForEndpointConfig(envKey string, defaultVal string) string {
 	envValue, exists := os.LookupEnv(envKey)
 	if exists {
 		loggers.LoggerAPI.Debugf("resolve env value %v", envValue)
-		return envValue
+		envUnquoted, err := strconv.Unquote(envValue)
+		if err != nil {
+			loggers.LoggerAPI.Debugf("Unquoting string %v in env variables has failed. %v", envValue, err.Error())
+			// unquoting has failed usually means it was unquoted and in correct format originally
+			return envValue
+		}
+		return envUnquoted
 	}
 	return defaultVal
 }
