@@ -445,18 +445,16 @@ func (swagger *MgwSwagger) SetEnvVariables(apiHashValue string) {
 	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
 	if len(productionEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Applying production endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
-		endpointsClusterFromEnv := generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
-		if endpointsClusterFromEnv != nil {
-			swagger.productionEndpoints = endpointsClusterFromEnv
-		}
+		swagger.productionEndpoints.EndpointPrefix = prodClustersConfigNamePrefix
+		swagger.productionEndpoints.Endpoints = productionEndpoints
+		swagger.productionEndpoints.EndpointType = LoadBalance
+
 	}
 	if len(sandboxEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Applying sandbox endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
-		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxEndpoints, LoadBalance)
-		endpointsClusterFromEnv := generateEndpointCluster(sandClustersConfigNamePrefix, sandboxEndpoints, LoadBalance)
-		if endpointsClusterFromEnv != nil {
-			swagger.sandboxEndpoints = endpointsClusterFromEnv
-		}
+		swagger.sandboxEndpoints.EndpointPrefix = sandClustersConfigNamePrefix
+		swagger.sandboxEndpoints.Endpoints = sandboxEndpoints
+		swagger.sandboxEndpoints.EndpointType = LoadBalance
 	}
 
 	// retrieving security credentials from environment variables

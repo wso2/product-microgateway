@@ -295,8 +295,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-
-	} else {
+	} else if apiProject.APIType != mgw.WS {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
