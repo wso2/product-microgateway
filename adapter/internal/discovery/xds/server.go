@@ -307,17 +307,22 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	mgwSwagger.OrganizationID = apiProject.OrganizationID
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
-	mgwSwagger.SetEnvVariables(apiHashValue)
 
 	if mgwSwagger.GetProdEndpoints() != nil {
 		mgwSwagger.GetProdEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.ProductionEndpoints)
+		if !mgwSwagger.GetProdEndpoints().SecurityConfig.Enabled && apiYaml.EndpointConfig.APIEndpointSecurity.Production.Enabled {
+			mgwSwagger.GetProdEndpoints().SecurityConfig = apiYaml.EndpointConfig.APIEndpointSecurity.Production
+		}
 	}
 
 	if mgwSwagger.GetSandEndpoints() != nil {
 		mgwSwagger.GetSandEndpoints().SetEndpointsConfig(apiYaml.EndpointConfig.SandBoxEndpoints)
+		if !mgwSwagger.GetSandEndpoints().SecurityConfig.Enabled && apiYaml.EndpointConfig.APIEndpointSecurity.Sandbox.Enabled {
+			mgwSwagger.GetSandEndpoints().SecurityConfig = apiYaml.EndpointConfig.APIEndpointSecurity.Sandbox
+		}
 	}
 
-	endpointSecurity := getEndpointSecurity(apiHashValue, apiYaml.EndpointConfig.APIEndpointSecurity)
+	mgwSwagger.SetEnvVariables(apiHashValue)
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
@@ -417,12 +422,12 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 
 	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
-		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
-			endpointSecurity, vHost)
+		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger,
+			apiProject.APILifeCycleStatus, vHost)
 	} else {
 		enforcerAPIMap := make(map[string]types.Resource)
 		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
-			endpointSecurity, vHost)
+			vHost)
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 
@@ -437,32 +442,6 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		startConsulServiceDiscovery(organizationID) //consul service discovery starting point
 	}
 	return deployedRevision, nil
-}
-
-func getEndpointSecurity(apiHashValue string, epSecurityFromYaml mgw.APIEndpointSecurity) mgw.APIEndpointSecurity {
-	if epSecurityFromYaml.Production.Enabled {
-		if epSecurityFromYaml.Production.Type != "" &&
-			strings.EqualFold("BASIC", epSecurityFromYaml.Production.Type) {
-			epSecurityFromYaml.Production = mgw.RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "prod",
-				epSecurityFromYaml.Production)
-		} else {
-			logger.LoggerXds.Errorf("endpoint security type : %v is not currently supported with WSO2 Choreo Connect",
-				epSecurityFromYaml.Production.Type)
-			epSecurityFromYaml.Production = mgw.EndpointSecurity{}
-		}
-	}
-	if epSecurityFromYaml.Sandbox.Enabled {
-		if epSecurityFromYaml.Sandbox.Type != "" &&
-			strings.EqualFold("BASIC", epSecurityFromYaml.Sandbox.Type) {
-			epSecurityFromYaml.Sandbox = mgw.RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "sand",
-				epSecurityFromYaml.Sandbox)
-		} else {
-			logger.LoggerXds.Errorf("endpoint security type : %v is not currently supported with WSO2 Choreo Connect",
-				epSecurityFromYaml.Sandbox.Type)
-			epSecurityFromYaml.Sandbox = mgw.EndpointSecurity{}
-		}
-	}
-	return epSecurityFromYaml
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments

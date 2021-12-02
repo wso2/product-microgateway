@@ -24,6 +24,7 @@ const (
 	LoadBalance           string = "loadbalance"
 	FailOver              string = "failover"
 	AdvanceEndpointConfig string = "advanceEndpointConfig"
+	SecurityConfig        string = "securityConfig"
 )
 
 // Constants for OpenAPI vendor extension keys

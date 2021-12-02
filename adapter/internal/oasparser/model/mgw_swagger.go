@@ -69,8 +69,9 @@ type EndpointCluster struct {
 	EndpointPrefix string
 	Endpoints      []Endpoint
 	// EndpointType enum {failover, loadbalance}. if any other value provided, consider as the default value; which is loadbalance
-	EndpointType string
-	Config       *EndpointConfig
+	EndpointType   string
+	Config         *EndpointConfig
+	SecurityConfig EndpointSecurity
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -444,11 +445,28 @@ func (swagger *MgwSwagger) SetEnvVariables(apiHashValue string) {
 	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
 	if len(productionEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Applying production endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
-		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
+		endpointsClusterFromEnv := generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
+		if endpointsClusterFromEnv != nil {
+			swagger.productionEndpoints = endpointsClusterFromEnv
+		}
 	}
 	if len(sandboxEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Applying sandbox endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
 		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxEndpoints, LoadBalance)
+		endpointsClusterFromEnv := generateEndpointCluster(sandClustersConfigNamePrefix, sandboxEndpoints, LoadBalance)
+		if endpointsClusterFromEnv != nil {
+			swagger.sandboxEndpoints = endpointsClusterFromEnv
+		}
+	}
+
+	// retrieving security credentials from environment variables
+	if swagger.productionEndpoints != nil && swagger.productionEndpoints.SecurityConfig.Enabled {
+		swagger.productionEndpoints.SecurityConfig = RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue,
+			"prod", swagger.productionEndpoints.SecurityConfig)
+	}
+	if swagger.sandboxEndpoints != nil && swagger.sandboxEndpoints.SecurityConfig.Enabled {
+		swagger.sandboxEndpoints.SecurityConfig = RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "sand",
+			swagger.sandboxEndpoints.SecurityConfig)
 	}
 }
 
@@ -785,6 +803,23 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 					endpointCluster.Config = &endpointConfig
 				} else {
 					return nil, errors.New("Invalid structure for advanceEndpointConfig in " + endpointName)
+				}
+			}
+			// Set Endpoint Config
+			if securityConfig, found := endpointClusterMap[SecurityConfig]; found {
+				if configMap, ok := securityConfig.(map[string]interface{}); ok {
+					var epSecurity EndpointSecurity
+					err := parser.Decode(configMap, &epSecurity)
+					if err != nil {
+						return nil, errors.New("Invalid schema for securityConfig in API " + swagger.title +
+							" : " + swagger.version + "for " + endpointName)
+					}
+					if !strings.EqualFold("BASIC", epSecurity.Type) {
+						return nil, errors.New("endpoint security type : " + epSecurity.Type +
+							" is not currently supported with WSO2 Choreo Connect")
+					}
+					epSecurity.Enabled = true
+					endpointCluster.SecurityConfig = epSecurity
 				}
 			}
 			return &endpointCluster, nil
@@ -1152,6 +1187,28 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			}
 		}
 		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
+
+		// if yaml has production security, setting it
+		if swagger.productionEndpoints != nil && endpointConfig.APIEndpointSecurity.Production.Enabled {
+			if endpointConfig.APIEndpointSecurity.Production.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Production.Type) {
+				swagger.productionEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Production
+			} else {
+				endpointConfig.APIEndpointSecurity.Production.Enabled = false
+				logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
+					endpointConfig.APIEndpointSecurity.Production.Type)
+			}
+		}
+		// if yaml has sandbox security, setting it
+		if swagger.sandboxEndpoints != nil && endpointConfig.APIEndpointSecurity.Sandbox.Enabled {
+			if endpointConfig.APIEndpointSecurity.Sandbox.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Sandbox.Type) {
+				swagger.sandboxEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Sandbox
+			} else {
+				endpointConfig.APIEndpointSecurity.Sandbox.Enabled = false
+				logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
+					endpointConfig.APIEndpointSecurity.Sandbox.Type)
+			}
+		}
 	}
+
 	return nil
 }
