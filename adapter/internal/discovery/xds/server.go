@@ -44,7 +44,6 @@ import (
 	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
@@ -271,8 +270,13 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		apiEnvProps = apiEnvPropsV
 	}
 
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
+	if err != nil {
+		return nil, err
+	}
+
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
-		mgwSwagger, err = operator.GetMgwSwagger(apiProject.OpenAPIJsn)
+		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
 			return nil, err
 		}
@@ -287,11 +291,6 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		}
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
-	} else if apiProject.APIType == mgw.WS {
-		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiProject.APIYaml)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")

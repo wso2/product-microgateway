@@ -148,6 +148,7 @@ type APIYaml struct {
 			RawSandboxEndpoints          interface{}    `json:"sandbox_endpoints,omitempty"`
 			SandBoxEndpoints             []EndpointInfo
 			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
+			ImplementationStatus         string         `json:"implementation_status,omitempty"`
 		} `json:"endpointConfig,omitempty"`
 	} `json:"data"`
 }

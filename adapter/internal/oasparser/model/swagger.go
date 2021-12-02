@@ -50,7 +50,9 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
 	// If the schemes property is not mentioned at all, http will be assigned. (Only swagger 2 version has this property)
-	if swagger2.Host != "" {
+	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// an exception is made where host property is not processed when the API is prototyped.
+	if swagger2.Host != "" && !swagger.IsProtoTyped {
 		urlScheme := ""
 		for _, scheme := range swagger2.Schemes {
 			//TODO: (VirajSalaka) Introduce Constants
@@ -248,72 +250,4 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 		vendorExtensions: pathItem.VendorExtensible.Extensions,
 	}
 	return resource
-}
-
-//SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
-// TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIYaml) error {
-
-	data := apiData.Data
-	// UUID in the generated api.yaml file is considerd as swagger.id
-	swagger.id = data.ID
-	// Set apiType as WS for websockets
-	swagger.apiType = "WS"
-	// name and version in api.yaml corresponds to title and version respectively.
-	swagger.title = data.Name
-	swagger.version = data.Version
-	// context value in api.yaml is assigned as xWso2Basepath
-	swagger.xWso2Basepath = data.Context + "/" + swagger.version
-
-	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
-	endpointConfig := data.EndpointConfig
-	if len(endpointConfig.SandBoxEndpoints) > 0 {
-		var endpoints []Endpoint
-		endpointType := LoadBalance
-		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
-			sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-			if err == nil {
-				endpoints = append(endpoints, *sandBoxEndpoint)
-			} else {
-				return err
-			}
-		}
-		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
-			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
-				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-				if err == nil {
-					endpointType = FailOver
-					endpoints = append(endpoints, *failoverEndpoint)
-				} else {
-					return err
-				}
-			}
-		}
-		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
-	}
-	if len(endpointConfig.ProductionEndpoints) > 0 {
-		var endpoints []Endpoint
-		endpointType := LoadBalance
-		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
-			prodEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-			if err == nil {
-				endpoints = append(endpoints, *prodEndpoint)
-			} else {
-				return err
-			}
-		}
-		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
-			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
-				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-				if err == nil {
-					endpointType = FailOver
-					endpoints = append(endpoints, *failoverEndpoint)
-				} else {
-					return err
-				}
-			}
-		}
-		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
-	}
-	return nil
 }

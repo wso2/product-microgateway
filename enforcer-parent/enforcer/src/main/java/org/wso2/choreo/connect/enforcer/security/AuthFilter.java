@@ -125,6 +125,10 @@ public class AuthFilter implements Filter {
         // It is required to skip the auth Filter if the lifecycle status is prototype
         if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(
                 requestContext.getMatchedAPI().getApiLifeCycleState())) {
+            // For prototyped endpoints, only the production endpoints could be available.
+            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                    requestContext.getProdClusterHeader());
+            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
             return true;
         }
 
@@ -181,7 +185,6 @@ public class AuthFilter implements Filter {
      */
     private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
             throws APISecurityException {
-
         String keyType = authContext.getKeyType();
         if (StringUtils.isEmpty(authContext.getKeyType())) {
             keyType = APIConstants.API_KEY_TYPE_PRODUCTION;

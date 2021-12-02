@@ -17,6 +17,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -25,10 +26,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-openapi/spec"
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
@@ -57,6 +61,7 @@ type MgwSwagger struct {
 	xWso2AuthHeader     string
 	disableSecurity     bool
 	OrganizationID      string
+	IsProtoTyped        bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -142,6 +147,8 @@ type InterceptEndpoint struct {
 	//"invocation_context" }
 	Includes *interceptor.RequestInclusions
 }
+
+const prototypedAPI = "prototyped"
 
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
@@ -941,4 +948,122 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 		return InterceptEndpoint{}, errors.New("error parsing response interceptors values to mgwSwagger")
 	}
 	return InterceptEndpoint{}, nil
+}
+
+// GetMgwSwagger converts the openAPI v3 and v2 content
+// To MgwSwagger objects
+func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
+
+	apiJsn, err := utills.ToJSON(apiContent)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error converting api file to json", err)
+		return err
+	}
+	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+
+	if swaggerVersion == "2" {
+		// map json to struct
+		var apiData2 spec.Swagger
+		err = json.Unmarshal(apiJsn, &apiData2)
+		if err != nil {
+			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
+		} else {
+			infoSwaggerErr := swagger.SetInfoSwagger(apiData2)
+			if infoSwaggerErr != nil {
+				return infoSwaggerErr
+			}
+		}
+
+	} else if swaggerVersion == "3" {
+		// map json to struct
+		var apiData3 openapi3.Swagger
+
+		err = json.Unmarshal(apiJsn, &apiData3)
+		if err != nil {
+			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
+		} else {
+			infoOpenAPIErr := swagger.SetInfoOpenAPI(apiData3)
+			if infoOpenAPIErr != nil {
+				return infoOpenAPIErr
+			}
+		}
+	}
+	err = swagger.SetXWso2Extensions()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error occurred while setting x-wso2 extensions for ",
+			swagger.GetTitle(), " ", err)
+		return err
+	}
+	return nil
+}
+
+//PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
+// TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
+func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType string) error {
+
+	data := apiData.Data
+	// UUID in the generated api.yaml file is considerd as swagger.id
+	swagger.id = data.ID
+	swagger.apiType = apiType
+	// name and version in api.yaml corresponds to title and version respectively.
+	swagger.title = data.Name
+	swagger.version = data.Version
+	// context value in api.yaml is assigned as xWso2Basepath
+	swagger.xWso2Basepath = data.Context + "/" + swagger.version
+
+	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
+	endpointConfig := data.EndpointConfig
+
+	if endpointConfig.ImplementationStatus == prototypedAPI {
+		swagger.IsProtoTyped = true
+	}
+	if len(endpointConfig.SandBoxEndpoints) > 0 {
+		var endpoints []Endpoint
+		endpointType := LoadBalance
+		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
+			sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+			if err == nil {
+				endpoints = append(endpoints, *sandBoxEndpoint)
+			} else {
+				return err
+			}
+		}
+		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
+			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
+				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+				if err == nil {
+					endpointType = FailOver
+					endpoints = append(endpoints, *failoverEndpoint)
+				} else {
+					return err
+				}
+			}
+		}
+		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
+	}
+	if len(endpointConfig.ProductionEndpoints) > 0 {
+		var endpoints []Endpoint
+		endpointType := LoadBalance
+		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
+			prodEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+			if err == nil {
+				endpoints = append(endpoints, *prodEndpoint)
+			} else {
+				return err
+			}
+		}
+		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
+			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
+				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+				if err == nil {
+					endpointType = FailOver
+					endpoints = append(endpoints, *failoverEndpoint)
+				} else {
+					return err
+				}
+			}
+		}
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
+	}
+	return nil
 }
