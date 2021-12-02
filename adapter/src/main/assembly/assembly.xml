@@ -33,7 +33,11 @@
     </fileSets>
     <files>
         <file>
-            <source>target/adapter-ubuntu</source>
+            <source>target/adapter-linux-amd64</source>
+            <outputDirectory/>
+        </file>
+        <file>
+            <source>target/adapter-linux-arm64</source>
             <outputDirectory/>
         </file>
         <file>

@@ -15,9 +15,9 @@
 # -----------------------------------------------------------------------
 
 FROM adoptopenjdk/openjdk11:jre-11.0.13_8-ubuntu
-RUN apt-get update && apt-get upgrade
+LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+RUN apt-get update && apt-get upgrade -y
 
 ENV LANG=C.UTF-8
 
