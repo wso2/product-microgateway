@@ -16,12 +16,13 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testcases.withapim;
+package org.wso2.choreo.connect.tests.testcases.withapim.apikey;
 
 import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
@@ -29,6 +30,7 @@ import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
@@ -227,5 +229,12 @@ public class APIKeyTestCase extends ApimBaseTest {
         Assert.assertEquals(response.getResponseCode(),
                 com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
                 "Response code mismatched");
+    }
+
+    @AfterClass
+    public void clean() throws Exception {
+        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
+        storeRestClient.removeApplicationById(applicationId);
+        publisherRestClient.deleteAPI(apiId);
     }
 }
