@@ -495,7 +495,8 @@ func MarshalAPIMetataAndReturnList(apiList *types.APIList, initialAPIUUIDListMap
 	}
 	resourceMapForLabel := APIListMap[gatewayLabel]
 	for _, api := range apiList.List {
-		// initialAPIUUIDListMap is null if the adapter is not running with global adapter
+		// initialAPIUUIDListMap is not null if the adapter is running with global adapter enabled, and it is
+		// the first method invocation.
 		if initialAPIUUIDListMap != nil {
 			if _, ok := initialAPIUUIDListMap[api.UUID]; !ok {
 				continue

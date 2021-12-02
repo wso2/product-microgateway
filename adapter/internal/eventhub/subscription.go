@@ -183,7 +183,8 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 			}
 		}
 	}
-	go retrieveAPIListFromChannel(APIListChannel, initialAPIUUIDListMap)
+	// InitialAPIUUIDList is already processed (if available). Then onwards, that list is not required.
+	go retrieveAPIListFromChannel(APIListChannel, nil)
 }
 
 // InvokeService invokes the internal data resource
