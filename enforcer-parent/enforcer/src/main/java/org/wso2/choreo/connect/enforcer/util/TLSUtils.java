@@ -101,11 +101,11 @@ public class TLSUtils {
                 return fileName != null && (fileName.toString().endsWith(crtExtension) ||
                         fileName.toString().endsWith(pemExtension));
             }).forEach(path -> {
-                updateTruststoreWithMutlipleCertPem(trustStore, path.toAbsolutePath().toString());
+                updateTruststoreWithMultipleCertPem(trustStore, path.toAbsolutePath().toString());
             });
         } else {
             log.debug("Provided Path is a regular File Path : " + filePath);
-            updateTruststoreWithMutlipleCertPem(trustStore, filePath);
+            updateTruststoreWithMultipleCertPem(trustStore, filePath);
         }
     }
 
@@ -142,7 +142,7 @@ public class TLSUtils {
         return certList;
     }
 
-    private static void updateTruststoreWithMutlipleCertPem (KeyStore trustStore, String filePath) {
+    private static void updateTruststoreWithMultipleCertPem (KeyStore trustStore, String filePath) {
         try {
             List<Certificate> certificateList = getCertsFromFile(filePath, false);
             certificateList.forEach(certificate -> {

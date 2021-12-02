@@ -132,7 +132,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 					"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						vendorExtensions: nil,
 					},
@@ -152,7 +152,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 					},
 					EndpointType: "loadbalance",
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						productionEndpoints: nil,
 					},
@@ -164,7 +164,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 					"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 							"type": "loadbalance", "urls": []interface{}{"https://resource.endpoint:80/base"}}},
@@ -185,7 +185,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 					},
 					EndpointType: "loadbalance",
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						productionEndpoints: &EndpointCluster{
 							EndpointPrefix: "clusterProd",
@@ -218,7 +218,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 						"AccessControlAllowOrigins":     []interface{}{"http://test123.com", "http://test456.com"},
 					},
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 							"type": "loadbalance", "urls": []interface{}{"https://resource.endpoint:80/base"}},
@@ -240,7 +240,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 					},
 					EndpointType: "loadbalance",
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						productionEndpoints: &EndpointCluster{
 							EndpointPrefix: "clusterProd",

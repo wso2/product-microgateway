@@ -59,8 +59,6 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BackendSecurityTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyQueryParamTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyAppLevelTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RetryAndTimeoutTestCase"/>
        </classes>
    </test>
@@ -86,7 +84,7 @@
     <test name="cc-specific-tests-with-apim" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutorTwo"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyHeaderTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.InternalKeyHeaderTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrototypedAPITestCase"/>
         </classes>
     </test>

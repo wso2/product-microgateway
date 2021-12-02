@@ -61,7 +61,6 @@ public class APIConstants {
     public static final String API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
-    public static final String API_SECURITY_API_KEY = "api_key";
     public static final String SWAGGER_API_KEY_AUTH_TYPE_NAME = "apiKey";
     public static final String SWAGGER_API_KEY_IN_HEADER = "header";
     public static final String SWAGGER_API_KEY_IN_QUERY = "query";

@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.tests.testcases.withapim;
 
 import org.apache.http.HttpStatus;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -57,11 +58,17 @@ public class APIKeyTestCase extends ApimBaseTest {
         String targetDir = Utils.getTargetDirPath();
         String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "api_key_openAPI.yaml";
 
+        // enable apikey in apim
+        JSONArray securityScheme = new JSONArray();
+        securityScheme.put("oauth_basic_auth_api_key_mandatory");
+        securityScheme.put("api_key");
+
         JSONObject apiProperties = new JSONObject();
         apiProperties.put("name", SAMPLE_API_NAME);
         apiProperties.put("context", "/" + SAMPLE_API_CONTEXT);
         apiProperties.put("version", SAMPLE_API_VERSION);
         apiProperties.put("provider", user.getUserName());
+        apiProperties.put("securityScheme", securityScheme);
         apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
 
         publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
@@ -97,7 +104,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     @Test(description = "Test to detect wrong API keys")
     public void invokeWithTamperedAPIKey() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", tamperedAPIKey);
+        headers.put("apikey", tamperedAPIKey);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
@@ -110,8 +117,21 @@ public class APIKeyTestCase extends ApimBaseTest {
     @Test(description = "Test to check the API Key in header is working", dependsOnMethods = "invokeWithTamperedAPIKey")
     public void invokeAPIKeyInHeaderSuccessTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", apiKey);
+        headers.put("apikey", apiKey);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(),
+                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
+                "Response code mismatched");
+    }
+
+    //Invoke API by including the API key as a query parameter
+    @Test(description = "Test to check the API Key in query param is working")
+    public void invokeAPIKeyInQueryParamSuccessTest() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps(endPoint + "?apikey=" + apiKey), headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(),
@@ -123,7 +143,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     public void invokeAPIKeyHeaderInvalidTokenTest() throws Exception {
         // Set header
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", TestConstant.INVALID_JWT_TOKEN);
+        headers.put("apikey", TestConstant.INVALID_JWT_TOKEN);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
@@ -138,7 +158,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     public void invokeAgainWithTamperedAPIKey() throws Exception {
         // Sets header
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", tamperedAPIKey);
+        headers.put("apikey", tamperedAPIKey);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
@@ -153,17 +173,17 @@ public class APIKeyTestCase extends ApimBaseTest {
     public void invokeExpiredAPIKeyTest() throws Exception {
         // Sets header
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("x-api-key", TestConstant.EXPIRED_API_KEY_TOKEN);
+        headers.put("apikey", TestConstant.EXPIRED_API_KEY_TOKEN);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
-    @Test(description = "Test to check the API Key for  incorrect IP address is not working")
+    @Test(description = "Test to check the API Key for incorrect IP address is not working")
     public void invokeAPIKeyForIncorrectIPAddressTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", apiKeyForIPTest);
+        headers.put("apikey", apiKeyForIPTest);
         headers.put("permittedIP", "192.168.1.2");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
@@ -175,7 +195,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     @Test(description = "Test to check the API Key for incorrect referer address is not working")
     public void invokeAPIKeyForIncorrectRefererTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", apiKeyForRefererTest);
+        headers.put("apikey", apiKeyForRefererTest);
         headers.put("referer", "http://www.abcd.com");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
@@ -186,7 +206,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     @Test(description = "Test to check the API Key for specific IP address is working")
     public void invokeAPIKeyForIPAddressSuccessTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", apiKeyForIPTest);
+        headers.put("apikey", apiKeyForIPTest);
         headers.put("x-forwarded-for", "192.168.1.1");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
@@ -199,7 +219,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     @Test(description = "Test to check the API Key for specific referer address is working")
     public void invokeAPIKeyForRefererSuccessTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("x-api-key", apiKeyForRefererTest);
+        headers.put("apikey", apiKeyForRefererTest);
         headers.put("referer", "http://www.abc.com");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 

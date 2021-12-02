@@ -52,7 +52,7 @@ type MgwSwagger struct {
 	productionEndpoints *EndpointCluster
 	sandboxEndpoints    *EndpointCluster
 	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []Resource
+	resources           []*Resource
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
 	securityScheme      []SecurityScheme
@@ -197,7 +197,7 @@ func (swagger *MgwSwagger) GetSandEndpoints() *EndpointCluster {
 }
 
 // GetResources returns the array of resources (openAPI path level info)
-func (swagger *MgwSwagger) GetResources() []Resource {
+func (swagger *MgwSwagger) GetResources() []*Resource {
 	return swagger.resources
 }
 
@@ -274,6 +274,93 @@ func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 // GetSecurity returns the API level security of the API
 func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 	return swagger.security
+}
+
+// SanitizeAPISecurity this will validate api level and operation level swagger security
+// if apiyaml security is provided swagger security will be removed accordingly
+func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool) {
+	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
+	apiSecurityDefinitionNames := []string{}
+	overridenAPISecurityDefinitions := []SecurityScheme{}
+
+	if isYamlAPIKey {
+		//creating security definition for apikey in header in behalf of apim yaml security
+		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
+			SecurityScheme{DefinitionName: APIMAPIKeyInHeader,
+				Type: APIKeyTypeInOAS, Name: APIKeyNameWithApim, In: APIKeyInHeaderOAS})
+
+		//creating security definition for apikey in query in behalf of apim yaml security
+		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
+			SecurityScheme{DefinitionName: APIMAPIKeyInQuery, Type: APIKeyTypeInOAS,
+				Name: APIKeyNameWithApim, In: APIKeyInQueryOAS})
+	}
+	for _, securityDef := range swagger.securityScheme {
+		//read default oauth2 security with scopes when oauth2 enabled
+		if isYamlOauth && securityDef.DefinitionName == APIMDefaultOauth2Security {
+			overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, securityDef)
+			apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
+		} else if !isOverrideSecurityByYaml {
+			apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
+		}
+	}
+	if isOverrideSecurityByYaml {
+		logger.LoggerXds.Debugf("Security definitions are overriden according to api.yaml for API %v:%v",
+			swagger.title, swagger.version)
+		swagger.SetSecurityScheme(overridenAPISecurityDefinitions)
+	}
+	logger.LoggerXds.Debugf("Security definitions for API %v:%v : %v", swagger.title, swagger.version,
+		swagger.securityScheme)
+
+	//sanitize API level security
+	sanitizedAPISecurity := []map[string][]string{}
+	for _, security := range swagger.security {
+		for securityDefName := range security {
+			if arrayContains(apiSecurityDefinitionNames, securityDefName) {
+				sanitizedAPISecurity = append(sanitizedAPISecurity, security)
+			} else {
+				logger.LoggerXds.Warnf("A security definition for %v has not found in API %v:%v",
+					securityDefName, swagger.title, swagger.version)
+			}
+		}
+	}
+	// Adding api level security when api.yaml apikey security is provided
+	if isYamlAPIKey {
+		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{APIMAPIKeyInHeader: {}})
+		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{APIMAPIKeyInQuery: {}})
+	}
+	swagger.security = sanitizedAPISecurity
+
+	//sanitize operation level security
+	for _, resource := range swagger.resources {
+		for _, operation := range resource.GetMethod() {
+			sanitizedOperationSecurity := []map[string][]string{}
+			for _, security := range operation.GetSecurity() {
+				for securityDefName := range security {
+					if arrayContains(apiSecurityDefinitionNames, securityDefName) {
+						sanitizedOperationSecurity = append(sanitizedOperationSecurity, security)
+					} else {
+						logger.LoggerXds.Warnf("A security definition for %v has not found in API %v:%v",
+							securityDefName, swagger.title, swagger.version)
+					}
+				}
+			}
+			// has do the following to enable apikey as well when default oauth2 security is in operation level
+			if isOverrideSecurityByYaml && isYamlOauth && isYamlAPIKey {
+				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{APIMAPIKeyInHeader: {}})
+				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{APIMAPIKeyInQuery: {}})
+			}
+			operation.SetSecurity(sanitizedOperationSecurity)
+		}
+	}
+}
+
+func arrayContains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }
 
 // SetXWso2Extensions set the MgwSwagger object with the properties

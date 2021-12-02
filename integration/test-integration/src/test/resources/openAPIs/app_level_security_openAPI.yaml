@@ -29,10 +29,6 @@ paths:
             $ref: '#/definitions/Pet'
         '404':
           description: Pet not found
-      x-wso2-application-security:
-        security-types:
-          - api_key
-        optional: false
 components:
   securitySchemes:
     default:

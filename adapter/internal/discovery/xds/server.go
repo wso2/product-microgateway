@@ -280,15 +280,20 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		if err != nil {
 			return nil, err
 		}
+		// the following will be used for APIM specific security config.
+		// it will enable folowing securities globally for the API, overriding swagger securities.
+		isYamlAPIKey := false
+		isYamlOauth := false
 		for _, value := range apiYaml.SecurityScheme {
-			if value == model.APIKeyInAppLevelSecurity {
-				schemes := append(mgwSwagger.GetSecurityScheme(), model.SecurityScheme{DefinitionName: model.APIKeyInAppLevelSecurity,
-					Type: value, Name: model.APIKeyNameWithApim})
-				security := append(mgwSwagger.GetSecurity(), map[string][]string{"api_key": {}})
-				mgwSwagger.SetSecurityScheme(schemes)
-				mgwSwagger.SetSecurity(security)
+			if value == model.APIMAPIKeyType {
+				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlAPIKey = true
+			} else if value == model.APIMOauth2Type {
+				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlOauth = true
 			}
 		}
+		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 
 	} else {
@@ -521,12 +526,12 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 				return err
 			}
 			deletedVhosts[vh] = void
-			
+
 			for val := range deletedVhosts {
 				existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 				if val == vh && len(existingLabels) == 0 {
 					logger.LoggerXds.Infof("Vhost : %v  deleted since there is no gateways assigned to it.", vh)
-					delete(apiToVhostsMap[apiNameVersionHashedID],val)
+					delete(apiToVhostsMap[apiNameVersionHashedID], val)
 				}
 			}
 		}
@@ -659,10 +664,10 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 				return nil
 			}
 			logger.LoggerXds.Infof("API identifier: %v does not have any gateways. Hence deleting the API.", apiIdentifier)
-			cleanMapResources(apiIdentifier,organizationID,toBeDelEnvs)
+			cleanMapResources(apiIdentifier, organizationID, toBeDelEnvs)
 			return nil
 		}
-    }
+	}
 
 	//clean maps of routes, clusters, endpoints, enforcerAPIs
 	if len(environments) == 0 {
@@ -671,7 +676,7 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	return nil
 }
 
-func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs []string){
+func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs []string) {
 	delete(orgIDOpenAPIRoutesMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIClustersMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)
