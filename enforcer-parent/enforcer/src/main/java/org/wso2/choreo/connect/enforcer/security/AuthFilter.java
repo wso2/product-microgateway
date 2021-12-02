@@ -134,7 +134,6 @@ public class AuthFilter implements Filter {
 
         boolean canAuthenticated = false;
         for (Authenticator authenticator : authenticators) {
-            log.info("Authenticators " + authenticator.getName());
             if (authenticator.canAuthenticate(requestContext)) {
                 canAuthenticated = true;
                 AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
@@ -186,8 +185,6 @@ public class AuthFilter implements Filter {
      */
     private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
             throws APISecurityException {
-        log.info("Inside updateCluster env " + requestContext.getProdClusterHeader() + " " +
-                requestContext.getSandClusterHeader());
         String keyType = authContext.getKeyType();
         if (StringUtils.isEmpty(authContext.getKeyType())) {
             keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
@@ -199,14 +196,12 @@ public class AuthFilter implements Filter {
                     requestContext.getProdClusterHeader());
             requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
             addRouterHttpHeaders(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
-            log.info("Prod clusterheader is added. " + requestContext.getProdClusterHeader());
         } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) &&
                 !StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
             requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                     requestContext.getSandClusterHeader());
             requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
             addRouterHttpHeaders(requestContext, APIConstants.API_KEY_TYPE_SANDBOX);
-            log.info("Sand clusterheader is added. " + requestContext.getSandClusterHeader());
         } else {
             if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
