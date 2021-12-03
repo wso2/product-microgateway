@@ -127,6 +127,7 @@ public class MockBackendSandbox extends Thread {
                 byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+            httpServer.createContext(context + "/echo", Utils::echo);
 
             httpServer.start();
         } catch (Exception ex) {

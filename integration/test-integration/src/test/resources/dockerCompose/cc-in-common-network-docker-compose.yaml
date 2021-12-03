@@ -49,6 +49,8 @@ services:
       - ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
       - cp_admin_pwd=admin
       - adapter_admin_pwd=admin
+      - api_848184930b1d317a4204aab4c52bc3dec38abcc7_sand_basic_username="john"
+      - api_848184930b1d317a4204aab4c52bc3dec38abcc7_sand_basic_password=lock
     ports:
       - "18000:18000"
       - "9843:9843"

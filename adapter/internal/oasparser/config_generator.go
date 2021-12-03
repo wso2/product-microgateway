@@ -116,7 +116,7 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArr
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition
 // along with the vhost to deploy the API.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity mgw.APIEndpointSecurity, vhost string) *api.Api {
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost string) *api.Api {
 	resources := []*api.Resource{}
 	securitySchemes := []*api.SecurityScheme{}
 	securityList := []*api.SecurityList{}
@@ -165,21 +165,25 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		resources = append(resources, resource)
 	}
 
-	endpointSecurityDetails := &api.EndpointSecurity{
-		SandBoxSecurityInfo: &api.SecurityInfo{
-			Username:         endpointSecurity.Sandbox.Username,
-			Password:         endpointSecurity.Sandbox.Password,
-			SecurityType:     endpointSecurity.Sandbox.Type,
-			Enabled:          endpointSecurity.Sandbox.Enabled,
-			CustomParameters: endpointSecurity.Sandbox.CustomParameters,
-		},
-		ProductionSecurityInfo: &api.SecurityInfo{
-			Username:         endpointSecurity.Production.Username,
-			Password:         endpointSecurity.Production.Password,
-			SecurityType:     endpointSecurity.Production.Type,
-			Enabled:          endpointSecurity.Production.Enabled,
-			CustomParameters: endpointSecurity.Production.CustomParameters,
-		},
+	endpointSecurityDetails := &api.EndpointSecurity{}
+
+	if mgwSwagger.GetProdEndpoints() != nil {
+		endpointSecurityDetails.ProductionSecurityInfo = &api.SecurityInfo{
+			Username:         mgwSwagger.GetProdEndpoints().SecurityConfig.Username,
+			Password:         mgwSwagger.GetProdEndpoints().SecurityConfig.Password,
+			SecurityType:     mgwSwagger.GetProdEndpoints().SecurityConfig.Type,
+			Enabled:          mgwSwagger.GetProdEndpoints().SecurityConfig.Enabled,
+			CustomParameters: mgwSwagger.GetProdEndpoints().SecurityConfig.CustomParameters,
+		}
+	}
+	if mgwSwagger.GetSandEndpoints() != nil {
+		endpointSecurityDetails.SandBoxSecurityInfo = &api.SecurityInfo{
+			Username:         mgwSwagger.GetSandEndpoints().SecurityConfig.Username,
+			Password:         mgwSwagger.GetSandEndpoints().SecurityConfig.Password,
+			SecurityType:     mgwSwagger.GetSandEndpoints().SecurityConfig.Type,
+			Enabled:          mgwSwagger.GetSandEndpoints().SecurityConfig.Enabled,
+			CustomParameters: mgwSwagger.GetSandEndpoints().SecurityConfig.CustomParameters,
+		}
 	}
 
 	return &api.Api{

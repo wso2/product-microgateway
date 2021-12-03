@@ -72,11 +72,11 @@ type ProjectAPI struct {
 
 // EndpointSecurity contains parameters of endpoint security at api.json
 type EndpointSecurity struct {
-	Password         string            `json:"password,omitempty"`
-	Type             string            `json:"type,omitempty"`
-	Enabled          bool              `json:"enabled,omitempty"`
-	Username         string            `json:"username,omitempty"`
-	CustomParameters map[string]string `json:"customparameters,omitempty"`
+	Password         string            `json:"password,omitempty" mapstructure:"password"`
+	Type             string            `json:"type,omitempty" mapstructure:"type"`
+	Enabled          bool              `json:"enabled,omitempty" mapstructure:"enabled"`
+	Username         string            `json:"username,omitempty" mapstructure:"username"`
+	CustomParameters map[string]string `json:"customparameters,omitempty" mapstructure:"customparameters"`
 }
 
 // APIEndpointSecurity represents the structure of endpoint_security param in api.yaml
