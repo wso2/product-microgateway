@@ -65,8 +65,9 @@
             <outputDirectory/>
         </file>
         <file>
-            <source>LICENSE.txt</source>
+            <source>../resources/license/LICENSE-ADAPTER.txt</source>
             <outputDirectory/>
+            <destName>LICENSE.txt</destName>
         </file>
     </files>
 </assembly>
