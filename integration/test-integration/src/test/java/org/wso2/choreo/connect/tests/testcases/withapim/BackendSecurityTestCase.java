@@ -130,7 +130,7 @@ public class BackendSecurityTestCase extends ApimBaseTest {
                 "backend basic auth header is incorrect");
     }
 
-    @Test(description = "oauth2 secured resource backend basic auth")
+    @Test(description = "test env variables is working")
     public void testBasicAuthBackendForSecuredResourceFromEnv() throws CCTestException, MalformedURLException {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + sandAccessToken);
