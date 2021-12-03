@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.mgwcodegen.AdvanceEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 
 import java.io.BufferedReader;
@@ -222,8 +223,11 @@ public class ProtobufParser {
      */
     private static EndpointListRouteDTO generateEpList(ExtensionHolder.Endpoints protoEps, String service) {
         EndpointListRouteDTO epList = new EndpointListRouteDTO();
+        AdvanceEndpointConfigDTO advanceEpConfig = new  AdvanceEndpointConfigDTO();
 
         protoEps.getUrlList().forEach(epList::addEndpoint);
+        advanceEpConfig.setTimeoutInMillis(protoEps.getAdvanceEndpointConfig().getTimeoutInMillis());
+        epList.setAdvanceEndpointConfig(advanceEpConfig);
         try {
             epList.validateEndpoints();
         } catch (CLICompileTimeException e) {
