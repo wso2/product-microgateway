@@ -81,6 +81,10 @@ public final class ExtensionHolder {
 
         public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+            if (this == UNRECOGNIZED) {
+                throw new java.lang.IllegalStateException(
+                        "Can't get the descriptor of an unrecognized enum value.");
+            }
             return getDescriptor().getValues().get(ordinal());
         }
         public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -212,6 +216,10 @@ public final class ExtensionHolder {
 
         public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+            if (this == UNRECOGNIZED) {
+                throw new java.lang.IllegalStateException(
+                        "Can't get the descriptor of an unrecognized enum value.");
+            }
             return getDescriptor().getValues().get(ordinal());
         }
         public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -285,6 +293,21 @@ public final class ExtensionHolder {
          * @return The type.
          */
         org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType getType();
+
+        /**
+         * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+         * @return Whether the advanceEndpointConfig field is set.
+         */
+        boolean hasAdvanceEndpointConfig();
+        /**
+         * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+         * @return The advanceEndpointConfig.
+         */
+        org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig getAdvanceEndpointConfig();
+        /**
+         * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+         */
+        org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfigOrBuilder getAdvanceEndpointConfigOrBuilder();
     }
     /**
      * <pre>
@@ -293,7 +316,7 @@ public final class ExtensionHolder {
      *
      * Protobuf type {@code wso2.Endpoints}
      */
-    public  static final class Endpoints extends
+    public static final class Endpoints extends
             com.google.protobuf.GeneratedMessageV3 implements
             // @@protoc_insertion_point(message_implements:wso2.Endpoints)
             EndpointsOrBuilder {
@@ -351,6 +374,19 @@ public final class ExtensionHolder {
                             int rawValue = input.readEnum();
 
                             type_ = rawValue;
+                            break;
+                        }
+                        case 26: {
+                            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder subBuilder = null;
+                            if (advanceEndpointConfig_ != null) {
+                                subBuilder = advanceEndpointConfig_.toBuilder();
+                            }
+                            advanceEndpointConfig_ = input.readMessage(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.parser(), extensionRegistry);
+                            if (subBuilder != null) {
+                                subBuilder.mergeFrom(advanceEndpointConfig_);
+                                advanceEndpointConfig_ = subBuilder.buildPartial();
+                            }
+
                             break;
                         }
                         default: {
@@ -429,17 +465,43 @@ public final class ExtensionHolder {
          * <code>.wso2.EndpointType type = 2;</code>
          * @return The enum numeric value on the wire for type.
          */
-        public int getTypeValue() {
+        @java.lang.Override public int getTypeValue() {
             return type_;
         }
         /**
          * <code>.wso2.EndpointType type = 2;</code>
          * @return The type.
          */
-        public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType getType() {
+        @java.lang.Override public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType getType() {
             @SuppressWarnings("deprecation")
             org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType result = org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType.valueOf(type_);
             return result == null ? org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType.UNRECOGNIZED : result;
+        }
+
+        public static final int ADVANCEENDPOINTCONFIG_FIELD_NUMBER = 3;
+        private org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig advanceEndpointConfig_;
+        /**
+         * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+         * @return Whether the advanceEndpointConfig field is set.
+         */
+        @java.lang.Override
+        public boolean hasAdvanceEndpointConfig() {
+            return advanceEndpointConfig_ != null;
+        }
+        /**
+         * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+         * @return The advanceEndpointConfig.
+         */
+        @java.lang.Override
+        public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig getAdvanceEndpointConfig() {
+            return advanceEndpointConfig_ == null ? org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.getDefaultInstance() : advanceEndpointConfig_;
+        }
+        /**
+         * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+         */
+        @java.lang.Override
+        public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfigOrBuilder getAdvanceEndpointConfigOrBuilder() {
+            return getAdvanceEndpointConfig();
         }
 
         private byte memoizedIsInitialized = -1;
@@ -462,6 +524,9 @@ public final class ExtensionHolder {
             if (type_ != org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType.DEFAULT.getNumber()) {
                 output.writeEnum(2, type_);
             }
+            if (advanceEndpointConfig_ != null) {
+                output.writeMessage(3, getAdvanceEndpointConfig());
+            }
             unknownFields.writeTo(output);
         }
 
@@ -483,6 +548,10 @@ public final class ExtensionHolder {
                 size += com.google.protobuf.CodedOutputStream
                         .computeEnumSize(2, type_);
             }
+            if (advanceEndpointConfig_ != null) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(3, getAdvanceEndpointConfig());
+            }
             size += unknownFields.getSerializedSize();
             memoizedSize = size;
             return size;
@@ -501,6 +570,11 @@ public final class ExtensionHolder {
             if (!getUrlList()
                     .equals(other.getUrlList())) return false;
             if (type_ != other.type_) return false;
+            if (hasAdvanceEndpointConfig() != other.hasAdvanceEndpointConfig()) return false;
+            if (hasAdvanceEndpointConfig()) {
+                if (!getAdvanceEndpointConfig()
+                        .equals(other.getAdvanceEndpointConfig())) return false;
+            }
             if (!unknownFields.equals(other.unknownFields)) return false;
             return true;
         }
@@ -518,6 +592,10 @@ public final class ExtensionHolder {
             }
             hash = (37 * hash) + TYPE_FIELD_NUMBER;
             hash = (53 * hash) + type_;
+            if (hasAdvanceEndpointConfig()) {
+                hash = (37 * hash) + ADVANCEENDPOINTCONFIG_FIELD_NUMBER;
+                hash = (53 * hash) + getAdvanceEndpointConfig().hashCode();
+            }
             hash = (29 * hash) + unknownFields.hashCode();
             memoizedHashCode = hash;
             return hash;
@@ -659,6 +737,12 @@ public final class ExtensionHolder {
                 bitField0_ = (bitField0_ & ~0x00000001);
                 type_ = 0;
 
+                if (advanceEndpointConfigBuilder_ == null) {
+                    advanceEndpointConfig_ = null;
+                } else {
+                    advanceEndpointConfig_ = null;
+                    advanceEndpointConfigBuilder_ = null;
+                }
                 return this;
             }
 
@@ -692,6 +776,11 @@ public final class ExtensionHolder {
                 }
                 result.url_ = url_;
                 result.type_ = type_;
+                if (advanceEndpointConfigBuilder_ == null) {
+                    result.advanceEndpointConfig_ = advanceEndpointConfig_;
+                } else {
+                    result.advanceEndpointConfig_ = advanceEndpointConfigBuilder_.build();
+                }
                 onBuilt();
                 return result;
             }
@@ -752,6 +841,9 @@ public final class ExtensionHolder {
                 }
                 if (other.type_ != 0) {
                     setTypeValue(other.getTypeValue());
+                }
+                if (other.hasAdvanceEndpointConfig()) {
+                    mergeAdvanceEndpointConfig(other.getAdvanceEndpointConfig());
                 }
                 this.mergeUnknownFields(other.unknownFields);
                 onChanged();
@@ -898,7 +990,7 @@ public final class ExtensionHolder {
              * <code>.wso2.EndpointType type = 2;</code>
              * @return The enum numeric value on the wire for type.
              */
-            public int getTypeValue() {
+            @java.lang.Override public int getTypeValue() {
                 return type_;
             }
             /**
@@ -907,6 +999,7 @@ public final class ExtensionHolder {
              * @return This builder for chaining.
              */
             public Builder setTypeValue(int value) {
+
                 type_ = value;
                 onChanged();
                 return this;
@@ -915,6 +1008,7 @@ public final class ExtensionHolder {
              * <code>.wso2.EndpointType type = 2;</code>
              * @return The type.
              */
+            @java.lang.Override
             public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType getType() {
                 @SuppressWarnings("deprecation")
                 org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType result = org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.EndpointType.valueOf(type_);
@@ -943,6 +1037,125 @@ public final class ExtensionHolder {
                 type_ = 0;
                 onChanged();
                 return this;
+            }
+
+            private org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig advanceEndpointConfig_;
+            private com.google.protobuf.SingleFieldBuilderV3<
+                    org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfigOrBuilder> advanceEndpointConfigBuilder_;
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             * @return Whether the advanceEndpointConfig field is set.
+             */
+            public boolean hasAdvanceEndpointConfig() {
+                return advanceEndpointConfigBuilder_ != null || advanceEndpointConfig_ != null;
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             * @return The advanceEndpointConfig.
+             */
+            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig getAdvanceEndpointConfig() {
+                if (advanceEndpointConfigBuilder_ == null) {
+                    return advanceEndpointConfig_ == null ? org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.getDefaultInstance() : advanceEndpointConfig_;
+                } else {
+                    return advanceEndpointConfigBuilder_.getMessage();
+                }
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             */
+            public Builder setAdvanceEndpointConfig(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig value) {
+                if (advanceEndpointConfigBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    advanceEndpointConfig_ = value;
+                    onChanged();
+                } else {
+                    advanceEndpointConfigBuilder_.setMessage(value);
+                }
+
+                return this;
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             */
+            public Builder setAdvanceEndpointConfig(
+                    org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder builderForValue) {
+                if (advanceEndpointConfigBuilder_ == null) {
+                    advanceEndpointConfig_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    advanceEndpointConfigBuilder_.setMessage(builderForValue.build());
+                }
+
+                return this;
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             */
+            public Builder mergeAdvanceEndpointConfig(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig value) {
+                if (advanceEndpointConfigBuilder_ == null) {
+                    if (advanceEndpointConfig_ != null) {
+                        advanceEndpointConfig_ =
+                                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.newBuilder(advanceEndpointConfig_).mergeFrom(value).buildPartial();
+                    } else {
+                        advanceEndpointConfig_ = value;
+                    }
+                    onChanged();
+                } else {
+                    advanceEndpointConfigBuilder_.mergeFrom(value);
+                }
+
+                return this;
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             */
+            public Builder clearAdvanceEndpointConfig() {
+                if (advanceEndpointConfigBuilder_ == null) {
+                    advanceEndpointConfig_ = null;
+                    onChanged();
+                } else {
+                    advanceEndpointConfig_ = null;
+                    advanceEndpointConfigBuilder_ = null;
+                }
+
+                return this;
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             */
+            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder getAdvanceEndpointConfigBuilder() {
+
+                onChanged();
+                return getAdvanceEndpointConfigFieldBuilder().getBuilder();
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             */
+            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfigOrBuilder getAdvanceEndpointConfigOrBuilder() {
+                if (advanceEndpointConfigBuilder_ != null) {
+                    return advanceEndpointConfigBuilder_.getMessageOrBuilder();
+                } else {
+                    return advanceEndpointConfig_ == null ?
+                            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.getDefaultInstance() : advanceEndpointConfig_;
+                }
+            }
+            /**
+             * <code>.wso2.AdvanceEndpointConfig advanceEndpointConfig = 3;</code>
+             */
+            private com.google.protobuf.SingleFieldBuilderV3<
+                    org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfigOrBuilder>
+            getAdvanceEndpointConfigFieldBuilder() {
+                if (advanceEndpointConfigBuilder_ == null) {
+                    advanceEndpointConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfigOrBuilder>(
+                            getAdvanceEndpointConfig(),
+                            getParentForChildren(),
+                            isClean());
+                    advanceEndpointConfig_ = null;
+                }
+                return advanceEndpointConfigBuilder_;
             }
             @java.lang.Override
             public final Builder setUnknownFields(
@@ -992,6 +1205,494 @@ public final class ExtensionHolder {
 
         @java.lang.Override
         public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.Endpoints getDefaultInstanceForType() {
+            return DEFAULT_INSTANCE;
+        }
+
+    }
+
+    public interface AdvanceEndpointConfigOrBuilder extends
+            // @@protoc_insertion_point(interface_extends:wso2.AdvanceEndpointConfig)
+            com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>int32 timeoutInMillis = 1;</code>
+         * @return The timeoutInMillis.
+         */
+        int getTimeoutInMillis();
+    }
+    /**
+     * Protobuf type {@code wso2.AdvanceEndpointConfig}
+     */
+    public static final class AdvanceEndpointConfig extends
+            com.google.protobuf.GeneratedMessageV3 implements
+            // @@protoc_insertion_point(message_implements:wso2.AdvanceEndpointConfig)
+            AdvanceEndpointConfigOrBuilder {
+        private static final long serialVersionUID = 0L;
+        // Use AdvanceEndpointConfig.newBuilder() to construct.
+        private AdvanceEndpointConfig(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+            super(builder);
+        }
+        private AdvanceEndpointConfig() {
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(
+                UnusedPrivateParameter unused) {
+            return new AdvanceEndpointConfig();
+        }
+
+        @java.lang.Override
+        public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+            return this.unknownFields;
+        }
+        private AdvanceEndpointConfig(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            this();
+            if (extensionRegistry == null) {
+                throw new java.lang.NullPointerException();
+            }
+            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                    com.google.protobuf.UnknownFieldSet.newBuilder();
+            try {
+                boolean done = false;
+                while (!done) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            done = true;
+                            break;
+                        case 8: {
+
+                            timeoutInMillis_ = input.readInt32();
+                            break;
+                        }
+                        default: {
+                            if (!parseUnknownField(
+                                    input, unknownFields, extensionRegistry, tag)) {
+                                done = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                throw e.setUnfinishedMessage(this);
+            } catch (java.io.IOException e) {
+                throw new com.google.protobuf.InvalidProtocolBufferException(
+                        e).setUnfinishedMessage(this);
+            } finally {
+                this.unknownFields = unknownFields.build();
+                makeExtensionsImmutable();
+            }
+        }
+        public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_AdvanceEndpointConfig_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+            return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_AdvanceEndpointConfig_fieldAccessorTable
+                    .ensureFieldAccessorsInitialized(
+                            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder.class);
+        }
+
+        public static final int TIMEOUTINMILLIS_FIELD_NUMBER = 1;
+        private int timeoutInMillis_;
+        /**
+         * <code>int32 timeoutInMillis = 1;</code>
+         * @return The timeoutInMillis.
+         */
+        @java.lang.Override
+        public int getTimeoutInMillis() {
+            return timeoutInMillis_;
+        }
+
+        private byte memoizedIsInitialized = -1;
+        @java.lang.Override
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized == 1) return true;
+            if (isInitialized == 0) return false;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            if (timeoutInMillis_ != 0) {
+                output.writeInt32(1, timeoutInMillis_);
+            }
+            unknownFields.writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+            int size = memoizedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (timeoutInMillis_ != 0) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeInt32Size(1, timeoutInMillis_);
+            }
+            size += unknownFields.getSerializedSize();
+            memoizedSize = size;
+            return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig)) {
+                return super.equals(obj);
+            }
+            org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig other = (org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig) obj;
+
+            if (getTimeoutInMillis()
+                    != other.getTimeoutInMillis()) return false;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+            if (memoizedHashCode != 0) {
+                return memoizedHashCode;
+            }
+            int hash = 41;
+            hash = (19 * hash) + getDescriptor().hashCode();
+            hash = (37 * hash) + TIMEOUTINMILLIS_FIELD_NUMBER;
+            hash = (53 * hash) + getTimeoutInMillis();
+            hash = (29 * hash) + unknownFields.hashCode();
+            memoizedHashCode = hash;
+            return hash;
+        }
+
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                java.nio.ByteBuffer data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                java.nio.ByteBuffer data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return PARSER.parseFrom(data, extensionRegistry);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3
+                    .parseWithIOException(PARSER, input);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3
+                    .parseWithIOException(PARSER, input, extensionRegistry);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3
+                    .parseDelimitedWithIOException(PARSER, input);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3
+                    .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3
+                    .parseWithIOException(PARSER, input);
+        }
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return com.google.protobuf.GeneratedMessageV3
+                    .parseWithIOException(PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder() {
+            return DEFAULT_INSTANCE.toBuilder();
+        }
+        public static Builder newBuilder(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig prototype) {
+            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+        @java.lang.Override
+        public Builder toBuilder() {
+            return this == DEFAULT_INSTANCE
+                    ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        /**
+         * Protobuf type {@code wso2.AdvanceEndpointConfig}
+         */
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+                // @@protoc_insertion_point(builder_implements:wso2.AdvanceEndpointConfig)
+                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfigOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_AdvanceEndpointConfig_descriptor;
+            }
+
+            @java.lang.Override
+            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_AdvanceEndpointConfig_fieldAccessorTable
+                        .ensureFieldAccessorsInitialized(
+                                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.class, org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.Builder.class);
+            }
+
+            // Construct using org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(
+                    com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessageV3
+                        .alwaysUseFieldBuilders) {
+                }
+            }
+            @java.lang.Override
+            public Builder clear() {
+                super.clear();
+                timeoutInMillis_ = 0;
+
+                return this;
+            }
+
+            @java.lang.Override
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.internal_static_wso2_AdvanceEndpointConfig_descriptor;
+            }
+
+            @java.lang.Override
+            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig getDefaultInstanceForType() {
+                return org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.getDefaultInstance();
+            }
+
+            @java.lang.Override
+            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig build() {
+                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            @java.lang.Override
+            public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig buildPartial() {
+                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig result = new org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig(this);
+                result.timeoutInMillis_ = timeoutInMillis_;
+                onBuilt();
+                return result;
+            }
+
+            @java.lang.Override
+            public Builder clone() {
+                return super.clone();
+            }
+            @java.lang.Override
+            public Builder setField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    java.lang.Object value) {
+                return super.setField(field, value);
+            }
+            @java.lang.Override
+            public Builder clearField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field) {
+                return super.clearField(field);
+            }
+            @java.lang.Override
+            public Builder clearOneof(
+                    com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+                return super.clearOneof(oneof);
+            }
+            @java.lang.Override
+            public Builder setRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    int index, java.lang.Object value) {
+                return super.setRepeatedField(field, index, value);
+            }
+            @java.lang.Override
+            public Builder addRepeatedField(
+                    com.google.protobuf.Descriptors.FieldDescriptor field,
+                    java.lang.Object value) {
+                return super.addRepeatedField(field, value);
+            }
+            @java.lang.Override
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig) {
+                    return mergeFrom((org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig other) {
+                if (other == org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig.getDefaultInstance()) return this;
+                if (other.getTimeoutInMillis() != 0) {
+                    setTimeoutInMillis(other.getTimeoutInMillis());
+                }
+                this.mergeUnknownFields(other.unknownFields);
+                onChanged();
+                return this;
+            }
+
+            @java.lang.Override
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            @java.lang.Override
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig parsedMessage = null;
+                try {
+                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    parsedMessage = (org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig) e.getUnfinishedMessage();
+                    throw e.unwrapIOException();
+                } finally {
+                    if (parsedMessage != null) {
+                        mergeFrom(parsedMessage);
+                    }
+                }
+                return this;
+            }
+
+            private int timeoutInMillis_ ;
+            /**
+             * <code>int32 timeoutInMillis = 1;</code>
+             * @return The timeoutInMillis.
+             */
+            @java.lang.Override
+            public int getTimeoutInMillis() {
+                return timeoutInMillis_;
+            }
+            /**
+             * <code>int32 timeoutInMillis = 1;</code>
+             * @param value The timeoutInMillis to set.
+             * @return This builder for chaining.
+             */
+            public Builder setTimeoutInMillis(int value) {
+
+                timeoutInMillis_ = value;
+                onChanged();
+                return this;
+            }
+            /**
+             * <code>int32 timeoutInMillis = 1;</code>
+             * @return This builder for chaining.
+             */
+            public Builder clearTimeoutInMillis() {
+
+                timeoutInMillis_ = 0;
+                onChanged();
+                return this;
+            }
+            @java.lang.Override
+            public final Builder setUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.setUnknownFields(unknownFields);
+            }
+
+            @java.lang.Override
+            public final Builder mergeUnknownFields(
+                    final com.google.protobuf.UnknownFieldSet unknownFields) {
+                return super.mergeUnknownFields(unknownFields);
+            }
+
+
+            // @@protoc_insertion_point(builder_scope:wso2.AdvanceEndpointConfig)
+        }
+
+        // @@protoc_insertion_point(class_scope:wso2.AdvanceEndpointConfig)
+        private static final org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig DEFAULT_INSTANCE;
+        static {
+            DEFAULT_INSTANCE = new org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig();
+        }
+
+        public static org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig getDefaultInstance() {
+            return DEFAULT_INSTANCE;
+        }
+
+        private static final com.google.protobuf.Parser<AdvanceEndpointConfig>
+                PARSER = new com.google.protobuf.AbstractParser<AdvanceEndpointConfig>() {
+            @java.lang.Override
+            public AdvanceEndpointConfig parsePartialFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                return new AdvanceEndpointConfig(input, extensionRegistry);
+            }
+        };
+
+        public static com.google.protobuf.Parser<AdvanceEndpointConfig> parser() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<AdvanceEndpointConfig> getParserForType() {
+            return PARSER;
+        }
+
+        @java.lang.Override
+        public org.wso2.apimgt.gateway.cli.protobuf.ExtensionHolder.AdvanceEndpointConfig getDefaultInstanceForType() {
             return DEFAULT_INSTANCE;
         }
 
@@ -1068,6 +1769,11 @@ public final class ExtensionHolder {
     private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internal_static_wso2_Endpoints_fieldAccessorTable;
+    private static final com.google.protobuf.Descriptors.Descriptor
+            internal_static_wso2_AdvanceEndpointConfig_descriptor;
+    private static final
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internal_static_wso2_AdvanceEndpointConfig_fieldAccessorTable;
 
     public static com.google.protobuf.Descriptors.FileDescriptor
     getDescriptor() {
@@ -1078,23 +1784,26 @@ public final class ExtensionHolder {
     static {
         java.lang.String[] descriptorData = {
                 "\n\022wso2_options.proto\022\004wso2\032 google/proto" +
-                        "buf/descriptor.proto\":\n\tEndpoints\022\013\n\003url" +
+                        "buf/descriptor.proto\"v\n\tEndpoints\022\013\n\003url" +
                         "\030\001 \003(\t\022 \n\004type\030\002 \001(\0162\022.wso2.EndpointType" +
-                        "*\033\n\014EndpointType\022\013\n\007DEFAULT\020\000*@\n\010Securit" +
-                        "y\022\010\n\004NONE\020\000\022\t\n\005BASIC\020\001\022\n\n\006OAUTH2\020\002\022\007\n\003JW" +
-                        "T\020\003\022\n\n\006APIKEY\020\004:P\n\024production_endpoints\022" +
-                        "\037.google.protobuf.ServiceOptions\030\321\206\003 \001(\013" +
-                        "2\017.wso2.Endpoints:M\n\021sandbox_endpoints\022\037" +
-                        ".google.protobuf.ServiceOptions\030\322\206\003 \001(\0132" +
-                        "\017.wso2.Endpoints:C\n\010security\022\037.google.pr" +
-                        "otobuf.ServiceOptions\030\323\206\003 \003(\0162\016.wso2.Sec" +
-                        "urity::\n\017throttling_tier\022\037.google.protob" +
-                        "uf.ServiceOptions\030\324\206\003 \001(\t:@\n\026method_thro" +
-                        "ttling_tier\022\036.google.protobuf.MethodOpti" +
-                        "ons\030\326\206\003 \001(\t:7\n\rmethod_scopes\022\036.google.pr" +
-                        "otobuf.MethodOptions\030\327\206\003 \001(\tB7\n$org.wso2" +
-                        ".apimgt.gateway.cli.protobufB\017ExtensionH" +
-                        "olderb\006proto3"
+                        "\022:\n\025advanceEndpointConfig\030\003 \001(\0132\033.wso2.A" +
+                        "dvanceEndpointConfig\"0\n\025AdvanceEndpointC" +
+                        "onfig\022\027\n\017timeoutInMillis\030\001 \001(\005*\033\n\014Endpoi" +
+                        "ntType\022\013\n\007DEFAULT\020\000*@\n\010Security\022\010\n\004NONE\020" +
+                        "\000\022\t\n\005BASIC\020\001\022\n\n\006OAUTH2\020\002\022\007\n\003JWT\020\003\022\n\n\006API" +
+                        "KEY\020\004:P\n\024production_endpoints\022\037.google.p" +
+                        "rotobuf.ServiceOptions\030\321\206\003 \001(\0132\017.wso2.En" +
+                        "dpoints:M\n\021sandbox_endpoints\022\037.google.pr" +
+                        "otobuf.ServiceOptions\030\322\206\003 \001(\0132\017.wso2.End" +
+                        "points:C\n\010security\022\037.google.protobuf.Ser" +
+                        "viceOptions\030\323\206\003 \003(\0162\016.wso2.Security::\n\017t" +
+                        "hrottling_tier\022\037.google.protobuf.Service" +
+                        "Options\030\324\206\003 \001(\t:@\n\026method_throttling_tie" +
+                        "r\022\036.google.protobuf.MethodOptions\030\326\206\003 \001(" +
+                        "\t:7\n\rmethod_scopes\022\036.google.protobuf.Met" +
+                        "hodOptions\030\327\206\003 \001(\tB7\n$org.wso2.apimgt.ga" +
+                        "teway.cli.protobufB\017ExtensionHolderb\006pro" +
+                        "to3"
         };
         descriptor = com.google.protobuf.Descriptors.FileDescriptor
                 .internalBuildGeneratedFileFrom(descriptorData,
@@ -1106,7 +1815,13 @@ public final class ExtensionHolder {
         internal_static_wso2_Endpoints_fieldAccessorTable = new
                 com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                 internal_static_wso2_Endpoints_descriptor,
-                new java.lang.String[] { "Url", "Type", });
+                new java.lang.String[] { "Url", "Type", "AdvanceEndpointConfig", });
+        internal_static_wso2_AdvanceEndpointConfig_descriptor =
+                getDescriptor().getMessageTypes().get(1);
+        internal_static_wso2_AdvanceEndpointConfig_fieldAccessorTable = new
+                com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+                internal_static_wso2_AdvanceEndpointConfig_descriptor,
+                new java.lang.String[] { "TimeoutInMillis", });
         productionEndpoints.internalInit(descriptor.getExtensions().get(0));
         sandboxEndpoints.internalInit(descriptor.getExtensions().get(1));
         security.internalInit(descriptor.getExtensions().get(2));

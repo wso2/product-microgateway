@@ -40,6 +40,11 @@ extend google.protobuf.MethodOptions {
 message Endpoints {
 	repeated string url = 1;
 	EndpointType type = 2;
+	AdvanceEndpointConfig advanceEndpointConfig = 3;
+}
+
+message AdvanceEndpointConfig {
+	int32 timeoutInMillis = 1;
 }
 
 enum EndpointType {
