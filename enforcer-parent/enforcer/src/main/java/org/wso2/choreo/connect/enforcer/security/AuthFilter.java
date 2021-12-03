@@ -234,7 +234,10 @@ public class AuthFilter implements Filter {
         }
 
         ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
-        if (resourceConfig.getEndpoints().containsKey(keyType)) {
+        // In websockets case, the endpoints object becomes null. Hence it would result
+        // in a NPE, if it is not checked.
+        if (resourceConfig.getEndpoints() != null &&
+                resourceConfig.getEndpoints().containsKey(keyType)) {
             EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
 
             // Apply resource level retry headers
