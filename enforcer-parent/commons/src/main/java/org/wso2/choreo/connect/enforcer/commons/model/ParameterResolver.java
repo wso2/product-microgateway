@@ -65,7 +65,7 @@ class ParameterResolver {
         final Matcher matcher = pattern.matcher(formattedURI);
         if (!matcher.matches()) {
             // Unlikely to occur as this pair is already matched within router.
-            logger.debug("PathTemplate:" + pathTemplate + " and RawPath:" + uriString + " is mismatched.");
+            logger.debug("PathTemplate: {}  and RawPath: {} is mismatched.", pathTemplate, uriString);
             return new HashMap<>();
         }
         final Map<String, String> map = new HashMap<>();
