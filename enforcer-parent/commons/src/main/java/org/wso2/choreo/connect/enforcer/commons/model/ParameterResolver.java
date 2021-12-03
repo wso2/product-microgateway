@@ -54,7 +54,7 @@ class ParameterResolver {
         }
         String regex = Pattern.quote(matcher.replaceAll("_____PARAM_____"))
                 .replace("_____PARAM_____", "\\E([^/]*)\\Q");
-        regex = regex.endsWith("*\\E") ? regex.substring(0, regex.length() - 4) + "\\E[/]{0,1}(.*)" : regex;
+        regex = regex.endsWith("*\\E") ? regex.substring(0, regex.length() - 4) + "\\E($|([/]{1}(.*)))" : regex;
         pattern = Pattern.compile(regex);
     }
 
