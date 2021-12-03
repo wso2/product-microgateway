@@ -66,7 +66,7 @@ RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
-COPY maven/ lib/
+COPY maven/lib/ lib/
 COPY maven/conf/log4j2.properties conf/log4j2.properties
 COPY maven/security security
 COPY maven/check_health.sh .

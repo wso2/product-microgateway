@@ -33,9 +33,11 @@
         <fileSet>
             <!-- TODO: (VirajSalaka) Another option is to use the dependencySet option -->
             <directory>target</directory>
-            <outputDirectory/>
+            <outputDirectory>lib</outputDirectory>
             <excludes>
                 <exclude>original*.jar</exclude>
+                <exclude>sources.jar</exclude>
+                <exclude>javadoc.jar</exclude>
             </excludes>
             <includes>
                 <include>*.jar</include>
