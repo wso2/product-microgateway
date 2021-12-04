@@ -124,7 +124,7 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         application.setApplicationOwner(getValueAsString(fieldsMap, MetadataConstants.APP_OWNER_KEY));
         application.setApplicationName(getValueAsString(fieldsMap, MetadataConstants.APP_NAME_KEY));
         application.setKeyType(getValueAsString(fieldsMap, MetadataConstants.APP_KEY_TYPE_KEY));
-        application.setApplicationId(getValueAsString(fieldsMap, MetadataConstants.APP_ID_KEY));
+        application.setApplicationId(getValueAsString(fieldsMap, MetadataConstants.APP_UUID_KEY));
         return application;
     }
 

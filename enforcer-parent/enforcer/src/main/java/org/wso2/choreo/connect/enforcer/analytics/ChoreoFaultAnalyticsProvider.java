@@ -59,7 +59,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public boolean isAnonymous() {
         return requestContext.getAuthenticationContext() == null ||
-                StringUtils.isEmpty(requestContext.getAuthenticationContext().getApplicationId());
+                StringUtils.isEmpty(requestContext.getAuthenticationContext().getApplicationUUID());
     }
 
     @Override
@@ -118,7 +118,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         // Default Value would be PRODUCTION
         application.setKeyType(
                 authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
-        application.setApplicationId(AnalyticsUtils.setDefaultIfNull(authContext.getApplicationId()));
+        application.setApplicationId(AnalyticsUtils.setDefaultIfNull(authContext.getApplicationUUID()));
         application.setApplicationOwner(AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
         application.setApplicationName(AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
         return application;

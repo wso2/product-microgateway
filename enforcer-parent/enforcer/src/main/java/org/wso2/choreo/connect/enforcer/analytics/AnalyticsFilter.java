@@ -127,8 +127,8 @@ public class AnalyticsFilter {
             // Default Value would be PRODUCTION
             requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
                     authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
-            requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY,
-                    AnalyticsUtils.setDefaultIfNull(authContext.getApplicationId()));
+            requestContext.addMetadataToMap(MetadataConstants.APP_UUID_KEY,
+                    AnalyticsUtils.setDefaultIfNull(authContext.getApplicationUUID()));
             requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
                     AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
             requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,

@@ -97,7 +97,7 @@ public class WebSocketThrottleFilter implements Filter {
             APIConfig api = requestContext.getMatchedAPI();
             String apiContext = api.getBasePath();
             String apiVersion = api.getVersion();
-            String appId = authContext.getApplicationId();
+            int appId = authContext.getApplicationId();
             String apiTier = getApiTier(api);
             String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
             String subTier = authContext.getTier();
@@ -164,7 +164,7 @@ public class WebSocketThrottleFilter implements Filter {
             }
 
             // Checking Application level throttling
-            String appThrottleKey = appId + ':' + authorizedUser;
+            String appThrottleKey = appId + ":" + authorizedUser;
             Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
             if (appDecision.isThrottled()) {
                 log.debug("Setting application throttle out response");
@@ -196,7 +196,7 @@ public class WebSocketThrottleFilter implements Filter {
         return apiThrottleKey;
     }
 
-    private String getSubscriptionThrottleKey(String appId, String apiContext, String apiVersion) {
+    private String getSubscriptionThrottleKey(int appId, String apiContext, String apiVersion) {
         String subThrottleKey = appId + ':' + apiContext;
         if (!apiVersion.isBlank()) {
             subThrottleKey += ':' + apiVersion;
@@ -237,11 +237,11 @@ public class WebSocketThrottleFilter implements Filter {
         }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
-        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ':' + authorizedUser);
+        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ":" + authorizedUser);
         throttleEvent.put(ThrottleEventConstants.APP_TIER, authContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
-        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ':' +
+        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ":" +
                 apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authContext.getTier());
         // TODO: (Praminda) should publish with tenant domain?
@@ -250,7 +250,7 @@ public class WebSocketThrottleFilter implements Filter {
         throttleEvent.put(ThrottleEventConstants.API_VERSION, apiVersion);
         throttleEvent.put(ThrottleEventConstants.APP_TENANT, authContext.getSubscriberTenantDomain());
         throttleEvent.put(ThrottleEventConstants.API_TENANT, tenantDomain);
-        throttleEvent.put(ThrottleEventConstants.APP_ID, authContext.getApplicationId());
+        throttleEvent.put(ThrottleEventConstants.APP_ID, String.valueOf(authContext.getApplicationId()));
         throttleEvent.put(ThrottleEventConstants.API_NAME, apiName);
         throttleEvent.put(ThrottleEventConstants.PROPERTIES, getProperties(requestContext).toString());
         return throttleEvent;

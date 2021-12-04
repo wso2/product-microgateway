@@ -387,7 +387,7 @@ public class ThrottleDataHolder {
      * @return throttle {@link Decision}
      */
     public Decision isThrottledByCustomPolicy(String userID, String resourceKey, String apiContext, String apiVersion,
-                                             String appTenant, String apiTenant, String appId, String clientIp) {
+                                             String appTenant, String apiTenant, int appId, String clientIp) {
         Decision decision = new Decision();
         if (keyTemplates.size() > 0) {
             for (String key : keyTemplates.keySet()) {
@@ -397,7 +397,7 @@ public class ThrottleDataHolder {
                 key = key.replaceAll("\\$apiVersion", apiVersion);
                 key = key.replaceAll("\\$appTenant", appTenant);
                 key = key.replaceAll("\\$apiTenant", apiTenant);
-                key = key.replaceAll("\\$appId", appId);
+                key = key.replaceAll("\\$appId", String.valueOf(appId));
 
                 if (clientIp != null) {
                     key = key.replaceAll("\\$clientIp", FilterUtils.ipToBigInteger(clientIp).toString());

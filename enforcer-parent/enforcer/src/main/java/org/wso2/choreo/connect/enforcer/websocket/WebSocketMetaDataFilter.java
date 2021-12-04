@@ -84,7 +84,10 @@ public class WebSocketMetaDataFilter implements Filter {
             requestContext.addMetadataToMap(MetadataConstants.CALLER_TOKEN,
                     getNullableStringValue(authenticationContext.getCallerToken()));
             requestContext.addMetadataToMap(MetadataConstants.APP_ID,
-                    getNullableStringValue(authenticationContext.getApplicationId()));
+                    String.valueOf(authenticationContext.getApplicationId()));
+            // Unused but added to maintain the consistancy
+            requestContext.addMetadataToMap(MetadataConstants.APP_UUID,
+                    String.valueOf(authenticationContext.getApplicationUUID()));
             requestContext.addMetadataToMap(MetadataConstants.APP_NAME,
                     getNullableStringValue(authenticationContext.getApplicationName()));
             requestContext.addMetadataToMap(MetadataConstants.CONSUMER_KEY,
