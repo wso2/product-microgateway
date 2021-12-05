@@ -226,10 +226,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().
                         getConfig().getJwtConfigurationDto();
                 if (jwtConfigurationDto.isEnabled()) {
-                    // TODO: (suksw) Ask if it is okay for this infoDTO to be different from the actual infoDTO
-                    APIKeyValidationInfoDTO infoDtoForBackendJWT = getAPIKeyValidationDTO(requestContext, payload);
                     JWTInfoDto jwtInfoDto = FilterUtils
-                            .generateJWTInfoDto(null, validationInfo, infoDtoForBackendJWT, requestContext);
+                            .generateJWTInfoDto(null, validationInfo, validationInfoDto, requestContext);
                     endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, tokenIdentifier,
                             jwtInfoDto, isGatewayTokenCacheEnabled);
                     // Set generated jwt token as a response header
