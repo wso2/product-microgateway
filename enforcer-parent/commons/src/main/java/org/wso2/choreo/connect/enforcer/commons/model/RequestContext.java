@@ -20,6 +20,8 @@ package org.wso2.choreo.connect.enforcer.commons.model;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import java.util.TreeMap;
  * through out the complete request flow through the gateway enforcer.
  */
 public class RequestContext {
+    private static final Logger logger = LogManager.getLogger(RequestContext.class);
 
     //constants
     public static final String CLUSTER_HEADER = "x-wso2-cluster-header";
@@ -447,6 +450,11 @@ public class RequestContext {
          */
         private Map<String, String> populatePathParameters(String basePath, String resourceTemplate,
                                                            String rawPath) {
+            if (resourceTemplate == null || rawPath == null) {
+                logger.debug("Skip populating the path parameters. template: {}, rawPath: {}", resourceTemplate,
+                        rawPath);
+                return null;
+            }
             // Format the basePath and resourcePath to maintain consistency
             String formattedBasePath = basePath.startsWith("/") ? basePath : "/" + basePath;
             formattedBasePath = formattedBasePath.endsWith("/") ?
@@ -457,8 +465,7 @@ public class RequestContext {
             String formattedRawPath = rawPath.split("\\?")[0];
             final ParameterResolver parameterResolver = new ParameterResolver
                     (formattedBasePath + formattedResourcePathTemplate);
-            final Map<String, String> resultMap = parameterResolver.parametersByName(formattedRawPath);
-            return resultMap;
+            return parameterResolver.parametersByName(formattedRawPath);
         }
     }
 }
