@@ -20,8 +20,6 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
-import org.wso2.choreo.connect.discovery.api.Scopes;
-import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
@@ -93,16 +91,13 @@ public class WebSocketAPI implements API {
             }
         }
 
-        for (SecurityList securityList : api.getSecurityList()) {
-            for (Map.Entry<String, Scopes> entry: securityList.getScopeListMap().entrySet()) {
-                apiSecurity.put(entry.getKey(), entry.getValue().getScopesList());
-                // - api_key: [] <-- supported
-                // - default: [] <-- supported
-                // - api_key: []
-                //   oauth: [] <-- AND operation not supported. Only the first will be considered.
-                break;
+        api.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
+            apiSecurity.put(key, new ArrayList<>());
+            if (security != null && security.getScopesList().size() > 0) {
+                List<String> scopeList = new ArrayList<>(security.getScopesList());
+                apiSecurity.replace(key, scopeList);
             }
-        }
+        }));
 
         EndpointSecurity endpointSecurity = new EndpointSecurity();
         if (api.getEndpointSecurity().hasProductionSecurityInfo()) {
@@ -119,7 +114,7 @@ public class WebSocketAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .apiSecurity(apiSecurity).tier(api.getTier()).endpointSecurity(endpointSecurity)
+                .tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).endpoints(endpoints).build();
         initFilters();
