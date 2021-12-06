@@ -27,7 +27,7 @@ cp "${CC_REPO_ROOT}/resources/security/mg.pem" "${CERTS}/mg.pem"
 cp "${CC_REPO_ROOT}/resources/security/mg.key" "${RESOURCES}/mg.key"
 
 # Generate server RSA 2048 key pair
-keytool -genkeypair -alias interceptor -keyalg RSA -keysize 2048 \
+keytool -genkeypair -alias interceptor -keyalg RSA -keysize 2048 -validity 36500 \
   -dname "CN=${DOMAIN},O=wso2,OU=Choreo Connect,S=CA,C=US" \
   -ext SAN=dns:${DOMAIN},dns:localhost \
   -keypass ${STORE_PASS} -keystore "${RESOURCES}/interceptor.jks" -storepass ${STORE_PASS}
