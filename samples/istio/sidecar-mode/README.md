@@ -50,7 +50,7 @@ kubectl label namespace default istio-injection=enabled
 - Verify the installation
 
     ```
-    kubectl get pods -n wso2
+    kubectl get pods
 
     Output:
     NAME                                         READY   STATUS    RESTARTS   AGE
