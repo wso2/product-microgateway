@@ -234,6 +234,7 @@ public class RestAPI implements API {
                     break;
                 }
             }
+            resource.setSecuritySchemas(securityMap);
         } else {
             resource.setSecuritySchemas(apiLevelSecurityList);
         }
