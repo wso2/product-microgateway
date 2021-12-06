@@ -20,6 +20,8 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Scopes;
+import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
@@ -91,13 +93,20 @@ public class WebSocketAPI implements API {
             }
         }
 
-        api.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            apiSecurity.put(key, new ArrayList<>());
-            if (security != null && security.getScopesList().size() > 0) {
-                List<String> scopeList = new ArrayList<>(security.getScopesList());
-                apiSecurity.replace(key, scopeList);
+        for (SecurityList securityList : api.getSecurityList()) {
+            for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                apiSecurity.put(entry.getKey(), new ArrayList<>());
+                if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                    List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                    apiSecurity.replace(entry.getKey(), scopeList);
+                }
+                // only supports security scheme OR combinations. Example -
+                // Security:
+                // - api_key: []
+                //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
+                break;
             }
-        }));
+        }
 
         EndpointSecurity endpointSecurity = new EndpointSecurity();
         if (api.getEndpointSecurity().hasProductionSecurityInfo()) {

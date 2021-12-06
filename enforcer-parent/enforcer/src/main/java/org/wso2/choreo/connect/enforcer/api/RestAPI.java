@@ -22,6 +22,8 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
+import org.wso2.choreo.connect.discovery.api.Scopes;
+import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
@@ -96,13 +98,20 @@ public class RestAPI implements API {
             }
         }
 
-        api.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            securityScopesMap.put(key, new ArrayList<>());
-            if (security != null && security.getScopesList().size() > 0) {
-                List<String> scopeList = new ArrayList<>(security.getScopesList());
-                securityScopesMap.replace(key, scopeList);
+        for (SecurityList securityList : api.getSecurityList()) {
+            for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                securityScopesMap.put(entry.getKey(), new ArrayList<>());
+                if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                    List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                    securityScopesMap.replace(entry.getKey(), scopeList);
+                }
+                // only supports security scheme OR combinations. Example -
+                // Security:
+                // - api_key: []
+                //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
+                break;
             }
-        }));
+        }
 
         for (Resource res : api.getResourcesList()) {
             Map<String, EndpointCluster> endpointClusterMap = new HashMap();
@@ -136,7 +145,7 @@ public class RestAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
-                .securitySchemeDefinitions(securitySchemeDefinitions)
+                .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
                 .endpoints(endpoints).endpointSecurity(endpointSecurity)
                 .organizationId(api.getOrganizationId()).build();
@@ -211,15 +220,20 @@ public class RestAPI implements API {
         resource.setDisableSecurity(operation.getDisableSecurity());
         Map<String, List<String>> securityMap = new HashMap<>();
         if (operation.getSecurityList().size() > 0) {
-            operation.getSecurityList().forEach(securityList ->
-                    securityList.getScopeListMap().forEach((key, security) -> {
-                        securityMap.put(key, new ArrayList<>());
-                        if (security != null && security.getScopesList().size() > 0) {
-                            List<String> scopeList = new ArrayList<>(security.getScopesList());
-                            securityMap.replace(key, scopeList);
-                        }
-                    }));
-            resource.setSecuritySchemas(securityMap);
+            for (SecurityList securityList : operation.getSecurityList()) {
+                for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                    securityMap.put(entry.getKey(), new ArrayList<>());
+                    if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                        List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                        securityMap.replace(entry.getKey(), scopeList);
+                    }
+                    // only supports security scheme OR combinations. Example -
+                    // Security:
+                    // - api_key: []
+                    //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
+                    break;
+                }
+            }
         } else {
             resource.setSecuritySchemas(apiLevelSecurityList);
         }
