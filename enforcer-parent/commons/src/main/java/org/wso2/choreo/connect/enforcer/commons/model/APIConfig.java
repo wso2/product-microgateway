@@ -38,8 +38,6 @@ public class APIConfig {
     private EndpointSecurity endpointSecurity;
     private String organizationId;
     private String uuid;
-
-    private Map<String, List<String>> apiSecurity = new HashMap<>();
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
@@ -148,18 +146,6 @@ public class APIConfig {
     }
 
     /**
-     * Security Schemas assigned for the corresponding API together with the scopes.
-     * Items of the map currently does not support being applied as AND.
-     * Authenticators are applied as OR. In other words, authentication succeeds if
-     * at least one security scheme matches.
-     *
-     * @return array of security schemes and scopes assigned for the API.
-     */
-    public Map<String, List<String>> getApiSecurity() {
-        return apiSecurity;
-    }
-
-    /**
      * API level Throttling tier assigned for the corresponding API.
      * @return API level throttling tier
      */
@@ -202,7 +188,6 @@ public class APIConfig {
         private String organizationId;
         private String uuid;
         private Map<String, SecuritySchemaConfig> securitySchemeDefinitions;
-        private Map<String, List<String>> apiSecurity = new HashMap<>();
         private String tier = "Unlimited";
         private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
@@ -256,11 +241,6 @@ public class APIConfig {
             return this;
         }
 
-        public Builder apiSecurity(Map<String, List<String>> apiSecurity) {
-            this.apiSecurity = apiSecurity;
-            return this;
-        }
-
         public Builder endpointSecurity(EndpointSecurity endpointSecurity) {
             this.endpointSecurity = endpointSecurity;
             return this;
@@ -296,7 +276,6 @@ public class APIConfig {
             apiConfig.resources = this.resources;
             apiConfig.apiType = this.apiType;
             apiConfig.endpoints = this.endpoints;
-            apiConfig.apiSecurity = this.apiSecurity;
             apiConfig.tier = this.tier;
             apiConfig.endpointSecurity = this.endpointSecurity;
             apiConfig.authorizationHeader = this.authorizationHeader;

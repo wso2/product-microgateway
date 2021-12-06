@@ -22,8 +22,6 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
-import org.wso2.choreo.connect.discovery.api.Scopes;
-import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
@@ -98,16 +96,13 @@ public class RestAPI implements API {
             }
         }
 
-        for (SecurityList securityList : api.getSecurityList()) {
-            for (Map.Entry<String, Scopes> entry: securityList.getScopeListMap().entrySet()) {
-                securityScopesMap.put(entry.getKey(), entry.getValue().getScopesList());
-                // - api_key: [] <-- supported
-                // - default: [] <-- supported
-                // - api_key: []
-                //   oauth: [] <-- AND operation not supported. Only the first will be considered.
-                break;
+        api.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
+            securityScopesMap.put(key, new ArrayList<>());
+            if (security != null && security.getScopesList().size() > 0) {
+                List<String> scopeList = new ArrayList<>(security.getScopesList());
+                securityScopesMap.replace(key, scopeList);
             }
-        }
+        }));
 
         for (Resource res : api.getResourcesList()) {
             Map<String, EndpointCluster> endpointClusterMap = new HashMap();
@@ -121,7 +116,7 @@ public class RestAPI implements API {
             }
 
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath());
+                ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setEndpoints(endpointClusterMap);
                 resources.add(resConfig);
             }
@@ -141,7 +136,7 @@ public class RestAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
-                .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
+                .securitySchemeDefinitions(securitySchemeDefinitions)
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
                 .endpoints(endpoints).endpointSecurity(endpointSecurity)
                 .organizationId(api.getOrganizationId()).build();
@@ -207,21 +202,27 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    private ResourceConfig buildResource(Operation operation, String resPath) {
+    private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
+            List<String>> apiLevelSecurityList) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
         resource.setTier(operation.getTier());
         resource.setDisableSecurity(operation.getDisableSecurity());
         Map<String, List<String>> securityMap = new HashMap<>();
-        operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            securityMap.put(key, new ArrayList<>());
-            if (security != null && security.getScopesList().size() > 0) {
-                List<String> scopeList = new ArrayList<>(security.getScopesList());
-                securityMap.replace(key, scopeList);
-            }
-        }));
-     resource.setSecuritySchemas(securityMap);
+        if (operation.getSecurityList().size() > 0) {
+            operation.getSecurityList().forEach(securityList ->
+                    securityList.getScopeListMap().forEach((key, security) -> {
+                        securityMap.put(key, new ArrayList<>());
+                        if (security != null && security.getScopesList().size() > 0) {
+                            List<String> scopeList = new ArrayList<>(security.getScopesList());
+                            securityMap.replace(key, scopeList);
+                        }
+                    }));
+            resource.setSecuritySchemas(securityMap);
+        } else {
+            resource.setSecuritySchemas(apiLevelSecurityList);
+        }
         return resource;
     }
 
