@@ -99,12 +99,16 @@ public class RestAPI implements API {
         }
 
         for (SecurityList securityList : api.getSecurityList()) {
-            for (Map.Entry<String, Scopes> entry: securityList.getScopeListMap().entrySet()) {
-                securityScopesMap.put(entry.getKey(), entry.getValue().getScopesList());
-                // - api_key: [] <-- supported
-                // - default: [] <-- supported
+            for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                securityScopesMap.put(entry.getKey(), new ArrayList<>());
+                if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                    List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                    securityScopesMap.replace(entry.getKey(), scopeList);
+                }
+                // only supports security scheme OR combinations. Example -
+                // Security:
                 // - api_key: []
-                //   oauth: [] <-- AND operation not supported. Only the first will be considered.
+                //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
                 break;
             }
         }
@@ -121,7 +125,7 @@ public class RestAPI implements API {
             }
 
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath());
+                ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setEndpoints(endpointClusterMap);
                 resources.add(resConfig);
             }
@@ -207,21 +211,33 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    private ResourceConfig buildResource(Operation operation, String resPath) {
+    private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
+            List<String>> apiLevelSecurityList) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
         resource.setTier(operation.getTier());
         resource.setDisableSecurity(operation.getDisableSecurity());
         Map<String, List<String>> securityMap = new HashMap<>();
-        operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            securityMap.put(key, new ArrayList<>());
-            if (security != null && security.getScopesList().size() > 0) {
-                List<String> scopeList = new ArrayList<>(security.getScopesList());
-                securityMap.replace(key, scopeList);
+        if (operation.getSecurityList().size() > 0) {
+            for (SecurityList securityList : operation.getSecurityList()) {
+                for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                    securityMap.put(entry.getKey(), new ArrayList<>());
+                    if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                        List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                        securityMap.replace(entry.getKey(), scopeList);
+                    }
+                    // only supports security scheme OR combinations. Example -
+                    // Security:
+                    // - api_key: []
+                    //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
+                    break;
+                }
             }
-        }));
-     resource.setSecuritySchemas(securityMap);
+            resource.setSecuritySchemas(securityMap);
+        } else {
+            resource.setSecuritySchemas(apiLevelSecurityList);
+        }
         return resource;
     }
 

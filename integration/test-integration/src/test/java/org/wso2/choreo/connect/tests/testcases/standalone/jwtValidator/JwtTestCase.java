@@ -38,19 +38,10 @@ import java.util.Map;
  */
 public class JwtTestCase {
     private String jwtWithoutScope;
-    private String jwtWithScope;
-    private String jwtWithMultipleScopes;
-    private String jwtWithMultipleInvalidScopes;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         jwtWithoutScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null,
-                false);
-        jwtWithScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets",
-                false);
-        jwtWithMultipleScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
-                "write:pets read:pets", false);
-        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar",
                 false);
     }
 
@@ -69,7 +60,7 @@ public class JwtTestCase {
                 "\"www-authenticate\" is available");
     }
 
-    @Test(description = "Test to check the JWT auth validate invalida signature token")
+    @Test(description = "Test to check the JWT auth validate invalid signature token")
     public void invokeJWTHeaderInvalidTokenTest() throws Exception {
 
         // Set header
@@ -89,7 +80,7 @@ public class JwtTestCase {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Something " + TestConstant.INVALID_JWT_TOKEN);
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Something " + jwtWithoutScope);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/pet/2") , headers);
 

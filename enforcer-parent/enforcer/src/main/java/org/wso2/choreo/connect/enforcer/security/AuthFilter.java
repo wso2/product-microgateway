@@ -69,7 +69,7 @@ public class AuthFilter implements Filter {
         boolean isOAuthBasicAuthMandatory = false;
 
         // Set security conditions
-        if (apiConfig.getApiSecurity() == null || apiConfig.getSecuritySchemeDefinitions() == null) {
+        if (apiConfig.getSecuritySchemeDefinitions() == null) {
             isOAuthProtected = true;
         } else {
             for (Map.Entry<String, SecuritySchemaConfig> securityDefinition :
