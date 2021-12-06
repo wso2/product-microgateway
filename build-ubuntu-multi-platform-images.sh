@@ -29,7 +29,11 @@ if [[ $(uname -m) == *"arm"* ]]; then
 fi
 
 echo "Reading product version..."
-MVN_PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+if [ -z $2 ]; then
+  MVN_PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+else
+  MVN_PROJECT_VERSION=$2
+fi
 echo "Product version: $MVN_PROJECT_VERSION"
 
 ADAPTER_IMAGE="wso2/choreo-connect-adapter:${MVN_PROJECT_VERSION}-ubuntu"
