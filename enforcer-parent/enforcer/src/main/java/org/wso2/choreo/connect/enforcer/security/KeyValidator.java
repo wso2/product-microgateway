@@ -281,7 +281,8 @@ public class KeyValidator {
         }
         infoDTO.setTier(sub.getPolicyId());
         infoDTO.setSubscriber(app.getSubName());
-        infoDTO.setApplicationId(app.getUUID());
+        infoDTO.setApplicationId(app.getId());
+        infoDTO.setApplicationUUID(app.getUUID());
         infoDTO.setApiName(api.getApiName());
         infoDTO.setApiVersion(api.getApiVersion());
         infoDTO.setApiPublisher(api.getApiProvider());

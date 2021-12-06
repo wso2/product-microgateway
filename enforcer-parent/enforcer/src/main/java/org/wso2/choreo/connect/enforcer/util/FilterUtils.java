@@ -200,7 +200,8 @@ public class FilterUtils {
         }
         // Setting end user as anonymous
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-        authContext.setApplicationId(clientIP);
+        // TODO: (VirajSalaka) clientIP for applicationUUID?
+        authContext.setApplicationUUID(clientIP);
         authContext.setApplicationName(null);
         authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
         authContext.setSubscriber(APIConstants.END_USER_ANONYMOUS);
@@ -229,6 +230,7 @@ public class FilterUtils {
         if (apiKeyValidationInfoDTO != null) {
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            authContext.setApplicationUUID(apiKeyValidationInfoDTO.getApplicationUUID());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
@@ -328,7 +330,7 @@ public class FilterUtils {
             authContext.setApiUUID(apiUUID);
         }
         authContext.setApplicationName(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
-        authContext.setApplicationId(UUID.nameUUIDFromBytes(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME.
+        authContext.setApplicationUUID(UUID.nameUUIDFromBytes(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME.
                 getBytes(StandardCharsets.UTF_8)).toString());
         authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
         authContext.setSubscriber(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
@@ -368,7 +370,7 @@ public class FilterUtils {
             }
         }
         if (apiKeyValidationInfoDTO != null) {
-            jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationUUID());
             jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             jwtInfoDto.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             jwtInfoDto.setKeyType(apiKeyValidationInfoDTO.getType());

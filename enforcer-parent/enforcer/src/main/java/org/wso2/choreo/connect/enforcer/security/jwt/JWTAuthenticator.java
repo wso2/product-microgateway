@@ -324,7 +324,8 @@ public class JWTAuthenticator implements Authenticator {
                                                                 String kmReference) {
         String applicationRef = APIConstants.ANONYMOUS_PREFIX + kmReference;
         apiKeyValidationInfoDTO.setApplicationName(applicationRef);
-        apiKeyValidationInfoDTO.setApplicationId(
+        apiKeyValidationInfoDTO.setApplicationId(-1);
+        apiKeyValidationInfoDTO.setApplicationUUID(
                 UUID.nameUUIDFromBytes(
                         applicationRef.getBytes(StandardCharsets.UTF_8)).toString());
         apiKeyValidationInfoDTO.setApplicationTier(APIConstants.UNLIMITED_TIER);
@@ -453,7 +454,8 @@ public class JWTAuthenticator implements Authenticator {
             JSONObject app = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
             if (app != null) {
                 validationInfo.setApplicationUUID(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID));
-                validationInfo.setApplicationId(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+                validationInfo.setApplicationId(app.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)
+                        .intValue());
                 validationInfo.setApplicationName(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
                 validationInfo.setApplicationTier(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
                 validationInfo.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
