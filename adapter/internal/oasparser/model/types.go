@@ -75,11 +75,11 @@ type ProjectAPI struct {
 
 // EndpointSecurity contains parameters of endpoint security at api.json
 type EndpointSecurity struct {
-	Password         string `json:"password,omitempty"`
-	Type             string `json:"type,omitempty"`
-	Enabled          bool   `json:"enabled,omitempty"`
-	Username         string `json:"username,omitempty"`
-	CustomParameters string `json:"customparameters,omitempty"`
+	Password         string            `json:"password,omitempty"`
+	Type             string            `json:"type,omitempty"`
+	Enabled          bool              `json:"enabled,omitempty"`
+	Username         string            `json:"username,omitempty"`
+	CustomParameters map[string]string `json:"customparameters,omitempty"`
 }
 
 // APIEndpointSecurity represents the structure of endpoint_security param in api.yaml
@@ -146,18 +146,18 @@ type APIYaml struct {
 			LoadBalanceSessionTimeOut    string `json:"sessionTimeOut,omitempty"`
 			EndpointSecurity             struct {
 				Production struct {
-					Password         string `json:"password,omitempty"`
-					Type             string `json:"type,omitempty"`
-					Enabled          bool   `json:"enabled,omitempty"`
-					Username         string `json:"username,omitempty"`
-					CustomParameters string `json:"customparameters,omitempty"`
+					Password         string            `json:"password,omitempty"`
+					Type             string            `json:"type,omitempty"`
+					Enabled          bool              `json:"enabled,omitempty"`
+					Username         string            `json:"username,omitempty"`
+					CustomParameters map[string]string `json:"customparameters,omitempty"`
 				} `json:"production,omitempty"`
 				Sandbox struct {
-					Password         string `json:"password,omitempty"`
-					Type             string `json:"type,omitempty"`
-					Enabled          bool   `json:"enabled,omitempty"`
-					Username         string `json:"username,omitempty"`
-					CustomParameters string `json:"customparameters,omitempty"`
+					Password         string            `json:"password,omitempty"`
+					Type             string            `json:"type,omitempty"`
+					Enabled          bool              `json:"enabled,omitempty"`
+					Username         string            `json:"username,omitempty"`
+					CustomParameters map[string]string `json:"customparameters,omitempty"`
 				} `json:"sandbox,omitempty"`
 			} `json:"endpoint_security,omitempty"`
 			RawProdEndpoints            interface{} `json:"production_endpoints,omitempty"`

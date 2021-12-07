@@ -20,7 +20,7 @@ public class Api {
                List<APIOperationsDTO> operationsDTOS, String[] vhosts) {
         this.name = name;
         this.version = version;
-        this.context = context;
+        this.context = endpointUrl;
         this.endpointUrl = context;
         this.tiersCollection = tiersCollection;
         this.tier = tier;

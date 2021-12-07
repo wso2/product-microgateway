@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JaegerExporterTest {
+    private static final String instrumentation = "CC";
     private static Map<String, String> okProps;
     private static Map<String, String> badProps;
 
@@ -37,29 +38,34 @@ public class JaegerExporterTest {
     public static void setup() {
         okProps = new HashMap<>();
         badProps = new HashMap<>();
-        okProps.put(TracingConstants.CONF_ENDPOINT, "http://localhost:14268/api/traces");
+        okProps.put(TracingConstants.CONF_HOST, "localhost");
+        okProps.put(TracingConstants.CONF_PORT, "14268");
+        okProps.put(TracingConstants.CONF_ENDPOINT, "/api/traces");
         okProps.put(TracingConstants.CONF_MAX_TRACES_PER_SEC, "3");
-        okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, "CC");
-        badProps.put(TracingConstants.CONF_ENDPOINT, "localhost:14268");
+        okProps.put(TracingConstants.CONF_EXPORTER_TIMEOUT, "15");
+        okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, instrumentation);
+        badProps.put(TracingConstants.CONF_HOST, "localhost");
+        badProps.put(TracingConstants.CONF_PORT, "");
+        badProps.put(TracingConstants.CONF_ENDPOINT, "");
         GlobalOpenTelemetry.resetForTest();
     }
 
     @Test
     public void testSuccessExporterInit() throws TracingException {
-        Tracer t = JaegerExporter.getInstance().initTracer(okProps);
+        Tracer t = JaegerExporter.getInstance().initSdk(okProps).getTracer(instrumentation);
         Assert.assertNotNull("Tracer can't be null", t);
     }
 
     @Test
-    public void testInitWithInvalidEP() {
-        Assert.assertThrows("Incorrect exception was thrown", IllegalArgumentException.class, () ->
-                JaegerExporter.getInstance().initTracer(badProps));
+    public void testInitWithInvalidPort() {
+        Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
+                JaegerExporter.getInstance().initSdk(badProps));
     }
 
     @Test
     public void testInitWithoutEP() {
-        badProps.put(TracingConstants.CONF_ENDPOINT, "");
+        badProps.put(TracingConstants.CONF_HOST, "");
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
-                JaegerExporter.getInstance().initTracer(badProps));
+                JaegerExporter.getInstance().initSdk(badProps));
     }
 }

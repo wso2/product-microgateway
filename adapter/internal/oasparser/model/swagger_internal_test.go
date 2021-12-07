@@ -87,8 +87,6 @@ func TestSetResourcesSwagger(t *testing.T) {
 		result  []Resource
 		message string
 	}
-	securitySchemes := []SecurityScheme{}
-
 	dataItems := []setResourcesTestItem{
 		{
 			spec.Swagger{
@@ -130,7 +128,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := setResourcesSwagger(item.input, &securitySchemes)
+		resultResources := setResourcesSwagger(item.input)
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)

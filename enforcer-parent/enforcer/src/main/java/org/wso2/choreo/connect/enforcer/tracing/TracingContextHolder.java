@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -14,19 +14,30 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
 package org.wso2.choreo.connect.enforcer.tracing;
 
-import io.opentelemetry.sdk.OpenTelemetrySdk;
-
-import java.util.Map;
+import io.opentelemetry.context.Context;
 
 /**
- * This is the interface to implement tracer SDK to export tracing data.
+ * Holds an instance of Tracing context per thread.
  */
-public interface TracerBuilder {
+public class TracingContextHolder {
+    private Context context;
+    private static ThreadLocal<TracingContextHolder> instance = ThreadLocal.withInitial(TracingContextHolder::new);
 
-    OpenTelemetrySdk initSdk(Map<String, String> properties) throws TracingException;
+    private TracingContextHolder() {}
+
+    public static TracingContextHolder getInstance() {
+        return instance.get();
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 }

@@ -30,7 +30,7 @@ public class APIProcessUtils {
         securityInfo.setSecurityType(protoSecurityInfo.getSecurityType());
         securityInfo.setUsername(protoSecurityInfo.getUsername());
         securityInfo.setPassword(protoSecurityInfo.getPassword().toCharArray());
-        securityInfo.setCustomParameters(protoSecurityInfo.getCustomParameters());
+        securityInfo.setCustomParameters(protoSecurityInfo.getCustomParametersMap());
         securityInfo.setEnabled(protoSecurityInfo.getEnabled());
         return securityInfo;
     }

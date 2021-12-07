@@ -20,16 +20,38 @@ public interface SecurityInfoOrBuilder extends
       getPasswordBytes();
 
   /**
-   * <code>string customParameters = 2;</code>
-   * @return The customParameters.
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
    */
-  java.lang.String getCustomParameters();
+  int getCustomParametersCount();
   /**
-   * <code>string customParameters = 2;</code>
-   * @return The bytes for customParameters.
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
    */
-  com.google.protobuf.ByteString
-      getCustomParametersBytes();
+  boolean containsCustomParameters(
+      java.lang.String key);
+  /**
+   * Use {@link #getCustomParametersMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getCustomParameters();
+  /**
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getCustomParametersMap();
+  /**
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
+   */
+
+  java.lang.String getCustomParametersOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue);
+  /**
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
+   */
+
+  java.lang.String getCustomParametersOrThrow(
+      java.lang.String key);
 
   /**
    * <code>string securityType = 3;</code>

@@ -44,11 +44,19 @@ const (
 	DefaultSecurity          string = "default"
 )
 
+// cluster name prefixes
+const (
+	sandClustersConfigNamePrefix    string = "clusterSand"
+	prodClustersConfigNamePrefix    string = "clusterProd"
+	xWso2EPClustersConfigNamePrefix string = "xwso2cluster"
+)
+
 // sub-property values and keys relevant for x-wso2-application security extension
 const (
 	Optional                 string = "optional"
 	SecurityTypes            string = "security-types"
 	APIKeyInAppLevelSecurity string = "api_key"
+	APIKeyNameWithApim       string = "apikey"
 	APIKeyTypeInOAS          string = "apiKey"
 )
 

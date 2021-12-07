@@ -23,12 +23,12 @@ package org.wso2.choreo.connect.enforcer.tracing;
  * This class contains all the constants related to the tracing implementation with azure app insights
  */
 public class TracingConstants {
-
-    public static final String SERVICE_NAME = "choreo_connect";
+    public static final String SERVICE_NAME_PREFIX = "choreo_connect_enforcer";
     public static final String AZURE_TRACE_EXPORTER = "azure";
     public static final String JAEGER_TRACE_EXPORTER = "jaeger";
     public static final String ZIPKIN_TRACE_EXPORTER = "zipkin";
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
+    public static final String ENFORCER_START_SPAN = "Enforcer:Starting request verification";
     public static final String PUBLISH_THROTTLE_EVENT_SPAN = "ThrottleFilter:handleRequest():Publish non " +
             "throttled event";
     public static final String ANALYTICS_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Success Flow";
@@ -64,6 +64,8 @@ public class TracingConstants {
     public static final String CONF_INSTRUMENTATION_NAME = "instrumentationName";
     public static final String CONF_EXPORTER_TIMEOUT = "timeout";
     public static final String CONF_ENDPOINT = "endpoint";
+    public static final String CONF_HOST = "host";
+    public static final String CONF_PORT = "port";
     public static final int DEFAULT_MAX_TRACES_PER_SEC = 2;
     public static final String DEFAULT_INSTRUMENTATION_NAME = "CHOREO-CONNECT";
     public static final long DEFAULT_TRACING_READ_TIMEOUT = 15;

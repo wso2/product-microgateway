@@ -21,7 +21,6 @@ private static final long serialVersionUID = 0L;
   }
   private SecurityInfo() {
     password_ = "";
-    customParameters_ = "";
     securityType_ = "";
     username_ = "";
   }
@@ -46,6 +45,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -63,9 +63,16 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            customParameters_ = s;
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              customParameters_ = com.google.protobuf.MapField.newMapField(
+                  CustomParametersDefaultEntryHolder.defaultEntry);
+              mutable_bitField0_ |= 0x00000001;
+            }
+            com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+            customParameters__ = input.readMessage(
+                CustomParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+            customParameters_.getMutableMap().put(
+                customParameters__.getKey(), customParameters__.getValue());
             break;
           }
           case 26: {
@@ -109,6 +116,18 @@ private static final long serialVersionUID = 0L;
     return org.wso2.choreo.connect.discovery.api.SecurityInfoProto.internal_static_wso2_discovery_api_SecurityInfo_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapField internalGetMapField(
+      int number) {
+    switch (number) {
+      case 2:
+        return internalGetCustomParameters();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -156,41 +175,84 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int CUSTOMPARAMETERS_FIELD_NUMBER = 2;
-  private volatile java.lang.Object customParameters_;
-  /**
-   * <code>string customParameters = 2;</code>
-   * @return The customParameters.
-   */
-  @java.lang.Override
-  public java.lang.String getCustomParameters() {
-    java.lang.Object ref = customParameters_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      customParameters_ = s;
-      return s;
+  private static final class CustomParametersDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                org.wso2.choreo.connect.discovery.api.SecurityInfoProto.internal_static_wso2_discovery_api_SecurityInfo_CustomParametersEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
+  }
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> customParameters_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetCustomParameters() {
+    if (customParameters_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          CustomParametersDefaultEntryHolder.defaultEntry);
     }
+    return customParameters_;
+  }
+
+  public int getCustomParametersCount() {
+    return internalGetCustomParameters().getMap().size();
   }
   /**
-   * <code>string customParameters = 2;</code>
-   * @return The bytes for customParameters.
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
+   */
+
+  @java.lang.Override
+  public boolean containsCustomParameters(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    return internalGetCustomParameters().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getCustomParametersMap()} instead.
    */
   @java.lang.Override
-  public com.google.protobuf.ByteString
-      getCustomParametersBytes() {
-    java.lang.Object ref = customParameters_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      customParameters_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getCustomParameters() {
+    return getCustomParametersMap();
+  }
+  /**
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
+   */
+  @java.lang.Override
+
+  public java.util.Map<java.lang.String, java.lang.String> getCustomParametersMap() {
+    return internalGetCustomParameters().getMap();
+  }
+  /**
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getCustomParametersOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetCustomParameters().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <code>map&lt;string, string&gt; customParameters = 2;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getCustomParametersOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetCustomParameters().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
     }
+    return map.get(key);
   }
 
   public static final int SECURITYTYPE_FIELD_NUMBER = 3;
@@ -297,9 +359,12 @@ private static final long serialVersionUID = 0L;
     if (!getPasswordBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, password_);
     }
-    if (!getCustomParametersBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, customParameters_);
-    }
+    com.google.protobuf.GeneratedMessageV3
+      .serializeStringMapTo(
+        output,
+        internalGetCustomParameters(),
+        CustomParametersDefaultEntryHolder.defaultEntry,
+        2);
     if (!getSecurityTypeBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, securityType_);
     }
@@ -321,8 +386,15 @@ private static final long serialVersionUID = 0L;
     if (!getPasswordBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, password_);
     }
-    if (!getCustomParametersBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, customParameters_);
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetCustomParameters().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      customParameters__ = CustomParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
+      size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, customParameters__);
     }
     if (!getSecurityTypeBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, securityType_);
@@ -351,8 +423,8 @@ private static final long serialVersionUID = 0L;
 
     if (!getPassword()
         .equals(other.getPassword())) return false;
-    if (!getCustomParameters()
-        .equals(other.getCustomParameters())) return false;
+    if (!internalGetCustomParameters().equals(
+        other.internalGetCustomParameters())) return false;
     if (!getSecurityType()
         .equals(other.getSecurityType())) return false;
     if (getEnabled()
@@ -372,8 +444,10 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
     hash = (53 * hash) + getPassword().hashCode();
-    hash = (37 * hash) + CUSTOMPARAMETERS_FIELD_NUMBER;
-    hash = (53 * hash) + getCustomParameters().hashCode();
+    if (!internalGetCustomParameters().getMap().isEmpty()) {
+      hash = (37 * hash) + CUSTOMPARAMETERS_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetCustomParameters().hashCode();
+    }
     hash = (37 * hash) + SECURITYTYPE_FIELD_NUMBER;
     hash = (53 * hash) + getSecurityType().hashCode();
     hash = (37 * hash) + ENABLED_FIELD_NUMBER;
@@ -492,6 +566,28 @@ private static final long serialVersionUID = 0L;
       return org.wso2.choreo.connect.discovery.api.SecurityInfoProto.internal_static_wso2_discovery_api_SecurityInfo_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 2:
+          return internalGetCustomParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMutableMapField(
+        int number) {
+      switch (number) {
+        case 2:
+          return internalGetMutableCustomParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -520,8 +616,7 @@ private static final long serialVersionUID = 0L;
       super.clear();
       password_ = "";
 
-      customParameters_ = "";
-
+      internalGetMutableCustomParameters().clear();
       securityType_ = "";
 
       enabled_ = false;
@@ -554,8 +649,10 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.api.SecurityInfo buildPartial() {
       org.wso2.choreo.connect.discovery.api.SecurityInfo result = new org.wso2.choreo.connect.discovery.api.SecurityInfo(this);
+      int from_bitField0_ = bitField0_;
       result.password_ = password_;
-      result.customParameters_ = customParameters_;
+      result.customParameters_ = internalGetCustomParameters();
+      result.customParameters_.makeImmutable();
       result.securityType_ = securityType_;
       result.enabled_ = enabled_;
       result.username_ = username_;
@@ -611,10 +708,8 @@ private static final long serialVersionUID = 0L;
         password_ = other.password_;
         onChanged();
       }
-      if (!other.getCustomParameters().isEmpty()) {
-        customParameters_ = other.customParameters_;
-        onChanged();
-      }
+      internalGetMutableCustomParameters().mergeFrom(
+          other.internalGetCustomParameters());
       if (!other.getSecurityType().isEmpty()) {
         securityType_ = other.securityType_;
         onChanged();
@@ -654,6 +749,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private java.lang.Object password_ = "";
     /**
@@ -731,79 +827,131 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object customParameters_ = "";
-    /**
-     * <code>string customParameters = 2;</code>
-     * @return The customParameters.
-     */
-    public java.lang.String getCustomParameters() {
-      java.lang.Object ref = customParameters_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        customParameters_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> customParameters_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetCustomParameters() {
+      if (customParameters_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            CustomParametersDefaultEntryHolder.defaultEntry);
       }
+      return customParameters_;
     }
-    /**
-     * <code>string customParameters = 2;</code>
-     * @return The bytes for customParameters.
-     */
-    public com.google.protobuf.ByteString
-        getCustomParametersBytes() {
-      java.lang.Object ref = customParameters_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        customParameters_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetMutableCustomParameters() {
+      onChanged();;
+      if (customParameters_ == null) {
+        customParameters_ = com.google.protobuf.MapField.newMapField(
+            CustomParametersDefaultEntryHolder.defaultEntry);
       }
+      if (!customParameters_.isMutable()) {
+        customParameters_ = customParameters_.copy();
+      }
+      return customParameters_;
+    }
+
+    public int getCustomParametersCount() {
+      return internalGetCustomParameters().getMap().size();
     }
     /**
-     * <code>string customParameters = 2;</code>
-     * @param value The customParameters to set.
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; customParameters = 2;</code>
      */
-    public Builder setCustomParameters(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      customParameters_ = value;
-      onChanged();
-      return this;
+
+    @java.lang.Override
+    public boolean containsCustomParameters(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetCustomParameters().getMap().containsKey(key);
     }
     /**
-     * <code>string customParameters = 2;</code>
-     * @return This builder for chaining.
+     * Use {@link #getCustomParametersMap()} instead.
      */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getCustomParameters() {
+      return getCustomParametersMap();
+    }
+    /**
+     * <code>map&lt;string, string&gt; customParameters = 2;</code>
+     */
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getCustomParametersMap() {
+      return internalGetCustomParameters().getMap();
+    }
+    /**
+     * <code>map&lt;string, string&gt; customParameters = 2;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getCustomParametersOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetCustomParameters().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <code>map&lt;string, string&gt; customParameters = 2;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getCustomParametersOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetCustomParameters().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
     public Builder clearCustomParameters() {
-      
-      customParameters_ = getDefaultInstance().getCustomParameters();
-      onChanged();
+      internalGetMutableCustomParameters().getMutableMap()
+          .clear();
       return this;
     }
     /**
-     * <code>string customParameters = 2;</code>
-     * @param value The bytes for customParameters to set.
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; customParameters = 2;</code>
      */
-    public Builder setCustomParametersBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      customParameters_ = value;
-      onChanged();
+
+    public Builder removeCustomParameters(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableCustomParameters().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+    getMutableCustomParameters() {
+      return internalGetMutableCustomParameters().getMutableMap();
+    }
+    /**
+     * <code>map&lt;string, string&gt; customParameters = 2;</code>
+     */
+    public Builder putCustomParameters(
+        java.lang.String key,
+        java.lang.String value) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (value == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableCustomParameters().getMutableMap()
+          .put(key, value);
+      return this;
+    }
+    /**
+     * <code>map&lt;string, string&gt; customParameters = 2;</code>
+     */
+
+    public Builder putAllCustomParameters(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableCustomParameters().getMutableMap()
+          .putAll(values);
       return this;
     }
 

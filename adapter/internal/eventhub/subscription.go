@@ -54,26 +54,16 @@ const (
 )
 
 var (
+	// This set of variables are used just for Type resolution with reflect.
+	// Hence no value needs to be assigned.
 	subList           *types.SubscriptionList
 	appList           *types.ApplicationList
 	appKeyMappingList *types.ApplicationKeyMappingList
 	appPolicyList     *types.ApplicationPolicyList
 	subPolicyList     *types.SubscriptionPolicyList
+	apiList           *types.APIList
 
-	// APIListMap contains the Api list against each label
-	APIListMap map[string]*types.APIList
-
-	// SubscriptionMap contains the subscriptions recieved from API Manager Control Plane
-	SubscriptionMap map[int32]*types.Subscription
-	// ApplicationMap contains the applications recieved from API Manager Control Plane
-	ApplicationMap map[string]*types.Application
-	// ApplicationKeyMappingMap contains the application key mappings recieved from API Manager Control Plane
-	ApplicationKeyMappingMap map[string]*types.ApplicationKeyMapping
-	// ApplicationPolicyMap contains the application policies recieved from API Manager Control Plane
-	ApplicationPolicyMap map[int32]*types.ApplicationPolicy
-	// SubscriptionPolicyMap contains the subscription policies recieved from API Manager Control Plane
-	SubscriptionPolicyMap map[int32]*types.SubscriptionPolicy
-	resources             = []resource{
+	resources = []resource{
 		{
 			endpoint:     "subscriptions",
 			responseType: subList,
@@ -117,7 +107,6 @@ type resource struct {
 
 func init() {
 	APIListChannel = make(chan response)
-	APIListMap = make(map[string]*types.APIList)
 }
 
 // LoadSubscriptionData loads subscription data from control-plane
@@ -166,7 +155,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 	for _, configuredEnv := range configuredEnvs {
 		queryParamMap := make(map[string]string, 1)
 		queryParamMap[GatewayLabelParam] = configuredEnv
-		go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
+		go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
 		for {
 			data := <-APIListChannel
 			logger.LoggerSync.Debug("Receiving API information for an environment")
@@ -189,12 +178,13 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
-					go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
+					go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
 				}(data)
 			}
 		}
 	}
-	go retrieveAPIListFromChannel(APIListChannel, initialAPIUUIDListMap)
+	// InitialAPIUUIDList is already processed (if available). Then onwards, that list is not required.
+	go retrieveAPIListFromChannel(APIListChannel, nil)
 }
 
 // InvokeService invokes the internal data resource
@@ -280,34 +270,12 @@ func retrieveAPIList(response response, initialAPIUUIDListMap map[string]int) {
 				apiListResponse := newResponse.(*types.APIList)
 				if logger.LoggerSubscription.Level == logrus.DebugLevel {
 					for _, api := range apiListResponse.List {
-						logger.LoggerSubscription.Infof("Received API List information for API : %s", api.UUID)
+						logger.LoggerSubscription.Debugf("Received API List information for API : %s", api.UUID)
 					}
 				}
-				if _, ok := APIListMap[response.GatewayLabel]; !ok {
-					// During the startup
-					// When GA is enabled need to load only the subscription data which are related to API UUIDs received
-					// from the GA.
-					if initialAPIUUIDListMap != nil {
-						newEmptyResponse := reflect.New(responseType).Interface()
-						APIListMap[response.GatewayLabel] = newEmptyResponse.(*types.APIList)
-						for i, api := range apiListResponse.List {
-							if _, ok := initialAPIUUIDListMap[api.UUID]; ok {
-								APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
-									apiListResponse.List[i])
-							}
-						}
-					} else {
-						// When GA is disabled load all the subscription data
-						APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
-					}
-				} else {
-					// API Details retrieved after startup contains single API per response.
-					if len(apiListResponse.List) == 1 {
-						APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
-							apiListResponse.List[0])
-					}
-				}
-				xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.MarshalAPIList(APIListMap[response.GatewayLabel]))
+
+				xds.UpdateEnforcerAPIList(response.GatewayLabel,
+					xds.MarshalAPIMetataAndReturnList(apiListResponse, initialAPIUUIDListMap, response.GatewayLabel))
 			default:
 				logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
 			}
@@ -327,49 +295,23 @@ func retrieveSubscriptionDataFromChannel(response response) {
 		case *types.SubscriptionList:
 			logger.LoggerSubscription.Debug("Received Subscription information.")
 			subList = newResponse.(*types.SubscriptionList)
-			ResourceMap := make(map[int32]*types.Subscription)
-			for index, subscription := range subList.List {
-				ResourceMap[subscription.SubscriptionID] = &subList.List[index]
-			}
-			SubscriptionMap = ResourceMap
-			xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionMap(SubscriptionMap))
+			xds.UpdateEnforcerSubscriptions(xds.MarshalMultipleSubscriptions(subList))
 		case *types.ApplicationList:
 			logger.LoggerSubscription.Debug("Received Application information.")
 			appList = newResponse.(*types.ApplicationList)
-			ResourceMap := make(map[string]*types.Application)
-			for index, application := range appList.List {
-				ResourceMap[application.UUID] = &appList.List[index]
-			}
-			ApplicationMap = ResourceMap
-			xds.UpdateEnforcerApplications(xds.MarshalApplicationMap(ApplicationMap))
+			xds.UpdateEnforcerApplications(xds.MarshalMultipleApplications(appList))
 		case *types.ApplicationPolicyList:
 			logger.LoggerSubscription.Debug("Received Application Policy information.")
 			appPolicyList = newResponse.(*types.ApplicationPolicyList)
-			ResourceMap := make(map[int32]*types.ApplicationPolicy)
-			for index, policy := range appPolicyList.List {
-				ResourceMap[policy.ID] = &appPolicyList.List[index]
-			}
-			ApplicationPolicyMap = ResourceMap
-			xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyMap(ApplicationPolicyMap))
+			xds.UpdateEnforcerApplicationPolicies(xds.MarshalMultipleApplicationPolicies(appPolicyList))
 		case *types.SubscriptionPolicyList:
 			logger.LoggerSubscription.Debug("Received Subscription Policy information.")
 			subPolicyList = newResponse.(*types.SubscriptionPolicyList)
-			ResourceMap := make(map[int32]*types.SubscriptionPolicy)
-			for index, policy := range subPolicyList.List {
-				ResourceMap[policy.ID] = &subPolicyList.List[index]
-			}
-			SubscriptionPolicyMap = ResourceMap
-			xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyMap(SubscriptionPolicyMap))
+			xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalMultipleSubscriptionPolicies(subPolicyList))
 		case *types.ApplicationKeyMappingList:
 			logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
 			appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
-			ResourceMap := make(map[string]*types.ApplicationKeyMapping)
-			for index, keyMapping := range appKeyMappingList.List {
-				applicationKeyMappingReference := keyMapping.ConsumerKey + ":" + keyMapping.KeyManager
-				ResourceMap[applicationKeyMappingReference] = &appKeyMappingList.List[index]
-			}
-			ApplicationKeyMappingMap = ResourceMap
-			xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(ApplicationKeyMappingMap))
+			xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalMultipleApplicationKeyMappings(appKeyMappingList))
 		default:
 			logger.LoggerSubscription.Debugf("Unknown type %T", t)
 		}

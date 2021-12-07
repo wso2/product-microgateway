@@ -116,8 +116,8 @@ func CreateDummyResourceForTests(path string, method []Operation, description st
 func CreateMinimalDummyResourceForTests(path string, methods []Operation, id string, productionUrls,
 	sandboxUrls []Endpoint) Resource {
 
-	prodEndpints := generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
-	sandboxEndpints := generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls, LoadBalance)
+	prodEndpints := generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+	sandboxEndpints := generateEndpointCluster(sandClustersConfigNamePrefix, sandboxUrls, LoadBalance)
 
 	return Resource{
 		path:                path,

@@ -12,7 +12,7 @@ option java_multiple_files = true;
 // Endpoint config model
 message SecurityInfo {
   string password = 1;
-  string customParameters = 2;
+  map<string,string> customParameters = 2;
   string securityType = 3;
   bool enabled = 4;
   string username = 5;

@@ -20,6 +20,7 @@ const (
 	extAuthzClusterName     string = "ext-authz"
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
+	tracingClusterName      string = "wso2_cc_trace"
 )
 
 const (
@@ -47,15 +48,11 @@ const (
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
 
+//cluster prefixes
 const (
-	xWso2EPClustersConfigNamePrefix string = "xwso2cluster_"
-	sandClustersConfigNamePrefix    string = "clusterSand_"
-	prodClustersConfigNamePrefix    string = "clusterProd_"
-)
-
-const (
-	requestInterceptClustersNamePrefix  string = "reqInterceptor_"
-	responseInterceptClustersNamePrefix string = "resInterceptor_"
+	xWso2EPClustersConfigNamePrefix     string = "xwso2cluster"
+	requestInterceptClustersNamePrefix  string = "reqInterceptor"
+	responseInterceptClustersNamePrefix string = "resInterceptor"
 )
 
 // Context Extensions which are set in ExtAuthzPerRoute Config
@@ -105,4 +102,15 @@ const (
 
 const (
 	defaultListenerHostAddress = "0.0.0.0"
+)
+
+// tracing configuration constants
+const (
+	tracerHost          = "host"
+	tracerPort          = "port"
+	tracerMaxPathLength = "maxPathLength"
+	tracerEndpoint      = "endpoint"
+	tracerNameZipkin    = "envoy.tracers.zipkin"
+	// Azure tracer's name
+	TracerTypeAzure = "azure"
 )

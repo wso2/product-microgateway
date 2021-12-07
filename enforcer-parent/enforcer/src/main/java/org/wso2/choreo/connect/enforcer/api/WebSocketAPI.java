@@ -23,6 +23,7 @@ import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -67,6 +68,16 @@ public class WebSocketAPI implements API {
         String apiType = api.getApiType();
         Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
         List<String> securitySchemeList = new ArrayList<>();
+        Map<String, EndpointCluster> endpoints = new HashMap<>();
+
+        EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
+        EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
+        if (productionEndpoints != null) {
+            endpoints.put(APIConstants.API_KEY_TYPE_PRODUCTION, productionEndpoints);
+        }
+        if (sandboxEndpoints != null) {
+            endpoints.put(APIConstants.API_KEY_TYPE_SANDBOX, sandboxEndpoints);
+        }
 
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
             if (securityScheme.getType() != null) {
@@ -101,7 +112,7 @@ public class WebSocketAPI implements API {
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).build();
+                .organizationId(api.getOrganizationId()).endpoints(endpoints).build();
         initFilters();
         initUpgradeFilters();
         return basePath;

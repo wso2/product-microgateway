@@ -70,7 +70,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.securityScheme = setSecuritySchemesOpenAPI(swagger3)
-	swagger.resources, err = setResourcesOpenAPI(swagger3, &swagger.securityScheme)
+	swagger.resources, err = setResourcesOpenAPI(swagger3)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 			}
 		}
 		if productionUrls != nil && len(productionUrls) > 0 {
-			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
+			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 		}
 	}
 	return nil
@@ -116,7 +116,7 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 	return resource
 }
 
-func setResourcesOpenAPI(openAPI openapi3.Swagger, securityschemes *[]SecurityScheme) ([]Resource, error) {
+func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 	var resources []Resource
 
 	// Check the disable security vendor ext at API level.
@@ -132,7 +132,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger, securityschemes *[]SecuritySc
 					if found {
 						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, val)
 					}
-					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod, securityschemes)
+					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
 					arrayIndex++
 				}
 			}
@@ -154,7 +154,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger, securityschemes *[]SecuritySc
 
 				}
 				if productionUrls != nil && len(productionUrls) > 0 {
-					resource.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
+					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 				}
 			}
 			resources = append(resources, resource)
@@ -174,7 +174,7 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	return securitySchemes
 }
 
-func getOperationLevelDetails(operation *openapi3.Operation, method string, securitySchemes *[]SecurityScheme) Operation {
+func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
 
 	if operation.Security != nil || extensions[xWso2ApplicationSecurity] != nil {
@@ -194,8 +194,6 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 								mapValue.(string): {},
 							}
 							securityArray = append(securityArray, applicationAPIKeyMap)
-							checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes)
-							checkAPIKeyInOperationArray(&securityArray, securitySchemes)
 						}
 					}
 				}
@@ -206,41 +204,6 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string, secu
 	}
 
 	return NewOperation(method, nil, extensions)
-}
-
-// checks API key in operation security array
-func checkAPIKeyInOperationArray(securityArray *[]map[string][]string, securitySchemes *[]SecurityScheme) {
-	logger.LoggerOasparser.Infof("Inside security scheme %v.", securitySchemes)
-	for _, val := range *securitySchemes {
-		if val.Type == APIKeyTypeInOAS {
-			for arrayKey, arrayVal := range *securityArray {
-				logger.LoggerOasparser.Infof("New method key %v. Value: %v", arrayKey, arrayVal)
-				if _, found := arrayVal[val.DefinitionName]; found {
-					*securityArray = removeAPIKeyFromOperationArray(*securityArray, arrayKey)
-				}
-			}
-		}
-	}
-}
-
-// removes element in the given index from operation security array
-func removeAPIKeyFromOperationArray(securityArray []map[string][]string, index int) []map[string][]string {
-	return append(securityArray[:index], securityArray[index+1:]...)
-}
-
-// checks api_key is in the security scheme. If it's not in the security scheme, this
-// method adds api_key security scheme to work with Application level enabled API keys.
-func checkAppSecurityAPIKeyInSecuritySchemes(securitySchemes *[]SecurityScheme) {
-	var isApplicationAPIKeyFound = false
-	for _, val := range *securitySchemes {
-		if val.DefinitionName == APIKeyInAppLevelSecurity {
-			isApplicationAPIKeyFound = true
-		}
-	}
-	if !isApplicationAPIKeyFound {
-		scheme := SecurityScheme{DefinitionName: APIKeyInAppLevelSecurity, Type: APIKeyInAppLevelSecurity, Name: APIKeyInAppLevelSecurity}
-		*securitySchemes = append(*securitySchemes, scheme)
-	}
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion

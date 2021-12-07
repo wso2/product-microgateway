@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.tracing;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 
@@ -33,39 +34,33 @@ public class Utils {
     private static boolean isTracingEnabled = false;
 
     /**
-     * Start the tracing span with or without parent
+     * Initialize a span with parent context. Used to link the enforcer traces under
+     * router's trace context.
      *
-     * @param spanName   the name of the span
-     * @param parentSpan the parent span
-     * @param tracer     io.opentelemetry.api.trace.Span
+     * @param spanName the name of the span
+     * @param context  parent trace context
+     * @param tracer   a tracer instance
      * @return a TracingSpan object
      */
-    public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
-
-        if (parentSpan == null) {
-            Span span = tracer.getTracingTracer().spanBuilder(spanName).startSpan();
-            return new TracingSpan(span);
-        } else {
-            Span childSpan = null;
-            Span sp = parentSpan.getSpan();
-            if (sp != null) {
-                childSpan = tracer.getTracingTracer().spanBuilder(spanName)
-                        .setParent(Context.current().with(sp)).startSpan();
-
-            }
-            return new TracingSpan(childSpan);
+    public static TracingSpan startSpan(String spanName, Context context, TracingTracer tracer) {
+        if (context == null) {
+            return startSpan(spanName, tracer);
         }
+        Span cs = tracer.getTracingTracer().spanBuilder(spanName)
+                .setParent(context)
+                .setSpanKind(SpanKind.SERVER)
+                .startSpan();
+        return new TracingSpan(cs);
     }
 
     /**
      * Start the tracing span
      *
-     * @param spanName   the name of the span
-     * @param tracer     io.opentelemetry.api.trace.Span
+     * @param spanName the name of the span
+     * @param tracer   io.opentelemetry.api.trace.Span
      * @return a TracingSpan object
      */
     public static TracingSpan startSpan(String spanName, TracingTracer tracer) {
-
         Span span = tracer.getTracingTracer().spanBuilder(spanName).startSpan();
         return new TracingSpan(span);
     }

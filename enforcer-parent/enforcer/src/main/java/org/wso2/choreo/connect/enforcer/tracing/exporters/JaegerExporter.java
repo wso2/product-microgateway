@@ -18,7 +18,8 @@
 package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
@@ -28,11 +29,14 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.tracing.RateLimitingSampler;
 import org.wso2.choreo.connect.enforcer.tracing.TracerBuilder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -55,24 +59,29 @@ public class JaegerExporter implements TracerBuilder {
     }
 
     /**
-     * Initialize the tracer with {@link JaegerExporter}.
+     * Initialize the tracer SDK with {@link JaegerExporter}.
      */
     @Override
-    public Tracer initTracer(Map<String, String> properties) throws TracingException {
-        String jaegerEp = properties.get(TracingConstants.CONF_ENDPOINT);
-
-        if (StringUtils.isEmpty(jaegerEp)) {
-            throw new TracingException("Error initializing Jaeger Trace Exporter. Jaeger endpoint is missing.");
+    public OpenTelemetrySdk initSdk(Map<String, String> properties) throws TracingException {
+        String ep;
+        String host = properties.get(TracingConstants.CONF_HOST);
+        String path = properties.get(TracingConstants.CONF_ENDPOINT);
+        ConfigHolder conf = ConfigHolder.getInstance();
+        try {
+            int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
+            ep = new URL("http", host, port, path).toString();
+        } catch (MalformedURLException | NumberFormatException e) {
+            throw new TracingException("Couldn't initialize the zipkin exporter. Invalid endpoint definition", e);
         }
-        JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder()
-                .setEndpoint(jaegerEp)
-                .build();
+
+        JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder().setEndpoint(ep).build();
+        String serviceName = TracingConstants.SERVICE_NAME_PREFIX + '-' + conf.getEnvVarConfig().getEnforcerLabel();
         Resource serviceNameResource =
-                Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, TracingConstants.SERVICE_NAME));
+                Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
         String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
-        String instrumentName = properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
                 TracingConstants.DEFAULT_MAX_TRACES_PER_SEC : Integer.parseInt(maxTracesPerSecondString);
+        String instrumentName = properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
         String instrumentationName = StringUtils.isEmpty(instrumentName) ?
                 TracingConstants.DEFAULT_INSTRUMENTATION_NAME : instrumentName;
 
@@ -82,9 +91,11 @@ public class JaegerExporter implements TracerBuilder {
                 .setSampler(new RateLimitingSampler(maxTracesPerSecond))
                 .setResource(Resource.getDefault().merge(serviceNameResource))
                 .build();
-        OpenTelemetrySdk ot = OpenTelemetrySdk.builder().setTracerProvider(provider).buildAndRegisterGlobal();
+        OpenTelemetrySdk ot = OpenTelemetrySdk.builder().setTracerProvider(provider)
+                .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+                .buildAndRegisterGlobal();
 
-        LOGGER.info("Tracer successfully initialized with Jaeger Trace Exporter.");
-        return ot.getTracer(instrumentationName);
+        LOGGER.info("Trace SDK successfully initialized with Jaeger Trace Exporter.");
+        return ot;
     }
 }

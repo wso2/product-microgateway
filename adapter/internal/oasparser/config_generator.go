@@ -23,7 +23,9 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -43,6 +45,28 @@ func GetRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts map[str
 	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
 
 	return routes, clusters, endpoints
+}
+
+// GetGlobalClusters generates initial internal clusters for given environment.
+func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
+	var (
+		clusters  []*clusterv3.Cluster
+		endpoints []*corev3.Address
+	)
+	conf, _ := config.ReadConfigs()
+
+	if conf.Tracing.Enabled && conf.Tracing.Type != envoyconf.TracerTypeAzure {
+		logger.LoggerOasparser.Debugln("Creating global cluster - Tracing")
+		if c, e, err := envoyconf.CreateTracingCluster(conf); err == nil {
+			clusters = append(clusters, c)
+			endpoints = append(endpoints, e...)
+		} else {
+			logger.LoggerOasparser.Error("Failed to initialize tracer's cluster. Router tracing will be disabled. ", err)
+			conf.Tracing.Enabled = false
+		}
+	}
+
+	return clusters, endpoints
 }
 
 // GetProductionListenerAndRouteConfig generates the listener and routesconfiguration configurations.

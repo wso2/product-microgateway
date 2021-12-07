@@ -53,7 +53,7 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 }
 
 // OnStreamResponse prints debug logs
-func (cb *Callbacks) OnStreamResponse(id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
+func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
 	logger.LoggerRouterXdsCallbacks.Debugf("stream response on stream id: %d, to node: %s, version: %s, for type: %v", id,
 		request.Node.Id, response.VersionInfo, response.TypeUrl)
 }
@@ -67,4 +67,22 @@ func (cb *Callbacks) OnFetchRequest(_ context.Context, req *discovery.DiscoveryR
 // OnFetchResponse prints debug logs
 func (cb *Callbacks) OnFetchResponse(req *discovery.DiscoveryRequest, res *discovery.DiscoveryResponse) {
 	logger.LoggerRouterXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type %s", req.Node.Id, req.VersionInfo, res.TypeUrl)
+}
+
+// OnDeltaStreamOpen is unused.
+func (cb *Callbacks) OnDeltaStreamOpen(_ context.Context, id int64, typ string) error {
+	return nil
+}
+
+// OnDeltaStreamClosed is unused.
+func (cb *Callbacks) OnDeltaStreamClosed(id int64) {
+}
+
+// OnStreamDeltaResponse is unused.
+func (cb *Callbacks) OnStreamDeltaResponse(id int64, req *discovery.DeltaDiscoveryRequest, res *discovery.DeltaDiscoveryResponse) {
+}
+
+// OnStreamDeltaRequest is unused.
+func (cb *Callbacks) OnStreamDeltaRequest(id int64, req *discovery.DeltaDiscoveryRequest) error {
+	return nil
 }

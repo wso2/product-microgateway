@@ -212,6 +212,7 @@ func Run(conf *config.Config) {
 	}
 
 	for _, env := range envs {
+		xds.GenerateGlobalClusters(env)
 		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
 		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
 		xds.UpdateEnforcerApis(env, apis, "")
