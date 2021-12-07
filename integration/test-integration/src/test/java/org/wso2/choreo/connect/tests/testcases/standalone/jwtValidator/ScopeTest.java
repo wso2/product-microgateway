@@ -69,7 +69,7 @@ public class ScopeTest {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
         jwtWithAPIScopeToken = TokenUtil.getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
-                3600, "write:pets", false);
+                3600, "write:scopes", false);
         jwtWithoutAPIScopeToken = TokenUtil.getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
                 3600, null, false);
     }

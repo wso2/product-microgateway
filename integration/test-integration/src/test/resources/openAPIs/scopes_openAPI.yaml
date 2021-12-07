@@ -11,7 +11,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 security:
   - petstore_auth:
-      - 'write:pets'
+      - 'write:scopes'
 x-wso2-cors:
   accessControlAllowOrigins:
     - http://test1.com
@@ -75,6 +75,65 @@ paths:
               $ref: '#/definitions/Pet'
         '400':
           description: Invalid status value
+  '/pet/{petId}':
+    get:
+      tags:
+        - pet
+      summary: Find pet by ID
+      description: Returns a single pet
+      operationId: getPetById
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: petId
+          in: path
+          description: ID of pet to return
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Pet'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+  '/pets/findByTags':
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by tags
+      description: 'Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.'
+      operationId: findPetsByTags
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: tags
+          in: query
+          description: Tags to filter by
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+        '400':
+          description: Invalid tag value
+      security:
+        - petstore_auth:
+            - 'write:scopes'
+            - 'read:scopes'
+      deprecated: true
 securityDefinitions:
   api_key:
     type: apiKey
@@ -85,8 +144,8 @@ securityDefinitions:
     authorizationUrl: 'http://mockBackend:2380/oauth/authorize'
     flow: implicit
     scopes:
-      'read:pets': read your pets
-      'write:pets': modify pets in your account
+      'read:scopes': read your pets
+      'write:scopes': modify pets in your account
 definitions:
   ApiResponse:
     type: object
