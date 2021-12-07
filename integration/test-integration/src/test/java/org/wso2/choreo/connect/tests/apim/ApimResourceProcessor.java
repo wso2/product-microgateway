@@ -70,10 +70,10 @@ public class ApimResourceProcessor {
         for (Api api : apis) {
             String apiId = PublisherUtils.createAPI(api, apiProvider, publisherRestClient);
             if (Objects.isNull(api.getVhosts())) {
-                PublisherUtils.deployAndPublishAPI(apiId, api.getName(), "localhost", publisherRestClient, false);
+                PublisherUtils.deployAndPublishAPI(apiId, api.getName(), "localhost", publisherRestClient);
             } else {
                 for (String vhost: api.getVhosts()) {
-                    PublisherUtils.deployAndPublishAPI(apiId, api.getName(), vhost, publisherRestClient, false);
+                    PublisherUtils.deployAndPublishAPI(apiId, api.getName(), vhost, publisherRestClient);
                 }
             }
             apiNameToId.put(api.getName(), apiId);
