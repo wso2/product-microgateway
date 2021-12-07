@@ -379,17 +379,20 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 		logger.LoggerOasparser.Error("Error while adding x-wso2-endpoints. ", xWso2EPErr)
 		return xWso2EPErr
 	}
+	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// an exception is made where servers url is not processed when the API is prototyped.
+	if !(swagger.IsProtoTyped) {
+		productionEndpointErr := swagger.setXWso2ProductionEndpoint()
+		if productionEndpointErr != nil {
+			logger.LoggerOasparser.Error("Error while adding x-wso2-production-endpoints. ", productionEndpointErr)
+			return productionEndpointErr
+		}
 
-	productionEndpointErr := swagger.setXWso2ProductionEndpoint()
-	if productionEndpointErr != nil {
-		logger.LoggerOasparser.Error("Error while adding x-wso2-production-endpoints. ", productionEndpointErr)
-		return productionEndpointErr
-	}
-
-	sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
-	if sandboxEndpointErr != nil {
-		logger.LoggerOasparser.Error("Error while adding x-wso2-sandbox-endpoints. ", sandboxEndpointErr)
-		return sandboxEndpointErr
+		sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
+		if sandboxEndpointErr != nil {
+			logger.LoggerOasparser.Error("Error while adding x-wso2-sandbox-endpoints. ", sandboxEndpointErr)
+			return sandboxEndpointErr
+		}
 	}
 
 	swagger.setXWso2Cors()
@@ -1138,73 +1141,109 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	if endpointConfig.ImplementationStatus == prototypedAPI {
 		swagger.IsProtoTyped = true
 	}
-	if len(endpointConfig.SandBoxEndpoints) > 0 {
+
+	if len(endpointConfig.ProductionEndpoints) > 0 {
 		var endpoints []Endpoint
 		endpointType := LoadBalance
-		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
-			sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+		var unProcessedURLs []interface{}
+		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
+			if apiType == WS {
+				prodEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+				if err == nil {
+					endpoints = append(endpoints, *prodEndpoint)
+				} else {
+					return err
+				}
+			} else {
+				unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+			}
+		}
+		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
+			endpointType = FailOver
+			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
+				if apiType == WS {
+					failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+					if err == nil {
+						endpoints = append(endpoints, *failoverEndpoint)
+					} else {
+						return err
+					}
+				} else {
+					unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+				}
+			}
+		}
+		if apiType != WS {
+			productionEndpoints, err := processEndpointUrls(unProcessedURLs)
 			if err == nil {
-				endpoints = append(endpoints, *sandBoxEndpoint)
+				endpoints = append(endpoints, productionEndpoints...)
 			} else {
 				return err
 			}
 		}
-		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
-			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
-				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
+	}
+
+	if len(endpointConfig.SandBoxEndpoints) > 0 {
+		var endpoints []Endpoint
+		endpointType := LoadBalance
+		var unProcessedURLs []interface{}
+		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
+			if apiType == WS {
+				sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
 				if err == nil {
-					endpointType = FailOver
-					endpoints = append(endpoints, *failoverEndpoint)
+					endpoints = append(endpoints, *sandBoxEndpoint)
 				} else {
 					return err
 				}
+			} else {
+				unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+			}
+		}
+		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
+			endpointType = FailOver
+			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
+				if apiType == WS {
+					failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+					if err == nil {
+						endpoints = append(endpoints, *failoverEndpoint)
+					} else {
+						return err
+					}
+				} else {
+					unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+				}
+			}
+		}
+		if apiType != WS {
+			sandboxEndpoints, err := processEndpointUrls(unProcessedURLs)
+			if err == nil {
+				endpoints = append(endpoints, sandboxEndpoints...)
+			} else {
+				return err
 			}
 		}
 		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
 	}
-	if len(endpointConfig.ProductionEndpoints) > 0 {
-		var endpoints []Endpoint
-		endpointType := LoadBalance
-		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
-			prodEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-			if err == nil {
-				endpoints = append(endpoints, *prodEndpoint)
-			} else {
-				return err
-			}
-		}
-		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
-			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
-				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-				if err == nil {
-					endpointType = FailOver
-					endpoints = append(endpoints, *failoverEndpoint)
-				} else {
-					return err
-				}
-			}
-		}
-		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
 
-		// if yaml has production security, setting it
-		if swagger.productionEndpoints != nil && endpointConfig.APIEndpointSecurity.Production.Enabled {
-			if endpointConfig.APIEndpointSecurity.Production.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Production.Type) {
-				swagger.productionEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Production
-			} else {
-				endpointConfig.APIEndpointSecurity.Production.Enabled = false
-				logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
-					endpointConfig.APIEndpointSecurity.Production.Type)
-			}
+	// if yaml has production security, setting it
+	if swagger.productionEndpoints != nil && endpointConfig.APIEndpointSecurity.Production.Enabled {
+		if endpointConfig.APIEndpointSecurity.Production.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Production.Type) {
+			swagger.productionEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Production
+		} else {
+			endpointConfig.APIEndpointSecurity.Production.Enabled = false
+			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
+				endpointConfig.APIEndpointSecurity.Production.Type)
 		}
-		// if yaml has sandbox security, setting it
-		if swagger.sandboxEndpoints != nil && endpointConfig.APIEndpointSecurity.Sandbox.Enabled {
-			if endpointConfig.APIEndpointSecurity.Sandbox.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Sandbox.Type) {
-				swagger.sandboxEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Sandbox
-			} else {
-				endpointConfig.APIEndpointSecurity.Sandbox.Enabled = false
-				logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
-					endpointConfig.APIEndpointSecurity.Sandbox.Type)
-			}
+	}
+	// if yaml has sandbox security, setting it
+	if swagger.sandboxEndpoints != nil && endpointConfig.APIEndpointSecurity.Sandbox.Enabled {
+		if endpointConfig.APIEndpointSecurity.Sandbox.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Sandbox.Type) {
+			swagger.sandboxEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Sandbox
+		} else {
+			endpointConfig.APIEndpointSecurity.Sandbox.Enabled = false
+			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
+				endpointConfig.APIEndpointSecurity.Sandbox.Type)
 		}
 	}
 	return nil
