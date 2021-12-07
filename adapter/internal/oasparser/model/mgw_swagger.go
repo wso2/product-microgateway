@@ -379,20 +379,17 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 		logger.LoggerOasparser.Error("Error while adding x-wso2-endpoints. ", xWso2EPErr)
 		return xWso2EPErr
 	}
-	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
-	// an exception is made where servers url is not processed when the API is prototyped.
-	if !(swagger.IsProtoTyped) {
-		productionEndpointErr := swagger.setXWso2ProductionEndpoint()
-		if productionEndpointErr != nil {
-			logger.LoggerOasparser.Error("Error while adding x-wso2-production-endpoints. ", productionEndpointErr)
-			return productionEndpointErr
-		}
 
-		sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
-		if sandboxEndpointErr != nil {
-			logger.LoggerOasparser.Error("Error while adding x-wso2-sandbox-endpoints. ", sandboxEndpointErr)
-			return sandboxEndpointErr
-		}
+	productionEndpointErr := swagger.setXWso2ProductionEndpoint()
+	if productionEndpointErr != nil {
+		logger.LoggerOasparser.Error("Error while adding x-wso2-production-endpoints. ", productionEndpointErr)
+		return productionEndpointErr
+	}
+
+	sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
+	if sandboxEndpointErr != nil {
+		logger.LoggerOasparser.Error("Error while adding x-wso2-sandbox-endpoints. ", sandboxEndpointErr)
+		return sandboxEndpointErr
 	}
 
 	swagger.setXWso2Cors()
