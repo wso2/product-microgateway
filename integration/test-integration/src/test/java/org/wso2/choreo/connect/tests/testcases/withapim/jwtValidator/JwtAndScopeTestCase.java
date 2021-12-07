@@ -90,7 +90,7 @@ public class JwtAndScopeTestCase extends ApimBaseTest {
                 new String[]{"write:scopes"}, user, storeRestClient);
         jwtWithMultipleScopes = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
-                new String[]{"write:scopes", "read:scopes"}, user, storeRestClient);
+                new String[]{"write:scopes", "open:scopes"}, user, storeRestClient);
         jwtWithMultipleInvalidScopes = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
                 new String[]{"foo", "bar"}, user, storeRestClient);
@@ -148,17 +148,6 @@ public class JwtAndScopeTestCase extends ApimBaseTest {
 //                response.getData().contains("The access token does not allow you to access the requested resource"),
 //                "Error response message mismatch");
 //    }
-
-    @Test(description = "Test to invoke resource protected with scopes with correct jwt")
-    public void testScopeProtectedResourceValidJWT() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithScope);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(endPoint + "/pet/findByStatus"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertEquals(response.getData(), ResponseConstants.RESPONSE_BODY,
-                "The returned payload does not match with the expected payload");
-    }
 
     @Test(description = "Test to invoke resource protected with multiple scopes with correct jwt having a single correct scope")
     public void testMultipleScopeProtectedResourceValidJWT() throws Exception {
