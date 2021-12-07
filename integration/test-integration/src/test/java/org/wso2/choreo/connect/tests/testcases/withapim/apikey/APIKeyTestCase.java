@@ -26,11 +26,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
+import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
@@ -52,6 +52,7 @@ public class APIKeyTestCase extends ApimBaseTest {
     private String applicationId;
     private String apiId;
     private String endPoint;
+    private String jwtEndpoint;
 
     @BeforeClass(description = "Initialise the setup for API key tests")
     void start() throws Exception {
@@ -84,6 +85,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
 
         endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/1");
+        jwtEndpoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/jwtheader");
 
         // Obtain API keys
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
@@ -229,6 +231,20 @@ public class APIKeyTestCase extends ApimBaseTest {
         Assert.assertEquals(response.getResponseCode(),
                 com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
                 "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the backend JWT generation for API Key")
+    public void apiKeyBackendJwtGenerationTestWithAPIM() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("apikey", apiKey);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/jwtheader"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(),
+                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
+                "Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.VALID_JWT_RESPONSE,
+                "Response body mismatched");
     }
 
     @AfterClass

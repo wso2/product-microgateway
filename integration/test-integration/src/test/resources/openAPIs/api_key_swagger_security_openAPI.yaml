@@ -84,6 +84,29 @@ paths:
       security:
         - petstore_auth:
             - write:pets
+  '/jwtheader':
+    get:
+      summary: Allows to validate backend JWT generation
+      produces:
+        - application/json
+      parameters:
+        - name: jwtParameteres
+          in: query
+          description: Backend JWT generation validator
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/jwt'
+        '400':
+          description: Invalid tag value
 securityDefinitions:
   APIKeyAuth:
     type: apiKey

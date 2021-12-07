@@ -6,6 +6,9 @@ enabled = false
 [enforcer.throttling]
   enableGlobalEventPublishing = false
 
+[enforcer.jwtGenerator]
+  enable = true
+
 [[enforcer.security.tokenService]]
 name = "Resident Key Manager"
 issuer = "https://localhost:9443/oauth2/token"
