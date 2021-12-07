@@ -90,7 +90,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: jwtParameteres
+        - name: jwtParameters
           in: query
           description: Backend JWT generation validator
           required: false
@@ -106,7 +106,7 @@ paths:
             items:
               $ref: '#/definitions/jwt'
         '400':
-          description: Invalid tag value
+          description: Invalid JWT header value
 securityDefinitions:
   APIKeyAuth:
     type: apiKey
