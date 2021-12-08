@@ -393,7 +393,8 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	}
 
 	// to remove swagger server/host urls being added when x-wso2-sandbox-endpoints is given
-	if !apiLevelProdEPFound && apiLevelSandEPFound && len(swagger.productionEndpoints.Endpoints) > 0 {
+	if !apiLevelProdEPFound && apiLevelSandEPFound && swagger.productionEndpoints != nil &&
+		len(swagger.productionEndpoints.Endpoints) > 0 {
 		swagger.productionEndpoints = nil
 	}
 
