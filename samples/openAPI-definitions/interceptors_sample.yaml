@@ -32,19 +32,17 @@ x-wso2-basePath: /petstore/v1
 x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
-# defines request flow interceptor in API level
-x-wso2-request-interceptor:
+x-wso2-request-interceptor:                          # defines request flow interceptor in API level
   serviceURL: http://host.request.interceptor:9081
   includes:
     - request_headers
     - invocation_context
 paths:
   "/pet/findByStatus":
-    # defines request flow inteceptor in resource level
     x-wso2-production-endpoints:
       urls:
       -  https://localhost:2380/v1
-    x-wso2-request-interceptor:
+    x-wso2-request-interceptor:                     # defines request flow inteceptor in resource level
       serviceURL: http://host.request.interceptor:9081
       includes:
       - request_body
@@ -85,35 +83,6 @@ paths:
                   "$ref": "#/components/schemas/Pet"
         '400':
           description: Invalid status value
-  "/pet/{petId}":
-    get:
-      tags:
-      - pet
-      summary: Find pet by ID
-      description: Returns a single pet
-      operationId: getPetById
-      parameters:
-      - name: petId
-        in: path
-        description: ID of pet to return
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/xml:
-              schema:
-                "$ref": "#/components/schemas/Pet"
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Pet"
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Pet not found
 components:
   schemas:
     Category:
