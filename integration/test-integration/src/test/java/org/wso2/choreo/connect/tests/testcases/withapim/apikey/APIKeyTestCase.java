@@ -125,9 +125,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     //Invoke API by including the API key as a query parameter
@@ -138,9 +136,7 @@ public class APIKeyTestCase extends ApimBaseTest {
                 Utils.getServiceURLHttps(endPoint + "?apikey=" + apiKey), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     @Test(description = "Test to check the API key auth validate invalid signature key")
@@ -151,9 +147,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_UNAUTHORIZED,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
@@ -166,9 +160,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_UNAUTHORIZED,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
@@ -215,9 +207,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     @Test(description = "Test to check the API Key for specific referer address is working")
@@ -228,9 +218,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     @Test(description = "Test to check the backend JWT generation for API Key")
@@ -240,11 +228,8 @@ public class APIKeyTestCase extends ApimBaseTest {
         HttpResponse response = HttpClientRequest.doGet(
                 Utils.getServiceURLHttps("/apiKey/1.0.0/jwtheader"), headers);
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(),
-                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
-                "Response code mismatched");
-        Assert.assertEquals(response.getData(), ResponseConstants.VALID_JWT_RESPONSE,
-                "Response body mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.VALID_JWT_RESPONSE, "Response body mismatched");
     }
 
     @AfterClass
