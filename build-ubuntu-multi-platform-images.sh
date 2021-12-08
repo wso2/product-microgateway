@@ -19,17 +19,21 @@ set -e
 BUILDX_VERSION=v0.7.0
 PLATFORMS="linux/amd64,linux/arm64"
 
-TARGET_OS=linux # for other platforms check corresponding release: https://github.com/docker/buildx/releases/
+HOST_OS=linux # for other platforms check corresponding release: https://github.com/docker/buildx/releases/
 if [[ $(uname) == 'Darwin' ]]; then
-   TARGET_OS='darwin'
+   HOST_OS='darwin'
 fi
-TARGET_ARCH=amd64
+HOST_ARCH=amd64
 if [[ $(uname -m) == *"arm"* ]]; then
-  TARGET_ARCH="arm64"
+  HOST_ARCH="arm64"
 fi
 
 echo "Reading product version..."
-MVN_PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+if [ -z $2 ]; then
+  MVN_PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+else
+  MVN_PROJECT_VERSION=$2
+fi
 echo "Product version: $MVN_PROJECT_VERSION"
 
 ADAPTER_IMAGE="wso2/choreo-connect-adapter:${MVN_PROJECT_VERSION}-ubuntu"
@@ -49,7 +53,7 @@ if [ ! -f docker-ubuntu-build/target/buildx ]; then
     mkdir -p docker-ubuntu-build/target
 
     echo "Downloading the buildx plugin..."
-    wget https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.${TARGET_OS}-${TARGET_ARCH} \
+    wget https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.${HOST_OS}-${HOST_ARCH} \
       -nv -O docker-ubuntu-build/target/buildx
 fi
 
@@ -57,6 +61,10 @@ chmod a+x docker-ubuntu-build/target/buildx
 mkdir -p ~/.docker/cli-plugins
 cp docker-ubuntu-build/target/buildx ~/.docker/cli-plugins
 
+if [[ $HOST_ARCH == "amd64" ]]; then
+  echo "Installing QEMU user mode emulation binaries"
+  docker run --rm --privileged multiarch/qemu-user-static:6.1.0-8 --reset -p yes
+fi
 # create build instance and use it
 docker buildx create --name cc-builder --use 2> /dev/null || docker buildx use cc-builder
 
@@ -108,7 +116,7 @@ else
   # Build images for the platform of host machine
   echo "Building images matched for the platform of the host machine..."
   platform="linux/amd64"
-  if [[ $TARGET_ARCH == "arm64" ]]; then
+  if [[ $HOST_ARCH == "arm64" ]]; then
     echo "Building images for platform: ARM"
     platform="linux/arm64"
   else

@@ -33,6 +33,7 @@ import (
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
@@ -173,13 +174,25 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 		}
 	}()
 
-	// TODO (renuka) when len of apiProject.deployments is 0, return err "nothing deployed" <- check
 	var overrideValue bool
 	if override == nil {
 		overrideValue = false
 	} else {
 		overrideValue = *override
 	}
+
+	// when deployment-environments is missing in the API Project, definition we deploy to default
+	// environment
+	if apiProject.Deployments == nil {
+		vhost, _, _ := config.GetDefaultVhost(config.DefaultGatewayName)
+		deployment := mgw.Deployment{
+			DisplayOnDevportal:    true,
+			DeploymentEnvironment: config.DefaultGatewayName,
+			DeploymentVhost:       vhost,
+		}
+		apiProject.Deployments = []model.Deployment{deployment}
+	}
+
 	//TODO: force overwride
 	if !overrideValue {
 		// if the API already exists in the one of vhost, break deployment of the API

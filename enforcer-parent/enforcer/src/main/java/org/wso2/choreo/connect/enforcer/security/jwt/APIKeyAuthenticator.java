@@ -52,8 +52,6 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -94,35 +92,27 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     private static String getAPIKeyFromRequest(RequestContext requestContext) {
         Map<String, SecuritySchemaConfig> securitySchemaDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
-        // check both resource level and api level security
-        List<Map<String, List<String>>> securityLists = Arrays.asList(requestContext.getMatchedResourcePath()
-                .getSecuritySchemas(), requestContext.getMatchedAPI().getApiSecurity());
-        // loop for resource security then api level
-        for (Map<String, List<String>> securityList : securityLists) {
-            // loop over security and get definition for the matching security definition name
-            for (String securityDefinitionName : securityList.keySet()) {
-                if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
-                    SecuritySchemaConfig securitySchemaDefinition =
-                            securitySchemaDefinitions.get(securityDefinitionName);
-                    if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
-                            securitySchemaDefinition.getType())) {
-                        // If Defined in openAPI definition (when not enabled at APIM App level),
-                        // key must exist in specified location
-                        if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
-                            if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
-                                return requestContext.getHeaders().get(securitySchemaDefinition.getName());
-                            }
+        // loop over resource security and get definition for the matching security definition name
+        for (String securityDefinitionName : requestContext.getMatchedResourcePath()
+                .getSecuritySchemas().keySet()) {
+            if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
+                SecuritySchemaConfig securitySchemaDefinition =
+                        securitySchemaDefinitions.get(securityDefinitionName);
+                if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
+                        securitySchemaDefinition.getType())) {
+                    // If Defined in openAPI definition (when not enabled at APIM App level),
+                    // key must exist in specified location
+                    if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
+                        if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
+                            return requestContext.getHeaders().get(securitySchemaDefinition.getName());
                         }
-                        if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
-                            if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
-                                return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
-                            }
+                    }
+                    if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
+                        if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
+                            return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
                         }
                     }
                 }
-            }
-            if (securityList.size() > 0) {
-                return "";
             }
         }
         return "";
@@ -271,7 +261,9 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             validationInfoDTO.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
         }
         if (app != null) {
-            validationInfoDTO.setApplicationId(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            validationInfoDTO.setApplicationId(app.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)
+                    .intValue());
+            validationInfoDTO.setApplicationUUID(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID));
             validationInfoDTO.setApplicationName(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
             validationInfoDTO.setApplicationTier(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
             validationInfoDTO.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));

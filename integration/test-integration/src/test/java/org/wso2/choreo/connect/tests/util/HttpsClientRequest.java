@@ -93,6 +93,18 @@ public class HttpsClientRequest {
         return response;
     }
 
+    public static HttpResponse retryUntil404(String requestUrl, Map<String, String> headers)
+            throws CCTestException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            log.info("Trying request with url : " + requestUrl);
+            response = HttpsClientRequest.doGet(requestUrl, headers);
+            retryCount++;
+        } while (response.getResponseCode() != 404 && shouldRetry(retryCount));
+        return response;
+    }
+
     private static boolean shouldRetry(int retryCount) {
         if(retryCount >= maxRetryCount) {
             log.info("Retrying of the request is finished");

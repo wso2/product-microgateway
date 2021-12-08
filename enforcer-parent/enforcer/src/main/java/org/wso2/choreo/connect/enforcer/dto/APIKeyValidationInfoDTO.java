@@ -42,7 +42,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String userType;
     private String endUserToken;
     private String endUserName;
-    private String applicationId;
+    private int applicationId;
     private String applicationName;
     private String applicationTier;
     //use this to pass key validation status
@@ -140,11 +140,11 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.endUserName = endUserName;
     }
 
-    public String getApplicationId() {
+    public int getApplicationId() {
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) {
+    public void setApplicationId(int applicationId) {
         this.applicationId = applicationId;
     }
 

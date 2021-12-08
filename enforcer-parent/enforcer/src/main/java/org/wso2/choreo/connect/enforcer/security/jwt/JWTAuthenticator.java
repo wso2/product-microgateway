@@ -95,36 +95,23 @@ public class JWTAuthenticator implements Authenticator {
     }
 
     private boolean isJWTEnabled(RequestContext requestContext) {
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
         Map<String, List<String>> resourceSecuritySchemes = requestContext.getMatchedResourcePath()
                 .getSecuritySchemas();
-        // handle default security
-        boolean notSpecified = true;
-        //check in resource level security
+        if (resourceSecuritySchemes.isEmpty()) {
+            // handle default security
+            return true;
+        }
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
+                .getSecuritySchemeDefinitions();
         for (String securityDefinitionName: resourceSecuritySchemes.keySet()) {
             if (securitySchemeDefinitions.containsKey(securityDefinitionName)) {
-                notSpecified = false;
                 SecuritySchemaConfig config = securitySchemeDefinitions.get(securityDefinitionName);
                 if (APIConstants.API_SECURITY_OAUTH2.equals(config.getType())) {
                     return true;
                 }
             }
         }
-        if (notSpecified) {
-            // check in API level security
-            Map<String, List<String>> apiSecuritySchemes = requestContext.getMatchedAPI().getApiSecurity();
-            for (String securityDefinitionName : apiSecuritySchemes.keySet()) {
-                if (securitySchemeDefinitions.containsKey(securityDefinitionName)) {
-                    notSpecified = false;
-                    SecuritySchemaConfig config = securitySchemeDefinitions.get(securityDefinitionName);
-                    if (APIConstants.API_SECURITY_OAUTH2.equals(config.getType())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return notSpecified;
+        return false;
     }
 
     @Override
@@ -324,7 +311,8 @@ public class JWTAuthenticator implements Authenticator {
                                                                 String kmReference) {
         String applicationRef = APIConstants.ANONYMOUS_PREFIX + kmReference;
         apiKeyValidationInfoDTO.setApplicationName(applicationRef);
-        apiKeyValidationInfoDTO.setApplicationId(
+        apiKeyValidationInfoDTO.setApplicationId(-1);
+        apiKeyValidationInfoDTO.setApplicationUUID(
                 UUID.nameUUIDFromBytes(
                         applicationRef.getBytes(StandardCharsets.UTF_8)).toString());
         apiKeyValidationInfoDTO.setApplicationTier(APIConstants.UNLIMITED_TIER);
@@ -453,7 +441,8 @@ public class JWTAuthenticator implements Authenticator {
             JSONObject app = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
             if (app != null) {
                 validationInfo.setApplicationUUID(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID));
-                validationInfo.setApplicationId(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+                validationInfo.setApplicationId(app.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)
+                        .intValue());
                 validationInfo.setApplicationName(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
                 validationInfo.setApplicationTier(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
                 validationInfo.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));

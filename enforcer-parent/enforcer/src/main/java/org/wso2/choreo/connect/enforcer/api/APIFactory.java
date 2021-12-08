@@ -130,6 +130,7 @@ public class APIFactory {
         if (api.getAPIConfig().getBasePath().equals(basePath)) {
             resourceConfig.setPath(basePath);
             resourceConfig.setMethod(ResourceConfig.HttpMethods.GET);
+            resourceConfig.setSecuritySchemas(api.getAPIConfig().getApiSecurity());
         }
         return resourceConfig;
     }

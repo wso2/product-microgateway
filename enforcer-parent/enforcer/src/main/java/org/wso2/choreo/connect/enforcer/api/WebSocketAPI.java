@@ -94,12 +94,16 @@ public class WebSocketAPI implements API {
         }
 
         for (SecurityList securityList : api.getSecurityList()) {
-            for (Map.Entry<String, Scopes> entry: securityList.getScopeListMap().entrySet()) {
-                apiSecurity.put(entry.getKey(), entry.getValue().getScopesList());
-                // - api_key: [] <-- supported
-                // - default: [] <-- supported
+            for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                apiSecurity.put(entry.getKey(), new ArrayList<>());
+                if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                    List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                    apiSecurity.replace(entry.getKey(), scopeList);
+                }
+                // only supports security scheme OR combinations. Example -
+                // Security:
                 // - api_key: []
-                //   oauth: [] <-- AND operation not supported. Only the first will be considered.
+                //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
                 break;
             }
         }

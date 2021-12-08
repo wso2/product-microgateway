@@ -70,6 +70,7 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "circuit_breakers_openAPI.yaml", "circuit_breakers");
         ApictlUtils.createProject( "disable_security_openAPI.yaml", "disable_security");
         ApictlUtils.createProject( "backend_security_openAPI.yaml", "backend_security");
+        ApictlUtils.createProject( "scopes_openAPI.yaml", "scopes");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -89,6 +90,7 @@ public class CcWithDefaultConf {
         ApictlUtils.deployAPI("circuit_breakers", "test");
         ApictlUtils.deployAPI("disable_security", "test");
         ApictlUtils.deployAPI("backend_security", "test");
+        ApictlUtils.deployAPI("scopes", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 
