@@ -300,13 +300,12 @@ public class FilterUtils {
      * @param tokenIdentifier
      * @param payload
      * @param api
-     * @param apiLevelPolicy
      * @param rawToken Raw token used to authenticate the request
      * @return
      * @throws java.text.ParseException
      */
     public static AuthenticationContext generateAuthenticationContext(String tokenIdentifier, JWTClaimsSet payload,
-                                                                      JSONObject api, String apiLevelPolicy,
+                                                                      JSONObject api,
                                                                       String apiUUID, String rawToken)
             throws java.text.ParseException {
 

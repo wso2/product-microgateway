@@ -40,7 +40,7 @@ public class APIConfig {
     private String uuid;
 
     private Map<String, List<String>> apiSecurity = new HashMap<>();
-    private String tier = "Unlimited";
+    private String tier;
     private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
 
@@ -203,7 +203,7 @@ public class APIConfig {
         private String uuid;
         private Map<String, SecuritySchemaConfig> securitySchemeDefinitions;
         private Map<String, List<String>> apiSecurity = new HashMap<>();
-        private String tier = "Unlimited";
+        private String tier;
         private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
 
