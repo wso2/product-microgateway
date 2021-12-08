@@ -380,16 +380,22 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 		return xWso2EPErr
 	}
 
-	productionEndpointErr := swagger.setXWso2ProductionEndpoint()
+	apiLevelProdEPFound, productionEndpointErr := swagger.setXWso2ProductionEndpoint()
 	if productionEndpointErr != nil {
 		logger.LoggerOasparser.Error("Error while adding x-wso2-production-endpoints. ", productionEndpointErr)
 		return productionEndpointErr
 	}
 
-	sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
+	apiLevelSandEPFound, sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
 	if sandboxEndpointErr != nil {
 		logger.LoggerOasparser.Error("Error while adding x-wso2-sandbox-endpoints. ", sandboxEndpointErr)
 		return sandboxEndpointErr
+	}
+
+	// to remove swagger server/host urls being added when x-wso2-sandbox-endpoints is given
+	if !apiLevelProdEPFound && apiLevelSandEPFound && swagger.productionEndpoints != nil &&
+		len(swagger.productionEndpoints.Endpoints) > 0 {
+		swagger.productionEndpoints = nil
 	}
 
 	swagger.setXWso2Cors()
@@ -480,48 +486,51 @@ func (swagger *MgwSwagger) SetProductionEndpoints(productionEndpoints []Endpoint
 	swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
 }
 
-func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {
+func (swagger *MgwSwagger) setXWso2ProductionEndpoint() (bool, error) {
+	apiLevelEPFound := false
 	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, xWso2ProdEndpoints)
 	if xWso2APIEndpoints != nil {
 		swagger.productionEndpoints = xWso2APIEndpoints
+		apiLevelEPFound = true
 	} else if err != nil {
-		return errors.New("error encountered when extracting endpoints. " + err.Error())
+		return apiLevelEPFound, errors.New("error encountered when extracting endpoints. " + err.Error())
 	}
 
 	//resources
 	for i, resource := range swagger.resources {
 		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, xWso2ProdEndpoints)
 		if err != nil {
-			return errors.New("error encountered when extracting resource endpoints for API with basepath: " +
+			return apiLevelEPFound, errors.New("error encountered when extracting resource endpoints for API with basepath: " +
 				swagger.xWso2Basepath + ". " + err.Error())
 		} else if xwso2ResourceEndpoints != nil {
 			swagger.resources[i].productionEndpoints = xwso2ResourceEndpoints
 		}
 	}
 
-	return nil
+	return apiLevelEPFound, nil
 }
 
-func (swagger *MgwSwagger) setXWso2SandboxEndpoint() error {
+func (swagger *MgwSwagger) setXWso2SandboxEndpoint() (bool, error) {
+	apiLevelEPFound := false
 	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, xWso2SandbxEndpoints)
 	if xWso2APIEndpoints != nil {
 		swagger.sandboxEndpoints = xWso2APIEndpoints
+		apiLevelEPFound = true
 	} else if err != nil {
-		return errors.New("error encountered when extracting endpoints")
+		return apiLevelEPFound, errors.New("error encountered when extracting endpoints")
 	}
 
 	// resources
 	for i, resource := range swagger.resources {
 		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, xWso2SandbxEndpoints)
 		if err != nil {
-			return errors.New("error encountered when extracting resource endpoints for API with basepath: " +
+			return apiLevelEPFound, errors.New("error encountered when extracting resource endpoints for API with basepath: " +
 				swagger.xWso2Basepath + ". " + err.Error())
 		} else if xwso2ResourceEndpoints != nil {
 			swagger.resources[i].sandboxEndpoints = xwso2ResourceEndpoints
 		}
 	}
-
-	return nil
+	return apiLevelEPFound, nil
 }
 
 // GetXWso2Endpoints get x-wso2-endpoints
