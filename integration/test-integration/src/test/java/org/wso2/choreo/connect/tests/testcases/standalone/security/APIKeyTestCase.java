@@ -21,6 +21,7 @@ package org.wso2.choreo.connect.tests.testcases.standalone.security;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
@@ -84,6 +85,18 @@ public class APIKeyTestCase extends ApimBaseTest {
                 Utils.getServiceURLHttps("/apiKey/1.0.0/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the backend JWT generation for API Key")
+    public void apiKeyBackendJwtGenerationTest() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-api-key-header", testAPIKey);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/jwtheader"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.VALID_JWT_RESPONSE,
+                "Response body mismatched");
     }
 
     @Test(description = "Test to check the oauth2 secured resource")

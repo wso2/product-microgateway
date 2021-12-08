@@ -32,6 +32,31 @@ paths:
           description: Pet not found
       security:
         - APIKeyAuth: []
+  '/jwtheader':
+    get:
+      summary: Allows to validate backend JWT generation
+      produces:
+        - application/json
+      parameters:
+        - name: jwtParameters
+          in: query
+          description: Backend JWT generation validator
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/jwt'
+        '400':
+          description: Invalid JWT header value
+      security:
+        - APIKeyAuth: []
 securityDefinitions:
   APIKeyAuth:
     type: apiKey
