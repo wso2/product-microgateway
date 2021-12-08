@@ -294,6 +294,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     String subTenant = subApi.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
                     if (subTier != null) {
                         validationInfoDTO.setTier(subTier);
+                        AuthenticatorUtils.populateTierInfo(validationInfoDTO, payload, subTier);
                     }
                     if (subPublisher != null) {
                         validationInfoDTO.setApiPublisher(subPublisher);

@@ -478,15 +478,7 @@ public class JWTAuthenticator implements Authenticator {
                     String subTenant = subApi.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
                     if (subTier != null) {
                         validationInfo.setTier(subTier);
-                        if (payload.getClaim(APIConstants.JwtTokenConstants.TIER_INFO) != null) {
-                            JSONObject tierInfo = (JSONObject) payload.getClaim(
-                                    APIConstants.JwtTokenConstants.TIER_INFO);
-                            if (tierInfo.get(subTier) != null) {
-                                JSONObject subTierInfo = (JSONObject) tierInfo.get(subTier);
-                                validationInfo.setStopOnQuotaReach((Boolean)
-                                        subTierInfo.get(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH));
-                            }
-                        }
+                        AuthenticatorUtils.populateTierInfo(validationInfo, payload, subTier);
                     }
                     if (subPublisher != null) {
                         validationInfo.setApiPublisher(subPublisher);
