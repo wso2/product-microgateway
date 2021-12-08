@@ -189,6 +189,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		clusterNameProd := apiLevelClusterNameProd
 		clusterNameSand := apiLevelClusterNameSand
 		resourceBasePath := ""
+		resourcePath := resource.GetPath()
 		if strictBasePath || ((resource.GetProdEndpoints() == nil || len(resource.GetProdEndpoints().Endpoints) < 1) &&
 			(resource.GetSandEndpoints() == nil || len(resource.GetSandEndpoints().Endpoints) < 1)) {
 			resourceBasePath = apiLevelbasePath
@@ -211,7 +212,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					clusterNameProd = apiLevelClusterNameProd
 					// reverting resource base path setting as production cluster creation has failed
 					resourceBasePath = prevResourceBasePath
-					logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s. %v", apiTitle, err.Error())
+					logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. %v",
+						apiTitle, apiVersion, resourcePath, err.Error())
 				} else {
 					clusters = append(clusters, clusterProd)
 					endpoints = append(endpoints, addressProd...)
@@ -220,7 +222,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 		if clusterNameProd == "" {
 			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
-				apiTitle, apiVersion, resource.GetPath())
+				apiTitle, apiVersion, resourcePath)
 		}
 
 		// resource level check sandbox endpoints
@@ -240,7 +242,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					clusterNameSand = apiLevelClusterNameSand
 					// reverting resource base path setting as sandbox cluster creation has failed
 					resourceBasePath = prevResourceBasePath
-					logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s. %v", apiTitle, err.Error())
+					logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. %v",
+						apiTitle, apiVersion, resourcePath, err.Error())
 				} else {
 					clusters = append(clusters, clusterSand)
 					endpoints = append(endpoints, addressSand...)
@@ -249,11 +252,21 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 		if clusterNameSand == "" {
 			logger.LoggerOasparser.Debugf("Sandbox environment endpoints are not available for the resource %v:%v-%v",
-				apiTitle, apiVersion, resource.GetPath())
+				apiTitle, apiVersion, resourcePath)
 		}
-		// if both resource level sandbox and production setting has failed, api level clusters will be applied with the api level basepath
-		if resourceBasePath == "" {
+
+		// if both resource level sandbox and production are same as api level, api level clusters will be applied with the api level basepath
+		if clusterNameProd == apiLevelClusterNameProd && clusterNameSand == apiLevelClusterNameSand {
 			resourceBasePath = apiLevelbasePath
+		}
+		if clusterNameProd != "" && clusterNameProd == apiLevelClusterNameProd && resourceBasePath != apiLevelbasePath {
+			logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. sandbox endpoint basepath : %v and production basepath : %v mismatched",
+				apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
+			clusterNameProd = ""
+		} else if clusterNameSand != "" && clusterNameSand == apiLevelClusterNameSand && resourceBasePath != apiLevelbasePath {
+			logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. production endpoint basepath : %v and sandbox basepath : %v mismatched",
+				apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
+			clusterNameSand = ""
 		}
 
 		reqInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor)
