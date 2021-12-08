@@ -1145,7 +1145,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
 			if apiType == WS {
-				prodEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+				prodEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *prodEndpoint)
 				} else {
@@ -1159,7 +1159,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			endpointType = FailOver
 			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
 				if apiType == WS {
-					failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
 					} else {
@@ -1187,7 +1187,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
 			if apiType == WS {
-				sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+				sandBoxEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *sandBoxEndpoint)
 				} else {
@@ -1201,7 +1201,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			endpointType = FailOver
 			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
 				if apiType == WS {
-					failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
+					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
 					} else {
