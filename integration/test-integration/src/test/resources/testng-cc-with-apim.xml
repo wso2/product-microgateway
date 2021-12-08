@@ -58,6 +58,7 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BackendSecurityTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.jwtValidator.JwtAndScopeTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyBlockedAPITestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyAppLevelThrottleTestCase"/>
