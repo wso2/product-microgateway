@@ -143,6 +143,3 @@ components:
             "$ref": "#/components/schemas/Pet"
       description: Pet object that needs to be added to the store
       required: true
-
-
-
