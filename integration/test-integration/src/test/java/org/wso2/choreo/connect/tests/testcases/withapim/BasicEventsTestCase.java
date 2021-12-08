@@ -19,12 +19,9 @@ package org.wso2.choreo.connect.tests.testcases.withapim;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.common.net.HttpHeaders;
-import org.awaitility.Awaitility;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.clients.publisher.api.ApiException;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
@@ -32,18 +29,15 @@ import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class BasicEventsTestCase extends ApimBaseTest {
     private static final String API_NAME = "BasicEventsApi";
@@ -96,8 +90,7 @@ public class BasicEventsTestCase extends ApimBaseTest {
     @Test(dependsOnMethods = "createDeployPublishAndInvokeAPI")
     void undeployAndTestResponse404() throws Exception {
         PublisherUtils.undeployAPI(apiId, revisionUUID, publisherRestClient);
-        Utils.delay(5000, "Interrupted when un-deploying");
-        HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
+        HttpResponse response = HttpsClientRequest.retryUntil404(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
@@ -122,6 +115,7 @@ public class BasicEventsTestCase extends ApimBaseTest {
         List<APIOperationsDTO> operationsDTOS = apiRequest.getOperationsDTOS();
         operationsDTOS.add(apiOperation);
         apiRequest.setOperationsDTOS(operationsDTOS);
+        publisherRestClient.updateAPI(apiRequest, apiId);
         revisionUUID = PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
 
         String newResource = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByTags");
@@ -137,11 +131,11 @@ public class BasicEventsTestCase extends ApimBaseTest {
         List<APIOperationsDTO> newOperationsDTOS = new ArrayList<>();
         newOperationsDTOS.add(oldOperationsDTOS.get(0));
         apiRequest.setOperationsDTOS(newOperationsDTOS);
+        publisherRestClient.updateAPI(apiRequest, apiId);
         revisionUUID = PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
-        Utils.delay(5000, "Interrupted when un-deploying");
 
         String newResource = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByTags");
-        HttpResponse response = HttpsClientRequest.doGet(newResource, headers);
+        HttpResponse response = HttpsClientRequest.retryUntil404(newResource, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + newResource + " HttpResponse ");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,
                 "Status code mismatched. Endpoint:" + newResource + " HttpResponse ");
