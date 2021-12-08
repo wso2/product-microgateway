@@ -323,7 +323,7 @@ func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 	return []string{"default"}
 }
 
-func getHostandBasepathandPortWebSocket(rawURL string) (*Endpoint, error) {
+func getEndpointForWebsocketURL(rawURL string) (*Endpoint, error) {
 	var (
 		basepath string
 		host     string
