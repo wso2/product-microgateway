@@ -144,6 +144,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
 
+            // If the user is sending the APIKey credentials within query parameters, those query parameters should
+            // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
+            // query parameter. In this scenario, apiKey query parameter is sent within the property called
+            // 'queryParamsToRemove' so that the custom filters also can utilize the method.
             if (responseObject.getQueryParamsToRemove().size() > 0) {
                 String constructedPath = constructQueryParamString(responseObject.getRequestPath(),
                         responseObject.getQueryParamMap(), responseObject.getQueryParamsToRemove());
@@ -195,7 +199,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         return Code.INTERNAL_VALUE;
     }
 
-    private String constructQueryParamString(String requestPath, Map<String, String> queryParams,
+    private String constructQueryParamString(String requestPath, Map<String, String> queryParamMap,
                                              List<String> queryParamsToRemove) {
         // If no query parameters needs to be removed, then the request path can be applied as it is.
         if (queryParamsToRemove.size() == 0) {

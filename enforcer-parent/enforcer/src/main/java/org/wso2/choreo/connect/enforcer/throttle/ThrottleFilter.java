@@ -400,7 +400,7 @@ public class ThrottleFilter implements Filter {
                 }
                 // Sending path header is stopped as it could contain query parameters which are used
                 // to secure APIs.
-                if (name.equals(":path")) {
+                if (name.equals(APIConstants.PATH_HEADER)) {
                     continue;
                 }
                 jsonObMap.put(name, headers.get(name));
