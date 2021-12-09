@@ -71,6 +71,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
 			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
+			swagger.sandboxEndpoints = nil
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}

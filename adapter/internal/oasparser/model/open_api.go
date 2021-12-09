@@ -97,6 +97,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		}
 		if len(productionUrls) > 0 {
 			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+			swagger.sandboxEndpoints = nil
 		}
 	}
 	return nil
