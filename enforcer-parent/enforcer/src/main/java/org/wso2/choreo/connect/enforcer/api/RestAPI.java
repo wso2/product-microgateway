@@ -308,7 +308,7 @@ public class RestAPI implements API {
             }
         }
 
-        //Internal-Key credential is considered to be protected headers, such that the header would not be sent
+        // Internal-Key credential is considered to be protected headers, such that the header would not be sent
         // to backend and traffic manager.
         String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
                 .getTestConsoleHeaderName().toLowerCase();
