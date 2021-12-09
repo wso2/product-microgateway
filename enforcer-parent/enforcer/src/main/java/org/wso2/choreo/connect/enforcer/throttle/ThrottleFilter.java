@@ -135,7 +135,7 @@ public class ThrottleFilter implements Filter {
                 String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
                 boolean isApiLevelTriggered = false;
 
-                if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
+                if (!StringUtils.isEmpty(api.getTier())) {
                     resourceThrottleKey = apiThrottleKey;
                     resourceTier = apiTier;
                     isApiLevelTriggered = true;
@@ -298,7 +298,9 @@ public class ThrottleFilter implements Filter {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
 
-        if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equals(apiTier)) {
+        // apiConfig instance will have the tier assigned only if openapi definition contains the
+        // extension
+        if (!StringUtils.isEmpty(api.getTier())) {
             resourceTier = apiTier;
             resourceKey = apiContext;
         } else {
@@ -362,7 +364,7 @@ public class ThrottleFilter implements Filter {
     }
 
     private String getApiTier(APIConfig apiConfig) {
-        if (!apiConfig.getTier().isBlank()) {
+        if (!StringUtils.isEmpty(apiConfig.getTier())) {
             return apiConfig.getTier();
         }
         return ThrottleConstants.UNLIMITED_TIER;

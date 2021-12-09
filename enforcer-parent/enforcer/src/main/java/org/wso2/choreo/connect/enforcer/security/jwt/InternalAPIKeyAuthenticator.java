@@ -228,7 +228,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     }
 
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
-                            requestContext.getMatchedAPI().getTier(),
                             requestContext.getMatchedAPI().getUuid(), internalKey);
                 } else {
                     log.error("Internal Key authentication failed. " + FilterUtils.getMaskedToken(splitToken[0]));
