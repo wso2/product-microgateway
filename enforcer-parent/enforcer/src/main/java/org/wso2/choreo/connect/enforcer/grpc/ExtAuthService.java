@@ -47,6 +47,9 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
  * This is the entry point to the filter chain process for a request.
@@ -140,6 +143,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
+
+            if (responseObject.getQueryParamsToRemove().size() > 0) {
+                String constructedPath = constructQueryParamString(responseObject.getRequestPath(),
+                        responseObject.getQueryParamMap(), responseObject.getQueryParamsToRemove());
+                HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
+                        .setHeader(HeaderValue.newBuilder().setKey(APIConstants.PATH_HEADER).setValue(constructedPath)
+                                .build())
+                        .build();
+                okResponseBuilder.addHeaders(headerValueOption);
+            }
+
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
@@ -179,5 +193,35 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 return Code.RESOURCE_EXHAUSTED_VALUE;
         }
         return Code.INTERNAL_VALUE;
+    }
+
+    private String constructQueryParamString(String requestPath, Map<String, String> queryParamMap,
+                                             List<String> queryParamsToRemove) {
+        // If no query parameters needs to be removed, then the request path can be applied as it is.
+        if (queryParamsToRemove.size() == 0) {
+            return requestPath;
+        }
+
+        String pathWithoutQueryParams = requestPath.split("\\?")[0];
+        StringBuilder requestPathBuilder = new StringBuilder(pathWithoutQueryParams);
+        int count = 0;
+        if (queryParamMap.size() > 0) {
+            for (String queryParam : queryParamMap.keySet()) {
+                if (queryParamsToRemove.contains(queryParam)) {
+                    continue;
+                }
+                if (count == 0) {
+                    requestPathBuilder.append("?");
+                } else {
+                    requestPathBuilder.append("&");
+                }
+                requestPathBuilder.append(queryParam);
+                if (queryParamMap.get(queryParam) != null) {
+                    requestPathBuilder.append("=").append(queryParamMap.get(queryParam));
+                }
+                count++;
+            }
+        }
+        return requestPathBuilder.toString();
     }
 }

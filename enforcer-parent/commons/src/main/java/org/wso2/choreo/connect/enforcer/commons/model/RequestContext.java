@@ -62,6 +62,7 @@ public class RequestContext {
     private WebSocketFrameContext webSocketFrameContext;
     private Map<String, String> queryParameters;
     private Map<String, String> pathParameters;
+    private ArrayList<String> queryParamsToRemove;
 
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
@@ -313,6 +314,16 @@ public class RequestContext {
     }
 
     /**
+     * If there is a set of query parameters needs to be removed from the request path, those parameters should
+     * be added to the arrayList here.
+     *
+     * @return query parameters which are supposed to be removed.
+     */
+    public ArrayList<String> getQueryParamsToRemove() {
+        return queryParamsToRemove;
+    }
+
+    /**
      * Implements builder pattern to build an {@link RequestContext} object.
      */
     public static class Builder {
@@ -412,6 +423,7 @@ public class RequestContext {
             requestContext.clientIp = this.clientIp;
             requestContext.addHeaders = new HashMap<>();
             requestContext.removeHeaders = new ArrayList<>();
+            requestContext.queryParamsToRemove = new ArrayList<>();
             String[] queryParts = this.requestPath.split("\\?");
             String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
 

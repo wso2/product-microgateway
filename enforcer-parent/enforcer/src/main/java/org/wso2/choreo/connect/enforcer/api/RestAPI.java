@@ -157,6 +157,7 @@ public class RestAPI implements API {
     @Override
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject(requestContext.getRequestID());
+        responseObject.setRequestPath(requestContext.getRequestPath());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         // Process to-be-removed headers
@@ -168,6 +169,8 @@ public class RestAPI implements API {
 
         if (executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
+            responseObject.setQueryParamsToRemove(requestContext.getQueryParamsToRemove());
+            responseObject.setQueryParamMap(requestContext.getQueryParameters());
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
