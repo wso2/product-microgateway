@@ -44,7 +44,7 @@ x-wso2-endpoints:                                             # defines x-wso2-e
       type: basic
       username: rajith
 x-wso2-basePath: /petstore/v1
-x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint"  # refers to the  x-wso2-endpoints defined above
+x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint"  # refers to the x-wso2-endpoints defined above
 paths:
   "/pet/findByStatus":
     get:
@@ -53,7 +53,7 @@ paths:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint3" # refers to the  x-wso2-endpoints defined above
+      x-wso2-production-endpoints: "#/x-wso2-endpoints/myEndpoint3" # refers to the x-wso2-endpoints defined above
       parameters:
       - name: status
         in: query

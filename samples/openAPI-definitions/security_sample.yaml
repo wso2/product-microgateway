@@ -32,57 +32,43 @@ x-wso2-basePath: /petstore/v1
 x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
-x-wso2-request-interceptor:                          # defines request flow interceptor in API level
-  serviceURL: http://host.request.interceptor:9081
-  includes:
-    - request_headers
-    - invocation_context
+security:
+ - ApiKeyAuthQuery: []                    # applies API key security in API level
 paths:
-  "/pet/findByStatus":
-    x-wso2-production-endpoints:
-      urls:
-      -  https://localhost:2380/v1
-    x-wso2-request-interceptor:                     # defines request flow interceptor in resource level
-      serviceURL: http://host.request.interceptor:9081
-      includes:
-      - request_body
+  "/pet/{petId}":
     get:
       tags:
       - pet
-      summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
-      operationId: findPetsByStatus
+      summary: Find pet by ID
+      description: Returns a single pet
+      operationId: getPetById
       parameters:
-      - name: status
-        in: query
-        description: Status values that need to be considered for filter
+      - name: petId
+        in: path
+        description: ID of pet to return
         required: true
-        explode: true
         schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - available
-            - pending
-            - sold
-            default: available
+          type: integer
+          format: int64
+      security:
+        - OAuth2:
+           - read
+           - write
+        - ApiKeyAuth: []             # adds API key security to the resource
       responses:
         '200':
           description: successful operation
           content:
             application/xml:
               schema:
-                type: array
-                items:
-                  "$ref": "#/components/schemas/Pet"
+                "$ref": "#/components/schemas/Pet"
             application/json:
               schema:
-                type: array
-                items:
-                  "$ref": "#/components/schemas/Pet"
+                "$ref": "#/components/schemas/Pet"
         '400':
-          description: Invalid status value
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
 components:
   schemas:
     Category:
@@ -142,6 +128,25 @@ components:
           - sold
       xml:
         name: Pet
+  securitySchemes:
+    OAuth2:                          # defines OAuth2 security scheme
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:                    # scopes relevant to the OAuth2 security scheme
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations
+    ApiKeyAuth:                      # arbitrary name for the API key security scheme
+      type: apiKey
+      in: header                     # allows using defined ApiKeyAuth as a header value
+      name: X-API-KEY                # name to provide API as a header value
+    ApiKeyAuthQuery:                 # arbitrary name for the API key security scheme
+      type: apiKey
+      in: query                      # allows using defined ApiKeyAuthQuery as a query parameter
+      name: X-API-KEY-Q              # name to provide API key as a query parameter
   requestBodies:
     Pet:
       content:

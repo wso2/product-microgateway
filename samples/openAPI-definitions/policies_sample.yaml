@@ -32,16 +32,16 @@ x-wso2-basePath: /petstore/v1
 x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
-x-wso2-throttling-tier: 20kPerMin
+x-wso2-throttling-tier: 20kPerMin        # defines x-wso2-throttling-tier in API level
 paths:
   "/pet/findByStatus":
+    x-wso2-throttling-tier: 10kPerMin    # defines x-wso2-throttling-tier in resource level
     get:
       tags:
       - pet
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
       operationId: findPetsByStatus
-      x-wso2-throttling-tier: 10kPerMin
       parameters:
       - name: status
         in: query

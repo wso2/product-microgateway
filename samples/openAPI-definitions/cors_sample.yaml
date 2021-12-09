@@ -32,7 +32,7 @@ x-wso2-basePath: /petstore/v1
 x-wso2-production-endpoints:
   urls:
   - https://petstore.swagger.io/v2
-x-wso2-cors:
+x-wso2-cors:                        # defines CORS configurations
   access-control-allow-origins:
       - test.com
       - example.com
