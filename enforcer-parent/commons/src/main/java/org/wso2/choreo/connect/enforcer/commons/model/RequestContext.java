@@ -317,7 +317,7 @@ public class RequestContext {
     }
 
     /**
-     * If there is a set of query parameters needs to be removed from the request path, those parameters should
+     * If there is a set of query parameters needs to be removed from the outbound request, those parameters should
      * be added to the arrayList here.
      *
      * @return query parameters which are supposed to be removed.
