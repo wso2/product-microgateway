@@ -75,7 +75,7 @@ function respond_error(handle, shared_info, error_info, is_request_flow)
     end
     backend_headers:add(STATUS, "500")
 
-    local content_length = handle:body():setBytes(resp_body)
+    local content_length = handle:body(true):setBytes(resp_body)
     handle:headers():replace("content-length", content_length)
     return
     --#endregion

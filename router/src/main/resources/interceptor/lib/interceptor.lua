@@ -113,7 +113,7 @@ local function modify_body(handle, interceptor_response_body, request_id, shared
             return true
         end
 
-        local content_length = handle:body():setBytes(body)
+        local content_length = handle:body(true):setBytes(body)
         handle:headers():replace("content-length", content_length)
         if not is_request_flow then
             local status_code = "200"
