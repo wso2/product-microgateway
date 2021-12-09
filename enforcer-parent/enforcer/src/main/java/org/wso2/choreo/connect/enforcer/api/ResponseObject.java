@@ -123,11 +123,11 @@ public class ResponseObject {
     }
 
     public Map<String, String> getQueryParamMap() {
-        return queryParamMap;
+        return queryParams;
     }
 
-    public void setQueryParamMap(Map<String, String> queryParamMap) {
-        this.queryParamMap = queryParamMap;
+    public void setQueryParamMap(Map<String, String> queryParams) {
+        this.queryParams = queryParams;
     }
 
     public String getRequestPath() {
