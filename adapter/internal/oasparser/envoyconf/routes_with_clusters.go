@@ -382,7 +382,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	for i, ep := range clusterDetails.Endpoints {
 		// validating the basepath to be same for all upstreams of an api
 		if strings.TrimSuffix(ep.Basepath, "/") != basePath {
-			return nil, nil, errors.New("endpoint basepath mismatched expected " + basePath + " but found " + ep.Basepath)
+			return nil, nil, errors.New("endpoint basepath mismatched for " + ep.RawURL + ". expected : " + basePath + " but found : " + ep.Basepath)
 		}
 		// create addresses for endpoints
 		address := createAddress(ep.Host, ep.Port)
