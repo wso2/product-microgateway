@@ -104,16 +104,11 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     // key must exist in specified location
                     if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
                         if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
-                            // Remove the apiKey header being forwarded to the backend.
-                            requestContext.getRemoveHeaders().add(securitySchemaDefinition.getName());
-                            // avoid the apiKey header being published within the throttle event.
-                            requestContext.getProtectedHeaders().add(securitySchemaDefinition.getName());
                             return requestContext.getHeaders().get(securitySchemaDefinition.getName());
                         }
                     }
                     if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
                         if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
-                            requestContext.getQueryParamsToRemove().add(securitySchemaDefinition.getName());
                             return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
                         }
                     }
