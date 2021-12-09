@@ -35,7 +35,7 @@ public class ResponseObject {
     private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
     private ArrayList<String> queryParamsToRemove = new ArrayList<>();
-    private Map<String, String> queryParamMap;
+    private Map<String, String> queryParams;
     private String requestPath;
 
     public ArrayList<String> getRemoveHeaderMap() {
