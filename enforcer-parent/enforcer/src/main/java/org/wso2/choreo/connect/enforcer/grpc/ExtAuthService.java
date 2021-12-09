@@ -195,7 +195,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         return Code.INTERNAL_VALUE;
     }
 
-    private String constructQueryParamString(String requestPath, Map<String, String> queryParamMap,
+    private String constructQueryParamString(String requestPath, Map<String, String> queryParams,
                                              List<String> queryParamsToRemove) {
         // If no query parameters needs to be removed, then the request path can be applied as it is.
         if (queryParamsToRemove.size() == 0) {
