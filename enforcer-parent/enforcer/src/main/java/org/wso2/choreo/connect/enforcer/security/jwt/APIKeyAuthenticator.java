@@ -106,6 +106,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
                             // Remove the apiKey header being forwarded to the backend.
                             requestContext.getRemoveHeaders().add(securitySchemaDefinition.getName());
+                            // avoid the apiKey header being published within the throttle event.
+                            requestContext.getProtectedHeaders().add(securitySchemaDefinition.getName());
                             return requestContext.getHeaders().get(securitySchemaDefinition.getName());
                         }
                     }

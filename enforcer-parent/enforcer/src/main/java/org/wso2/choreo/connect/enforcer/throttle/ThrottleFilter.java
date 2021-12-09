@@ -395,7 +395,7 @@ public class ThrottleFilter implements Filter {
             Map<String, String> headers = requestContext.getHeaders();
             for (String name : headers.keySet()) {
                 // To avoid publishing user token to the traffic manager.
-                if (requestContext.getRemoveHeaders().contains(name)) {
+                if (requestContext.getProtectedHeaders().contains(name)) {
                     continue;
                 }
                 // Sending path header is stopped as it could contain query parameters which are used

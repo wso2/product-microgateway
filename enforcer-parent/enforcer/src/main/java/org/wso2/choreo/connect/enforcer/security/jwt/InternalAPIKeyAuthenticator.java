@@ -98,6 +98,8 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 String internalKey = extractInternalKey(requestContext);
                 // Remove internal key from outbound request
                 requestContext.getRemoveHeaders().add(securityParam);
+                // Avoid internal key being published to the Traffic Manager
+                requestContext.getProtectedHeaders().add(securityParam);
 
                 String[] splitToken = internalKey.split("\\.");
                 SignedJWT signedJWT = SignedJWT.parse(internalKey);

@@ -166,6 +166,8 @@ public class RestAPI implements API {
             String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
             requestContext.getRemoveHeaders().add(authHeaderName);
         }
+        // Authorization Header should not be included in the throttle publishing event.
+        requestContext.getProtectedHeaders().add(FilterUtils.getAuthHeaderName(requestContext));
 
         if (executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
