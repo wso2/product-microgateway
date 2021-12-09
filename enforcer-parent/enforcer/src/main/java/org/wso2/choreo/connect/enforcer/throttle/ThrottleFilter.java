@@ -135,7 +135,7 @@ public class ThrottleFilter implements Filter {
                 String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
                 boolean isApiLevelTriggered = false;
 
-                if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
+                if (!StringUtils.isEmpty(api.getTier())) {
                     resourceThrottleKey = apiThrottleKey;
                     resourceTier = apiTier;
                     isApiLevelTriggered = true;
