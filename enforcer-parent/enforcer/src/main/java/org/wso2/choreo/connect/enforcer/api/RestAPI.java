@@ -297,7 +297,7 @@ public class RestAPI implements API {
         for (Map.Entry<String, SecuritySchemaConfig> entry : securitySchemeDefinitions.entrySet()) {
             SecuritySchemaConfig schema = entry.getValue();
             if ("apiKey".equalsIgnoreCase(schema.getType())) {
-                if ("header".equals(schema.getIn())) {
+                if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equals(schema.getIn())) {
                     requestContext.getProtectedHeaders().add(schema.getName());
                     requestContext.getRemoveHeaders().add(schema.getName());
                     continue;
