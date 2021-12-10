@@ -43,8 +43,6 @@ import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
-import java.util.UUID;
-
 /**
  * Implements the authenticator interface to authenticate non-secured APIs.
  */
@@ -101,13 +99,11 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
                 apiKeyValidationInfoDTO.setApiName(requestContext.getMatchedAPI().getName());
                 apiKeyValidationInfoDTO.setApiVersion(requestContext.getMatchedAPI().getVersion());
 
-                String jwtTokenIdentifier = UUID.randomUUID().toString();
-
                 AbstractAPIMgtGatewayJWTGenerator jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
                 boolean isGatewayTokenCacheEnabled = ConfigHolder.getInstance().getConfig().getCacheDto().isEnabled();
                 JWTInfoDto jwtInfoDto = FilterUtils.generateJWTInfoDto(null, validationInfo,
                         apiKeyValidationInfoDTO, requestContext);
-                endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, jwtTokenIdentifier,
+                endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, "",
                         jwtInfoDto, isGatewayTokenCacheEnabled);
                 // Set generated jwt token as a response header
                 requestContext.addOrModifyHeaders(backendJwtConfig.getJwtHeader(), endUserToken);
