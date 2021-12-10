@@ -31,7 +31,7 @@ paths:
       urls:
         -  https://localhost:2380/v1
     x-wso2-request-interceptor:                     # defines request flow interceptor in resource level
-      serviceURL: http://host.request.interceptor:9081
+      serviceURL: http://host-2.request.interceptor:9081
       includes:
         - request_body
     get:
