@@ -47,7 +47,7 @@ public class JwtTransformerTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/jwttoken") , headers);
+                "/v2/standard/jwttoken") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
 

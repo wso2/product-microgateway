@@ -20,15 +20,23 @@ package org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.awaitility.Awaitility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.context.CCTestException;
-import org.wso2.choreo.connect.tests.util.*;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.TokenUtil;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class QSGAndSwaggerTestCase {
     private static final String encodedCredentials = "Basic YWRtaW46YWRtaW4=";
@@ -45,9 +53,13 @@ public class QSGAndSwaggerTestCase {
     }
 
     @Test
-    public void deployAPI() throws CCTestException {
+    public void deployAPI() throws CCTestException, MalformedURLException {
         ApictlUtils.login("test");
         ApictlUtils.deployAPI("qsg_petstore", "test");
+        String endpoint = Utils.getServiceURLHttps(
+                "/v2/pet/findByStatus?status=available");
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
+                HttpsClientRequest.isResourceURLAvailable(endpoint, new HashMap<>()));
     }
 
     @Test(description = "QSG test. Invoke with test key", dependsOnMethods = "deployAPI")

@@ -79,7 +79,7 @@ public class ScopeTest {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithoutScope);
         HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps(
-                "/v2/pets/findByTags"), headers);
+                "/v2/standard/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
         Assert.assertTrue(
@@ -114,7 +114,7 @@ public class ScopeTest {
     public void testScopeProtectedResourceValidJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithScope);
-        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/pet/findByStatus"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/standard/pet/findByStatus"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.RESPONSE_BODY,
@@ -125,7 +125,7 @@ public class ScopeTest {
     public void testMultipleScopeProtectedResourceValidJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithScope);
-        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/pets/findByTags"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/standard/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
@@ -136,7 +136,7 @@ public class ScopeTest {
     public void testMultipleScopeProtectedResourceValidMultiScopeJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithMultipleScopes);
-        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/pets/findByTags"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/standard/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
@@ -147,7 +147,7 @@ public class ScopeTest {
     public void testMultipleScopeProtectedResourceInvalidMultiScopeJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithMultipleInvalidScopes);
-        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/pets/findByTags"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps("/v2/standard/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN,"Response code mismatched");
         Assert.assertTrue(
