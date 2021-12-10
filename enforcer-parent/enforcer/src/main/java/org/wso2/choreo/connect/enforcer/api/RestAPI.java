@@ -302,7 +302,7 @@ public class RestAPI implements API {
                     requestContext.getRemoveHeaders().add(schema.getName());
                     continue;
                 }
-                if ("query".equals(schema.getIn())) {
+                if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equals(schema.getIn())) {
                     requestContext.getQueryParamsToRemove().add(schema.getName());
                 }
             }
