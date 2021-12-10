@@ -1,0 +1,107 @@
+---
+openapi: 3.0.0
+servers:
+- url: http://petstore.swagger.io/v2
+info:
+  description: 'This example defines different security schemes.'
+  version: 1.0.0
+  title: Swagger Petstore New
+  termsOfService: http://swagger.io/terms/
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+- name: pet
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
+security:
+ - ApiKeyAuthQuery: []                    # applies API key security in API level
+paths:
+  "/pet/{petId}":
+    get:
+      tags:
+      - pet
+      summary: Find pet by ID
+      operationId: getPetById
+      parameters:
+      - name: petId
+        in: path
+        description: ID of pet to return
+        required: true
+        schema:
+          type: integer
+          format: int64
+      security:
+        - OAuth2:
+           - read
+           - write
+        - ApiKeyAuth: []             # adds API key security to the resource
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Pet"
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+      - name
+      - photoUrls
+      properties:
+        id:
+          type: integer
+          format: int64
+        category:
+          type: string
+        name:
+          type: string
+        photoUrls:
+          type: string
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+          - available
+          - sold
+      xml:
+        name: Pet
+  securitySchemes:
+    OAuth2:                          # defines OAuth2 security scheme
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:                    # scopes relevant to the OAuth2 security scheme
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations
+    ApiKeyAuth:                      # arbitrary name for the API key security scheme
+      type: apiKey
+      in: header                     # allows using defined ApiKeyAuth as a header value
+      name: X-API-KEY                # name to provide API as a header value
+    ApiKeyAuthQuery:                 # arbitrary name for the API key security scheme
+      type: apiKey
+      in: query                      # allows using defined ApiKeyAuthQuery as a query parameter
+      name: X-API-KEY-Q              # name to provide API key as a query parameter
+  requestBodies:
+    Pet:
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+        application/xml:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+      description: Pet object that needs to be added to the store
+      required: true
