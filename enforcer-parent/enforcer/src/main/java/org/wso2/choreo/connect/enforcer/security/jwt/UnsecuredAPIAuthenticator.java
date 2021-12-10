@@ -20,11 +20,17 @@ package org.wso2.choreo.connect.enforcer.security.jwt;
 
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
+import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
@@ -34,7 +40,10 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
+import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+
+import java.util.UUID;
 
 /**
  * Implements the authenticator interface to authenticate non-secured APIs.
@@ -79,7 +88,31 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
                 throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
                         GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
             }
-            return FilterUtils.generateAuthenticationContextForUnsecured(requestContext);
+
+            // Generate or get backend JWT
+            JWTConfigurationDto backendJwtConfig = ConfigHolder.getInstance().getConfig().
+                    getJwtConfigurationDto();
+            String endUserToken = null;
+
+            if (backendJwtConfig.isEnabled()) {
+                JWTValidationInfo validationInfo = new JWTValidationInfo();
+
+                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                apiKeyValidationInfoDTO.setApiName(requestContext.getMatchedAPI().getName());
+                apiKeyValidationInfoDTO.setApiVersion(requestContext.getMatchedAPI().getVersion());
+
+                String jwtTokenIdentifier = UUID.randomUUID().toString();
+
+                AbstractAPIMgtGatewayJWTGenerator jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
+                boolean isGatewayTokenCacheEnabled = ConfigHolder.getInstance().getConfig().getCacheDto().isEnabled();
+                JWTInfoDto jwtInfoDto = FilterUtils.generateJWTInfoDto(null, validationInfo,
+                        apiKeyValidationInfoDTO, requestContext);
+                endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, jwtTokenIdentifier,
+                        jwtInfoDto, isGatewayTokenCacheEnabled);
+                // Set generated jwt token as a response header
+                requestContext.addOrModifyHeaders(backendJwtConfig.getJwtHeader(), endUserToken);
+            }
+            return FilterUtils.generateAuthenticationContextForUnsecured(requestContext, endUserToken);
         } finally {
             if (Utils.tracingEnabled()) {
                 unsecuredApiAuthenticatorSpanScope.close();
@@ -98,7 +131,8 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
         return "Unsecured";
     }
 
-    @Override public int getPriority() {
+    @Override
+    public int getPriority() {
         return -20;
     }
 
@@ -107,6 +141,7 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
      * AuthType can be deduced from API level and resource level. If both are defined,
      * resource level gets the precedence.
      * If nothing declared, it will return the authType as "default".
+     *
      * @param matchingResource matching resource related configurations
      * @return value of the authType from API definition. If not present "default"
      */
