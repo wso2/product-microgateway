@@ -296,7 +296,7 @@ public class RestAPI implements API {
         // credentials.
         for (Map.Entry<String, SecuritySchemaConfig> entry : securitySchemeDefinitions.entrySet()) {
             SecuritySchemaConfig schema = entry.getValue();
-            if ("apiKey".equalsIgnoreCase(schema.getType())) {
+            if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(schema.getType())) {
                 if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equals(schema.getIn())) {
                     requestContext.getProtectedHeaders().add(schema.getName());
                     requestContext.getRemoveHeaders().add(schema.getName());
