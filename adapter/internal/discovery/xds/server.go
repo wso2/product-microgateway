@@ -84,6 +84,7 @@ var (
 	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:API_UUID -> Envoy Clusters map
 	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
 	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:API_UUID -> API Resource map
+	orgIDvHostBasepathMap       map[string]map[string]string               // organizationID -> Vhost:basepath -> Vhost:API_UUID
 
 	reverseAPINameVersionMap map[string]string
 
@@ -161,6 +162,7 @@ func init() {
 	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:API_UUID -> Envoy Clusters map
 	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
 	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:API_UUID -> API Resource map
+	orgIDvHostBasepathMap = make(map[string]map[string]string)
 
 	reverseAPINameVersionMap = make(map[string]string)
 
@@ -330,6 +332,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		return nil, validationErr
 	}
 
+	// -------- Finished updating mgwSwagger struct
+
 	uniqueIdentifier := apiYaml.ID
 
 	if uniqueIdentifier == "" {
@@ -342,8 +346,14 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
 
-	// Get the map from organizationID map.
+	// -------- Begin updating maps
 
+	err = addBasepathToMap(mgwSwagger, organizationID, vHost, apiIdentifier)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the map from organizationID map.
 	if _, ok := orgIDAPIMgwSwaggerMap[organizationID]; ok {
 		orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier] = mgwSwagger
 	} else {
@@ -466,6 +476,38 @@ func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 		return
 	}
 	return "", false
+}
+
+func addBasepathToMap(mgwSwagger mgw.MgwSwagger, organizationID, vHost, apiIdentifier string) error {
+	newBasepath := mgwSwagger.GetXWso2Basepath()
+
+	// Check if the basepath exists
+	if existingAPIIdentifier, ok := orgIDvHostBasepathMap[organizationID][vHost+":"+newBasepath]; ok {
+		// Check if it is NOT just an update for the already existing API
+		if existingAPIIdentifier != apiIdentifier {
+			logger.LoggerXds.Errorf("An API exists with the same basepath. Basepath: %v Existing_API: %v New_API: %v orgID: %v VHost: %v",
+				newBasepath, existingAPIIdentifier, apiIdentifier, organizationID, vHost)
+			err := errors.New("An API exists with the same basepath. Existing_API: " + existingAPIIdentifier + "New_API:" + apiIdentifier +
+				" orgID: " + organizationID + " VHost: " + vHost)
+			return err
+		}
+	}
+
+	// Remove the old basepath anyway
+	if oldMgwSwagger, ok := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]; ok {
+		oldBasepath := oldMgwSwagger.GetXWso2Basepath()
+		delete(orgIDvHostBasepathMap[organizationID], vHost+":"+oldBasepath)
+	}
+
+	// Add the new basepath
+	if _, ok := orgIDvHostBasepathMap[organizationID]; ok {
+		orgIDvHostBasepathMap[organizationID][vHost+":"+newBasepath] = apiIdentifier
+	} else {
+		vHostBasepathMap := make(map[string]string)
+		vHostBasepathMap[vHost+":"+newBasepath] = apiIdentifier
+		orgIDvHostBasepathMap[organizationID] = vHostBasepathMap
+	}
+	return nil
 }
 
 // DeleteAPIs deletes an API, its resources and updates the caches of given environments
@@ -665,10 +707,21 @@ func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs 
 	//resources that belongs to the remaining APIs
 	updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
 
+	deleteBasepathForVHost(organizationID, apiIdentifier)
 	delete(orgIDOpenAPIEnvoyMap[organizationID], apiIdentifier)  //delete labels
 	delete(orgIDAPIMgwSwaggerMap[organizationID], apiIdentifier) //delete mgwSwagger
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API %v of organization %v", apiIdentifier, organizationID)
+}
+
+func deleteBasepathForVHost(organizationID, apiIdentifier string) {
+	// Remove the basepath from map (that is used to avoid duplicate basepaths)
+	if oldMgwSwagger, ok := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]; ok {
+		s := strings.Split(apiIdentifier, apiKeyFieldSeparator)
+		vHost := s[0]
+		oldBasepath := oldMgwSwagger.GetXWso2Basepath()
+		delete(orgIDvHostBasepathMap[organizationID], vHost+":"+oldBasepath)
+	}
 }
 
 func arrayContains(a []string, x string) bool {
