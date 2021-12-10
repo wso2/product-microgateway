@@ -55,7 +55,10 @@ public class CcWithMultipleEnv {
         ApictlUtils.login("test2");
 
         ApictlUtils.deployAPI("apictl_petstore2", "test2");
-        TimeUnit.SECONDS.sleep(5);
+        String endpoint = Utils.getServiceURLHttps(
+                "/v2/new/pet/findByStatus?status=available");
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
+                HttpsClientRequest.isResourceURLAvailable(endpoint, new HashMap<>()));
     }
 
     @Test(description = "Undeploy API From Specific Gateway Env and Specific Vhost.")

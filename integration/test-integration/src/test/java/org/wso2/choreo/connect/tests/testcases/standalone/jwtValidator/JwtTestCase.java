@@ -52,7 +52,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithoutScope);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -67,7 +67,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.INVALID_JWT_TOKEN);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
@@ -82,7 +82,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Something " + jwtWithoutScope);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
@@ -95,7 +95,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.EXPIRED_JWT_TOKEN);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
@@ -111,7 +111,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + "aaa.bbb.ccc");
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,

@@ -25,8 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -36,6 +40,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * This class can be used to send http request.
@@ -235,6 +241,21 @@ public class HttpsClientRequest {
 
     public static Callable<Boolean> isResponseAvailable(String URL, Map<String, String> requestHeaders) {
         return () -> checkForResponse(URL, requestHeaders);
+    }
+
+    public static Callable<Boolean> isResourceURLAvailable(String URL, Map<String, String> requestHeaders) {
+        return () -> checkIfResourceIsAvailable(URL, requestHeaders);
+    }
+
+    private static Boolean checkIfResourceIsAvailable(String URL, Map<String, String> requestHeaders) {
+        HttpResponse response = null;
+        try {
+            response = HttpsClientRequest.doGet(URL, requestHeaders);
+        } catch (CCTestException e) {
+            return false;
+        }
+        int responseCode = response.getResponseCode();
+        return responseCode == 200 || responseCode == 201 || responseCode == 401 || responseCode == 403;
     }
 
     private static Boolean checkForResponse(String URL, Map<String, String> requestHeaders) {
