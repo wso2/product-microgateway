@@ -132,7 +132,10 @@ public class ThrottleFilter implements Filter {
                 String appTenant = authContext.getSubscriberTenantDomain();
                 String clientIp = reqContext.getClientIp();
                 String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
-                String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
+                // API Tenant Domain is required to be taken in order to support internal Key scenario.
+                // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
+                String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(),
+                        apiTenantDomain);
                 boolean isApiLevelTriggered = false;
 
                 if (!StringUtils.isEmpty(api.getTier())) {
@@ -290,7 +293,9 @@ public class ThrottleFilter implements Filter {
         String apiTier = getApiTier(api);
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         String appTenant = authContext.getSubscriberTenantDomain();
-        String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
+        // API Tenant Domain is required to be taken in order to support internal Key scenario.
+        // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
+        String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), tenantDomain);
         String resourceTier;
         String resourceKey;
 
