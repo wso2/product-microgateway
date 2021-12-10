@@ -96,8 +96,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 }
                 // Extract internal from the request while removing it from the msg context.
                 String internalKey = extractInternalKey(requestContext);
-                // Remove internal key from outbound request
-                requestContext.getRemoveHeaders().add(securityParam);
 
                 String[] splitToken = internalKey.split("\\.");
                 SignedJWT signedJWT = SignedJWT.parse(internalKey);

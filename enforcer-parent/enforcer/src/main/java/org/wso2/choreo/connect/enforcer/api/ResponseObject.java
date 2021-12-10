@@ -34,6 +34,9 @@ public class ResponseObject {
     private ArrayList<String> removeHeaderMap = new ArrayList<>();
     private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
+    private ArrayList<String> queryParamsToRemove = new ArrayList<>();
+    private Map<String, String> queryParams;
+    private String requestPath;
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -109,5 +112,29 @@ public class ResponseObject {
 
     public void setMetaDataMap(Map<String, String> metaDataMap) {
         this.metaDataMap = metaDataMap;
+    }
+
+    public ArrayList<String> getQueryParamsToRemove() {
+        return queryParamsToRemove;
+    }
+
+    public void setQueryParamsToRemove(ArrayList<String> queryParamsToRemove) {
+        this.queryParamsToRemove = queryParamsToRemove;
+    }
+
+    public Map<String, String> getQueryParamMap() {
+        return queryParams;
+    }
+
+    public void setQueryParamMap(Map<String, String> queryParams) {
+        this.queryParams = queryParams;
+    }
+
+    public String getRequestPath() {
+        return requestPath;
+    }
+
+    public void setRequestPath(String requestPath) {
+        this.requestPath = requestPath;
     }
 }

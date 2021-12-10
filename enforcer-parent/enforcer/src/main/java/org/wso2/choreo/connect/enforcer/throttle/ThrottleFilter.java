@@ -396,6 +396,15 @@ public class ThrottleFilter implements Filter {
         if (config.isHeaderConditionsEnabled()) {
             Map<String, String> headers = requestContext.getHeaders();
             for (String name : headers.keySet()) {
+                // To avoid publishing user token to the traffic manager.
+                if (requestContext.getProtectedHeaders().contains(name)) {
+                    continue;
+                }
+                // Sending path header is stopped as it could contain query parameters which are used
+                // to secure APIs.
+                if (name.equals(APIConstants.PATH_HEADER)) {
+                    continue;
+                }
                 jsonObMap.put(name, headers.get(name));
             }
         }
@@ -403,6 +412,10 @@ public class ThrottleFilter implements Filter {
         if (config.isQueryConditionsEnabled()) {
             Map<String, String> params = requestContext.getQueryParameters();
             for (String name : params.keySet()) {
+                // To avoid publishing apiKey to the traffic manager.
+                if (requestContext.getQueryParamsToRemove().contains(name)) {
+                    continue;
+                }
                 jsonObMap.put(name, params.get(name));
             }
         }
