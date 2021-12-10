@@ -14,7 +14,7 @@ import (
 
 const (
 	deployedRevisionEP   string = "internal/data/v1/apis/deployed-revisions"
-	unDeployedRevisionEP string = "internal/data/v1/apis/un-deploy-revision"
+	unDeployedRevisionEP string = "internal/data/v1/apis/undeployed-revision"
 )
 
 //UpdateDeployedRevisions create the DeployedAPIRevision object
