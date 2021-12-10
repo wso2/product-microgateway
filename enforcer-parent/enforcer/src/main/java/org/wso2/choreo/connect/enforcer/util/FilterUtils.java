@@ -183,7 +183,8 @@ public class FilterUtils {
         return domain;
     }
 
-    public static AuthenticationContext generateAuthenticationContextForUnsecured(RequestContext requestContext) {
+    public static AuthenticationContext generateAuthenticationContextForUnsecured(RequestContext requestContext,
+                                                                                  String endUserToken) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         String clientIP = requestContext.getClientIp();
 
@@ -208,7 +209,10 @@ public class FilterUtils {
         authContext.setApiName(requestContext.getMatchedAPI().getName());
         authContext.setStopOnQuotaReach(true);
         authContext.setConsumerKey(null);
-        authContext.setCallerToken(null);
+        // Set JWT token sent to the backend
+        if (StringUtils.isNotEmpty(endUserToken)) {
+            authContext.setCallerToken(endUserToken);
+        }
         String apiUUID = requestContext.getMatchedAPI().getUuid();
         if (!StringUtils.isEmpty(apiUUID)) {
             authContext.setApiUUID(apiUUID);
