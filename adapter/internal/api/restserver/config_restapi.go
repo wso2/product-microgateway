@@ -21,6 +21,7 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"net/http"
+
 	// enable profiling endpoints
 	_ "net/http/pprof"
 	"strconv"
@@ -151,10 +152,11 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
-			switch err.Error() {
-			case constants.AlreadyExists:
+			if err.Error() == constants.AlreadyExists {
 				return api_individual.NewPostApisConflict()
-			default:
+			} else if strings.HasPrefix(err.Error(), "An API exists with the same basepath") {
+				return api_individual.NewPostApisConflict()
+			} else {
 				return api_individual.NewPostApisInternalServerError()
 			}
 		}
