@@ -100,7 +100,7 @@ func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment strin
 		revisionEP += "/" + unDeployedRevisionEP
 	}
 
-	if apiUUID == "" || revisionUUID == "" || environment == "" {
+	if apiUUID == "" || revisionUUID == "" || environment == "" || !cpConfigs.Enabled {
 		return
 	}
 
@@ -122,7 +122,7 @@ func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment strin
 
 		success := true
 		if err != nil {
-			logger.LoggerNotifier.Warnf("Error response from %v for attempt %v : %v", revisionEP, retries, err.Error())
+			logger.LoggerNotifier.Errorf("Error response from %v for attempt %v : %v", revisionEP, retries, err.Error())
 			success = false
 		}
 		if resp != nil && resp.StatusCode != http.StatusOK {

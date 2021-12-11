@@ -586,10 +586,7 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, revisionUUID string) {
 	apiIdentifiers := make(map[string]struct{})
 
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
-	}
+	conf, _ := config.ReadConfigs()
 	gaEnabled := conf.GlobalAdapter.Enabled
 
 	mutexForInternalMapUpdate.Lock()
@@ -608,7 +605,7 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 		} else {
 			// if no error, update internal vhost maps
 			// error only happens when API not found in deleteAPI func
-			logger.LoggerXds.Infof("Successfully undeployed API %v of Organization %v from environments %v revision %v before revisionUUID", apiIdentifier, organizationID, environments, revisionUUID)
+			logger.LoggerXds.Infof("Successfully undeployed the revision %v of API %v under Organization %v and environment %v ", revisionUUID, apiIdentifier, organizationID, environments)
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
