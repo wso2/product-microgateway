@@ -270,6 +270,7 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 			APIUUID:          apiEntry,
 			IsDeployEvent:    false,
 			OrganizationUUID: gaAPI.OrganizationUUID,
+			RevisionUUID:     gaAPI.RevisionUUID,
 		}
 		GAAPIChannel <- event
 		delete(apiRevisionMap, apiEntry)

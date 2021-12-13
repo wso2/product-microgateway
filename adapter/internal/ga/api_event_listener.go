@@ -36,7 +36,7 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 			configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 		}
 		if !event.IsDeployEvent {
-			xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, configuredEnvs)
+			xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, configuredEnvs, event.RevisionUUID)
 			for _, env := range configuredEnvs {
 				xds.DeleteAPIAndReturnList(event.APIUUID, event.OrganizationUUID, env)
 			}
