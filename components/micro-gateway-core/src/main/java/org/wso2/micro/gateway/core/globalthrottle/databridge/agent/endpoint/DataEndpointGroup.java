@@ -434,13 +434,23 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
                     return true;
                 } else {
                     // this block is executed when connection is SSL
-                    SSLSocket socket = (SSLSocket) sslSocketFactory.createSocket(ip, port);
-                    OutputStream outputStream = socket.getOutputStream();
-                    String sessionId = dataEndpoint.getDataEndpointConfiguration().getSessionId();
-                    ByteBuffer buf = ByteBuffer.allocate(sessionId.length());
-                    outputStream.write(buf.array());
-                    outputStream.flush();
-                    socket.close();
+                    SSLSocket socket = null;
+                    try {
+                        socket = (SSLSocket) sslSocketFactory.createSocket(ip, port);
+                        OutputStream outputStream = socket.getOutputStream();
+                        String sessionId = dataEndpoint.getDataEndpointConfiguration().getSessionId();
+                        ByteBuffer buf = ByteBuffer.allocate(sessionId.length());
+                        outputStream.write(buf.array());
+                        outputStream.flush();
+                    } finally {
+                        try {
+                            if ((socket != null) && (socket.isConnected())) {
+                                socket.close();
+                            }
+                        } catch (IOException e) {
+                            log.error("Can not close the SSL socket which is used to check the server status ", e);
+                        }
+                    }
                     return true;
                 }
             } catch (UnknownHostException e) {
