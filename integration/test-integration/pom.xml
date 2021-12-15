@@ -225,7 +225,7 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>mock-backend-server</artifactId>
-            <version>1.0.0-rc3-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -244,7 +244,7 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer</artifactId>
-            <version>1.0.0-rc3-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
