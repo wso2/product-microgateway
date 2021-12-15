@@ -18,7 +18,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.am.choreo.connect</groupId>
+        <groupId>org.wso2.choreo.connect</groupId>
         <artifactId>integration</artifactId>
         <version>1.0.0-rc3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -56,7 +56,7 @@
                         </property>
                     </systemProperties>
                     <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.wso2.am.choreo.connect:org.wso2.choreo.connect.enforcer</classpathDependencyExclude>
+                        <classpathDependencyExclude>org.wso2.choreo.connect:org.wso2.choreo.connect.enforcer</classpathDependencyExclude>
                     </classpathDependencyExcludes>
                 </configuration>
             </plugin>
@@ -223,7 +223,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.am.choreo.connect</groupId>
+            <groupId>org.wso2.choreo.connect</groupId>
             <artifactId>mock-backend-server</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
@@ -242,12 +242,12 @@
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.am.choreo.connect</groupId>
+            <groupId>org.wso2.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.am.choreo.connect</groupId>
+            <groupId>org.wso2.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer.commons</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
