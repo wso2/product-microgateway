@@ -96,8 +96,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 }
                 // Extract internal from the request while removing it from the msg context.
                 String internalKey = extractInternalKey(requestContext);
-                // Remove internal key from outbound request
-                requestContext.getRemoveHeaders().add(securityParam);
 
                 String[] splitToken = internalKey.split("\\.");
                 SignedJWT signedJWT = SignedJWT.parse(internalKey);
@@ -106,11 +104,15 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
                 // Check if the decoded header contains type as 'InternalKey'.
                 if (!isInternalKey(payload)) {
-                    log.error("Invalid Internal Key token type." + FilterUtils.getMaskedToken(splitToken[0]));
+                    log.error("Invalid Internal Key token type. " + FilterUtils.getMaskedToken(splitToken[0]));
                     // To provide support for API keys. If internal key name's header name value changed similar
                     // to the API key header name this will enable that support.
                     AuthenticationContext authenticationContext = new AuthenticationContext();
                     authenticationContext.setAuthenticated(false);
+
+                    // We check the type before verifying the signature. In case the type was incorrect but also not an
+                    // API key, this will throw a NPE at RestAPI class setStatusCode method. This prevents it.
+                    FilterUtils.setUnauthenticatedErrorToContext(requestContext);
                     return authenticationContext;
                 }
 
@@ -224,7 +226,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     }
 
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
-                            requestContext.getMatchedAPI().getTier(),
                             requestContext.getMatchedAPI().getUuid(), internalKey);
                 } else {
                     log.error("Internal Key authentication failed. " + FilterUtils.getMaskedToken(splitToken[0]));
@@ -255,7 +256,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
             throws ParseException {
 
         APIKeyValidationInfoDTO validationInfoDTO = new APIKeyValidationInfoDTO();
-        validationInfoDTO.setApiTier(requestContext.getMatchedAPI().getTier());
         if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
             validationInfoDTO.setType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
         } else {

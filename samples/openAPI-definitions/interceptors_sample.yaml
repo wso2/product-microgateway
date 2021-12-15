@@ -1,0 +1,103 @@
+---
+openapi: 3.0.0
+servers:
+  - url: http://petstore.swagger.io/v2
+info:
+  description: 'This example demonstrates how to define request flow interceptor using  x-wso2-request-interceptor extension.'
+  version: 1.0.0
+  title: SwaggerPetStore
+  termsOfService: http://swagger.io/terms/
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: pet
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
+  urls:
+    - https://petstore.swagger.io/v2
+x-wso2-request-interceptor:                          # defines request flow interceptor in API level
+  serviceURL: http://host.request.interceptor:9081
+  includes:
+    - request_headers
+    - invocation_context
+paths:
+  "/pet/findByStatus":
+    x-wso2-production-endpoints:
+      urls:
+        -  https://localhost:2380/v1
+    x-wso2-request-interceptor:                     # defines request flow interceptor in resource level
+      serviceURL: http://host-2.request.interceptor:9081
+      includes:
+        - request_body
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      parameters:
+        - name: status
+          in: query
+          description: Status values that need to be considered for filter
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - available
+                - pending
+                - sold
+              default: available
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Pet"
+        '400':
+          description: Invalid status value
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        id:
+          type: integer
+          format: int64
+        category:
+          type: string
+        name:
+          type: string
+        tags:
+          type: string
+        status:
+          type: string
+          enum:
+            - available
+            - pending
+      xml:
+        name: Pet
+  requestBodies:
+    Pet:
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+        application/xml:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+      description: Pet object that needs to be added to the store
+      required: true

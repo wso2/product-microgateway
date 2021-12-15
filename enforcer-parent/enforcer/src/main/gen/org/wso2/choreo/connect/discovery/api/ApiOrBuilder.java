@@ -182,57 +182,81 @@ public interface ApiOrBuilder extends
       int index);
 
   /**
-   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   * <code>repeated .wso2.discovery.api.SecurityList security = 13;</code>
+   */
+  java.util.List<org.wso2.choreo.connect.discovery.api.SecurityList> 
+      getSecurityList();
+  /**
+   * <code>repeated .wso2.discovery.api.SecurityList security = 13;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.SecurityList getSecurity(int index);
+  /**
+   * <code>repeated .wso2.discovery.api.SecurityList security = 13;</code>
+   */
+  int getSecurityCount();
+  /**
+   * <code>repeated .wso2.discovery.api.SecurityList security = 13;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecurityListOrBuilder> 
+      getSecurityOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.api.SecurityList security = 13;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.SecurityListOrBuilder getSecurityOrBuilder(
+      int index);
+
+  /**
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 14;</code>
    * @return Whether the endpointSecurity field is set.
    */
   boolean hasEndpointSecurity();
   /**
-   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 14;</code>
    * @return The endpointSecurity.
    */
   org.wso2.choreo.connect.discovery.api.EndpointSecurity getEndpointSecurity();
   /**
-   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 14;</code>
    */
   org.wso2.choreo.connect.discovery.api.EndpointSecurityOrBuilder getEndpointSecurityOrBuilder();
 
   /**
-   * <code>string authorizationHeader = 14;</code>
+   * <code>string authorizationHeader = 15;</code>
    * @return The authorizationHeader.
    */
   java.lang.String getAuthorizationHeader();
   /**
-   * <code>string authorizationHeader = 14;</code>
+   * <code>string authorizationHeader = 15;</code>
    * @return The bytes for authorizationHeader.
    */
   com.google.protobuf.ByteString
       getAuthorizationHeaderBytes();
 
   /**
-   * <code>bool disableSecurity = 15;</code>
+   * <code>bool disableSecurity = 16;</code>
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
 
   /**
-   * <code>string vhost = 16;</code>
+   * <code>string vhost = 17;</code>
    * @return The vhost.
    */
   java.lang.String getVhost();
   /**
-   * <code>string vhost = 16;</code>
+   * <code>string vhost = 17;</code>
    * @return The bytes for vhost.
    */
   com.google.protobuf.ByteString
       getVhostBytes();
 
   /**
-   * <code>string organizationId = 17;</code>
+   * <code>string organizationId = 18;</code>
    * @return The organizationId.
    */
   java.lang.String getOrganizationId();
   /**
-   * <code>string organizationId = 17;</code>
+   * <code>string organizationId = 18;</code>
    * @return The bytes for organizationId.
    */
   com.google.protobuf.ByteString

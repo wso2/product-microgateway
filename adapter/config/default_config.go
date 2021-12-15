@@ -147,10 +147,11 @@ var defaultConfig = &Config{
 					CertificateFilePath:  "/home/wso2/security/truststore/mg.pem",
 				},
 				{
-					Name:                "APIM Publisher",
-					Issuer:              "https://localhost:9443/publisher",
-					CertificateAlias:    "",
-					CertificateFilePath: "/home/wso2/security/truststore/wso2carbon.pem",
+					Name:                 "APIM Publisher",
+					Issuer:               "https://localhost:9443/publisher",
+					ValidateSubscription: true,
+					CertificateAlias:     "",
+					CertificateFilePath:  "/home/wso2/security/truststore/wso2carbon.pem",
 				},
 			},
 			AuthHeader: authHeader{

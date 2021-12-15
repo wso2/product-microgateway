@@ -22,6 +22,8 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
+import org.wso2.choreo.connect.discovery.api.Scopes;
+import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
@@ -71,7 +73,7 @@ public class RestAPI implements API {
         String apiType = api.getApiType();
         Map<String, EndpointCluster> endpoints = new HashMap<>();
         Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
-        List<String> securitySchemeList = new ArrayList<>();
+        Map<String, List<String>> securityScopesMap = new HashMap<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
 
@@ -93,8 +95,21 @@ public class RestAPI implements API {
                 securitySchemaConfig.setName(securityScheme.getName());
                 securitySchemaConfig.setIn(securityScheme.getIn());
                 securitySchemeDefinitions.put(definitionName, securitySchemaConfig);
-                securitySchemeList.add(securityScheme.getType());
-                // TODO: add two separate protos to hold the definitions and the schemes to apply at API level
+            }
+        }
+
+        for (SecurityList securityList : api.getSecurityList()) {
+            for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                securityScopesMap.put(entry.getKey(), new ArrayList<>());
+                if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                    List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                    securityScopesMap.replace(entry.getKey(), scopeList);
+                }
+                // only supports security scheme OR combinations. Example -
+                // Security:
+                // - api_key: []
+                //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
+                break;
             }
         }
 
@@ -110,7 +125,7 @@ public class RestAPI implements API {
             }
 
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath(), securitySchemeDefinitions);
+                ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setEndpoints(endpointClusterMap);
                 resources.add(resConfig);
             }
@@ -129,11 +144,11 @@ public class RestAPI implements API {
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
-                .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(endpointSecurity)
-                .endpoints(endpoints)
-                .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).securitySchemeDefinitions(securitySchemeDefinitions).build();
+                .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
+                .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
+                .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
+                .endpoints(endpoints).endpointSecurity(endpointSecurity)
+                .organizationId(api.getOrganizationId()).build();
 
         initFilters();
         return basePath;
@@ -142,17 +157,15 @@ public class RestAPI implements API {
     @Override
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject(requestContext.getRequestID());
+        responseObject.setRequestPath(requestContext.getRequestPath());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
-        // Process to-be-removed headers
-        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
-        if (!authHeader.isEnableOutboundAuthHeader()) {
-            String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
-            requestContext.getRemoveHeaders().add(authHeaderName);
-        }
+        populateRemoveAndProtectedHeaders(requestContext);
 
         if (executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
+            responseObject.setQueryParamsToRemove(requestContext.getQueryParamsToRemove());
+            responseObject.setQueryParamMap(requestContext.getQueryParameters());
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
@@ -197,26 +210,32 @@ public class RestAPI implements API {
     }
 
     private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
-            SecuritySchemaConfig> securitySchemeDefinitions) {
+            List<String>> apiLevelSecurityList) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
         resource.setTier(operation.getTier());
         resource.setDisableSecurity(operation.getDisableSecurity());
         Map<String, List<String>> securityMap = new HashMap<>();
-        operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            if (security != null && security.getScopesList().size() > 0) {
-                List<String> scopeList = new ArrayList<>(security.getScopesList());
-                securityMap.put(key, scopeList);
+        if (operation.getSecurityList().size() > 0) {
+            for (SecurityList securityList : operation.getSecurityList()) {
+                for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
+                    securityMap.put(entry.getKey(), new ArrayList<>());
+                    if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
+                        List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
+                        securityMap.replace(entry.getKey(), scopeList);
+                    }
+                    // only supports security scheme OR combinations. Example -
+                    // Security:
+                    // - api_key: []
+                    //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
+                    break;
+                }
             }
-            if (security != null && FilterUtils.getAPIKeyDefinitionNames(securitySchemeDefinitions).contains(key)) {
-                securityMap.put(key, new ArrayList<>());
-            }
-            if (security != null && key.equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
-                securityMap.put(key, new ArrayList<>());
-            }
-        }));
-     resource.setSecuritySchemas(securityMap);
+            resource.setSecuritySchemas(securityMap);
+        } else {
+            resource.setSecuritySchemas(apiLevelSecurityList);
+        }
         return resource;
     }
 
@@ -266,5 +285,44 @@ public class RestAPI implements API {
                         + filterDTO.getClassName());
             }
         }
+    }
+
+    private void populateRemoveAndProtectedHeaders(RequestContext requestContext) {
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions =
+                requestContext.getMatchedAPI().getSecuritySchemeDefinitions();
+        // API key headers are considered to be protected headers, such that the header would not be sent
+        // to backend and traffic manager.
+        // This would prevent leaking credentials, even if user is invoking unsecured resource with some
+        // credentials.
+        for (Map.Entry<String, SecuritySchemaConfig> entry : securitySchemeDefinitions.entrySet()) {
+            SecuritySchemaConfig schema = entry.getValue();
+            if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(schema.getType())) {
+                if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equals(schema.getIn())) {
+                    requestContext.getProtectedHeaders().add(schema.getName());
+                    requestContext.getRemoveHeaders().add(schema.getName());
+                    continue;
+                }
+                if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equals(schema.getIn())) {
+                    requestContext.getQueryParamsToRemove().add(schema.getName());
+                }
+            }
+        }
+
+        // Internal-Key credential is considered to be protected headers, such that the header would not be sent
+        // to backend and traffic manager.
+        String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                .getTestConsoleHeaderName().toLowerCase();
+        requestContext.getRemoveHeaders().add(internalKeyHeader);
+        // Avoid internal key being published to the Traffic Manager
+        requestContext.getProtectedHeaders().add(internalKeyHeader);
+
+        // Remove Authorization Header
+        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
+        String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
+        if (!authHeader.isEnableOutboundAuthHeader()) {
+            requestContext.getRemoveHeaders().add(authHeaderName);
+        }
+        // Authorization Header should not be included in the throttle publishing event.
+        requestContext.getProtectedHeaders().add(authHeaderName);
     }
 }

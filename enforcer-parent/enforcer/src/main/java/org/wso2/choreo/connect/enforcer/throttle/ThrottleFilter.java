@@ -122,7 +122,7 @@ public class ThrottleFilter implements Filter {
                 APIConfig api = reqContext.getMatchedAPI();
                 String apiContext = api.getBasePath();
                 String apiVersion = api.getVersion();
-                String appId = authContext.getApplicationId();
+                int appId = authContext.getApplicationId();
                 String apiTier = getApiTier(api);
                 String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
                 String resourceTier = getResourceTier(reqContext.getMatchedResourcePath());
@@ -132,10 +132,13 @@ public class ThrottleFilter implements Filter {
                 String appTenant = authContext.getSubscriberTenantDomain();
                 String clientIp = reqContext.getClientIp();
                 String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
-                String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
+                // API Tenant Domain is required to be taken in order to support internal Key scenario.
+                // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
+                String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(),
+                        apiTenantDomain);
                 boolean isApiLevelTriggered = false;
 
-                if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
+                if (!StringUtils.isEmpty(api.getTier())) {
                     resourceThrottleKey = apiThrottleKey;
                     resourceTier = apiTier;
                     isApiLevelTriggered = true;
@@ -202,7 +205,7 @@ public class ThrottleFilter implements Filter {
                 }
 
                 // Checking Application level throttling
-                String appThrottleKey = appId + ':' + authorizedUser;
+                String appThrottleKey = appId + ":" + authorizedUser;
                 Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
                 if (appDecision.isThrottled()) {
                     log.debug("Setting application throttle out response");
@@ -290,7 +293,9 @@ public class ThrottleFilter implements Filter {
         String apiTier = getApiTier(api);
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         String appTenant = authContext.getSubscriberTenantDomain();
-        String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
+        // API Tenant Domain is required to be taken in order to support internal Key scenario.
+        // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
+        String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), tenantDomain);
         String resourceTier;
         String resourceKey;
 
@@ -298,7 +303,9 @@ public class ThrottleFilter implements Filter {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
 
-        if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equals(apiTier)) {
+        // apiConfig instance will have the tier assigned only if openapi definition contains the
+        // extension
+        if (!StringUtils.isEmpty(api.getTier())) {
             resourceTier = apiTier;
             resourceKey = apiContext;
         } else {
@@ -307,11 +314,11 @@ public class ThrottleFilter implements Filter {
         }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
-        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ':' + authorizedUser);
+        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ":" + authorizedUser);
         throttleEvent.put(ThrottleEventConstants.APP_TIER, authContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
-        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ':' +
+        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ":" +
                 apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authContext.getTier());
         throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, resourceKey);
@@ -322,7 +329,7 @@ public class ThrottleFilter implements Filter {
         throttleEvent.put(ThrottleEventConstants.API_VERSION, apiVersion);
         throttleEvent.put(ThrottleEventConstants.APP_TENANT, authContext.getSubscriberTenantDomain());
         throttleEvent.put(ThrottleEventConstants.API_TENANT, tenantDomain);
-        throttleEvent.put(ThrottleEventConstants.APP_ID, authContext.getApplicationId());
+        throttleEvent.put(ThrottleEventConstants.APP_ID, String.valueOf(authContext.getApplicationId()));
         throttleEvent.put(ThrottleEventConstants.API_NAME, apiName);
         throttleEvent.put(ThrottleEventConstants.PROPERTIES, getProperties(requestContext).toString());
         return throttleEvent;
@@ -346,8 +353,8 @@ public class ThrottleFilter implements Filter {
         return apiThrottleKey;
     }
 
-    private String getSubscriptionThrottleKey(String appId, String apiContext, String apiVersion) {
-        String subThrottleKey = appId + ':' + apiContext;
+    private String getSubscriptionThrottleKey(int appId, String apiContext, String apiVersion) {
+        String subThrottleKey = appId + ":" + apiContext;
         if (!apiVersion.isBlank()) {
             subThrottleKey += ':' + apiVersion;
         }
@@ -362,7 +369,7 @@ public class ThrottleFilter implements Filter {
     }
 
     private String getApiTier(APIConfig apiConfig) {
-        if (!apiConfig.getTier().isBlank()) {
+        if (!StringUtils.isEmpty(apiConfig.getTier())) {
             return apiConfig.getTier();
         }
         return ThrottleConstants.UNLIMITED_TIER;
@@ -394,6 +401,15 @@ public class ThrottleFilter implements Filter {
         if (config.isHeaderConditionsEnabled()) {
             Map<String, String> headers = requestContext.getHeaders();
             for (String name : headers.keySet()) {
+                // To avoid publishing user token to the traffic manager.
+                if (requestContext.getProtectedHeaders().contains(name)) {
+                    continue;
+                }
+                // Sending path header is stopped as it could contain query parameters which are used
+                // to secure APIs.
+                if (name.equals(APIConstants.PATH_HEADER)) {
+                    continue;
+                }
                 jsonObMap.put(name, headers.get(name));
             }
         }
@@ -401,6 +417,10 @@ public class ThrottleFilter implements Filter {
         if (config.isQueryConditionsEnabled()) {
             Map<String, String> params = requestContext.getQueryParameters();
             for (String name : params.keySet()) {
+                // To avoid publishing apiKey to the traffic manager.
+                if (requestContext.getQueryParamsToRemove().contains(name)) {
+                    continue;
+                }
                 jsonObMap.put(name, params.get(name));
             }
         }

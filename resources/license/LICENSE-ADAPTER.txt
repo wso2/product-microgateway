@@ -1,0 +1,90 @@
+
+This product is licensed by WSO2 Inc. under Apache License 2.0. The license
+can be downloaded from the following locations:
+	http://www.apache.org/licenses/LICENSE-2.0.html
+	http://www.apache.org/licenses/LICENSE-2.0.txt
+
+This product also contains software under different licenses. This table below
+all the contained libraries (jar files) and the license under which they are 
+provided to you.
+
+At the bottom of this file is a table that shows what each license indicated
+below is and where the actual text of the license can be found.
+
+
+Dependency                                              Version                                     License
+-----------------------------------------------------------------------------------------------------------------
+github.com/Azure/azure-amqp-common-go                   v3.1.0                                      mit
+github.com/Azure/azure-service-bus-go                   v0.10.14                                    mit
+github.com/Azure/go-amqp                                v0.13.8                                     mit
+github.com/Azure/go-autorest/autorest                   v0.11.18                                    apache2
+github.com/Azure/go-autorest/autorest/adal              v0.9.13                                     apache2
+github.com/Azure/go-autorest/autorest/date              v0.3.0                                      apache2
+github.com/Azure/go-autorest/autorest/to                v0.4.0                                      apache2
+github.com/Azure/go-autorest/logger                     v0.2.1                                      apache2
+github.com/Azure/go-autorest/tracing                    v0.6.0                                      apache2
+github.com/PuerkitoBio/purell                           v1.1.1                                      bsd3
+github.com/PuerkitoBio/urlesc                           v0.0.0-20170810143723-de5bf2ad4578          bsd3
+github.com/asaskevich/govalidator                       v0.0.0-20200428143746-21a406dcc535          mit
+github.com/census-instrumentation/opencensus-proto      v0.2.1                                      apache2
+github.com/cncf/xds/go                                  v0.0.0-20211001041855-01bcc9b48dfe          apache2
+github.com/decred/dcrd/dcrec/secp256k1                  v3.0.0                                      isc
+github.com/devigned/tab                                 v0.1.1                                      mit
+github.com/docker/go-units                              v0.4.0                                      apache2
+github.com/envoyproxy/go-control-plane                  v0.10.0                                     apache2
+github.com/envoyproxy/protoc-gen-validate               v0.4.1                                      apache2
+github.com/form3tech-oss/jwt-go                         v3.2.2+incompatible                         mit
+github.com/fsnotify/fsnotify                            v1.4.9                                      bsd3
+github.com/getkin/kin-openapi                           v0.8.0                                      mit
+github.com/ghodss/yaml                                  v1.0.0                                      mit
+github.com/go-openapi/analysis                          v0.19.10                                    apache2
+github.com/go-openapi/errors                            v0.19.7                                     apache2
+github.com/go-openapi/jsonpointer                       v0.19.3                                     apache2
+github.com/go-openapi/jsonreference                     v0.19.3                                     apache2
+github.com/go-openapi/loads                             v0.19.5                                     apache2
+github.com/go-openapi/runtime                           v0.19.22                                    apache2
+github.com/go-openapi/spec                              v0.19.8                                     apache2
+github.com/go-openapi/strfmt                            v0.19.6                                     apache2
+github.com/go-openapi/swag                              v0.19.9                                     apache2
+github.com/go-openapi/validate                          v0.19.11                                    apache2
+github.com/go-stack/stack                               v1.8.0                                      mit
+github.com/golang/protobuf                              v1.5.0                                      bsd3
+github.com/google/uuid                                  v1.1.2                                      bsd3
+github.com/grpc-ecosystem/go-grpc-middleware            v1.3.0                                      apache2
+github.com/jessevdk/go-flags                            v1.4.0                                      bsd3
+github.com/klauspost/compress                           v1.10.3                                     mit
+github.com/lestrrat-go/backoff                          v2.0.7                                      mit
+github.com/lestrrat-go/httpcc                           v1.0.0                                      mit
+github.com/lestrrat-go/iter                             v1.0.0                                      mit
+github.com/lestrrat-go/jwx                              v1.1.3                                      mit
+github.com/lestrrat-go/option                           v1.0.0                                      mit
+github.com/mailru/easyjson                              v0.7.1                                      mit
+github.com/mitchellh/mapstructure                       v1.3.3                                      mit
+github.com/pelletier/go-toml                            v1.8.1                                      mit
+github.com/pkg/errors                                   v0.9.1                                      bsd2
+github.com/sirupsen/logrus                              v1.7.0                                      mit
+github.com/streadway/amqp                               v1.0.0                                      bsd2
+go.mongodb.org/mongo-driver                             v1.3.4                                      apache2
+golang.org/x/crypto                                     v0.0.0-20201217014255-9d1352758620          bsd3
+golang.org/x/net                                        v0.0.0-20210805182204-aaa1db679c0d          bsd3
+golang.org/x/sys                                        v0.0.0-20210809222454-d867a43fc93e          bsd3
+golang.org/x/text                                       v0.3.6                                      bsd3
+google.golang.org/genproto                              v0.0.0-20201201144952-b05cb90ed32e          apache2
+google.golang.org/grpc                                  v1.36.0                                     apache2
+google.golang.org/protobuf                              v1.27.1                                     bsd3
+gopkg.in/natefinch/lumberjack.v2                        v2.0.0                                      mit
+gopkg.in/yaml.v2                                        v2.3.0                                      apache2
+nhooyr.io/websocket                                     v1.8.6                                      mit
+
+The license types used by the above libraries and their information is given below:
+
+apache2        Apache License Version 2.0
+               http://www.apache.org/licenses/LICENSE-2.0.html
+mit            MIT License
+               http://www.opensource.org/licenses/mit-license.php
+bsd2           Berkeley License - 2
+               https://opensource.org/licenses/BSD-2-Clause
+bsd3           Berkeley License - 3
+               http://opensource.org/licenses/BSD-3-Clause
+isc            Internet Systems Consortium
+               https://opensource.org/licenses/ISC

@@ -33,15 +33,17 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
-import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
+import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
@@ -50,8 +52,6 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,6 +62,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     private static final Logger log = LogManager.getLogger(APIKeyAuthenticator.class);
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
+    private boolean apiKeySubValidationEnabled = false;
 
     private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
@@ -73,116 +74,48 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
         }
+        Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
+        for (ExtendedTokenIssuerDto tokenIssuer: tokenIssuers.values()) {
+            if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(tokenIssuer.getName())) {
+                apiKeySubValidationEnabled = tokenIssuer.isValidateSubscriptions();
+                break;
+            }
+        }
     }
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        boolean isAPIkeyProtected = getIsAPIKeyProtected(requestContext);
-        if (!isAPIkeyProtected) {
-            return  false;
-        }
-        String apiKey = getAPIKeyFromRequest(requestContext);
-        return isAPIKey(apiKey);
-    }
-
-    private boolean getIsAPIKeyProtected(RequestContext requestContext) {
-        boolean isAPIKeyProtected = false;
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
-
-        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
-        Map<String, List<String>> resourceSecuritySchemes = resourceConfig.getSecuritySchemas();
-        if (resourceSecuritySchemes.containsKey(APIConstants.API_SECURITY_API_KEY) ||
-                isResourceSecurityApplicable(securitySchemeDefinitions, resourceSecuritySchemes)) {
-            isAPIKeyProtected = true;
-        }
-        return isAPIKeyProtected;
-    }
-
-    private boolean isResourceSecurityApplicable(Map<String, SecuritySchemaConfig> schemeMap,
-                                                 Map<String, List<String>> resourceSchemeMap) {
-        for (String securityDefinitionName: resourceSchemeMap.keySet()) {
-            if (schemeMap.containsKey(securityDefinitionName)) {
-                SecuritySchemaConfig config = schemeMap.get(securityDefinitionName);
-                if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equals(config.getType())) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return isAPIKey(getAPIKeyFromRequest(requestContext));
     }
 
     // Gets API key from request
-    private String getAPIKeyFromRequest(RequestContext requestContext) {
-        boolean isAppLevelApiKeySecurityEnabled = isAppLevelApiKeySecurityEnabled(requestContext);
-        String apiKey = "";
-        if (isAppLevelApiKeySecurityEnabled) {
-            // If API key enabled at Application level via APIM, key can exist in header or query param
-            String apiKeyName = requestContext.getMatchedAPI().
-                    getSecuritySchemeDefinitions().get(APIConstants.API_SECURITY_API_KEY).getName();
-            if (requestContext.getHeaders().containsKey(apiKeyName)) {
-                return requestContext.getHeaders().get(apiKeyName);
-            }
-            if (requestContext.getQueryParameters().containsKey(apiKeyName)) {
-                return requestContext.getQueryParameters().get(apiKeyName);
-            }
-        } else {
-            apiKey = getAPIKey(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME, requestContext, true);
-            if ("".equals(apiKey)) {
-                apiKey = getAPIKey(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME, requestContext, false);
-            }
-        }
-        return apiKey;
-    }
-
-    private static String getAPIKey(String securitySchemeType, RequestContext requestContext, boolean isResourceLevel) {
-        Iterator<String> securitySchemesToApply;
-        if (isResourceLevel) {
-            securitySchemesToApply = requestContext.getMatchedResourcePath().getSecuritySchemas().keySet().iterator();
-        } else {
-            securitySchemesToApply = requestContext.getMatchedAPI().getSecuritySchemas().iterator();
-        }
-
+    private static String getAPIKeyFromRequest(RequestContext requestContext) {
         Map<String, SecuritySchemaConfig> securitySchemaDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
-
-        for (Iterator<String> it = securitySchemesToApply; it.hasNext(); ) {
-            String securitySchemeName = it.next();
-            SecuritySchemaConfig securitySchemaDefinition = securitySchemaDefinitions.get(securitySchemeName);
-
-            // We only need apiKey of the given type
-            if (securitySchemaDefinition != null && securitySchemeType.equalsIgnoreCase(
-                    securitySchemaDefinition.getType())) {
-
-                // If Defined in openAPI definition (when not enabled at APIM App level),
-                // key must exist in specified location
-                if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(
-                        securitySchemaDefinition.getIn())) {
-                    if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
-                        return requestContext.getHeaders().get(securitySchemaDefinition.getName());
+        // loop over resource security and get definition for the matching security definition name
+        for (String securityDefinitionName : requestContext.getMatchedResourcePath()
+                .getSecuritySchemas().keySet()) {
+            if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
+                SecuritySchemaConfig securitySchemaDefinition =
+                        securitySchemaDefinitions.get(securityDefinitionName);
+                if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(
+                        securitySchemaDefinition.getType())) {
+                    // If Defined in openAPI definition (when not enabled at APIM App level),
+                    // key must exist in specified location
+                    if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
+                        if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
+                            return requestContext.getHeaders().get(securitySchemaDefinition.getName());
+                        }
                     }
-                }
-                if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(
-                        securitySchemaDefinition.getIn())) {
-                    if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
-                        return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
+                    if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
+                        if (requestContext.getQueryParameters().containsKey(securitySchemaDefinition.getName())) {
+                            return requestContext.getQueryParameters().get(securitySchemaDefinition.getName());
+                        }
                     }
                 }
             }
         }
         return "";
-    }
-
-    private boolean isAppLevelApiKeySecurityEnabled(RequestContext requestContext) {
-        // When API-Key security is enabled at app level, all three keys definitionName, type, name
-        // in SecuritySchemaConfig are equal to "api_key" and does not have a value for in.
-        // When API-Key security is set via definition, the type = "apiKey".
-        Map<String, SecuritySchemaConfig> securitySchemaConfigMap = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
-        if (securitySchemaConfigMap.containsKey(APIConstants.API_SECURITY_API_KEY)) {
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -203,6 +136,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
             String apiVersion = requestContext.getMatchedAPI().getVersion();
             String apiContext = requestContext.getMatchedAPI().getBasePath();
+            String apiUuid = requestContext.getMatchedAPI().getUuid();
 
             // Avoids using internal API keys, when internal key header or queryParam configured as api_key
             if (isInternalKey(payload)) {
@@ -242,13 +176,31 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 }
 
                 validateAPIKeyRestrictions(payload, requestContext, apiContext, apiVersion);
+                APIKeyValidationInfoDTO validationInfoDto;
+                if (apiKeySubValidationEnabled) {
+                    validationInfoDto = KeyValidator.validateSubscription(apiUuid, apiContext, payload);
+                } else {
+                    validationInfoDto = getAPIKeyValidationDTO(requestContext, payload);
+                }
 
-                validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
+                if (!validationInfoDto.isAuthorized()) {
+                    if (GeneralErrorCodeConstants.API_BLOCKED_CODE == validationInfoDto
+                            .getValidationStatus()) {
+                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
+                                .getCode(), validationInfoDto.getValidationStatus(),
+                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                    }
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                            validationInfoDto.getValidationStatus(),
+                            "User is NOT authorized to access the Resource. "
+                                    + "API Subscription validation failed.");
+                }
 
                 log.debug("API Key authentication successful.");
-
-                // Get APIKeyValidationInfoDTO
-                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
 
                 // TODO: Add analytics data processing
 
@@ -265,7 +217,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         getConfig().getJwtConfigurationDto();
                 if (jwtConfigurationDto.isEnabled()) {
                     JWTInfoDto jwtInfoDto = FilterUtils
-                            .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
+                            .generateJWTInfoDto(null, validationInfo, validationInfoDto, requestContext);
                     endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, tokenIdentifier,
                             jwtInfoDto, isGatewayTokenCacheEnabled);
                     // Set generated jwt token as a response header
@@ -276,7 +228,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
                 AuthenticationContext authenticationContext = FilterUtils
                         .generateAuthenticationContext(requestContext, tokenIdentifier, validationInfo,
-                                apiKeyValidationInfoDTO, endUserToken, apiKey, false);
+                                validationInfoDto, endUserToken, apiKey, false);
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                 }
@@ -301,24 +253,25 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
         APIKeyValidationInfoDTO validationInfoDTO = new APIKeyValidationInfoDTO();
         JSONObject app = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
-        String name = requestContext.getMatchedAPI().getName();
-        String version = requestContext.getMatchedAPI().getVersion();
         JSONObject api = null;
 
-        validationInfoDTO.setApiTier(requestContext.getMatchedAPI().getTier());
         if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
             validationInfoDTO.setType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
         } else {
             validationInfoDTO.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
         }
         if (app != null) {
-            validationInfoDTO.setApplicationId(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            validationInfoDTO.setApplicationId(app.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)
+                    .intValue());
+            validationInfoDTO.setApplicationUUID(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID));
             validationInfoDTO.setApplicationName(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
             validationInfoDTO.setApplicationTier(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
             validationInfoDTO.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
         }
 
         //check whether name is assigned correctly (This was not populated in JWTAuthenticator)
+        String name = requestContext.getMatchedAPI().getName();
+        String version = requestContext.getMatchedAPI().getVersion();
         validationInfoDTO.setApiName(name);
         validationInfoDTO.setApiVersion(version);
 
@@ -341,6 +294,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     String subTenant = subApi.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
                     if (subTier != null) {
                         validationInfoDTO.setTier(subTier);
+                        AuthenticatorUtils.populateTierInfo(validationInfoDTO, payload, subTier);
                     }
                     if (subPublisher != null) {
                         validationInfoDTO.setApiPublisher(subPublisher);
@@ -363,7 +317,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         }
-
         return validationInfoDTO;
     }
 

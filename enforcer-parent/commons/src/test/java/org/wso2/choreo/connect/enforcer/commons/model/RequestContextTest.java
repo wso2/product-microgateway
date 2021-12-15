@@ -72,8 +72,15 @@ public class RequestContextTest {
     public void testPathParameterGenerationWithWildcard() {
         testPathParamValues("/v2/pet/12/2/random/random2", "/v2", "/pet/{petId}/{imageId}/*",
                 "petId", "12");
+        testPathParamValues("/v2/pet/12/2/random/random2/random3", "/v2", "/pet/{petId}/{imageId}/*",
+                "petId", "12");
         testPathParamValues("/v2/pet/12/image/2/random/random2", "/v2", "/pet/{petId}/image/{imageId}/*",
                 "imageId", "2");
+        testPathParamValues("/v2/pet/12/2/image", "/v2", "/pet/{petId}/{imageId}/image/*",
+                "petId", "12");
+        testPathParamValues("/v2/pet/pet-1/image/*", "/v2", "/pet/{imageId}/image/*",
+                "imageId", "pet-1");
+        testMismatchedPaths("/v2/pet/12/2/image123", "/v2", "/pet/{petId}/{imageId}/image/*");
     }
 
     @Test
@@ -105,6 +112,15 @@ public class RequestContextTest {
         Assert.assertTrue(requestContext.getPathParameters().containsKey(pathParamName));
         Assert.assertEquals("Path Parameter mismatch for the template" + pathTemplate,
                 requestContext.getPathParameters().get(pathParamName), expectedValue);
+    }
+
+    private void testMismatchedPaths(String rawPath, String basePath, String pathTemplate) {
+        RequestContext.Builder builder = new RequestContext.Builder(rawPath);
+        builder.matchedAPI(new APIConfig.Builder("Petstore").basePath(basePath).build());
+        builder.pathTemplate(pathTemplate);
+        RequestContext requestContext = builder.build();
+        Assert.assertNotNull(requestContext.getPathParameters());
+        Assert.assertEquals(0, requestContext.getPathParameters().size());
     }
 
 }

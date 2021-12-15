@@ -20,6 +20,8 @@ package org.wso2.choreo.connect.enforcer.commons.model;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import java.util.TreeMap;
  * through out the complete request flow through the gateway enforcer.
  */
 public class RequestContext {
+    private static final Logger logger = LogManager.getLogger(RequestContext.class);
 
     //constants
     public static final String CLUSTER_HEADER = "x-wso2-cluster-header";
@@ -59,6 +62,10 @@ public class RequestContext {
     private WebSocketFrameContext webSocketFrameContext;
     private Map<String, String> queryParameters;
     private Map<String, String> pathParameters;
+    private ArrayList<String> queryParamsToRemove;
+    // This is used to keep protected headers like authorization header. The protected headers will not be
+    // sent to the Traffic Manager when header based rate limiting is enabled.
+    private ArrayList<String> protectedHeaders;
 
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
@@ -310,6 +317,28 @@ public class RequestContext {
     }
 
     /**
+     * If there is a set of query parameters needs to be removed from the outbound request, those parameters should
+     * be added to the arrayList here.
+     *
+     * @return query parameters which are supposed to be removed.
+     */
+    public ArrayList<String> getQueryParamsToRemove() {
+        return queryParamsToRemove;
+    }
+
+    /**
+     * If there is a set of headers needs to be removed from the throttle publishing event, those headers should
+     * be added to the arrayList here.
+     *
+     * Ex. Authorization Header
+     *
+     * @return header names which are not supposed to be published to the traffic manager.
+     */
+    public ArrayList<String> getProtectedHeaders() {
+        return protectedHeaders;
+    }
+
+    /**
      * Implements builder pattern to build an {@link RequestContext} object.
      */
     public static class Builder {
@@ -409,6 +438,8 @@ public class RequestContext {
             requestContext.clientIp = this.clientIp;
             requestContext.addHeaders = new HashMap<>();
             requestContext.removeHeaders = new ArrayList<>();
+            requestContext.queryParamsToRemove = new ArrayList<>();
+            requestContext.protectedHeaders = new ArrayList<>();
             String[] queryParts = this.requestPath.split("\\?");
             String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
 
@@ -447,6 +478,11 @@ public class RequestContext {
          */
         private Map<String, String> populatePathParameters(String basePath, String resourceTemplate,
                                                            String rawPath) {
+            if (resourceTemplate == null || rawPath == null) {
+                logger.debug("Skip populating the path parameters. template: {}, rawPath: {}", resourceTemplate,
+                        rawPath);
+                return null;
+            }
             // Format the basePath and resourcePath to maintain consistency
             String formattedBasePath = basePath.startsWith("/") ? basePath : "/" + basePath;
             formattedBasePath = formattedBasePath.endsWith("/") ?
@@ -457,8 +493,7 @@ public class RequestContext {
             String formattedRawPath = rawPath.split("\\?")[0];
             final ParameterResolver parameterResolver = new ParameterResolver
                     (formattedBasePath + formattedResourcePathTemplate);
-            final Map<String, String> resultMap = parameterResolver.parametersByName(formattedRawPath);
-            return resultMap;
+            return parameterResolver.parametersByName(formattedRawPath);
         }
     }
 }

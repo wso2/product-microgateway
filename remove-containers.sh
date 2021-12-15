@@ -16,16 +16,16 @@
 # -----------------------------------------------------------------------
 
 # Just to assist developers by removing all the containers.
-micro_gw_version=1.0.0-beta
+cc_version=1.0.0
 
-docker kill "$(docker ps -a | grep wso2/choreo-connect-enforcer:$micro_gw_version | awk '{print $1}')"
-docker rm "$(docker ps -a | grep wso2/choreo-connect-enforcer:$micro_gw_version | awk '{print $1}')"
+docker kill "$(docker ps -a | grep wso2/choreo-connect-enforcer:$cc_version | awk '{print $1}')"
+docker rm "$(docker ps -a | grep wso2/choreo-connect-enforcer:$cc_version | awk '{print $1}')"
 
-docker kill "$(docker ps -a | grep wso2/choreo-connect-adapter:$micro_gw_version | awk '{print $1}')"
-docker rm "$(docker ps -a | grep wso2/choreo-connect-adapter:$micro_gw_version | awk '{print $1}')"
+docker kill "$(docker ps -a | grep wso2/choreo-connect-adapter:$cc_version | awk '{print $1}')"
+docker rm "$(docker ps -a | grep wso2/choreo-connect-adapter:$cc_version | awk '{print $1}')"
 
-docker kill "$(docker ps -a | grep wso2/choreo-connect-router:$micro_gw_version | awk '{print $1}')"
-docker rm "$(docker ps -a | grep wso2/choreo-connect-router:$micro_gw_version | awk '{print $1}')"
+docker kill "$(docker ps -a | grep wso2/choreo-connect-router:$cc_version | awk '{print $1}')"
+docker rm "$(docker ps -a | grep wso2/choreo-connect-router:$cc_version | awk '{print $1}')"
 
-docker kill "$(docker ps -a | grep wso2/choreo-connect-mock-backend:latest | awk '{print $1}')"
-docker rm "$(docker ps -a | grep wso2/choreo-connect-mock-backend:latest | awk '{print $1}')"
+docker kill "$(docker ps -a | grep wso2/choreo-connect-mock-backend:$cc_version | awk '{print $1}')"
+docker rm "$(docker ps -a | grep wso2/choreo-connect-mock-backend:$cc_version | awk '{print $1}')"

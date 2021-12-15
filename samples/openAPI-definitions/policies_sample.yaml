@@ -1,0 +1,86 @@
+---
+openapi: 3.0.0
+servers:
+- url: http://petstore.swagger.io/v2
+info:
+  description: 'This is an example to demonstrate how to define policies using  x-wso2-throttling-tier extension.'
+  version: 1.0.0
+  title: Swagger Petstore New
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+- name: pet
+x-wso2-basePath: /petstore/v1
+x-wso2-production-endpoints:
+  urls:
+  - https://petstore.swagger.io/v2
+x-wso2-throttling-tier: 20kPerMin        # defines x-wso2-throttling-tier in API level
+paths:
+  "/pet/findByStatus":
+    x-wso2-throttling-tier: 10kPerMin    # defines x-wso2-throttling-tier in resource level
+    get:
+      tags:
+      - pet
+      summary: Finds Pets by status
+      operationId: findPetsByStatus
+      parameters:
+      - name: status
+        in: query
+        description: Status values that need to be considered for filter
+        required: true
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - available
+            - pending
+            default: available
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Pet"
+        '400':
+          description: Invalid status value
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        id:
+          type: integer
+          format: int64
+        category:
+          type: string
+        name:
+          type: string
+        photoUrls:
+          type: string
+        status:
+          type: string
+          enum:
+            - available
+            - sold
+      xml:
+        name: Pet
+  requestBodies:
+    Pet:
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+        application/xml:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+      description: Pet object that needs to be added to the store
+      required: true

@@ -30,7 +30,7 @@ x-wso2-endpoints:
       urls:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
-x-wso2-basePath: /v2
+x-wso2-basePath: /v2/standard
 tags:
   - name: pet
     description: Everything about your Pets
@@ -236,8 +236,6 @@ paths:
           description: Invalid ID supplied
         '404':
           description: Pet not found
-      security:
-        - api_key: []
     post:
       tags:
         - pet

@@ -70,6 +70,9 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.securityScheme = setSecuritySchemesOpenAPI(swagger3)
+	for _, security := range swagger3.Security {
+		swagger.security = append(swagger.security, security)
+	}
 	swagger.resources, err = setResourcesOpenAPI(swagger3)
 	if err != nil {
 		return err
@@ -77,7 +80,9 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.apiType = HTTP
 	var productionUrls []Endpoint
-	if isServerURLIsAvailable(swagger3.Servers) {
+	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// an exception is made where servers url is not processed when the API is prototyped.
+	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsProtoTyped {
 		for _, serverEntry := range swagger3.Servers {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
@@ -90,14 +95,15 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 				logger.LoggerOasparser.Errorf("error encountered when parsing the endpoint under openAPI servers object")
 			}
 		}
-		if productionUrls != nil && len(productionUrls) > 0 {
+		if len(productionUrls) > 0 {
 			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+			swagger.sandboxEndpoints = nil
 		}
 	}
 	return nil
 }
 
-func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.PathItem) Resource {
+func setPathInfoOpenAPI(path string, methods []*Operation, pathItem *openapi3.PathItem) Resource {
 	var resource Resource
 	if pathItem != nil {
 		resource = Resource{
@@ -116,20 +122,24 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 	return resource
 }
 
-func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
-	var resources []Resource
+func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
+	var resources []*Resource
 
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
 	// resource level if vendor ext is not present at each resource level.
-	val, found := resolveAPILevelDisableSecurity(openAPI.ExtensionProps)
+	val, found := resolveDisableSecurity(openAPI.ExtensionProps)
 	if openAPI.Paths != nil {
 		for path, pathItem := range openAPI.Paths {
-			methodsArray := make([]Operation, len(pathItem.Operations()))
+			// Checks for resource level security. (security is disabled in resource level using x-wso2-disable-security extension)
+			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity(pathItem.ExtensionProps)
+			methodsArray := make([]*Operation, len(pathItem.Operations()))
 			var arrayIndex int = 0
 			for httpMethod, operation := range pathItem.Operations() {
 				if operation != nil {
-					if found {
+					if foundInResourceLevel {
+						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, isResourceLvlSecurityDisabled)
+					} else if found {
 						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, val)
 					}
 					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
@@ -157,7 +167,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 				}
 			}
-			resources = append(resources, resource)
+			resources = append(resources, &resource)
 
 		}
 	}
@@ -174,36 +184,21 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	return securitySchemes
 }
 
-func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
+func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
 
-	if operation.Security != nil || extensions[xWso2ApplicationSecurity] != nil {
-		var securityData []openapi3.SecurityRequirement = *(operation.Security)
-		var securityArray = make([]map[string][]string, len(securityData))
-		for i, security := range securityData {
-			securityArray[i] = security
-		}
-
-		result, ok := extensions[xWso2ApplicationSecurity].(map[string]interface{})
-		if ok {
-			if _, found := result[SecurityTypes]; found {
-				if val, ok := result[SecurityTypes].([]interface{}); ok {
-					for _, mapValue := range val {
-						if mapValue == APIKeyInAppLevelSecurity {
-							applicationAPIKeyMap := map[string][]string{
-								mapValue.(string): {},
-							}
-							securityArray = append(securityArray, applicationAPIKeyMap)
-						}
-					}
-				}
-			}
-		}
-		logger.LoggerOasparser.Debugf("Security array %v", securityArray)
-		return NewOperation(method, securityArray, extensions)
+	if operation.Security == nil {
+		return NewOperation(method, nil, extensions)
 	}
 
-	return NewOperation(method, nil, extensions)
+	var securityData []openapi3.SecurityRequirement = *(operation.Security)
+	var securityArray = make([]map[string][]string, len(securityData))
+	for i, security := range securityData {
+		securityArray[i] = security
+	}
+	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
+	return NewOperation(method, securityArray, extensions)
+
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion
@@ -275,13 +270,13 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 	jsnRawExtensible := vendorExtensions.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ", err)
+		logger.LoggerOasparser.Error("Error marshalling vendor extensions: ", err)
 	}
 
 	var extensible map[string]interface{}
 	err = json.Unmarshal(b, &extensible)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error unmarsheling vendor extenstions:", err)
+		logger.LoggerOasparser.Error("Error unmarshalling vendor extensions: ", err)
 	}
 	return extensible
 }
@@ -291,7 +286,7 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 // If found, it will return two bool values which are the following in order.
 // 1st bool represnt the value of the vendor extension.
 // 2nd bool represent if the vendor extension present.
-func resolveAPILevelDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
+func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
 	extensions := convertExtensibletoReadableFormat(vendorExtensions)
 	if y, found := extensions[xWso2DisableSecurity]; found {
 		if val, ok := y.(bool); ok {
@@ -304,7 +299,7 @@ func resolveAPILevelDisableSecurity(vendorExtensions openapi3.ExtensionProps) (b
 
 // This method add the disable security to given vendor extensions, if it's not present.
 func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, val bool) openapi3.ExtensionProps {
-	_, found := resolveAPILevelDisableSecurity(vendorExtensions)
+	_, found := resolveDisableSecurity(vendorExtensions)
 	if !found {
 		vendorExtensions.Extensions[xWso2DisableSecurity] = val
 	}
@@ -329,7 +324,7 @@ func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 	return []string{"default"}
 }
 
-func getHostandBasepathandPortWebSocket(rawURL string) (*Endpoint, error) {
+func getEndpointForWebsocketURL(rawURL string) (*Endpoint, error) {
 	var (
 		basepath string
 		host     string

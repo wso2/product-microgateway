@@ -31,6 +31,8 @@ spec:
     metadata:
       labels:
         deployment: wso2apim
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       hostAliases:
         - ip: "127.0.0.1"
@@ -58,7 +60,6 @@ spec:
                 - /bin/bash
                 - -c
                 - nc -z localhost 9443
-            initialDelaySeconds: 240
             periodSeconds: 10
           readinessProbe:
             exec:
@@ -66,7 +67,6 @@ spec:
                 - /bin/bash
                 - -c
                 - nc -z localhost 9443
-            initialDelaySeconds: 240
             periodSeconds: 10
           imagePullPolicy: IfNotPresent
           ports:

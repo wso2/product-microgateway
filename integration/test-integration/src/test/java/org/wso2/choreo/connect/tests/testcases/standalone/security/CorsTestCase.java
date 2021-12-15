@@ -164,7 +164,7 @@ public class CorsTestCase {
     @Test(description = "CORS preflight request against a resource without CORS")
     public void testPreflightReqResourceWithoutCors() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/v2/pet/1"));
+        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/v2/standard/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://notAllowedOrigin.com");
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
         HttpResponse response = httpclient.execute(option);

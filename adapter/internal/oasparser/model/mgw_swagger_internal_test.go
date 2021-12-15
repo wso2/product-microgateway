@@ -132,7 +132,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 					"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						vendorExtensions: nil,
 					},
@@ -152,7 +152,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 					},
 					EndpointType: "loadbalance",
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						productionEndpoints: nil,
 					},
@@ -164,7 +164,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 					"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 							"type": "loadbalance", "urls": []interface{}{"https://resource.endpoint:80/base"}}},
@@ -185,7 +185,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 					},
 					EndpointType: "loadbalance",
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						productionEndpoints: &EndpointCluster{
 							EndpointPrefix: "clusterProd",
@@ -218,7 +218,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 						"AccessControlAllowOrigins":     []interface{}{"http://test123.com", "http://test456.com"},
 					},
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 							"type": "loadbalance", "urls": []interface{}{"https://resource.endpoint:80/base"}},
@@ -240,7 +240,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 					},
 					EndpointType: "loadbalance",
 				},
-				resources: []Resource{
+				resources: []*Resource{
 					{
 						productionEndpoints: &EndpointCluster{
 							EndpointPrefix: "clusterProd",
@@ -273,5 +273,39 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		if mgwSwag.resources != nil {
 			assert.Equal(t, item.result.resources[0].productionEndpoints, mgwSwag.resources[0].productionEndpoints, item.message)
 		}
+	}
+}
+
+func TestValidateBasePath(t *testing.T) {
+	type getXWso2BasepathTestItem struct {
+		mgwSwagger MgwSwagger
+		errorNil   bool
+		message    string
+	}
+	dataItems := []getXWso2BasepathTestItem{
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: "/v1/base"},
+			errorNil:   true,
+			message:    "valid basepath",
+		},
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: "/ERROR-Hello%20W"},
+			errorNil:   false,
+			message:    "basepath must not include invalid characters",
+		},
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: "base"},
+			errorNil:   false,
+			message:    "basepath must start with /",
+		},
+		{
+			mgwSwagger: MgwSwagger{xWso2Basepath: ""},
+			errorNil:   false,
+			message:    "basepath must not be empty",
+		},
+	}
+	for _, item := range dataItems {
+		err := item.mgwSwagger.validateBasePath()
+		assert.Equal(t, item.errorNil, err == nil, item.message)
 	}
 }

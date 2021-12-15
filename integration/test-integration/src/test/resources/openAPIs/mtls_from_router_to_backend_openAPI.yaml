@@ -10,7 +10,7 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 host: 'mockBackend:2383'
-basePath: /v2
+basePath: /v2/standard
 tags:
   - name: pet
     description: Everything about your Pets
@@ -132,8 +132,6 @@ paths:
           description: Invalid ID supplied
         '404':
           description: Pet not found
-      security:
-        - api_key: []
 securityDefinitions:
   api_key:
     type: apiKey

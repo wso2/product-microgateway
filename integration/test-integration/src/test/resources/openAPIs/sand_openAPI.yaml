@@ -9,6 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: example.com
 basePath: /v2
 x-wso2-basePath: /v2/sand
 tags:
@@ -66,27 +67,6 @@ definitions:
       id:
         type: integer
         format: int64
-      category:
-        $ref: '#/definitions/Category'
-      name:
-        type: string
-        example: doggie
-      photoUrls:
-        type: array
-        xml:
-          wrapped: true
-        items:
-          type: string
-          xml:
-            name: photoUrl
-      tags:
-        type: array
-        xml:
-          wrapped: true
-        items:
-          xml:
-            name: tag
-          $ref: '#/definitions/Tag'
       status:
         type: string
         description: pet status in the store

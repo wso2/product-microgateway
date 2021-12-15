@@ -27,12 +27,12 @@ public class AuthenticationContext {
     private String username;
     private String applicationTier;
     private String tier;
-    private String apiTier;
     private boolean isContentAwareTierPresent;
     private String apiKey;
     private String keyType;
     private String callerToken;
-    private String applicationId;
+    private int applicationId;
+    private String applicationUUID;
     private String applicationName;
     private String consumerKey;
     private String subscriber;
@@ -52,10 +52,9 @@ public class AuthenticationContext {
     public static final String UNKNOWN_VALUE = "__unknown__";
 
     public AuthenticationContext() {
-        this.applicationId = UNKNOWN_VALUE;
         this.apiPublisher = UNKNOWN_VALUE;
-        this.apiTier = "";
-        this.applicationId = UNKNOWN_VALUE;
+        this.applicationUUID = UNKNOWN_VALUE;
+        this.applicationId = -1;
         this.applicationName = UNKNOWN_VALUE;
         this.applicationTier = "Unlimited";
         this.consumerKey = UNKNOWN_VALUE;
@@ -85,20 +84,6 @@ public class AuthenticationContext {
 
     public void setIsContentAware(boolean isContentAware) {
         this.isContentAwareTierPresent = isContentAware;
-    }
-
-    /**
-     * API Level throttling tier.
-     *
-     * @return API Level Throttling Tier.
-     */
-    public String getApiTier() {
-        return apiTier;
-    }
-
-
-    public void setApiTier(String apiTier) {
-        this.apiTier = apiTier;
     }
 
     /**
@@ -206,15 +191,15 @@ public class AuthenticationContext {
     }
 
     /**
-     * Get the application UUID for the matched application.
+     * Get the application ID for the matched application.
      *
      * @return
      */
-    public String getApplicationId() {
+    public int getApplicationId() {
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) {
+    public void setApplicationId(int applicationId) {
         this.applicationId = applicationId;
     }
 
@@ -385,5 +370,13 @@ public class AuthenticationContext {
 
     public void setRawToken(String rawToken) {
         this.rawToken = rawToken;
+    }
+
+    public String getApplicationUUID() {
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+        this.applicationUUID = applicationUUID;
     }
 }

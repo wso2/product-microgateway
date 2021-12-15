@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-  <assembly>
+<assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
     <id>router</id>
@@ -46,11 +46,20 @@
             <source>../resources/security/ca-certificates.crt</source>
             <outputDirectory>security/truststore</outputDirectory>
         </file>
+        <file>
+            <source>../resources/license/LICENSE-ROUTER.txt</source>
+            <outputDirectory/>
+            <destName>LICENSE.txt</destName>
+        </file>
     </files>
     <fileSets>
-      <fileSet>
-          <directory>../resources/router/security</directory>
-          <outputDirectory>security</outputDirectory>
-      </fileSet>
+        <fileSet>
+            <directory>../resources/router/security</directory>
+            <outputDirectory>security</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources/interceptor</directory>
+            <outputDirectory>interceptor</outputDirectory>
+        </fileSet>
     </fileSets>
 </assembly>

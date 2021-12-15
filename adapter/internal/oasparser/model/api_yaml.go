@@ -18,19 +18,11 @@
 package model
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"os"
-	"strconv"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
-)
-
-const (
-	basicAuthSecurity string = "BASIC"
 )
 
 // VerifyMandatoryFields check and pupulates the mandatory fields if null
@@ -80,104 +72,8 @@ func VerifyMandatoryFields(apiYaml APIYaml) error {
 func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 	apiProject.APIType = strings.ToUpper(apiYaml.Data.APIType)
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiYaml.Data.LifeCycleStatus)
-
-	var apiHashValue string = generateHashValue(apiYaml.Data.Name, apiYaml.Data.Version)
-
-	endpointConfig := apiYaml.Data.EndpointConfig
-	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
-	if len(productionEndpoints) > 0 && len(sandboxEndpoints) > 0 {
-		apiProject.ProductionEndpoints = productionEndpoints
-		apiProject.SandboxEndpoints = sandboxEndpoints
-	}
-
-	// production Endpoint security
-	prodEpSecurity, _ := retrieveEndPointSecurityInfo("api_"+apiHashValue,
-		endpointConfig.EndpointSecurity.Production, "prod")
-
-	// sandbox Endpoint security
-	sandBoxEpSecurity, _ := retrieveEndPointSecurityInfo("api_"+apiHashValue,
-		endpointConfig.EndpointSecurity.Sandbox, "sand")
-
-	epSecurity := APIEndpointSecurity{
-		Sandbox:    sandBoxEpSecurity,
-		Production: prodEpSecurity,
-	}
-
 	// organization ID would remain empty string if unassigned
 	apiProject.OrganizationID = apiYaml.Data.OrganizationID
-
-	apiProject.EndpointSecurity = epSecurity
-}
-
-func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
-	var productionEndpoints []Endpoint
-	var sandboxEndpoints []Endpoint
-
-	i := 0
-	for {
-		var productionEndpointURL string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_"+strconv.Itoa(i), "")
-		if productionEndpointURL == "" {
-			break
-		}
-		productionEndpoint, err := getHostandBasepathandPort(productionEndpointURL)
-		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURL, err.Error())
-		}
-		productionEndpoints = append(productionEndpoints, *productionEndpoint)
-
-		// sandbox Endpoints set
-		var sandboxEndpointURL string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_"+strconv.Itoa(i), "")
-		if sandboxEndpointURL == "" {
-			break
-		}
-		sandboxEndpoint, err := getHostandBasepathandPort(sandboxEndpointURL)
-		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", sandboxEndpointURL, err.Error())
-		}
-		sandboxEndpoints = append(sandboxEndpoints, *sandboxEndpoint)
-		i = 1 + 1
-	}
-	return productionEndpoints, sandboxEndpoints
-}
-
-func retrieveEndPointSecurityInfo(value string, endPointSecurity EndpointSecurity,
-	keyType string) (epSecurityInfo EndpointSecurity, err error) {
-	var username string
-	var password string
-	var securityType = endPointSecurity.Type
-
-	if securityType != "" {
-		if securityType == basicAuthSecurity {
-			username = resolveEnvValueForEndpointConfig(value+"_"+keyType+"_basic_username", endPointSecurity.Username)
-			password = resolveEnvValueForEndpointConfig(value+"_"+keyType+"_basic_password", endPointSecurity.Password)
-
-			epSecurityInfo.Username = username
-			epSecurityInfo.Password = password
-			epSecurityInfo.Type = securityType
-			epSecurityInfo.Enabled = endPointSecurity.Enabled
-			return epSecurityInfo, nil
-		}
-		errMsg := securityType + " endpoint security type is not currently supported with" +
-			"WSO2 Choreo Connect"
-		err = errors.New(errMsg)
-		loggers.LoggerAPI.Error(errMsg)
-	}
-	return epSecurityInfo, err
-}
-
-func resolveEnvValueForEndpointConfig(envKey string, defaultVal string) string {
-	envValue, exists := os.LookupEnv(envKey)
-	if exists {
-		loggers.LoggerAPI.Debugf("resolve env value %v", envValue)
-		return envValue
-	}
-	return defaultVal
-}
-
-func generateHashValue(apiName string, apiVersion string) string {
-	endpointConfigSHValue := sha1.New()
-	endpointConfigSHValue.Write([]byte(apiName + ":" + apiVersion))
-	return hex.EncodeToString(endpointConfigSHValue.Sum(nil)[:])
 }
 
 // PopulateEndpointsInfo this will map sandbox and prod endpoint

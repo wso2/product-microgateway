@@ -17,17 +17,22 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-openapi/spec"
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
@@ -47,14 +52,16 @@ type MgwSwagger struct {
 	productionEndpoints *EndpointCluster
 	sandboxEndpoints    *EndpointCluster
 	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []Resource
+	resources           []*Resource
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
 	securityScheme      []SecurityScheme
+	security            []map[string][]string
 	xWso2ThrottlingTier string
 	xWso2AuthHeader     string
 	disableSecurity     bool
 	OrganizationID      string
+	IsProtoTyped        bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -62,8 +69,9 @@ type EndpointCluster struct {
 	EndpointPrefix string
 	Endpoints      []Endpoint
 	// EndpointType enum {failover, loadbalance}. if any other value provided, consider as the default value; which is loadbalance
-	EndpointType string
-	Config       *EndpointConfig
+	EndpointType   string
+	Config         *EndpointConfig
+	SecurityConfig EndpointSecurity
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -141,6 +149,8 @@ type InterceptEndpoint struct {
 	Includes *interceptor.RequestInclusions
 }
 
+const prototypedAPI = "prototyped"
+
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
 	return swagger.xWso2Cors
@@ -188,7 +198,7 @@ func (swagger *MgwSwagger) GetSandEndpoints() *EndpointCluster {
 }
 
 // GetResources returns the array of resources (openAPI path level info)
-func (swagger *MgwSwagger) GetResources() []Resource {
+func (swagger *MgwSwagger) GetResources() []*Resource {
 	return swagger.resources
 }
 
@@ -227,6 +237,19 @@ func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []SecurityScheme) {
 	swagger.securityScheme = securityScheme
 }
 
+// SetSecurity sets the API level security of the API. These refer to the security schemes
+// defined for the same API and would have the structure given below,
+//
+// security:
+//	- PetstoreAuth:
+// 		- 'write:pets'
+//		- 'read:pets'
+//	- ApiKeyAuth: []
+//
+func (swagger *MgwSwagger) SetSecurity(security []map[string][]string) {
+	swagger.security = security
+}
+
 // SetVersion sets the version of the API
 func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
@@ -249,6 +272,98 @@ func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 	return swagger.securityScheme
 }
 
+// GetSecurity returns the API level security of the API
+func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
+	return swagger.security
+}
+
+// SanitizeAPISecurity this will validate api level and operation level swagger security
+// if apiyaml security is provided swagger security will be removed accordingly
+func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool) {
+	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
+	apiSecurityDefinitionNames := []string{}
+	overridenAPISecurityDefinitions := []SecurityScheme{}
+
+	if isYamlAPIKey {
+		//creating security definition for apikey in header in behalf of apim yaml security
+		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
+			SecurityScheme{DefinitionName: APIMAPIKeyInHeader,
+				Type: APIKeyTypeInOAS, Name: APIKeyNameWithApim, In: APIKeyInHeaderOAS})
+
+		//creating security definition for apikey in query in behalf of apim yaml security
+		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
+			SecurityScheme{DefinitionName: APIMAPIKeyInQuery, Type: APIKeyTypeInOAS,
+				Name: APIKeyNameWithApim, In: APIKeyInQueryOAS})
+	}
+	for _, securityDef := range swagger.securityScheme {
+		//read default oauth2 security with scopes when oauth2 enabled
+		if isYamlOauth && securityDef.DefinitionName == APIMDefaultOauth2Security {
+			overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, securityDef)
+			apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
+		} else if !isOverrideSecurityByYaml {
+			apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
+		}
+	}
+	if isOverrideSecurityByYaml {
+		logger.LoggerXds.Debugf("Security definitions are overriden according to api.yaml for API %v:%v",
+			swagger.title, swagger.version)
+		swagger.SetSecurityScheme(overridenAPISecurityDefinitions)
+	}
+	logger.LoggerXds.Debugf("Security definitions for API %v:%v : %v", swagger.title, swagger.version,
+		swagger.securityScheme)
+
+	//sanitize API level security
+	sanitizedAPISecurity := []map[string][]string{}
+	for _, security := range swagger.security {
+		for securityDefName := range security {
+			if arrayContains(apiSecurityDefinitionNames, securityDefName) {
+				sanitizedAPISecurity = append(sanitizedAPISecurity, security)
+			} else {
+				logger.LoggerXds.Warnf("A security definition for %v has not found in API %v:%v",
+					securityDefName, swagger.title, swagger.version)
+			}
+		}
+	}
+	// Adding api level security when api.yaml apikey security is provided
+	if isYamlAPIKey {
+		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{APIMAPIKeyInHeader: {}})
+		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{APIMAPIKeyInQuery: {}})
+	}
+	swagger.security = sanitizedAPISecurity
+
+	//sanitize operation level security
+	for _, resource := range swagger.resources {
+		for _, operation := range resource.GetMethod() {
+			sanitizedOperationSecurity := []map[string][]string{}
+			for _, security := range operation.GetSecurity() {
+				for securityDefName := range security {
+					if arrayContains(apiSecurityDefinitionNames, securityDefName) {
+						sanitizedOperationSecurity = append(sanitizedOperationSecurity, security)
+					} else {
+						logger.LoggerXds.Warnf("A security definition for %v has not found in API %v:%v",
+							securityDefName, swagger.title, swagger.version)
+					}
+				}
+			}
+			// has do the following to enable apikey as well when default oauth2 security is in operation level
+			if isOverrideSecurityByYaml && isYamlOauth && isYamlAPIKey {
+				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{APIMAPIKeyInHeader: {}})
+				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{APIMAPIKeyInQuery: {}})
+			}
+			operation.SetSecurity(sanitizedOperationSecurity)
+		}
+	}
+}
+
+func arrayContains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
+
 // SetXWso2Extensions set the MgwSwagger object with the properties
 // extracted from vendor extensions.
 // xWso2Basepath, xWso2ProductionEndpoints, and xWso2SandboxEndpoints are assigned
@@ -265,16 +380,22 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 		return xWso2EPErr
 	}
 
-	productionEndpointErr := swagger.setXWso2ProductionEndpoint()
+	apiLevelProdEPFound, productionEndpointErr := swagger.setXWso2ProductionEndpoint()
 	if productionEndpointErr != nil {
 		logger.LoggerOasparser.Error("Error while adding x-wso2-production-endpoints. ", productionEndpointErr)
 		return productionEndpointErr
 	}
 
-	sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
+	apiLevelSandEPFound, sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
 	if sandboxEndpointErr != nil {
 		logger.LoggerOasparser.Error("Error while adding x-wso2-sandbox-endpoints. ", sandboxEndpointErr)
 		return sandboxEndpointErr
+	}
+
+	// to remove swagger server/host urls being added when x-wso2-sandbox-endpoints is given
+	if !apiLevelProdEPFound && apiLevelSandEPFound && swagger.productionEndpoints != nil &&
+		len(swagger.productionEndpoints.Endpoints) > 0 {
+		swagger.productionEndpoints = nil
 	}
 
 	swagger.setXWso2Cors()
@@ -286,8 +407,8 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	return nil
 }
 
-// SetEnvProperties sets environment specific values
-func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
+// SetEnvLabelProperties sets environment specific values
+func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvProps) {
 	var productionUrls []Endpoint
 	var sandboxUrls []Endpoint
 
@@ -305,7 +426,7 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 
 	if len(productionUrls) > 0 {
 		logger.LoggerOasparser.Infof("Production endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
-		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionUrls, LoadBalance)
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 	}
 
 	if envProps.APIConfigs.SandBoxEndpoint != "" {
@@ -321,7 +442,35 @@ func (swagger *MgwSwagger) SetEnvProperties(envProps synchronizer.APIEnvProps) {
 
 	if len(sandboxUrls) > 0 {
 		logger.LoggerOasparser.Infof("Sandbox endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
-		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxUrls, LoadBalance)
+		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxUrls, LoadBalance)
+	}
+}
+
+// SetEnvVariables sets environment specific values to the mgwswagger
+func (swagger *MgwSwagger) SetEnvVariables(apiHashValue string) {
+	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
+	if len(productionEndpoints) > 0 {
+		logger.LoggerOasparser.Infof("Applying production endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
+		swagger.productionEndpoints.EndpointPrefix = prodClustersConfigNamePrefix
+		swagger.productionEndpoints.Endpoints = productionEndpoints
+		swagger.productionEndpoints.EndpointType = LoadBalance
+
+	}
+	if len(sandboxEndpoints) > 0 {
+		logger.LoggerOasparser.Infof("Applying sandbox endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
+		swagger.sandboxEndpoints.EndpointPrefix = sandClustersConfigNamePrefix
+		swagger.sandboxEndpoints.Endpoints = sandboxEndpoints
+		swagger.sandboxEndpoints.EndpointType = LoadBalance
+	}
+
+	// retrieving security credentials from environment variables
+	if swagger.productionEndpoints != nil && swagger.productionEndpoints.SecurityConfig.Enabled {
+		swagger.productionEndpoints.SecurityConfig = RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue,
+			"prod", swagger.productionEndpoints.SecurityConfig)
+	}
+	if swagger.sandboxEndpoints != nil && swagger.sandboxEndpoints.SecurityConfig.Enabled {
+		swagger.sandboxEndpoints.SecurityConfig = RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue, "sand",
+			swagger.sandboxEndpoints.SecurityConfig)
 	}
 }
 
@@ -337,48 +486,51 @@ func (swagger *MgwSwagger) SetProductionEndpoints(productionEndpoints []Endpoint
 	swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
 }
 
-func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {
+func (swagger *MgwSwagger) setXWso2ProductionEndpoint() (bool, error) {
+	apiLevelEPFound := false
 	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, xWso2ProdEndpoints)
 	if xWso2APIEndpoints != nil {
 		swagger.productionEndpoints = xWso2APIEndpoints
+		apiLevelEPFound = true
 	} else if err != nil {
-		return errors.New("error encountered when extracting endpoints. " + err.Error())
+		return apiLevelEPFound, errors.New("error encountered when extracting endpoints. " + err.Error())
 	}
 
 	//resources
 	for i, resource := range swagger.resources {
 		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, xWso2ProdEndpoints)
 		if err != nil {
-			return errors.New("error encountered when extracting resource endpoints for API with basepath: " +
+			return apiLevelEPFound, errors.New("error encountered when extracting resource endpoints for API with basepath: " +
 				swagger.xWso2Basepath + ". " + err.Error())
 		} else if xwso2ResourceEndpoints != nil {
 			swagger.resources[i].productionEndpoints = xwso2ResourceEndpoints
 		}
 	}
 
-	return nil
+	return apiLevelEPFound, nil
 }
 
-func (swagger *MgwSwagger) setXWso2SandboxEndpoint() error {
+func (swagger *MgwSwagger) setXWso2SandboxEndpoint() (bool, error) {
+	apiLevelEPFound := false
 	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, xWso2SandbxEndpoints)
 	if xWso2APIEndpoints != nil {
 		swagger.sandboxEndpoints = xWso2APIEndpoints
+		apiLevelEPFound = true
 	} else if err != nil {
-		return errors.New("error encountered when extracting endpoints")
+		return apiLevelEPFound, errors.New("error encountered when extracting endpoints")
 	}
 
 	// resources
 	for i, resource := range swagger.resources {
 		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, xWso2SandbxEndpoints)
 		if err != nil {
-			return errors.New("error encountered when extracting resource endpoints for API with basepath: " +
+			return apiLevelEPFound, errors.New("error encountered when extracting resource endpoints for API with basepath: " +
 				swagger.xWso2Basepath + ". " + err.Error())
 		} else if xwso2ResourceEndpoints != nil {
 			swagger.resources[i].sandboxEndpoints = xwso2ResourceEndpoints
 		}
 	}
-
-	return nil
+	return apiLevelEPFound, nil
 }
 
 // GetXWso2Endpoints get x-wso2-endpoints
@@ -522,9 +674,11 @@ func (swagger *MgwSwagger) Validate() error {
 }
 
 func (swagger *MgwSwagger) validateBasePath() error {
-	if xWso2BasePath == "" {
-		return errors.New("empty Basepath is provided. Either use x-wso2-basePath extension or assign basePath (if OpenAPI v2 definition is used)" +
-			" / servers entry (if OpenAPI v3 definition is used) with non empty context")
+	if swagger.xWso2Basepath == "" {
+		return errors.New("empty Basepath is provided. Provide a non empty context either using the x-wso2-basePath extension," +
+			" or else 'basePath' (if OpenAPI v2) or a 'servers' entry (if OpenAPI v3)")
+	} else if match, _ := regexp.MatchString("^[/][a-zA-Z0-9~/_.-]*$", swagger.xWso2Basepath); !match {
+		return errors.New("invalid basepath. Does not start with / or includes invalid characters")
 	}
 	return nil
 }
@@ -656,6 +810,23 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 					endpointCluster.Config = &endpointConfig
 				} else {
 					return nil, errors.New("Invalid structure for advanceEndpointConfig in " + endpointName)
+				}
+			}
+			// Set Endpoint Config
+			if securityConfig, found := endpointClusterMap[SecurityConfig]; found {
+				if configMap, ok := securityConfig.(map[string]interface{}); ok {
+					var epSecurity EndpointSecurity
+					err := parser.Decode(configMap, &epSecurity)
+					if err != nil {
+						return nil, errors.New("Invalid schema for securityConfig in API " + swagger.title +
+							" : " + swagger.version + "for " + endpointName)
+					}
+					if !strings.EqualFold("BASIC", epSecurity.Type) {
+						return nil, errors.New("endpoint security type : " + epSecurity.Type +
+							" is not currently supported with WSO2 Choreo Connect")
+					}
+					epSecurity.Enabled = true
+					endpointCluster.SecurityConfig = epSecurity
 				}
 			}
 			return &endpointCluster, nil
@@ -810,7 +981,8 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 		if val, ok := z.(bool); ok {
 			disableSecurity = val
 		}
-	} else if vExtAuthType {
+	}
+	if vExtAuthType && !disableSecurity {
 		// If APIs are published through APIM, all resource levels contains x-auth-type
 		// vendor extension.
 		if val, ok := y.(string); ok {
@@ -906,4 +1078,179 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 		return InterceptEndpoint{}, errors.New("error parsing response interceptors values to mgwSwagger")
 	}
 	return InterceptEndpoint{}, nil
+}
+
+// GetMgwSwagger converts the openAPI v3 and v2 content
+// To MgwSwagger objects
+func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
+
+	apiJsn, err := utills.ToJSON(apiContent)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error converting api file to json", err)
+		return err
+	}
+	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+
+	if swaggerVersion == "2" {
+		// map json to struct
+		var apiData2 spec.Swagger
+		err = json.Unmarshal(apiJsn, &apiData2)
+		if err != nil {
+			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
+		} else {
+			infoSwaggerErr := swagger.SetInfoSwagger(apiData2)
+			if infoSwaggerErr != nil {
+				return infoSwaggerErr
+			}
+		}
+
+	} else if swaggerVersion == "3" {
+		// map json to struct
+		var apiData3 openapi3.Swagger
+
+		err = json.Unmarshal(apiJsn, &apiData3)
+		if err != nil {
+			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
+		} else {
+			infoOpenAPIErr := swagger.SetInfoOpenAPI(apiData3)
+			if infoOpenAPIErr != nil {
+				return infoOpenAPIErr
+			}
+		}
+	}
+	err = swagger.SetXWso2Extensions()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error occurred while setting x-wso2 extensions for ",
+			swagger.GetTitle(), " ", err)
+		return err
+	}
+	return nil
+}
+
+//PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
+// TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
+func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType string) error {
+
+	data := apiData.Data
+	// UUID in the generated api.yaml file is considerd as swagger.id
+	swagger.id = data.ID
+	swagger.apiType = apiType
+	// name and version in api.yaml corresponds to title and version respectively.
+	swagger.title = data.Name
+	swagger.version = data.Version
+	// context value in api.yaml is assigned as xWso2Basepath
+	swagger.xWso2Basepath = data.Context + "/" + swagger.version
+
+	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
+	endpointConfig := data.EndpointConfig
+
+	if endpointConfig.ImplementationStatus == prototypedAPI {
+		swagger.IsProtoTyped = true
+	}
+
+	if len(endpointConfig.ProductionEndpoints) > 0 {
+		var endpoints []Endpoint
+		endpointType := LoadBalance
+		var unProcessedURLs []interface{}
+		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
+			if apiType == WS {
+				prodEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+				if err == nil {
+					endpoints = append(endpoints, *prodEndpoint)
+				} else {
+					return err
+				}
+			} else {
+				unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+			}
+		}
+		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
+			endpointType = FailOver
+			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
+				if apiType == WS {
+					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+					if err == nil {
+						endpoints = append(endpoints, *failoverEndpoint)
+					} else {
+						return err
+					}
+				} else {
+					unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+				}
+			}
+		}
+		if apiType != WS {
+			productionEndpoints, err := processEndpointUrls(unProcessedURLs)
+			if err == nil {
+				endpoints = append(endpoints, productionEndpoints...)
+			} else {
+				return err
+			}
+		}
+		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
+	}
+
+	if len(endpointConfig.SandBoxEndpoints) > 0 {
+		var endpoints []Endpoint
+		endpointType := LoadBalance
+		var unProcessedURLs []interface{}
+		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
+			if apiType == WS {
+				sandBoxEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+				if err == nil {
+					endpoints = append(endpoints, *sandBoxEndpoint)
+				} else {
+					return err
+				}
+			} else {
+				unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+			}
+		}
+		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
+			endpointType = FailOver
+			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
+				if apiType == WS {
+					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+					if err == nil {
+						endpoints = append(endpoints, *failoverEndpoint)
+					} else {
+						return err
+					}
+				} else {
+					unProcessedURLs = append(unProcessedURLs, endpointConfig.Endpoint)
+				}
+			}
+		}
+		if apiType != WS {
+			sandboxEndpoints, err := processEndpointUrls(unProcessedURLs)
+			if err == nil {
+				endpoints = append(endpoints, sandboxEndpoints...)
+			} else {
+				return err
+			}
+		}
+		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
+	}
+
+	// if yaml has production security, setting it
+	if swagger.productionEndpoints != nil && endpointConfig.APIEndpointSecurity.Production.Enabled {
+		if endpointConfig.APIEndpointSecurity.Production.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Production.Type) {
+			swagger.productionEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Production
+		} else {
+			endpointConfig.APIEndpointSecurity.Production.Enabled = false
+			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
+				endpointConfig.APIEndpointSecurity.Production.Type)
+		}
+	}
+	// if yaml has sandbox security, setting it
+	if swagger.sandboxEndpoints != nil && endpointConfig.APIEndpointSecurity.Sandbox.Enabled {
+		if endpointConfig.APIEndpointSecurity.Sandbox.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Sandbox.Type) {
+			swagger.sandboxEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Sandbox
+		} else {
+			endpointConfig.APIEndpointSecurity.Sandbox.Enabled = false
+			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
+				endpointConfig.APIEndpointSecurity.Sandbox.Type)
+		}
+	}
+	return nil
 }

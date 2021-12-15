@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -68,11 +69,13 @@ public class AuthFilter implements Filter {
         boolean isOAuthBasicAuthMandatory = false;
 
         // Set security conditions
-        if (apiConfig.getSecuritySchemas() == null) {
+        if (apiConfig.getSecuritySchemeDefinitions() == null) {
             isOAuthProtected = true;
         } else {
-            for (String apiSecurityLevel : apiConfig.getSecuritySchemas()) {
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            for (Map.Entry<String, SecuritySchemaConfig> securityDefinition :
+                    apiConfig.getSecuritySchemeDefinitions().entrySet()) {
+                String apiSecurityLevel = securityDefinition.getValue().getType();
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH2)) {
                     isOAuthProtected = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                     isMutualSSLProtected = true;
@@ -83,8 +86,7 @@ public class AuthFilter implements Filter {
                 } else if (apiSecurityLevel.trim().
                         equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOAuthBasicAuthMandatory = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY) ||
-                           apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
                     isApiKeyProtected = true;
                 }
             }
@@ -122,6 +124,10 @@ public class AuthFilter implements Filter {
         // It is required to skip the auth Filter if the lifecycle status is prototype
         if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(
                 requestContext.getMatchedAPI().getApiLifeCycleState())) {
+            // For prototyped endpoints, only the production endpoints could be available.
+            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                    requestContext.getProdClusterHeader());
+            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
             return true;
         }
 
@@ -178,7 +184,6 @@ public class AuthFilter implements Filter {
      */
     private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
             throws APISecurityException {
-
         String keyType = authContext.getKeyType();
         if (StringUtils.isEmpty(authContext.getKeyType())) {
             keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
@@ -228,21 +233,20 @@ public class AuthFilter implements Filter {
             addAPILevelTimeoutHeaders(requestContext, keyType);
         }
 
-        for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getResources()) {
-            if (resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
-                if (resourceConfig.getEndpoints().containsKey(keyType)) {
-                    EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
+        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
+        // In websockets case, the endpoints object becomes null. Hence it would result
+        // in a NPE, if it is not checked.
+        if (resourceConfig.getEndpoints() != null &&
+                resourceConfig.getEndpoints().containsKey(keyType)) {
+            EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
 
-                    // Apply resource level retry headers
-                    if (endpointCluster.getRetryConfig() != null) {
-                        addRetryConfigHeaders(requestContext, endpointCluster.getRetryConfig());
-                    }
-                    // Apply resource level timeout headers
-                    if (endpointCluster.getRouteTimeoutInMillis() != null) {
-                        addTimeoutHeaders(requestContext, endpointCluster.getRouteTimeoutInMillis());
-                    }
-                }
-                return; // check only in the requested path
+            // Apply resource level retry headers
+            if (endpointCluster.getRetryConfig() != null) {
+                addRetryConfigHeaders(requestContext, endpointCluster.getRetryConfig());
+            }
+            // Apply resource level timeout headers
+            if (endpointCluster.getRouteTimeoutInMillis() != null) {
+                addTimeoutHeaders(requestContext, endpointCluster.getRouteTimeoutInMillis());
             }
         }
     }

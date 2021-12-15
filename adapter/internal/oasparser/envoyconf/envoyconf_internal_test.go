@@ -83,9 +83,9 @@ func TestCreateRoute(t *testing.T) {
 		RawURL:   "http://abc.com",
 	}
 	version := "1.0"
-	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []model.Operation{model.NewOperation("GET", nil, nil)},
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
-	resourceWithGetPost := model.CreateMinimalDummyResourceForTests("/resourcePath", []model.Operation{model.NewOperation("GET", nil, nil), model.NewOperation("POST", nil, nil)},
+	resourceWithGetPost := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil), model.NewOperation("POST", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 	clusterName := "resource_operation_id"
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
@@ -171,7 +171,7 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 	version := "1.0.0"
 	apiType := "HTTP"
 
-	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []model.Operation{model.NewOperation("GET", nil, nil)},
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
 	routeWithProdEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
@@ -210,7 +210,7 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 	version := "1.0.0"
 	apiType := "HTTP"
 
-	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []model.Operation{model.NewOperation("GET", nil, nil)},
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
 	routeWithProdEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,

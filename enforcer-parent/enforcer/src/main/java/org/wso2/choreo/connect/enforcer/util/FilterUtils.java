@@ -200,8 +200,8 @@ public class FilterUtils {
         }
         // Setting end user as anonymous
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-        authContext.setApiTier(getAPILevelTier(requestContext));
-        authContext.setApplicationId(clientIP);
+        // TODO: (VirajSalaka) clientIP for applicationUUID?
+        authContext.setApplicationUUID(clientIP);
         authContext.setApplicationName(null);
         authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
         authContext.setSubscriber(APIConstants.END_USER_ANONYMOUS);
@@ -228,9 +228,9 @@ public class FilterUtils {
         authContext.setUsername(jwtValidationInfo.getUser());
 
         if (apiKeyValidationInfoDTO != null) {
-            authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            authContext.setApplicationUUID(apiKeyValidationInfoDTO.getApplicationUUID());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
@@ -300,13 +300,12 @@ public class FilterUtils {
      * @param tokenIdentifier
      * @param payload
      * @param api
-     * @param apiLevelPolicy
      * @param rawToken Raw token used to authenticate the request
      * @return
      * @throws java.text.ParseException
      */
     public static AuthenticationContext generateAuthenticationContext(String tokenIdentifier, JWTClaimsSet payload,
-                                                                      JSONObject api, String apiLevelPolicy,
+                                                                      JSONObject api,
                                                                       String apiUUID, String rawToken)
             throws java.text.ParseException {
 
@@ -320,7 +319,6 @@ public class FilterUtils {
         } else {
             authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         }
-        authContext.setApiTier(apiLevelPolicy);
         if (api != null) {
             authContext.setTier(APIConstants.UNLIMITED_TIER);
             authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
@@ -331,7 +329,7 @@ public class FilterUtils {
             authContext.setApiUUID(apiUUID);
         }
         authContext.setApplicationName(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
-        authContext.setApplicationId(UUID.nameUUIDFromBytes(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME.
+        authContext.setApplicationUUID(UUID.nameUUIDFromBytes(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME.
                 getBytes(StandardCharsets.UTF_8)).toString());
         authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
         authContext.setSubscriber(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
@@ -371,7 +369,7 @@ public class FilterUtils {
             }
         }
         if (apiKeyValidationInfoDTO != null) {
-            jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationUUID());
             jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             jwtInfoDto.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             jwtInfoDto.setKeyType(apiKeyValidationInfoDTO.getType());
@@ -514,26 +512,6 @@ public class FilterUtils {
             return username + '@' + tenantDomain;
         }
         return username;
-    }
-
-    /**
-     * Get the API related throttling tier for auth context.
-     * If API level present, it will be returned. If not resource level
-     * would be returned. If both not present, UNLIMITED tier would be returned.
-     * @param requestContext Request context
-     * @return string format API tier.
-     */
-    public static String getAPILevelTier(RequestContext requestContext) {
-        String apiTier = requestContext.getMatchedAPI().getTier();
-        String resourceTier = requestContext.getMatchedResourcePath().getTier();
-
-        if (!apiTier.isEmpty() && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
-            return apiTier;
-        }
-        if (!resourceTier.isBlank()) {
-            return resourceTier;
-        }
-        return ThrottleConstants.UNLIMITED_TIER;
     }
 
     public static String getClientIp(Map<String, String> headers, String knownIp) {

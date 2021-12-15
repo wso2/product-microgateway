@@ -38,13 +38,11 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //If this property is true then throttle handler should build message or get content length and pass it to
     //throttle server.
     private boolean contentAware;
-    //Form API Manager 2.0 onward API specific tiers can define and this property is here to pass it.
-    private String apiTier;
     //JWT or SAML token containing details of API invoker
     private String userType;
     private String endUserToken;
     private String endUserName;
-    private String applicationId;
+    private int applicationId;
     private String applicationName;
     private String applicationTier;
     //use this to pass key validation status
@@ -76,14 +74,6 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     public void setThrottlingDataList(List<String> throttlingDataList) {
         this.throttlingDataList = throttlingDataList;
-    }
-
-    public String getApiTier() {
-        return apiTier;
-    }
-
-    public void setApiTier(String apiTier) {
-        this.apiTier = apiTier;
     }
 
     public boolean isContentAware() {
@@ -150,11 +140,11 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.endUserName = endUserName;
     }
 
-    public String getApplicationId() {
+    public int getApplicationId() {
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) {
+    public void setApplicationId(int applicationId) {
         this.applicationId = applicationId;
     }
 

@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
@@ -57,11 +58,14 @@ import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 
 /**
@@ -83,9 +87,29 @@ public class JWTAuthenticator implements Authenticator {
     }
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        String jwt = retrieveAuthHeaderValue(requestContext);
-        if (jwt != null && jwt.split("\\.").length == 3) {
+        if (isJWTEnabled(requestContext)) {
+            String jwt = retrieveAuthHeaderValue(requestContext);
+            return jwt != null && jwt.split("\\.").length == 3;
+        }
+        return false;
+    }
+
+    private boolean isJWTEnabled(RequestContext requestContext) {
+        Map<String, List<String>> resourceSecuritySchemes = requestContext.getMatchedResourcePath()
+                .getSecuritySchemas();
+        if (resourceSecuritySchemes.isEmpty()) {
+            // handle default security
             return true;
+        }
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
+                .getSecuritySchemeDefinitions();
+        for (String securityDefinitionName: resourceSecuritySchemes.keySet()) {
+            if (securitySchemeDefinitions.containsKey(securityDefinitionName)) {
+                SecuritySchemaConfig config = securitySchemeDefinitions.get(securityDefinitionName);
+                if (APIConstants.API_SECURITY_OAUTH2.equals(config.getType())) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -208,6 +232,13 @@ public class JWTAuthenticator implements Authenticator {
                                                     + "API Subscription validation failed.");
                                 }
                             }
+                        } else {
+                            // In this case, the application related properties are populated so that analytics
+                            // could provide much better insights.
+                            // Since application notion becomes less meaningful with subscription validation disabled,
+                            // the application name would be populated under the convention "anon:<KM Reference>"
+                            updateApplicationNameForSubscriptionDisabledKM(apiKeyValidationInfoDTO,
+                                    issuerDto.getName());
                         }
                     } finally {
                         if (Utils.tracingEnabled()) {
@@ -274,6 +305,17 @@ public class JWTAuthenticator implements Authenticator {
             }
         }
 
+    }
+
+    private void updateApplicationNameForSubscriptionDisabledKM(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                                String kmReference) {
+        String applicationRef = APIConstants.ANONYMOUS_PREFIX + kmReference;
+        apiKeyValidationInfoDTO.setApplicationName(applicationRef);
+        apiKeyValidationInfoDTO.setApplicationId(-1);
+        apiKeyValidationInfoDTO.setApplicationUUID(
+                UUID.nameUUIDFromBytes(
+                        applicationRef.getBytes(StandardCharsets.UTF_8)).toString());
+        apiKeyValidationInfoDTO.setApplicationTier(APIConstants.UNLIMITED_TIER);
     }
 
     @Override
@@ -399,7 +441,8 @@ public class JWTAuthenticator implements Authenticator {
             JSONObject app = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
             if (app != null) {
                 validationInfo.setApplicationUUID(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID));
-                validationInfo.setApplicationId(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+                validationInfo.setApplicationId(app.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)
+                        .intValue());
                 validationInfo.setApplicationName(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
                 validationInfo.setApplicationTier(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
                 validationInfo.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
@@ -435,6 +478,7 @@ public class JWTAuthenticator implements Authenticator {
                     String subTenant = subApi.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
                     if (subTier != null) {
                         validationInfo.setTier(subTier);
+                        AuthenticatorUtils.populateTierInfo(validationInfo, payload, subTier);
                     }
                     if (subPublisher != null) {
                         validationInfo.setApiPublisher(subPublisher);

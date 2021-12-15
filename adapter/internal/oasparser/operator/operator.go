@@ -31,55 +31,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
-// GetMgwSwagger converts the openAPI v3 and v2 content
-// To MgwSwagger objects
-// TODO: (VirajSalaka) return the error and handle
-func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
-	var mgwSwagger model.MgwSwagger
-
-	apiJsn, err := utills.ToJSON(apiContent)
-	if err != nil {
-		logger.LoggerOasparser.Error("Error converting api file to json", err)
-		return mgwSwagger, err
-	}
-	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
-
-	if swaggerVerison == "2" {
-		// map json to struct
-		var apiData2 spec.Swagger
-		err = json.Unmarshal(apiJsn, &apiData2)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
-		} else {
-			infoSwaggerErr := mgwSwagger.SetInfoSwagger(apiData2)
-			if infoSwaggerErr != nil {
-				return mgwSwagger, infoSwaggerErr
-			}
-		}
-
-	} else if swaggerVerison == "3" {
-		// map json to struct
-		var apiData3 *openapi3.Swagger
-
-		err = json.Unmarshal(apiJsn, &apiData3)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
-		} else {
-			infoOpenAPIErr := mgwSwagger.SetInfoOpenAPI(*apiData3)
-			if infoOpenAPIErr != nil {
-				return mgwSwagger, infoOpenAPIErr
-			}
-		}
-	}
-	err = mgwSwagger.SetXWso2Extensions()
-	if err != nil {
-		logger.LoggerOasparser.Error("Error occured while setting x-wso2 extensions for ",
-			mgwSwagger.GetTitle(), " ", err)
-		return mgwSwagger, err
-	}
-	return mgwSwagger, nil
-}
-
 // GetOpenAPIVersionAndJSONContent get the json content and openapi version
 // The input can be either json content or yaml content
 // TODO: (VirajSalaka) Use the MGWSwagger instead of this.
@@ -89,8 +40,8 @@ func GetOpenAPIVersionAndJSONContent(apiContent []byte) (string, []byte, error) 
 		logger.LoggerOasparser.Error("Error converting api file to json:", err)
 		return "", apiContent, err
 	}
-	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
-	return swaggerVerison, apiJsn, nil
+	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+	return swaggerVersion, apiJsn, nil
 }
 
 // GetOpenAPIV3Struct converts the json content to the openAPIv3 struct
@@ -100,7 +51,7 @@ func GetOpenAPIV3Struct(openAPIJson []byte) (openapi3.Swagger, error) {
 
 	err := json.Unmarshal(openAPIJson, &apiData3)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+		logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		return apiData3, err
 	}
 	return apiData3, nil
@@ -112,7 +63,7 @@ func GetOpenAPIV2Struct(openAPIJson []byte) (spec.Swagger, error) {
 	var apiData2 spec.Swagger
 	err := json.Unmarshal(openAPIJson, &apiData2)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+		logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
 		return apiData2, err
 	}
 	return apiData2, nil
@@ -142,17 +93,4 @@ to pass labels. Currently value "DefaultGatewayName" is returned
 */
 func GetXWso2LabelsWebSocket(webSocketAPIDef model.MgwSwagger) []string {
 	return []string{config.DefaultGatewayName}
-}
-
-/*
-GetMgwSwaggerWebSocket returns a MgwSwagger for the web socket APIs
-*/
-func GetMgwSwaggerWebSocket(apiData model.APIYaml) (model.MgwSwagger, error) {
-	var mgwSwagger model.MgwSwagger
-	err := mgwSwagger.SetInfoSwaggerWebSocket(apiData)
-	if err != nil {
-		return mgwSwagger, err
-	}
-	return mgwSwagger, nil
-
 }

@@ -1,0 +1,160 @@
+---
+openapi: 3.0.0
+servers:
+  - url: http://petstore.swagger.io/v2
+info:
+  description: 'This example shows how to apply different wso2 vendor specific extensions in an OpenAPI Specification file.'
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: pet
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+x-wso2-basePath: /petstore/v1         # defines x-wso2-basePath
+x-wso2-production-endpoints:          # defines x-wso2-production-endpoint(s) in API level
+  urls:
+    - https://petstore.swagger.io/v2
+x-wso2-sandbox-endpoints:             # defines x-wso2-sandbox-endpoint(s) in API level
+  urls:
+    - 'https://petstore.swagger.io/v2'
+  type: http
+x-wso2-throttling-tier: 20kPerMin     # defines x-wso2-throttling-tier in API level
+x-wso2-cors:                          # defines x-wso2-cors
+  access-control-allow-origins:
+    - test.com
+    - example.com
+  access-control-allow-headers:
+    - Authorization
+    - Content-Type
+  access-control-allow-methods:
+    - GET
+    - PUT
+    - POST
+x-wso2-auth-header: "AuthHeader"     # defines x-wso2-auth-header
+paths:
+  "/pet/findByStatus":
+    x-wso2-throttling-tier: 10kPerMin # defines x-wso2-throttling-tier in resource level
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      operationId: findPetsByStatus
+      parameters:
+        - name: status
+          in: query
+          description: Status values
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - available
+                - pending
+              default: available
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Pet"
+        '400':
+          description: Invalid status value
+  "/pet/{petId}":
+    x-wso2-production-endpoints:     # defines x-wso2-production-endpoints in resource level
+      urls:
+        - http://www.mocky.io/v2/5cd28cd73100008628339802
+        - https://petstore.swagger.io/v4
+    x-wso2-disable-security: true    # defines x-wso2-disable-security in resource level
+    get:
+      tags:
+        - pet
+      summary: Find pet by ID
+      description: Returns a single pet
+      operationId: getPetById
+      parameters:
+        - name: petId
+          in: path
+          description: ID of pet to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Pet"
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+  "/store/inventory":
+    get:
+      x-wso2-disable-security: true  # defines x-wso2-disable-security in operation level
+      tags:
+        - store
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: getInventory
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        id:
+          type: integer
+          format: int64
+        category:
+          type: string
+        name:
+          type: string
+          example: doggie
+        photoUrls:
+          type: string
+        tags:
+          type: string
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+            - available
+            - pending
+      xml:
+        name: Pet
+  requestBodies:
+    Pet:
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+        application/xml:
+          schema:
+            "$ref": "#/components/schemas/Pet"
+      description: Pet object that needs to be added to the store
+      required: true

@@ -58,6 +58,7 @@
 [[enforcer.security.tokenService]]
   name = "APIM Publisher"
   issuer = "https://localhost:9443/publisher"
+  validateSubscription = true
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [controlPlane]

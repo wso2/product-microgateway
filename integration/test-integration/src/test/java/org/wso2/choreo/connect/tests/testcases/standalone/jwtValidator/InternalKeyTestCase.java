@@ -18,12 +18,9 @@
 package org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.tests.testcases.withapim.throttle.ThrottlingBaseTestCase;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -39,7 +36,8 @@ public class InternalKeyTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        internalKey = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, true);
+        internalKey = TokenUtil.getJwtForPetstoreWithDifferentContext(TestConstant.KEY_TYPE_PRODUCTION, null,
+                true, "v2/standard");
         tamperedInternalKey = internalKey.substring(0, internalKey.length()-4);
     }
 
@@ -49,7 +47,7 @@ public class InternalKeyTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", tamperedInternalKey);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
@@ -63,7 +61,7 @@ public class InternalKeyTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", internalKey);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -74,11 +72,11 @@ public class InternalKeyTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", TestConstant.INVALID_JWT_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertTrue(response.getData().contains("Unclassified Validation Failure"),
-                "Error response message mismatch");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
     // After invoking with original key, it is cached as a success token. But again using the tampered key should fail.
@@ -87,7 +85,7 @@ public class InternalKeyTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", tamperedInternalKey);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
@@ -100,7 +98,7 @@ public class InternalKeyTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Internal-Key", TestConstant.EXPIRED_INTERNAL_KEY_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");

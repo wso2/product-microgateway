@@ -43,13 +43,16 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	}
 	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
 	swagger.securityScheme = setSecurityDefinitions(swagger2)
+	swagger.security = swagger2.Security
 	swagger.resources = setResourcesSwagger(swagger2)
 	swagger.apiType = HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
 	// If the schemes property is not mentioned at all, http will be assigned. (Only swagger 2 version has this property)
-	if swagger2.Host != "" {
+	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// an exception is made where host property is not processed when the API is prototyped.
+	if swagger2.Host != "" && !swagger.IsProtoTyped {
 		urlScheme := ""
 		for _, scheme := range swagger2.Schemes {
 			//TODO: (VirajSalaka) Introduce Constants
@@ -68,6 +71,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
 			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
+			swagger.sandboxEndpoints = nil
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}
@@ -76,22 +80,28 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
-	var resources []Resource
+func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
+	var resources []*Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
 	// resourve level, if it's not present at resource level using "addResourceLevelDisableSecurity"
-	disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
 	if swagger2.Paths != nil {
 		for path, pathItem := range swagger2.Paths.Paths {
-			var methodsArray []Operation
+			disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
+			// Checks for resource level security, if security is disabled in resource level,
+			// below code segment will override above two variable values (disableSecurity & found)
+			disableResourceLevelSecurity, foundInResourceLevel := pathItem.Extensions.GetBool(xWso2DisableSecurity)
+			if foundInResourceLevel {
+				logger.LoggerOasparser.Infof("x-wso2-disable-security extension is available in the API: %v %v's resource %v.",
+					swagger2.Info.Title, swagger2.Info.Version, path)
+				disableSecurity = disableResourceLevelSecurity
+				found = true
+			}
+			var methodsArray []*Operation
 			methodFound := false
 			if pathItem.Get != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
-				}
-				if applicationSecurity, found := pathItem.Get.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Get.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
 					pathItem.Get.Extensions))
@@ -101,9 +111,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Post.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Post.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security,
 					pathItem.Post.Extensions))
 				methodFound = true
@@ -111,9 +118,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if pathItem.Put != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
-				}
-				if applicationSecurity, found := pathItem.Put.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Put.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security,
 					pathItem.Put.Extensions))
@@ -123,9 +127,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Delete.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Delete.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security,
 					pathItem.Delete.Extensions))
 				methodFound = true
@@ -133,9 +134,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			if pathItem.Head != nil {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
-				}
-				if applicationSecurity, found := pathItem.Head.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Head.Security)
 				}
 				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security,
 					pathItem.Head.Extensions))
@@ -145,9 +143,6 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Patch.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Patch.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security,
 					pathItem.Patch.Extensions))
 				methodFound = true
@@ -156,16 +151,13 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
-				if applicationSecurity, found := pathItem.Options.VendorExtensible.Extensions[xWso2ApplicationSecurity]; found {
-					setApplicationSecurity(applicationSecurity, &pathItem.Options.Security)
-				}
 				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
 					pathItem.Options.Extensions))
 				methodFound = true
 			}
 			if methodFound {
 				resource := setOperationSwagger(path, methodsArray, pathItem)
-				resources = append(resources, resource)
+				resources = append(resources, &resource)
 			}
 		}
 	}
@@ -192,48 +184,8 @@ func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
 	}
 }
 
-// checks whether application level security given by (x-wso2-application-security extension)is optional or not
-func getIsApplicationSecurityOptional(applicationSecurity interface{}) bool {
-	var isApplicationSecurityOptional = true
-	result, ok := applicationSecurity.(map[string]interface{})
-	if ok {
-		for key, value := range result {
-			if key == "optional" && value != true {
-				isApplicationSecurityOptional = false
-			}
-		}
-	}
-	return isApplicationSecurityOptional
-}
-
-// sets application level security defined under the x-wso2-application-security extension.
-func setApplicationSecurity(applicationSecurity interface{}, pathItemSecurity *[]map[string][]string) {
-	var isApplicationSecurityOptional = getIsApplicationSecurityOptional(applicationSecurity)
-	result, ok := applicationSecurity.(map[string]interface{})
-	if ok && !isApplicationSecurityOptional {
-		if _, found := result[SecurityTypes]; found {
-			if val, ok := result[SecurityTypes].([]interface{}); ok {
-				for _, mapValue := range val {
-					if mapValue == APIKeyInAppLevelSecurity {
-						applicationAPIKeyMap := map[string][]string{
-							mapValue.(string): {},
-						}
-						*pathItemSecurity = append(*pathItemSecurity, applicationAPIKeyMap)
-					}
-				}
-			}
-		}
-	}
-}
-
-func getSwaggerOperationLevelDetails(operation *spec.Operation, method string) Operation {
-	var securityData []map[string][]string = operation.Security
-	return NewOperation(method, securityData, operation.Extensions)
-}
-
-func setOperationSwagger(path string, methods []Operation, pathItem spec.PathItem) Resource {
-	var resource Resource
-	resource = Resource{
+func setOperationSwagger(path string, methods []*Operation, pathItem spec.PathItem) Resource {
+	return Resource{
 		path:    path,
 		methods: methods,
 		// TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
@@ -246,73 +198,4 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 		//security:         operation.Security,
 		vendorExtensions: pathItem.VendorExtensible.Extensions,
 	}
-	return resource
-}
-
-//SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
-// TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData APIYaml) error {
-
-	data := apiData.Data
-	// UUID in the generated api.yaml file is considerd as swagger.id
-	swagger.id = data.ID
-	// Set apiType as WS for websockets
-	swagger.apiType = "WS"
-	// name and version in api.yaml corresponds to title and version respectively.
-	swagger.title = data.Name
-	swagger.version = data.Version
-	// context value in api.yaml is assigned as xWso2Basepath
-	swagger.xWso2Basepath = data.Context + "/" + swagger.version
-
-	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
-	endpointConfig := data.EndpointConfig
-	if len(endpointConfig.SandBoxEndpoints) > 0 {
-		var endpoints []Endpoint
-		endpointType := LoadBalance
-		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
-			sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-			if err == nil {
-				endpoints = append(endpoints, *sandBoxEndpoint)
-			} else {
-				return err
-			}
-		}
-		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
-			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
-				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-				if err == nil {
-					endpointType = FailOver
-					endpoints = append(endpoints, *failoverEndpoint)
-				} else {
-					return err
-				}
-			}
-		}
-		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
-	}
-	if len(endpointConfig.ProductionEndpoints) > 0 {
-		var endpoints []Endpoint
-		endpointType := LoadBalance
-		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
-			prodEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-			if err == nil {
-				endpoints = append(endpoints, *prodEndpoint)
-			} else {
-				return err
-			}
-		}
-		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
-			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
-				failoverEndpoint, err := getHostandBasepathandPortWebSocket(endpointConfig.Endpoint)
-				if err == nil {
-					endpointType = FailOver
-					endpoints = append(endpoints, *failoverEndpoint)
-				} else {
-					return err
-				}
-			}
-		}
-		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
-	}
-	return nil
 }

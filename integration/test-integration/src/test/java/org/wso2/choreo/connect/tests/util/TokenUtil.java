@@ -174,7 +174,15 @@ public class TokenUtil {
         subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
 
         JSONObject jwtTokenInfo = new JSONObject();
+
+        JSONObject tierDTO = new JSONObject();
+        tierDTO.put("stopOnQuotaReach", true);
+        JSONObject tierInfoDTO = new JSONObject();
+        tierInfoDTO.put(tier, tierDTO);
+
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
+        jwtTokenInfo.put("tierInfo", tierInfoDTO);
+
         if (isInternalKey) {
             return TokenUtil.getInternalKey(jwtTokenInfo, keyType, validityPeriod);
         }
@@ -182,9 +190,14 @@ public class TokenUtil {
     }
 
     public static String getJwtForPetstore(String keyType, String scopes, boolean isInternalKey) throws Exception {
+        return getJwtForPetstoreWithDifferentContext(keyType, scopes, isInternalKey, "v2");
+    }
+
+    public static String getJwtForPetstoreWithDifferentContext(String keyType, String scopes, boolean isInternalKey,
+                                                               String apiContext) throws Exception {
         API api = new API();
         api.setName("PetStoreAPI");
-        api.setContext("v2");
+        api.setContext(apiContext);
         api.setProdEndpoint(Utils.getMockServiceURLHttp("/echo/prod"));
         api.setVersion("1.0.5");
         api.setProvider("admin");

@@ -30,6 +30,7 @@ public class MetadataConstants {
     public static final String KEY_TYPE = "keyType";
     public static final String CALLER_TOKEN = "callerToken";
     public static final String APP_ID = "applicationId";
+    public static final String APP_UUID = "applicationUUID";
     public static final String APP_NAME = "applicationName";
     public static final String CONSUMER_KEY = "consumerKey";
     public static final String SUBSCRIBER = "subscriber";

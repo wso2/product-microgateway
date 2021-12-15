@@ -30,10 +30,6 @@ spec:
       labels:
         app: choreo-connect-deployment
     spec:
-      initContainers:
-        - name: init-adapter-service
-          image: busybox:1.31
-          command: [ 'sh', '-c', 'echo -e "Checking for the availability of Adapter"; while ! nc -z adapter 18000; do sleep 1; printf "-"; done; echo -e "  >> Adapter has started";' ]
       containers:
         - name: choreo-connect-enforcer
           volumeMounts:
@@ -46,7 +42,7 @@ spec:
               name: log4j2-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/choreo-connect-enforcer:1.0.0-beta
+          image: wso2/choreo-connect-enforcer:1.0.0
           imagePullPolicy: IfNotPresent
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -99,12 +95,12 @@ spec:
           livenessProbe:
             exec:
               command: [ "sh", "check_health.sh" ]
-            initialDelaySeconds: 10
+            initialDelaySeconds: 5
             periodSeconds: 30
           readinessProbe:
             exec:
               command: [ "sh", "check_health.sh" ]
-            initialDelaySeconds: 8
+            initialDelaySeconds: 5
             periodSeconds: 5
         - name: choreo-connect-router
           volumeMounts:
@@ -112,7 +108,7 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/choreo-connect-router:1.0.0-beta
+          image: wso2/choreo-connect-router:1.0.0
           imagePullPolicy: IfNotPresent
           env:
             - name: ROUTER_ADMIN_HOST
@@ -143,6 +139,8 @@ spec:
               value: "18090"
             - name: ENFORCER_CA_CERT_PATH
               value: "/home/wso2/security/truststore/mg.pem"
+            - name: CONCURRENCY
+              value: "2"
           resources:
             requests:
               memory: "500Mi"
@@ -171,7 +169,6 @@ spec:
               httpHeaders:
                 - name: Host
                   value: gw.wso2.com
-            initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
             httpGet:
@@ -181,7 +178,6 @@ spec:
               httpHeaders:
                 - name: Host
                   value: gw.wso2.com
-            initialDelaySeconds: 20
             periodSeconds: 5
       volumes:
         - name: router-keystore-vol

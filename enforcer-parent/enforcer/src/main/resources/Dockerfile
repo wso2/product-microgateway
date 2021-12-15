@@ -15,6 +15,8 @@
 # -----------------------------------------------------------------------
 
 FROM adoptopenjdk/openjdk11:jre-11.0.13_8-alpine
+LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
+
 RUN apk update && apk upgrade --no-cache
 
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
@@ -64,10 +66,10 @@ RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
-COPY maven/ lib/
+COPY maven/lib/ lib/
 COPY maven/conf/log4j2.properties conf/log4j2.properties
 COPY maven/security security
-COPY check_health.sh .
+COPY maven/check_health.sh .
 COPY maven/LICENSE.txt .
 
 #todo add applicationinsights.json file and point it to the appInsightsAgent jar

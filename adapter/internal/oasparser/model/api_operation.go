@@ -42,14 +42,19 @@ func (operation *Operation) GetSecurity() []map[string][]string {
 	return operation.security
 }
 
+// SetSecurity sets the security schemas for the http opeartion
+func (operation *Operation) SetSecurity(security []map[string][]string) {
+	operation.security = security
+}
+
 // GetTier returns the operation level throttling tier
 func (operation *Operation) GetTier() string {
 	return operation.tier
 }
 
 // NewOperation Creates and returns operation type object
-func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) Operation {
+func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
-	return Operation{method, security, tier, disableSecurity}
+	return &Operation{method, security, tier, disableSecurity}
 }

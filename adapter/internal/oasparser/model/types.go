@@ -55,17 +55,14 @@ const (
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIYaml             APIYaml
-	APIEnvProps         map[string]synchronizer.APIEnvProps
-	Deployments         []Deployment
-	OpenAPIJsn          []byte
-	InterceptorCerts    []byte
-	APIType             string              // read from api.yaml and formatted to upper case
-	APILifeCycleStatus  string              // read from api.yaml and formatted to upper case
-	ProductionEndpoints []Endpoint          // read from env variable
-	SandboxEndpoints    []Endpoint          // read from env variable
-	OrganizationID      string              // read from api.yaml or config
-	EndpointSecurity    APIEndpointSecurity // derived from api.yaml or config
+	APIYaml            APIYaml
+	APIEnvProps        map[string]synchronizer.APIEnvProps
+	Deployments        []Deployment
+	OpenAPIJsn         []byte
+	InterceptorCerts   []byte
+	APIType            string // read from api.yaml and formatted to upper case
+	APILifeCycleStatus string // read from api.yaml and formatted to upper case
+	OrganizationID     string // read from api.yaml or config
 
 	//UpstreamCerts cert filename -> cert bytes
 	UpstreamCerts map[string][]byte
@@ -75,17 +72,17 @@ type ProjectAPI struct {
 
 // EndpointSecurity contains parameters of endpoint security at api.json
 type EndpointSecurity struct {
-	Password         string            `json:"password,omitempty"`
-	Type             string            `json:"type,omitempty"`
-	Enabled          bool              `json:"enabled,omitempty"`
-	Username         string            `json:"username,omitempty"`
-	CustomParameters map[string]string `json:"customparameters,omitempty"`
+	Password         string            `json:"password,omitempty" mapstructure:"password"`
+	Type             string            `json:"type,omitempty" mapstructure:"type"`
+	Enabled          bool              `json:"enabled,omitempty" mapstructure:"enabled"`
+	Username         string            `json:"username,omitempty" mapstructure:"username"`
+	CustomParameters map[string]string `json:"customparameters,omitempty" mapstructure:"customparameters"`
 }
 
 // APIEndpointSecurity represents the structure of endpoint_security param in api.yaml
 type APIEndpointSecurity struct {
-	Production EndpointSecurity
-	Sandbox    EndpointSecurity
+	Production EndpointSecurity `json:"production,omitempty"`
+	Sandbox    EndpointSecurity `json:"sandbox,omitempty"`
 }
 
 // ApimMeta represents APIM meta information of files received from APIM
@@ -140,32 +137,18 @@ type APIYaml struct {
 		SecurityScheme             []string `json:"securityScheme,omitempty"`
 		OrganizationID             string   `json:"organizationId,omitempty"`
 		EndpointConfig             struct {
-			EndpointType                 string `json:"endpoint_type,omitempty"`
-			LoadBalanceAlgo              string `json:"algoCombo,omitempty"`
-			LoadBalanceSessionManagement string `json:"sessionManagement,omitempty"`
-			LoadBalanceSessionTimeOut    string `json:"sessionTimeOut,omitempty"`
-			EndpointSecurity             struct {
-				Production struct {
-					Password         string            `json:"password,omitempty"`
-					Type             string            `json:"type,omitempty"`
-					Enabled          bool              `json:"enabled,omitempty"`
-					Username         string            `json:"username,omitempty"`
-					CustomParameters map[string]string `json:"customparameters,omitempty"`
-				} `json:"production,omitempty"`
-				Sandbox struct {
-					Password         string            `json:"password,omitempty"`
-					Type             string            `json:"type,omitempty"`
-					Enabled          bool              `json:"enabled,omitempty"`
-					Username         string            `json:"username,omitempty"`
-					CustomParameters map[string]string `json:"customparameters,omitempty"`
-				} `json:"sandbox,omitempty"`
-			} `json:"endpoint_security,omitempty"`
-			RawProdEndpoints            interface{} `json:"production_endpoints,omitempty"`
-			ProductionEndpoints         []EndpointInfo
-			ProductionFailoverEndpoints []EndpointInfo `json:"production_failovers,omitempty"`
-			RawSandboxEndpoints         interface{}    `json:"sandbox_endpoints,omitempty"`
-			SandBoxEndpoints            []EndpointInfo
-			SandboxFailoverEndpoints    []EndpointInfo `json:"sandbox_failovers,omitempty"`
+			EndpointType                 string              `json:"endpoint_type,omitempty"`
+			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
+			LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
+			LoadBalanceSessionTimeOut    string              `json:"sessionTimeOut,omitempty"`
+			APIEndpointSecurity          APIEndpointSecurity `json:"endpoint_security,omitempty"`
+			RawProdEndpoints             interface{}         `json:"production_endpoints,omitempty"`
+			ProductionEndpoints          []EndpointInfo
+			ProductionFailoverEndpoints  []EndpointInfo `json:"production_failovers,omitempty"`
+			RawSandboxEndpoints          interface{}    `json:"sandbox_endpoints,omitempty"`
+			SandBoxEndpoints             []EndpointInfo
+			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
+			ImplementationStatus         string         `json:"implementation_status,omitempty"`
 		} `json:"endpointConfig,omitempty"`
 	} `json:"data"`
 }

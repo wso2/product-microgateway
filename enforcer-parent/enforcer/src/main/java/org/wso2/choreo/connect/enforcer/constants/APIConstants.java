@@ -36,7 +36,7 @@ public class APIConstants {
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String END_USER_ANONYMOUS = "anonymous";
-
+    public static final String ANONYMOUS_PREFIX = "anon:";
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
     public static final String DEFAULT_ISSUER = "Resident Key Manager";
@@ -58,10 +58,9 @@ public class APIConstants {
     public static final String TENANT_DOMAIN_SEPARATOR = "@";
 
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
-    public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
+    public static final String API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
-    public static final String API_SECURITY_API_KEY = "api_key";
     public static final String SWAGGER_API_KEY_AUTH_TYPE_NAME = "apiKey";
     public static final String SWAGGER_API_KEY_IN_HEADER = "header";
     public static final String SWAGGER_API_KEY_IN_QUERY = "query";
@@ -87,6 +86,7 @@ public class APIConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
+    public static final String PATH_HEADER = ":path";
 
     public static final String LOG_TRACE_ID = "traceId";
 

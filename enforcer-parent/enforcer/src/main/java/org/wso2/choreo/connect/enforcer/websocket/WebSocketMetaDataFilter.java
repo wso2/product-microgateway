@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -45,7 +46,6 @@ public class WebSocketMetaDataFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
 
     private APIConfig apiConfig;
-    private AuthenticationContext authenticationContext;
 
     @Override
     public void init(APIConfig apiConfig, Map<String, String> configProperties) {
@@ -64,7 +64,9 @@ public class WebSocketMetaDataFilter implements Filter {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
 
             }
-            this.authenticationContext = requestContext.getAuthenticationContext();
+            String apiTier = !requestContext.getMatchedAPI().getTier().isBlank()
+                    ? requestContext.getMatchedAPI().getTier() : ThrottleConstants.UNLIMITED_TIER;
+            AuthenticationContext authenticationContext = requestContext.getAuthenticationContext();
             requestContext.addMetadataToMap(MetadataConstants.GRPC_STREAM_ID, UUID.randomUUID().toString());
             requestContext.addMetadataToMap(MetadataConstants.REQUEST_ID,
                     getNullableStringValue(requestContext.getRequestID()));
@@ -75,7 +77,7 @@ public class WebSocketMetaDataFilter implements Filter {
             requestContext.addMetadataToMap(MetadataConstants.TIER,
                     getNullableStringValue(authenticationContext.getTier()));
             requestContext.addMetadataToMap(MetadataConstants.API_TIER,
-                    getNullableStringValue(authenticationContext.getApiTier()));
+                    getNullableStringValue(apiTier));
             requestContext.addMetadataToMap(MetadataConstants.CONTENT_AWARE_TIER_PRESENT,
                     getNullableStringValue(String.valueOf(authenticationContext.isContentAwareTierPresent())));
             requestContext.addMetadataToMap(MetadataConstants.API_KEY,
@@ -85,7 +87,10 @@ public class WebSocketMetaDataFilter implements Filter {
             requestContext.addMetadataToMap(MetadataConstants.CALLER_TOKEN,
                     getNullableStringValue(authenticationContext.getCallerToken()));
             requestContext.addMetadataToMap(MetadataConstants.APP_ID,
-                    getNullableStringValue(authenticationContext.getApplicationId()));
+                    String.valueOf(authenticationContext.getApplicationId()));
+            // Unused but added to maintain the consistancy
+            requestContext.addMetadataToMap(MetadataConstants.APP_UUID,
+                    String.valueOf(authenticationContext.getApplicationUUID()));
             requestContext.addMetadataToMap(MetadataConstants.APP_NAME,
                     getNullableStringValue(authenticationContext.getApplicationName()));
             requestContext.addMetadataToMap(MetadataConstants.CONSUMER_KEY,

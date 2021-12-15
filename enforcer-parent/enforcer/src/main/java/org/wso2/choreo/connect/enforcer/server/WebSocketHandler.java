@@ -18,6 +18,7 @@
 package org.wso2.choreo.connect.enforcer.server;
 
 import io.opentelemetry.context.Scope;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -100,13 +101,16 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
         String username = extAuthMetadata.get(MetadataConstants.USERNAME);
         String appTier = extAuthMetadata.get(MetadataConstants.APP_TIER);
         String tier = extAuthMetadata.get(MetadataConstants.TIER);
-        String apiTier = extAuthMetadata.get(MetadataConstants.API_TIER);
         boolean isContentAwareTierPresent = Boolean.parseBoolean(extAuthMetadata
                 .get(MetadataConstants.CONTENT_AWARE_TIER_PRESENT));
         String apiKey = extAuthMetadata.get(MetadataConstants.API_KEY);
         String keyType = extAuthMetadata.get(MetadataConstants.KEY_TYPE);
         String callerToken = extAuthMetadata.get(MetadataConstants.CALLER_TOKEN);
-        String applicationId = extAuthMetadata.get(MetadataConstants.APP_ID);
+        int applicationId = -1;
+        if (!StringUtils.isEmpty(extAuthMetadata.get(MetadataConstants.APP_ID))) {
+            applicationId = Integer.parseInt(extAuthMetadata.get(MetadataConstants.APP_ID));
+        }
+
         String applicationName = extAuthMetadata.get(MetadataConstants.APP_NAME);
         String consumerKey = extAuthMetadata.get(MetadataConstants.CONSUMER_KEY);
         String subscriber = extAuthMetadata.get(MetadataConstants.SUBSCRIBER);
@@ -132,7 +136,6 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
         authenticationContext.setUsername(username);
         authenticationContext.setApplicationTier(appTier);
         authenticationContext.setTier(tier);
-        authenticationContext.setApiTier(apiTier);
         authenticationContext.setIsContentAware(isContentAwareTierPresent);
         authenticationContext.setApiKey(apiKey);
         authenticationContext.setKeyType(keyType);

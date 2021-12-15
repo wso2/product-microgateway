@@ -38,19 +38,10 @@ import java.util.Map;
  */
 public class JwtTestCase {
     private String jwtWithoutScope;
-    private String jwtWithScope;
-    private String jwtWithMultipleScopes;
-    private String jwtWithMultipleInvalidScopes;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         jwtWithoutScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null,
-                false);
-        jwtWithScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets",
-                false);
-        jwtWithMultipleScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
-                "write:pets read:pets", false);
-        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar",
                 false);
     }
 
@@ -61,7 +52,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithoutScope);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -69,14 +60,14 @@ public class JwtTestCase {
                 "\"www-authenticate\" is available");
     }
 
-    @Test(description = "Test to check the JWT auth validate invalida signature token")
+    @Test(description = "Test to check the JWT auth validate invalid signature token")
     public void invokeJWTHeaderInvalidTokenTest() throws Exception {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.INVALID_JWT_TOKEN);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
@@ -89,9 +80,9 @@ public class JwtTestCase {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Something " + TestConstant.INVALID_JWT_TOKEN);
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Something " + jwtWithoutScope);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
@@ -104,7 +95,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.EXPIRED_JWT_TOKEN);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
@@ -120,7 +111,7 @@ public class JwtTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + "aaa.bbb.ccc");
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/2") , headers);
+                "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,

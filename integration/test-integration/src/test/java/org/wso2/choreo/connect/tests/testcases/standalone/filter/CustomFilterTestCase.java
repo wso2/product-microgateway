@@ -52,7 +52,7 @@ public class CustomFilterTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
-                .doGet(Utils.getServiceURLHttps("/v2/headers"), headers);
+                .doGet(Utils.getServiceURLHttps("/v2/standard/headers"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         JSONObject responseJSON = new JSONObject(response.getData());
@@ -68,7 +68,7 @@ public class CustomFilterTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
-                .doGet(Utils.getServiceURLHttps("/v2/headers/23.api"), headers);
+                .doGet(Utils.getServiceURLHttps("/v2/standard/headers/23.api"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         JSONObject responseJSON = new JSONObject(response.getData());
@@ -84,7 +84,7 @@ public class CustomFilterTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
-                .doGet(Utils.getServiceURLHttps("/v2/headers?queryParam=abc"), headers);
+                .doGet(Utils.getServiceURLHttps("/v2/standard/headers?queryParam=abc"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         JSONObject responseJSON = new JSONObject(response.getData());
@@ -101,7 +101,7 @@ public class CustomFilterTestCase {
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         headers.put("Custom-remove-header", "Bar");
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
-                .doGet(Utils.getServiceURLHttps("/v2/headers"), headers);
+                .doGet(Utils.getServiceURLHttps("/v2/standard/headers"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         JSONObject responseJSON = new JSONObject(response.getData());
@@ -115,7 +115,7 @@ public class CustomFilterTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
-                .doGet(Utils.getServiceURLHttps("/v2/headers"), headers);
+                .doGet(Utils.getServiceURLHttps("/v2/standard/headers"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         JSONObject responseJSON = new JSONObject(response.getData());
@@ -134,7 +134,7 @@ public class CustomFilterTestCase {
         // template: <organizationID>_<EndpointName>_xwso2cluster_<vHost>_<API name><API version>
         headers.put("Custom-dynamic-endpoint", "carbon.super_myDynamicEndpoint_xwso2cluster_localhost_SwaggerPetstore1.0.5");
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
-                .doGet(Utils.getServiceURLHttps("/v2/pet/findByStatus"), headers);
+                .doGet(Utils.getServiceURLHttps("/v2/standard/pet/findByStatus"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.API_SANDBOX_RESPONSE, "Response body mismatched for dynamic endpoint");

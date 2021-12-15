@@ -29,21 +29,6 @@ public final class ResourceProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_api_Operation_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_api_SecurityList_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_api_SecurityList_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_api_SecurityList_ScopeListEntry_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_api_SecurityList_ScopeListEntry_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_api_Scopes_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_api_Scopes_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -55,33 +40,31 @@ public final class ResourceProto {
     java.lang.String[] descriptorData = {
       "\n!wso2/discovery/api/Resource.proto\022\022wso" +
       "2.discovery.api\032)wso2/discovery/api/endp" +
-      "oint_cluster.proto\"\233\003\n\010Resource\022\n\n\002id\030\001 " +
-      "\001(\t\022\014\n\004path\030\002 \001(\t\022.\n\007methods\030\003 \003(\0132\035.wso" +
-      "2.discovery.api.Operation\022\017\n\007summary\030\004 \001" +
-      "(\t\022\023\n\013description\030\005 \001(\t\022@\n\023productionEnd" +
-      "points\030\006 \001(\0132#.wso2.discovery.api.Endpoi" +
-      "ntCluster\022=\n\020sandboxEndpoints\030\007 \001(\0132#.ws" +
-      "o2.discovery.api.EndpointCluster\022<\n\010secu" +
-      "rity\030\010 \003(\0132*.wso2.discovery.api.Resource" +
-      ".SecurityEntry\022\020\n\010consumes\030\t \003(\t\022\017\n\007sche" +
-      "mes\030\n \003(\t\022\014\n\004tags\030\013 \003(\t\032/\n\rSecurityEntry" +
-      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"v\n\tOper" +
-      "ation\022\016\n\006method\030\001 \001(\t\0222\n\010security\030\002 \003(\0132" +
-      " .wso2.discovery.api.SecurityList\022\014\n\004tie" +
-      "r\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010\"\240\001\n\014Sec" +
-      "urityList\022B\n\tscopeList\030\001 \003(\0132/.wso2.disc" +
-      "overy.api.SecurityList.ScopeListEntry\032L\n" +
-      "\016ScopeListEntry\022\013\n\003key\030\001 \001(\t\022)\n\005value\030\002 " +
-      "\001(\0132\032.wso2.discovery.api.Scopes:\0028\001\"\030\n\006S" +
-      "copes\022\016\n\006scopes\030\001 \003(\tBw\n%org.wso2.choreo" +
-      ".connect.discovery.apiB\rResourceProtoP\001Z" +
-      "=github.com/envoyproxy/go-control-plane/" +
-      "wso2/discovery/api;apib\006proto3"
+      "oint_cluster.proto\032(wso2/discovery/api/s" +
+      "ecurity_scheme.proto\"\233\003\n\010Resource\022\n\n\002id\030" +
+      "\001 \001(\t\022\014\n\004path\030\002 \001(\t\022.\n\007methods\030\003 \003(\0132\035.w" +
+      "so2.discovery.api.Operation\022\017\n\007summary\030\004" +
+      " \001(\t\022\023\n\013description\030\005 \001(\t\022@\n\023productionE" +
+      "ndpoints\030\006 \001(\0132#.wso2.discovery.api.Endp" +
+      "ointCluster\022=\n\020sandboxEndpoints\030\007 \001(\0132#." +
+      "wso2.discovery.api.EndpointCluster\022<\n\010se" +
+      "curity\030\010 \003(\0132*.wso2.discovery.api.Resour" +
+      "ce.SecurityEntry\022\020\n\010consumes\030\t \003(\t\022\017\n\007sc" +
+      "hemes\030\n \003(\t\022\014\n\004tags\030\013 \003(\t\032/\n\rSecurityEnt" +
+      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"v\n\tOp" +
+      "eration\022\016\n\006method\030\001 \001(\t\0222\n\010security\030\002 \003(" +
+      "\0132 .wso2.discovery.api.SecurityList\022\014\n\004t" +
+      "ier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010Bw\n%or" +
+      "g.wso2.choreo.connect.discovery.apiB\rRes" +
+      "ourceProtoP\001Z=github.com/envoyproxy/go-c" +
+      "ontrol-plane/wso2/discovery/api;apib\006pro" +
+      "to3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor(),
         });
     internal_static_wso2_discovery_api_Resource_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -101,25 +84,8 @@ public final class ResourceProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Operation_descriptor,
         new java.lang.String[] { "Method", "Security", "Tier", "DisableSecurity", });
-    internal_static_wso2_discovery_api_SecurityList_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_wso2_discovery_api_SecurityList_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_api_SecurityList_descriptor,
-        new java.lang.String[] { "ScopeList", });
-    internal_static_wso2_discovery_api_SecurityList_ScopeListEntry_descriptor =
-      internal_static_wso2_discovery_api_SecurityList_descriptor.getNestedTypes().get(0);
-    internal_static_wso2_discovery_api_SecurityList_ScopeListEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_api_SecurityList_ScopeListEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    internal_static_wso2_discovery_api_Scopes_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_wso2_discovery_api_Scopes_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_api_Scopes_descriptor,
-        new java.lang.String[] { "Scopes", });
     org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor();
+    org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

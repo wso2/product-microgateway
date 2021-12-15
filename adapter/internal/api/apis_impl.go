@@ -33,6 +33,7 @@ import (
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
@@ -68,7 +69,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
+		loggers.LoggerAPI.Errorf("Error occurred while unzipping the apictl project. Error: %v", err.Error())
 		return apiProject, err
 	}
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
@@ -78,7 +79,7 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
 		unzippedFileBytes, err := readZipFile(file)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while reading the file : %v %v", file.Name, err.Error())
+			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
 			return apiProject, err
 		}
 		err = apiProject.ProcessFilesInsideProject(unzippedFileBytes, file.Name)
@@ -173,13 +174,25 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 		}
 	}()
 
-	// TODO (renuka) when len of apiProject.deployments is 0, return err "nothing deployed" <- check
 	var overrideValue bool
 	if override == nil {
 		overrideValue = false
 	} else {
 		overrideValue = *override
 	}
+
+	// when deployment-environments is missing in the API Project, definition we deploy to default
+	// environment
+	if apiProject.Deployments == nil {
+		vhost, _, _ := config.GetDefaultVhost(config.DefaultGatewayName)
+		deployment := mgw.Deployment{
+			DisplayOnDevportal:    true,
+			DeploymentEnvironment: config.DefaultGatewayName,
+			DeploymentVhost:       vhost,
+		}
+		apiProject.Deployments = []model.Deployment{deployment}
+	}
+
 	//TODO: force overwride
 	if !overrideValue {
 		// if the API already exists in the one of vhost, break deployment of the API
@@ -205,9 +218,9 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		_, err := xds.UpdateAPI(vhost, apiProject, environments)
+		_, err = xds.UpdateAPI(vhost, apiProject, environments)
 		if err != nil {
-			return err
+			return
 		}
 	}
 	return nil
@@ -215,7 +228,11 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string, apiEnvs map[string]map[string]synchronizer.APIEnvProps) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
+func ApplyAPIProjectFromAPIM(
+	payload []byte,
+	vhostToEnvsMap map[string][]string,
+	apiEnvs map[string]map[string]synchronizer.APIEnvProps,
+) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return nil, err

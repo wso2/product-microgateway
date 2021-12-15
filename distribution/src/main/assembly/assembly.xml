@@ -35,6 +35,10 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>../resources/license</directory>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>../resources/k8s-artifacts</directory>
             <excludes>
                 <exclude>./choreo-connect/config-toml-configmap.yaml</exclude>
@@ -166,16 +170,6 @@
         <file>
             <source>../release-note.html</source>
             <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
-        </file>
-        <file>
-            <source>../adapter/LICENSE.txt</source>
-            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
-            <destName>LICENSE-ADAPTER.txt</destName>
-        </file>
-        <file>
-            <source>../enforcer-parent/enforcer/LICENSE.txt</source>
-            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
-            <destName>LICENSE-ENFORCER.txt</destName>
         </file>
         <file>
             <source>../README.md</source>

@@ -42,7 +42,7 @@ func TestSortResources(t *testing.T) {
 	}
 }
 
-func getResources() []Resource {
+func getResources() []*Resource {
 	paths := []string{
 		"/pet",
 		"/pet/{id}",
@@ -54,11 +54,11 @@ func getResources() []Resource {
 		"/pet/pet.{anc}",
 		"/pet/{pet}.{anc}",
 	}
-	resources := make([]Resource, len(paths))
+	resources := make([]*Resource, len(paths))
 	for index := range paths {
-		res := CreateMinimalDummyResourceForTests(paths[index], make([]Operation, 0), "",
+		res := CreateMinimalDummyResourceForTests(paths[index], make([]*Operation, 0), "",
 			make([]Endpoint, 0), make([]Endpoint, 0))
-		resources[index] = res
+		resources[index] = &res
 	}
 	return resources
 }
