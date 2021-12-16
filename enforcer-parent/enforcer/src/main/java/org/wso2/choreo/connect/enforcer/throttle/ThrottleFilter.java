@@ -69,8 +69,13 @@ public class ThrottleFilter implements Filter {
         if (!ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
             return true;
         }
-        log.debug("Throttle filter received the request");
 
+        if (APIConstants.WEBSOCKET.equals(requestContext.getHeaders().get(APIConstants.UPGRADE_HEADER))) {
+            log.debug("Throttle filter discarded the request as it is a websocket upgrade request");
+            return true;
+        }
+
+        log.debug("Throttle filter received the request");
         if (doThrottle(requestContext)) {
             // breaking filter chain since request is throttled
             return false;

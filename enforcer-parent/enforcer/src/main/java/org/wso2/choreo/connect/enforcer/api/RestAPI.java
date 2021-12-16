@@ -209,7 +209,7 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
+    public static ResourceConfig buildResource(Operation operation, String resPath, Map<String,
             List<String>> apiLevelSecurityList) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);

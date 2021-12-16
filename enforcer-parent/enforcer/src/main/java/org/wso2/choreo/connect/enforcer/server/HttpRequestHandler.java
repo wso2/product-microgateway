@@ -76,11 +76,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         }
         address = FilterUtils.getClientIp(headers, address);
         ResourceConfig resourceConfig = null;
-        if (APIConstants.ApiType.WEB_SOCKET.equals(api.getAPIConfig().getApiType())) {
-            resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
-        } else {
-            resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
-        }
+        resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)

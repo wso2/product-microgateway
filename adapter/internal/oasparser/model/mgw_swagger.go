@@ -28,6 +28,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
+	"github.com/google/uuid"
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
@@ -1231,6 +1232,53 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		}
 		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
 	}
+	if apiType == WS {
+		var resources []*Resource
+		securityMapRes1 := make(map[string][]string)
+		securityMapRes2 := make(map[string][]string)
+		securityArrayRes1 := []string{"myscope1", "myscope2"}
+		securityArrayRes2 := []string{"myscope2", "myscope2"}
+		swagger.securityScheme = []SecurityScheme{
+			{
+				DefinitionName: "default",
+				Type:           "oauth2",
+			},
+		}
+
+		securityMapRes1["default"] = securityArrayRes1
+		securityMapRes2["default"] = securityArrayRes2
+		resource1 := Resource{
+			path: "/notifications",
+			methods: []*Operation{{
+				method:          "GET",
+				tier:            "Unlimited",
+				disableSecurity: false,
+				security:        []map[string][]string{securityMapRes1},
+			}},
+			// TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
+			iD: uuid.New().String(),
+			//Schemes: operation.,
+			//tags: operation.Tags,
+			//security: pathItem.operation.Security.,
+		}
+		resource2 := Resource{
+			path: "/rooms",
+			methods: []*Operation{{
+				method:          "GET",
+				tier:            "Unlimited",
+				disableSecurity: false,
+				security:        []map[string][]string{securityMapRes2},
+			}},
+			// TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
+			iD: uuid.New().String(),
+			//Schemes: operation.,
+			//tags: operation.Tags,
+			//security: pathItem.operation.Security.,
+		}
+		resources = append(resources, &resource1)
+		resources = append(resources, &resource2)
+		swagger.resources = resources
+	}
 
 	// if yaml has production security, setting it
 	if swagger.productionEndpoints != nil && endpointConfig.APIEndpointSecurity.Production.Enabled {
@@ -1251,6 +1299,11 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
 				endpointConfig.APIEndpointSecurity.Sandbox.Type)
 		}
+	}
+
+	// TODO: (VirajSalaka) Check the impact on RestAPIs
+	if len(data.APIThrottlingPolicy) != 0 {
+		swagger.xWso2ThrottlingTier = data.APIThrottlingPolicy
 	}
 	return nil
 }

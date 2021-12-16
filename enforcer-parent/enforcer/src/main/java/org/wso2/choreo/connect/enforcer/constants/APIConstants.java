@@ -87,6 +87,8 @@ public class APIConstants {
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
+    public static final String UPGRADE_HEADER = "upgrade";
+    public static final String WEBSOCKET = "websocket";
 
     public static final String LOG_TRACE_ID = "traceId";
 
