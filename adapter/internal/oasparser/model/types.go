@@ -152,7 +152,30 @@ type APIYaml struct {
 			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
 			ImplementationStatus         string         `json:"implementation_status,omitempty"`
 		} `json:"endpointConfig,omitempty"`
+		Operations []OperationYaml `json:"Operations,omitempty"`
 	} `json:"data"`
+}
+
+// OperationYaml holds attributes of APIM operations
+type OperationYaml struct {
+	Target            string            `json:"target,omitempty"`
+	Verb              string            `json:"verb,omitempty"`
+	OperationPolicies OperationPolicies `json:"operationPolicies,omitempty"`
+}
+
+// OperationPolicies holds policies of the APIM operations
+type OperationPolicies struct {
+	In    []Policy `json:"in,omitempty"`
+	Out   []Policy `json:"out,omitempty"`
+	Fault []Policy `json:"fault,omitempty"`
+}
+
+// Policy holds APIM policies
+type Policy struct {
+	PolicyName   string      `json:"policyName,omitempty"`
+	TemplateName string      `json:"templateName,omitempty"`
+	Order        int         `json:"order,omitempty"`
+	Parameters   interface{} `json:"parameters,omitempty"`
 }
 
 // EndpointInfo holds config values regards to the endpoint

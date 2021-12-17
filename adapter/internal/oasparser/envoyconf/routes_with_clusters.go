@@ -25,10 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/any"
-	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -49,6 +46,10 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/wrappers"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -391,15 +392,15 @@ func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Ad
 	}
 
 	if epHost = conf.Tracing.ConfigProperties[tracerHost]; len(epHost) <= 0 {
-		return nil, nil, errors.New("Invalid host provided for tracing endpoint")
+		return nil, nil, errors.New("invalid host provided for tracing endpoint")
 	}
 	if epPath = conf.Tracing.ConfigProperties[tracerEndpoint]; len(epPath) <= 0 {
-		return nil, nil, errors.New("Invalid endpoint path provided for tracing endpoint")
+		return nil, nil, errors.New("invalid endpoint path provided for tracing endpoint")
 	}
 	if port, err := strconv.ParseUint(conf.Tracing.ConfigProperties[tracerPort], 10, 32); err == nil {
 		epPort = uint32(port)
 	} else {
-		return nil, nil, errors.New("Invalid port provided for tracing endpoint")
+		return nil, nil, errors.New("invalid port provided for tracing endpoint")
 	}
 
 	epCluster.Endpoints[0].Host = epHost
@@ -458,7 +459,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			}
 
 			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
-			marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
+			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
 			}
@@ -497,7 +498,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
-		ConnectTimeout:       ptypes.DurationProto(timeout * time.Second),
+		ConnectTimeout:       durationpb.New(timeout * time.Second),
 		ClusterDiscoveryType: &clusterv3.Cluster_Type{Type: clusterv3.Cluster_STRICT_DNS},
 		DnsLookupFamily:      clusterv3.Cluster_V4_ONLY,
 		LbPolicy:             clusterv3.Cluster_ROUND_ROBIN,
@@ -552,8 +553,8 @@ func createHealthCheck() []*corev3.HealthCheck {
 	conf, _ := config.ReadConfigs()
 	return []*corev3.HealthCheck{
 		{
-			Timeout:            ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
-			Interval:           ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
+			Timeout:            durationpb.New(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
+			Interval:           durationpb.New(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
 			UnhealthyThreshold: wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.UnhealthyThreshold)),
 			HealthyThreshold:   wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.HealthyThreshold)),
 			// we only support tcp default healthcheck
@@ -658,7 +659,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	xWso2Basepath := params.xWSO2BasePath
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
-	resourcePathParam := params.resourcePathParam
+	resourcePath := params.resourcePathParam
 	resourceMethods := params.resourceMethods
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
@@ -675,7 +676,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		action                  *routev3.Route_Route
 		match                   *routev3.RouteMatch
 		decorator               *routev3.Decorator
-		resourcePath            string
 		responseHeadersToRemove []string
 	)
 
@@ -702,7 +702,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			},
 		},
 	}
-	resourcePath = resourcePathParam
 	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
@@ -807,6 +806,10 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Value:   luaMarshelled.Bytes(),
 	}
 
+	pathRegex := xWso2Basepath
+	if params.rewritePath != "" {
+		pathRegex = xWso2Basepath + resourcePath
+	}
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
@@ -819,14 +822,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 								MaxProgramSize: nil,
 							},
 						},
-						Regex: xWso2Basepath,
+						Regex: pathRegex,
 					},
-					Substitution: endpointBasepath,
+					Substitution: endpointBasepath + params.rewritePath,
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
-				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+				Timeout:           durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+				IdleTimeout:       durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
 	} else {
@@ -870,6 +873,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 	// remove the 'x-envoy-upstream-service-time' from the response.
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
+	responseHeadersToRemove = append(responseHeadersToRemove, clusterHeaderName)
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 	router = routev3.Route{
@@ -1240,11 +1244,14 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		resourceMethods:     getDefaultResourceMethods(swagger.GetAPIType()),
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
+		rewritePath:         "",
+		removeQueries:       false,
 	}
 
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
+		params.rewritePath, params.removeQueries = resource.GetRewritePath()
 	}
 
 	if swagger.GetProdEndpoints() != nil {

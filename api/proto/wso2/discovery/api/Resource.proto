@@ -49,4 +49,20 @@ message Operation {
     repeated SecurityList security = 2;
     string tier = 3;
     bool disableSecurity = 4;
+	OperationPolicies policies = 5;
+}
+
+// OperationPolicies holds policies of the APIM operations
+message OperationPolicies {
+	repeated Policy in = 1;    
+	repeated Policy out = 2;    
+	repeated Policy fault = 3;
+}
+
+// Policy holds APIM policies
+message Policy {
+	string policyName = 1;        
+	string templateName = 2;   
+	uint32 order = 3;               
+	map<string, string> parameters = 4;
 }

@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Operation;
+import org.wso2.choreo.connect.discovery.api.OperationPolicies;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
@@ -30,6 +31,8 @@ import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
+import org.wso2.choreo.connect.enforcer.commons.model.Policy;
+import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -38,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
+import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -216,6 +220,7 @@ public class RestAPI implements API {
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
         resource.setTier(operation.getTier());
         resource.setDisableSecurity(operation.getDisableSecurity());
+        resource.setPolicyConfig(genPolicyConfig(operation.getPolicies()));
         Map<String, List<String>> securityMap = new HashMap<>();
         if (operation.getSecurityList().size() > 0) {
             for (SecurityList securityList : operation.getSecurityList()) {
@@ -239,6 +244,29 @@ public class RestAPI implements API {
         return resource;
     }
 
+    private PolicyConfig genPolicyConfig(OperationPolicies operationPolicies) {
+        PolicyConfig policyConfig = new PolicyConfig();
+        if (operationPolicies.getInCount() > 0) {
+            policyConfig.setIn(genPolicyList(operationPolicies.getInList()));
+        }
+        if (operationPolicies.getOutCount() > 0) {
+            policyConfig.setOut(genPolicyList(operationPolicies.getOutList()));
+        }
+        if (operationPolicies.getFaultCount() > 0) {
+            policyConfig.setFault(genPolicyList(operationPolicies.getFaultList()));
+        }
+        return policyConfig;
+    }
+
+    private ArrayList<Policy> genPolicyList(List<org.wso2.choreo.connect.discovery.api.Policy> operationPoliciesList) {
+        ArrayList<Policy> policyList = new ArrayList<>();
+        for (org.wso2.choreo.connect.discovery.api.Policy policy : operationPoliciesList) {
+            policyList.add(new Policy(policy.getPolicyName(), policy.getTemplateName(), policy.getOrder(),
+                    policy.getParametersMap()));
+        }
+        return policyList;
+    }
+
     private void initFilters() {
         // TODO : re-vist the logic with apim prototype implemetation
 
@@ -256,6 +284,9 @@ public class RestAPI implements API {
         // CORS filter is added as the first filter, and it is not customizable.
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(0, corsFilter);
+
+        MediationPolicyFilter mediationPolicyFilter = new MediationPolicyFilter();
+        this.filters.add(mediationPolicyFilter);
     }
 
     private void loadCustomFilters(APIConfig apiConfig) {

@@ -60,4 +60,19 @@ public interface OperationOrBuilder extends
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
+
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   * @return Whether the policies field is set.
+   */
+  boolean hasPolicies();
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   * @return The policies.
+   */
+  org.wso2.choreo.connect.discovery.api.OperationPolicies getPolicies();
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.OperationPoliciesOrBuilder getPoliciesOrBuilder();
 }

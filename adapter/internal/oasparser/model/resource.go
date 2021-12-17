@@ -23,6 +23,8 @@ import (
 	"regexp"
 	"sort"
 
+	"strings"
+
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
@@ -86,6 +88,34 @@ func (resource *Resource) GetMethodList() []string {
 		methodList[i] = method.method
 	}
 	return methodList
+}
+
+// GetRewritePath returns the rewrite upstream path for a given resource.
+func (resource *Resource) GetRewritePath() (string, bool) {
+	for _, method := range resource.methods {
+		if len(method.policies.In) > 0 {
+			for _, policy := range method.policies.In {
+				if strings.EqualFold("REWRITE_RESOURCE_PATH", policy.TemplateName) {
+					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+						rewritePath := ""
+						includeQuery := false
+						if paramValue, found := paramMap["resourcePath"]; found {
+							rewritePath = paramValue.(string)
+							if rewritePath != "" {
+								rewritePath = "/" + strings.TrimPrefix(rewritePath, "/")
+								rewritePath = strings.TrimSuffix(rewritePath, "/")
+							}
+						}
+						if paramValue, found := paramMap["includeQueryParams"]; found {
+							includeQuery = !paramValue.(bool)
+						}
+						return rewritePath, includeQuery
+					}
+				}
+			}
+		}
+	}
+	return "", false
 }
 
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values

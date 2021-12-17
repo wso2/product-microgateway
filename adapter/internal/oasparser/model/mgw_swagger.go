@@ -282,6 +282,21 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 	return swagger.security
 }
 
+// SetOperationPolicies this will merge operation level policies provided in api yaml
+func (swagger *MgwSwagger) SetOperationPolicies(yamlOperations []OperationYaml) {
+	for _, resource := range swagger.resources {
+		path := strings.TrimSuffix(resource.path, "/")
+		for _, operation := range resource.methods {
+			method := operation.method
+			for _, yamlOperation := range yamlOperations {
+				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
+					operation.policies = yamlOperation.OperationPolicies
+				}
+			}
+		}
+	}
+}
+
 // SanitizeAPISecurity this will validate api level and operation level swagger security
 // if apiyaml security is provided swagger security will be removed accordingly
 func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool) {
