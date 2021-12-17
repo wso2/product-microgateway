@@ -25,6 +25,7 @@ type Operation struct {
 	security        []map[string][]string
 	tier            string
 	disableSecurity bool
+	policies        OperationPolicies
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -35,6 +36,11 @@ func (operation *Operation) GetMethod() string {
 // GetDisableSecurity returns if the resouce is secured.
 func (operation *Operation) GetDisableSecurity() bool {
 	return operation.disableSecurity
+}
+
+// GetPolicies returns if the resouce is secured.
+func (operation *Operation) GetPolicies() *OperationPolicies {
+	return &operation.policies
 }
 
 // GetSecurity returns the security schemas defined for the http opeartion
@@ -56,5 +62,5 @@ func (operation *Operation) GetTier() string {
 func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
-	return &Operation{method, security, tier, disableSecurity}
+	return &Operation{method, security, tier, disableSecurity, OperationPolicies{}}
 }
