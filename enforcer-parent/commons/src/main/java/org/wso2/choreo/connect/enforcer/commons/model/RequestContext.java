@@ -63,6 +63,7 @@ public class RequestContext {
     private Map<String, String> queryParameters;
     private Map<String, String> pathParameters;
     private ArrayList<String> queryParamsToRemove;
+    private Map<String, String> queryParamsToAdd;
     // This is used to keep protected headers like authorization header. The protected headers will not be
     // sent to the Traffic Manager when header based rate limiting is enabled.
     private ArrayList<String> protectedHeaders;
@@ -327,6 +328,16 @@ public class RequestContext {
     }
 
     /**
+     * If there is a set of query parameters needs to be added to the outbound request, those parameters should
+     * be added to the arrayList here.
+     *
+     * @return query parameters which are supposed to be added.
+     */
+    public Map<String, String> getQueryParamsToAdd() {
+        return queryParamsToAdd;
+    }
+
+    /**
      * If there is a set of headers needs to be removed from the throttle publishing event, those headers should
      * be added to the arrayList here.
      *
@@ -439,12 +450,13 @@ public class RequestContext {
             requestContext.addHeaders = new HashMap<>();
             requestContext.removeHeaders = new ArrayList<>();
             requestContext.queryParamsToRemove = new ArrayList<>();
+            requestContext.queryParamsToAdd = new HashMap<>();
             requestContext.protectedHeaders = new ArrayList<>();
             String[] queryParts = this.requestPath.split("\\?");
-            String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
+            String queryParamsString = queryParts.length > 1 ? queryParts[1] : "";
 
             requestContext.queryParameters = new HashMap<>();
-            List<NameValuePair> queryParams = URLEncodedUtils.parse(queryPrams, StandardCharsets.UTF_8);
+            List<NameValuePair> queryParams = URLEncodedUtils.parse(queryParamsString, StandardCharsets.UTF_8);
             for (NameValuePair param : queryParams) {
                 requestContext.queryParameters.put(param.getName(), param.getValue());
             }

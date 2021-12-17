@@ -169,6 +169,7 @@ public class RestAPI implements API {
         if (executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
             responseObject.setQueryParamsToRemove(requestContext.getQueryParamsToRemove());
+            responseObject.setQueryParamsToAdd(requestContext.getQueryParamsToAdd());
             responseObject.setQueryParamMap(requestContext.getQueryParameters());
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
