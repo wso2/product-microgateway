@@ -44,35 +44,30 @@ public class MediationPolicyFilter implements Filter {
 
     private void applyPolicy(RequestContext requestContext, Policy policy) {
         switch (policy.getTemplateName()) {
-            case "SET_HEADER": {
-                addHeader(requestContext, policy.getParameters());
-                break;
-            }
+            case "SET_HEADER":
             case "RENAME_HEADER": {
-                renameHeader(requestContext, policy.getParameters());
+                addOrModifyHeader(requestContext, policy.getParameters());
                 break;
             }
             case "REMOVE_HEADER": {
                 removeHeader(requestContext, policy.getParameters());
                 break;
             }
+            case "ADD_QUERY": {
+                addOrModifyQuery(requestContext, policy.getParameters());
+                break;
+            }
+            case "REMOVE_QUERY": {
+                removeQuery(requestContext, policy.getParameters());
+                break;
+            }
         }
     }
 
-    private void addHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
+    private void addOrModifyHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
         String headerName = policyAttrib.get("headerName");
         String headerValue = policyAttrib.get("headerValue");
-        requestContext.getAddHeaders().put(headerName, headerValue);
-    }
-
-    private void renameHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String currentHeaderName = policyAttrib.get("currentHeaderName");
-        String updatedHeaderName = policyAttrib.get("updatedHeaderName");
-        if (requestContext.getHeaders().containsKey(currentHeaderName)) {
-            String headerValue = requestContext.getHeaders().get(currentHeaderName);
-            requestContext.getRemoveHeaders().add(currentHeaderName);
-            requestContext.getAddHeaders().put(updatedHeaderName, headerValue);
-        }
+        requestContext.addOrModifyHeaders(headerName, headerValue);
     }
 
     private void removeHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
@@ -80,4 +75,14 @@ public class MediationPolicyFilter implements Filter {
         requestContext.getRemoveHeaders().add(headerName);
     }
 
+    private void removeQuery(RequestContext requestContext, Map<String, String> policyAttrib) {
+        String queryName = policyAttrib.get("queryParamName");
+        requestContext.getQueryParamsToRemove().add(queryName);
+    }
+
+    private void addOrModifyQuery(RequestContext requestContext, Map<String, String> policyAttrib) {
+        String queryName = policyAttrib.get("queryParamName");
+        String queryValue = policyAttrib.get("queryParamValue");
+        requestContext.getQueryParamsToAdd().put(queryName, queryValue);
+    }
 }
