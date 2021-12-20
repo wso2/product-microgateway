@@ -18,6 +18,8 @@
 package oasparser
 
 import (
+	"strconv"
+
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -249,6 +251,8 @@ func castPoliciesToEnforcerPolicies(policies []model.Policy) []*api.Policy {
 				for paramK := range params {
 					if paramV, parsed := params[paramK].(string); parsed {
 						parameterMap[paramK] = paramV
+					} else if paramV, parsed := params[paramK].(bool); parsed {
+						parameterMap[paramK] = strconv.FormatBool(paramV)
 					}
 				}
 

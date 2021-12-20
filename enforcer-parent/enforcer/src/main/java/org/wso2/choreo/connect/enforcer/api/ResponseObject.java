@@ -35,6 +35,7 @@ public class ResponseObject {
     private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
     private ArrayList<String> queryParamsToRemove = new ArrayList<>();
+    private boolean removeAllQueryParams = false;
     private Map<String, String> queryParamsToAdd;
     private Map<String, String> queryParams;
     private String requestPath;
@@ -124,6 +125,14 @@ public class ResponseObject {
 
     public void setQueryParamsToRemove(ArrayList<String> queryParamsToRemove) {
         this.queryParamsToRemove = queryParamsToRemove;
+    }
+
+    public void setRemoveAllQueryParams(boolean queryParamsToRemove) {
+        this.removeAllQueryParams = queryParamsToRemove;
+    }
+
+    public boolean isRemoveAllQueryParams() {
+        return removeAllQueryParams;
     }
 
     public void setQueryParamsToAdd(Map<String, String> queryParamsToAdd) {

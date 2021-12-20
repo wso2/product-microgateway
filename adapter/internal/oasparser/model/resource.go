@@ -88,31 +88,29 @@ func (resource *Resource) GetMethodList() []string {
 }
 
 // GetRewritePath returns the rewrite upstream path for a given resource.
-func (resource *Resource) GetRewritePath() (string, bool) {
+func (resource *Resource) GetRewritePath() string {
 	for _, method := range resource.methods {
 		if len(method.policies.In) > 0 {
 			for _, policy := range method.policies.In {
 				if strings.EqualFold("REWRITE_RESOURCE_PATH", policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						rewritePath := ""
-						includeQuery := false
 						if paramValue, found := paramMap["resourcePath"]; found {
-							rewritePath = paramValue.(string)
-							if rewritePath != "" {
+							rewritePath, found := paramValue.(string)
+							if found && rewritePath != "" {
+								if rewritePath == "/" {
+									return rewritePath
+								}
 								rewritePath = "/" + strings.TrimPrefix(rewritePath, "/")
-								rewritePath = strings.TrimSuffix(rewritePath, "/")
+								return strings.TrimSuffix(rewritePath, "/")
 							}
 						}
-						if paramValue, found := paramMap["includeQueryParams"]; found {
-							includeQuery = !paramValue.(bool)
-						}
-						return rewritePath, includeQuery
+						return ""
 					}
 				}
 			}
 		}
 	}
-	return "", false
+	return ""
 }
 
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values
