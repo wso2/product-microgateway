@@ -63,6 +63,7 @@ public class RequestContext {
     private Map<String, String> queryParameters;
     private Map<String, String> pathParameters;
     private ArrayList<String> queryParamsToRemove;
+    private boolean removeAllQueryParams;
     private Map<String, String> queryParamsToAdd;
     // This is used to keep protected headers like authorization header. The protected headers will not be
     // sent to the Traffic Manager when header based rate limiting is enabled.
@@ -328,6 +329,22 @@ public class RequestContext {
     }
 
     /**
+     * If all query parameters needs to be removed from the outbound request.
+     *
+     * @return if all query params need to be removed.
+     */
+    public boolean isRemoveAllQueryParams() {
+        return removeAllQueryParams;
+    }
+
+    /**
+     * Set if all query parameters needs to be removed from the outbound request.
+     */
+    public void setRemoveAllQueryParams(boolean removeAllQueryParams) {
+        this.removeAllQueryParams = removeAllQueryParams;
+    }
+
+    /**
      * If there is a set of query parameters needs to be added to the outbound request, those parameters should
      * be added to the arrayList here.
      *
@@ -366,7 +383,6 @@ public class RequestContext {
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
         private String clientIp;
-        private ArrayList<String> removeHeaders;
         private WebSocketFrameContext webSocketFrameContext;
 
         public Builder(String requestPath) {
@@ -450,6 +466,7 @@ public class RequestContext {
             requestContext.addHeaders = new HashMap<>();
             requestContext.removeHeaders = new ArrayList<>();
             requestContext.queryParamsToRemove = new ArrayList<>();
+            requestContext.removeAllQueryParams = false;
             requestContext.queryParamsToAdd = new HashMap<>();
             requestContext.protectedHeaders = new ArrayList<>();
             String[] queryParts = this.requestPath.split("\\?");

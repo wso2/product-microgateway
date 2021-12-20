@@ -61,6 +61,10 @@ public class MediationPolicyFilter implements Filter {
                 removeQuery(requestContext, policy.getParameters());
                 break;
             }
+            case "REWRITE_RESOURCE_PATH": {
+                removeQueries(requestContext, policy.getParameters());
+                break;
+            }
         }
     }
 
@@ -78,6 +82,13 @@ public class MediationPolicyFilter implements Filter {
     private void removeQuery(RequestContext requestContext, Map<String, String> policyAttrib) {
         String queryName = policyAttrib.get("queryParamName");
         requestContext.getQueryParamsToRemove().add(queryName);
+    }
+
+    private void removeQueries(RequestContext requestContext, Map<String, String> policyAttrib) {
+        if (policyAttrib.containsKey("includeQueryParams")) {
+            boolean removeQuery = !Boolean.parseBoolean(policyAttrib.get("includeQueryParams"));
+            requestContext.setRemoveAllQueryParams(removeQuery);
+        }
     }
 
     private void addOrModifyQuery(RequestContext requestContext, Map<String, String> policyAttrib) {

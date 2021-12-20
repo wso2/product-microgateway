@@ -41,5 +41,4 @@ type routeCreateParams struct {
 	responseInterceptor map[string]model.InterceptEndpoint
 	corsPolicy          *model.CorsConfig
 	rewritePath         string
-	removeQueries       bool
 }

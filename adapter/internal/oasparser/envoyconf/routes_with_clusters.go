@@ -808,7 +808,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	pathRegex := xWso2Basepath
 	if params.rewritePath != "" {
-		pathRegex = xWso2Basepath + resourcePath
+		pathRegex = routePath
 	}
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
@@ -1245,13 +1245,12 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
 		rewritePath:         "",
-		removeQueries:       false,
 	}
 
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
-		params.rewritePath, params.removeQueries = resource.GetRewritePath()
+		params.rewritePath = resource.GetRewritePath()
 	}
 
 	if swagger.GetProdEndpoints() != nil {
