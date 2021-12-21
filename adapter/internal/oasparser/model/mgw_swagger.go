@@ -580,7 +580,7 @@ func (swagger *MgwSwagger) setXWso2Endpoints() error {
 
 // SetEndpointsConfig set configs for Endpoints sent by api.yaml
 func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo) error {
-	if endpointInfos == nil || len(endpointInfos) == 0 {
+	if len(endpointInfos) == 0 {
 		return nil
 	}
 	if endpointCluster.Config == nil {
@@ -1043,7 +1043,7 @@ func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndp
 }
 
 //GetInterceptor returns interceptors
-func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string, level string) (InterceptEndpoint, error) {
+func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string, level string) InterceptEndpoint {
 	var endpointCluster EndpointCluster
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
@@ -1058,7 +1058,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				endpoint, err := getHostandBasepathandPort(serviceURLV)
 				if err != nil {
 					logger.LoggerOasparser.Error("Error reading interceptors service url value", err)
-					return InterceptEndpoint{}, errors.New("error reading interceptors service url value")
+					return InterceptEndpoint{}
 				}
 				if endpoint.Basepath != "" {
 					logger.LoggerOasparser.Warnf("Interceptor serviceURL basepath is given as %v but it will be ignored",
@@ -1068,7 +1068,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 
 			} else {
 				logger.LoggerOasparser.Error("Error reading interceptors service url value")
-				return InterceptEndpoint{}, errors.New("error reading interceptors service url value")
+				return InterceptEndpoint{}
 			}
 			//clusterTimeout optional
 			if v, found := val[constants.ClusterTimeout]; found {
@@ -1092,24 +1092,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			if v, found := val[constants.Includes]; found {
 				includes := v.([]interface{})
 				if len(includes) > 0 {
-					for _, include := range includes {
-						switch include.(string) {
-						case "request_headers":
-							includesV.RequestHeaders = true
-						case "request_body":
-							includesV.RequestBody = true
-						case "request_trailers":
-							includesV.RequestTrailer = true
-						case "response_headers":
-							includesV.ResponseHeaders = true
-						case "response_body":
-							includesV.ResponseBody = true
-						case "response_trailers":
-							includesV.ResponseTrailers = true
-						case "invocation_context":
-							includesV.InvocationContext = true
-						}
-					}
+					includesV = GenerateInterceptorIncludes(includes)
 				}
 			}
 
@@ -1120,11 +1103,35 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				RequestTimeout:  requestTimeoutV,
 				Includes:        includesV,
 				Level:           level,
-			}, nil
+			}
 		}
-		return InterceptEndpoint{}, errors.New("error parsing response interceptors values to mgwSwagger")
+		logger.LoggerOasparser.Error("Error parsing response interceptors values to mgwSwagger")
 	}
-	return InterceptEndpoint{}, nil
+	return InterceptEndpoint{}
+}
+
+//GenerateInterceptorIncludes generate includes
+func GenerateInterceptorIncludes(includes []interface{}) *interceptor.RequestInclusions {
+	includesV := &interceptor.RequestInclusions{}
+	for _, include := range includes {
+		switch include.(string) {
+		case "request_headers":
+			includesV.RequestHeaders = true
+		case "request_body":
+			includesV.RequestBody = true
+		case "request_trailers":
+			includesV.RequestTrailer = true
+		case "response_headers":
+			includesV.ResponseHeaders = true
+		case "response_body":
+			includesV.ResponseBody = true
+		case "response_trailers":
+			includesV.ResponseTrailers = true
+		case "invocation_context":
+			includesV.InvocationContext = true
+		}
+	}
+	return includesV
 }
 
 // GetMgwSwagger converts the openAPI v3 and v2 content
