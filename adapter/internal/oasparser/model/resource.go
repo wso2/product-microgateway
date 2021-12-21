@@ -23,6 +23,9 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 )
 
 // Resource represents the object structure holding the information related to the
@@ -111,6 +114,50 @@ func (resource *Resource) GetRewritePath() string {
 		}
 	}
 	return ""
+}
+
+// GetCallInterceptorService returns the rewrite upstream path for a given resource.
+func (resource *Resource) GetCallInterceptorService(fieldName string) InterceptEndpoint {
+	for _, method := range resource.methods {
+		if len(method.policies.In) > 0 {
+			for _, policy := range method.policies.In {
+				if strings.EqualFold(fieldName, policy.TemplateName) {
+					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+						urlValue, urlFound := paramMap["interceptorServiceURL"]
+						includesValue, includesFound := paramMap["includes"]
+						if urlFound {
+							url, isString := urlValue.(string)
+							if isString && url != "" {
+								endpoint, err := getHostandBasepathandPort(url)
+								if err == nil {
+									conf, _ := config.ReadConfigs()
+									clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+									requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+									includesV := &interceptor.RequestInclusions{}
+									if includesFound {
+										includes, isList := includesValue.([]interface{})
+										if isList && len(includes) > 0 {
+											includesV = GenerateInterceptorIncludes(includes)
+										}
+									}
+									if err == nil {
+										return InterceptEndpoint{
+											Enable:          true,
+											EndpointCluster: EndpointCluster{Endpoints: []Endpoint{*endpoint}},
+											ClusterTimeout:  clusterTimeoutV,
+											RequestTimeout:  requestTimeoutV,
+											Includes:        includesV,
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return InterceptEndpoint{}
 }
 
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values

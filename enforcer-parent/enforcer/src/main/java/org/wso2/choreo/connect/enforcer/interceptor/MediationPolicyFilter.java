@@ -43,6 +43,12 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private void applyPolicy(RequestContext requestContext, Policy policy) {
+        //todo(amali)
+        // 1. handle fault in out
+        // 2. parameter sanitization, set constants
+        // 3. check order
+        // 4. per operation interceptor
+        // 5. check interceptor extension and policy as and/or?
         switch (policy.getTemplateName()) {
             case "SET_HEADER":
             case "RENAME_HEADER": {
