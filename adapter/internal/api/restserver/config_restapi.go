@@ -43,7 +43,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations/authorization"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	constants "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )

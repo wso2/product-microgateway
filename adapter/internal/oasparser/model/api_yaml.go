@@ -68,8 +68,8 @@ func VerifyMandatoryFields(apiYaml APIYaml) error {
 	return nil
 }
 
-// ExtractAPIInformation reads the values in api.yaml/api.json and populates ProjectAPI struct
-func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
+// PopulateAPIInfo reads the values in api.yaml/api.json and populates ProjectAPI struct
+func (apiProject *ProjectAPI) PopulateAPIInfo(apiYaml APIYaml) {
 	apiProject.APIType = strings.ToUpper(apiYaml.Data.APIType)
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiYaml.Data.LifeCycleStatus)
 	// organization ID would remain empty string if unassigned
@@ -78,7 +78,7 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 
 // PopulateEndpointsInfo this will map sandbox and prod endpoint
 // This is done to fix the issue https://github.com/wso2/product-microgateway/issues/2288
-func PopulateEndpointsInfo(apiYaml APIYaml) APIYaml {
+func (apiYaml *APIYaml) PopulateEndpointsInfo() {
 	rawProdEndpoints := apiYaml.Data.EndpointConfig.RawProdEndpoints
 	if rawProdEndpoints != nil {
 		if val, ok := rawProdEndpoints.(map[string]interface{}); ok {
@@ -112,5 +112,4 @@ func PopulateEndpointsInfo(apiYaml APIYaml) APIYaml {
 			loggers.LoggerAPI.Warn("No sandbox endpoints provided")
 		}
 	}
-	return apiYaml
 }

@@ -39,6 +39,7 @@ import (
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -304,7 +305,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			clusterNameSand, resourceRequestInterceptor, resourceResponseInterceptor, organizationID))
 		routes = append(routes, routeP)
 	}
-	if mgwSwagger.GetAPIType() == model.WS {
+	if mgwSwagger.GetAPIType() == constants.WS {
 		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelbasePath, apiLevelClusterNameProd,
 			apiLevelClusterNameSand, apiRequestInterceptor, apiResponseInterceptor, organizationID))
 		routes = append(routes, routesP)
@@ -1110,7 +1111,7 @@ func generateRegex(fullpath string) string {
 
 func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 	var upgradeConfig []*routev3.RouteAction_UpgradeConfig
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
 			UpgradeType: "websocket",
 			Enabled:     &wrappers.BoolValue{Value: true},
@@ -1221,7 +1222,7 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 // getMaxStreamDuration configures a maximum duration for a websocket route.
 func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration {
 	var maxStreamDuration *routev3.RouteAction_MaxStreamDuration = nil
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		maxStreamDuration = &routev3.RouteAction_MaxStreamDuration{
 			MaxStreamDuration: &durationpb.Duration{
 				Seconds: 60 * 60 * 24,
@@ -1233,7 +1234,7 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 
 func getDefaultResourceMethods(apiType string) []string {
 	var defaultResourceMethods []string = nil
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		defaultResourceMethods = []string{"GET"}
 	}
 	return defaultResourceMethods

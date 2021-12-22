@@ -32,6 +32,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
@@ -287,17 +288,17 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 	if isYamlAPIKey {
 		//creating security definition for apikey in header in behalf of apim yaml security
 		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
-			SecurityScheme{DefinitionName: APIMAPIKeyInHeader,
-				Type: APIKeyTypeInOAS, Name: APIKeyNameWithApim, In: APIKeyInHeaderOAS})
+			SecurityScheme{DefinitionName: constants.APIMAPIKeyInHeader,
+				Type: constants.APIKeyTypeInOAS, Name: constants.APIKeyNameWithApim, In: constants.APIKeyInHeaderOAS})
 
 		//creating security definition for apikey in query in behalf of apim yaml security
 		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
-			SecurityScheme{DefinitionName: APIMAPIKeyInQuery, Type: APIKeyTypeInOAS,
-				Name: APIKeyNameWithApim, In: APIKeyInQueryOAS})
+			SecurityScheme{DefinitionName: constants.APIMAPIKeyInQuery, Type: constants.APIKeyTypeInOAS,
+				Name: constants.APIKeyNameWithApim, In: constants.APIKeyInQueryOAS})
 	}
 	for _, securityDef := range swagger.securityScheme {
 		//read default oauth2 security with scopes when oauth2 enabled
-		if isYamlOauth && securityDef.DefinitionName == APIMDefaultOauth2Security {
+		if isYamlOauth && securityDef.DefinitionName == constants.APIMDefaultOauth2Security {
 			overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, securityDef)
 			apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
 		} else if !isOverrideSecurityByYaml {
@@ -326,8 +327,8 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 	}
 	// Adding api level security when api.yaml apikey security is provided
 	if isYamlAPIKey {
-		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{APIMAPIKeyInHeader: {}})
-		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{APIMAPIKeyInQuery: {}})
+		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{constants.APIMAPIKeyInHeader: {}})
+		sanitizedAPISecurity = append(sanitizedAPISecurity, map[string][]string{constants.APIMAPIKeyInQuery: {}})
 	}
 	swagger.security = sanitizedAPISecurity
 
@@ -347,8 +348,8 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			}
 			// has do the following to enable apikey as well when default oauth2 security is in operation level
 			if isOverrideSecurityByYaml && isYamlOauth && isYamlAPIKey {
-				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{APIMAPIKeyInHeader: {}})
-				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{APIMAPIKeyInQuery: {}})
+				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{constants.APIMAPIKeyInHeader: {}})
+				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{constants.APIMAPIKeyInQuery: {}})
 			}
 			operation.SetSecurity(sanitizedOperationSecurity)
 		}
@@ -426,7 +427,8 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 
 	if len(productionUrls) > 0 {
 		logger.LoggerOasparser.Infof("Production endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
-		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+		swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix,
+			productionUrls, constants.LoadBalance)
 	}
 
 	if envProps.APIConfigs.SandBoxEndpoint != "" {
@@ -442,7 +444,7 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 
 	if len(sandboxUrls) > 0 {
 		logger.LoggerOasparser.Infof("Sandbox endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
-		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxUrls, LoadBalance)
+		swagger.sandboxEndpoints = generateEndpointCluster(constants.SandClustersConfigNamePrefix, sandboxUrls, constants.LoadBalance)
 	}
 }
 
@@ -451,16 +453,16 @@ func (swagger *MgwSwagger) SetEnvVariables(apiHashValue string) {
 	productionEndpoints, sandboxEndpoints := retrieveEndpointsFromEnv(apiHashValue)
 	if len(productionEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Applying production endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
-		swagger.productionEndpoints.EndpointPrefix = prodClustersConfigNamePrefix
+		swagger.productionEndpoints.EndpointPrefix = constants.ProdClustersConfigNamePrefix
 		swagger.productionEndpoints.Endpoints = productionEndpoints
-		swagger.productionEndpoints.EndpointType = LoadBalance
+		swagger.productionEndpoints.EndpointType = constants.LoadBalance
 
 	}
 	if len(sandboxEndpoints) > 0 {
 		logger.LoggerOasparser.Infof("Applying sandbox endpoints provided in env variables for API %v : %v", swagger.title, swagger.version)
-		swagger.sandboxEndpoints.EndpointPrefix = sandClustersConfigNamePrefix
+		swagger.sandboxEndpoints.EndpointPrefix = constants.SandClustersConfigNamePrefix
 		swagger.sandboxEndpoints.Endpoints = sandboxEndpoints
-		swagger.sandboxEndpoints.EndpointType = LoadBalance
+		swagger.sandboxEndpoints.EndpointType = constants.LoadBalance
 	}
 
 	// retrieving security credentials from environment variables
@@ -477,18 +479,20 @@ func (swagger *MgwSwagger) SetEnvVariables(apiHashValue string) {
 // SetSandboxEndpoints set the MgwSwagger object with the SandboxEndpoint when
 // it is not populated by SetXWso2Extensions
 func (swagger *MgwSwagger) SetSandboxEndpoints(sandboxEndpoints []Endpoint) {
-	swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxEndpoints, LoadBalance)
+	swagger.sandboxEndpoints = generateEndpointCluster(constants.SandClustersConfigNamePrefix,
+		sandboxEndpoints, constants.LoadBalance)
 }
 
 // SetProductionEndpoints set the MgwSwagger object with the productionEndpoint when
 // it is not populated by SetXWso2Extensions
 func (swagger *MgwSwagger) SetProductionEndpoints(productionEndpoints []Endpoint) {
-	swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
+	swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix,
+		productionEndpoints, constants.LoadBalance)
 }
 
 func (swagger *MgwSwagger) setXWso2ProductionEndpoint() (bool, error) {
 	apiLevelEPFound := false
-	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, xWso2ProdEndpoints)
+	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, constants.XWso2ProdEndpoints)
 	if xWso2APIEndpoints != nil {
 		swagger.productionEndpoints = xWso2APIEndpoints
 		apiLevelEPFound = true
@@ -498,7 +502,7 @@ func (swagger *MgwSwagger) setXWso2ProductionEndpoint() (bool, error) {
 
 	//resources
 	for i, resource := range swagger.resources {
-		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, xWso2ProdEndpoints)
+		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, constants.XWso2ProdEndpoints)
 		if err != nil {
 			return apiLevelEPFound, errors.New("error encountered when extracting resource endpoints for API with basepath: " +
 				swagger.xWso2Basepath + ". " + err.Error())
@@ -512,7 +516,7 @@ func (swagger *MgwSwagger) setXWso2ProductionEndpoint() (bool, error) {
 
 func (swagger *MgwSwagger) setXWso2SandboxEndpoint() (bool, error) {
 	apiLevelEPFound := false
-	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, xWso2SandbxEndpoints)
+	xWso2APIEndpoints, err := swagger.getEndpoints(swagger.vendorExtensions, constants.XWso2SandbxEndpoints)
 	if xWso2APIEndpoints != nil {
 		swagger.sandboxEndpoints = xWso2APIEndpoints
 		apiLevelEPFound = true
@@ -522,7 +526,7 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() (bool, error) {
 
 	// resources
 	for i, resource := range swagger.resources {
-		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, xWso2SandbxEndpoints)
+		xwso2ResourceEndpoints, err := swagger.getEndpoints(resource.vendorExtensions, constants.XWso2SandbxEndpoints)
 		if err != nil {
 			return apiLevelEPFound, errors.New("error encountered when extracting resource endpoints for API with basepath: " +
 				swagger.xWso2Basepath + ". " + err.Error())
@@ -536,7 +540,7 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() (bool, error) {
 // GetXWso2Endpoints get x-wso2-endpoints
 func (swagger *MgwSwagger) setXWso2Endpoints() error {
 	endpointClusters := make(map[string]*EndpointCluster)
-	if val, found := swagger.vendorExtensions[xWso2endpoints]; found {
+	if val, found := swagger.vendorExtensions[constants.XWso2endpoints]; found {
 		if val1, ok := val.([]interface{}); ok {
 			for _, val2 := range val1 { // loop thorough multiple endpoints
 				if eps, ok := val2.(map[string]interface{}); ok {
@@ -608,7 +612,7 @@ func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
 // if the property is not available, an empty string is returned.
 func getXWso2AuthHeader(vendorExtensions map[string]interface{}) string {
 	xWso2AuthHeader := ""
-	if y, found := vendorExtensions[xAuthHeader]; found {
+	if y, found := vendorExtensions[constants.XAuthHeader]; found {
 		if val, ok := y.(string); ok {
 			xWso2AuthHeader = val
 		}
@@ -765,24 +769,24 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 	// TODO: (VirajSalaka) x-wso2-production-endpoint 's type does not represent http/https, instead it indicates loadbalance and failover
 	if endpointClusterYaml, found := vendorExtensions[endpointName]; found {
 		if endpointClusterMap, ok := endpointClusterYaml.(map[string]interface{}); ok {
-			endpointPrefix := endpointName + "_" + xWso2EPClustersConfigNamePrefix
-			if strings.EqualFold(endpointName, xWso2ProdEndpoints) {
-				endpointPrefix = prodClustersConfigNamePrefix
-			} else if strings.EqualFold(endpointName, xWso2SandbxEndpoints) {
-				endpointPrefix = sandClustersConfigNamePrefix
+			endpointPrefix := endpointName + "_" + constants.XWso2EPClustersConfigNamePrefix
+			if strings.EqualFold(endpointName, constants.XWso2ProdEndpoints) {
+				endpointPrefix = constants.ProdClustersConfigNamePrefix
+			} else if strings.EqualFold(endpointName, constants.XWso2SandbxEndpoints) {
+				endpointPrefix = constants.SandClustersConfigNamePrefix
 			}
 			endpointCluster := EndpointCluster{
 				EndpointPrefix: endpointPrefix,
 			}
 			// Set URLs
-			if urlsProperty, found := endpointClusterMap[urls]; found {
+			if urlsProperty, found := endpointClusterMap[constants.Urls]; found {
 				if urlsArray, ok := urlsProperty.([]interface{}); ok {
 					endpoints, err := processEndpointUrls(urlsArray)
 					if err != nil {
 						return nil, err
 					}
 					endpointCluster.Endpoints = endpoints
-					endpointCluster.EndpointType = LoadBalance
+					endpointCluster.EndpointType = constants.LoadBalance
 				} else {
 					return nil, errors.New("Error while parsing array of urls in " + endpointName)
 				}
@@ -794,13 +798,13 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 			}
 
 			// Update Endpoint Cluster type
-			if epType, found := endpointClusterMap[typeConst]; found {
+			if epType, found := endpointClusterMap[constants.Type]; found {
 				if endpointType, ok := epType.(string); ok {
 					endpointCluster.EndpointType = endpointType
 				}
 			}
 			// Set Endpoint Config
-			if advanceEndpointConfig, found := endpointClusterMap[AdvanceEndpointConfig]; found {
+			if advanceEndpointConfig, found := endpointClusterMap[constants.AdvanceEndpointConfig]; found {
 				if configMap, ok := advanceEndpointConfig.(map[string]interface{}); ok {
 					var endpointConfig EndpointConfig
 					err := parser.Decode(configMap, &endpointConfig)
@@ -813,7 +817,7 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 				}
 			}
 			// Set Endpoint Config
-			if securityConfig, found := endpointClusterMap[SecurityConfig]; found {
+			if securityConfig, found := endpointClusterMap[constants.SecurityConfig]; found {
 				if configMap, ok := securityConfig.(map[string]interface{}); ok {
 					var epSecurity EndpointSecurity
 					err := parser.Decode(configMap, &epSecurity)
@@ -831,8 +835,9 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 			}
 			return &endpointCluster, nil
 		} else if endpointRef, ok := endpointClusterYaml.(string); ok &&
-			(strings.EqualFold(endpointName, xWso2ProdEndpoints) || strings.EqualFold(endpointName, xWso2SandbxEndpoints)) {
-			refPrefix := "#/" + xWso2endpoints + "/"
+			(strings.EqualFold(endpointName, constants.XWso2ProdEndpoints) ||
+				strings.EqualFold(endpointName, constants.XWso2SandbxEndpoints)) {
+			refPrefix := "#/" + constants.XWso2endpoints + "/"
 			if strings.HasPrefix(endpointRef, refPrefix) {
 				epName := strings.TrimPrefix(endpointRef, refPrefix)
 				if _, found := swagger.xWso2Endpoints[epName]; found {
@@ -881,7 +886,7 @@ func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
 // if the property is not available, an empty string is returned.
 func getXWso2Basepath(vendorExtensions map[string]interface{}) string {
 	xWso2basepath := ""
-	if y, found := vendorExtensions[xWso2BasePath]; found {
+	if y, found := vendorExtensions[constants.XWso2BasePath]; found {
 		if val, ok := y.(string); ok {
 			xWso2basepath = val
 		}
@@ -897,8 +902,8 @@ func (swagger *MgwSwagger) setXWso2Basepath() {
 }
 
 func (swagger *MgwSwagger) setXWso2Cors() {
-	if cors, corsFound := swagger.vendorExtensions[xWso2Cors]; corsFound {
-		logger.LoggerOasparser.Debugf("%v configuration is available", xWso2Cors)
+	if cors, corsFound := swagger.vendorExtensions[constants.XWso2Cors]; corsFound {
+		logger.LoggerOasparser.Debugf("%v configuration is available", constants.XWso2Cors)
 		if parsedCors, parsedCorsOk := cors.(map[string]interface{}); parsedCorsOk {
 			//Default CorsConfiguration
 			corsConfig := &CorsConfig{
@@ -906,7 +911,7 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 			}
 			err := parser.Decode(parsedCors, &corsConfig)
 			if err != nil {
-				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), xWso2Cors)
+				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), constants.XWso2Cors)
 				return
 			}
 			if corsConfig.Enabled {
@@ -917,7 +922,7 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 			swagger.xWso2Cors = generateGlobalCors()
 			return
 		}
-		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
+		logger.LoggerOasparser.Errorf("Error while parsing %v .", constants.XWso2Cors)
 	} else {
 		swagger.xWso2Cors = generateGlobalCors()
 	}
@@ -954,11 +959,11 @@ func generateGlobalCors() *CorsConfig {
 // if both the properties are not available, an empty string is returned.
 func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
 	xTier := ""
-	if x, found := vendorExtensions[xWso2ThrottlingTier]; found {
+	if x, found := vendorExtensions[constants.XWso2ThrottlingTier]; found {
 		if val, ok := x.(string); ok {
 			xTier = val
 		}
-	} else if y, found := vendorExtensions[xThrottlingTier]; found {
+	} else if y, found := vendorExtensions[constants.XThrottlingTier]; found {
 		if val, ok := y.(string); ok {
 			xTier = val
 		}
@@ -974,8 +979,8 @@ func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
 // x-wso2-disable-security : true/false to enable and disable security.
 func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 	disableSecurity := false
-	y, vExtAuthType := vendorExtensions[xAuthType]
-	z, vExtDisableSecurity := vendorExtensions[xWso2DisableSecurity]
+	y, vExtAuthType := vendorExtensions[constants.XAuthType]
+	z, vExtDisableSecurity := vendorExtensions[constants.XWso2DisableSecurity]
 	if vExtDisableSecurity {
 		// If x-wso2-disable-security is present, then disableSecurity = val
 		if val, ok := z.(bool); ok {
@@ -988,7 +993,7 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 		if val, ok := y.(string); ok {
 			// If the x-auth-type vendor ext is None, then the API/resource is considerd
 			// to be non secure
-			if val == None {
+			if val == constants.None {
 				disableSecurity = true
 			}
 		}
@@ -1007,7 +1012,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	if x, found := vendorExtensions[extensionName]; found {
 		if val, ok := x.(map[string]interface{}); ok {
 			//serviceURL mandatory
-			if v, found := val[serviceURL]; found {
+			if v, found := val[constants.ServiceURL]; found {
 				serviceURLV := v.(string)
 				endpoint, err := getHostandBasepathandPort(serviceURLV)
 				if err != nil {
@@ -1025,25 +1030,25 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				return InterceptEndpoint{}, errors.New("error reading interceptors service url value")
 			}
 			//clusterTimeout optional
-			if v, found := val[clusterTimeout]; found {
+			if v, found := val[constants.ClusterTimeout]; found {
 				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
 				if err == nil {
 					clusterTimeoutV = time.Duration(p)
 				} else {
-					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", clusterTimeout, err.Error())
+					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", constants.ClusterTimeout, err.Error())
 				}
 			}
 			//requestTimeout optional
-			if v, found := val[requestTimeout]; found {
+			if v, found := val[constants.RequestTimeout]; found {
 				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
 				if err == nil {
 					requestTimeoutV = time.Duration(p)
 				} else {
-					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", requestTimeout, err.Error())
+					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", constants.RequestTimeout, err.Error())
 				}
 			}
 			//includes optional
-			if v, found := val[includes]; found {
+			if v, found := val[constants.Includes]; found {
 				includes := v.([]interface{})
 				if len(includes) > 0 {
 					for _, include := range includes {
@@ -1150,10 +1155,10 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 
 	if len(endpointConfig.ProductionEndpoints) > 0 {
 		var endpoints []Endpoint
-		endpointType := LoadBalance
+		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
-			if apiType == WS {
+			if apiType == constants.WS {
 				prodEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *prodEndpoint)
@@ -1165,9 +1170,9 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			}
 		}
 		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
-			endpointType = FailOver
+			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
-				if apiType == WS {
+				if apiType == constants.WS {
 					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
@@ -1179,7 +1184,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				}
 			}
 		}
-		if apiType != WS {
+		if apiType != constants.WS {
 			productionEndpoints, err := processEndpointUrls(unProcessedURLs)
 			if err == nil {
 				endpoints = append(endpoints, productionEndpoints...)
@@ -1187,15 +1192,15 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				return err
 			}
 		}
-		swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, endpoints, endpointType)
+		swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, endpoints, endpointType)
 	}
 
 	if len(endpointConfig.SandBoxEndpoints) > 0 {
 		var endpoints []Endpoint
-		endpointType := LoadBalance
+		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
-			if apiType == WS {
+			if apiType == constants.WS {
 				sandBoxEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *sandBoxEndpoint)
@@ -1207,9 +1212,9 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			}
 		}
 		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
-			endpointType = FailOver
+			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
-				if apiType == WS {
+				if apiType == constants.WS {
 					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
@@ -1221,7 +1226,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				}
 			}
 		}
-		if apiType != WS {
+		if apiType != constants.WS {
 			sandboxEndpoints, err := processEndpointUrls(unProcessedURLs)
 			if err == nil {
 				endpoints = append(endpoints, sandboxEndpoints...)
@@ -1229,7 +1234,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				return err
 			}
 		}
-		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, endpoints, endpointType)
+		swagger.sandboxEndpoints = generateEndpointCluster(constants.SandClustersConfigNamePrefix, endpoints, endpointType)
 	}
 
 	// if yaml has production security, setting it

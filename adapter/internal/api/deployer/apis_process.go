@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+// Package deployer - file apis_process.go includes methods used during both modes; standalone and with API-M
 package deployer
 
 import (
@@ -27,6 +28,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
@@ -57,7 +59,7 @@ const (
 )
 
 // extractAPIProject accepts the API project as a zip file and returns the extracted content.
-// The apictl project must be in zipped format.
+// The API project must be in zipped format.
 // API type is decided by the type field in the api.yaml file.
 func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
@@ -117,7 +119,7 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 			return apiProject, conversionErr
 		}
 		apiProject.OpenAPIJsn = swaggerJsn
-		apiProject.APIType = model.HTTP
+		apiProject.APIType = constants.HTTP
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
 		if !tlsutils.IsPublicCertificate(fileContent) {
@@ -168,7 +170,7 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 			loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
 			return apiProject, err
 		}
-		apiYaml = model.PopulateEndpointsInfo(apiYaml)
+		apiYaml.PopulateEndpointsInfo()
 
 		err = model.VerifyMandatoryFields(apiYaml)
 		if err != nil {
@@ -183,7 +185,7 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 			return apiProject, err
 		}
 		apiProject.APIYaml = apiYaml
-		model.ExtractAPIInformation(&apiProject, apiYaml)
+		apiProject.PopulateAPIInfo(apiYaml)
 	}
 	return apiProject, nil
 }
@@ -226,7 +228,7 @@ func ValidateAPIType(apiProject *model.ProjectAPI) error {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiProject.APIType != model.HTTP && apiProject.APIType != model.WS && apiProject.APIType != model.WEBHOOK {
+	} else if apiProject.APIType != constants.HTTP && apiProject.APIType != constants.WS && apiProject.APIType != constants.WEBHOOK {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		err = errors.New(errMsg)
 		return err

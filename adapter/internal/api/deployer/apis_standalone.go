@@ -29,9 +29,8 @@ import (
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
-
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 )
 
 // API Controller related constants
@@ -40,7 +39,7 @@ const (
 )
 
 // ProcessMountedAPIProjects iterates through the api artifacts directory and apply the projects located within the directory.
-func ProcessMountedAPIProjects() (err error) {
+func ProcessMountedAPIProjects() error {
 	conf, _ := config.ReadConfigs()
 	apisDirName := filepath.FromSlash(conf.Adapter.ArtifactsDirectory + "/" + apisArtifactDir)
 	files, err := ioutil.ReadDir((apisDirName))
@@ -54,10 +53,7 @@ func ProcessMountedAPIProjects() (err error) {
 
 	for _, apiProjectFile := range files {
 		if apiProjectFile.IsDir() {
-			apiProject := mgw.ProjectAPI{
-				EndpointCerts: make(map[string]string),
-				UpstreamCerts: make(map[string][]byte),
-			}
+			var apiProject model.ProjectAPI
 			err = filepath.Walk(filepath.FromSlash(apisDirName+"/"+apiProjectFile.Name()), func(path string, info os.FileInfo, err error) error {
 
 				if !info.IsDir() {
@@ -108,7 +104,7 @@ func ProcessMountedAPIProjects() (err error) {
 	return nil
 }
 
-func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error) {
+func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err error) {
 	apiYaml := apiProject.APIYaml.Data
 	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 
@@ -131,7 +127,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 	// environment
 	if apiProject.Deployments == nil {
 		vhost, _, _ := config.GetDefaultVhost(config.DefaultGatewayName)
-		deployment := mgw.Deployment{
+		deployment := model.Deployment{
 			DisplayOnDevportal:    true,
 			DeploymentEnvironment: config.DefaultGatewayName,
 			DeploymentVhost:       vhost,
@@ -153,7 +149,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 		if exists {
 			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.",
 				apiYaml.Name, apiYaml.Version)
-			return errors.New(mgw.AlreadyExists)
+			return errors.New(constants.AlreadyExists)
 		}
 	}
 	vhostToEnvsMap := make(map[string][]string)
