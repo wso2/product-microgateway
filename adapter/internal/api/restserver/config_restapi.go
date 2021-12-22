@@ -35,7 +35,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
+	"github.com/wso2/product-microgateway/adapter/internal/api/deployer"
 	"github.com/wso2/product-microgateway/adapter/internal/api/models"
 	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations"
 	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations/api_collection"
@@ -145,12 +145,12 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(
 		params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
 
-		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.Query, params.Limit, tenantDomain))
+		return api_collection.NewGetApisOK().WithPayload(deployer.ListApis(params.Query, params.Limit, tenantDomain))
 	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
+		err := deployer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
 			if err.Error() == constants.AlreadyExists {
 				return api_individual.NewPostApisConflict()

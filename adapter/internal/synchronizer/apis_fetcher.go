@@ -29,13 +29,13 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
-
-	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
+
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/api/deployer"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 )
 
 const (
@@ -100,7 +100,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps)
+		deployedRevisionList, err = deployer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
