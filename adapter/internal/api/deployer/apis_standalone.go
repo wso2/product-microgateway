@@ -15,12 +15,9 @@
  *
  */
 
-// Package api contains the REST API implementation for the adapter
-package api
+package deployer
 
 import (
-	"archive/zip"
-	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -32,67 +29,15 @@ import (
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
+
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 // API Controller related constants
 const (
-	openAPIDir                 string = "Definitions"
-	openAPIFilename            string = "swagger."
-	apiYAMLFile                string = "api.yaml"
-	deploymentsYAMLFile        string = "deployment_environments.yaml"
-	apiJSONFile                string = "api.json"
-	endpointCertDir            string = "Endpoint-certificates"
-	interceptorCertDir         string = "Endpoint-certificates/interceptors"
-	crtExtension               string = ".crt"
-	pemExtension               string = ".pem"
-	apiTypeFilterKey           string = "type"
-	apiTypeYamlKey             string = "type"
-	lifeCycleStatus            string = "lifeCycleStatus"
-	securityScheme             string = "securityScheme"
-	endpointImplementationType string = "endpointImplementationType"
-	inlineEndpointType         string = "INLINE"
-	endpointSecurity           string = "endpoint_security"
-	production                 string = "production"
-	sandbox                    string = "sandbox"
-	zipExt                     string = ".zip"
-	apisArtifactDir            string = "apis"
+	apisArtifactDir string = "apis"
 )
-
-// extractAPIProject accepts the API project as a zip file and returns the extracted content.
-// The apictl project must be in zipped format.
-// API type is decided by the type field in the api.yaml file.
-func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
-	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
-
-	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occurred while unzipping the apictl project. Error: %v", err.Error())
-		return apiProject, err
-	}
-	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
-	apiProject.UpstreamCerts = make(map[string][]byte)
-	apiProject.EndpointCerts = make(map[string]string)
-	for _, file := range zipReader.File {
-		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
-		unzippedFileBytes, err := readZipFile(file)
-		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
-			return apiProject, err
-		}
-		err = apiProject.ProcessFilesInsideProject(unzippedFileBytes, file.Name)
-		if err != nil {
-			return apiProject, err
-		}
-	}
-	err = apiProject.ValidateAPIType()
-	if err != nil {
-		return apiProject, err
-	}
-	return apiProject, nil
-}
 
 // ProcessMountedAPIProjects iterates through the api artifacts directory and apply the projects located within the directory.
 func ProcessMountedAPIProjects() (err error) {
@@ -120,7 +65,8 @@ func ProcessMountedAPIProjects() (err error) {
 					if err != nil {
 						return err
 					}
-					return apiProject.ProcessFilesInsideProject(fileContent, path)
+					apiProject, err = ProcessFilesInsideProject(fileContent, path)
+					return err
 				}
 				return nil
 			})
@@ -128,7 +74,7 @@ func ProcessMountedAPIProjects() (err error) {
 				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
 				continue
 			}
-			err = apiProject.ValidateAPIType()
+			err = ValidateAPIType(&apiProject)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error while validation type of the api artifact - %s during startup : %v",
 					apiProjectFile.Name(), err)
@@ -226,81 +172,6 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 	return nil
 }
 
-// ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
-// and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(
-	payload []byte,
-	vhostToEnvsMap map[string][]string,
-	apiEnvs map[string]map[string]synchronizer.APIEnvProps,
-) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
-	apiProject, err := extractAPIProject(payload)
-	if err != nil {
-		return nil, err
-	}
-	apiYaml := apiProject.APIYaml.Data
-	if apiEnvProps, found := apiEnvs[apiProject.APIYaml.Data.ID]; found {
-		loggers.LoggerAPI.Infof("Environment specific values found for the API %v ", apiProject.APIYaml.Data.ID)
-		apiProject.APIEnvProps = apiEnvProps
-	}
-
-	// handle panic
-	defer func() {
-		if r := recover(); r != nil {
-			loggers.LoggerAPI.Error("Recovered from panic. ", r)
-			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
-		}
-	}()
-
-	if apiProject.OrganizationID == "" {
-		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
-	}
-	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
-
-	// vhostsToRemove contains vhosts and environments to undeploy
-	vhostsToRemove := make(map[string][]string)
-
-	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
-	for vhost, environments := range vhostToEnvsMap {
-		// search for vhosts in the given environments
-		for _, env := range environments {
-			if existingVhost, exists := xds.GetVhostOfAPI(apiYaml.ID, env); exists {
-				loggers.LoggerAPI.Infof("API %v:%v with UUID \"%v\" already deployed to vhost: %v",
-					apiYaml.Name, apiYaml.Version, apiYaml.ID, existingVhost)
-				if vhost != existingVhost {
-					loggers.LoggerAPI.Infof("Un-deploying API %v:%v with UUID \"%v\" which is already deployed to vhost: %v",
-						apiYaml.Name, apiYaml.Version, apiYaml.ID, existingVhost)
-					vhostsToRemove[existingVhost] = append(vhostsToRemove[existingVhost], env)
-				}
-			}
-		}
-
-		// allEnvironments represent all the environments the API should be deployed
-		allEnvironments := xds.GetAllEnvironments(apiYaml.ID, vhost, environments)
-		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
-			allEnvironments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
-		// first update the API for vhost
-		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, allEnvironments)
-		if err != nil {
-			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
-		}
-		if deployedRevision != nil {
-			deployedRevisionList = append(deployedRevisionList, deployedRevision)
-		}
-	}
-
-	// undeploy APIs with other vhosts in the same gateway environment
-	for vhost, environments := range vhostsToRemove {
-		if vhost == "" {
-			// ignore if vhost is empty, since it deletes all vhosts of API
-			continue
-		}
-		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiProject.OrganizationID); err != nil {
-			return deployedRevisionList, err
-		}
-	}
-	return deployedRevisionList, nil
-}
-
 // ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
 // between create and update using the override param
 func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error) {
@@ -322,13 +193,4 @@ func ListApis(query *string, limit *int64, organizationID string) *apiModel.APIM
 		}
 	}
 	return xds.ListApis("", organizationID, limit)
-}
-
-func readZipFile(zf *zip.File) ([]byte, error) {
-	f, err := zf.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return ioutil.ReadAll(f)
 }

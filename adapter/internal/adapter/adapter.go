@@ -19,18 +19,21 @@
 package adapter
 
 import (
+	"context"
 	"crypto/tls"
+	"flag"
+	"fmt"
+	"net"
+	"os"
+	"os/signal"
 	"strings"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	"github.com/wso2/product-microgateway/adapter/internal/api"
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
-	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
-	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
-	"github.com/wso2/product-microgateway/adapter/internal/ga"
-	"github.com/wso2/product-microgateway/adapter/internal/messaging"
+	"github.com/fsnotify/fsnotify"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
 	"github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	apiservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
@@ -43,21 +46,18 @@ import (
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
-	"context"
-	"flag"
-	"fmt"
-	"net"
-	"os"
-	"os/signal"
-
-	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/api/deployer"
+	"github.com/wso2/product-microgateway/adapter/internal/api/restserver"
+	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
+	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/eventhub"
+	"github.com/wso2/product-microgateway/adapter/internal/ga"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/messaging"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -254,7 +254,7 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
 	} else {
-		err := api.ProcessMountedAPIProjects()
+		err := deployer.ProcessMountedAPIProjects()
 		if err != nil {
 			logger.LoggerMgw.Error("Readiness probe is not set as local api artifacts processing has failed.")
 			return
