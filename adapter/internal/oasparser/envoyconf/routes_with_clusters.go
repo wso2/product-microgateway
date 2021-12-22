@@ -269,7 +269,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 
 		// create resource level request interceptor cluster
-		reqInterceptorVal := resource.GetCallInterceptorService("REQUEST_CALL_INTERCEPTOR_SERVICE")
+		reqInterceptorVal := resource.GetCallInterceptorService(true)
 		if !reqInterceptorVal.Enable {
 			reqInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, ResourceLevelInterceptor)
 		}
@@ -310,7 +310,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
-		respInterceptorVal := resource.GetCallInterceptorService("RESPONSE_CALL_INTERCEPTOR_SERVICE")
+		respInterceptorVal := resource.GetCallInterceptorService(false)
 		if !respInterceptorVal.Enable {
 			respInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor, ResourceLevelInterceptor)
 		}

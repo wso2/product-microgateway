@@ -47,7 +47,6 @@ public class MediationPolicyFilter implements Filter {
 
     private void applyPolicy(RequestContext requestContext, Policy policy) {
         //todo(amali)
-        // 1. handle fault in out
         // 2. parameter sanitization, set constants
         // 3. check order
         // 4. per operation interceptor

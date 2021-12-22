@@ -118,11 +118,17 @@ func (resource *Resource) GetRewritePath() (string, bool) {
 }
 
 // GetCallInterceptorService returns the rewrite upstream path for a given resource.
-func (resource *Resource) GetCallInterceptorService(fieldName string) InterceptEndpoint {
+func (resource *Resource) GetCallInterceptorService(isIn bool) InterceptEndpoint {
 	for _, method := range resource.methods {
-		if len(method.policies.In) > 0 {
-			for _, policy := range method.policies.In {
-				if strings.EqualFold(fieldName, policy.TemplateName) {
+		var policies []Policy
+		if isIn {
+			policies = method.policies.In
+		} else {
+			policies = method.policies.Out
+		}
+		if len(policies) > 0 {
+			for _, policy := range policies {
+				if strings.EqualFold("CALL_INTERCEPTOR_SERVICE", policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 						urlValue, urlFound := paramMap["interceptorServiceURL"]
 						includesValue, includesFound := paramMap["includes"]
