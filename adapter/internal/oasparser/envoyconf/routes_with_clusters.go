@@ -268,7 +268,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 
 		//todo(amali) check if we need to combine extension and operational policies together
 		// first check operational policies
-		reqInterceptorVal := resource.GetCallInterceptorService("REQUEST_CALL_INTERCEPTOR_SERVICE")
+		reqInterceptorVal := resource.GetCallInterceptorService(true)
 		if !reqInterceptorVal.Enable {
 			reqInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor)
 		}
@@ -287,7 +287,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
-		respInterceptorVal := resource.GetCallInterceptorService("RESPONSE_CALL_INTERCEPTOR_SERVICE")
+		respInterceptorVal := resource.GetCallInterceptorService(false)
 		if !respInterceptorVal.Enable {
 			respInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor)
 		}
