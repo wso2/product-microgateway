@@ -21,11 +21,13 @@ package messaging
 import (
 	"context"
 	"errors"
-	servicebus "github.com/Azure/azure-service-bus-go"
-	"github.com/google/uuid"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"strconv"
 	"time"
+
+	asb "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
+	"github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus/admin"
+	"github.com/google/uuid"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // TODO: (erandi) when refactoring, refactor organization purge flow as well
@@ -33,9 +35,8 @@ var bindingKeys = []string{tokenRevocation, notification, stepQuotaThreshold, st
 
 // Subscription stores the meta data of a specific subscription
 type Subscription struct {
-	topicName           string
-	subscriptionName    string
-	subscriptionManager *servicebus.SubscriptionManager
+	topicName        string
+	subscriptionName string
 }
 
 var (
@@ -61,87 +62,85 @@ func init() {
 
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
 // further process
-func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componentName string, reconnectRetryCount int,
+func InitiateBrokerConnectionAndValidate(connectionString string, componentName string, reconnectRetryCount int,
 	reconnectInterval time.Duration, subscriptionIdleTimeDuration time.Duration) ([]Subscription, error) {
 	subscriptionMetaDataList := make([]Subscription, 0)
-	namespace, processError := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(eventListeningEndpoint))
-	if processError == nil {
-		logger.LoggerMgw.Debug("Service bus namespace successfully received for connection url : " +
-			eventListeningEndpoint)
+	subProps := &admin.SubscriptionProperties{
+		AutoDeleteOnIdle: &subscriptionIdleTimeDuration,
+	}
+	_, err := asb.NewClientFromConnectionString(connectionString, nil)
+
+	if err == nil {
+		logger.LoggerMgw.Debugf("ASB client initialized for connection url: %s", connectionString)
+
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
-			processError = nil
-			subscriptionMetaDataList, processError = retrieveSubscriptionMetadata(subscriptionMetaDataList,
-				namespace, componentName,
-				servicebus.SubscriptionWithAutoDeleteOnIdle(&subscriptionIdleTimeDuration))
-			if processError != nil {
-				logError(reconnectRetryCount, reconnectInterval, processError)
+			err = nil
+			subscriptionMetaDataList, err = retrieveSubscriptionMetadata(subscriptionMetaDataList,
+				connectionString, componentName, subProps)
+			if err != nil {
+				logError(reconnectRetryCount, reconnectInterval, err)
 				subscriptionMetaDataList = nil
 				time.Sleep(reconnectInterval)
 				continue
 			}
-			return subscriptionMetaDataList, processError
+			return subscriptionMetaDataList, err
 		}
-		if processError != nil {
-			logger.LoggerMgw.Errorf("%v. Retry attempted %d times.", processError, reconnectRetryCount)
-			return subscriptionMetaDataList, processError
+		if err != nil {
+			logger.LoggerMgw.Errorf("%v. Retry attempted %d times.", err, reconnectRetryCount)
+			return subscriptionMetaDataList, err
 		}
 	} else {
-		//Any error which comes to this point is because the connection url is not up to the expected format
-		//Hence not retrying
-		logger.LoggerMgw.Errorf("Error occurred while trying get the namespace "+
-			"in azure service bus using the connection url %s :%v", eventListeningEndpoint, processError)
+		// any error which comes to this point is because the connection url is not up to the expected format
+		// hence not retrying
+		logger.LoggerMgw.Errorf("Error occurred while trying to create ASB client using the connection url %s, err: %v",
+			connectionString, err)
 	}
-	return subscriptionMetaDataList, processError
+	return subscriptionMetaDataList, err
 }
 
 // InitiateConsumers to pass event consumption
-func InitiateConsumers(subscriptionMetaDataList []Subscription, reconnectInterval time.Duration) {
+func InitiateConsumers(connectionString string, subscriptionMetaDataList []Subscription, reconnectInterval time.Duration) {
 	for _, subscriptionMetaData := range subscriptionMetaDataList {
 		go func(subscriptionMetaData Subscription) {
-			startBrokerConsumer(subscriptionMetaData, reconnectInterval)
+			startBrokerConsumer(connectionString, subscriptionMetaData, reconnectInterval)
 		}(subscriptionMetaData)
 	}
 }
 
-func retrieveSubscriptionMetadata(metaDataList []Subscription, ns *servicebus.Namespace, componentName string,
-	opts ...servicebus.SubscriptionManagementOption) ([]Subscription, error) {
+func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString string, componentName string,
+	opts *admin.SubscriptionProperties) ([]Subscription, error) {
 	parentContext := context.Background()
+	adminClient, clientErr := admin.NewClientFromConnectionString(connectionString, nil)
+	if clientErr != nil {
+		logger.LoggerMgw.Errorf("Error occurred while trying to create ASB admin client using the connection url %s", connectionString)
+		return nil, clientErr
+	}
+
 	for _, key := range bindingKeys {
-		var subManager *servicebus.SubscriptionManager
-		var subManagerError error
 		var errorValue error
 		subscriptionMetaData := Subscription{
-			topicName:           key,
-			subscriptionName:    "",
-			subscriptionManager: nil,
+			topicName:        key,
+			subscriptionName: "",
 		}
-		subManager, subManagerError = ns.NewSubscriptionManager(key)
-		if subManagerError != nil {
-			errorValue = errors.New("Error occurred while trying to get subscription manager from azure service bus for topic name : " +
-				key + ":" + subManagerError.Error())
-			return metaDataList, errorValue
-		}
-		logger.LoggerMgw.Debug("Subscription manager created for the topic " + key)
-		subscriptionMetaData.subscriptionManager = subManager
-		//We are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
+		// we are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
 		// idle for three days
 		uniqueID := uuid.New()
 
-		//In Azure service bus subscription names can contain letters, numbers, periods (.), hyphens (-), and
+		// in ASB, subscription names can contain letters, numbers, periods (.), hyphens (-), and
 		// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
 		var subscriptionName = componentName + "_" + uniqueID.String() + "_sub"
 		var subscriptionCreationError error
 		func() {
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
-			_, subscriptionCreationError = subManager.Put(ctx, subscriptionName, opts...)
+			_, subscriptionCreationError = adminClient.CreateSubscription(ctx, key, subscriptionName, opts, nil)
 		}()
 		if subscriptionCreationError != nil {
-			errorValue = errors.New("Error occurred while trying to create subscription " + subscriptionName + "in azure service bus for topic name " +
-				key + ":" + subscriptionCreationError.Error())
+			errorValue = errors.New("Error occurred while trying to create subscription " + subscriptionName + " in ASB for topic name " +
+				key + "." + subscriptionCreationError.Error())
 			return metaDataList, errorValue
 		}
-		logger.LoggerMgw.Debug("Subscription " + subscriptionName + " created.")
+		logger.LoggerMgw.Debugf("Subscription %s created.", subscriptionName)
 		subscriptionMetaData.subscriptionName = subscriptionName
 		subscriptionMetaData.topicName = key
 		metaDataList = append(metaDataList, subscriptionMetaData)
@@ -154,6 +153,5 @@ func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal e
 	if reconnectRetryCount > 0 {
 		retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
 	}
-	logger.LoggerMgw.Errorf("%v."+retryAttemptMessage+" .Retrying after %s seconds",
-		errVal, reconnectInterval)
+	logger.LoggerMgw.Errorf("%v. %s .Retrying after %s seconds", errVal, retryAttemptMessage, reconnectInterval)
 }
