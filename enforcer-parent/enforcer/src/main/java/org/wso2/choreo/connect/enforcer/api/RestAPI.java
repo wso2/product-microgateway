@@ -40,6 +40,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
@@ -357,5 +358,8 @@ public class RestAPI implements API {
         }
         // Authorization Header should not be included in the throttle publishing event.
         requestContext.getProtectedHeaders().add(authHeaderName);
+
+        // not allow clients to set cluster header manually
+        requestContext.getRemoveHeaders().add(AdapterConstants.CLUSTER_HEADER);
     }
 }

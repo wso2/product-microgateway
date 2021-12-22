@@ -76,6 +76,17 @@ public class CorsFilter implements Filter {
                         requestContext.getMatchedAPI().getResources().get(0).getPath() +
                         ". Responded with allow header : " + allowedMethodsBuilder.toString());
                 return false;
+            } else if (requestContext.getMatchedResourcePath() == null) {
+                // handle other not allowed non option calls
+                requestContext.getProperties()
+                        .put(APIConstants.MessageFormat.STATUS_CODE, APIConstants.StatusCodes.NOTFOUND.getCode());
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
+                        APIConstants.StatusCodes.NOTFOUND.getValue());
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                        APIConstants.NOT_FOUND_MESSAGE);
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                        APIConstants.NOT_FOUND_DESCRIPTION);
+                return false;
             }
             return true;
         } finally {

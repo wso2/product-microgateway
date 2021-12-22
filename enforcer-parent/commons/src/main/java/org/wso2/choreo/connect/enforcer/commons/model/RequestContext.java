@@ -37,9 +37,6 @@ import java.util.TreeMap;
 public class RequestContext {
     private static final Logger logger = LogManager.getLogger(RequestContext.class);
 
-    //constants
-    public static final String CLUSTER_HEADER = "x-wso2-cluster-header";
-
     private APIConfig matchedAPI;
     private String requestPath;
     private String requestMethod;
@@ -484,11 +481,6 @@ public class RequestContext {
             if (this.webSocketFrameContext != null) {
                 requestContext.webSocketFrameContext = this.webSocketFrameContext;
             }
-
-            // sanitize wso2 added headers
-            // not allow client's to set cluster header manually
-            requestContext.removeHeaders.add(CLUSTER_HEADER);
-
             return requestContext;
         }
 

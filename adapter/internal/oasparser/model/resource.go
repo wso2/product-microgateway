@@ -91,29 +91,28 @@ func (resource *Resource) GetMethodList() []string {
 }
 
 // GetRewritePath returns the rewrite upstream path for a given resource.
-func (resource *Resource) GetRewritePath() string {
+func (resource *Resource) GetRewritePath() (string, bool) {
+	rewritePath := ""
+	rewriteMethod := false
 	for _, method := range resource.methods {
 		if len(method.policies.In) > 0 {
 			for _, policy := range method.policies.In {
 				if strings.EqualFold("REWRITE_RESOURCE_PATH", policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 						if paramValue, found := paramMap["resourcePath"]; found {
-							rewritePath, found := paramValue.(string)
+							rewritePath, found = paramValue.(string)
 							if found && rewritePath != "" {
-								if rewritePath == "/" {
-									return rewritePath
-								}
-								rewritePath = "/" + strings.TrimPrefix(rewritePath, "/")
-								return strings.TrimSuffix(rewritePath, "/")
+								rewritePath = "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePath, "/"), "/")
 							}
 						}
-						return ""
 					}
+				} else if strings.EqualFold("REWRITE_RESOURCE_METHOD", policy.TemplateName) {
+					rewriteMethod = true
 				}
 			}
 		}
 	}
-	return ""
+	return rewritePath, rewriteMethod
 }
 
 // GetCallInterceptorService returns the rewrite upstream path for a given resource.
