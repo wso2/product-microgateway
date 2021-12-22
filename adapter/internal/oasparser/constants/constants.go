@@ -15,12 +15,12 @@
  *
  */
 
-package model
+package constants
 
 // sub-property keys mentioned under x-wso2-production-endpoints
 const (
-	urls                  string = "urls"
-	typeConst             string = "type"
+	Urls                  string = "urls"
+	Type                  string = "type"
 	LoadBalance           string = "loadbalance"
 	FailOver              string = "failover"
 	AdvanceEndpointConfig string = "advanceEndpointConfig"
@@ -29,26 +29,26 @@ const (
 
 // Constants for OpenAPI vendor extension keys
 const (
-	xWso2ProdEndpoints   string = "x-wso2-production-endpoints"
-	xWso2SandbxEndpoints string = "x-wso2-sandbox-endpoints"
-	xWso2endpoints       string = "x-wso2-endpoints"
-	xWso2BasePath        string = "x-wso2-basePath"
-	xWso2Label           string = "x-wso2-label"
-	xWso2Cors            string = "x-wso2-cors"
-	xThrottlingTier      string = "x-throttling-tier"
-	xWso2ThrottlingTier  string = "x-wso2-throttling-tier"
-	xAuthHeader          string = "x-wso2-auth-header"
-	xAuthType            string = "x-auth-type"
-	xWso2DisableSecurity string = "x-wso2-disable-security"
+	XWso2ProdEndpoints   string = "x-wso2-production-endpoints"
+	XWso2SandbxEndpoints string = "x-wso2-sandbox-endpoints"
+	XWso2endpoints       string = "x-wso2-endpoints"
+	XWso2BasePath        string = "x-wso2-basePath"
+	XWso2Label           string = "x-wso2-label"
+	XWso2Cors            string = "x-wso2-cors"
+	XThrottlingTier      string = "x-throttling-tier"
+	XWso2ThrottlingTier  string = "x-wso2-throttling-tier"
+	XAuthHeader          string = "x-wso2-auth-header"
+	XAuthType            string = "x-auth-type"
+	XWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
 	DefaultSecurity      string = "default"
 )
 
 // cluster name prefixes
 const (
-	sandClustersConfigNamePrefix    string = "clusterSand"
-	prodClustersConfigNamePrefix    string = "clusterProd"
-	xWso2EPClustersConfigNamePrefix string = "xwso2cluster"
+	SandClustersConfigNamePrefix    string = "clusterSand"
+	ProdClustersConfigNamePrefix    string = "clusterProd"
+	XWso2EPClustersConfigNamePrefix string = "xwso2cluster"
 )
 
 // sub-property values and keys relevant for x-wso2-application security extension
@@ -66,19 +66,17 @@ const (
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
 const (
-	serviceURL                string = "serviceURL"
-	clusterTimeout            string = "clusterTimeout"
-	requestTimeout            string = "requestTimeout"
-	includes                  string = "includes"
+	ServiceURL                string = "serviceURL"
+	ClusterTimeout            string = "clusterTimeout"
+	RequestTimeout            string = "requestTimeout"
+	Includes                  string = "includes"
 	OperationLevelInterceptor string = "operation"
 )
 
+// API type constants
 const (
-	// HTTP - API type for http/https APIs
-	HTTP string = "HTTP"
-	// WS - API type for websocket APIs
-	WS string = "WS"
-	// WEBHOOK - API type for WEBHOOK APIs
+	HTTP    string = "HTTP"
+	WS      string = "WS"
 	WEBHOOK string = "WEBHOOK"
 )
 

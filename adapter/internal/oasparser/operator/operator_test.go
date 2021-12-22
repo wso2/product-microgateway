@@ -25,6 +25,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
@@ -233,10 +234,10 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 
 	var apiYaml model.APIYaml
 	err = json.Unmarshal(apiJsn, &apiYaml)
-	apiYaml = model.PopulateEndpointsInfo(apiYaml)
+	apiYaml.PopulateEndpointsInfo()
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	var mgwSwagger model.MgwSwagger
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, constants.WS)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, mgwSwagger.GetAPIType(), "WS", "API type for websocket mismatch")

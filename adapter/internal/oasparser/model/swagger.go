@@ -23,6 +23,7 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // SetInfoSwagger populates the MgwSwagger object with the properties within the openAPI v2
@@ -45,7 +46,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.securityScheme = setSecurityDefinitions(swagger2)
 	swagger.security = swagger2.Security
 	swagger.resources = setResourcesSwagger(swagger2)
-	swagger.apiType = HTTP
+	swagger.apiType = constants.HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
@@ -70,7 +71,8 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
-			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionEndpoints, LoadBalance)
+			swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix,
+				productionEndpoints, constants.LoadBalance)
 			swagger.sandboxEndpoints = nil
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
@@ -87,10 +89,10 @@ func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 	// resourve level, if it's not present at resource level using "addResourceLevelDisableSecurity"
 	if swagger2.Paths != nil {
 		for path, pathItem := range swagger2.Paths.Paths {
-			disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
+			disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(constants.XWso2DisableSecurity)
 			// Checks for resource level security, if security is disabled in resource level,
 			// below code segment will override above two variable values (disableSecurity & found)
-			disableResourceLevelSecurity, foundInResourceLevel := pathItem.Extensions.GetBool(xWso2DisableSecurity)
+			disableResourceLevelSecurity, foundInResourceLevel := pathItem.Extensions.GetBool(constants.XWso2DisableSecurity)
 			if foundInResourceLevel {
 				logger.LoggerOasparser.Infof("x-wso2-disable-security extension is available in the API: %v %v's resource %v.",
 					swagger2.Info.Title, swagger2.Info.Version, path)
@@ -179,8 +181,8 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 // This methods adds x-wso2-disable-security vendor extension
 // if it's not present in the given vendor extensions.
 func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
-	if _, found := v.Extensions.GetBool(xWso2DisableSecurity); !found {
-		v.AddExtension(xWso2DisableSecurity, enable)
+	if _, found := v.Extensions.GetBool(constants.XWso2DisableSecurity); !found {
+		v.AddExtension(constants.XWso2DisableSecurity, enable)
 	}
 }
 
