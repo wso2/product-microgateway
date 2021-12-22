@@ -153,7 +153,6 @@ func watchAPIs() {
 			lastReceivedResponse = discoveryResponse
 			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
 			addAPIToChannel(discoveryResponse)
-			go handleAPIEventsFromGA(GAAPIChannel)
 			ack()
 		}
 	}
@@ -198,6 +197,7 @@ func getAdapterNode() *core.Node {
 // InitGAClient initializes the connection to the global adapter.
 func InitGAClient() {
 	logger.LoggerGA.Info("Starting the XDS Client connection to Global Adapter.")
+	go handleAPIEventsFromGA(GAAPIChannel)
 	conn := initializeAndWatch()
 	for retryTrueReceived := range connectionFaultChannel {
 		// event is always true
