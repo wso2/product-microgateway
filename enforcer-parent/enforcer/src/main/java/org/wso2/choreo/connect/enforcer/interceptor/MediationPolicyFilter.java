@@ -17,6 +17,9 @@
  */
 package org.wso2.choreo.connect.enforcer.interceptor;
 
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
@@ -28,7 +31,7 @@ import java.util.Map;
  * Apply mediation policies.
  */
 public class MediationPolicyFilter implements Filter {
-
+    private static final Logger log = LogManager.getLogger(MediationPolicyFilter.class);
     @Override
     public boolean handleRequest(RequestContext requestContext) {
         // get operation policies
@@ -71,6 +74,10 @@ public class MediationPolicyFilter implements Filter {
                 removeQueries(requestContext, policy.getParameters());
                 break;
             }
+            case "REWRITE_RESOURCE_METHOD": {
+                modifyMethod(requestContext, policy.getParameters());
+                break;
+            }
         }
     }
 
@@ -101,5 +108,18 @@ public class MediationPolicyFilter implements Filter {
         String queryName = policyAttrib.get("queryParamName");
         String queryValue = policyAttrib.get("queryParamValue");
         requestContext.getQueryParamsToAdd().put(queryName, queryValue);
+    }
+
+    private void modifyMethod(RequestContext requestContext, Map<String, String> policyAttrib) {
+        String currentMethod = policyAttrib.get("currentMethod");
+        try {
+            HttpMethod updatedMethod = HttpMethod.valueOf(policyAttrib.get("updatedMethod"));
+
+            if (currentMethod.equalsIgnoreCase(requestContext.getHeaders().get(":method"))) {
+                requestContext.addOrModifyHeaders(":method", updatedMethod.toString().toUpperCase());
+            }
+        } catch (IllegalArgumentException ex) {
+            log.error("Error while getting mediation policy rewrite method", ex);
+        }
     }
 }

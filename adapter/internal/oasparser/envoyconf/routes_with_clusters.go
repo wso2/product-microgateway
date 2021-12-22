@@ -683,29 +683,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		responseHeadersToRemove []string
 	)
 
-	// OPTIONS is always added even if it is not listed under resources
-	// This is required to handle CORS preflight request fail scenario
-	methodRegex := strings.Join(resourceMethods, "|")
-	if !strings.Contains(methodRegex, "OPTIONS") {
-		methodRegex = methodRegex + "|OPTIONS"
-	}
-	headerMatcherArray := routev3.HeaderMatcher{
-		Name: httpMethodHeader,
-		HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
-			StringMatch: &envoy_type_matcherv3.StringMatcher{
-				MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
-					SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
-						Regex: "^(" + methodRegex + ")$",
-					},
-				},
-			},
-		},
-	}
 	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
@@ -719,7 +696,34 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				Regex: routePath,
 			},
 		},
-		Headers: []*routev3.HeaderMatcher{&headerMatcherArray},
+	}
+
+	if !params.rewriteMethod {
+		// todo(amali) is this needed in enforcer
+		// OPTIONS is always added even if it is not listed under resources
+		// This is required to handle CORS preflight request fail scenario
+		methodRegex := strings.Join(resourceMethods, "|")
+		if !strings.Contains(methodRegex, "OPTIONS") {
+			methodRegex = methodRegex + "|OPTIONS"
+		}
+		headerMatcherArray := routev3.HeaderMatcher{
+			Name: httpMethodHeader,
+			HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
+				StringMatch: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
+						SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+							EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+								GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+									MaxProgramSize: nil,
+								},
+							},
+							Regex: "^(" + methodRegex + ")$",
+						},
+					},
+				},
+			},
+		}
+		match.Headers = []*routev3.HeaderMatcher{&headerMatcherArray}
 	}
 
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
@@ -1249,12 +1253,13 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
 		rewritePath:         "",
+		rewriteMethod:       false,
 	}
 
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
-		params.rewritePath = resource.GetRewritePath()
+		params.rewritePath, params.rewriteMethod = resource.GetRewritePath()
 	}
 
 	if swagger.GetProdEndpoints() != nil {
