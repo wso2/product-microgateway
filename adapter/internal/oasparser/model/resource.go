@@ -90,23 +90,30 @@ func (resource *Resource) GetMethodList() []string {
 	return methodList
 }
 
-// GetRewritePath returns the rewrite upstream path for a given resource.
-func (resource *Resource) GetRewritePath() (string, bool) {
+// GetRewriteResource returns the rewrite upstream path for a given resource.
+func (resource *Resource) GetRewriteResource() (string, bool) {
 	rewritePath := ""
 	rewriteMethod := false
+	pathOrder := 0
 	for _, method := range resource.methods {
 		if len(method.policies.In) > 0 {
 			for _, policy := range method.policies.In {
-				if strings.EqualFold("REWRITE_RESOURCE_PATH", policy.TemplateName) {
+				if strings.EqualFold(REWRITE_PATH_TEMPLATE, policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						if paramValue, found := paramMap["resourcePath"]; found {
+						if paramValue, found := paramMap[REWRITE_PATH_RESOURCE_PATH]; found {
+							if v, orderExists := paramMap[ORDER]; orderExists {
+								if pathOrder > v.(int) {
+									continue
+								}
+								pathOrder = v.(int)
+							}
 							rewritePath, found = paramValue.(string)
 							if found && rewritePath != "" {
 								rewritePath = "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePath, "/"), "/")
 							}
 						}
 					}
-				} else if strings.EqualFold("REWRITE_RESOURCE_METHOD", policy.TemplateName) {
+				} else if strings.EqualFold(REWRITE_METHOD_TEMPLATE, policy.TemplateName) {
 					rewriteMethod = true
 				}
 			}
@@ -126,10 +133,10 @@ func (resource *Resource) GetCallInterceptorService(isIn bool) InterceptEndpoint
 		}
 		if len(policies) > 0 {
 			for _, policy := range policies {
-				if strings.EqualFold("CALL_INTERCEPTOR_SERVICE", policy.TemplateName) {
+				if strings.EqualFold(INTERCEPTOR_SERVICE_TEMPLATE, policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						urlValue, urlFound := paramMap["interceptorServiceURL"]
-						includesValue, includesFound := paramMap["includes"]
+						urlValue, urlFound := paramMap[INTERCEPTOR_SERVICE_URL]
+						includesValue, includesFound := paramMap[INTERCEPTOR_SERVICE_INCLUDES]
 						if urlFound {
 							url, isString := urlValue.(string)
 							if isString && url != "" {
