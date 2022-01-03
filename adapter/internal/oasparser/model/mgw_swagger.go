@@ -29,6 +29,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
 	parser "github.com/mitchellh/mapstructure"
+
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -63,6 +64,7 @@ type MgwSwagger struct {
 	disableSecurity     bool
 	OrganizationID      string
 	IsProtoTyped        bool
+	LifecycleStatus     string
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1115,44 +1117,40 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	return InterceptEndpoint{}, nil
 }
 
-// GetMgwSwagger converts the openAPI v3 and v2 content
+// GetMgwSwagger converts the openAPI v3, v2 and asyncAPI content
 // To MgwSwagger objects
 func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
-	apiJsn, err := utills.ToJSON(apiContent)
+	definitionJsn, err := utills.ToJSON(apiContent)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error converting api file to json", err)
+		logger.LoggerOasparser.Error("Error converting api file to json ", err)
 		return err
 	}
-	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+	definitionVersion := utills.FindAPIDefinitionVersion(definitionJsn)
 
-	if swaggerVersion == "2" {
-		// map json to struct
-		var apiData2 spec.Swagger
-		err = json.Unmarshal(apiJsn, &apiData2)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
-		} else {
-			infoSwaggerErr := swagger.SetInfoSwagger(apiData2)
-			if infoSwaggerErr != nil {
-				return infoSwaggerErr
-			}
+	if definitionVersion == constants.Swagger2 {
+		var swaggerSpec spec.Swagger
+		err = json.Unmarshal(definitionJsn, &swaggerSpec)
+		if err == nil {
+			err = swagger.SetInfoSwagger(swaggerSpec)
 		}
-
-	} else if swaggerVersion == "3" {
-		// map json to struct
-		var apiData3 openapi3.Swagger
-
-		err = json.Unmarshal(apiJsn, &apiData3)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
-		} else {
-			infoOpenAPIErr := swagger.SetInfoOpenAPI(apiData3)
-			if infoOpenAPIErr != nil {
-				return infoOpenAPIErr
-			}
+	} else if definitionVersion == constants.OpenAPI3 {
+		var openAPISpec openapi3.Swagger
+		err = json.Unmarshal(definitionJsn, &openAPISpec)
+		if err == nil {
+			err = swagger.SetInfoOpenAPI(openAPISpec)
 		}
+	} else if definitionVersion == constants.AsyncAPI2_0_0 {
+
+	} else {
+		return errors.New("API version not specified or not supported")
 	}
+
+	if err != nil {
+		logger.LoggerOasparser.Error("Error occurred while extracting the API definition to MgwSwagger ", err)
+		return err
+	}
+
 	err = swagger.SetXWso2Extensions()
 	if err != nil {
 		logger.LoggerOasparser.Error("Error occurred while setting x-wso2 extensions for ",
@@ -1164,17 +1162,25 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
 //PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType string) error {
+func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml) error {
 
 	data := apiData.Data
-	// UUID in the generated api.yaml file is considerd as swagger.id
+	// UUID in the generated api.yaml file is considered as swagger.id
 	swagger.id = data.ID
-	swagger.apiType = apiType
+	swagger.apiType = strings.ToUpper(data.APIType)
 	// name and version in api.yaml corresponds to title and version respectively.
 	swagger.title = data.Name
 	swagger.version = data.Version
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
+
+	if data.OrganizationID != "" {
+		swagger.OrganizationID = data.OrganizationID
+	} else {
+		swagger.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
+	}
+
+	swagger.LifecycleStatus = strings.ToUpper(data.LifeCycleStatus)
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
@@ -1188,7 +1194,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
-			if apiType == constants.WS {
+			if swagger.apiType == constants.WS {
 				prodEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *prodEndpoint)
@@ -1202,7 +1208,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
 			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
-				if apiType == constants.WS {
+				if swagger.apiType == constants.WS {
 					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
@@ -1214,7 +1220,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				}
 			}
 		}
-		if apiType != constants.WS {
+		if swagger.apiType != constants.WS {
 			productionEndpoints, err := processEndpointUrls(unProcessedURLs)
 			if err == nil {
 				endpoints = append(endpoints, productionEndpoints...)
@@ -1230,7 +1236,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
-			if apiType == constants.WS {
+			if swagger.apiType == constants.WS {
 				sandBoxEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *sandBoxEndpoint)
@@ -1244,7 +1250,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
 			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
-				if apiType == constants.WS {
+				if swagger.apiType == constants.WS {
 					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
@@ -1256,7 +1262,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				}
 			}
 		}
-		if apiType != constants.WS {
+		if swagger.apiType != constants.WS {
 			sandboxEndpoints, err := processEndpointUrls(unProcessedURLs)
 			if err == nil {
 				endpoints = append(endpoints, sandboxEndpoints...)

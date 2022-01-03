@@ -17,7 +17,7 @@
 
 package constants
 
-// sub-property keys mentioned under x-wso2-production-endpoints
+// sub-property keys and values mentioned in API definitions
 const (
 	Urls                  string = "urls"
 	Type                  string = "type"
@@ -25,6 +25,15 @@ const (
 	FailOver              string = "failover"
 	AdvanceEndpointConfig string = "advanceEndpointConfig"
 	SecurityConfig        string = "securityConfig"
+	None                  string = "None"
+	DefaultSecurity       string = "default"
+
+	HTTP    string = "HTTP"
+	WS      string = "WS"
+	WEBHOOK string = "WEBHOOK"
+	SSE     string = "SSE"
+
+	InlineEndpointType string = "INLINE"
 )
 
 // Constants for OpenAPI vendor extension keys
@@ -40,8 +49,6 @@ const (
 	XAuthHeader          string = "x-wso2-auth-header"
 	XAuthType            string = "x-auth-type"
 	XWso2DisableSecurity string = "x-wso2-disable-security"
-	None                 string = "None"
-	DefaultSecurity      string = "default"
 )
 
 // cluster name prefixes
@@ -73,15 +80,20 @@ const (
 	OperationLevelInterceptor string = "operation"
 )
 
-// API type constants
-const (
-	HTTP    string = "HTTP"
-	WS      string = "WS"
-	WEBHOOK string = "WEBHOOK"
-)
-
 // Constants to represent errors
 const (
 	AlreadyExists string = "ALREADY_EXISTS"
 	NotFound      string = "NOT_FOUND"
+)
+
+// Constants used for version identification of API definitions
+const (
+	Swagger       string = "swagger"
+	OpenAPI       string = "openapi"
+	AsyncAPI      string = "asyncapi"
+	Swagger2      string = "swagger_2"
+	OpenAPI3      string = "openapi_3"
+	AsyncAPI2_0_0 string = "asyncapi_2.0.0"
+	NotDefined    string = "not_defined"
+	NotSupported  string = "not_supported"
 )

@@ -40,7 +40,7 @@ func GetOpenAPIVersionAndJSONContent(apiContent []byte) (string, []byte, error) 
 		logger.LoggerOasparser.Error("Error converting api file to json:", err)
 		return "", apiContent, err
 	}
-	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+	swaggerVersion := utills.FindAPIDefinitionVersion(apiJsn)
 	return swaggerVersion, apiJsn, nil
 }
 

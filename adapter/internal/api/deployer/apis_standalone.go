@@ -106,7 +106,7 @@ func ProcessMountedAPIProjects() error {
 
 func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err error) {
 	apiYaml := apiProject.APIYaml.Data
-	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
+	organizationID := config.GetControlPlaneConnectedTenantDomain()
 
 	// handle panic
 	defer func() {
@@ -140,7 +140,7 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err erro
 		// if the API already exists in the one of vhost, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiProject.OrganizationID) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, organizationID) {
 				exists = true
 				break
 			}

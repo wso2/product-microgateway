@@ -38,6 +38,7 @@ import (
 const (
 	openAPIDir                 string = "Definitions"
 	openAPIFilename            string = "swagger."
+	asyncAPIFilename           string = "asyncapi."
 	apiYAMLFile                string = "api.yaml"
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	endpointCertFile           string = "endpoint_certificates."
@@ -51,7 +52,6 @@ const (
 	lifeCycleStatus            string = "lifeCycleStatus"
 	securityScheme             string = "securityScheme"
 	endpointImplementationType string = "endpointImplementationType"
-	inlineEndpointType         string = "INLINE"
 	endpointSecurity           string = "endpoint_security"
 	production                 string = "production"
 	sandbox                    string = "sandbox"
@@ -102,6 +102,8 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 	apiProject.UpstreamCerts = make(map[string][]byte)
 	apiProject.EndpointCerts = make(map[string]string)
 	newLineByteArray := []byte("\n")
+
+	// Deployment file
 	if strings.Contains(fileName, deploymentsYAMLFile) {
 		loggers.LoggerAPI.Debug("Setting deployments of API")
 		deployments, err := parseDeployments(fileContent)
@@ -110,25 +112,33 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 				fileName, err.Error())
 		}
 		apiProject.Deployments = deployments
-	}
-	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
+
+		// API definition
+	} else if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) ||
+		strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+asyncAPIFilename) {
+
 		loggers.LoggerAPI.Debugf("openAPI file : %v", fileName)
 		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
 		if conversionErr != nil {
 			loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
 			return apiProject, conversionErr
 		}
-		apiProject.OpenAPIJsn = swaggerJsn
-		apiProject.APIType = constants.HTTP
+		apiProject.APIDefinition = swaggerJsn
+
+		// Interceptor certs
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
+
 		if !tlsutils.IsPublicCertificate(fileContent) {
 			loggers.LoggerAPI.Errorf("Provided interceptor certificate: %v is not in the PEM file format. ", fileName)
 			return apiProject, errors.New("interceptor certificate Validation Error")
 		}
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, fileContent...)
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, newLineByteArray...)
+
+		// Endpoint certs
 	} else if strings.Contains(fileName, endpointCertDir+string(os.PathSeparator)) {
+
 		if strings.Contains(fileName, endpointCertFile) {
 			epCertJSON, conversionErr := utills.ToJSON(fileContent)
 			if conversionErr != nil {
@@ -156,38 +166,49 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 				apiProject.UpstreamCerts[certFileName] = fileContent
 			}
 		}
+
+		// api.yaml or api.json
 	} else if (strings.Contains(fileName, apiYAMLFile) || strings.Contains(fileName, apiJSONFile)) &&
 		!strings.Contains(fileName, openAPIDir) {
-		loggers.LoggerAPI.Debugf("fileName : %v", fileName)
-		apiJsn, conversionErr := utills.ToJSON(fileContent)
-		if conversionErr != nil {
-			loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
-			return apiProject, conversionErr
-		}
-		var apiYaml model.APIYaml
-		err = json.Unmarshal(apiJsn, &apiYaml)
-		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
-			return apiProject, err
-		}
-		apiYaml.PopulateEndpointsInfo()
 
-		err = model.VerifyMandatoryFields(apiYaml)
+		apiYaml, err := ExtractAPIYaml(fileContent)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("%v", err)
-			return apiProject, err
-		}
-
-		if apiYaml.Data.EndpointImplementationType == inlineEndpointType {
-			errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
-			loggers.LoggerAPI.Warnf(errmsg)
-			err = errors.New(errmsg)
-			return apiProject, err
+			loggers.LoggerAPI.Errorf("Error while reading %v", fileName)
+			return apiProject, errors.New("Error while reading api.yaml or api.json")
 		}
 		apiProject.APIYaml = apiYaml
-		apiProject.PopulateAPIInfo(apiYaml)
 	}
 	return apiProject, nil
+}
+
+// ExtractAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json
+func ExtractAPIYaml(fileContent []byte) (apiYaml model.APIYaml, err error) {
+	apiJsn, err := utills.ToJSON(fileContent)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occurred converting api file to json: %v", err.Error())
+		return apiYaml, err
+	}
+
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occurred while parsing api.yaml or api.json %v", err.Error())
+		return apiYaml, err
+	}
+
+	apiYaml.PopulateEndpointsInfo()
+	err = apiYaml.VerifyMandatoryFields()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("%v", err)
+		return apiYaml, err
+	}
+
+	if apiYaml.Data.EndpointImplementationType == constants.InlineEndpointType {
+		errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
+		loggers.LoggerAPI.Warnf(errmsg)
+		err = errors.New(errmsg)
+		return apiYaml, err
+	}
+	return apiYaml, nil
 }
 
 func parseDeployments(data []byte) ([]model.Deployment, error) {
@@ -222,13 +243,13 @@ func parseDeployments(data []byte) ([]model.Deployment, error) {
 }
 
 // ValidateAPIType checks if the apiProject is properly assigned with the type.
-func ValidateAPIType(apiProject *model.ProjectAPI) error {
-	var err error
-	if apiProject.APIYaml.Type == "" {
+func ValidateAPIType(apiProject *model.ProjectAPI) (err error) {
+	apiType := strings.ToUpper(apiProject.APIYaml.Type)
+	if apiType == "" {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiProject.APIType != constants.HTTP && apiProject.APIType != constants.WS && apiProject.APIType != constants.WEBHOOK {
+	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.WEBHOOK {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		err = errors.New(errMsg)
 		return err
