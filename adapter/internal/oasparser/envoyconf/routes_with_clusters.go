@@ -1259,7 +1259,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
-		params.rewritePath, params.rewriteMethod = resource.GetRewritePath()
+		params.rewritePath, params.rewriteMethod = resource.GetRewriteResource()
 	}
 
 	if swagger.GetProdEndpoints() != nil {
