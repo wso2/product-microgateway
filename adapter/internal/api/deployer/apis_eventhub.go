@@ -53,10 +53,10 @@ func ApplyAPIProjectFromAPIM(
 		}
 	}()
 
-	if apiProject.OrganizationID == "" {
-		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
+	if apiYaml.OrganizationID == "" {
+		apiYaml.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	}
-	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
+	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID)
 
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
@@ -96,7 +96,7 @@ func ApplyAPIProjectFromAPIM(
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiProject.OrganizationID); err != nil {
+		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiYaml.OrganizationID); err != nil {
 			return deployedRevisionList, err
 		}
 	}

@@ -20,19 +20,13 @@ import "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIYaml            APIYaml
-	APIEnvProps        map[string]synchronizer.APIEnvProps
-	Deployments        []Deployment
-	OpenAPIJsn         []byte
-	InterceptorCerts   []byte
-	APIType            string // read from api.yaml and formatted to upper case
-	APILifeCycleStatus string // read from api.yaml and formatted to upper case
-	OrganizationID     string // read from api.yaml or config
-
-	//UpstreamCerts cert filename -> cert bytes
-	UpstreamCerts map[string][]byte
-	//EndpointCerts url -> cert filename
-	EndpointCerts map[string]string
+	APIYaml          APIYaml
+	APIEnvProps      map[string]synchronizer.APIEnvProps
+	Deployments      []Deployment
+	APIDefinition    []byte
+	InterceptorCerts []byte
+	UpstreamCerts    map[string][]byte // cert filename -> cert bytes
+	EndpointCerts    map[string]string // cert url -> cert filename
 }
 
 // EndpointSecurity contains parameters of endpoint security at api.json
@@ -42,12 +36,6 @@ type EndpointSecurity struct {
 	Enabled          bool              `json:"enabled,omitempty" mapstructure:"enabled"`
 	Username         string            `json:"username,omitempty" mapstructure:"username"`
 	CustomParameters map[string]string `json:"customparameters,omitempty" mapstructure:"customparameters"`
-}
-
-// APIEndpointSecurity represents the structure of endpoint_security param in api.yaml
-type APIEndpointSecurity struct {
-	Production EndpointSecurity `json:"production,omitempty"`
-	Sandbox    EndpointSecurity `json:"sandbox,omitempty"`
 }
 
 // ApimMeta represents APIM meta information of files received from APIM
@@ -82,47 +70,4 @@ type EndpointCertificate struct {
 	Alias       string `json:"alias"`
 	Endpoint    string `json:"endpoint"`
 	Certificate string `json:"certificate"`
-}
-
-// APIYaml contains everything necessary to extract api.json/api.yaml file
-// To support both api.json and api.yaml we convert yaml to json and then use json.Unmarshal()
-// Therefore, the params are defined to support json.Unmarshal()
-type APIYaml struct {
-	ApimMeta
-	Data struct {
-		ID                         string   `json:"Id,omitempty"`
-		Name                       string   `json:"name,omitempty"`
-		Context                    string   `json:"context,omitempty"`
-		Version                    string   `json:"version,omitempty"`
-		RevisionID                 int      `json:"revisionId,omitempty"`
-		APIType                    string   `json:"type,omitempty"`
-		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
-		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
-		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
-		SecurityScheme             []string `json:"securityScheme,omitempty"`
-		OrganizationID             string   `json:"organizationId,omitempty"`
-		EndpointConfig             struct {
-			EndpointType                 string              `json:"endpoint_type,omitempty"`
-			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
-			LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
-			LoadBalanceSessionTimeOut    string              `json:"sessionTimeOut,omitempty"`
-			APIEndpointSecurity          APIEndpointSecurity `json:"endpoint_security,omitempty"`
-			RawProdEndpoints             interface{}         `json:"production_endpoints,omitempty"`
-			ProductionEndpoints          []EndpointInfo
-			ProductionFailoverEndpoints  []EndpointInfo `json:"production_failovers,omitempty"`
-			RawSandboxEndpoints          interface{}    `json:"sandbox_endpoints,omitempty"`
-			SandBoxEndpoints             []EndpointInfo
-			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
-			ImplementationStatus         string         `json:"implementation_status,omitempty"`
-		} `json:"endpointConfig,omitempty"`
-	} `json:"data"`
-}
-
-// EndpointInfo holds config values regards to the endpoint
-type EndpointInfo struct {
-	Endpoint string `json:"url,omitempty"`
-	Config   struct {
-		ActionDuration string `json:"actionDuration,omitempty"`
-		RetryTimeOut   string `json:"retryTimeOut,omitempty"`
-	} `json:"config,omitempty"`
 }

@@ -25,8 +25,57 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
-// VerifyMandatoryFields check and pupulates the mandatory fields if null
-func VerifyMandatoryFields(apiYaml APIYaml) error {
+// APIYaml contains everything necessary to extract api.json/api.yaml file
+// To support both api.json and api.yaml we convert yaml to json and then use json.Unmarshal()
+// Therefore, the params are defined to support json.Unmarshal()
+type APIYaml struct {
+	ApimMeta
+	Data struct {
+		ID                         string   `json:"Id,omitempty"`
+		Name                       string   `json:"name,omitempty"`
+		Context                    string   `json:"context,omitempty"`
+		Version                    string   `json:"version,omitempty"`
+		RevisionID                 int      `json:"revisionId,omitempty"`
+		APIType                    string   `json:"type,omitempty"`
+		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
+		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
+		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
+		SecurityScheme             []string `json:"securityScheme,omitempty"`
+		OrganizationID             string   `json:"organizationId,omitempty"`
+		EndpointConfig             struct {
+			EndpointType                 string              `json:"endpoint_type,omitempty"`
+			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
+			LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
+			LoadBalanceSessionTimeOut    string              `json:"sessionTimeOut,omitempty"`
+			APIEndpointSecurity          APIEndpointSecurity `json:"endpoint_security,omitempty"`
+			RawProdEndpoints             interface{}         `json:"production_endpoints,omitempty"`
+			ProductionEndpoints          []EndpointInfo
+			ProductionFailoverEndpoints  []EndpointInfo `json:"production_failovers,omitempty"`
+			RawSandboxEndpoints          interface{}    `json:"sandbox_endpoints,omitempty"`
+			SandBoxEndpoints             []EndpointInfo
+			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
+			ImplementationStatus         string         `json:"implementation_status,omitempty"`
+		} `json:"endpointConfig,omitempty"`
+	} `json:"data"`
+}
+
+// APIEndpointSecurity represents the structure of endpoint_security param in api.yaml
+type APIEndpointSecurity struct {
+	Production EndpointSecurity `json:"production,omitempty"`
+	Sandbox    EndpointSecurity `json:"sandbox,omitempty"`
+}
+
+// EndpointInfo holds config values regards to the endpoint
+type EndpointInfo struct {
+	Endpoint string `json:"url,omitempty"`
+	Config   struct {
+		ActionDuration string `json:"actionDuration,omitempty"`
+		RetryTimeOut   string `json:"retryTimeOut,omitempty"`
+	} `json:"config,omitempty"`
+}
+
+// VerifyMandatoryFields check and populates the mandatory fields if null
+func (apiYaml *APIYaml) VerifyMandatoryFields() error {
 	var errMsg string = ""
 	var apiName string = apiYaml.Data.Name
 	var apiVersion string = apiYaml.Data.Version
@@ -66,14 +115,6 @@ func VerifyMandatoryFields(apiYaml APIYaml) error {
 		}
 	}
 	return nil
-}
-
-// PopulateAPIInfo reads the values in api.yaml/api.json and populates ProjectAPI struct
-func (apiProject *ProjectAPI) PopulateAPIInfo(apiYaml APIYaml) {
-	apiProject.APIType = strings.ToUpper(apiYaml.Data.APIType)
-	apiProject.APILifeCycleStatus = strings.ToUpper(apiYaml.Data.LifeCycleStatus)
-	// organization ID would remain empty string if unassigned
-	apiProject.OrganizationID = apiYaml.Data.OrganizationID
 }
 
 // PopulateEndpointsInfo this will map sandbox and prod endpoint
