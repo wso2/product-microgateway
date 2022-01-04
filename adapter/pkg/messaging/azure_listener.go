@@ -22,6 +22,7 @@ import (
 	"context"
 	"strings"
 	"time"
+
 	servicebus "github.com/Azure/azure-service-bus-go"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
@@ -59,12 +60,14 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 			defer cancel()
 			err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
 				message *servicebus.Message) error {
+				logger.LoggerMgw.Infof("Message %s from ASB waits to be processed.", message.ID)
 				dataChannel <- message.Data
+				logger.LoggerMgw.Infof("Message %s from ASB is complete", message.ID)
 				return message.Complete(ctx)
 			}))
 		}()
 		if err != nil {
-			logger.LoggerMgw.Errorf("Error occurred while listening to subscription %s from azure " +
+			logger.LoggerMgw.Errorf("Error occurred while listening to subscription %s from azure "+
 				"service bus for topic name %s:%v. Hence retrying in %s", subscriptionName, topicName, err, reconnectInterval)
 			time.Sleep(reconnectInterval)
 		}
