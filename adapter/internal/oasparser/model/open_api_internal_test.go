@@ -106,7 +106,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 			[]*Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []*Operation{{"7678768", "GET", nil, "", false, nil}},
+					methods:     []*Operation{{"", "GET", nil, "", false, nil}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",
@@ -120,6 +120,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 		assert.Nil(t, err, "No error should be encountered when setting resources")
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
+			resultResources[0].GetMethod()[0].iD = item.result[0].methods[0].iD
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
 			assert.Equal(t, item.result[0].description, resultResources[0].description, item.message)
 			assert.Equal(t, item.result[0].summary, resultResources[0].summary, item.message)

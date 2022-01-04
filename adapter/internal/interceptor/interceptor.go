@@ -33,7 +33,7 @@ type Interceptor struct {
 	ResponseFlow       map[string]Config // key:operation method -> value:config
 }
 
-//HTTPCallConfig hold values used for external interceptor engine
+//Config hold config values used for request/response interceptors
 type Config struct {
 	Enable       bool
 	ExternalCall *HTTPCallConfig
