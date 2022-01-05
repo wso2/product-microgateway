@@ -910,8 +910,8 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 	}
 	if len(responseInterceptor) > 0 {
 		i.ResponseFlowEnable = true
-		for method, op := range requestInterceptor {
-			i.RequestFlow[method] = interceptor.Config{
+		for method, op := range responseInterceptor {
+			i.ResponseFlow[method] = interceptor.Config{
 				ExternalCall: &interceptor.HTTPCallConfig{
 					ClusterName: op.ClusterName,
 					// multiplying in seconds here because in configs we are directly getting config to time.Duration

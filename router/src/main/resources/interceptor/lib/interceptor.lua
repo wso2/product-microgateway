@@ -278,6 +278,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     local req_flow_includes = {}
     if intercept_service_list[method] == nil or req_flow_includes_list[method] == nil then
         skip_interceptor_call = true
+        request_handle:logDebug("Method " .. method .. "is not included in configs. Hence request interceptor is not applied.")
     else
         intercept_service = intercept_service_list[method]
         req_flow_includes = req_flow_includes_list[method]
@@ -390,11 +391,13 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     local method = shared_info[REQUEST.REQ_HEADERS][":method"]
     if method == nil then
+        response_handle:logErr("Header :method is missing in shared info's request headers.")
         return
     end
     local resp_flow_includes = resp_flow_includes_list[method]
     local intercept_service = intercept_service_list[method]
     if resp_flow_includes == nil or intercept_service == nil then
+        response_handle:logDebug("Method " .. method .. " is missing in response configs. Hence response interceptor is not applied.")
         return
     end
 
