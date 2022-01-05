@@ -75,46 +75,40 @@ var (
 	// commonTemplate contains common lua code for request and response intercept
 	// Note: this template only applies if request or response interceptor is enabled
 	commonTemplate = `
-  local interceptor = require 'home.wso2.interceptor.lib.interceptor'
-  {{if .ResponseFlowEnable}} {{/* resp_flow details are required in req flow if request info needed in resp flow */}}
-  local resp_flow_list = {  {{ range $key, $value := .ResponseFlow }} {{ $key }}={invocationContext={{$value.Include.InvocationContext}}, requestHeaders={{$value.Include.RequestHeaders}}, requestBody={{$value.Include.RequestBody}}, requestTrailer={{$value.Include.RequestTrailer}},
-          responseHeaders={{$value.Include.ResponseHeaders}}, responseBody={{$value.Include.ResponseBody}}, responseTrailers={{$value.Include.ResponseTrailers}}},
-  {{ end }}}
-  {{else}}local resp_flow_list = {}{{end}} {{/* if resp_flow disabled no need req info in resp path */}}
-  local inv_context = {
-      organizationId = "{{.Context.OrganizationID}}",
-      basePath = "{{.Context.BasePath}}",
-      supportedMethods = "{{.Context.SupportedMethods}}",
-      apiName = "{{.Context.APIName}}",
-      apiVersion = "{{.Context.APIVersion}}",
-      pathTemplate = "{{.Context.PathTemplate}}",
-      vhost = "{{.Context.Vhost}}",
-      prodClusterName = "{{.Context.ProdClusterName}}",
-      sandClusterName = "{{.Context.SandClusterName}}"
-  }
+local interceptor = require 'home.wso2.interceptor.lib.interceptor'
+{{if .ResponseFlowEnable}} {{/* resp_flow details are required in req flow if request info needed in resp flow */}}
+local resp_flow_list = {  {{ range $key, $value := .ResponseFlow }} {{ $key }}={invocationContext={{$value.Include.InvocationContext}}, requestHeaders={{$value.Include.RequestHeaders}}, requestBody={{$value.Include.RequestBody}}, requestTrailer={{$value.Include.RequestTrailer}},
+		responseHeaders={{$value.Include.ResponseHeaders}}, responseBody={{$value.Include.ResponseBody}}, responseTrailers={{$value.Include.ResponseTrailers}}}, {{ end }}}
+{{else}}local resp_flow_list = {}{{end}} {{/* if resp_flow disabled no need req info in resp path */}}
+local inv_context = {
+	organizationId = "{{.Context.OrganizationID}}",
+	basePath = "{{.Context.BasePath}}",
+	supportedMethods = "{{.Context.SupportedMethods}}",
+	apiName = "{{.Context.APIName}}",
+	apiVersion = "{{.Context.APIVersion}}",
+	pathTemplate = "{{.Context.PathTemplate}}",
+	vhost = "{{.Context.Vhost}}",
+	prodClusterName = "{{.Context.ProdClusterName}}",
+	sandClusterName = "{{.Context.SandClusterName}}"
+}
   `
 	requestInterceptorTemplate = `
- local req_flow_list = {  {{ range $key, $value := .RequestFlow }} {{ $key }}={invocationContext={{$value.Include.InvocationContext}}, requestHeaders={{$value.Include.RequestHeaders}}, requestBody={{$value.Include.RequestBody}}, requestTrailer={{$value.Include.RequestTrailer}}},
- {{ end }}}
- local req_call_config = {  {{ range $key, $value := .RequestFlow }} {{ $key }}={ClusterName="{{$value.ExternalCall.ClusterName}}", Timeout={{$value.ExternalCall.Timeout}}},
- {{ end }}}
- function envoy_on_request(request_handle)
+local req_flow_list = {  {{ range $key, $value := .RequestFlow }} {{ $key }}={invocationContext={{$value.Include.InvocationContext}}, requestHeaders={{$value.Include.RequestHeaders}}, requestBody={{$value.Include.RequestBody}}, requestTrailer={{$value.Include.RequestTrailer}}}, {{ end }}}
+local req_call_config = {  {{ range $key, $value := .RequestFlow }} {{ $key }}={cluster_name="{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}}, {{ end }}}
+function envoy_on_request(request_handle)
 	interceptor.handle_request_interceptor(
 		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context
 	)
- end
+end
  `
-	//get method in response flow
+
 	responseInterceptorTemplate = `
- local res_call_config = {
-     {{ range $key, $value := .ResponseFlow }}
-     {{ $key }}= {ClusterName="{{$value.ExternalCall.ClusterName}}", Timeout={{$value.ExternalCall.Timeout}}}
-     {{ end }}}
- function envoy_on_response(response_handle)
+local res_call_config = {  {{ range $key, $value := .ResponseFlow }} {{ $key }} = {cluster_name="{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}}, {{ end }}}
+function envoy_on_response(response_handle)
 	interceptor.handle_response_interceptor(
 		response_handle, res_call_config, resp_flow_list
 	)
- end
+end
  `
 	// defaultRequestInterceptorTemplate is the template that is applied when request flow is disabled
 	// just updated req flow info with  resp flow without calling interceptor service
@@ -146,7 +140,6 @@ func GetInterceptor(values *Interceptor) string {
 		logger.LoggerInterceptor.Error("executing request interceptor template:", err)
 		return ""
 	}
-	println(out.String())
 	return out.String()
 }
 
