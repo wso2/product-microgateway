@@ -22,8 +22,9 @@ import (
 	"context"
 	"strings"
 	"time"
+
 	servicebus "github.com/Azure/azure-service-bus-go"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
 func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval time.Duration) {
@@ -48,23 +49,25 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 		//topic subscription client creation
 		topicSubscriptionClient, err := subscriptionMetaData.subscriptionManager.Topic.NewSubscription(subscriptionName)
 		if err != nil {
-			logger.LoggerMgw.Errorf("Error occurred while trying to create "+
+			logger.LoggerMsg.Errorf("Error occurred while trying to create "+
 				"topic subscription client for %s from azure service bus for topic name %s:%v.",
 				subscriptionName, topicName, err)
 		}
-		logger.LoggerMgw.Info("Starting the consumer for subscriptionName " + subscriptionName +
+		logger.LoggerMsg.Info("Starting the consumer for subscriptionName " + subscriptionName +
 			" from azure service bus for topic name " + topicName)
 		func() {
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
 			err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
 				message *servicebus.Message) error {
+				logger.LoggerMsg.Debugf("Message %s from ASB waits to be processed.", message.ID)
 				dataChannel <- message.Data
+				logger.LoggerMsg.Debugf("Message %s from ASB is complete", message.ID)
 				return message.Complete(ctx)
 			}))
 		}()
 		if err != nil {
-			logger.LoggerMgw.Errorf("Error occurred while listening to subscription %s from azure " +
+			logger.LoggerMsg.Errorf("Error occurred while listening to subscription %s from azure "+
 				"service bus for topic name %s:%v. Hence retrying in %s", subscriptionName, topicName, err, reconnectInterval)
 			time.Sleep(reconnectInterval)
 		}
