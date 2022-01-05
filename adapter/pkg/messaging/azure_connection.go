@@ -27,7 +27,7 @@ import (
 	asb "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus/admin"
 	"github.com/google/uuid"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
 // TODO: (erandi) when refactoring, refactor organization purge flow as well
@@ -71,7 +71,7 @@ func InitiateBrokerConnectionAndValidate(connectionString string, componentName 
 	_, err := asb.NewClientFromConnectionString(connectionString, nil)
 
 	if err == nil {
-		logger.LoggerMgw.Debugf("ASB client initialized for connection url: %s", connectionString)
+		logger.LoggerMsg.Debugf("ASB client initialized for connection url: %s", connectionString)
 
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
 			err = nil
@@ -86,13 +86,13 @@ func InitiateBrokerConnectionAndValidate(connectionString string, componentName 
 			return subscriptionMetaDataList, err
 		}
 		if err != nil {
-			logger.LoggerMgw.Errorf("%v. Retry attempted %d times.", err, reconnectRetryCount)
+			logger.LoggerMsg.Errorf("%v. Retry attempted %d times.", err, reconnectRetryCount)
 			return subscriptionMetaDataList, err
 		}
 	} else {
 		// any error which comes to this point is because the connection url is not up to the expected format
 		// hence not retrying
-		logger.LoggerMgw.Errorf("Error occurred while trying to create ASB client using the connection url %s, err: %v",
+		logger.LoggerMsg.Errorf("Error occurred while trying to create ASB client using the connection url %s, err: %v",
 			connectionString, err)
 	}
 	return subscriptionMetaDataList, err
@@ -112,7 +112,7 @@ func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString 
 	parentContext := context.Background()
 	adminClient, clientErr := admin.NewClientFromConnectionString(connectionString, nil)
 	if clientErr != nil {
-		logger.LoggerMgw.Errorf("Error occurred while trying to create ASB admin client using the connection url %s", connectionString)
+		logger.LoggerMsg.Errorf("Error occurred while trying to create ASB admin client using the connection url %s", connectionString)
 		return nil, clientErr
 	}
 
@@ -140,7 +140,7 @@ func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString 
 				key + "." + subscriptionCreationError.Error())
 			return metaDataList, errorValue
 		}
-		logger.LoggerMgw.Debugf("Subscription %s created.", subscriptionName)
+		logger.LoggerMsg.Debugf("Subscription %s created.", subscriptionName)
 		subscriptionMetaData.subscriptionName = subscriptionName
 		subscriptionMetaData.topicName = key
 		metaDataList = append(metaDataList, subscriptionMetaData)
@@ -153,5 +153,5 @@ func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal e
 	if reconnectRetryCount > 0 {
 		retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
 	}
-	logger.LoggerMgw.Errorf("%v. %s .Retrying after %s seconds", errVal, retryAttemptMessage, reconnectInterval)
+	logger.LoggerMsg.Errorf("%v. %s .Retrying after %s seconds", errVal, retryAttemptMessage, reconnectInterval)
 }

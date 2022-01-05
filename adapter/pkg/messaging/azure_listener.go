@@ -24,7 +24,7 @@ import (
 	"time"
 
 	asb "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
 func startBrokerConsumer(connectionString string, sub Subscription, reconnectInterval time.Duration) {
@@ -49,18 +49,18 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 		// initializing the receiver client
 		subClient, err := asb.NewClientFromConnectionString(connectionString, nil)
 		if err != nil {
-			logger.LoggerMgw.Errorf("Failed to create ASB client for %s , topic:  %s. error: %v.",
+			logger.LoggerMsg.Errorf("Failed to create ASB client for %s , topic:  %s. error: %v.",
 				subName, topic, err)
 			continue
 		}
 		receiver, err := subClient.NewReceiverForSubscription(topic, subName, nil)
 		if err != nil {
-			logger.LoggerMgw.Errorf("Failed to create ASB receiver for %s , topic:  %s. error: %v.",
+			logger.LoggerMsg.Errorf("Failed to create ASB receiver for %s , topic:  %s. error: %v.",
 				subName, topic, err)
 			continue
 		}
 
-		logger.LoggerMgw.Infof("Starting the ASB consumer for subscription: %s, topic: %s", subName, topic)
+		logger.LoggerMsg.Infof("Starting the ASB consumer for subscription: %s, topic: %s", subName, topic)
 		func() {
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
@@ -69,23 +69,23 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 			for {
 				messages, err := receiver.ReceiveMessages(ctx, 10, nil)
 				if err != nil {
-					logger.LoggerMgw.Errorf("Failed to receive messages from ASB. %v", err)
+					logger.LoggerMsg.Errorf("Failed to receive messages from ASB. %v", err)
 					time.Sleep(reconnectInterval)
 					continue
 				}
 				for _, message := range messages {
 					body, err := message.Body()
 					if err != nil {
-						logger.LoggerMgw.Errorf("Failed to parse the ASB message. %v", err)
+						logger.LoggerMsg.Errorf("Failed to parse the ASB message. %v", err)
 					}
 
-					logger.LoggerMgw.Debugf("Message %s from ASB waits to be processed.", message.MessageID)
+					logger.LoggerMsg.Debugf("Message %s from ASB waits to be processed.", message.MessageID)
 					dataChannel <- body
-					logger.LoggerMgw.Debugf("Message %s from ASB is complete", message.MessageID)
+					logger.LoggerMsg.Debugf("Message %s from ASB is complete", message.MessageID)
 
 					err = receiver.CompleteMessage(ctx, message)
 					if err != nil {
-						logger.LoggerMgw.Warnf("Failed to complete the ASB message. %v", err)
+						logger.LoggerMsg.Warnf("Failed to complete the ASB message. %v", err)
 					}
 				}
 			}
