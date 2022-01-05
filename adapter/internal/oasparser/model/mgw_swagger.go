@@ -1005,6 +1005,7 @@ func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndp
 
 	for _, op := range operations {
 		operationInterceptor, _ := swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, "operation")
+		operationInterceptor.ClusterName = op.iD
 		// if operation interceptor not given add resource level interceptor
 		if !operationInterceptor.Enable {
 			operationInterceptor = resourceInterceptor
@@ -1015,7 +1016,6 @@ func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndp
 		}
 		// add opertaion to the list only if an interceptor is enabled for the operation
 		if operationInterceptor.Enable {
-			operationInterceptor.ClusterName = op.iD
 			interceptorOperationMap[strings.ToUpper(op.method)] = operationInterceptor
 		}
 	}

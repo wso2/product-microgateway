@@ -366,9 +366,9 @@ end
 
 ---interceptor handler for response flow
 ---@param response_handle table - response_handle
----@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
----@param resp_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
-function interceptor.handle_response_interceptor(response_handle, intercept_service, resp_flow_includes)
+---@param intercept_service_list {method: {cluster_name: string, resource_path: string, timeout: number}}
+---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
+function interceptor.handle_response_interceptor(response_handle, intercept_service_list, resp_flow_includes_list)
     local meta = response_handle:streamInfo():dynamicMetadata():get(LUA_FILTER_NAME)
     local shared_info = meta and meta[SHARED_INFO_META_KEY]
     if not shared_info then
@@ -376,6 +376,16 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         -- TODO: (renuka) check again, if we want to go response flow if enforcer validation failed, have to set request info metadata from enforcer
         return
     end
+    local method = shared_info[REQUEST.REQ_HEADERS][":method"]
+    if method == nil then
+        return
+    end
+    local resp_flow_includes = resp_flow_includes_list[method]
+    local intercept_service = intercept_service_list[method]
+    if resp_flow_includes == nil or intercept_service == nil then
+        return
+    end
+
     local request_id = shared_info[SHARED.REQUEST_ID]
     if shared_info[RESPONSE.DIRECT_RESPOND] then
         response_handle:logDebug("Ignoring response path intercept since direct responded for the request_id: " .. request_id)
