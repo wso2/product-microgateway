@@ -276,12 +276,12 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
 
     local intercept_service = intercept_service_list[method]
     local req_flow_includes = req_flow_includes_list[method]
+    local noMethod = false
     if intercept_service == nil or req_flow_includes == nil then
+        noMethod = true
         if skip_interceptor_call then 
             intercept_service = {}
             req_flow_includes = {}
-        else
-            return
         end
     end
 
@@ -337,7 +337,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     end
     --#endregion
 
-    if skip_interceptor_call then
+    if skip_interceptor_call or noMethod then
         -- skip calling interceptor service by only setting the shared_info
         -- this is useful when the request interceptor flow is disabled and only the response interceptor flow is enabled.
         request_handle:streamInfo():dynamicMetadata():set(LUA_FILTER_NAME, SHARED_INFO_META_KEY, shared_info)
