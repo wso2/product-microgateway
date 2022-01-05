@@ -99,18 +99,9 @@ var (
  local req_call_config = {  {{ range $key, $value := .RequestFlow }} {{ $key }}={ClusterName="{{$value.ExternalCall.ClusterName}}", Timeout={{$value.ExternalCall.Timeout}}},
  {{ end }}}
  function envoy_on_request(request_handle)
-     method=request_handle:headers():get(":method")
-	 if req_flow_list[method] ~= nil and req_call_config[method] ~= nil then
-		resp_flow = {}
-		if req_flow_list[method] ~= nil then
-			resp_flow = resp_flow_list[method]
-		end
-		interceptor.handle_request_interceptor(
-			request_handle,
-			{cluster_name=req_call_config[method].ClusterName, timeout=req_call_config[method].Timeout},
-			req_flow_list[method], resp_flow, inv_context
-		)
-	 end
+	interceptor.handle_request_interceptor(
+		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context
+	)
  end
  `
 	//get method in response flow
@@ -120,23 +111,16 @@ var (
      {{ $key }}= {ClusterName="{{$value.ExternalCall.ClusterName}}", Timeout={{$value.ExternalCall.Timeout}}}
      {{ end }}}
  function envoy_on_response(response_handle)
-	 if resp_flow_list[method] ~= nil and res_call_config[method] ~= nil then
-		interceptor.handle_response_interceptor(
-			response_handle, res_call_config, resp_flow_list
-		)
-	 end
+	interceptor.handle_response_interceptor(
+		response_handle, res_call_config, resp_flow_list
+	)
  end
  `
 	// defaultRequestInterceptorTemplate is the template that is applied when request flow is disabled
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
  function envoy_on_request(request_handle)
-     method=request_handle:headers():get(":method")
- 	 resp_flow = {}
- 	 if resp_flow_list[method] ~= nil and res_call_config[method] ~= nil then
-	  	resp_flow = resp_flow_list[method]
-	 end
-	 interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow, inv_context, true)
+	 interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true)
  end
  `
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled

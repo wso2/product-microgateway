@@ -261,17 +261,34 @@ end
 
 ---interceptor handler for request flow
 ---@param request_handle table - request_handle
----@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
----@param req_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean}
----@param resp_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
+---@param intercept_service_list {method: {cluster_name: string, resource_path: string, timeout: number}}
+---@param req_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean}}
+---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
 ---@param inv_context table
 ---@param skip_interceptor_call boolean
-function interceptor.handle_request_interceptor(request_handle, intercept_service, req_flow_includes, resp_flow_includes, inv_context, skip_interceptor_call)
+function interceptor.handle_request_interceptor(request_handle, intercept_service_list, req_flow_includes_list, resp_flow_includes_list, inv_context, skip_interceptor_call)
     local shared_info = {}
 
     local request_headers = request_handle:headers()
     local request_id = request_headers:get("x-request-id")
+    local method = request_headers:get(":method")
     shared_info[SHARED.REQUEST_ID] = request_id
+
+    local intercept_service = intercept_service_list[method]
+    local req_flow_includes = req_flow_includes_list[method]
+    if intercept_service == nil or req_flow_includes == nil then
+        if skip_interceptor_call then 
+            intercept_service = {}
+            req_flow_includes = {}
+        else
+            return
+        end
+    end
+
+    local resp_flow_includes = {}
+    if resp_flow_includes_list[method] ~= nil then
+        resp_flow_includes = resp_flow_includes_list[method]
+    end
 
     local interceptor_request_body = {}
     -- including invocation context first it is required to read headers
