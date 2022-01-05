@@ -295,14 +295,11 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
 
     --#region read request headers and update shared_info
     local request_headers_table = {}
-    if req_flow_includes[INCLUDES.REQ_HEADERS] or resp_flow_includes[INCLUDES.REQ_HEADERS] then
-        for key, value in pairs(request_headers) do
-            request_headers_table[key] = value
-        end
+    for key, value in pairs(request_headers) do
+        request_headers_table[key] = value
     end
-    if resp_flow_includes[INCLUDES.REQ_HEADERS] then
-        shared_info[REQUEST.REQ_HEADERS] = request_headers_table
-    end
+    shared_info[REQUEST.REQ_HEADERS] = request_headers_table
+    
     --#endregion
 
     --#region read request body and update shared_info

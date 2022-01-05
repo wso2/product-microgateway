@@ -72,11 +72,11 @@ paths:
         '200':
           description: successful operation
   /pet/findByStatus/resp-intercept-enabled:
-    x-wso2-response-interceptor: # Resource level interceptor definition
-      serviceURL: https://mockBackend:2371
-      includes:
-        - request_headers
     post:
+      x-wso2-response-interceptor: # Operational level interceptor definition
+        serviceURL: https://mockBackend:2371
+        includes:
+          - request_headers
       tags:
         - pet
       summary: Finds Pets by status

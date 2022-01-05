@@ -290,15 +290,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		operationalReqInterceptors := mgwSwagger.GetOperationInterceptors(apiRequestInterceptor, resourceRequestInterceptor, resource.GetMethod(),
 			xWso2requestInterceptor)
 		for method, opI := range operationalReqInterceptors {
-			println(opI.Enable)
-			println(opI.Level)
 			if opI.Enable && opI.Level == "operation" {
 				logger.LoggerOasparser.Debugf("Operation level request interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
 					opI.ClusterName)
-
-				println(opI.ClusterName)
 				opI.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opI.ClusterName)
-				println(opI.ClusterName)
 				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
 				if err != nil {
 					logger.LoggerOasparser.Errorf("Error while adding operational level request intercept external cluster for %s. %v",
