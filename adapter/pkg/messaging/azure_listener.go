@@ -46,19 +46,17 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 	parentContext := context.Background()
 
 	for {
-		// initializing the receiver client connection
+		// initializing the receiver client
 		subClient, err := asb.NewClientFromConnectionString(connectionString, nil)
 		if err != nil {
 			logger.LoggerMgw.Errorf("Failed to create ASB client for %s , topic:  %s. error: %v.",
 				subName, topic, err)
-			time.Sleep(reconnectInterval)
 			continue
 		}
 		receiver, err := subClient.NewReceiverForSubscription(topic, subName, nil)
 		if err != nil {
 			logger.LoggerMgw.Errorf("Failed to create ASB receiver for %s , topic:  %s. error: %v.",
 				subName, topic, err)
-			time.Sleep(reconnectInterval)
 			continue
 		}
 
@@ -67,13 +65,13 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
 
+			// keep receiving messages from asb
 			for {
 				messages, err := receiver.ReceiveMessages(ctx, 10, nil)
 				if err != nil {
 					logger.LoggerMgw.Errorf("Failed to receive messages from ASB. %v", err)
-					// there can be an unrecoverable error here. Therefore its safer to exit ReceiveMessage loop and
-					// try to reconnect to ASB
-					break
+					time.Sleep(reconnectInterval)
+					continue
 				}
 				for _, message := range messages {
 					body, err := message.Body()
@@ -81,7 +79,10 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 						logger.LoggerMgw.Errorf("Failed to parse the ASB message. %v", err)
 					}
 
+					logger.LoggerMgw.Debugf("Message %s from ASB waits to be processed.", message.MessageID)
 					dataChannel <- body
+					logger.LoggerMgw.Debugf("Message %s from ASB is complete", message.MessageID)
+
 					err = receiver.CompleteMessage(ctx, message)
 					if err != nil {
 						logger.LoggerMgw.Warnf("Failed to complete the ASB message. %v", err)
