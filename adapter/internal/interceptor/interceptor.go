@@ -133,6 +133,13 @@ end
 function envoy_on_response(response_handle)
 end
 `
+	// emptyRequestInterceptorTemplate is the template that is applied when request flow and response flow is disabled
+	emptyInterceptorTemplate = `
+function envoy_on_request(request_handle)
+end
+function envoy_on_response(response_handle)
+end
+`
 )
 
 //GetInterceptor inject values and get request interceptor
@@ -142,14 +149,14 @@ func GetInterceptor(values *Interceptor) string {
 		values.ResponseFlowEnable))
 	if err != nil {
 		logger.LoggerInterceptor.Error("error while parsing the interceptor template:", err)
-		return ""
+		return emptyInterceptorTemplate
 	}
 	templ := template.Must(t, err)
 	var out bytes.Buffer
 	err = templ.Execute(&out, values)
 	if err != nil {
 		logger.LoggerInterceptor.Error("executing request interceptor template:", err)
-		return ""
+		return emptyInterceptorTemplate
 	}
 	return out.String()
 }
