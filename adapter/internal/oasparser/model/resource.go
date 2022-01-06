@@ -98,10 +98,10 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 	for _, method := range resource.methods {
 		if len(method.policies.In) > 0 {
 			for _, policy := range method.policies.In {
-				if strings.EqualFold(REWRITE_PATH_TEMPLATE, policy.TemplateName) {
+				if strings.EqualFold(RewritePathTemplate, policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						if paramValue, found := paramMap[REWRITE_PATH_RESOURCE_PATH]; found {
-							if v, orderExists := paramMap[ORDER]; orderExists {
+						if paramValue, found := paramMap[RewritePathResourcePath]; found {
+							if v, orderExists := paramMap[Order]; orderExists {
 								if pathOrder > v.(int) {
 									continue
 								}
@@ -113,7 +113,7 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 							}
 						}
 					}
-				} else if strings.EqualFold(REWRITE_METHOD_TEMPLATE, policy.TemplateName) {
+				} else if strings.EqualFold(RewriteMethodTemplate, policy.TemplateName) {
 					rewriteMethod = true
 				}
 			}
@@ -133,10 +133,10 @@ func (resource *Resource) GetCallInterceptorService(isIn bool) InterceptEndpoint
 		}
 		if len(policies) > 0 {
 			for _, policy := range policies {
-				if strings.EqualFold(INTERCEPTOR_SERVICE_TEMPLATE, policy.TemplateName) {
+				if strings.EqualFold(InterceptorServiceTemplate, policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						urlValue, urlFound := paramMap[INTERCEPTOR_SERVICE_URL]
-						includesValue, includesFound := paramMap[INTERCEPTOR_SERVICE_INCLUDES]
+						urlValue, urlFound := paramMap[InterceptorServiceURL]
+						includesValue, includesFound := paramMap[InterceptorServiceIncludes]
 						if urlFound {
 							url, isString := urlValue.(string)
 							if isString && url != "" {

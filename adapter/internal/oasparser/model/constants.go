@@ -89,11 +89,11 @@ const (
 
 // operational policy field names
 const (
-	REWRITE_METHOD_TEMPLATE      string = "REWRITE_RESOURCE_METHOD"
-	INTERCEPTOR_SERVICE_TEMPLATE string = "CALL_INTERCEPTOR_SERVICE"
-	REWRITE_PATH_TEMPLATE        string = "REWRITE_RESOURCE_PATH"
-	REWRITE_PATH_RESOURCE_PATH   string = "resourcePath"
-	INTERCEPTOR_SERVICE_URL      string = "interceptorServiceURL"
-	INTERCEPTOR_SERVICE_INCLUDES string = "includes"
-	ORDER                        string = "order"
+	RewriteMethodTemplate      string = "REWRITE_RESOURCE_METHOD"
+	InterceptorServiceTemplate string = "CALL_INTERCEPTOR_SERVICE"
+	RewritePathTemplate        string = "REWRITE_RESOURCE_PATH"
+	RewritePathResourcePath    string = "resourcePath"
+	InterceptorServiceURL      string = "interceptorServiceURL"
+	InterceptorServiceIncludes string = "includes"
+	Order                      string = "order"
 )
