@@ -19,7 +19,13 @@
 // and create a common model which can represent both types.
 package model
 
-import "github.com/google/uuid"
+import (
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
+)
 
 // Operation type object holds data about each http method in the REST API.
 type Operation struct {
@@ -72,6 +78,55 @@ func (operation *Operation) GetVendorExtensions() map[string]interface{} {
 // This is a randomly generated UUID
 func (operation *Operation) GetID() string {
 	return operation.iD
+}
+
+// GetCallInterceptorService returns the interceptor configs for a given operation.
+func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoint {
+	var policies []Policy
+	if isIn {
+		policies = operation.policies.In
+	} else {
+		policies = operation.policies.Out
+	}
+	if len(policies) > 0 {
+		for _, policy := range policies {
+			if strings.EqualFold(InterceptorServiceTemplate, policy.TemplateName) {
+				if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+					urlValue, urlFound := paramMap[InterceptorServiceURL]
+					includesValue, includesFound := paramMap[InterceptorServiceIncludes]
+					if urlFound {
+						url, isString := urlValue.(string)
+						if isString && url != "" {
+							endpoint, err := getHostandBasepathandPort(url)
+							if err == nil {
+								conf, _ := config.ReadConfigs()
+								clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+								requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+								includesV := &interceptor.RequestInclusions{}
+								if includesFound {
+									includes, isList := includesValue.([]interface{})
+									if isList && len(includes) > 0 {
+										includesV = GenerateInterceptorIncludes(includes)
+									}
+								}
+								if err == nil {
+									return InterceptEndpoint{
+										Enable:          true,
+										EndpointCluster: EndpointCluster{Endpoints: []Endpoint{*endpoint}},
+										ClusterTimeout:  clusterTimeoutV,
+										RequestTimeout:  requestTimeoutV,
+										Includes:        includesV,
+										Level:           "operation",
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return InterceptEndpoint{}
 }
 
 // NewOperation Creates and returns operation type object

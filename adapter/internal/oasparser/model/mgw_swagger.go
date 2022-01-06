@@ -1015,11 +1015,20 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 }
 
 //GetOperationInterceptors returns operation interceptors
-func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndpoint, resourceInterceptor InterceptEndpoint, operations []*Operation, extensionName string) map[string]InterceptEndpoint {
+func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndpoint, resourceInterceptor InterceptEndpoint, operations []*Operation, isIn bool) map[string]InterceptEndpoint {
 	interceptorOperationMap := make(map[string]InterceptEndpoint)
 
 	for _, op := range operations {
-		operationInterceptor := swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, "operation")
+		extensionName := XWso2RequestInterceptor
+		// first get operational policies
+		operationInterceptor := op.GetCallInterceptorService(isIn)
+		// if operational policy interceptor not given check operational level swagger extension
+		if !operationInterceptor.Enable {
+			if !isIn {
+				extensionName = XWso2ResponseInterceptor
+			}
+			operationInterceptor = swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, "operation")
+		}
 		operationInterceptor.ClusterName = op.iD
 		// if operation interceptor not given add resource level interceptor
 		if !operationInterceptor.Enable {
@@ -1049,7 +1058,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	if x, found := vendorExtensions[extensionName]; found {
 		if val, ok := x.(map[string]interface{}); ok {
 			//serviceURL mandatory
-			if v, found := val[serviceURL]; found {
+			if v, found := val[ServiceURL]; found {
 				serviceURLV := v.(string)
 				endpoint, err := getHostandBasepathandPort(serviceURLV)
 				if err != nil {
@@ -1067,25 +1076,25 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				return InterceptEndpoint{}
 			}
 			//clusterTimeout optional
-			if v, found := val[clusterTimeout]; found {
+			if v, found := val[ClusterTimeout]; found {
 				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
 				if err == nil {
 					clusterTimeoutV = time.Duration(p)
 				} else {
-					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", clusterTimeout, err.Error())
+					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", ClusterTimeout, err.Error())
 				}
 			}
 			//requestTimeout optional
-			if v, found := val[requestTimeout]; found {
+			if v, found := val[RequestTimeout]; found {
 				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
 				if err == nil {
 					requestTimeoutV = time.Duration(p)
 				} else {
-					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", requestTimeout, err.Error())
+					logger.LoggerOasparser.Errorf("Error reading interceptors %v value : %v", RequestTimeout, err.Error())
 				}
 			}
 			//includes optional
-			if v, found := val[includes]; found {
+			if v, found := val[Includes]; found {
 				includes := v.([]interface{})
 				if len(includes) > 0 {
 					includesV = GenerateInterceptorIncludes(includes)

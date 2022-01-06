@@ -266,11 +266,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			clusterNameSand = ""
 		}
 
-		// first check operational policies
-		reqInterceptorVal := resource.GetCallInterceptorService(true)
-		if !reqInterceptorVal.Enable {
-			reqInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, "resource")
-		}
+		reqInterceptorVal := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, "resource")
 		if reqInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugf("Resource level request interceptors found for %v:%v-%v", apiTitle, apiVersion, resource.GetPath())
 			reqInterceptorVal.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost,
@@ -287,8 +283,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 
 		// create operational level response interceptor clusters
-		operationalReqInterceptors := mgwSwagger.GetOperationInterceptors(apiRequestInterceptor, resourceRequestInterceptor, resource.GetMethod(),
-			xWso2requestInterceptor)
+		operationalReqInterceptors := mgwSwagger.GetOperationInterceptors(apiRequestInterceptor, resourceRequestInterceptor, resource.GetMethod(), true)
 		for method, opI := range operationalReqInterceptors {
 			if opI.Enable && opI.Level == "operation" {
 				logger.LoggerOasparser.Debugf("Operation level request interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
@@ -308,10 +303,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 
 		// create resource level response interceptor cluster
-		respInterceptorVal := resource.GetCallInterceptorService(false)
-		if !respInterceptorVal.Enable {
-			respInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor, "resource")
-		}
+		respInterceptorVal := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor, "resource")
 		if respInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugf("Resource level response interceptors found for %v:%v-%v"+apiTitle, apiVersion, resource.GetPath())
 			respInterceptorVal.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID,
@@ -329,7 +321,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 
 		// create operation level response interceptor clusters
 		operationalRespInterceptorVal := mgwSwagger.GetOperationInterceptors(apiResponseInterceptor, resourceResponseInterceptor, resource.GetMethod(),
-			xWso2responseInterceptor)
+			false)
 		for method, opI := range operationalRespInterceptorVal {
 			if opI.Enable && opI.Level == "operation" {
 				logger.LoggerOasparser.Debugf("Operational level response interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
