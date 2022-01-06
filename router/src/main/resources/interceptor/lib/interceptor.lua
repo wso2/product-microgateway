@@ -391,7 +391,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     local method = shared_info[REQUEST.REQ_HEADERS][":method"]
     if method == nil then
-        response_handle:logErr("Header :method is missing in shared info's request headers.")
+        response_handle:logErr("Error getting header ':method' in response flow interceptor. The header is not found in shared info's request headers.")
         return
     end
     local resp_flow_includes = resp_flow_includes_list[method]

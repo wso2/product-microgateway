@@ -91,7 +91,7 @@ local inv_context = {
 	prodClusterName = "{{.Context.ProdClusterName}}",
 	sandClusterName = "{{.Context.SandClusterName}}"
 }
-  `
+`
 	requestInterceptorTemplate = `
 local req_flow_list = {  {{ range $key, $value := .RequestFlow }} {{ $key }}={invocationContext={{$value.Include.InvocationContext}}, requestHeaders={{$value.Include.RequestHeaders}}, requestBody={{$value.Include.RequestBody}}, requestTrailer={{$value.Include.RequestTrailer}}}, {{ end }}}
 local req_call_config = {  {{ range $key, $value := .RequestFlow }} {{ $key }}={cluster_name="{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}}, {{ end }}}
@@ -100,7 +100,7 @@ function envoy_on_request(request_handle)
 		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context
 	)
 end
- `
+`
 
 	responseInterceptorTemplate = `
 local res_call_config = {  {{ range $key, $value := .ResponseFlow }} {{ $key }} = {cluster_name="{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}}, {{ end }}}
@@ -109,19 +109,19 @@ function envoy_on_response(response_handle)
 		response_handle, res_call_config, resp_flow_list
 	)
 end
- `
+`
 	// defaultRequestInterceptorTemplate is the template that is applied when request flow is disabled
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
- function envoy_on_request(request_handle)
-	 interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true)
- end
- `
+function envoy_on_request(request_handle)
+	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true)
+end
+`
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
 	defaultResponseInterceptorTemplate = `
- function envoy_on_response(response_handle)
- end
- `
+function envoy_on_response(response_handle)
+end
+`
 )
 
 //GetInterceptor inject values and get request interceptor
