@@ -78,10 +78,6 @@ paths:
       serviceURL: https://invalid-service-url:2371
       includes:
         - request_headers
-    x-wso2-response-interceptor: # Resource level interceptor definition
-      serviceURL: https://invalid-service-url:2372
-      includes:
-        - request_headers
     post:
       x-wso2-request-interceptor: # Operational level interceptor definition
         serviceURL: https://mockBackend:2371

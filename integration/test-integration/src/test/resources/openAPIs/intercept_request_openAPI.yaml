@@ -72,12 +72,8 @@ paths:
         '200':
           description: successful operation
   /pet/findByStatus/resp-intercept-enabled:
-    x-wso2-request-interceptor: # Resource level interceptor definition
-      serviceURL: https://invalid-service-url:2371
-      includes:
-        - request_headers
     x-wso2-response-interceptor: # Resource level interceptor definition
-      serviceURL: https://invalid-service-url:2372
+      serviceURL: https://invalid-service-url:2371
       includes:
         - request_headers
     post:
