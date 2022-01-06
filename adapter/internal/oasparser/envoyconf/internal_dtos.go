@@ -37,8 +37,8 @@ type routeCreateParams struct {
 	prodRouteConfig     *model.EndpointConfig
 	sandRouteConfig     *model.EndpointConfig
 	AuthHeader          string
-	requestInterceptor  model.InterceptEndpoint
-	responseInterceptor model.InterceptEndpoint
+	requestInterceptor  map[string]model.InterceptEndpoint
+	responseInterceptor map[string]model.InterceptEndpoint
 	corsPolicy          *model.CorsConfig
 	rewritePath         string
 	rewriteMethod       bool

@@ -150,7 +150,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 	}
 
-	apiRequestInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor)
+	apiRequestInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor, "api")
 	if apiRequestInterceptor.Enable {
 		logger.LoggerOasparser.Debugf("API level request interceptors found for %v : %v", apiTitle, apiVersion)
 		apiRequestInterceptor.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost,
@@ -165,7 +165,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			endpoints = append(endpoints, addresses...)
 		}
 	}
-	apiResponseInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor)
+	apiResponseInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor, "api")
 	if apiResponseInterceptor.Enable {
 		logger.LoggerOasparser.Debugln("API level response interceptors found for " + mgwSwagger.GetID())
 		apiResponseInterceptor.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID, vHost,
@@ -266,11 +266,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			clusterNameSand = ""
 		}
 
-		//todo(amali) check if we need to combine extension and operational policies together
 		// first check operational policies
 		reqInterceptorVal := resource.GetCallInterceptorService(true)
 		if !reqInterceptorVal.Enable {
-			reqInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor)
+			reqInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, "resource")
 		}
 		if reqInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugf("Resource level request interceptors found for %v:%v-%v", apiTitle, apiVersion, resource.GetPath())
@@ -287,9 +286,31 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
+		// create operational level response interceptor clusters
+		operationalReqInterceptors := mgwSwagger.GetOperationInterceptors(apiRequestInterceptor, resourceRequestInterceptor, resource.GetMethod(),
+			xWso2requestInterceptor)
+		for method, opI := range operationalReqInterceptors {
+			if opI.Enable && opI.Level == "operation" {
+				logger.LoggerOasparser.Debugf("Operation level request interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
+					opI.ClusterName)
+				opI.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opI.ClusterName)
+				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
+				if err != nil {
+					logger.LoggerOasparser.Errorf("Error while adding operational level request intercept external cluster for %s. %v",
+						apiTitle, err.Error())
+					// setting resource level interceptor to failed operation level interceptor.
+					operationalReqInterceptors[method] = resourceRequestInterceptor
+				} else {
+					clusters = append(clusters, cluster)
+					endpoints = append(endpoints, addresses...)
+				}
+			}
+		}
+
+		// create resource level response interceptor cluster
 		respInterceptorVal := resource.GetCallInterceptorService(false)
 		if !respInterceptorVal.Enable {
-			respInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor)
+			respInterceptorVal = mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor, "resource")
 		}
 		if respInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugf("Resource level response interceptors found for %v:%v-%v"+apiTitle, apiVersion, resource.GetPath())
@@ -306,13 +327,34 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
+		// create operation level response interceptor clusters
+		operationalRespInterceptorVal := mgwSwagger.GetOperationInterceptors(apiResponseInterceptor, resourceResponseInterceptor, resource.GetMethod(),
+			xWso2responseInterceptor)
+		for method, opI := range operationalRespInterceptorVal {
+			if opI.Enable && opI.Level == "operation" {
+				logger.LoggerOasparser.Debugf("Operational level response interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
+					opI.ClusterName)
+				opI.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opI.ClusterName)
+				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
+				if err != nil {
+					logger.LoggerOasparser.Errorf("Error while adding operational level response intercept external cluster for %s. %v",
+						apiTitle, err.Error())
+					// setting resource level interceptor to failed operation level interceptor.
+					operationalRespInterceptorVal[method] = resourceResponseInterceptor
+				} else {
+					clusters = append(clusters, cluster)
+					endpoints = append(endpoints, addresses...)
+				}
+			}
+		}
+
 		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
-			clusterNameSand, resourceRequestInterceptor, resourceResponseInterceptor, organizationID))
+			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID))
 		routes = append(routes, routeP)
 	}
 	if mgwSwagger.GetAPIType() == model.WS {
 		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelbasePath, apiLevelClusterNameProd,
-			apiLevelClusterNameSand, apiRequestInterceptor, apiResponseInterceptor, organizationID))
+			apiLevelClusterNameSand, nil, nil, organizationID))
 		routes = append(routes, routesP)
 	}
 	return routes, clusters, endpoints
@@ -731,7 +773,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	var luaPerFilterConfig lua.LuaPerRoute
-	if !requestInterceptor.Enable && !responseInterceptor.Enable {
+	if len(requestInterceptor) < 1 && len(responseInterceptor) < 1 {
 		luaPerFilterConfig = lua.LuaPerRoute{
 			Override: &lua.LuaPerRoute_Disabled{Disabled: true},
 		}
@@ -854,35 +896,41 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	return &router
 }
 
-func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInterceptor model.InterceptEndpoint,
+func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, responseInterceptor map[string]model.InterceptEndpoint,
 	requestContext *interceptor.InvocationContext) string {
 
 	i := &interceptor.Interceptor{
-		Context:              requestContext,
-		RequestExternalCall:  &interceptor.HTTPCallConfig{}, // assign default values ("false" if req flow disabled)
-		ResponseExternalCall: &interceptor.HTTPCallConfig{},
-		ReqFlowInclude:       &interceptor.RequestInclusions{}, // assign default values ("false" if headers not included req details)
-		RespFlowInclude:      &interceptor.RequestInclusions{},
+		Context:      requestContext,
+		RequestFlow:  make(map[string]interceptor.Config),
+		ResponseFlow: make(map[string]interceptor.Config),
 	}
-	if requestInterceptor.Enable {
-		i.RequestExternalCall = &interceptor.HTTPCallConfig{
-			Enable:      true,
-			ClusterName: requestInterceptor.ClusterName,
-			// multiplying in seconds here because in configs we are directly getting config to time.Duration
-			// which is in nano seconds, so multiplying it in seconds here
-			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
+	if len(requestInterceptor) > 0 {
+		i.RequestFlowEnable = true
+		for method, op := range requestInterceptor {
+			i.RequestFlow[method] = interceptor.Config{
+				ExternalCall: &interceptor.HTTPCallConfig{
+					ClusterName: op.ClusterName,
+					// multiplying in seconds here because in configs we are directly getting config to time.Duration
+					// which is in nano seconds, so multiplying it in seconds here
+					Timeout: strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+				},
+				Include: op.Includes,
+			}
 		}
-		i.ReqFlowInclude = requestInterceptor.Includes
 	}
-	if responseInterceptor.Enable {
-		i.ResponseExternalCall = &interceptor.HTTPCallConfig{
-			Enable:      true,
-			ClusterName: responseInterceptor.ClusterName,
-			// multiplying in seconds here because in configs we are directly getting config to time.Duration
-			// which is in nano seconds, so multiplying it in seconds here
-			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
+	if len(responseInterceptor) > 0 {
+		i.ResponseFlowEnable = true
+		for method, op := range responseInterceptor {
+			i.ResponseFlow[method] = interceptor.Config{
+				ExternalCall: &interceptor.HTTPCallConfig{
+					ClusterName: op.ClusterName,
+					// multiplying in seconds here because in configs we are directly getting config to time.Duration
+					// which is in nano seconds, so multiplying it in seconds here
+					Timeout: strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+				},
+				Include: op.Includes,
+			}
 		}
-		i.RespFlowInclude = responseInterceptor.Includes
 	}
 	return interceptor.GetInterceptor(i)
 }
@@ -1183,8 +1231,8 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 }
 
 func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
-	prodClusterName string, sandClusterName string, requestInterceptor model.InterceptEndpoint,
-	responseInterceptor model.InterceptEndpoint, organizationID string) *routeCreateParams {
+	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
+	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 	params := &routeCreateParams{
 		organizationID:      organizationID,
 		title:               swagger.GetTitle(),

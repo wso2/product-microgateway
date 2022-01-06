@@ -143,6 +143,9 @@ type InterceptEndpoint struct {
 	ClusterName     string
 	ClusterTimeout  time.Duration
 	RequestTimeout  time.Duration
+	// Level this is an enum allowing only values {api, resource, operation}
+	// to indicate from which level interceptor is added
+	Level string
 	// Includes this is an enum allowing only values in
 	// {"request_headers", "request_body", "request_trailer", "response_headers", "response_body", "response_trailer",
 	//"invocation_context" }
@@ -1011,8 +1014,32 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 	return disableSecurity
 }
 
+//GetOperationInterceptors returns operation interceptors
+func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndpoint, resourceInterceptor InterceptEndpoint, operations []*Operation, extensionName string) map[string]InterceptEndpoint {
+	interceptorOperationMap := make(map[string]InterceptEndpoint)
+
+	for _, op := range operations {
+		operationInterceptor := swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, "operation")
+		operationInterceptor.ClusterName = op.iD
+		// if operation interceptor not given add resource level interceptor
+		if !operationInterceptor.Enable {
+			operationInterceptor = resourceInterceptor
+		}
+		// if resource interceptor not given add api level interceptor
+		if !operationInterceptor.Enable {
+			operationInterceptor = apiInterceptor
+		}
+		// add opertaion to the list only if an interceptor is enabled for the operation
+		if operationInterceptor.Enable {
+			interceptorOperationMap[strings.ToUpper(op.method)] = operationInterceptor
+		}
+	}
+	return interceptorOperationMap
+
+}
+
 //GetInterceptor returns interceptors
-func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) InterceptEndpoint {
+func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string, level string) InterceptEndpoint {
 	var endpointCluster EndpointCluster
 	conf, _ := config.ReadConfigs()
 	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
@@ -1071,6 +1098,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				ClusterTimeout:  clusterTimeoutV,
 				RequestTimeout:  requestTimeoutV,
 				Includes:        includesV,
+				Level:           level,
 			}
 		}
 		logger.LoggerOasparser.Error("Error parsing response interceptors values to mgwSwagger")
