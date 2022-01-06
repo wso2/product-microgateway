@@ -25,8 +25,6 @@ import (
 
 	"strings"
 
-	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
@@ -100,10 +98,10 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 	for _, method := range resource.methods {
 		if len(method.policies.In) > 0 {
 			for _, policy := range method.policies.In {
-				if strings.EqualFold(RewritePathTemplate, policy.TemplateName) {
+				if strings.EqualFold(constants.RewritePathTemplate, policy.TemplateName) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						if paramValue, found := paramMap[RewritePathResourcePath]; found {
-							if v, orderExists := paramMap[Order]; orderExists {
+						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
+							if v, orderExists := paramMap[constants.Order]; orderExists {
 								if pathOrder > v.(int) {
 									continue
 								}
@@ -115,63 +113,13 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 							}
 						}
 					}
-				} else if strings.EqualFold(RewriteMethodTemplate, policy.TemplateName) {
+				} else if strings.EqualFold(constants.RewriteMethodTemplate, policy.TemplateName) {
 					rewriteMethod = true
 				}
 			}
 		}
 	}
 	return rewritePath, rewriteMethod
-}
-
-// GetCallInterceptorService returns the rewrite upstream path for a given resource.
-func (resource *Resource) GetCallInterceptorService(isIn bool) InterceptEndpoint {
-	for _, method := range resource.methods {
-		var policies []Policy
-		if isIn {
-			policies = method.policies.In
-		} else {
-			policies = method.policies.Out
-		}
-		if len(policies) > 0 {
-			for _, policy := range policies {
-				if strings.EqualFold(InterceptorServiceTemplate, policy.TemplateName) {
-					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						urlValue, urlFound := paramMap[InterceptorServiceURL]
-						includesValue, includesFound := paramMap[InterceptorServiceIncludes]
-						if urlFound {
-							url, isString := urlValue.(string)
-							if isString && url != "" {
-								endpoint, err := getHostandBasepathandPort(url)
-								if err == nil {
-									conf, _ := config.ReadConfigs()
-									clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
-									requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
-									includesV := &interceptor.RequestInclusions{}
-									if includesFound {
-										includes, isList := includesValue.([]interface{})
-										if isList && len(includes) > 0 {
-											includesV = GenerateInterceptorIncludes(includes)
-										}
-									}
-									if err == nil {
-										return InterceptEndpoint{
-											Enable:          true,
-											EndpointCluster: EndpointCluster{Endpoints: []Endpoint{*endpoint}},
-											ClusterTimeout:  clusterTimeoutV,
-											RequestTimeout:  requestTimeoutV,
-											Includes:        includesV,
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return InterceptEndpoint{}
 }
 
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values

@@ -1017,11 +1017,20 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 }
 
 //GetOperationInterceptors returns operation interceptors
-func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndpoint, resourceInterceptor InterceptEndpoint, operations []*Operation, extensionName string) map[string]InterceptEndpoint {
+func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndpoint, resourceInterceptor InterceptEndpoint, operations []*Operation, isIn bool) map[string]InterceptEndpoint {
 	interceptorOperationMap := make(map[string]InterceptEndpoint)
 
 	for _, op := range operations {
-		operationInterceptor, _ := swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, constants.OperationLevelInterceptor)
+		extensionName := constants.XWso2RequestInterceptor
+		// first get operational policies
+		operationInterceptor := op.GetCallInterceptorService(isIn)
+		// if operational policy interceptor not given check operational level swagger extension
+		if !operationInterceptor.Enable {
+			if !isIn {
+				extensionName = constants.XWso2ResponseInterceptor
+			}
+			operationInterceptor = swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, OperationLevelInterceptor)
+		}
 		operationInterceptor.ClusterName = op.iD
 		// if operation interceptor not given
 		if !operationInterceptor.Enable {
