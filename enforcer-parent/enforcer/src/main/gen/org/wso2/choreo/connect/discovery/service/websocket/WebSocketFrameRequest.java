@@ -19,6 +19,7 @@ private static final long serialVersionUID = 0L;
     nodeId_ = "";
     remoteIp_ = "";
     payload_ = com.google.protobuf.ByteString.EMPTY;
+    direction_ = 0;
   }
 
   @java.lang.Override
@@ -86,6 +87,17 @@ private static final long serialVersionUID = 0L;
             payload_ = input.readBytes();
             break;
           }
+          case 48: {
+            int rawValue = input.readEnum();
+
+            direction_ = rawValue;
+            break;
+          }
+          case 56: {
+
+            apimErrorCode_ = input.readInt32();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -116,6 +128,127 @@ private static final long serialVersionUID = 0L;
     return org.wso2.choreo.connect.discovery.service.websocket.MgwWebSocketProto.internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameRequest_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.class, org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.Builder.class);
+  }
+
+  /**
+   * <pre>
+   * direction of the message
+   * </pre>
+   *
+   * Protobuf enum {@code envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection}
+   */
+  public enum MessageDirection
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>PUBLISH = 0;</code>
+     */
+    PUBLISH(0),
+    /**
+     * <code>SUBSCRIBE = 1;</code>
+     */
+    SUBSCRIBE(1),
+    /**
+     * <code>HANDSHAKE = 2;</code>
+     */
+    HANDSHAKE(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>PUBLISH = 0;</code>
+     */
+    public static final int PUBLISH_VALUE = 0;
+    /**
+     * <code>SUBSCRIBE = 1;</code>
+     */
+    public static final int SUBSCRIBE_VALUE = 1;
+    /**
+     * <code>HANDSHAKE = 2;</code>
+     */
+    public static final int HANDSHAKE_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static MessageDirection valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static MessageDirection forNumber(int value) {
+      switch (value) {
+        case 0: return PUBLISH;
+        case 1: return SUBSCRIBE;
+        case 2: return HANDSHAKE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<MessageDirection>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        MessageDirection> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<MessageDirection>() {
+            public MessageDirection findValueByNumber(int number) {
+              return MessageDirection.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final MessageDirection[] VALUES = values();
+
+    public static MessageDirection valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private MessageDirection(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection)
   }
 
   public static final int NODE_ID_FIELD_NUMBER = 1;
@@ -274,6 +407,36 @@ private static final long serialVersionUID = 0L;
     return payload_;
   }
 
+  public static final int DIRECTION_FIELD_NUMBER = 6;
+  private int direction_;
+  /**
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection direction = 6;</code>
+   * @return The enum numeric value on the wire for direction.
+   */
+  @java.lang.Override public int getDirectionValue() {
+    return direction_;
+  }
+  /**
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection direction = 6;</code>
+   * @return The direction.
+   */
+  @java.lang.Override public org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection getDirection() {
+    @SuppressWarnings("deprecation")
+    org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection result = org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection.valueOf(direction_);
+    return result == null ? org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection.UNRECOGNIZED : result;
+  }
+
+  public static final int APIM_ERROR_CODE_FIELD_NUMBER = 7;
+  private int apimErrorCode_;
+  /**
+   * <code>int32 apim_error_code = 7;</code>
+   * @return The apimErrorCode.
+   */
+  @java.lang.Override
+  public int getApimErrorCode() {
+    return apimErrorCode_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -303,6 +466,12 @@ private static final long serialVersionUID = 0L;
     if (!payload_.isEmpty()) {
       output.writeBytes(5, payload_);
     }
+    if (direction_ != org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection.PUBLISH.getNumber()) {
+      output.writeEnum(6, direction_);
+    }
+    if (apimErrorCode_ != 0) {
+      output.writeInt32(7, apimErrorCode_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -329,6 +498,14 @@ private static final long serialVersionUID = 0L;
     if (!payload_.isEmpty()) {
       size += com.google.protobuf.CodedOutputStream
         .computeBytesSize(5, payload_);
+    }
+    if (direction_ != org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection.PUBLISH.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(6, direction_);
+    }
+    if (apimErrorCode_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(7, apimErrorCode_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -358,6 +535,9 @@ private static final long serialVersionUID = 0L;
         .equals(other.getRemoteIp())) return false;
     if (!getPayload()
         .equals(other.getPayload())) return false;
+    if (direction_ != other.direction_) return false;
+    if (getApimErrorCode()
+        != other.getApimErrorCode()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -381,6 +561,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getRemoteIp().hashCode();
     hash = (37 * hash) + PAYLOAD_FIELD_NUMBER;
     hash = (53 * hash) + getPayload().hashCode();
+    hash = (37 * hash) + DIRECTION_FIELD_NUMBER;
+    hash = (53 * hash) + direction_;
+    hash = (37 * hash) + APIM_ERROR_CODE_FIELD_NUMBER;
+    hash = (53 * hash) + getApimErrorCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -528,6 +712,10 @@ private static final long serialVersionUID = 0L;
 
       payload_ = com.google.protobuf.ByteString.EMPTY;
 
+      direction_ = 0;
+
+      apimErrorCode_ = 0;
+
       return this;
     }
 
@@ -563,6 +751,8 @@ private static final long serialVersionUID = 0L;
       result.frameLength_ = frameLength_;
       result.remoteIp_ = remoteIp_;
       result.payload_ = payload_;
+      result.direction_ = direction_;
+      result.apimErrorCode_ = apimErrorCode_;
       onBuilt();
       return result;
     }
@@ -627,6 +817,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getPayload() != com.google.protobuf.ByteString.EMPTY) {
         setPayload(other.getPayload());
+      }
+      if (other.direction_ != 0) {
+        setDirectionValue(other.getDirectionValue());
+      }
+      if (other.getApimErrorCode() != 0) {
+        setApimErrorCode(other.getApimErrorCode());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1077,6 +1273,91 @@ private static final long serialVersionUID = 0L;
     public Builder clearPayload() {
       
       payload_ = getDefaultInstance().getPayload();
+      onChanged();
+      return this;
+    }
+
+    private int direction_ = 0;
+    /**
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection direction = 6;</code>
+     * @return The enum numeric value on the wire for direction.
+     */
+    @java.lang.Override public int getDirectionValue() {
+      return direction_;
+    }
+    /**
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection direction = 6;</code>
+     * @param value The enum numeric value on the wire for direction to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDirectionValue(int value) {
+      
+      direction_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection direction = 6;</code>
+     * @return The direction.
+     */
+    @java.lang.Override
+    public org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection getDirection() {
+      @SuppressWarnings("deprecation")
+      org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection result = org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection.valueOf(direction_);
+      return result == null ? org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection.UNRECOGNIZED : result;
+    }
+    /**
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection direction = 6;</code>
+     * @param value The direction to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDirection(org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.MessageDirection value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      
+      direction_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameRequest.MessageDirection direction = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDirection() {
+      
+      direction_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int apimErrorCode_ ;
+    /**
+     * <code>int32 apim_error_code = 7;</code>
+     * @return The apimErrorCode.
+     */
+    @java.lang.Override
+    public int getApimErrorCode() {
+      return apimErrorCode_;
+    }
+    /**
+     * <code>int32 apim_error_code = 7;</code>
+     * @param value The apimErrorCode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApimErrorCode(int value) {
+      
+      apimErrorCode_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 apim_error_code = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApimErrorCode() {
+      
+      apimErrorCode_ = 0;
       onChanged();
       return this;
     }

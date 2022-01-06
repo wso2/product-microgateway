@@ -46,9 +46,15 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
     private static final Logger logger = LogManager.getLogger(ChoreoFaultAnalyticsProvider.class);
+    private final boolean isWebsocketUpgradeRequest;
 
     public ChoreoFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
+        if (APIConstants.WEBSOCKET.equals(requestContext.getHeaders().get(APIConstants.UPGRADE_HEADER))) {
+            isWebsocketUpgradeRequest = true;
+        } else {
+            isWebsocketUpgradeRequest = false;
+        }
     }
 
     @Override
@@ -129,6 +135,12 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         // This could be null if  OPTIONS request comes
         if (requestContext.getMatchedResourcePath() != null) {
             Operation operation = new Operation();
+            if (isWebsocketUpgradeRequest) {
+                operation.setApiMethod("HANDSHAKE");
+                operation.setApiResourceTemplate("init-request:" +
+                        requestContext.getMatchedResourcePath().getPath());
+                return operation;
+            }
             operation.setApiMethod(requestContext.getMatchedResourcePath().getMethod().name());
             operation.setApiResourceTemplate(requestContext.getMatchedResourcePath().getPath());
             return operation;
@@ -149,7 +161,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Latencies getLatencies() {
         // Latencies information are not required.
-        return null;
+        return new Latencies();
     }
 
     @Override
@@ -197,13 +209,11 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public String getUserAgentHeader() {
         // User agent is not required for fault scenario
-        logger.error("Internal Error: User agent header is not required for fault events");
         return null;
     }
 
     @Override
     public String getEndUserIP() {
-        logger.error("Internal Error: End User IPAddress is not required for fault events");
         // EndUserIP is not required for fault event type
         return null;
     }

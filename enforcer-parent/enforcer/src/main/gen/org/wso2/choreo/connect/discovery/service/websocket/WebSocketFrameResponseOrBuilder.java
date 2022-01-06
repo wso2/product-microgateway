@@ -23,4 +23,10 @@ public interface WebSocketFrameResponseOrBuilder extends
    * @return The throttlePeriod.
    */
   long getThrottlePeriod();
+
+  /**
+   * <code>int32 apim_error_code = 3;</code>
+   * @return The apimErrorCode.
+   */
+  int getApimErrorCode();
 }

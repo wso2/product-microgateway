@@ -41,6 +41,7 @@ public class MetadataConstants {
     public static final String PRODUCT_NAME = "productName";
     public static final String PRODUCT_PROVIDER = "productProvider";
     public static final String API_PUBLISHER = "apiPublisher";
+    public static final String API_TYPE_KEY = "apiType";
     public static final String REQUEST_ID = "requestId";
     public static final String MESSAGE_SIZE = "messageSize";
     public static final String GRPC_STREAM_ID = "streamId";

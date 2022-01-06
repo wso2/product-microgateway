@@ -60,6 +60,11 @@ private static final long serialVersionUID = 0L;
             throttlePeriod_ = input.readInt64();
             break;
           }
+          case 24: {
+
+            apimErrorCode_ = input.readInt32();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -263,6 +268,17 @@ private static final long serialVersionUID = 0L;
     return throttlePeriod_;
   }
 
+  public static final int APIM_ERROR_CODE_FIELD_NUMBER = 3;
+  private int apimErrorCode_;
+  /**
+   * <code>int32 apim_error_code = 3;</code>
+   * @return The apimErrorCode.
+   */
+  @java.lang.Override
+  public int getApimErrorCode() {
+    return apimErrorCode_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -283,6 +299,9 @@ private static final long serialVersionUID = 0L;
     if (throttlePeriod_ != 0L) {
       output.writeInt64(2, throttlePeriod_);
     }
+    if (apimErrorCode_ != 0) {
+      output.writeInt32(3, apimErrorCode_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -299,6 +318,10 @@ private static final long serialVersionUID = 0L;
     if (throttlePeriod_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
         .computeInt64Size(2, throttlePeriod_);
+    }
+    if (apimErrorCode_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(3, apimErrorCode_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -318,6 +341,8 @@ private static final long serialVersionUID = 0L;
     if (throttleState_ != other.throttleState_) return false;
     if (getThrottlePeriod()
         != other.getThrottlePeriod()) return false;
+    if (getApimErrorCode()
+        != other.getApimErrorCode()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -334,6 +359,8 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + THROTTLE_PERIOD_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         getThrottlePeriod());
+    hash = (37 * hash) + APIM_ERROR_CODE_FIELD_NUMBER;
+    hash = (53 * hash) + getApimErrorCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -471,6 +498,8 @@ private static final long serialVersionUID = 0L;
 
       throttlePeriod_ = 0L;
 
+      apimErrorCode_ = 0;
+
       return this;
     }
 
@@ -499,6 +528,7 @@ private static final long serialVersionUID = 0L;
       org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse result = new org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse(this);
       result.throttleState_ = throttleState_;
       result.throttlePeriod_ = throttlePeriod_;
+      result.apimErrorCode_ = apimErrorCode_;
       onBuilt();
       return result;
     }
@@ -552,6 +582,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getThrottlePeriod() != 0L) {
         setThrottlePeriod(other.getThrottlePeriod());
+      }
+      if (other.getApimErrorCode() != 0) {
+        setApimErrorCode(other.getApimErrorCode());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -663,6 +696,37 @@ private static final long serialVersionUID = 0L;
     public Builder clearThrottlePeriod() {
       
       throttlePeriod_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private int apimErrorCode_ ;
+    /**
+     * <code>int32 apim_error_code = 3;</code>
+     * @return The apimErrorCode.
+     */
+    @java.lang.Override
+    public int getApimErrorCode() {
+      return apimErrorCode_;
+    }
+    /**
+     * <code>int32 apim_error_code = 3;</code>
+     * @param value The apimErrorCode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApimErrorCode(int value) {
+      
+      apimErrorCode_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 apim_error_code = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApimErrorCode() {
+      
+      apimErrorCode_ = 0;
       onChanged();
       return this;
     }

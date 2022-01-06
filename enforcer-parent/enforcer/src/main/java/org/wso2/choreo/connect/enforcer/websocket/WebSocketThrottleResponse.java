@@ -34,6 +34,7 @@ enum WebSocketThrottleState {
 public class WebSocketThrottleResponse {
     private WebSocketThrottleState webSocketThrottleState;
     private long throttlePeriod;
+    private int apimErrorCode = 0;
 
     public WebSocketThrottleState getWebSocketThrottleState() {
         return webSocketThrottleState;
@@ -57,5 +58,13 @@ public class WebSocketThrottleResponse {
 
     public void setThrottlePeriod(long throttlePeriod) {
         this.throttlePeriod = throttlePeriod;
+    }
+
+    public int getApimErrorCode() {
+        return apimErrorCode;
+    }
+
+    public void setApimErrorCode(int apimErrorCode) {
+        this.apimErrorCode = apimErrorCode;
     }
 }

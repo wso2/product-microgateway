@@ -25,6 +25,7 @@ import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
+import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
@@ -38,6 +39,7 @@ import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
@@ -160,7 +162,11 @@ public class WebSocketAPI implements API {
     @Override
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
+        boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
         if (executeFilterChain(requestContext)) {
+            if (analyticsEnabled) {
+                AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
+            }
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
@@ -186,6 +192,10 @@ public class WebSocketAPI implements API {
             }
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
+            }
+            if (analyticsEnabled && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
+                AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
+                responseObject.setMetaDataMap(new HashMap<>(0));
             }
         }
         return responseObject;
@@ -269,6 +279,8 @@ public class WebSocketAPI implements API {
         }
         WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
         webSocketThrottleResponse.setOverLimitState();
+        webSocketThrottleResponse.setApimErrorCode(Integer.parseInt(requestContext.getProperties()
+                .get(APIConstants.MessageFormat.ERROR_CODE).toString()));
         webSocketThrottleResponse.setThrottlePeriod(
                 (Long) requestContext.getProperties().get(ThrottleConstants.HEADER_RETRY_AFTER));
         return webSocketThrottleResponse;
