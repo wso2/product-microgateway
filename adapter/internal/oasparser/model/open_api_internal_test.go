@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 )
 
+// TestSetInfoOpenAPI for mgwSwagger.SetInfoOpenAPI()
 func TestSetInfoOpenAPI(t *testing.T) {
 	type setInfoTestItem struct {
 		input   openapi3.Swagger
@@ -76,6 +77,7 @@ func TestSetInfoOpenAPI(t *testing.T) {
 	}
 }
 
+// TestSetResourcesOpenAPI for setResourcesOpenAPI()
 func TestSetResourcesOpenAPI(t *testing.T) {
 	type setResourcesTestItem struct {
 		input   openapi3.Swagger
@@ -129,6 +131,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 	}
 }
 
+// TestGetHostandBasepathandPort for getHostandBasepathandPort()
 func TestGetHostandBasepathandPort(t *testing.T) {
 	type setResourcesTestItem struct {
 		input   string
@@ -157,7 +160,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				URLType:  "https",
 				RawURL:   "https://petstore.io:8000/api/v2",
 			},
-			message: "when port is not provided", //here should find a way to readi configs in tests
+			message: "when port is not provided", //here should find a way to read configs in tests
 		},
 		{
 			input: "petstore.io:8000/api/v2",
@@ -177,7 +180,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := getHostandBasepathandPort(item.input)
+		resultResources, err := getHTTPEndpoint(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 		if resultResources != nil {
 			assert.Nil(t, err, "Error encountered when processing the endpoint")
@@ -187,6 +190,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 	}
 }
 
+// TestGetXWso2Label for GetXWso2Label()
 func TestGetXWso2Label(t *testing.T) {
 	// TODO: (Vajira) add more test scenarios
 	//newLabels := GetXWso2Label(openAPIV3Struct.ExtensionProps)
@@ -198,11 +202,12 @@ func TestGetXWso2Label(t *testing.T) {
 
 	wso2Label := GetXWso2Label(swagger.ExtensionProps)
 
-	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
+	assert.NotNil(t, wso2Label, "Label should at least be default")
 
 }
 
-func TestMalformedUrl(t *testing.T) {
+// TestMalformedURL for getHostandBasepathandPort()
+func TestMalformedURL(t *testing.T) {
 
 	suspectedRawUrls := []string{
 		"http://#de.abc.com:80/api",
@@ -218,7 +223,7 @@ func TestMalformedUrl(t *testing.T) {
 	}
 
 	for index := range suspectedRawUrls {
-		response, _ := getHostandBasepathandPort(suspectedRawUrls[index])
+		response, _ := getHTTPEndpoint(suspectedRawUrls[index])
 		assert.Nil(t, response)
 	}
 

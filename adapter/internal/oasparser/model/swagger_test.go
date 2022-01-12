@@ -14,7 +14,8 @@
  *  limitations under the License.
  *
  */
-package model_test
+
+package model
 
 import (
 	"encoding/json"
@@ -23,14 +24,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
+// TestSetInfoSwaggerWebSocket for mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml)
 func TestSetInfoSwaggerWebSocket(t *testing.T) {
 
 	type setInfoSwaggerWebSocketTestItem struct {
-		input   model.MgwSwagger
+		input   MgwSwagger
 		apiData map[string]interface{}
 	}
 
@@ -40,10 +41,10 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 
-	var apiYaml model.APIYaml
+	var apiYaml APIYaml
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	var mgwSwagger model.MgwSwagger
+	var mgwSwagger MgwSwagger
 	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 
@@ -81,11 +82,12 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 
 }
 
+// TestValidate for mgwSwagger.Validate()
 func TestValidate(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_prod_sand_extensions.yaml"
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
-	mgwSwaggerForOpenapi := model.MgwSwagger{}
+	mgwSwaggerForOpenapi := MgwSwagger{}
 	err = mgwSwaggerForOpenapi.GetMgwSwagger(openapiByteArr)
 	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
 	err = mgwSwaggerForOpenapi.Validate()

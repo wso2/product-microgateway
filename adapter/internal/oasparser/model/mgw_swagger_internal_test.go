@@ -24,6 +24,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
+// TestGetXWso2Endpoints for mgwSwagger.getEndpoints()
 func TestGetXWso2Endpoints(t *testing.T) {
 	type getXWso2EndpointsTestItem struct {
 		inputVendorExtensions map[string]interface{}
@@ -33,17 +34,17 @@ func TestGetXWso2Endpoints(t *testing.T) {
 	}
 	dataItems := []getXWso2EndpointsTestItem{
 		{
-			inputEndpointName: "x-wso2-production-endpoints",
-			inputVendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
-				"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80"}}},
+			inputEndpointName: constants.XWso2ProdEndpoints,
+			inputVendorExtensions: map[string]interface{}{constants.XWso2ProdEndpoints: map[string]interface{}{
+				"type": "loadbalance", "urls": []interface{}{"https://www.getxwso2endpoints.com:80"}}},
 			result: &EndpointCluster{
 				EndpointPrefix: "clusterProd",
 				Endpoints: []Endpoint{
 					{
-						Host:    "www.facebook.com",
+						Host:    "www.getxwso2endpoints.com",
 						Port:    80,
 						URLType: "https",
-						RawURL:  "https://www.facebook.com:80",
+						RawURL:  "https://www.getxwso2endpoints.com:80",
 					},
 				},
 				EndpointType: "loadbalance",
@@ -53,9 +54,9 @@ func TestGetXWso2Endpoints(t *testing.T) {
 		{
 			inputEndpointName: "x-wso2-production-endpoints",
 			inputVendorExtensions: map[string]interface{}{"x-wso2-production-endpoints+++": map[string]interface{}{
-				"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
+				"type": "loadbalance", "urls": []interface{}{"https://www.getxwso2endpoints1.com:80/base"}}},
 			result:  nil,
-			message: "when having incorrect extenstion name",
+			message: "when having incorrect extension name",
 		},
 	}
 	for _, item := range dataItems {
@@ -66,6 +67,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 	}
 }
 
+// TestGetXWso2RefEndpoints for mgwSwagger.setXWso2Endpoints()
 func TestGetXWso2RefEndpoints(t *testing.T) {
 	xWso2EPVendorExtension := []interface{}{map[string]interface{}{
 		"myep": map[string]interface{}{
@@ -98,6 +100,7 @@ func TestGetXWso2RefEndpoints(t *testing.T) {
 	assert.Equal(t, result, resultEP, "x-wso2-endpoints vendor extension has not read correctly")
 }
 
+// TestGetXWso2Basepath for getXWso2Basepath()
 func TestGetXWso2Basepath(t *testing.T) {
 	type getXWso2BasepathTestItem struct {
 		inputVendorExtensions map[string]interface{}
@@ -122,6 +125,7 @@ func TestGetXWso2Basepath(t *testing.T) {
 	}
 }
 
+// TestSetXWso2ProductionEndpoint for mgwSwagger.setXWso2ProductionEndpoint()
 func TestSetXWso2ProductionEndpoint(t *testing.T) {
 	type setXWso2ProductionEndpointTestItem struct {
 		input   MgwSwagger
@@ -213,7 +217,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 					"type": "loadbalance", "urls": []interface{}{"https://www.youtube.com:80/base"}},
 					constants.XWso2Cors: map[string]interface{}{
 						"Enabled":                       "true",
-						"AccessControlAllowCredentials": "true",
+						"AccessControlAllowCredentials": true,
 						"AccessControlAllowHeaders":     []interface{}{"Authorization"},
 						"AccessControlAllowMethods":     []interface{}{"GET"},
 						"AccessControlAllowOrigins":     []interface{}{"http://test123.com", "http://test456.com"},
@@ -277,6 +281,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 	}
 }
 
+// TestValidateBasePath for mgwSwagger.validateBasePath()
 func TestValidateBasePath(t *testing.T) {
 	type getXWso2BasepathTestItem struct {
 		mgwSwagger MgwSwagger

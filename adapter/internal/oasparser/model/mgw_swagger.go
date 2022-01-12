@@ -283,7 +283,6 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 // SanitizeAPISecurity this will validate api level and operation level swagger security
 // if apiyaml security is provided swagger security will be removed accordingly
 func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool) {
-	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
 	apiSecurityDefinitionNames := []string{}
 	overridenAPISecurityDefinitions := []SecurityScheme{}
 
@@ -303,11 +302,11 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 		if isYamlOauth && securityDef.DefinitionName == constants.APIMDefaultOauth2Security {
 			overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, securityDef)
 			apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
-		} else if !isOverrideSecurityByYaml {
+		} else if !isYamlAPIKey && !isYamlOauth {
 			apiSecurityDefinitionNames = append(apiSecurityDefinitionNames, securityDef.DefinitionName)
 		}
 	}
-	if isOverrideSecurityByYaml {
+	if isYamlAPIKey || isYamlOauth {
 		logger.LoggerXds.Debugf("Security definitions are overriden according to api.yaml for API %v:%v",
 			swagger.title, swagger.version)
 		swagger.SetSecurityScheme(overridenAPISecurityDefinitions)
@@ -343,28 +342,19 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 					if arrayContains(apiSecurityDefinitionNames, securityDefName) {
 						sanitizedOperationSecurity = append(sanitizedOperationSecurity, security)
 					} else {
-						logger.LoggerXds.Warnf("A security definition for %v has not found in API %v:%v",
+						logger.LoggerXds.Warnf("A security definition for %v was not found in API %v:%v",
 							securityDefName, swagger.title, swagger.version)
 					}
 				}
 			}
 			// has do the following to enable apikey as well when default oauth2 security is in operation level
-			if isOverrideSecurityByYaml && isYamlOauth && isYamlAPIKey {
+			if isYamlOauth && isYamlAPIKey {
 				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{constants.APIMAPIKeyInHeader: {}})
 				sanitizedOperationSecurity = append(sanitizedOperationSecurity, map[string][]string{constants.APIMAPIKeyInQuery: {}})
 			}
 			operation.SetSecurity(sanitizedOperationSecurity)
 		}
 	}
-}
-
-func arrayContains(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
 }
 
 // SetXWso2Extensions set the MgwSwagger object with the properties
@@ -418,7 +408,7 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 	if envProps.APIConfigs.ProductionEndpoint != "" {
 		logger.LoggerOasparser.Infof("Production endpoints are found in env properties for %v : %v",
 			swagger.title, swagger.version)
-		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.ProductionEndpoint)
+		endpoint, err := getHTTPEndpoint(envProps.APIConfigs.ProductionEndpoint)
 		if err == nil {
 			productionUrls = append(productionUrls, *endpoint)
 		} else {
@@ -435,7 +425,7 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 
 	if envProps.APIConfigs.SandBoxEndpoint != "" {
 		logger.LoggerOasparser.Infof("Sandbox endpoints are found in env properties %v : %v", swagger.title, swagger.version)
-		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.SandBoxEndpoint)
+		endpoint, err := getHTTPEndpoint(envProps.APIConfigs.SandBoxEndpoint)
 		if err == nil {
 			sandboxUrls = append(sandboxUrls, *endpoint)
 		} else {
@@ -608,18 +598,6 @@ func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
 	if tier != "" {
 		swagger.xWso2ThrottlingTier = tier
 	}
-}
-
-// getXWso2AuthHeader extracts the value of xWso2AuthHeader extension.
-// if the property is not available, an empty string is returned.
-func getXWso2AuthHeader(vendorExtensions map[string]interface{}) string {
-	xWso2AuthHeader := ""
-	if y, found := vendorExtensions[constants.XAuthHeader]; found {
-		if val, ok := y.(string); ok {
-			xWso2AuthHeader = val
-		}
-	}
-	return xWso2AuthHeader
 }
 
 // SetXWSO2AuthHeader sets the AuthHeader of the API
@@ -865,7 +843,7 @@ func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
 				logger.LoggerOasparser.Error("Consul syntax parse error ", err)
 				continue
 			}
-			endpoint, err := getHostandBasepathandPort(defHost)
+			endpoint, err := getHTTPEndpoint(defHost)
 			if err == nil {
 				endpoint.ServiceDiscoveryString = queryString
 				endpoints = append(endpoints, *endpoint)
@@ -873,7 +851,7 @@ func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
 				return nil, err
 			}
 		} else {
-			endpoint, err := getHostandBasepathandPort(v.(string))
+			endpoint, err := getHTTPEndpoint(v.(string))
 			if err == nil {
 				endpoints = append(endpoints, *endpoint)
 			} else {
@@ -882,18 +860,6 @@ func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
 		}
 	}
 	return endpoints, nil
-}
-
-// getXWso2Basepath extracts the value of xWso2BasePath extension.
-// if the property is not available, an empty string is returned.
-func getXWso2Basepath(vendorExtensions map[string]interface{}) string {
-	xWso2basepath := ""
-	if y, found := vendorExtensions[constants.XWso2BasePath]; found {
-		if val, ok := y.(string); ok {
-			xWso2basepath = val
-		}
-	}
-	return xWso2basepath
 }
 
 func (swagger *MgwSwagger) setXWso2Basepath() {
@@ -955,54 +921,6 @@ func generateGlobalCors() *CorsConfig {
 	}
 }
 
-// ResolveThrottlingTier extracts the value of x-wso2-throttling-tier and
-// x-throttling-tier extension. if x-wso2-throttling-tier is available it
-// will be prioritized.
-// if both the properties are not available, an empty string is returned.
-func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
-	xTier := ""
-	if x, found := vendorExtensions[constants.XWso2ThrottlingTier]; found {
-		if val, ok := x.(string); ok {
-			xTier = val
-		}
-	} else if y, found := vendorExtensions[constants.XThrottlingTier]; found {
-		if val, ok := y.(string); ok {
-			xTier = val
-		}
-	}
-	return xTier
-}
-
-// ResolveDisableSecurity extracts the value of x-auth-type extension.
-// if the property is not available, false is returned.
-// If the API definition is fed from API manager, then API definition contains
-// x-auth-type as "None" for non secured APIs. Then the return value would be true.
-// If the API definition is fed through apictl, the users can use either
-// x-wso2-disable-security : true/false to enable and disable security.
-func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
-	disableSecurity := false
-	y, vExtAuthType := vendorExtensions[constants.XAuthType]
-	z, vExtDisableSecurity := vendorExtensions[constants.XWso2DisableSecurity]
-	if vExtDisableSecurity {
-		// If x-wso2-disable-security is present, then disableSecurity = val
-		if val, ok := z.(bool); ok {
-			disableSecurity = val
-		}
-	}
-	if vExtAuthType && !disableSecurity {
-		// If APIs are published through APIM, all resource levels contains x-auth-type
-		// vendor extension.
-		if val, ok := y.(string); ok {
-			// If the x-auth-type vendor ext is None, then the API/resource is considerd
-			// to be non secure
-			if val == constants.None {
-				disableSecurity = true
-			}
-		}
-	}
-	return disableSecurity
-}
-
 //GetInterceptor returns interceptors
 func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) (InterceptEndpoint, error) {
 	var endpointCluster EndpointCluster
@@ -1016,7 +934,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			//serviceURL mandatory
 			if v, found := val[constants.ServiceURL]; found {
 				serviceURLV := v.(string)
-				endpoint, err := getHostandBasepathandPort(serviceURLV)
+				endpoint, err := getHTTPEndpoint(serviceURLV)
 				if err != nil {
 					logger.LoggerOasparser.Error("Error reading interceptors service url value", err)
 					return InterceptEndpoint{}, errors.New("error reading interceptors service url value")
@@ -1111,7 +1029,11 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			err = swagger.SetInfoOpenAPI(openAPISpec)
 		}
 	} else if definitionVersion == constants.AsyncAPI2_0_0 {
-
+		var asyncAPISpec AsyncAPI
+		err = json.Unmarshal(definitionJsn, &asyncAPISpec)
+		if err == nil {
+			err = swagger.SetInfoAsyncAPI(asyncAPISpec)
+		}
 	} else {
 		return errors.New("API version not specified or not supported")
 	}
@@ -1132,9 +1054,9 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
 //PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml) error {
+func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiYaml APIYaml) (err error) {
 
-	data := apiData.Data
+	data := apiYaml.Data
 	// UUID in the generated api.yaml file is considered as swagger.id
 	swagger.id = data.ID
 	swagger.apiType = strings.ToUpper(data.APIType)
@@ -1152,20 +1074,31 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml) error {
 
 	swagger.LifecycleStatus = strings.ToUpper(data.LifeCycleStatus)
 
-	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
-	endpointConfig := data.EndpointConfig
+	err = swagger.setProdEndpointsFromAPIyaml(apiYaml)
+	if err != nil {
+		return err
+	}
+	err = swagger.setSandboxEndpointsFromAPIyaml(apiYaml)
+	if err != nil {
+		return err
+	}
 
-	if endpointConfig.ImplementationStatus == prototypedAPI {
+	if data.EndpointConfig.ImplementationStatus == prototypedAPI {
 		swagger.IsProtoTyped = true
 	}
 
+	return nil
+}
+
+func (swagger *MgwSwagger) setProdEndpointsFromAPIyaml(apiYaml APIYaml) error {
+	endpointConfig := apiYaml.Data.EndpointConfig
 	if len(endpointConfig.ProductionEndpoints) > 0 {
 		var endpoints []Endpoint
 		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
 			if swagger.apiType == constants.WS {
-				prodEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+				prodEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *prodEndpoint)
 				} else {
@@ -1179,7 +1112,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml) error {
 			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
 				if swagger.apiType == constants.WS {
-					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+					failoverEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
 					} else {
@@ -1200,14 +1133,28 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml) error {
 		}
 		swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, endpoints, endpointType)
 	}
+	// if yaml has production security, setting it
+	if swagger.productionEndpoints != nil && endpointConfig.APIEndpointSecurity.Production.Enabled {
+		if endpointConfig.APIEndpointSecurity.Production.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Production.Type) {
+			swagger.productionEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Production
+		} else {
+			endpointConfig.APIEndpointSecurity.Production.Enabled = false
+			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
+				endpointConfig.APIEndpointSecurity.Production.Type)
+		}
+	}
+	return nil
+}
 
+func (swagger *MgwSwagger) setSandboxEndpointsFromAPIyaml(apiYaml APIYaml) error {
+	endpointConfig := apiYaml.Data.EndpointConfig
 	if len(endpointConfig.SandBoxEndpoints) > 0 {
 		var endpoints []Endpoint
 		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
 			if swagger.apiType == constants.WS {
-				sandBoxEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+				sandBoxEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *sandBoxEndpoint)
 				} else {
@@ -1221,7 +1168,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml) error {
 			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
 				if swagger.apiType == constants.WS {
-					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+					failoverEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
 					} else {
@@ -1241,17 +1188,6 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml) error {
 			}
 		}
 		swagger.sandboxEndpoints = generateEndpointCluster(constants.SandClustersConfigNamePrefix, endpoints, endpointType)
-	}
-
-	// if yaml has production security, setting it
-	if swagger.productionEndpoints != nil && endpointConfig.APIEndpointSecurity.Production.Enabled {
-		if endpointConfig.APIEndpointSecurity.Production.Type != "" && strings.EqualFold("BASIC", endpointConfig.APIEndpointSecurity.Production.Type) {
-			swagger.productionEndpoints.SecurityConfig = endpointConfig.APIEndpointSecurity.Production
-		} else {
-			endpointConfig.APIEndpointSecurity.Production.Enabled = false
-			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
-				endpointConfig.APIEndpointSecurity.Production.Type)
-		}
 	}
 	// if yaml has sandbox security, setting it
 	if swagger.sandboxEndpoints != nil && endpointConfig.APIEndpointSecurity.Sandbox.Enabled {

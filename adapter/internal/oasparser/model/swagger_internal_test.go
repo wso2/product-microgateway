@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestSetInfoSwagger for mgwSwagger.SetInfoSwagger()
 func TestSetInfoSwagger(t *testing.T) {
 	type setInfoTestItem struct {
 		input   spec.Swagger
@@ -81,6 +82,7 @@ func TestSetInfoSwagger(t *testing.T) {
 	}
 }
 
+// TestSetResourcesSwagger for setResourcesSwagger()
 func TestSetResourcesSwagger(t *testing.T) {
 	type setResourcesTestItem struct {
 		input   spec.Swagger
@@ -128,7 +130,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := setResourcesSwagger(item.input)
+		resultResources := getResourcesSwagger(item.input)
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)

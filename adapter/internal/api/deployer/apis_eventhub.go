@@ -81,7 +81,7 @@ func ApplyAPIProjectFromAPIM(
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			allEnvironments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		// first update the API for vhost
-		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, allEnvironments)
+		deployedRevision, err := xds.UpdateAPI(vhost, *apiProject, allEnvironments)
 		if err != nil {
 			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}

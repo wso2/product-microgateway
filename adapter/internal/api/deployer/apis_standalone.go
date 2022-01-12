@@ -54,6 +54,8 @@ func ProcessMountedAPIProjects() error {
 	for _, apiProjectFile := range files {
 		if apiProjectFile.IsDir() {
 			var apiProject model.ProjectAPI
+			apiProject.UpstreamCerts = make(map[string][]byte)
+			apiProject.EndpointCerts = make(map[string]string)
 			err = filepath.Walk(filepath.FromSlash(apisDirName+"/"+apiProjectFile.Name()), func(path string, info os.FileInfo, err error) error {
 
 				if !info.IsDir() {
@@ -61,7 +63,7 @@ func ProcessMountedAPIProjects() error {
 					if err != nil {
 						return err
 					}
-					apiProject, err = ProcessFilesInsideProject(fileContent, path)
+					err = ProcessFileInsideProject(&apiProject, fileContent, path)
 					return err
 				}
 				return nil
@@ -172,10 +174,11 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err erro
 // between create and update using the override param
 func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error) {
 	apiProject, err := extractAPIProject(payload)
+
 	if err != nil {
 		return err
 	}
-	return validateAndUpdateXds(apiProject, override)
+	return validateAndUpdateXds(*apiProject, override)
 }
 
 // ListApis calls the ListApis method in xds_server.go

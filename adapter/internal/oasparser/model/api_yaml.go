@@ -29,8 +29,9 @@ import (
 // To support both api.json and api.yaml we convert yaml to json and then use json.Unmarshal()
 // Therefore, the params are defined to support json.Unmarshal()
 type APIYaml struct {
-	ApimMeta
-	Data struct {
+	Type    string `yaml:"type" json:"type"`
+	Version string `yaml:"version" json:"version"`
+	Data    struct {
 		ID                         string   `json:"Id,omitempty"`
 		Name                       string   `json:"name,omitempty"`
 		Context                    string   `json:"context,omitempty"`
@@ -63,6 +64,15 @@ type APIYaml struct {
 type APIEndpointSecurity struct {
 	Production EndpointSecurity `json:"production,omitempty"`
 	Sandbox    EndpointSecurity `json:"sandbox,omitempty"`
+}
+
+// EndpointSecurity contains parameters of endpoint security at api.json
+type EndpointSecurity struct {
+	Password         string            `json:"password,omitempty" mapstructure:"password"`
+	Type             string            `json:"type,omitempty" mapstructure:"type"`
+	Enabled          bool              `json:"enabled,omitempty" mapstructure:"enabled"`
+	Username         string            `json:"username,omitempty" mapstructure:"username"`
+	CustomParameters map[string]string `json:"customparameters,omitempty" mapstructure:"customparameters"`
 }
 
 // EndpointInfo holds config values regards to the endpoint
