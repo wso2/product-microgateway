@@ -132,6 +132,7 @@ public class StoreUtils {
                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
         if (Objects.isNull(response)) {
+            log.error("Error while subscribing to the API. API may not have been published.");
             throw new CCTestException(
                     "Error while subscribing to the API. API Id : " + apiId + ", Application Id: " + applicationId);
         }

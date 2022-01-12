@@ -36,6 +36,7 @@
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
+                        <cc_root_dir>${project.basedir}${file.separator}..${file.separator}..</cc_root_dir>
                         <jwt_transformer_jar>
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>

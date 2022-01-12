@@ -1,0 +1,36 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Interceptor APIM Mode With MTLS API
+  license:
+    name: MIT
+servers:
+  - url: http://mockBackend:2383/v2
+x-wso2-basePath: /interceptor-apim-mode-with-mtls
+paths:
+  /echo/123:
+    x-wso2-request-interceptor:
+      serviceURL: https://mockBackend:2371
+      includes:
+        - request_headers
+    post:
+      summary: Interceptor echo backend
+      responses:
+        '200':
+          description: successful operation
+
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string

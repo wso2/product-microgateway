@@ -1,6 +1,8 @@
 [router]
 [router.cors]
     enabled = false
+[router.upstream.tls]
+    trustedCertPath = "/home/wso2/security/truststore/ca-certificates.crt"
 
 [enforcer]
 [enforcer.security]
