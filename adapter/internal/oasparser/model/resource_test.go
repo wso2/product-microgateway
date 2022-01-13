@@ -14,6 +14,7 @@
  *  limitations under the License.
  *
  */
+
 package model
 
 import (
@@ -22,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestSortResources for SortResources()
 func TestSortResources(t *testing.T) {
 	resources := getResources()
 	sortedPaths := []string{

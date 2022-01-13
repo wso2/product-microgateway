@@ -14,6 +14,8 @@
  *  limitations under the License.
  */
 
+// This files contains types that are NOT used to define an API
+
 package model
 
 import "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
@@ -29,26 +31,12 @@ type ProjectAPI struct {
 	EndpointCerts    map[string]string // cert url -> cert filename
 }
 
-// EndpointSecurity contains parameters of endpoint security at api.json
-type EndpointSecurity struct {
-	Password         string            `json:"password,omitempty" mapstructure:"password"`
-	Type             string            `json:"type,omitempty" mapstructure:"type"`
-	Enabled          bool              `json:"enabled,omitempty" mapstructure:"enabled"`
-	Username         string            `json:"username,omitempty" mapstructure:"username"`
-	CustomParameters map[string]string `json:"customparameters,omitempty" mapstructure:"customparameters"`
-}
-
-// ApimMeta represents APIM meta information of files received from APIM
-type ApimMeta struct {
-	Type    string `yaml:"type" json:"type"`
-	Version string `yaml:"version" json:"version"`
-}
-
 // DeploymentEnvironments represents content of deployment_environments.yaml file
 // of an API_CTL Project
 type DeploymentEnvironments struct {
-	ApimMeta
-	Data []Deployment `yaml:"data"`
+	Type    string       `yaml:"type" json:"type"`
+	Version string       `yaml:"version" json:"version"`
+	Data    []Deployment `yaml:"data"`
 }
 
 // Deployment represents deployment information of an API_CTL project
@@ -61,8 +49,9 @@ type Deployment struct {
 // EndpointCertificatesDetails represents content of endpoint_certificates.yaml file
 // of an API_CTL Project
 type EndpointCertificatesDetails struct {
-	ApimMeta
-	Data []EndpointCertificate `json:"data"`
+	Type    string                `yaml:"type" json:"type"`
+	Version string                `yaml:"version" json:"version"`
+	Data    []EndpointCertificate `json:"data"`
 }
 
 // EndpointCertificate represents certificate information of an API_CTL project

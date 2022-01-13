@@ -19,10 +19,6 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
-	"net/url"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -81,14 +77,14 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 
 	swagger.apiType = constants.HTTP
 	var productionUrls []Endpoint
-	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
 	// an exception is made where servers url is not processed when the API is prototyped.
 	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsProtoTyped {
 		for _, serverEntry := range swagger3.Servers {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
 			}
-			endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+			endpoint, err := getHTTPEndpoint(serverEntry.URL)
 			if err == nil {
 				productionUrls = append(productionUrls, *endpoint)
 				swagger.xWso2Basepath = endpoint.Basepath
@@ -156,7 +152,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 					if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 						continue
 					}
-					endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+					endpoint, err := getHTTPEndpoint(serverEntry.URL)
 					if err == nil {
 						productionUrls = append(productionUrls, *endpoint)
 
@@ -202,60 +198,6 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
 	return NewOperation(method, securityArray, extensions)
 
-}
-
-// getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion
-// from of the production endpoints url entry, combination of schemes and host (in openapi v2)
-// or server property.
-//
-// if no scheme is mentioned before the hostname, urlType would be assigned as http
-func getHostandBasepathandPort(rawURL string) (*Endpoint, error) {
-	var (
-		basepath string
-		host     string
-		port     uint32
-		urlType  string
-	)
-
-	if !strings.Contains(rawURL, "://") {
-		rawURL = "http://" + rawURL
-	}
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
-		return nil, err
-	}
-
-	// Hostname validation
-	if err == nil && !regexp.MustCompile(hostNameValidator).MatchString(parsedURL.Hostname()) {
-		logger.LoggerOasparser.Error("Malformed endpoint detected (Invalid host name) : ", rawURL)
-		return nil, errors.New("malformed endpoint detected (Invalid host name) : " + rawURL)
-	}
-
-	host = parsedURL.Hostname()
-	basepath = parsedURL.Path
-	if parsedURL.Port() != "" {
-		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
-		}
-		port = uint32(u32)
-	} else {
-		if strings.HasPrefix(rawURL, "https://") {
-			port = uint32(443)
-		} else {
-			port = uint32(80)
-		}
-	}
-
-	urlType = "http"
-	if strings.HasPrefix(rawURL, "https://") {
-		urlType = "https"
-	} else if !strings.HasPrefix(rawURL, "http://") {
-		rawURL = "http://" + rawURL
-	}
-
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType, RawURL: rawURL}, nil
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3
@@ -325,48 +267,4 @@ func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
 	}
 	return []string{"default"}
-}
-
-func getEndpointForWebsocketURL(rawURL string) (*Endpoint, error) {
-	var (
-		basepath string
-		host     string
-		port     uint32
-		urlType  string
-	)
-	if !strings.Contains(rawURL, "://") {
-		rawURL = "ws://" + rawURL
-	}
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
-		return nil, err
-	}
-
-	host = parsedURL.Hostname()
-	if parsedURL.Path == "" {
-		basepath = "/"
-	} else {
-		basepath = parsedURL.Path
-	}
-	if parsedURL.Port() != "" {
-		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
-		}
-		port = uint32(u32)
-	} else {
-		if strings.HasPrefix(rawURL, "wss://") {
-			port = uint32(443)
-		} else {
-			port = uint32(80)
-		}
-	}
-	urlType = "ws"
-	if strings.HasPrefix(rawURL, "wss://") {
-		urlType = "wss"
-	} else if !strings.HasPrefix(rawURL, "ws://") {
-		rawURL = "ws://" + rawURL
-	}
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType, RawURL: rawURL}, nil
 }

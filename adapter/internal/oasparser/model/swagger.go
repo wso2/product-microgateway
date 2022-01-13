@@ -21,7 +21,6 @@ import (
 	"errors"
 
 	"github.com/go-openapi/spec"
-	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
@@ -43,9 +42,9 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		swagger.version = swagger2.Info.Version
 	}
 	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
-	swagger.securityScheme = setSecurityDefinitions(swagger2)
+	swagger.securityScheme = getSecurityDefinitions(swagger2)
 	swagger.security = swagger2.Security
-	swagger.resources = setResourcesSwagger(swagger2)
+	swagger.resources = getResourcesSwagger(swagger2)
 	swagger.apiType = constants.HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
@@ -68,7 +67,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 					swagger2.Info.Title, swagger2.Info.Version)
 			}
 		}
-		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
+		endpoint, err := getHTTPEndpoint(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
 			swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix,
@@ -81,8 +80,8 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	return nil
 }
 
-// setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
+// getResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
+func getResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 	var resources []*Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
@@ -158,7 +157,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 				methodFound = true
 			}
 			if methodFound {
-				resource := setOperationSwagger(path, methodsArray, pathItem)
+				resource := generateResource(path, methodsArray, pathItem.Extensions)
 				resources = append(resources, &resource)
 			}
 		}
@@ -166,15 +165,14 @@ func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 	return SortResources(resources)
 }
 
-// Sets security definitions defined in swagger 2 format.
-func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
+// get a security definitions array from a swagger 2 definition.
+func getSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 	var securitySchemes []SecurityScheme
 
 	for key, val := range swagger2.SecurityDefinitions {
 		scheme := SecurityScheme{DefinitionName: key, Type: val.Type, Name: val.Name, In: val.In}
 		securitySchemes = append(securitySchemes, scheme)
 	}
-	logger.LoggerOasparser.Debugf("Security schemes in setSecurityDefinitions  %v:", securitySchemes)
 	return securitySchemes
 }
 
@@ -183,21 +181,5 @@ func setSecurityDefinitions(swagger2 spec.Swagger) []SecurityScheme {
 func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
 	if _, found := v.Extensions.GetBool(constants.XWso2DisableSecurity); !found {
 		v.AddExtension(constants.XWso2DisableSecurity, enable)
-	}
-}
-
-func setOperationSwagger(path string, methods []*Operation, pathItem spec.PathItem) Resource {
-	return Resource{
-		path:    path,
-		methods: methods,
-		// TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
-		iD: uuid.New().String(),
-		// PathItem object in swagger 2 specification does not contain summary and description properties
-		summary:     "",
-		description: "",
-		//schemes:          operation.Schemes,
-		//tags:             operation.Tags,
-		//security:         operation.Security,
-		vendorExtensions: pathItem.VendorExtensible.Extensions,
 	}
 }

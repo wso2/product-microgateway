@@ -239,14 +239,14 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 		productionEndpoints := mgwSwagger.GetProdEndpoints().Endpoints
 		productionEndpoint := productionEndpoints[0]
 		assert.Equal(t, productionEndpoint.Host, "echo.websocket.org", "mgwSwagger production endpoint host mismatch")
-		assert.Equal(t, productionEndpoint.Basepath, "/", "mgwSwagger production endpoint basepath mistmatch")
+		assert.Equal(t, productionEndpoint.Basepath, "", "mgwSwagger production endpoint basepath mistmatch")
 		assert.Equal(t, productionEndpoint.URLType, "ws", "mgwSwagger production endpoint URLType mismatch")
 		var port uint32 = 80
 		assert.Equal(t, productionEndpoint.Port, port, "mgwSwagger production endpoint port mismatch")
 		sandboxEndpoints := mgwSwagger.GetSandEndpoints().Endpoints
 		sandboxEndpoint := sandboxEndpoints[0]
 		assert.Equal(t, sandboxEndpoint.Host, "echo.websocket.org", "mgwSwagger sandbox endpoint host mismatch")
-		assert.Equal(t, sandboxEndpoint.Basepath, "/", "mgwSwagger sandbox endpoint basepath mistmatch")
+		assert.Equal(t, sandboxEndpoint.Basepath, "", "mgwSwagger sandbox endpoint basepath mistmatch")
 		assert.Equal(t, sandboxEndpoint.URLType, "ws", "mgwSwagger sandbox endpoint URLType mismatch")
 		assert.Equal(t, sandboxEndpoint.Port, port, "mgwSwagger sandbox endpoint port mismatch")
 	}
@@ -259,7 +259,7 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 		productionEndpoint := productionEndpoints[0]
 		var port uint32 = 80
 		assert.Equal(t, productionEndpoint.Host, "echo.websocket.org", "mgwSwagger production endpoint host mismatch")
-		assert.Equal(t, productionEndpoint.Basepath, "/", "mgwSwagger production endpoint basepath mistmatch")
+		assert.Equal(t, productionEndpoint.Basepath, "", "mgwSwagger production endpoint basepath mistmatch")
 		assert.Equal(t, productionEndpoint.URLType, "ws", "mgwSwagger production endpoint URLType mismatch")
 		assert.Equal(t, productionEndpoint.Port, port, "mgwSwagger production endpoint port mismatch")
 		sandboxEndpoints := mgwSwagger.GetSandEndpoints()
@@ -275,7 +275,7 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 		sandboxEndpoints := mgwSwagger.GetSandEndpoints().Endpoints
 		sandboxEndpoint := sandboxEndpoints[0]
 		assert.Equal(t, sandboxEndpoint.Host, "echo.websocket.org", "mgwSwagger sandbox endpoint host mismatch")
-		assert.Equal(t, sandboxEndpoint.Basepath, "/", "mgwSwagger sandbox endpoint basepath mistmatch")
+		assert.Equal(t, sandboxEndpoint.Basepath, "", "mgwSwagger sandbox endpoint basepath mistmatch")
 		assert.Equal(t, sandboxEndpoint.URLType, "ws", "mgwSwagger sandbox endpoint URLType mismatch")
 		assert.Equal(t, sandboxEndpoint.Port, port, "mgwSwagger sandbox endpoint port mismatch")
 		productionEndpoints := mgwSwagger.GetProdEndpoints()

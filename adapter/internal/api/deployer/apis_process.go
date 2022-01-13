@@ -61,12 +61,15 @@ const (
 // extractAPIProject accepts the API project as a zip file and returns the extracted content.
 // The API project must be in zipped format.
 // API type is decided by the type field in the api.yaml file.
-func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) {
+func extractAPIProject(payload []byte) (*model.ProjectAPI, error) {
+	var apiProject model.ProjectAPI
+	apiProject.UpstreamCerts = make(map[string][]byte)
+	apiProject.EndpointCerts = make(map[string]string)
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Error occurred while unzipping the apictl project. Error: %v", err.Error())
-		return apiProject, err
+		return nil, err
 	}
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
@@ -74,18 +77,18 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 		unzippedFileBytes, err := readZipFile(file)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
-			return apiProject, err
+			return nil, err
 		}
-		apiProject, err = ProcessFilesInsideProject(unzippedFileBytes, file.Name)
+		err = ProcessFileInsideProject(&apiProject, unzippedFileBytes, file.Name)
 		if err != nil {
-			return apiProject, err
+			return nil, err
 		}
 	}
 	err = ValidateAPIType(&apiProject)
 	if err != nil {
-		return apiProject, err
+		return nil, err
 	}
-	return apiProject, nil
+	return &apiProject, nil
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {
@@ -97,10 +100,10 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
-// ProcessFilesInsideProject process single file inside API Project and update the apiProject instance appropriately.
-func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject model.ProjectAPI, err error) {
-	apiProject.UpstreamCerts = make(map[string][]byte)
-	apiProject.EndpointCerts = make(map[string]string)
+// ProcessFileInsideProject method process one file at a time and
+// update the apiProject instance appropriately. Files could be: /petstore,
+// /petstore/Definition, /petstore/Definition/swagger.yaml, /petstore/api.yaml, etc.
+func ProcessFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, fileName string) error {
 	newLineByteArray := []byte("\n")
 
 	// Deployment file
@@ -121,7 +124,7 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
 		if conversionErr != nil {
 			loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
-			return apiProject, conversionErr
+			return conversionErr
 		}
 		apiProject.APIDefinition = swaggerJsn
 
@@ -131,7 +134,7 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 
 		if !tlsutils.IsPublicCertificate(fileContent) {
 			loggers.LoggerAPI.Errorf("Provided interceptor certificate: %v is not in the PEM file format. ", fileName)
-			return apiProject, errors.New("interceptor certificate Validation Error")
+			return errors.New("interceptor certificate Validation Error")
 		}
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, fileContent...)
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, newLineByteArray...)
@@ -143,7 +146,7 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 			epCertJSON, conversionErr := utills.ToJSON(fileContent)
 			if conversionErr != nil {
 				loggers.LoggerAPI.Errorf("Error converting %v file to json: %v", fileName, conversionErr.Error())
-				return apiProject, conversionErr
+				return conversionErr
 			}
 			endpointCertificates := &model.EndpointCertificatesDetails{}
 			err := json.Unmarshal(epCertJSON, endpointCertificates)
@@ -158,7 +161,7 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 			if !tlsutils.IsPublicCertificate(fileContent) {
 				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", fileName)
 				// TODO: (VirajSalaka) Create standard error handling mechanism
-				return apiProject, errors.New("certificate Validation Error")
+				return errors.New("certificate Validation Error")
 			}
 
 			if fileNameArray := strings.Split(fileName, string(os.PathSeparator)); len(fileNameArray) > 0 {
@@ -174,11 +177,11 @@ func ProcessFilesInsideProject(fileContent []byte, fileName string) (apiProject 
 		apiYaml, err := ExtractAPIYaml(fileContent)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("Error while reading %v", fileName)
-			return apiProject, errors.New("Error while reading api.yaml or api.json")
+			return errors.New("Error while reading api.yaml or api.json")
 		}
 		apiProject.APIYaml = apiYaml
 	}
-	return apiProject, nil
+	return nil
 }
 
 // ExtractAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json
@@ -244,7 +247,7 @@ func parseDeployments(data []byte) ([]model.Deployment, error) {
 
 // ValidateAPIType checks if the apiProject is properly assigned with the type.
 func ValidateAPIType(apiProject *model.ProjectAPI) (err error) {
-	apiType := strings.ToUpper(apiProject.APIYaml.Type)
+	apiType := strings.ToUpper(apiProject.APIYaml.Data.APIType)
 	if apiType == "" {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")

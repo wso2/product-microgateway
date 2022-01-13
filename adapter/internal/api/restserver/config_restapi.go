@@ -152,6 +152,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		err := deployer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
+			logger.LoggerAPI.Error("Error while deploying API: ", err.Error())
 			if err.Error() == constants.AlreadyExists {
 				return api_individual.NewPostApisConflict()
 			} else if strings.HasPrefix(err.Error(), "An API exists with the same basepath") {

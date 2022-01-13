@@ -21,7 +21,7 @@ package constants
 const (
 	Urls                  string = "urls"
 	Type                  string = "type"
-	LoadBalance           string = "loadbalance"
+	LoadBalance           string = "load_balance"
 	FailOver              string = "failover"
 	AdvanceEndpointConfig string = "advanceEndpointConfig"
 	SecurityConfig        string = "securityConfig"

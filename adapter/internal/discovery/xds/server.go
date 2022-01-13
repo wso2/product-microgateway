@@ -279,9 +279,11 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	}
 
 	apiType := mgwSwagger.GetAPIType()
-	if apiType == constants.HTTP || apiType == constants.WS || apiType == constants.WEBHOOK || apiType == constants.SSE {
-
+	if apiType == constants.HTTP || apiType == constants.WEBHOOK {
 		err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
+		mgwSwagger.SetID(apiYaml.ID)
+		mgwSwagger.SetName(apiYaml.Name)
+		mgwSwagger.SetVersion(apiYaml.Version)
 		if err != nil {
 			return nil, err
 		}
@@ -300,9 +302,10 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-	} else {
+	} else if apiType != constants.WS {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
+		errMsg := fmt.Sprintf("API type %v currently supported by Choreo Connect", apiType)
+		return nil, errors.New(errMsg)
 	}
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
 	organizationID := mgwSwagger.OrganizationID
