@@ -26,6 +26,23 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/config"
 )
 
+// ErrorLog used to keep error details for error logs
+type ErrorLog struct {
+	Message  string
+	Severity string
+	Code     int
+}
+
+// Log represents the extended type of logrus.logger
+type Log struct {
+	*logrus.Logger
+}
+
+// ErrorC can be used for formal error logs
+func (l *Log) ErrorC(e ErrorLog) {
+	logrus.WithFields(logrus.Fields{"severity": e.Severity, "code": e.Code}).Errorf(e.Message)
+}
+
 func logLevelMapper(pkgLevel string) logrus.Level {
 	logLevel := defaultLogLevel
 	switch pkgLevel {
@@ -49,16 +66,18 @@ func logLevelMapper(pkgLevel string) logrus.Level {
 // InitPackageLogger initialises the package loggers for given package name.
 // If the package log level is defined in the log_config.toml file, it override the
 // root log level.
-func InitPackageLogger(pkgName string) *logrus.Logger {
+func InitPackageLogger(pkgName string) Log {
 
 	pkgLogLevel := defaultLogLevel //default log level
 	isPackegeLevelDefined := false
 
-	logger := logrus.New()
+	logger := Log{logrus.New()}
 	logger.SetReportCaller(true)
 
-	formatter := loggerFormat()
+	formatter := LogFormatter
 	logger.SetFormatter(formatter)
+
+	logger.AddHook(&ErrorHook{})
 
 	logConf := config.ReadLogConfigs()
 

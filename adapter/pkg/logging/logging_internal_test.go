@@ -17,31 +17,12 @@
 
 package logging
 
-import "github.com/sirupsen/logrus"
-
-// Log Level Constants
-const (
-	defaultLogLevel = logrus.InfoLevel
-	panicLevel      = "PANC"
-	fatalLevel      = "FATL"
-	errorLevel      = "ERRO"
-	warnLevel       = "WARN"
-	infoLevel       = "INFO"
-	debugLevel      = "DEBG"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-// Log Formalization Constants
-const (
-	defaultType = "NONE"
-	jsonType    = "JSON"
-)
-
-// Log (Error) severity level constants
-const (
-	BLOCKER  = "Blocker"
-	CRITICAL = "Critical"
-	MAJOR    = "Major"
-	MINOR    = "Minor"
-	TRIVIAL  = "Trivial"
-	DEFAULT  = "Default"
-)
+func TestInitPackageLogger(t *testing.T) {
+	log := InitPackageLogger("sample.package")
+	assert.NotNil(t, log, "InitPackageLogger failed.")
+}

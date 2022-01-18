@@ -60,6 +60,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
+import static  org.wso2.choreo.connect.enforcer.commons.logging.ErrorLog.errorLog;
+
 /**
  * gRPC netty based server that handles the incoming requests.
  */
@@ -68,6 +70,7 @@ public class AuthServer {
     private static final Logger logger = LogManager.getLogger(AuthServer.class);
 
     public static void main(String[] args) {
+        logger.error("Test error msg", errorLog("critical", 349000));
         try {
             // initialize the config holder
             ConfigHolder.getInstance();

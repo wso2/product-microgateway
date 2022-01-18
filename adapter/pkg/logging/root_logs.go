@@ -18,20 +18,12 @@
 package logging
 
 import (
-	"fmt"
-	"io"
-	"os"
-	"strings"
-
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/pkg/config"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
+	"io"
+	"os"
 )
-
-type plainFormatter struct {
-	TimestampFormat string
-	LevelDesc       []string
-}
 
 func init() {
 	logConf := config.ReadLogConfigs()
@@ -51,8 +43,9 @@ func initGlobalLogger(filename string) error {
 	_, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 
 	logrus.SetReportCaller(true)
-	formatter := loggerFormat()
+	formatter := LogFormatter
 	logrus.SetFormatter(formatter)
+	logrus.AddHook(&ErrorHook{})
 
 	if err != nil {
 		// Cannot open log file. Logging to stderr
@@ -68,40 +61,6 @@ func initGlobalLogger(filename string) error {
 	logConf := config.ReadLogConfigs()
 	logrus.SetLevel(logLevelMapper(logConf.LogLevel))
 	return err
-}
-
-// loggerFormat initiates the log formatter.
-func loggerFormat() *plainFormatter {
-
-	formatter := new(plainFormatter)
-	formatter.TimestampFormat = "2006-01-02 15:04:05"
-	formatter.LevelDesc = []string{
-		panicLevel,
-		fatalLevel,
-		errorLevel,
-		warnLevel,
-		infoLevel,
-		debugLevel}
-
-	return formatter
-}
-
-// formatFilePath retrieves only the last part from a path.
-func formatFilePath(path string) string {
-	arr := strings.Split(path, "/")
-	return arr[len(arr)-1]
-}
-
-// Format sets a custom format for loggers.
-func (f *plainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
-
-	return []byte(fmt.Sprintf("%s %s [%s:%d] - [%s] [-] %s\n",
-		timestamp,
-		f.LevelDesc[entry.Level],
-		formatFilePath(entry.Caller.File),
-		entry.Caller.Line,
-		formatFilePath(entry.Caller.Function), entry.Message)), nil
 }
 
 // setLogRotation initiates the log rotation feature using lumberjack library.
