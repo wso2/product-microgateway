@@ -83,7 +83,9 @@ public class APIConstants {
 
     //headers and values
     public static final String CONTENT_TYPE_HEADER = "Content-type";
+    public static final String ACCEPT_HEADER = "Accept";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_XML = "application/xml";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
@@ -372,6 +374,14 @@ public class APIConstants {
     public static class ApiType {
         public static final String WEB_SOCKET = "WS";
         public static final String REST = "HTTP";
+        public static final String PROTOTYPE = "PROTOTYPE";
+    }
+
+    /**
+     * Holds values for prototype APIs
+     */
+    public static class PrototypeApiConstants {
+        public static final String HEADER = "header";
     }
 
 }

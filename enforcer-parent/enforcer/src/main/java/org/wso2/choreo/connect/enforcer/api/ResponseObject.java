@@ -37,6 +37,7 @@ public class ResponseObject {
     private ArrayList<String> queryParamsToRemove = new ArrayList<>();
     private Map<String, String> queryParams;
     private String requestPath;
+    private String prototypeResponsePayload;
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -136,5 +137,13 @@ public class ResponseObject {
 
     public void setRequestPath(String requestPath) {
         this.requestPath = requestPath;
+    }
+
+    public String getPrototypeResponsePayload() {
+        return prototypeResponsePayload;
+    }
+
+    public void setPrototypeResponsePayload(String prototypeResponsePayload) {
+        this.prototypeResponsePayload = prototypeResponsePayload;
     }
 }

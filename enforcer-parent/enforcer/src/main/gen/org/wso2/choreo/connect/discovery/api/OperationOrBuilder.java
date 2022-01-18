@@ -60,4 +60,19 @@ public interface OperationOrBuilder extends
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
+
+  /**
+   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+   * @return Whether the xMediationScript field is set.
+   */
+  boolean hasXMediationScript();
+  /**
+   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+   * @return The xMediationScript.
+   */
+  org.wso2.choreo.connect.discovery.api.PrototypeConfig getXMediationScript();
+  /**
+   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.PrototypeConfigOrBuilder getXMediationScriptOrBuilder();
 }

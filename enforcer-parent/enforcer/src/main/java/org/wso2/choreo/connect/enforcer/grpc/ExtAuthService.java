@@ -35,6 +35,8 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
+import org.wso2.choreo.connect.enforcer.api.API;
+import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
@@ -98,6 +100,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
+        API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
+        boolean isPrototypedAPI = matchedAPI.getAPIConfig().getApiType().
+                equalsIgnoreCase(APIConstants.ApiType.PROTOTYPE);
         if (responseObject.isDirectResponse()) {
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
@@ -118,11 +123,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                                 .build())
                         .build();
             }
-            // Error handling
-            JSONObject responseJson = new JSONObject();
-            responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
-            responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
-            responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder().setHeader(
                     HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
                             .setValue(APIConstants.APPLICATION_JSON).build())
@@ -136,11 +136,32 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
 
-            return CheckResponse.newBuilder()
+            CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
-                    .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
-                    .setDynamicMetadata(structBuilder.build())
-                    .build();
+                    .setDynamicMetadata(structBuilder.build());
+
+            if (!isPrototypedAPI) {
+                // Error handling
+                JSONObject responseJson = new JSONObject();
+                responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
+                responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
+                responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
+
+                return checkResponseBuilder
+                        .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
+                        .build();
+            } else {
+                responseBuilder.setBody(responseObject.getPrototypeResponsePayload());
+
+                // Below condition is evaluated to stop re-directing successful prototyped responses to upstream.
+                // Here only the checkResponse object's status code is changed. API call's response status code remain
+                // same as what prototyped JSON script specifies.
+                if (responseObject.getStatusCode() >= 200 || responseObject.getStatusCode() <= 299) {
+                    checkResponseBuilder.setStatus(Status.newBuilder().setCode(421));
+                }
+                status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+                return  checkResponseBuilder.setDeniedResponse(responseBuilder.setStatus(status).build()).build();
+            }
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
 

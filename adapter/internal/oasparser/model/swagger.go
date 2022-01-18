@@ -44,8 +44,13 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
 	swagger.securityScheme = setSecurityDefinitions(swagger2)
 	swagger.security = swagger2.Security
-	swagger.resources = setResourcesSwagger(swagger2)
-	swagger.apiType = HTTP
+	swagger.resources = setResourcesSwagger(swagger2, swagger)
+
+	if(swagger.IsProtoTyped) {
+		swagger.apiType = PROTOTYPE
+	} else {
+		swagger.apiType = HTTP
+	}
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
@@ -80,7 +85,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
+func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resource {
 	var resources []*Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
@@ -99,60 +104,97 @@ func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 			}
 			var methodsArray []*Operation
 			methodFound := false
+			var prototypeConfig PrototypeConfig = PrototypeConfig{}
+			var methodName string
 			if pathItem.Get != nil {
+				methodName = "GET"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
-					pathItem.Get.Extensions))
+				if (mgwSwagger.IsProtoTyped) {
+					xMediationScriptValue ,_ := pathItem.Get.VendorExtensible.Extensions.GetString(xMediationScript)
+					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+				}
+				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Get.Security,
+					pathItem.Get.Extensions, prototypeConfig))
 				methodFound = true
 			}
 			if pathItem.Post != nil {
+				methodName = "POST"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security,
-					pathItem.Post.Extensions))
+				if (mgwSwagger.IsProtoTyped) {
+					xMediationScriptValue ,_ := pathItem.Post.VendorExtensible.Extensions.GetString(xMediationScript)
+					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+				}
+				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Post.Security,
+					pathItem.Post.Extensions, prototypeConfig))
 				methodFound = true
 			}
 			if pathItem.Put != nil {
+				methodName = "PUT"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security,
-					pathItem.Put.Extensions))
+				if (mgwSwagger.IsProtoTyped) {
+					xMediationScriptValue ,_ := pathItem.Put.VendorExtensible.Extensions.GetString(xMediationScript)
+					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+				}
+				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Put.Security,
+					pathItem.Put.Extensions, prototypeConfig))
 				methodFound = true
 			}
 			if pathItem.Delete != nil {
+				methodName = "DELETE"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security,
-					pathItem.Delete.Extensions))
+				if (mgwSwagger.IsProtoTyped) {
+					xMediationScriptValue ,_ := pathItem.Delete.VendorExtensible.Extensions.GetString(xMediationScript)
+					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+				}
+				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Delete.Security,
+					pathItem.Delete.Extensions, prototypeConfig))
 				methodFound = true
 			}
 			if pathItem.Head != nil {
+				methodName = "HEAD"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security,
-					pathItem.Head.Extensions))
+				if (mgwSwagger.IsProtoTyped) {
+					xMediationScriptValue ,_ := pathItem.Head.VendorExtensible.Extensions.GetString(xMediationScript)
+					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+				}
+				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Head.Security,
+					pathItem.Head.Extensions, prototypeConfig))
 				methodFound = true
 			}
 			if pathItem.Patch != nil {
+				methodName = "PATCH"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security,
-					pathItem.Patch.Extensions))
+				if (mgwSwagger.IsProtoTyped) {
+					xMediationScriptValue ,_ := pathItem.Patch.VendorExtensible.Extensions.GetString(xMediationScript)
+					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+				}
+				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Patch.Security,
+					pathItem.Patch.Extensions, prototypeConfig))
 				methodFound = true
 			}
 			if pathItem.Options != nil {
+				methodName = "OPTION"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
-					pathItem.Options.Extensions))
+				if (mgwSwagger.IsProtoTyped) {
+					xMediationScriptValue ,_ := pathItem.Options.VendorExtensible.Extensions.GetString(xMediationScript)
+					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+				}
+				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Options.Security,
+					pathItem.Options.Extensions, prototypeConfig))
 				methodFound = true
 			}
 			if methodFound {

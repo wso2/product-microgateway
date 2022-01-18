@@ -1,0 +1,56 @@
+//  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+//  WSO2 Inc. licenses this file to you under the Apache License,
+//  Version 2.0 (the "License"); you may not use this file except
+//  in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
+
+syntax = "proto3";
+
+package wso2.discovery.api;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
+option java_package = "org.wso2.choreo.connect.discovery.api";
+option java_outer_classname = "SecurityConfigProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: PrototypeConfig]
+
+// Prototype config model
+
+// PrototypeConfig model holds prototype implementation relevant to a given resource's operation
+message PrototypeConfig {
+  string in = 1;
+  string name = 2;
+  repeated PrototypeResponse responses = 3;
+}
+
+// PrototypeResponses hold response configurations for the prototype implementations
+message PrototypeResponse {
+  string value = 1;
+  repeated PrototypeHeader headers = 2;
+  int32 code = 3;
+  PrototypePayload payload = 4;
+}
+
+// PrototypeHeader holds prototype header configs in prototype implementations
+message PrototypeHeader {
+  string name = 1;
+  string value = 2;
+}
+
+// PrototypePayload holds prototype payload configs in prototype implementations
+message PrototypePayload {
+  string applicationJSON = 1;
+  string applicationXML = 2;
+}
+

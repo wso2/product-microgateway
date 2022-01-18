@@ -82,6 +82,19 @@ private static final long serialVersionUID = 0L;
             disableSecurity_ = input.readBool();
             break;
           }
+          case 42: {
+            org.wso2.choreo.connect.discovery.api.PrototypeConfig.Builder subBuilder = null;
+            if (xMediationScript_ != null) {
+              subBuilder = xMediationScript_.toBuilder();
+            }
+            xMediationScript_ = input.readMessage(org.wso2.choreo.connect.discovery.api.PrototypeConfig.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(xMediationScript_);
+              xMediationScript_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -244,6 +257,32 @@ private static final long serialVersionUID = 0L;
     return disableSecurity_;
   }
 
+  public static final int XMEDIATIONSCRIPT_FIELD_NUMBER = 5;
+  private org.wso2.choreo.connect.discovery.api.PrototypeConfig xMediationScript_;
+  /**
+   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+   * @return Whether the xMediationScript field is set.
+   */
+  @java.lang.Override
+  public boolean hasXMediationScript() {
+    return xMediationScript_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+   * @return The xMediationScript.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.PrototypeConfig getXMediationScript() {
+    return xMediationScript_ == null ? org.wso2.choreo.connect.discovery.api.PrototypeConfig.getDefaultInstance() : xMediationScript_;
+  }
+  /**
+   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.PrototypeConfigOrBuilder getXMediationScriptOrBuilder() {
+    return getXMediationScript();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -270,6 +309,9 @@ private static final long serialVersionUID = 0L;
     if (disableSecurity_ != false) {
       output.writeBool(4, disableSecurity_);
     }
+    if (xMediationScript_ != null) {
+      output.writeMessage(5, getXMediationScript());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -292,6 +334,10 @@ private static final long serialVersionUID = 0L;
     if (disableSecurity_ != false) {
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(4, disableSecurity_);
+    }
+    if (xMediationScript_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(5, getXMediationScript());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -316,6 +362,11 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTier())) return false;
     if (getDisableSecurity()
         != other.getDisableSecurity()) return false;
+    if (hasXMediationScript() != other.hasXMediationScript()) return false;
+    if (hasXMediationScript()) {
+      if (!getXMediationScript()
+          .equals(other.getXMediationScript())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -338,6 +389,10 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getDisableSecurity());
+    if (hasXMediationScript()) {
+      hash = (37 * hash) + XMEDIATIONSCRIPT_FIELD_NUMBER;
+      hash = (53 * hash) + getXMediationScript().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -488,6 +543,12 @@ private static final long serialVersionUID = 0L;
 
       disableSecurity_ = false;
 
+      if (xMediationScriptBuilder_ == null) {
+        xMediationScript_ = null;
+      } else {
+        xMediationScript_ = null;
+        xMediationScriptBuilder_ = null;
+      }
       return this;
     }
 
@@ -527,6 +588,11 @@ private static final long serialVersionUID = 0L;
       }
       result.tier_ = tier_;
       result.disableSecurity_ = disableSecurity_;
+      if (xMediationScriptBuilder_ == null) {
+        result.xMediationScript_ = xMediationScript_;
+      } else {
+        result.xMediationScript_ = xMediationScriptBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -611,6 +677,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getDisableSecurity() != false) {
         setDisableSecurity(other.getDisableSecurity());
+      }
+      if (other.hasXMediationScript()) {
+        mergeXMediationScript(other.getXMediationScript());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1063,6 +1132,125 @@ private static final long serialVersionUID = 0L;
       disableSecurity_ = false;
       onChanged();
       return this;
+    }
+
+    private org.wso2.choreo.connect.discovery.api.PrototypeConfig xMediationScript_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.PrototypeConfig, org.wso2.choreo.connect.discovery.api.PrototypeConfig.Builder, org.wso2.choreo.connect.discovery.api.PrototypeConfigOrBuilder> xMediationScriptBuilder_;
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     * @return Whether the xMediationScript field is set.
+     */
+    public boolean hasXMediationScript() {
+      return xMediationScriptBuilder_ != null || xMediationScript_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     * @return The xMediationScript.
+     */
+    public org.wso2.choreo.connect.discovery.api.PrototypeConfig getXMediationScript() {
+      if (xMediationScriptBuilder_ == null) {
+        return xMediationScript_ == null ? org.wso2.choreo.connect.discovery.api.PrototypeConfig.getDefaultInstance() : xMediationScript_;
+      } else {
+        return xMediationScriptBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     */
+    public Builder setXMediationScript(org.wso2.choreo.connect.discovery.api.PrototypeConfig value) {
+      if (xMediationScriptBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        xMediationScript_ = value;
+        onChanged();
+      } else {
+        xMediationScriptBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     */
+    public Builder setXMediationScript(
+        org.wso2.choreo.connect.discovery.api.PrototypeConfig.Builder builderForValue) {
+      if (xMediationScriptBuilder_ == null) {
+        xMediationScript_ = builderForValue.build();
+        onChanged();
+      } else {
+        xMediationScriptBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     */
+    public Builder mergeXMediationScript(org.wso2.choreo.connect.discovery.api.PrototypeConfig value) {
+      if (xMediationScriptBuilder_ == null) {
+        if (xMediationScript_ != null) {
+          xMediationScript_ =
+            org.wso2.choreo.connect.discovery.api.PrototypeConfig.newBuilder(xMediationScript_).mergeFrom(value).buildPartial();
+        } else {
+          xMediationScript_ = value;
+        }
+        onChanged();
+      } else {
+        xMediationScriptBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     */
+    public Builder clearXMediationScript() {
+      if (xMediationScriptBuilder_ == null) {
+        xMediationScript_ = null;
+        onChanged();
+      } else {
+        xMediationScript_ = null;
+        xMediationScriptBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.PrototypeConfig.Builder getXMediationScriptBuilder() {
+      
+      onChanged();
+      return getXMediationScriptFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.PrototypeConfigOrBuilder getXMediationScriptOrBuilder() {
+      if (xMediationScriptBuilder_ != null) {
+        return xMediationScriptBuilder_.getMessageOrBuilder();
+      } else {
+        return xMediationScript_ == null ?
+            org.wso2.choreo.connect.discovery.api.PrototypeConfig.getDefaultInstance() : xMediationScript_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.PrototypeConfig, org.wso2.choreo.connect.discovery.api.PrototypeConfig.Builder, org.wso2.choreo.connect.discovery.api.PrototypeConfigOrBuilder> 
+        getXMediationScriptFieldBuilder() {
+      if (xMediationScriptBuilder_ == null) {
+        xMediationScriptBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.PrototypeConfig, org.wso2.choreo.connect.discovery.api.PrototypeConfig.Builder, org.wso2.choreo.connect.discovery.api.PrototypeConfigOrBuilder>(
+                getXMediationScript(),
+                getParentForChildren(),
+                isClean());
+        xMediationScript_ = null;
+      }
+      return xMediationScriptBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

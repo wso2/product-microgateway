@@ -46,7 +46,7 @@ public class APIConfig {
 
     /**
      * getApiType returns the API type. This could be one of the following.
-     * HTTP, WS, WEBHOOK
+     * HTTP, WS, WEBHOOK, PROTOTYPE
      *
      * @return the apiType
      */
