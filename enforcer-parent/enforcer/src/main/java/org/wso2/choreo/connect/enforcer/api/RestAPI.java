@@ -30,6 +30,10 @@ import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
+import org.wso2.choreo.connect.enforcer.commons.model.PrototypeConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.PrototypeHeader;
+import org.wso2.choreo.connect.enforcer.commons.model.PrototypePayload;
+import org.wso2.choreo.connect.enforcer.commons.model.PrototypeResponse;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -127,6 +131,10 @@ public class RestAPI implements API {
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setEndpoints(endpointClusterMap);
+                if (operation.getXMediationScript() != null) {
+                    resConfig.setPrototypeConfig(getPrototypedOperationConfig(operation.getXMediationScript(),
+                            operation.getMethod()));
+                }
                 resources.add(resConfig);
             }
         }
@@ -173,10 +181,13 @@ public class RestAPI implements API {
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
             }
+            if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.PROTOTYPE)) {
+                return Utils.processPrototypedApiCall(requestContext, responseObject);
+            }
             // set metadata for interceptors
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {
-            // If a enforcer stops with a false, it will be passed directly to the client.
+            // If enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
             responseObject.setStatusCode(Integer.parseInt(
                     requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString()));
@@ -239,12 +250,41 @@ public class RestAPI implements API {
         return resource;
     }
 
-    private void initFilters() {
-        // TODO : re-vist the logic with apim prototype implemetation
+    private PrototypeConfig getPrototypedOperationConfig(
+            org.wso2.choreo.connect.discovery.api.PrototypeConfig prototypeConfig, String operationName) {
+        PrototypeConfig configData = new PrototypeConfig();
+        configData.setIn(prototypeConfig.getIn());
+        configData.setName(prototypeConfig.getName());
+        List<PrototypeResponse> responses = new ArrayList<>();
+        if (prototypeConfig.getResponsesList() != null) {
+            for (org.wso2.choreo.connect.discovery.api.PrototypeResponse response :
+                    prototypeConfig.getResponsesList()) {
+                PrototypeResponse responseData = new PrototypeResponse();
+                responseData.setCode(response.getCode());
+                responseData.setValue(response.getValue());
+                if (response.getHeadersList() != null) {
+                    List<PrototypeHeader> headers = new ArrayList<>();
+                    for (org.wso2.choreo.connect.discovery.api.PrototypeHeader header : response.getHeadersList()) {
+                        PrototypeHeader headerConfig = new PrototypeHeader();
+                        headerConfig.setName(header.getName());
+                        headerConfig.setValue(header.getValue());
+                        headers.add(headerConfig);
+                    }
+                    responseData.setHeaders(headers);
+                }
+                PrototypePayload payload = new PrototypePayload();
+                payload.setApplicationJSON(response.getPayload().getApplicationJSON());
+                payload.setApplicationXML(response.getPayload().getApplicationXML());
+                responseData.setPayload(payload);
+                responses.add(responseData);
+            }
+        }
+        configData.setResponses(responses);
+        logger.debug("Prototyped config processed successfully for the " + operationName + " operation.");
+        return configData;
+    }
 
-        AuthFilter authFilter = new AuthFilter();
-        authFilter.init(apiConfig, null);
-        this.filters.add(authFilter);
+    private void initFilters() {
 
         // enable throttle filter
         ThrottleFilter throttleFilter = new ThrottleFilter();
@@ -252,6 +292,13 @@ public class RestAPI implements API {
         this.filters.add(throttleFilter);
 
         loadCustomFilters(apiConfig);
+
+        // These filters will not be added if it's a prototyped API
+        if (!apiConfig.getApiType().equalsIgnoreCase(APIConstants.ApiType.PROTOTYPE)) {
+            AuthFilter authFilter = new AuthFilter();
+            authFilter.init(apiConfig, null);
+            this.filters.add(authFilter);
+        }
 
         // CORS filter is added as the first filter, and it is not customizable.
         CorsFilter corsFilter = new CorsFilter();

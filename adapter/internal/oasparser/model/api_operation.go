@@ -19,12 +19,15 @@
 // and create a common model which can represent both types.
 package model
 
+import "reflect"
+
 // Operation type object holds data about each http method in the REST API.
 type Operation struct {
-	method          string
-	security        []map[string][]string
-	tier            string
-	disableSecurity bool
+	method              string
+	security            []map[string][]string
+	tier                string
+	disableSecurity     bool
+	xMediationScript	PrototypeConfig    
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -52,9 +55,18 @@ func (operation *Operation) GetTier() string {
 	return operation.tier
 }
 
+// GetXMediationScript returns the operation level prototype implementation configs
+func (operation *Operation) GetXMediationScript() PrototypeConfig {
+	return operation.xMediationScript
+}
+
 // NewOperation Creates and returns operation type object
-func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
+func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}, 
+	prototypeConfig PrototypeConfig) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
-	return &Operation{method, security, tier, disableSecurity}
+	if reflect.DeepEqual(PrototypeConfig{},prototypeConfig) {
+		return &Operation{method, security, tier, disableSecurity,PrototypeConfig{}}
+	} 
+	return &Operation{method, security, tier, disableSecurity, prototypeConfig}
 }

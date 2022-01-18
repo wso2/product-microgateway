@@ -86,6 +86,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 		input   spec.Swagger
 		result  []*Resource
 		message string
+		mgw 	MgwSwagger
 	}
 	dataItems := []setResourcesTestItem{
 		{
@@ -96,6 +97,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 			},
 			nil,
 			"when paths are nil",
+			MgwSwagger{},
 		},
 		{
 			spec.Swagger{
@@ -118,17 +120,18 @@ func TestSetResourcesSwagger(t *testing.T) {
 			[]*Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []*Operation{{"GET", nil, "", false}},
+					methods:     []*Operation{{"GET", nil, "", false, PrototypeConfig{}}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",
 				},
 			},
 			"usual case",
+			MgwSwagger{},
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := setResourcesSwagger(item.input)
+		resultResources := setResourcesSwagger(item.input,&item.mgw)
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)

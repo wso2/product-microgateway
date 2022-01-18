@@ -42,6 +42,7 @@ const (
 	xWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
 	DefaultSecurity      string = "default"
+	xMediationScript	 string = "x-mediation-script"
 )
 
 // cluster name prefixes
@@ -79,6 +80,8 @@ const (
 	WS string = "WS"
 	// WEBHOOK - API type for WEBHOOK APIs
 	WEBHOOK string = "WEBHOOK"
+	// PROTOTYPE - API type for PROTOTYPE APIs
+	PROTOTYPE string = "PROTOTYPE"
 )
 
 // Constants to represent errors

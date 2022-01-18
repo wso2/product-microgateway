@@ -51,6 +51,8 @@ const (
 	hostNameValidator = "^[a-zA-Z0-9][a-zA-Z0-9-.]*[0-9a-zA-Z]$"
 )
 
+var isPrototypedAPI bool
+
 // SetInfoOpenAPI populates the MgwSwagger object with the properties within the openAPI v3 definition.
 // The title, version, description, vendor extension map, endpoints based on servers property,
 // and pathItem level information are populated here.
@@ -62,6 +64,7 @@ const (
 // No operation specific information is extracted.
 func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	var err error
+	isPrototypedAPI = false
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
 		swagger.title = swagger3.Info.Title
@@ -78,9 +81,13 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
-	swagger.apiType = HTTP
+	if isPrototypedAPI {
+		swagger.apiType = PROTOTYPE
+	} else {
+		swagger.apiType = HTTP
+	}
 	var productionUrls []Endpoint
-	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
 	// an exception is made where servers url is not processed when the API is prototyped.
 	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsProtoTyped {
 		for _, serverEntry := range swagger3.Servers {
@@ -186,9 +193,16 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
+	var prototypeConfig PrototypeConfig
+
+	// x-mediation-script extension is only available for the prototyped APIs. Below condition will execute only for the
+	// prototyped APIs.
+	if xMedVal, isXMediationAvailable := extensions[xMediationScript]; isXMediationAvailable {
+		getPrototypeConfig(xMedVal, &prototypeConfig, method )
+	}
 
 	if operation.Security == nil {
-		return NewOperation(method, nil, extensions)
+		return NewOperation(method, nil, extensions, prototypeConfig)
 	}
 
 	var securityData []openapi3.SecurityRequirement = *(operation.Security)
@@ -197,8 +211,28 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 		securityArray[i] = security
 	}
 	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
-	return NewOperation(method, securityArray, extensions)
+	return NewOperation(method, securityArray, extensions, prototypeConfig)
 
+}
+
+// getPrototypeConfig recieves xMediationScriptValue, prototypeConfig pointer value and method name and unmrashalls the xMediationScript string 
+// to prototypeConfig struct type.
+func getPrototypeConfig(xMediationScriptValue interface{}, prototypeConfig *PrototypeConfig, method string) {
+	if str, ok := xMediationScriptValue.(string); ok {
+		isValidJSONString := json.Valid([]byte(str))
+		if isValidJSONString {
+			logger.LoggerOasparser.Infof("Inside the method...")
+			unmarshalError := json.Unmarshal([]byte(str), &prototypeConfig)
+			if unmarshalError != nil {
+				logger.LoggerOasparser.Errorf("Error: %v occurred while prototypeConfig unmarshalling for method %v.", unmarshalError, method)
+			} else {
+				isPrototypedAPI = true
+			}
+		} else {
+			logger.LoggerOasparser.Errorf("Invalid JSON value received for prototyped implementation in %v operation.", method)
+		}
+	}
+	logger.LoggerOasparser.Infof("x-mediation-script value processed successfully for the %v operation.", method)
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion

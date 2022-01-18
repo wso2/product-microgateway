@@ -149,7 +149,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
-			operations[i] = GetEnforcerAPIOperation(*op)
+			operations[i] = GetEnforcerAPIOperation(*op, mgwSwagger.IsProtoTyped)
 		}
 		resource := &api.Resource{
 			Id:      res.GetID(),
@@ -209,7 +209,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 }
 
 // GetEnforcerAPIOperation builds the operation object expected by the proto definition
-func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
+func GetEnforcerAPIOperation(operation mgw.Operation, isPrototyped bool ) *api.Operation { operation.GetTier()
 	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
 	for i, security := range operation.GetSecurity() {
 		mapOfSecurity := make(map[string]*api.Scopes)
@@ -224,11 +224,19 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		}
 		secSchemas[i] = secSchema
 	}
+
+	var prototypeConfig api.PrototypeConfig
+	if isPrototyped {
+		xMediationScriptValue := operation.GetXMediationScript()
+		generatePrototypeConfig(&prototypeConfig,xMediationScriptValue)
+	}
+
 	apiOperation := api.Operation{
-		Method:          operation.GetMethod(),
-		Security:        secSchemas,
-		Tier:            operation.GetTier(),
-		DisableSecurity: operation.GetDisableSecurity(),
+		Method:           operation.GetMethod(),
+		Security:         secSchemas,
+		Tier:             operation.GetTier(),
+		DisableSecurity:  operation.GetDisableSecurity(),
+		XMediationScript: &prototypeConfig,
 	}
 	return &apiOperation
 }
@@ -275,4 +283,33 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 		}
 	}
 	return endpoints
+}
+
+// Generates prototypeConfig (prototype configuration to pass for the enforcer) considering xMediationScript value
+func generatePrototypeConfig(prototypeConfig *api.PrototypeConfig , xMediationScriptValue mgw.PrototypeConfig) {
+	prototypeConfig.In = xMediationScriptValue.In
+	prototypeConfig.Name = xMediationScriptValue.Name
+	responseConfigList := make ([]*api.PrototypeResponse,0)
+
+	for _, val := range xMediationScriptValue.Responses {
+		var responseConfig api.PrototypeResponse
+		responseConfig.Value = val.Value
+		responseConfig.Code = int32(val.Code)
+		var payload api.PrototypePayload
+		payload.ApplicationJSON = val.Payload.ApplicationJSON
+		payload.ApplicationXML = val.Payload.ApplicationXML
+
+		responseConfig.Payload = &payload
+		headerConfigList := responseConfig.Headers
+		for _, header := range val.Headers {
+			var prototypeHeader api.PrototypeHeader
+			prototypeHeader.Name = header.Name
+			prototypeHeader.Value = header.Value
+			headerConfigList = append(headerConfigList, &prototypeHeader)
+		}
+		responseConfig.Headers = headerConfigList
+		responseConfigList = append(responseConfigList, &responseConfig)
+	}
+	prototypeConfig.Responses = responseConfigList
+	logger.LoggerOasparser.Debugf("Prototype configuration generated successfully.")
 }

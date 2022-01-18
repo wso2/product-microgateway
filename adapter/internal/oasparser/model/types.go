@@ -162,6 +162,33 @@ type EndpointInfo struct {
 	} `json:"config,omitempty"`
 }
 
+// PrototypeConfig holds prototype implementation relevant to a given resource's operation
+type PrototypeConfig struct {
+	In          string                 `json:"in,omitempty"`
+	Name        string                 `json:"name,omitempty"`
+	Responses   []PrototypeResponses   `json:"responses,omitempty"`
+}
+
+// PrototypeResponses hold response configurations for the prototype implementations
+type PrototypeResponses struct {
+	Value 	string                     `json:"value,omitempty"`
+	Headers []PrototypeHeader          `json:"headers,omitempty"`
+	Code	int                        `json:"code,omitempty"`	
+	Payload PrototypePayload           `json:"payload,omitempty"`
+}
+
+// PrototypeHeader holds prototype header configs in prototype implementations
+type PrototypeHeader struct {
+	Name  string                       `json:"name,omitempty"`
+	Value string                       `json:"value,omitempty"`
+}
+
+// PrototypePayload holds prototype payload configs in prototype implementations
+type PrototypePayload struct {
+	ApplicationJSON string             `json:"application/json,omitempty"`
+	ApplicationXML 	string             `json:"application/xml,omitempty"`
+}
+
 // ValidateAPIType checks if the apiProject is properly assigned with the type.
 func (apiProject *ProjectAPI) ValidateAPIType() error {
 	var err error
@@ -253,13 +280,6 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		err = VerifyMandatoryFields(apiYaml)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("%v", err)
-			return err
-		}
-
-		if apiYaml.Data.EndpointImplementationType == inlineEndpointType {
-			errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
-			loggers.LoggerAPI.Warnf(errmsg)
-			err = errors.New(errmsg)
 			return err
 		}
 		apiProject.APIYaml = apiYaml
