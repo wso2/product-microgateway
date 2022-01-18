@@ -897,7 +897,7 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 		ResponseFlow: make(map[string]interceptor.Config),
 	}
 	if len(requestInterceptor) > 0 {
-		i.RequestFlowEnable = true
+		i.IsRequestFlowEnabled = true
 		for method, op := range requestInterceptor {
 			i.RequestFlow[method] = interceptor.Config{
 				ExternalCall: &interceptor.HTTPCallConfig{
@@ -911,7 +911,7 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 		}
 	}
 	if len(responseInterceptor) > 0 {
-		i.ResponseFlowEnable = true
+		i.IsResponseFlowEnabled = true
 		for method, op := range responseInterceptor {
 			i.ResponseFlow[method] = interceptor.Config{
 				ExternalCall: &interceptor.HTTPCallConfig{

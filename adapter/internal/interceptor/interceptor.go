@@ -26,11 +26,11 @@ import (
 
 //Interceptor hold values used for interceptor
 type Interceptor struct {
-	Context            *InvocationContext
-	RequestFlowEnable  bool
-	ResponseFlowEnable bool
-	RequestFlow        map[string]Config // key:operation method -> value:config
-	ResponseFlow       map[string]Config // key:operation method -> value:config
+	Context               *InvocationContext
+	IsRequestFlowEnabled  bool
+	IsResponseFlowEnabled bool
+	RequestFlow           map[string]Config // key:operation method -> value:config
+	ResponseFlow          map[string]Config // key:operation method -> value:config
 }
 
 //Config hold config values used for request/response interceptors
@@ -76,7 +76,7 @@ var (
 	// Note: this template only applies if request or response interceptor is enabled
 	commonTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
-{{if .ResponseFlowEnable -}} {{/* resp_flow details are required in req flow if request info needed in resp flow */}}
+{{if .IsResponseFlowEnabled -}} {{/* resp_flow details are required in req flow if request info needed in resp flow */}}
 local resp_flow_list = {  
 	{{- range $key, $value := .ResponseFlow -}} 
 		{{- $key }} = {invocationContext = {{$value.Include.InvocationContext}}, requestHeaders = {{$value.Include.RequestHeaders}}, requestBody = {{$value.Include.RequestBody}}, requestTrailer = {{$value.Include.RequestTrailer}}, responseHeaders = {{$value.Include.ResponseHeaders}}, responseBody = {{$value.Include.ResponseBody}}, responseTrailers = {{$value.Include.ResponseTrailers}}}, 
@@ -145,8 +145,8 @@ end
 //GetInterceptor inject values and get request interceptor
 // Note: This method is called only if one of request or response interceptor is enabled
 func GetInterceptor(values *Interceptor) string {
-	t, err := template.New("lua-filter").Parse(getTemplate(values.RequestFlowEnable,
-		values.ResponseFlowEnable))
+	t, err := template.New("lua-filter").Parse(getTemplate(values.IsRequestFlowEnabled,
+		values.IsResponseFlowEnabled))
 	if err != nil {
 		logger.LoggerInterceptor.Error("error while parsing the interceptor template:", err)
 		return emptyInterceptorTemplate
