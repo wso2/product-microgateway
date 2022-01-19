@@ -19,15 +19,21 @@
 // and create a common model which can represent both types.
 package model
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/google/uuid"
+)
 
 // Operation type object holds data about each http method in the REST API.
 type Operation struct {
-	method              string
-	security            []map[string][]string
-	tier                string
-	disableSecurity     bool
-	xMediationScript	PrototypeConfig    
+	iD               string
+	method           string
+	security         []map[string][]string
+	tier             string
+	disableSecurity  bool
+	vendorExtensions map[string]interface{}
+	xMediationScript PrototypeConfig    
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -60,13 +66,26 @@ func (operation *Operation) GetXMediationScript() PrototypeConfig {
 	return operation.xMediationScript
 }
 
+// GetVendorExtensions returns vendor extensions which are explicitly defined under
+// a given resource.
+func (operation *Operation) GetVendorExtensions() map[string]interface{} {
+	return operation.vendorExtensions
+}
+
+// GetID returns the id of a given resource.
+// This is a randomly generated UUID
+func (operation *Operation) GetID() string {
+	return operation.iD
+}
+
 // NewOperation Creates and returns operation type object
 func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}, 
 	prototypeConfig PrototypeConfig) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
+	id := uuid.New().String()
 	if reflect.DeepEqual(PrototypeConfig{},prototypeConfig) {
-		return &Operation{method, security, tier, disableSecurity,PrototypeConfig{}}
-	} 
-	return &Operation{method, security, tier, disableSecurity, prototypeConfig}
+		return &Operation{id, method, security, tier, disableSecurity, extensions, PrototypeConfig{}}
+	}
+	return &Operation{id, method, security, tier, disableSecurity, extensions, prototypeConfig}
 }

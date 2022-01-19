@@ -120,7 +120,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 			[]*Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []*Operation{{"GET", nil, "", false, PrototypeConfig{}}},
+					methods:     []*Operation{{"", "GET", nil, "", false, nil, PrototypeConfig{}}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",
@@ -134,6 +134,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 		resultResources := setResourcesSwagger(item.input,&item.mgw)
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
+			resultResources[0].GetMethod()[0].iD = item.result[0].methods[0].iD
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
 		} else {
 			assert.Equal(t, item.result, resultResources, item.message)
