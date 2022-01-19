@@ -30,15 +30,23 @@ import org.wso2.carbon.databridge.commons.utils.DataBridgeThreadFactory;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.DataEndpointAgent;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.conf.DataEndpointConfiguration;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.DataEndpointConfigurationException;
+import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.DataEndpointException;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.EventQueueFullException;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.DataEndpointConstants;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.DataPublisherUtil;
+import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.SecurityConstants;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -46,6 +54,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * This class holds the endpoints associated within a group. Also it has a queue
@@ -75,6 +88,8 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
 
     private boolean isShutdown = false;
 
+    private SSLSocketFactory sslSocketFactory;
+
     /**
      * HA Type.
      */
@@ -95,6 +110,14 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
         this.reconnectionService.scheduleAtFixedRate(new ReconnectionTask(), reconnectionInterval,
                 reconnectionInterval, TimeUnit.SECONDS);
         currentDataPublisherIndex.set(startIndex);
+
+        try {
+            SSLContext ctx = createSSLContext(agent.getAgentConfiguration().getTrustStorePath(),
+                    agent.getAgentConfiguration().getTrustStorePassword());
+            this.sslSocketFactory = ctx.getSocketFactory();
+        } catch (DataEndpointException e) {
+            log.error("Error when initializing SSL socket factory");
+        }
     }
 
     public void addDataEndpoint(DataEndpoint dataEndpoint) {
@@ -411,14 +434,23 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
                     return true;
                 } else {
                     // this block is executed when connection is SSL
-                    DataEndpointConfiguration dataEndpointConfiguration = dataEndpoint.getDataEndpointConfiguration();
-                    Socket socket = (Socket) dataEndpointConfiguration.getSecuredTransportPool().borrowObject(
-                            dataEndpointConfiguration.getPublisherKey());
-                    OutputStream outputStream = socket.getOutputStream();
-                    String sessionId = dataEndpointConfiguration.getSessionId();
-                    ByteBuffer buf = ByteBuffer.allocate(sessionId.length());
-                    outputStream.write(buf.array());
-                    outputStream.flush();
+                    SSLSocket socket = null;
+                    try {
+                        socket = (SSLSocket) sslSocketFactory.createSocket(ip, port);
+                        OutputStream outputStream = socket.getOutputStream();
+                        String sessionId = dataEndpoint.getDataEndpointConfiguration().getSessionId();
+                        ByteBuffer buf = ByteBuffer.allocate(sessionId.length());
+                        outputStream.write(buf.array());
+                        outputStream.flush();
+                    } finally {
+                        try {
+                            if ((socket != null) && (socket.isConnected())) {
+                                socket.close();
+                            }
+                        } catch (IOException e) {
+                            log.error("Can not close the SSL socket which is used to check the server status ", e);
+                        }
+                    }
                     return true;
                 }
             } catch (UnknownHostException e) {
@@ -460,6 +492,26 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
         isShutdown = true;
         for (DataEndpoint dataEndpoint : dataEndpoints) {
             dataEndpoint.shutdown();
+        }
+    }
+
+    private SSLContext createSSLContext(String trustStorePath, String trustStorePassword) throws DataEndpointException {
+        FileInputStream fileInputStream;
+        SSLContext ctx;
+        try {
+            ctx = SSLContext.getInstance(SecurityConstants.SSLCONTEXT_ALGORITHM);
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(SecurityConstants.TMF_ALGORITHM);
+            KeyStore keyStore = KeyStore.getInstance(SecurityConstants.KEYSTORE_TYPE);
+            fileInputStream = new FileInputStream(trustStorePath);
+            keyStore.load(fileInputStream, trustStorePassword != null ?
+                    trustStorePassword.toCharArray() : null);
+            trustManagerFactory.init(keyStore);
+            ctx.init(null, trustManagerFactory.getTrustManagers(), null);
+            return ctx;
+        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyManagementException |
+                KeyStoreException e) {
+            throw new DataEndpointException("Error while creating the SSLContext with instance type : TLS." +
+                    e.getMessage(), e);
         }
     }
 }
