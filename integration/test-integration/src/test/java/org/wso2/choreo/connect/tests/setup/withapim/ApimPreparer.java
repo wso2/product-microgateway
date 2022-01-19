@@ -17,7 +17,8 @@
  */
 package org.wso2.choreo.connect.tests.setup.withapim;
 
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
@@ -27,24 +28,27 @@ import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 /**
- * APIs, Apps, Subs created here will be used to test whether
- * resources that existed in APIM were pulled by CC during startup
- * This class must run before CcStartupExecutor
+ * This class creates APIs, Apps, Subscriptions in API-M which are then reflected in Choreo Connect.
+ * ApiRequests to create APIs, and custom json objects to create Apps and Subscriptions are read from
+ * the relevant folder from integration/test-integration/src/test/resources/apim depending on the parameter
+ * apimArtifactsIndex
  */
 public class ApimPreparer extends ApimBaseTest {
     /**
      * Initialize the clients in the super class and create APIs, Apps, Subscriptions etc.
      */
-    @BeforeTest
-    private void createApiAppSubsEtc() throws Exception {
+    @Test
+    @Parameters("apimArtifactsIndex")
+    private void createApiAppSubsEtc(String apimArtifactsIndex) throws Exception {
         super.initWithSuperTenant();
         // The tests can be run against the same API Manager instance. Therefore, we clean first
         // in case the tests get interrupted before it ends in the previous run
         StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
         PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
 
-        ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor();
-        apimResourceProcessor.createApisAppsSubs(user.getUserName(), publisherRestClient, storeRestClient);
+        ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor(apimArtifactsIndex, user.getUserName(),
+                publisherRestClient, storeRestClient);
+        apimResourceProcessor.createApisAppsSubs();
 
         if(ChoreoConnectImpl.checkCCInstanceHealth()) {
             //wait till all resources deleted and are redeployed
