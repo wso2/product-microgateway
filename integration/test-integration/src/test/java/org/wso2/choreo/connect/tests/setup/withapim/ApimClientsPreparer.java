@@ -19,7 +19,6 @@ package org.wso2.choreo.connect.tests.setup.withapim;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.test.ClientAuthenticator;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
