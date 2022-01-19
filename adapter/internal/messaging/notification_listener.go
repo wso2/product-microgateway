@@ -169,7 +169,7 @@ func handleAPIEvents(data []byte, eventType string) {
 		// removeFromGateway event with multiple labels could only appear when the API is subjected
 		// to delete. Hence we could simply delete after checking against just one iteration.
 		if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels)
+			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels, "")
 			for _, env := range apiEvent.GatewayLabels {
 				xdsAPIList := xds.DeleteAPIAndReturnList(apiEvent.UUID, apiEvent.TenantDomain, env)
 				if xdsAPIList != nil {
