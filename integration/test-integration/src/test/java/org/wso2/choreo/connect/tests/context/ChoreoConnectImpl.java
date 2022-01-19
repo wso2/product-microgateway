@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.wso2.choreo.connect.tests.mockbackend.MockBackendServer;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -39,10 +38,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * Implementation class to be extended by the Choreo Connect instance
@@ -156,8 +158,8 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
     }
 
     public static void addInterceptorCertToRouterTruststore() throws IOException {
-        String routerTruststore = System.getProperty("cc_root_dir") + TestConstant.RESOURCES_DIR
-                 + TestConstant.SECURITY_DIR + TestConstant.CA_CERTS_FILE;
+        String routerTruststore = ChoreoConnectImpl.class.getClassLoader()
+                .getResource("certs/" + TestConstant.CA_CERTS_FILE).getPath();
         String interceptorCert = ChoreoConnectImpl.class.getClassLoader()
                 .getResource("certs/interceptor.crt").getPath();
 
@@ -175,7 +177,6 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         fileTmp.createNewFile();
         Path newRouterTruststorePath = Paths.get(newRouterTruststore);
 
-
         // Charset for read and write
         Charset charset = StandardCharsets.UTF_8;
 
@@ -186,6 +187,4 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
                     StandardOpenOption.APPEND);
         }
     }
-
-
 }

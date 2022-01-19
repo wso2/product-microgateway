@@ -46,7 +46,7 @@ public class CcInstance extends ChoreoConnectImpl {
      */
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile,
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
-                       boolean isInterceptorCertInRouterTruststore)
+                       boolean isInterceptorCertRequired)
             throws IOException, CCTestException {
         createTmpMgwSetup();
         String targetDir = Utils.getTargetDirPath();
@@ -78,7 +78,7 @@ public class CcInstance extends ChoreoConnectImpl {
             }
         }
 
-        if (isInterceptorCertInRouterTruststore) {
+        if (isInterceptorCertRequired) {
             addInterceptorCertToRouterTruststore();
         }
 
@@ -102,7 +102,7 @@ public class CcInstance extends ChoreoConnectImpl {
         List<String> startupAPIProjectFiles = new ArrayList<>();
         boolean withCustomJwtTransformer = false;
         boolean withAnalyticsMetricImpl = false;
-        boolean isInterceptorCertInRouterTruststore = false;
+        boolean isInterceptorCertRequired = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -130,14 +130,14 @@ public class CcInstance extends ChoreoConnectImpl {
         }
 
         public Builder withInterceptorCertInRouterTruststore() {
-            this.isInterceptorCertInRouterTruststore = true;
+            this.isInterceptorCertRequired = true;
             return this;
         }
 
         public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.withCustomJwtTransformer, this.withAnalyticsMetricImpl, this.startupAPIProjectFiles,
-                    this.isInterceptorCertInRouterTruststore);
+                    this.isInterceptorCertRequired);
             return instance;
         }
     }
