@@ -25,7 +25,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.context.CCTestException;
-import org.wso2.choreo.connect.tests.util.*;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
 import java.util.HashMap;
