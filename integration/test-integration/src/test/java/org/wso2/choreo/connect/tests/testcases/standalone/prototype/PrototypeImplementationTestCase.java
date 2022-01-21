@@ -25,9 +25,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.context.CCTestException;
-import org.wso2.choreo.connect.tests.util.HttpResponse;
-import org.wso2.choreo.connect.tests.util.ApictlUtils;
-import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,6 +43,8 @@ public class PrototypeImplementationTestCase extends ApimBaseTest {
     public void deployAPI() throws CCTestException {
         ApictlUtils.login("test");
         ApictlUtils.deployAPI("apictl_prototype_impl_test", "test");
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
+
     }
 
     //    Invokes with prototyped API implementation using header value
