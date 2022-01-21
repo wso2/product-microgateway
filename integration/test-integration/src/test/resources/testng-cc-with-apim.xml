@@ -91,7 +91,6 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.InternalKeyHeaderTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrototypedAPITestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.CreateStateInternalKeyTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrototypeImplementationTestCase"/>
         </classes>
     </test>
     <test name="cc-shutdown-and-apim-shutdown" parallel="false">

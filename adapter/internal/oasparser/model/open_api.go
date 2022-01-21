@@ -89,7 +89,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	var productionUrls []Endpoint
 	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
 	// an exception is made where servers url is not processed when the API is prototyped.
-	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsProtoTyped {
+	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsPrototyped {
 		for _, serverEntry := range swagger3.Servers {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
@@ -221,7 +221,6 @@ func getPrototypeConfig(xMediationScriptValue interface{}, prototypeConfig *Prot
 	if str, ok := xMediationScriptValue.(string); ok {
 		isValidJSONString := json.Valid([]byte(str))
 		if isValidJSONString {
-			logger.LoggerOasparser.Infof("Inside the method...")
 			unmarshalError := json.Unmarshal([]byte(str), &prototypeConfig)
 			if unmarshalError != nil {
 				logger.LoggerOasparser.Errorf("Error: %v occurred while prototypeConfig unmarshalling for method %v.", unmarshalError, method)

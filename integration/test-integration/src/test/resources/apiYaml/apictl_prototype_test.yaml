@@ -1,0 +1,82 @@
+type: api
+version: v4.0.0
+data:
+  id: 747450a8-ae5e-4213-bede-e424ca3f6cac
+  name: PrototypedImplementationTestAPI
+  context: /prototyped
+  version: 1.0.0
+  provider: admin
+  lifeCycleStatus: PROTOTYPED
+  responseCachingEnabled: false
+  cacheTimeout: 300
+  hasThumbnail: false
+  isDefaultVersion: false
+  isRevision: false
+  revisionId: 0
+  enableSchemaValidation: false
+  type: HTTP
+  transport:
+    - http
+    - https
+  tags: []
+  policies:
+    - Unlimited
+  authorizationHeader: Authorization
+  securityScheme:
+    - oauth2
+    - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  mediationPolicies: []
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalProperties: []
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins: []
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders: []
+    accessControlAllowMethods: []
+  websubSubscriptionConfiguration:
+    enable: false
+    secret: ""
+    signingAlgorithm: SHA1
+    signatureHeader: x-hub-signature
+  createdTime: 2022-01-19 12:20:13.744
+  lastUpdatedTime: 2022-01-19 12:20:23.452
+  endpointConfig:
+    endpoint_type: http
+    sandbox_endpoints:
+      url: http://localhost
+    production_endpoints:
+      url: http://localhost
+    implementation_status: prototyped
+  endpointImplementationType: INLINE
+  scopes: []
+  operations:
+    -
+      id: ""
+      target: /testChoreoConnect
+      verb: GET
+      authType: Application & Application User
+      throttlingPolicy: Unlimited
+      scopes: []
+      usedProductIds: []
+    - id: ""
+      target: /testChoreoConnectWithQuery
+      verb: GET
+      authType: Application & Application User
+      throttlingPolicy: Unlimited
+      scopes: [ ]
+      usedProductIds: [ ]
+  categories: []
+  keyManagers:
+    - all
+  advertiseInfo:
+    advertised: false
+    apiOwner: admin
+    vendor: WSO2

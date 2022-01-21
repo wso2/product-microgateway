@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Utility Methods used across different APIs.
@@ -101,7 +102,9 @@ public class Utils {
             setPrototypedResponse(responseObject, headersMap, prototypeConfig, acceptType);
         } else {
             Map<String, String> queryParamMap = requestContext.getQueryParameters();
-            setPrototypedResponse(responseObject, queryParamMap, prototypeConfig, acceptType);
+            Map<String, String> treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            treeMap.putAll(queryParamMap);
+            setPrototypedResponse(responseObject, treeMap, prototypeConfig, acceptType);
         }
         return responseObject;
     }
@@ -117,7 +120,7 @@ public class Utils {
     private static void setPrototypedResponse(ResponseObject responseObject, Map<String, String> propertiesMap,
                                               PrototypeConfig prototypeConfig, String acceptType) {
         try {
-            if (propertiesMap != null && propertiesMap.containsKey(prototypeConfig.getName())) {
+            if (propertiesMap != null && propertiesMap.containsKey(prototypeConfig.getName().toLowerCase())) {
                 String value = propertiesMap.get(prototypeConfig.getName());
                 List<PrototypeResponse> responseConfigList = prototypeConfig.getResponses();
                 // iterates over the prototyped responses
@@ -148,5 +151,4 @@ public class Utils {
             log.error("Error occurred while creating prototyped response.", e);
         }
     }
-
 }

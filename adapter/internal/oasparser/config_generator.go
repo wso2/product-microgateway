@@ -149,7 +149,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
-			operations[i] = GetEnforcerAPIOperation(*op, mgwSwagger.IsProtoTyped)
+			operations[i] = GetEnforcerAPIOperation(*op, mgwSwagger.IsPrototyped)
 		}
 		resource := &api.Resource{
 			Id:      res.GetID(),
@@ -209,7 +209,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 }
 
 // GetEnforcerAPIOperation builds the operation object expected by the proto definition
-func GetEnforcerAPIOperation(operation mgw.Operation, isPrototyped bool ) *api.Operation { operation.GetTier()
+func GetEnforcerAPIOperation(operation mgw.Operation, isPrototyped bool ) *api.Operation {
 	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
 	for i, security := range operation.GetSecurity() {
 		mapOfSecurity := make(map[string]*api.Scopes)

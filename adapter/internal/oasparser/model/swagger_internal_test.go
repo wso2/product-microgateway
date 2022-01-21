@@ -131,7 +131,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := setResourcesSwagger(item.input,&item.mgw)
+		resultResources := setResourcesSwagger(item.input, &item.mgw)
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			resultResources[0].GetMethod()[0].iD = item.result[0].methods[0].iD

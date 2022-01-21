@@ -254,7 +254,7 @@ public class RestAPI implements API {
             org.wso2.choreo.connect.discovery.api.PrototypeConfig prototypeConfig, String operationName) {
         PrototypeConfig configData = new PrototypeConfig();
         configData.setIn(prototypeConfig.getIn());
-        configData.setName(prototypeConfig.getName());
+        configData.setName(prototypeConfig.getName().toLowerCase());
         List<PrototypeResponse> responses = new ArrayList<>();
         if (prototypeConfig.getResponsesList() != null) {
             for (org.wso2.choreo.connect.discovery.api.PrototypeResponse response :

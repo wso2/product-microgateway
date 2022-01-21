@@ -50,5 +50,5 @@ message Operation {
     repeated SecurityList security = 2;
     string tier = 3;
     bool disableSecurity = 4;
-		PrototypeConfig xMediationScript = 5;
+    PrototypeConfig xMediationScript = 5;
 }

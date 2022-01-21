@@ -46,7 +46,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.security = swagger2.Security
 	swagger.resources = setResourcesSwagger(swagger2, swagger)
 
-	if(swagger.IsProtoTyped) {
+	if(swagger.IsPrototyped) {
 		swagger.apiType = PROTOTYPE
 	} else {
 		swagger.apiType = HTTP
@@ -57,7 +57,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	// If the schemes property is not mentioned at all, http will be assigned. (Only swagger 2 version has this property)
 	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
 	// an exception is made where host property is not processed when the API is prototyped.
-	if swagger2.Host != "" && !swagger.IsProtoTyped {
+	if swagger2.Host != "" && !swagger.IsPrototyped {
 		urlScheme := ""
 		for _, scheme := range swagger2.Schemes {
 			//TODO: (VirajSalaka) Introduce Constants
@@ -111,7 +111,7 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsProtoTyped) {
+				if (mgwSwagger.IsPrototyped) {
 					xMediationScriptValue ,_ := pathItem.Get.VendorExtensible.Extensions.GetString(xMediationScript)
 					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
 				}
@@ -124,7 +124,7 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsProtoTyped) {
+				if (mgwSwagger.IsPrototyped) {
 					xMediationScriptValue ,_ := pathItem.Post.VendorExtensible.Extensions.GetString(xMediationScript)
 					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
 				}
@@ -137,7 +137,7 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsProtoTyped) {
+				if (mgwSwagger.IsPrototyped) {
 					xMediationScriptValue ,_ := pathItem.Put.VendorExtensible.Extensions.GetString(xMediationScript)
 					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
 				}
@@ -150,7 +150,7 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsProtoTyped) {
+				if (mgwSwagger.IsPrototyped) {
 					xMediationScriptValue ,_ := pathItem.Delete.VendorExtensible.Extensions.GetString(xMediationScript)
 					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
 				}
@@ -163,7 +163,7 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsProtoTyped) {
+				if (mgwSwagger.IsPrototyped) {
 					xMediationScriptValue ,_ := pathItem.Head.VendorExtensible.Extensions.GetString(xMediationScript)
 					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
 				}
@@ -176,7 +176,7 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsProtoTyped) {
+				if (mgwSwagger.IsPrototyped) {
 					xMediationScriptValue ,_ := pathItem.Patch.VendorExtensible.Extensions.GetString(xMediationScript)
 					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
 				}
@@ -189,7 +189,7 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsProtoTyped) {
+				if (mgwSwagger.IsPrototyped) {
 					xMediationScriptValue ,_ := pathItem.Options.VendorExtensible.Extensions.GetString(xMediationScript)
 					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
 				}

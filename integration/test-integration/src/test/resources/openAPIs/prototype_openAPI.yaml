@@ -1,33 +1,28 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Swagger Petstore Prototyped Implementation
+  title: OAS Prototyped Implementation
   license:
     name: MIT
 servers:
   - url: /
-x-wso2-production-endpoints:
-  urls:
-    - '/'
-x-wso2-basePath: /prototyped
+x-wso2-basePath: /prototype/1.0.0
 paths:
-  /pet/findByStatus:
+  /testChoreoConnect:
     get:
-      summary: Finds Pets by status
-      operationId: findPetsByStatus
-      tags:
-        - pets
+      summary: Tests Choreo Connect prototype implementation
+      operationId: testImpl
       responses:
         '200':
           description: Expected response to a valid request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
+                $ref: "#/components/schemas/Data"
       x-mediation-script: |
         {
            "in": "header",
-           "name": "prototypedValue",
+           "name": "prototypeValue",
            "responses": [
                {
                    "value": "success",
@@ -39,29 +34,40 @@ paths:
                    ],
                    "code": 200,
                    "payload": {
-                       "application/json": "{\"name\" : \"slcd\"}",
-                       "application/xml": "<name>slcd</name>"
+                       "application/json": "{\"name\" : \"choreo connect\"}",
+                       "application/xml": "<name>choreo connect</name>"
                    }
-               },
+               }
+           ]
+        }
+  /testQueryParam:
+    get:
+      summary: Tests Choreo Connect prototype implementation with query parameters
+      operationId: testImpl2
+      x-mediation-script: |
+        {
+           "in": "query",
+           "name": "prototypeQueryVal",
+           "responses": [
                {
-                   "value": "failure",
+                   "value": "success",
                    "headers": [
                        {
-                           "name": "x-wso2-header2",
-                           "value": "Failed header value"
+                           "name": "x-wso2-q-header",
+                           "value": "Header value for query param"
                        }
                    ],
                    "code": 500,
                    "payload": {
-                       "application/json": "{\"name1\" : \"value1\"}",
-                       "application/xml": "<name1>value1</name1>"
+                       "application/json": "{\"name\" : \"choreo connect\"}",
+                       "application/xml": "<name>choreo connect</name>"
                    }
                }
            ]
         }
 components:
   schemas:
-    Pet:
+    Data:
       type: object
       required:
         - id
@@ -73,19 +79,4 @@ components:
         name:
           type: string
         tag:
-          type: string
-    Pets:
-      type: array
-      items:
-        $ref: "#/components/schemas/Pet"
-    Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
           type: string

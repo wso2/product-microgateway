@@ -61,7 +61,7 @@ type MgwSwagger struct {
 	xWso2AuthHeader     string
 	disableSecurity     bool
 	OrganizationID      string
-	IsProtoTyped        bool
+	IsPrototyped        bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1175,7 +1175,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	endpointConfig := data.EndpointConfig
 
 	if endpointConfig.ImplementationStatus == prototypedAPI {
-		swagger.IsProtoTyped = true
+		swagger.IsPrototyped = true
 	}
 
 	if len(endpointConfig.ProductionEndpoints) > 0 {
