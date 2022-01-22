@@ -22,6 +22,8 @@ package model
 import (
 	"regexp"
 	"sort"
+
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // Resource represents the object structure holding the information related to the
@@ -91,8 +93,8 @@ func (resource *Resource) GetMethodList() []string {
 func CreateMinimalDummyResourceForTests(path string, methods []*Operation, id string, productionUrls,
 	sandboxUrls []Endpoint) Resource {
 
-	prodEndpints := generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
-	sandboxEndpints := generateEndpointCluster(sandClustersConfigNamePrefix, sandboxUrls, LoadBalance)
+	prodEndpints := generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
+	sandboxEndpints := generateEndpointCluster(constants.SandClustersConfigNamePrefix, sandboxUrls, constants.LoadBalance)
 
 	return Resource{
 		path:                path,

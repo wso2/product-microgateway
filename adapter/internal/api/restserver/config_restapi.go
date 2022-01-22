@@ -27,12 +27,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
-
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+
+	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
@@ -42,10 +43,9 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations/api_individual"
 	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations/authorization"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	constants "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"github.com/wso2/product-microgateway/adapter/pkg/health"
-	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 var (

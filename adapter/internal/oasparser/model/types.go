@@ -22,12 +22,14 @@ import (
 	"os"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
-	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -169,7 +171,7 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiProject.APIType != HTTP && apiProject.APIType != WS && apiProject.APIType != WEBHOOK {
+	} else if apiProject.APIType != constants.HTTP && apiProject.APIType != constants.WS && apiProject.APIType != constants.WEBHOOK {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		err = errors.New(errMsg)
 		return err
@@ -197,7 +199,7 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 			return conversionErr
 		}
 		apiProject.OpenAPIJsn = swaggerJsn
-		apiProject.APIType = HTTP
+		apiProject.APIType = constants.HTTP
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
 		if !tlsutils.IsPublicCertificate(fileContent) {
