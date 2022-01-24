@@ -130,7 +130,7 @@ func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment strin
 			success = false
 		}
 		if success {
-			logger.LoggerNotifier.Infof("Revision un-deployed message sent to Control plane for attempt %v", retries)
+			logger.LoggerNotifier.Infof("Revision un-deployed message sent to Control plane for attempt %d", retries)
 			break
 		}
 		time.Sleep(2 * time.Second)
