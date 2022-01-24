@@ -92,7 +92,9 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment string) {
 	conf, _ := config.ReadConfigs()
 	cpConfigs := conf.ControlPlane
-
+	if apiUUID == "" || revisionUUID == "" || environment == "" || !cpConfigs.Enabled {
+		return
+	}
 	revisionEP := cpConfigs.ServiceURL
 	if strings.HasSuffix(revisionEP, "/") {
 		revisionEP += unDeployedRevisionEP
