@@ -75,10 +75,14 @@ paths:
           description: successful operation
   /pet/findByStatus/req-intercept-enabled:
     x-wso2-request-interceptor: # Resource level interceptor definition
-      serviceURL: https://mockBackend:2371
+      serviceURL: https://invalid-service-url:2371
       includes:
         - request_headers
     post:
+      x-wso2-request-interceptor: # Operational level interceptor definition
+        serviceURL: https://mockBackend:2371
+        includes:
+          - request_headers
       tags:
         - pet
       summary: Finds Pets by status

@@ -81,6 +81,12 @@ const (
 	xWso2responseInterceptor string = "x-wso2-response-interceptor"
 )
 
+// interceptor levels
+const (
+	APILevelInterceptor       string = "api"
+	ResourceLevelInterceptor  string = "resource"
+	OperationLevelInterceptor string = "operation"
+)
 const (
 	httpsURLType     string = "https"
 	wssURLType       string = "wss"
