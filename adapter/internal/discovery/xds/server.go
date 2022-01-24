@@ -656,7 +656,7 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 		} else {
 			// if no error, update internal vhost maps
 			// error only happens when API not found in deleteAPI func
-			logger.LoggerXds.Infof("Successfully undeployed the revision %v of API %v under Organization %v and environment %v ", revisionUUID, apiIdentifier, organizationID, environments)
+			logger.LoggerXds.Infof("Successfully undeployed the revision %s of API %v under Organization %s and environment %s ", revisionUUID, apiIdentifier, organizationID, environments)
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
