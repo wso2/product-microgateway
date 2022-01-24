@@ -102,9 +102,6 @@ func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment strin
 		revisionEP += "/" + unDeployedRevisionEP
 	}
 
-	if apiUUID == "" || revisionUUID == "" || environment == "" || !cpConfigs.Enabled {
-		return
-	}
 
 	removedRevision := UnDeployedAPIRevision{
 		APIUUID:      apiUUID,
