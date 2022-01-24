@@ -122,7 +122,7 @@ func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment strin
 
 		success := true
 		if err != nil {
-			logger.LoggerNotifier.Errorf("Error response from %v for attempt %v : %v", revisionEP, retries, err.Error())
+			logger.LoggerNotifier.Errorf("Error response from %s for attempt %d : %v", revisionEP, retries, err.Error())
 			success = false
 		}
 		if resp != nil && resp.StatusCode != http.StatusOK {
