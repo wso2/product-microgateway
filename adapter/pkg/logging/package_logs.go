@@ -40,7 +40,7 @@ type Log struct {
 
 // ErrorC can be used for formal error logs
 func (l *Log) ErrorC(e ErrorLog) {
-	logrus.WithFields(logrus.Fields{"severity": e.Severity, "code": e.Code}).Errorf(e.Message)
+	l.WithFields(logrus.Fields{"severity": e.Severity, "code": e.Code}).Errorf(e.Message)
 }
 
 func logLevelMapper(pkgLevel string) logrus.Level {

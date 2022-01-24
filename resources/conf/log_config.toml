@@ -4,6 +4,7 @@
 
 logfile = "logs/adapter.log" # This file will be created inside adapter container.
 logLevel = "INFO" # LogLevels can be "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
+LogFormalization = "NONE" # Values can be "JSON", "NONE"
 
 [rotation]
 MaxSize = 10    # In MegaBytes (MB)

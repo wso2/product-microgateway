@@ -34,7 +34,6 @@ import (
 	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
-	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -131,7 +130,6 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 			} else {
 				// Keep the iteration going on until a response is recieved.
 				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
-				logger.LoggerSync.ErrorC(logging.ErrorLog{Message: "Test error", Severity: "Normal", Code: 455678})
 				go func(d response) {
 					// Retry fetching from control plane after a configured time interval
 					if conf.ControlPlane.RetryInterval == 0 {

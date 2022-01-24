@@ -69,12 +69,12 @@ public class ErrorLogPatternConverter extends LogEventPatternConverter {
                     } else {
                         toAppendTo.append("severity:" + LoggingConstants.Severity.DEFAULT);
                         toAppendTo.append(" ");
-                        toAppendTo.append("code:" + "0");
+                        toAppendTo.append("code:" + 0);
                     }
                 } else {
                     toAppendTo.append("severity:" + LoggingConstants.Severity.DEFAULT);
                     toAppendTo.append(" ");
-                    toAppendTo.append("code:" + "0");
+                    toAppendTo.append("code:" + 0);
                 }
             }
         }
