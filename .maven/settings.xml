@@ -4,25 +4,25 @@
         <mirror>
             <id>wso2.releases.mirror</id>
             <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
+            <url>https://maven.wso2.org/nexus/content/repositories/releases/</url>
             <mirrorOf>wso2.releases</mirrorOf>
         </mirror>
         <mirror>
             <id>wso2.snapshots.mirror</id>
             <name>Apache Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
+            <url>https://maven.wso2.org/nexus/content/repositories/snapshots/</url>
             <mirrorOf>wso2.snapshots</mirrorOf>
         </mirror>
         <mirror>
             <id>wso2.nexus.mirror</id>
             <name>WSO2 Public Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
             <mirrorOf>wso2-nexus</mirrorOf>
         </mirror>
         <mirror>
             <id>knopflerfish.mirror</id>
             <name>Knopflerfish Repository</name>
-            <url>http://resources.knopflerfish.org/repo/maven2/release</url>
+            <url>https://resources.knopflerfish.org/repo/maven2/release</url>
             <mirrorOf>knopflerfish</mirrorOf>
         </mirror>
     </mirrors>
