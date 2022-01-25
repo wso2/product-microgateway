@@ -28,6 +28,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // hostNameValidator regex is for validate the host name of the URL
@@ -81,7 +82,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
-	swagger.apiType = HTTP
+	swagger.apiType = constants.HTTP
 	var productionUrls []Endpoint
 	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
 	// an exception is made where servers url is not processed when the API is prototyped.
@@ -99,7 +100,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 			}
 		}
 		if len(productionUrls) > 0 {
-			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+			swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
 			swagger.sandboxEndpoints = nil
 		}
 	}
@@ -167,7 +168,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 
 				}
 				if productionUrls != nil && len(productionUrls) > 0 {
-					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+					resource.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
 				}
 			}
 			resources = append(resources, &resource)
@@ -193,7 +194,7 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 
 	// x-mediation-script extension is only available for the prototyped APIs. Below condition will execute only for the
 	// prototyped APIs.
-	if scriptValue, isScriptAvailable := extensions[xMediationScript]; isScriptAvailable {
+	if scriptValue, isScriptAvailable := extensions[constants.XMediationScript]; isScriptAvailable {
 		getMockedAPIConfig(scriptValue, &mockedAPIConfig, method )
 	}
 
@@ -317,7 +318,7 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 // 2nd bool represent if the vendor extension present.
 func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
 	extensions := convertExtensibletoReadableFormat(vendorExtensions)
-	if y, found := extensions[xWso2DisableSecurity]; found {
+	if y, found := extensions[constants.XWso2DisableSecurity]; found {
 		if val, ok := y.(bool); ok {
 			return val, found
 		}
@@ -330,7 +331,7 @@ func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, boo
 func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, val bool) openapi3.ExtensionProps {
 	_, found := resolveDisableSecurity(vendorExtensions)
 	if !found {
-		vendorExtensions.Extensions[xWso2DisableSecurity] = val
+		vendorExtensions.Extensions[constants.XWso2DisableSecurity] = val
 	}
 	return vendorExtensions
 }
@@ -341,7 +342,7 @@ func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, va
 func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 	vendorExtensionsMap := convertExtensibletoReadableFormat(vendorExtensions)
 	var labelArray []string
-	if y, found := vendorExtensionsMap[xWso2Label]; found {
+	if y, found := vendorExtensionsMap[constants.XWso2Label]; found {
 		if val, ok := y.([]interface{}); ok {
 			for _, label := range val {
 				labelArray = append(labelArray, label.(string))

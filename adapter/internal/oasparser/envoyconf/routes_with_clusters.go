@@ -22,10 +22,16 @@ import (
 	"net"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
-	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -36,20 +42,13 @@ import (
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-	"github.com/golang/protobuf/ptypes/any"
-	"github.com/golang/protobuf/ptypes/wrappers"
+
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"google.golang.org/protobuf/types/known/wrapperspb"
-
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
-
-	"strings"
-	"time"
-
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -351,7 +350,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID))
 		routes = append(routes, routeP)
 	}
-	if mgwSwagger.GetAPIType() == model.WS {
+	if mgwSwagger.GetAPIType() == constants.WS {
 		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelbasePath, apiLevelClusterNameProd,
 			apiLevelClusterNameSand, nil, nil, organizationID))
 		routes = append(routes, routesP)
@@ -1163,7 +1162,7 @@ func generateRegex(fullpath string) string {
 
 func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 	var upgradeConfig []*routev3.RouteAction_UpgradeConfig
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
 			UpgradeType: "websocket",
 			Enabled:     &wrappers.BoolValue{Value: true},
@@ -1274,7 +1273,7 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 // getMaxStreamDuration configures a maximum duration for a websocket route.
 func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration {
 	var maxStreamDuration *routev3.RouteAction_MaxStreamDuration = nil
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		maxStreamDuration = &routev3.RouteAction_MaxStreamDuration{
 			MaxStreamDuration: &durationpb.Duration{
 				Seconds: 60 * 60 * 24,
@@ -1286,7 +1285,7 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 
 func getDefaultResourceMethods(apiType string) []string {
 	var defaultResourceMethods []string = nil
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		defaultResourceMethods = []string{"GET"}
 	}
 	return defaultResourceMethods
