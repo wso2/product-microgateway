@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ import (
 )
 
 type LogAttr struct {
-	Code     int
-	File     string
-	Function string
-	Level    string
-	Msg      string
-	Severity string
-	Time     string
+	ErrorCode int    `json:"error_code"`
+	File      string `json:"file"`
+	Function  string `json:"func"`
+	Level     string `json:"level"`
+	Msg       string `json:"msg"`
+	Severity  string `json:"severity"`
+	Time      string `json:"time"`
 }
 
 func TestInitPackageLogger(t *testing.T) {
@@ -57,7 +57,7 @@ func TestInitPackageLogger(t *testing.T) {
 		LoggerTest1.SetOutput(os.Stderr)
 	}()
 	// Test error logs printed using ErrorC
-	LoggerTest1.ErrorC(ErrorLog{Message: "Test error log 1", Severity: CRITICAL, Code: 455678})
+	LoggerTest1.ErrorC(ErrorDetails{Message: "Test error log 1", Severity: CRITICAL, ErrorCode: 455678})
 	var log1 LogAttr
 	buf2 := new(bytes.Buffer)
 	if err := json.Compact(buf2, buf.Bytes()); err != nil {
@@ -67,7 +67,7 @@ func TestInitPackageLogger(t *testing.T) {
 	assert.Nil(t, err1, "JSON formatted error log parsing error")
 	assert.Equal(t, "Test error log 1", log1.Msg, "Error log message mismatch")
 	assert.Equal(t, CRITICAL, log1.Severity, "Error log severity mismatch")
-	assert.Equal(t, 455678, log1.Code, "Error log code mismatch")
+	assert.Equal(t, 455678, log1.ErrorCode, "Error log code mismatch")
 	buf.Reset()
 	buf2.Reset()
 
@@ -81,7 +81,7 @@ func TestInitPackageLogger(t *testing.T) {
 	assert.Nil(t, err2, "JSON formatted error log parsing error")
 	assert.Equal(t, "Sample error log without details", log2.Msg, "Error log message mismatch")
 	assert.Equal(t, DEFAULT, log2.Severity, "Error log severity mismatch")
-	assert.Equal(t, 0, log2.Code, "Error log code mismatch")
+	assert.Equal(t, 0, log2.ErrorCode, "Error log code mismatch")
 	buf.Reset()
 	buf2.Reset()
 
@@ -102,7 +102,7 @@ func TestInitPackageLogger(t *testing.T) {
 	defer func() {
 		LoggerTest2.SetOutput(os.Stderr)
 	}()
-	LoggerTest2.ErrorC(ErrorLog{Message: "Test error log2", Severity: BLOCKER, Code: 345678})
+	LoggerTest2.ErrorC(ErrorDetails{Message: "Test error log2", Severity: BLOCKER, ErrorCode: 345678})
 	assert.Contains(t, buf.String(), "severity="+BLOCKER, "Invalid error log in plain format"+
 		"(included severity, but not found)")
 }
@@ -123,7 +123,7 @@ func TestInitGlobalLogger(t *testing.T) {
 		logrus.SetOutput(os.Stderr)
 	}()
 	// Test error logs printed using logrus.Error with fields
-	logrus.WithFields(logrus.Fields{"severity": BLOCKER, "code": 234567}).Errorf("Test error log JSON format")
+	logrus.WithFields(logrus.Fields{"severity": BLOCKER, "error_code": 234567}).Errorf("Test error log JSON format")
 	var log1 LogAttr
 	buf2 := new(bytes.Buffer)
 	if err := json.Compact(buf2, buf.Bytes()); err != nil {
@@ -133,7 +133,13 @@ func TestInitGlobalLogger(t *testing.T) {
 	assert.Nil(t, err1, "JSON formatted error log parsing error")
 	assert.Equal(t, "Test error log JSON format", log1.Msg, "Error log message mismatch")
 	assert.Equal(t, BLOCKER, log1.Severity, "Error log severity mismatch")
-	assert.Equal(t, 234567, log1.Code, "Error log code mismatch")
+	assert.Equal(t, 234567, log1.ErrorCode, "Error log code mismatch")
 	buf.Reset()
 	buf2.Reset()
+
+	// to remove the log_adapter.log file created by initGlobalLogger
+	e := os.Remove("log_adapter.log")
+	if e != nil {
+		t.Error(e)
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org).
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -32,5 +32,13 @@ public class LoggingConstants {
         public static final String MINOR = "Minor";
         public static final String TRIVIAL = "Trivial";
         public static final String DEFAULT = "Default";
+    }
+
+    /**
+     * Constants for log attribute names
+     */
+    public final class LogAttributes {
+        public static final String SEVERITY = "severity";
+        public static final String ERROR_CODE = "error_code";
     }
 }

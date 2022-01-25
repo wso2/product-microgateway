@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org).
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -21,7 +21,7 @@ package org.wso2.choreo.connect.enforcer.commons.logging;
 /**
  * Represents a model for Error logs to hold few additional attributes
  */
-public class ErrorLog {
+public class ErrorDetails {
     private String severity;
     private int code;
 
@@ -29,7 +29,7 @@ public class ErrorLog {
      * @param severity severity level of the error
      * @param code     unique code to troubleshoot the error
      */
-    public ErrorLog(String severity, int code) {
+    private ErrorDetails(String severity, int code) {
         this.severity = severity;
         this.code = code;
     }
@@ -41,8 +41,8 @@ public class ErrorLog {
      * @param code     unique code to troubleshoot the error
      * @return ErrorLog object
      */
-    public static ErrorLog errorLog(String severity, int code) {
-        return new ErrorLog(severity, code);
+    public static ErrorDetails errorLog(String severity, int code) {
+        return new ErrorDetails(severity, code);
     }
 
     /**

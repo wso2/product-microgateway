@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org).
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -68,20 +68,20 @@ public class CustomJsonLayout extends AbstractStringLayout {
                 if (logEvent.getMessage().getClass() == ParameterizedMessage.class) {
                     Object[] parameters = ((ParameterizedMessage) logEvent.getMessage()).getParameters();
                     if (Arrays.stream(parameters).anyMatch(p ->
-                            p.getClass().getName().equals(ErrorLog.class.getName()))) {
+                            p.getClass().getName().equals(ErrorDetails.class.getName()))) {
                         Arrays.stream(parameters)
-                                .filter(p -> p.getClass().getName().equals(ErrorLog.class.getName())).forEach((c) -> {
-                                    ErrorLog errorLog = (ErrorLog) c;
-                                    obj.put("severity", errorLog.getSeverity());
-                                    obj.put("code", errorLog.getCode());
-                                });
+                            .filter(p -> p.getClass().getName().equals(ErrorDetails.class.getName())).forEach((c) -> {
+                                ErrorDetails errorDetails = (ErrorDetails) c;
+                                obj.put(LoggingConstants.LogAttributes.SEVERITY, errorDetails.getSeverity());
+                                obj.put(LoggingConstants.LogAttributes.ERROR_CODE, errorDetails.getCode());
+                            });
                     } else {
-                        obj.put("severity", LoggingConstants.Severity.DEFAULT);
-                        obj.put("code", 0);
+                        obj.put(LoggingConstants.LogAttributes.SEVERITY, LoggingConstants.Severity.DEFAULT);
+                        obj.put(LoggingConstants.LogAttributes.ERROR_CODE, 0);
                     }
                 } else {
-                    obj.put("severity", LoggingConstants.Severity.DEFAULT);
-                    obj.put("code", 0);
+                    obj.put(LoggingConstants.LogAttributes.SEVERITY, LoggingConstants.Severity.DEFAULT);
+                    obj.put(LoggingConstants.LogAttributes.ERROR_CODE, 0);
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org).
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -58,23 +58,23 @@ public class ErrorLogPatternConverter extends LogEventPatternConverter {
                 if (logEvent.getMessage().getClass() == ParameterizedMessage.class) {
                     Object[] parameters = ((ParameterizedMessage) logEvent.getMessage()).getParameters();
                     if (Arrays.stream(parameters).anyMatch(p ->
-                            p.getClass().getName().equals(ErrorLog.class.getName()))) {
+                            p.getClass().getName().equals(ErrorDetails.class.getName()))) {
                         Arrays.stream(parameters)
-                                .filter(p -> p.getClass().getName().equals(ErrorLog.class.getName())).forEach((c) -> {
-                                    ErrorLog errorLog = (ErrorLog) c;
-                                    toAppendTo.append("severity:" + errorLog.getSeverity());
-                                    toAppendTo.append(" ");
-                                    toAppendTo.append("code:" + errorLog.getCode());
-                                });
+                            .filter(p -> p.getClass().getName().equals(ErrorDetails.class.getName())).forEach((c) -> {
+                                ErrorDetails errorDetails = (ErrorDetails) c;
+                                toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
+                                        errorDetails.getSeverity() + " " + LoggingConstants.LogAttributes.ERROR_CODE
+                                        + ":" + errorDetails.getCode());
+                            });
                     } else {
-                        toAppendTo.append("severity:" + LoggingConstants.Severity.DEFAULT);
-                        toAppendTo.append(" ");
-                        toAppendTo.append("code:" + 0);
+                        toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
+                                LoggingConstants.Severity.DEFAULT + " " +
+                                LoggingConstants.LogAttributes.ERROR_CODE + ":" + 0);
                     }
                 } else {
-                    toAppendTo.append("severity:" + LoggingConstants.Severity.DEFAULT);
-                    toAppendTo.append(" ");
-                    toAppendTo.append("code:" + 0);
+                    toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
+                            LoggingConstants.Severity.DEFAULT + " " +
+                            LoggingConstants.LogAttributes.ERROR_CODE + ":" + 0);
                 }
             }
         }

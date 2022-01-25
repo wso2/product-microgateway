@@ -30,9 +30,9 @@ type accessLog struct {
 
 // LogConfig represents the configurations related to adapter logs and envoy access logs.
 type LogConfig struct {
-	Logfile          string
-	LogLevel         string
-	LogFormalization string
+	Logfile   string
+	LogLevel  string
+	LogFormat string
 	// log rotation parameters.
 	Rotation struct {
 		IP         string
@@ -49,9 +49,9 @@ type LogConfig struct {
 
 func getDefaultLogConfig() *LogConfig {
 	adapterLogConfig = &LogConfig{
-		Logfile:          "/dev/null",
-		LogLevel:         "INFO",
-		LogFormalization: "NONE",
+		Logfile:   "/dev/null",
+		LogLevel:  "INFO",
+		LogFormat: "TEXT",
 		AccessLogs: &accessLog{
 			Enable:  false,
 			LogFile: "/dev/stdout",

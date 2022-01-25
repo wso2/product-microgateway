@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -42,13 +42,13 @@ var (
 )
 
 func init() {
-	LoggerFormat()
+	InitLogFormatter()
 }
 
-// LoggerFormat will read the configs (LogFormalization) and decide which formatter to be used for logging
-func LoggerFormat() {
+// InitLogFormatter will read the configs (LogFormalization) and decide which formatter to be used for logging
+func InitLogFormatter() {
 	logConf := config.ReadLogConfigs()
-	switch logConf.LogFormalization {
+	switch logConf.LogFormat {
 	case jsonType:
 		formatter := new(logrus.JSONFormatter)
 		formatter.TimestampFormat = "2006-01-02 15:04:05"
@@ -58,7 +58,7 @@ func LoggerFormat() {
 		}
 		LogFormatter = formatter
 
-	default:
+	case plainTextType:
 		formatter := new(plainFormatter)
 		formatter.TimestampFormat = "2006-01-02 15:04:05"
 		formatter.LevelDesc = []string{
@@ -110,8 +110,8 @@ func (h *ErrorHook) Fire(e *logrus.Entry) error {
 	if _, ok := e.Data["severity"]; !ok {
 		e.Data["severity"] = DEFAULT
 	}
-	if _, ok := e.Data["code"]; !ok {
-		e.Data["code"] = 0
+	if _, ok := e.Data["error_code"]; !ok {
+		e.Data["error_code"] = 0
 	}
 	return nil
 }

@@ -32,8 +32,8 @@ const (
 
 // Log Formalization Constants
 const (
-	defaultType = "NONE"
-	jsonType    = "JSON"
+	plainTextType = "TEXT"
+	jsonType      = "JSON"
 )
 
 // Log (Error) severity level constants
@@ -44,4 +44,10 @@ const (
 	MINOR    = "Minor"
 	TRIVIAL  = "Trivial"
 	DEFAULT  = "Default"
+)
+
+// Error Log attribute name constants
+const (
+	SEVERITY = "severity"
+	CODE     = "error_code"
 )
