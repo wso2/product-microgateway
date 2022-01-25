@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -66,7 +66,7 @@ public class MediationPolicyFilter implements Filter {
                 break;
             }
             case "REWRITE_RESOURCE_PATH": {
-                removeQueries(requestContext, policy.getParameters());
+                removeAllQueries(requestContext, policy.getParameters());
                 break;
             }
             case "REWRITE_RESOURCE_METHOD": {
@@ -92,7 +92,7 @@ public class MediationPolicyFilter implements Filter {
         requestContext.getQueryParamsToRemove().add(queryName);
     }
 
-    private void removeQueries(RequestContext requestContext, Map<String, String> policyAttrib) {
+    private void removeAllQueries(RequestContext requestContext, Map<String, String> policyAttrib) {
         if (policyAttrib.containsKey("includeQueryParams")) {
             boolean removeQuery = !Boolean.parseBoolean(policyAttrib.get("includeQueryParams"));
             requestContext.setRemoveAllQueryParams(removeQuery);

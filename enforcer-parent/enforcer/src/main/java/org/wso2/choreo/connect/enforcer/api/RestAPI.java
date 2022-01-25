@@ -166,8 +166,19 @@ public class RestAPI implements API {
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         populateRemoveAndProtectedHeaders(requestContext);
-
-        if (executeFilterChain(requestContext)) {
+        boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePath() != null;
+        if (!isExistsMatchedResourcePath) {
+            // handle other not allowed non option calls
+            requestContext.getProperties()
+                    .put(APIConstants.MessageFormat.STATUS_CODE, APIConstants.StatusCodes.NOTFOUND.getCode());
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
+                    APIConstants.StatusCodes.NOTFOUND.getValue());
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                    APIConstants.NOT_FOUND_MESSAGE);
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                    APIConstants.NOT_FOUND_DESCRIPTION);
+        }
+        if (isExistsMatchedResourcePath && executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
             responseObject.setQueryParamsToRemove(requestContext.getQueryParamsToRemove());
             responseObject.setRemoveAllQueryParams(requestContext.isRemoveAllQueryParams());

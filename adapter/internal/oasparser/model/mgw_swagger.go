@@ -291,6 +291,7 @@ func (swagger *MgwSwagger) SetOperationPolicies(yamlOperations []OperationYaml) 
 			for _, yamlOperation := range yamlOperations {
 				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
 					operation.policies = yamlOperation.OperationPolicies
+					break
 				}
 			}
 		}

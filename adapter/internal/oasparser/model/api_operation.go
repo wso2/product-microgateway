@@ -116,7 +116,7 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 										ClusterTimeout:  clusterTimeoutV,
 										RequestTimeout:  requestTimeoutV,
 										Includes:        includesV,
-										Level:           "operation",
+										Level:           OperationLevelInterceptor,
 									}
 								}
 							}

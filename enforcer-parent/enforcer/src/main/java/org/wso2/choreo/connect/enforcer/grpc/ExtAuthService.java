@@ -149,7 +149,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
             // query parameter. In this scenario, apiKey query parameter is sent within the property called
             // 'queryParamsToRemove' so that the custom filters also can utilize the method.
-            if (responseObject.getQueryParamsToRemove().size() > 0 || responseObject.getQueryParamsToAdd().size() > 0) {
+            if (responseObject.getQueryParamsToRemove().size() > 0 || responseObject.getQueryParamsToAdd().size() > 0 ||
+                    responseObject.isRemoveAllQueryParams()) {
                 String constructedPath = constructQueryParamString(responseObject.isRemoveAllQueryParams(),
                         responseObject.getRequestPath(), responseObject.getQueryParamMap(),
                         responseObject.getQueryParamsToRemove(), responseObject.getQueryParamsToAdd());

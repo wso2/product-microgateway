@@ -25,6 +25,7 @@ import (
 
 	"strings"
 
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
@@ -108,8 +109,12 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 								pathOrder = v.(int)
 							}
 							rewritePath, found = paramValue.(string)
-							if found && rewritePath != "" {
+							if found {
 								rewritePath = "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePath, "/"), "/")
+								if matched, _ := regexp.MatchString("^[a-zA-Z0-9~/_.-]*$", rewritePath); !matched {
+									logger.LoggerOasparser.Error("Rewrite path includes invalid characters")
+									rewritePath = ""
+								}
 							}
 						}
 					}

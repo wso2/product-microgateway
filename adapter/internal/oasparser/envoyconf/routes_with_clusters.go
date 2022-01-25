@@ -691,8 +691,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		},
 	}
 
+	// if any of the operations on the route path has a method rewrite policy,
+	// we remove the :method header matching,
+	// because envoy does not allow method rewrting later if the following method regex doesnot have the new method.
+	// hence when method rewriting is enabled for the resource, the method validation will be handled by the enforcer instead of the router.
 	if !params.rewriteMethod {
-		// todo(amali) is this needed in enforcer
 		// OPTIONS is always added even if it is not listed under resources
 		// This is required to handle CORS preflight request fail scenario
 		methodRegex := strings.Join(resourceMethods, "|")
@@ -808,8 +811,12 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	pathRegex := xWso2Basepath
+	substitutionString := endpointBasepath
 	if params.rewritePath != "" {
 		pathRegex = routePath
+		if params.rewritePath != "/" {
+			substitutionString = endpointBasepath + params.rewritePath
+		}
 	}
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
@@ -825,7 +832,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 						},
 						Regex: pathRegex,
 					},
-					Substitution: endpointBasepath + params.rewritePath,
+					Substitution: substitutionString,
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
@@ -874,7 +881,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 	// remove the 'x-envoy-upstream-service-time' from the response.
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
-	responseHeadersToRemove = append(responseHeadersToRemove, clusterHeaderName)
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 	router = routev3.Route{
