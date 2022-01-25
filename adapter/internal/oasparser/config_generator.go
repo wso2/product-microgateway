@@ -286,7 +286,7 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 	return endpoints
 }
 
-// Generates mockedApiConfig (prototype configuration to pass for the enforcer) considering xMediationScript value
+// Generates mocked API configuration to pass for the enforcer considering xMediationScript value
 func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig , mgwMockedAPIConfig mgw.MockedAPIConfig) {
 	mockedAPIConfig.In = mgwMockedAPIConfig.In
 	mockedAPIConfig.Name = mgwMockedAPIConfig.Name

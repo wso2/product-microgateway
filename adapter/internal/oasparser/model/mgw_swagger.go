@@ -64,7 +64,7 @@ type MgwSwagger struct {
 	disableSecurity     bool
 	OrganizationID      string
 	IsPrototyped        bool
-	IsMockedAPI        bool
+	IsMockedAPI         bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1180,8 +1180,8 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	}
 
 	// below condition will evaluate as true for mocked API implementations
-	if endpointConfig.ImplementationStatus == prototypedImplementationStatus || 
-	data.EndpointImplementationType == templateEndpointType {
+	if endpointConfig.ImplementationStatus == prototypedImplementationStatus &&
+		data.EndpointImplementationType == templateEndpointType {
 		swagger.IsMockedAPI = true
 	}
 

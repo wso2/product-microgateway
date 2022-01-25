@@ -101,7 +101,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
         API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
-        boolean isPrototypedAPI = matchedAPI.getAPIConfig().isMockedApi();
+        boolean isMockedApi = matchedAPI.getAPIConfig().isMockedApi();
         if (responseObject.isDirectResponse()) {
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
@@ -139,7 +139,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDynamicMetadata(structBuilder.build());
 
-            if (!isPrototypedAPI) {
+            if (!isMockedApi) {
                 // Error handling
                 JSONObject responseJson = new JSONObject();
                 responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
@@ -152,9 +152,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             } else {
                 responseBuilder.setBody(responseObject.getMockApiResponsePayload());
 
-                // Below condition is evaluated to stop re-directing successful prototyped responses to upstream.
-                // Here only the checkResponse object's status code is changed. API call's response status code remain
-                // same as what prototyped JSON script specifies.
+                // Below condition is evaluated to stop re-directing successful mock API responses to upstream.
+                // Here only the checkResponse object's status code is changed. This provides API call's response status
+                // code as specified in the mock API's JSON script (expected status code).
                 if (responseObject.getStatusCode() >= 200 || responseObject.getStatusCode() <= 299) {
                     checkResponseBuilder.setStatus(Status.newBuilder().setCode(421));
                 }
@@ -173,8 +173,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         responseObject.getQueryParamMap(), responseObject.getQueryParamsToRemove());
                 HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                         .setHeader(HeaderValue.newBuilder().setKey(APIConstants.PATH_HEADER).setValue(constructedPath)
-                                .build())
-                        .build();
+                                .build()).build();
                 okResponseBuilder.addHeaders(headerValueOption);
             }
 

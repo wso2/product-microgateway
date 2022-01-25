@@ -1,16 +1,16 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: OAS Prototyped Implementation
+  title: Mock API Implementation
   license:
     name: MIT
 servers:
   - url: /
-x-wso2-basePath: /prototype/1.0.0
+x-wso2-basePath: /mock/1.0.0
 paths:
   /testChoreoConnect:
     get:
-      summary: Tests Choreo Connect prototype implementation
+      summary: Tests Choreo Connect mock API implementation
       operationId: testImpl
       responses:
         '200':
@@ -22,7 +22,7 @@ paths:
       x-mediation-script: |
         {
            "in": "header",
-           "name": "prototypeValue",
+           "name": "mockApiValue",
            "responses": [
                {
                    "value": "success",
@@ -42,12 +42,12 @@ paths:
         }
   /testQueryParam:
     get:
-      summary: Tests Choreo Connect prototype implementation with query parameters
+      summary: Tests Choreo Connect mock API implementation with query parameters
       operationId: testImpl2
       x-mediation-script: |
         {
            "in": "query",
-           "name": "prototypeQueryVal",
+           "name": "mockApiQueryVal",
            "responses": [
                {
                    "value": "success",

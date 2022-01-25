@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testcases.standalone.prototype;
+package org.wso2.choreo.connect.tests.testcases.standalone.mockEndpoint;
 
 
 import org.apache.http.HttpStatus;
@@ -35,28 +35,28 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PrototypeImplementationTestCase extends ApimBaseTest {
+public class MockApiTestCase extends ApimBaseTest {
 
     @BeforeClass
     public void createApiProject() throws IOException, CCTestException {
-        ApictlUtils.createProject( "prototype_openAPI.yaml", "apictl_prototype_impl_test",
+        ApictlUtils.createProject( "mock_endpoint_openAPI.yaml", "apictl_mock_api_test",
                 null, null, null,"apictl_prototype_test.yaml");
     }
 
     @Test
     public void deployAPI() throws CCTestException {
         ApictlUtils.login("test");
-        ApictlUtils.deployAPI("apictl_prototype_impl_test", "test");
+        ApictlUtils.deployAPI("apictl_mock_api_test", "test");
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
 
     }
 
-    //    Invokes with prototyped API implementation using header value
+    //    Invokes mocked API implementation using header value
     @Test(description = "Test to detect wrong API keys")
-    public void invokePrototypedAPIImplementation() throws Exception {
+    public void invokeMockedAPIImplementation() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("prototypeValue", "success");
-        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/prototype/1.0.0/testChoreoConnect", headers);
+        headers.put("mockApiValue", "success");
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mock/1.0.0/testChoreoConnect", headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertTrue(response.getHeaders().containsKey("x-wso2-header1"), "Response header not available");
@@ -66,13 +66,13 @@ public class PrototypeImplementationTestCase extends ApimBaseTest {
         Assert.assertTrue(response.getData().contains("{\"name\" : \"choreo connect\""), "Error response message mismatch");
     }
 
-    //    Invokes with prototyped API implementation using query param
+    //    Invokes with mocked API implementation using query param
     @Test(description = "Test to detect wrong API keys")
-    public void invokePrototypedAPIImplementationWithQueryParam() throws Exception {
+    public void invokeMockedAPIImplementationWithQueryParam() throws Exception {
         String headerName = "x-wso2-q-header";
         Map<String, String> headers = new HashMap<>();
         headers.put("accept", "application/xml");
-        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/prototype/1.0.0/testQueryParam?prototypeQueryVal=success", headers);
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mock/1.0.0/testQueryParam?mockApiQueryVal=success", headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
         Assert.assertTrue(response.getHeaders().containsKey(headerName), "Response header not available");

@@ -130,10 +130,9 @@ public class ResourceConfig {
     }
 
     /**
-     * Provides prototype JSON configurations defined in a given resource's operation.
+     * Provides mock API configurations defined in the JSON.
      *
-     * @return MockedApiConfig object which includes all the configurations defined in a prototyped resource
-     * operation
+     * @return MockedApiConfig object with all the configurations defined under operation of a mocked API.
      */
     public MockedApiConfig getMockedApiConfig() {
         return mockedApiConfig;

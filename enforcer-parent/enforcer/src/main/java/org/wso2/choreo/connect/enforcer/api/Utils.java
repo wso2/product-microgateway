@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Utility Methods used across different APIs.
@@ -86,8 +85,7 @@ public class Utils {
      * @param requestContext request context
      * @param responseObject response object for the mock API call
      */
-    public static void processMockedApiCall(RequestContext requestContext,
-                                                          ResponseObject responseObject) {
+    public static void processMockedApiCall(RequestContext requestContext, ResponseObject responseObject) {
         responseObject.setDirectResponse(true);
         String acceptType = "";
         ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
@@ -101,9 +99,7 @@ public class Utils {
             setMockApiResponse(responseObject, headersMap, mockedApiConfig, acceptType);
         } else {
             Map<String, String> queryParamMap = requestContext.getQueryParameters();
-            Map<String, String> treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-            treeMap.putAll(queryParamMap);
-            setMockApiResponse(responseObject, treeMap, mockedApiConfig, acceptType);
+            setMockApiResponse(responseObject, queryParamMap, mockedApiConfig, acceptType);
         }
     }
 
@@ -117,11 +113,19 @@ public class Utils {
      */
     private static void setMockApiResponse(ResponseObject responseObject, Map<String, String> propertiesMap,
                                            MockedApiConfig mockedApiConfig, String acceptType) {
-        if (propertiesMap == null || !propertiesMap.containsKey(mockedApiConfig.getName().toLowerCase())) {
+        String requestValuePosition = mockedApiConfig.getIn();
+        String name;
+        if (requestValuePosition.equalsIgnoreCase(APIConstants.MockApiConstants.HEADER)) {
+            name = mockedApiConfig.getName().toLowerCase();
+        } else {
+            name = mockedApiConfig.getName();
+        }
+
+        if (propertiesMap == null || !propertiesMap.containsKey(name)) {
             log.error("Response determining value not available in the mock API request.");
             return;
         }
-        String nameInRequest = propertiesMap.get(mockedApiConfig.getName().toLowerCase());
+        String nameInRequest = propertiesMap.get(name);
         List<MockedResponseConfig> responseConfigList = mockedApiConfig.getResponses();
         // iterates over the mock API responses
         for (MockedResponseConfig responseConfig : responseConfigList) {

@@ -377,10 +377,11 @@ public class APIConstants {
     }
 
     /**
-     * Holds values for prototype APIs
+     * Holds values for mocked APIs
      */
     public static class MockApiConstants {
         public static final String HEADER = "header";
+        public static final String QUERY = "query";
     }
 
 }

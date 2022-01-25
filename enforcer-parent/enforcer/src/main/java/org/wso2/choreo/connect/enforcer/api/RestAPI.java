@@ -255,7 +255,7 @@ public class RestAPI implements API {
             org.wso2.choreo.connect.discovery.api.MockedApiConfig mockedApiConfig, String operationName) {
         MockedApiConfig configData = new MockedApiConfig();
         configData.setIn(mockedApiConfig.getIn());
-        configData.setName(mockedApiConfig.getName().toLowerCase());
+        configData.setName(mockedApiConfig.getName());
         List<MockedResponseConfig> responses = new ArrayList<>();
         if (mockedApiConfig.getResponsesList() != null) {
             for (org.wso2.choreo.connect.discovery.api.MockedResponseConfig response :

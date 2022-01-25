@@ -52,8 +52,6 @@ const (
 	hostNameValidator = "^[a-zA-Z0-9][a-zA-Z0-9-.]*[0-9a-zA-Z]$"
 )
 
-var isPrototypedAPI bool
-
 // SetInfoOpenAPI populates the MgwSwagger object with the properties within the openAPI v3 definition.
 // The title, version, description, vendor extension map, endpoints based on servers property,
 // and pathItem level information are populated here.
@@ -65,7 +63,6 @@ var isPrototypedAPI bool
 // No operation specific information is extracted.
 func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	var err error
-	isPrototypedAPI = false
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
 		swagger.title = swagger3.Info.Title
@@ -192,8 +189,8 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
 	var mockedAPIConfig MockedAPIConfig
 
-	// x-mediation-script extension is only available for the prototyped APIs. Below condition will execute only for the
-	// prototyped APIs.
+	// x-mediation-script extension is only available for the mocked APIs. Below condition will execute only for the
+	// mocked APIs.
 	if scriptValue, isScriptAvailable := extensions[constants.XMediationScript]; isScriptAvailable {
 		getMockedAPIConfig(scriptValue, &mockedAPIConfig, method )
 	}
@@ -220,15 +217,13 @@ func getMockedAPIConfig(xMediationScriptValue interface{}, mockedAPIConfig *Mock
 		if isValidJSONString {
 			unmarshalError := json.Unmarshal([]byte(str), &mockedAPIConfig)
 			if unmarshalError != nil {
-				logger.LoggerOasparser.Errorf("Error while unmarshalling %v for method %v.", unmarshalError, method)
-			} else {
-				isPrototypedAPI = true
-			}
+				logger.LoggerOasparser.Errorf("Error while unmarshalling JSON for method %v. Error: %v", method, unmarshalError)
+			} 
 		} else {
-			logger.LoggerOasparser.Errorf("Invalid JSON value received for prototyped implementation in %v operation.", method)
+			logger.LoggerOasparser.Errorf("Invalid JSON value received for mocked API implementation's %v operation.", method)
 		}
 	}
-	logger.LoggerOasparser.Infof("x-mediation-script value processed successfully for the %v operation.", method)
+	logger.LoggerOasparser.Debugf("x-mediation-script value processed successfully for the %v operation.", method)
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion
