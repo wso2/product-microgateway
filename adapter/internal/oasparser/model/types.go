@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package model
+package api
 
 import (
 	"encoding/json"
@@ -22,14 +22,13 @@ import (
 	"os"
 	"strings"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
-	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -57,146 +56,14 @@ const (
 	zipExt                         string = ".zip"
 )
 
-// ProjectAPI contains the extracted from an API project zip
-type ProjectAPI struct {
-	APIYaml            APIYaml
-	APIEnvProps        map[string]synchronizer.APIEnvProps
-	Deployments        []Deployment
-	OpenAPIJsn         []byte
-	InterceptorCerts   []byte
-	APIType            string // read from api.yaml and formatted to upper case
-	APILifeCycleStatus string // read from api.yaml and formatted to upper case
-	OrganizationID     string // read from api.yaml or config
-
-	//UpstreamCerts cert filename -> cert bytes
-	UpstreamCerts map[string][]byte
-	//EndpointCerts url -> cert filename
-	EndpointCerts map[string]string
-}
-
-// EndpointSecurity contains parameters of endpoint security at api.json
-type EndpointSecurity struct {
-	Password         string            `json:"password,omitempty" mapstructure:"password"`
-	Type             string            `json:"type,omitempty" mapstructure:"type"`
-	Enabled          bool              `json:"enabled,omitempty" mapstructure:"enabled"`
-	Username         string            `json:"username,omitempty" mapstructure:"username"`
-	CustomParameters map[string]string `json:"customparameters,omitempty" mapstructure:"customparameters"`
-}
-
-// APIEndpointSecurity represents the structure of endpoint_security param in api.yaml
-type APIEndpointSecurity struct {
-	Production EndpointSecurity `json:"production,omitempty"`
-	Sandbox    EndpointSecurity `json:"sandbox,omitempty"`
-}
-
-// ApimMeta represents APIM meta information of files received from APIM
-type ApimMeta struct {
-	Type    string `yaml:"type" json:"type"`
-	Version string `yaml:"version" json:"version"`
-}
-
-// DeploymentEnvironments represents content of deployment_environments.yaml file
-// of an API_CTL Project
-type DeploymentEnvironments struct {
-	ApimMeta
-	Data []Deployment `yaml:"data"`
-}
-
-// Deployment represents deployment information of an API_CTL project
-type Deployment struct {
-	DisplayOnDevportal    bool   `yaml:"displayOnDevportal"`
-	DeploymentVhost       string `yaml:"deploymentVhost"`
-	DeploymentEnvironment string `yaml:"deploymentEnvironment"`
-}
-
-// EndpointCertificatesDetails represents content of endpoint_certificates.yaml file
-// of an API_CTL Project
-type EndpointCertificatesDetails struct {
-	ApimMeta
-	Data []EndpointCertificate `json:"data"`
-}
-
-// EndpointCertificate represents certificate information of an API_CTL project
-type EndpointCertificate struct {
-	Alias       string `json:"alias"`
-	Endpoint    string `json:"endpoint"`
-	Certificate string `json:"certificate"`
-}
-
-// APIYaml contains everything necessary to extract api.json/api.yaml file
-// To support both api.json and api.yaml we convert yaml to json and then use json.Unmarshal()
-// Therefore, the params are defined to support json.Unmarshal()
-type APIYaml struct {
-	ApimMeta
-	Data struct {
-		ID                         string   `json:"Id,omitempty"`
-		Name                       string   `json:"name,omitempty"`
-		Context                    string   `json:"context,omitempty"`
-		Version                    string   `json:"version,omitempty"`
-		RevisionID                 int      `json:"revisionId,omitempty"`
-		APIType                    string   `json:"type,omitempty"`
-		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
-		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
-		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
-		SecurityScheme             []string `json:"securityScheme,omitempty"`
-		OrganizationID             string   `json:"organizationId,omitempty"`
-		EndpointConfig             struct {
-			EndpointType                 string              `json:"endpoint_type,omitempty"`
-			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
-			LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
-			LoadBalanceSessionTimeOut    string              `json:"sessionTimeOut,omitempty"`
-			APIEndpointSecurity          APIEndpointSecurity `json:"endpoint_security,omitempty"`
-			RawProdEndpoints             interface{}         `json:"production_endpoints,omitempty"`
-			ProductionEndpoints          []EndpointInfo
-			ProductionFailoverEndpoints  []EndpointInfo `json:"production_failovers,omitempty"`
-			RawSandboxEndpoints          interface{}    `json:"sandbox_endpoints,omitempty"`
-			SandBoxEndpoints             []EndpointInfo
-			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
-			ImplementationStatus         string         `json:"implementation_status,omitempty"`
-		} `json:"endpointConfig,omitempty"`
-		Operations []OperationYaml `json:"Operations,omitempty"`
-	} `json:"data"`
-}
-
-// OperationYaml holds attributes of APIM operations
-type OperationYaml struct {
-	Target            string            `json:"target,omitempty"`
-	Verb              string            `json:"verb,omitempty"`
-	OperationPolicies OperationPolicies `json:"operationPolicies,omitempty"`
-}
-
-// OperationPolicies holds policies of the APIM operations
-type OperationPolicies struct {
-	In    []Policy `json:"in,omitempty"`
-	Out   []Policy `json:"out,omitempty"`
-	Fault []Policy `json:"fault,omitempty"`
-}
-
-// Policy holds APIM policies
-type Policy struct {
-	PolicyName   string      `json:"policyName,omitempty"`
-	TemplateName string      `json:"templateName,omitempty"`
-	Order        int         `json:"order,omitempty"`
-	Parameters   interface{} `json:"parameters,omitempty"`
-}
-
-// EndpointInfo holds config values regards to the endpoint
-type EndpointInfo struct {
-	Endpoint string `json:"url,omitempty"`
-	Config   struct {
-		ActionDuration string `json:"actionDuration,omitempty"`
-		RetryTimeOut   string `json:"retryTimeOut,omitempty"`
-	} `json:"config,omitempty"`
-}
-
 // ValidateAPIType checks if the apiProject is properly assigned with the type.
-func (apiProject *ProjectAPI) ValidateAPIType() error {
-	var err error
-	if apiProject.APIYaml.Type == "" {
+func ValidateAPIType(apiProject *model.ProjectAPI) (err error) {
+	apiType := apiProject.APIYaml.Data.APIType
+	if apiType == "" {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiProject.APIType != constants.HTTP && apiProject.APIType != constants.WS && apiProject.APIType != constants.WEBHOOK {
+	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.WEBHOOK {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		err = errors.New(errMsg)
 		return err
@@ -204,9 +71,13 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 	return nil
 }
 
-// ProcessFilesInsideProject process single file inside API Project and update the apiProject instance appropriately.
-func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, fileName string) (err error) {
+// ProcessFileInsideProject method process one file at a time and
+// update the apiProject instance appropriately. Files could be: /petstore,
+// /petstore/Definition, /petstore/Definition/swagger.yaml, /petstore/api.yaml, etc.
+func ProcessFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, fileName string) (err error) {
 	newLineByteArray := []byte("\n")
+
+	// Deployment file
 	if strings.Contains(fileName, deploymentsYAMLFile) {
 		loggers.LoggerAPI.Debug("Setting deployments of API")
 		deployments, err := parseDeployments(fileContent)
@@ -216,6 +87,8 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.Deployments = deployments
 	}
+
+	// API definition file
 	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 		loggers.LoggerAPI.Debugf("openAPI file : %v", fileName)
 		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
@@ -224,7 +97,8 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 			return conversionErr
 		}
 		apiProject.OpenAPIJsn = swaggerJsn
-		apiProject.APIType = constants.HTTP
+
+		// Interceptor certs
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
 		if !tlsutils.IsPublicCertificate(fileContent) {
@@ -233,6 +107,8 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, fileContent...)
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, newLineByteArray...)
+
+		// Endpoint certs
 	} else if strings.Contains(fileName, endpointCertDir+string(os.PathSeparator)) {
 		if strings.Contains(fileName, endpointCertFile) {
 			epCertJSON, conversionErr := utills.ToJSON(fileContent)
@@ -240,7 +116,7 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 				loggers.LoggerAPI.Errorf("Error converting %v file to json: %v", fileName, conversionErr.Error())
 				return conversionErr
 			}
-			endpointCertificates := &EndpointCertificatesDetails{}
+			endpointCertificates := &model.EndpointCertificatesDetails{}
 			err := json.Unmarshal(epCertJSON, endpointCertificates)
 			if err != nil {
 				loggers.LoggerAPI.Error("Error parsing content of endpoint certificates: ", err)
@@ -261,42 +137,60 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 				apiProject.UpstreamCerts[certFileName] = fileContent
 			}
 		}
+
+		// api.yaml or api.json
 	} else if (strings.Contains(fileName, apiYAMLFile) || strings.Contains(fileName, apiJSONFile)) &&
 		!strings.Contains(fileName, openAPIDir) {
-		loggers.LoggerAPI.Debugf("fileName : %v", fileName)
-		apiJsn, conversionErr := utills.ToJSON(fileContent)
-		if conversionErr != nil {
-			loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
-			return conversionErr
-		}
-		var apiYaml APIYaml
-		err = json.Unmarshal(apiJsn, &apiYaml)
+		apiYaml, err := ExtractAPIYaml(fileContent)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
-			return err
-		}
-		apiYaml = PopulateEndpointsInfo(apiYaml)
-
-		err = VerifyMandatoryFields(apiYaml)
-		if err != nil {
-			loggers.LoggerAPI.Errorf("%v", err)
-			return err
+			loggers.LoggerAPI.Errorf("Error while reading %v. %v", fileName, err)
+			return errors.New("Error while reading api.yaml or api.json")
 		}
 		apiProject.APIYaml = apiYaml
-		ExtractAPIInformation(apiProject, apiYaml)
 	}
 	return nil
 }
 
-func parseDeployments(data []byte) ([]Deployment, error) {
+// ExtractAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json
+func ExtractAPIYaml(fileContent []byte) (apiYaml model.APIYaml, err error) {
+	apiJsn, err := utills.ToJSON(fileContent)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occurred converting api file to json: %v", err.Error())
+		return apiYaml, err
+	}
+
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occurred while parsing api.yaml or api.json %v", err.Error())
+		return apiYaml, err
+	}
+
+	apiYaml.FormatAndUpdateInfo()
+	apiYaml.PopulateEndpointsInfo()
+	err = apiYaml.VerifyMandatoryFields()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("%v", err)
+		return apiYaml, err
+	}
+
+	if apiYaml.Data.EndpointImplementationType == inlineEndpointType {
+		errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
+		loggers.LoggerAPI.Warnf(errmsg)
+		err = errors.New(errmsg)
+		return apiYaml, err
+	}
+	return apiYaml, nil
+}
+
+func parseDeployments(data []byte) ([]model.Deployment, error) {
 	// deployEnvsFromAPI represents deployments read from API Project
-	deployEnvsFromAPI := &DeploymentEnvironments{}
+	deployEnvsFromAPI := &model.DeploymentEnvironments{}
 	if err := yaml.Unmarshal(data, deployEnvsFromAPI); err != nil {
 		loggers.LoggerAPI.Errorf("Error parsing content of deployment environments: %v", err.Error())
 		return nil, err
 	}
 
-	deployments := make([]Deployment, 0, len(deployEnvsFromAPI.Data))
+	deployments := make([]model.Deployment, 0, len(deployEnvsFromAPI.Data))
 	for _, deployFromAPI := range deployEnvsFromAPI.Data {
 		defaultVhost, exists, err := config.GetDefaultVhost(deployFromAPI.DeploymentEnvironment)
 		if err != nil {

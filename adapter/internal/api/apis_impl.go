@@ -40,27 +40,7 @@ import (
 
 // API Controller related constants
 const (
-	openAPIDir                 string = "Definitions"
-	openAPIFilename            string = "swagger."
-	apiYAMLFile                string = "api.yaml"
-	deploymentsYAMLFile        string = "deployment_environments.yaml"
-	apiJSONFile                string = "api.json"
-	endpointCertDir            string = "Endpoint-certificates"
-	interceptorCertDir         string = "Endpoint-certificates/interceptors"
-	crtExtension               string = ".crt"
-	pemExtension               string = ".pem"
-	apiTypeFilterKey           string = "type"
-	apiTypeYamlKey             string = "type"
-	lifeCycleStatus            string = "lifeCycleStatus"
-	securityScheme             string = "securityScheme"
-	endpointImplementationType string = "endpointImplementationType"
-	inlineEndpointType         string = "INLINE"
-	templateEndpointType       string = "TEMPLATE"
-	endpointSecurity           string = "endpoint_security"
-	production                 string = "production"
-	sandbox                    string = "sandbox"
-	zipExt                     string = ".zip"
-	apisArtifactDir            string = "apis"
+	apisArtifactDir string = "apis"
 )
 
 // extractAPIProject accepts the API project as a zip file and returns the extracted content.
@@ -83,12 +63,12 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
 			return apiProject, err
 		}
-		err = apiProject.ProcessFilesInsideProject(unzippedFileBytes, file.Name)
+		err = ProcessFileInsideProject(&apiProject, unzippedFileBytes, file.Name)
 		if err != nil {
 			return apiProject, err
 		}
 	}
-	err = apiProject.ValidateAPIType()
+	err = ValidateAPIType(&apiProject)
 	if err != nil {
 		return apiProject, err
 	}
@@ -121,7 +101,7 @@ func ProcessMountedAPIProjects() (err error) {
 					if err != nil {
 						return err
 					}
-					return apiProject.ProcessFilesInsideProject(fileContent, path)
+					return ProcessFileInsideProject(&apiProject, fileContent, path)
 				}
 				return nil
 			})
@@ -129,9 +109,9 @@ func ProcessMountedAPIProjects() (err error) {
 				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
 				continue
 			}
-			err = apiProject.ValidateAPIType()
+			err = ValidateAPIType(&apiProject)
 			if err != nil {
-				loggers.LoggerAPI.Errorf("Error while validation type of the api artifact - %s during startup : %v",
+				loggers.LoggerAPI.Errorf("Error while validating the API type - %s during startup : %v",
 					apiProjectFile.Name(), err)
 				continue
 			}
@@ -165,7 +145,6 @@ func ProcessMountedAPIProjects() (err error) {
 
 func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err error) {
 	apiYaml := apiProject.APIYaml.Data
-	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 
 	// handle panic
 	defer func() {
@@ -198,7 +177,7 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err erro
 		// if the API already exists in at least one of the vhosts, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiYaml.Name, apiYaml.Version, apiProject.OrganizationID) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID) {
 				exists = true
 				break
 			}
@@ -251,10 +230,7 @@ func ApplyAPIProjectFromAPIM(
 		}
 	}()
 
-	if apiProject.OrganizationID == "" {
-		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
-	}
-	loggers.LoggerAPI.Infof("Deploying API %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
+	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID)
 
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
@@ -294,7 +270,7 @@ func ApplyAPIProjectFromAPIM(
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiProject.OrganizationID); err != nil {
+		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiYaml.OrganizationID); err != nil {
 			return deployedRevisionList, err
 		}
 	}

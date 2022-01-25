@@ -65,6 +65,7 @@ type MgwSwagger struct {
 	OrganizationID      string
 	IsPrototyped        bool
 	IsMockedAPI         bool
+	LifecycleStatus     string
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1192,17 +1193,18 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
 //PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType string) error {
+func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiYaml APIYaml) error {
 
-	data := apiData.Data
-	// UUID in the generated api.yaml file is considerd as swagger.id
+	data := apiYaml.Data
+	// UUID in the generated api.yaml file is considered as swagger.id
 	swagger.id = data.ID
-	swagger.apiType = apiType
+	swagger.apiType = data.APIType
 	// name and version in api.yaml corresponds to title and version respectively.
 	swagger.title = data.Name
 	swagger.version = data.Version
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
+	swagger.LifecycleStatus = data.LifeCycleStatus
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
@@ -1222,7 +1224,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
-			if apiType == constants.WS {
+			if swagger.apiType == constants.WS {
 				prodEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *prodEndpoint)
@@ -1236,7 +1238,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		if len(endpointConfig.ProductionFailoverEndpoints) > 0 {
 			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
-				if apiType == constants.WS {
+				if swagger.apiType == constants.WS {
 					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
@@ -1248,7 +1250,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				}
 			}
 		}
-		if apiType != constants.WS {
+		if swagger.apiType != constants.WS {
 			productionEndpoints, err := processEndpointUrls(unProcessedURLs)
 			if err == nil {
 				endpoints = append(endpoints, productionEndpoints...)
@@ -1264,7 +1266,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		endpointType := constants.LoadBalance
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
-			if apiType == constants.WS {
+			if swagger.apiType == constants.WS {
 				sandBoxEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *sandBoxEndpoint)
@@ -1278,7 +1280,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		if len(endpointConfig.SandboxFailoverEndpoints) > 0 {
 			endpointType = constants.FailOver
 			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
-				if apiType == constants.WS {
+				if swagger.apiType == constants.WS {
 					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
@@ -1290,7 +1292,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 				}
 			}
 		}
-		if apiType != constants.WS {
+		if swagger.apiType != constants.WS {
 			sandboxEndpoints, err := processEndpointUrls(unProcessedURLs)
 			if err == nil {
 				endpoints = append(endpoints, sandboxEndpoints...)
