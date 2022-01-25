@@ -113,7 +113,7 @@ public class PublisherUtils {
      */
     public static String createAPIUsingOAS(JSONObject apiProperties,
                                            String filePath, RestAPIPublisherImpl publisherRestClient)
-                                           throws MalformedURLException, ApiException {
+                                           throws MalformedURLException, CCTestException {
         File definition = new File(filePath);
         JSONObject endpoints = new JSONObject();
         endpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
@@ -129,8 +129,14 @@ public class PublisherUtils {
         apiProperties.put("endpointConfig", endpointConfig);
         apiProperties.put("policies", tierList);
 
-        APIDTO apiDTO = publisherRestClient.importOASDefinition(definition, apiProperties.toString());
-        return  apiDTO.getId();
+        APIDTO apiDTO;
+        try {
+            apiDTO = publisherRestClient.importOASDefinition(definition, apiProperties.toString());
+        } catch (ApiException e) {
+            log.error("Error occurred while importing OpenAPI definition to APIM. Response: {}", e.getResponseBody());
+            throw new CCTestException("Error while creating an API", e);
+        }
+        return apiDTO.getId();
     }
 
     /**
@@ -355,11 +361,11 @@ public class PublisherUtils {
                                   RestAPIPublisherImpl publisherRestClient) throws CCTestException {
         HttpResponse publishAPIResponse = changeLCStateAPI(apiId,
                 APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, false);
-        if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK && APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
+        if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK &&
+                APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
+            log.error("Error while Publishing API. APIM Response: {}", publishAPIResponse.getData());
             throw new CCTestException(
-                    "Error while Publishing API:" + apiName + "Response Code:"
-                            + publishAPIResponse.getResponseCode() + " Response Data :" + publishAPIResponse
-                            .getData());
+                    "Error while Publishing API:" + apiName + "Response Code:" + publishAPIResponse.getResponseCode());
         }
         log.info("API Published. Name:" + apiName);
     }

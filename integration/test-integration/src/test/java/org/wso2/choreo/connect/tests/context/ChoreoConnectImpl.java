@@ -32,12 +32,19 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * Implementation class to be extended by the Choreo Connect instance
@@ -129,26 +136,55 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
     }
 
     public void addCcLoggersToEnv() {
-        Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
-        Logger adapterLogger = LoggerFactory.getLogger("Adapter");
-        Logger routerLogger = LoggerFactory.getLogger("Router");
-        Logger mockBackendLogger = LoggerFactory.getLogger("MockBackend");
-        Slf4jLogConsumer enforcerLogConsumer = new Slf4jLogConsumer(enforcerLogger);
-        Slf4jLogConsumer adapterLogConsumer = new Slf4jLogConsumer(adapterLogger);
-        Slf4jLogConsumer routerLogConsumer = new Slf4jLogConsumer(routerLogger);
-        Slf4jLogConsumer mockBackendLogConsumer = new Slf4jLogConsumer(mockBackendLogger);
-        environment.withLogConsumer("enforcer", enforcerLogConsumer)
-                .withLogConsumer("adapter", adapterLogConsumer)
-                .withLogConsumer("router", routerLogConsumer)
-                .withLogConsumer("mockBackend", mockBackendLogConsumer);
+        environment.withLogConsumer("enforcer", getLogConsumer("Enforcer"))
+                .withLogConsumer("adapter", getLogConsumer("Adapter"))
+                .withLogConsumer("router", getLogConsumer("Router"))
+                .withLogConsumer("mockBackend", getLogConsumer("MockBackend"));
         if (Boolean.parseBoolean(System.getenv(ENFORCER_DEBUG_ENV))) {
             environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
         }
+    }
+
+    private Slf4jLogConsumer getLogConsumer(String loggerName) {
+        Logger logger = LoggerFactory.getLogger(loggerName);
+        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(logger);
+        return logConsumer;
     }
 
     public static void addCustomJwtTransformer() throws CCTestException {
         Utils.copyFile(System.getProperty("jwt_transformer_jar"),
                 Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
                         + File.separator + "jwt-transformer.jar");
+    }
+
+    public static void addInterceptorCertToRouterTruststore() throws IOException {
+        String routerTruststore = ChoreoConnectImpl.class.getClassLoader()
+                .getResource("certs/" + TestConstant.CA_CERTS_FILE).getPath();
+        String interceptorCert = ChoreoConnectImpl.class.getClassLoader()
+                .getResource("certs/interceptor.crt").getPath();
+
+        // Input files
+        List<Path> inputs = Arrays.asList(
+                Paths.get(routerTruststore),
+                Paths.get(interceptorCert)
+        );
+
+        // Output file
+        String newRouterTruststore = Utils.getTargetDirPath() + File.separator + TestConstant.CC_TEMP_PATH
+                + TestConstant.DOCKER_COMPOSE_DIR + TestConstant.ROUTER_TRUSTSTORE_DIR
+                + TestConstant.CA_CERTS_FILE;
+        File fileTmp = new File(newRouterTruststore);
+        fileTmp.createNewFile();
+        Path newRouterTruststorePath = Paths.get(newRouterTruststore);
+
+        // Charset for read and write
+        Charset charset = StandardCharsets.UTF_8;
+
+        // Join files (lines)
+        for (Path path : inputs) {
+            List<String> lines = Files.readAllLines(path, charset);
+            Files.write(newRouterTruststorePath, lines, charset, StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
+        }
     }
 }
