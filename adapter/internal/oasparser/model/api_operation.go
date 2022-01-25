@@ -25,6 +25,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // Operation type object holds data about each http method in the REST API.
@@ -90,10 +91,10 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 	}
 	if len(policies) > 0 {
 		for _, policy := range policies {
-			if strings.EqualFold(InterceptorServiceTemplate, policy.TemplateName) {
+			if strings.EqualFold(constants.InterceptorServiceTemplate, policy.TemplateName) {
 				if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-					urlValue, urlFound := paramMap[InterceptorServiceURL]
-					includesValue, includesFound := paramMap[InterceptorServiceIncludes]
+					urlValue, urlFound := paramMap[constants.InterceptorServiceURL]
+					includesValue, includesFound := paramMap[constants.InterceptorServiceIncludes]
 					if urlFound {
 						url, isString := urlValue.(string)
 						if isString && url != "" {
@@ -116,7 +117,7 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 										ClusterTimeout:  clusterTimeoutV,
 										RequestTimeout:  requestTimeoutV,
 										Includes:        includesV,
-										Level:           OperationLevelInterceptor,
+										Level:           constants.OperationLevelInterceptor,
 									}
 								}
 							}

@@ -1030,7 +1030,7 @@ func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndp
 			if !isIn {
 				extensionName = constants.XWso2ResponseInterceptor
 			}
-			operationInterceptor = swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, OperationLevelInterceptor)
+			operationInterceptor = swagger.GetInterceptor(op.GetVendorExtensions(), extensionName, constants.OperationLevelInterceptor)
 		}
 		operationInterceptor.ClusterName = op.iD
 		// if operation interceptor not given
