@@ -41,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
@@ -167,7 +168,9 @@ public class RestAPI implements API {
 
         populateRemoveAndProtectedHeaders(requestContext);
         boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePath() != null;
-        if (!isExistsMatchedResourcePath) {
+        // This flag is used to apply cors filter
+        boolean isOptionCall = requestContext.getRequestMethod().contains(HttpConstants.OPTIONS);
+        if (!isExistsMatchedResourcePath && !isOptionCall) {
             // handle other not allowed non option calls
             requestContext.getProperties()
                     .put(APIConstants.MessageFormat.STATUS_CODE, APIConstants.StatusCodes.NOTFOUND.getCode());
@@ -178,7 +181,7 @@ public class RestAPI implements API {
             requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                     APIConstants.NOT_FOUND_DESCRIPTION);
         }
-        if (isExistsMatchedResourcePath && executeFilterChain(requestContext)) {
+        if ((isExistsMatchedResourcePath || isOptionCall) && executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
             responseObject.setQueryParamsToRemove(requestContext.getQueryParamsToRemove());
             responseObject.setRemoveAllQueryParams(requestContext.isRemoveAllQueryParams());
