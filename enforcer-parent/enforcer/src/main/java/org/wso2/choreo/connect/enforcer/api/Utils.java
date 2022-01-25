@@ -21,15 +21,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.EndpointClusterConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypeConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypeHeader;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypePayload;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypeResponse;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedApiConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedPayloadConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +61,7 @@ public class Utils {
         });
         EndpointCluster endpointCluster = new EndpointCluster();
         endpointCluster.setUrls(urls);
+
         if (rpcEndpointCluster.hasConfig()) {
             EndpointClusterConfig endpointClusterConfig = rpcEndpointCluster.getConfig();
             if (endpointClusterConfig.hasRetryConfig()) {
@@ -81,74 +81,71 @@ public class Utils {
     }
 
     /**
-     * Handles prototyped API call and prepares response object considering provided values in the request.
+     * Handles mock API call and prepares response object considering provided values in the request.
      *
      * @param requestContext request context
-     * @param responseObject response object for the prototyped API call
-     * @return response object to provide requested prototype values.
+     * @param responseObject response object for the mock API call
      */
-    public static ResponseObject processPrototypedApiCall(RequestContext requestContext,
+    public static void processMockedApiCall(RequestContext requestContext,
                                                           ResponseObject responseObject) {
         responseObject.setDirectResponse(true);
         String acceptType = "";
         ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
-        PrototypeConfig prototypeConfig = resourceConfig.getPrototypeConfig();
+        MockedApiConfig mockedApiConfig = resourceConfig.getMockedApiConfig();
         Map<String, String> headersMap = requestContext.getHeaders();
         if (headersMap.containsKey(APIConstants.ACCEPT_HEADER.toLowerCase())) {
             acceptType = headersMap.get(APIConstants.ACCEPT_HEADER.toLowerCase());
         }
 
-        if (prototypeConfig.getIn().equalsIgnoreCase(APIConstants.PrototypeApiConstants.HEADER)) {
-            setPrototypedResponse(responseObject, headersMap, prototypeConfig, acceptType);
+        if (mockedApiConfig.getIn().equalsIgnoreCase(APIConstants.MockApiConstants.HEADER)) {
+            setMockApiResponse(responseObject, headersMap, mockedApiConfig, acceptType);
         } else {
             Map<String, String> queryParamMap = requestContext.getQueryParameters();
             Map<String, String> treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             treeMap.putAll(queryParamMap);
-            setPrototypedResponse(responseObject, treeMap, prototypeConfig, acceptType);
+            setMockApiResponse(responseObject, treeMap, mockedApiConfig, acceptType);
         }
-        return responseObject;
     }
 
     /**
-     * Prepares prototype response considering the properties map and prototypeConfig.
+     * Prepares mock API response considering the properties map and mockedApiConfig.
      *
-     * @param responseObject Response object (represents response for the API call)
-     * @param propertiesMap A map which includes values specified in headers or query parameters
-     * @param prototypeConfig Holds the JSON values specified in the prototype implementation
-     * @param acceptType Denotes accepted contend type as the response
+     * @param responseObject  Response object (represents response for the API call)
+     * @param propertiesMap   A map which includes values specified in headers or query parameters
+     * @param mockedApiConfig Holds the JSON values specified in the mock API implementation
+     * @param acceptType      Denotes accepted contend type as the response
      */
-    private static void setPrototypedResponse(ResponseObject responseObject, Map<String, String> propertiesMap,
-                                              PrototypeConfig prototypeConfig, String acceptType) {
-        try {
-            if (propertiesMap != null && propertiesMap.containsKey(prototypeConfig.getName().toLowerCase())) {
-                String value = propertiesMap.get(prototypeConfig.getName());
-                List<PrototypeResponse> responseConfigList = prototypeConfig.getResponses();
-                // iterates over the prototyped responses
-                for (PrototypeResponse responseConfig : responseConfigList) {
-                    if (responseConfig.getValue().equalsIgnoreCase(value)) {
-                        responseObject.setStatusCode(responseConfig.getCode());
-                        Map<String, String> headerMap = new HashMap<>();
-                        // iterates over the headers list in the prototyped JSON
-                        for (PrototypeHeader header : responseConfig.getHeaders()) {
-                            headerMap.put(header.getName(), header.getValue());
-                        }
-                        PrototypePayload payload = responseConfig.getPayload();
-                        // checks and assigns the accepted content type
-                        if (acceptType.equalsIgnoreCase(APIConstants.APPLICATION_XML)) {
-                            headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_XML);
-                            responseObject.setPrototypeResponsePayload(payload.getApplicationXML());
-                        } else {
-                            headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_JSON);
-                            responseObject.setPrototypeResponsePayload(payload.getApplicationJSON());
-                        }
-                        responseObject.setHeaderMap(headerMap);
-                    }
-                }
-            } else {
-                throw new EnforcerException("Response determining value not provided in the request.");
+    private static void setMockApiResponse(ResponseObject responseObject, Map<String, String> propertiesMap,
+                                           MockedApiConfig mockedApiConfig, String acceptType) {
+        if (propertiesMap == null || !propertiesMap.containsKey(mockedApiConfig.getName().toLowerCase())) {
+            log.error("Response determining value not available in the mock API request.");
+            return;
+        }
+        String nameInRequest = propertiesMap.get(mockedApiConfig.getName().toLowerCase());
+        List<MockedResponseConfig> responseConfigList = mockedApiConfig.getResponses();
+        // iterates over the mock API responses
+        for (MockedResponseConfig responseConfig : responseConfigList) {
+            if (!responseConfig.getValue().equalsIgnoreCase(nameInRequest)) {
+                log.error("Mocked response config JSON does not contain the value provided in the request.");
+                return;
             }
-        } catch (Exception e) {
-            log.error("Error occurred while creating prototyped response.", e);
+            responseObject.setStatusCode(responseConfig.getCode());
+            Map<String, String> headerMap = new HashMap<>();
+            // iterates over the headers list in the mock API JSON
+            for (MockedHeaderConfig header : responseConfig.getHeaders()) {
+                headerMap.put(header.getName(), header.getValue());
+            }
+            MockedPayloadConfig payload = responseConfig.getPayload();
+            // checks and assigns the accepted content type
+            if (acceptType.equalsIgnoreCase(APIConstants.APPLICATION_XML) &&
+                    payload.getPayloadMap().get(APIConstants.APPLICATION_XML) != null) {
+                headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_XML);
+                responseObject.setMockApiResponsePayload(payload.getPayloadMap().get(APIConstants.APPLICATION_XML));
+            } else {
+                headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_JSON);
+                responseObject.setMockApiResponsePayload(payload.getPayloadMap().get(APIConstants.APPLICATION_JSON));
+            }
+            responseObject.setHeaderMap(headerMap);
         }
     }
 }

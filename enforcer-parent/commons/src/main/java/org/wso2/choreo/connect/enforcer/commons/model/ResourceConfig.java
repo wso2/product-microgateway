@@ -32,7 +32,7 @@ public class ResourceConfig {
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
     private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
-    private PrototypeConfig prototypeConfig;
+    private MockedApiConfig mockedApiConfig;
 
     /**
      * ENUM to hold http operations.
@@ -132,15 +132,15 @@ public class ResourceConfig {
     /**
      * Provides prototype JSON configurations defined in a given resource's operation.
      *
-     * @return PrototypeConfig object which includes all the configurations defined in a prototyped resource
+     * @return MockedApiConfig object which includes all the configurations defined in a prototyped resource
      * operation
      */
-    public PrototypeConfig getPrototypeConfig() {
-        return prototypeConfig;
+    public MockedApiConfig getMockedApiConfig() {
+        return mockedApiConfig;
     }
 
-    public void setPrototypeConfig(PrototypeConfig prototypeConfig) {
-        this.prototypeConfig = prototypeConfig;
+    public void setMockApiConfig(MockedApiConfig mockedApiConfig) {
+        this.mockedApiConfig = mockedApiConfig;
     }
 
 }

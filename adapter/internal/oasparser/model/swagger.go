@@ -44,13 +44,9 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
 	swagger.securityScheme = setSecurityDefinitions(swagger2)
 	swagger.security = swagger2.Security
-	swagger.resources = setResourcesSwagger(swagger2, swagger)
+	swagger.apiType = HTTP
+	swagger.resources = setResourcesSwagger(swagger2, swagger.IsMockedAPI)
 
-	if(swagger.IsPrototyped) {
-		swagger.apiType = PROTOTYPE
-	} else {
-		swagger.apiType = HTTP
-	}
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
@@ -85,7 +81,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resource {
+func setResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 	var resources []*Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
@@ -104,19 +100,19 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 			}
 			var methodsArray []*Operation
 			methodFound := false
-			var prototypeConfig PrototypeConfig = PrototypeConfig{}
+			var mockedAPIConfig MockedAPIConfig = MockedAPIConfig{}
 			var methodName string
 			if pathItem.Get != nil {
 				methodName = "GET"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsPrototyped) {
+				if (isMockedAPI) {
 					xMediationScriptValue ,_ := pathItem.Get.VendorExtensible.Extensions.GetString(xMediationScript)
-					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
 				}
 				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Get.Security,
-					pathItem.Get.Extensions, prototypeConfig))
+					pathItem.Get.Extensions, mockedAPIConfig))
 				methodFound = true
 			}
 			if pathItem.Post != nil {
@@ -124,12 +120,12 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsPrototyped) {
+				if (isMockedAPI) {
 					xMediationScriptValue ,_ := pathItem.Post.VendorExtensible.Extensions.GetString(xMediationScript)
-					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
 				}
 				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Post.Security,
-					pathItem.Post.Extensions, prototypeConfig))
+					pathItem.Post.Extensions, mockedAPIConfig))
 				methodFound = true
 			}
 			if pathItem.Put != nil {
@@ -137,12 +133,12 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsPrototyped) {
+				if (isMockedAPI) {
 					xMediationScriptValue ,_ := pathItem.Put.VendorExtensible.Extensions.GetString(xMediationScript)
-					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
 				}
 				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Put.Security,
-					pathItem.Put.Extensions, prototypeConfig))
+					pathItem.Put.Extensions, mockedAPIConfig))
 				methodFound = true
 			}
 			if pathItem.Delete != nil {
@@ -150,12 +146,12 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsPrototyped) {
+				if (isMockedAPI) {
 					xMediationScriptValue ,_ := pathItem.Delete.VendorExtensible.Extensions.GetString(xMediationScript)
-					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
 				}
 				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Delete.Security,
-					pathItem.Delete.Extensions, prototypeConfig))
+					pathItem.Delete.Extensions, mockedAPIConfig))
 				methodFound = true
 			}
 			if pathItem.Head != nil {
@@ -163,12 +159,12 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsPrototyped) {
+				if (isMockedAPI) {
 					xMediationScriptValue ,_ := pathItem.Head.VendorExtensible.Extensions.GetString(xMediationScript)
-					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
 				}
 				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Head.Security,
-					pathItem.Head.Extensions, prototypeConfig))
+					pathItem.Head.Extensions, mockedAPIConfig))
 				methodFound = true
 			}
 			if pathItem.Patch != nil {
@@ -176,12 +172,12 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsPrototyped) {
+				if (isMockedAPI) {
 					xMediationScriptValue ,_ := pathItem.Patch.VendorExtensible.Extensions.GetString(xMediationScript)
-					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
 				}
 				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Patch.Security,
-					pathItem.Patch.Extensions, prototypeConfig))
+					pathItem.Patch.Extensions, mockedAPIConfig))
 				methodFound = true
 			}
 			if pathItem.Options != nil {
@@ -189,12 +185,12 @@ func setResourcesSwagger(swagger2 spec.Swagger, mgwSwagger *MgwSwagger) []*Resou
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
-				if (mgwSwagger.IsPrototyped) {
+				if (isMockedAPI) {
 					xMediationScriptValue ,_ := pathItem.Options.VendorExtensible.Extensions.GetString(xMediationScript)
-					getPrototypeConfig(xMediationScriptValue, &prototypeConfig, methodName)
+					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
 				}
 				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Options.Security,
-					pathItem.Options.Extensions, prototypeConfig))
+					pathItem.Options.Extensions, mockedAPIConfig))
 				methodFound = true
 			}
 			if methodFound {

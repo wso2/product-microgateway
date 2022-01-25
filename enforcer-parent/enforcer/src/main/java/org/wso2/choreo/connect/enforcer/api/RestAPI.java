@@ -30,10 +30,10 @@ import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypeConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypeHeader;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypePayload;
-import org.wso2.choreo.connect.enforcer.commons.model.PrototypeResponse;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedApiConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedPayloadConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -131,8 +131,8 @@ public class RestAPI implements API {
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setEndpoints(endpointClusterMap);
-                if (operation.getXMediationScript() != null) {
-                    resConfig.setPrototypeConfig(getPrototypedOperationConfig(operation.getXMediationScript(),
+                if (operation.getMockedApiConfig() != null) {
+                    resConfig.setMockApiConfig(getMockedApiOperationConfig(operation.getMockedApiConfig(),
                             operation.getMethod()));
                 }
                 resources.add(resConfig);
@@ -155,7 +155,7 @@ public class RestAPI implements API {
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
                 .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
-                .endpoints(endpoints).endpointSecurity(endpointSecurity)
+                .endpoints(endpoints).endpointSecurity(endpointSecurity).mockedApi(api.getIsMockedApi())
                 .organizationId(api.getOrganizationId()).build();
 
         initFilters();
@@ -181,8 +181,9 @@ public class RestAPI implements API {
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
             }
-            if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.PROTOTYPE)) {
-                return Utils.processPrototypedApiCall(requestContext, responseObject);
+            if (requestContext.getMatchedAPI().isMockedApi()) {
+                Utils.processMockedApiCall(requestContext, responseObject);
+                return responseObject;
             }
             // set metadata for interceptors
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
@@ -250,44 +251,52 @@ public class RestAPI implements API {
         return resource;
     }
 
-    private PrototypeConfig getPrototypedOperationConfig(
-            org.wso2.choreo.connect.discovery.api.PrototypeConfig prototypeConfig, String operationName) {
-        PrototypeConfig configData = new PrototypeConfig();
-        configData.setIn(prototypeConfig.getIn());
-        configData.setName(prototypeConfig.getName().toLowerCase());
-        List<PrototypeResponse> responses = new ArrayList<>();
-        if (prototypeConfig.getResponsesList() != null) {
-            for (org.wso2.choreo.connect.discovery.api.PrototypeResponse response :
-                    prototypeConfig.getResponsesList()) {
-                PrototypeResponse responseData = new PrototypeResponse();
+    private MockedApiConfig getMockedApiOperationConfig(
+            org.wso2.choreo.connect.discovery.api.MockedApiConfig mockedApiConfig, String operationName) {
+        MockedApiConfig configData = new MockedApiConfig();
+        configData.setIn(mockedApiConfig.getIn());
+        configData.setName(mockedApiConfig.getName().toLowerCase());
+        List<MockedResponseConfig> responses = new ArrayList<>();
+        if (mockedApiConfig.getResponsesList() != null) {
+            for (org.wso2.choreo.connect.discovery.api.MockedResponseConfig response :
+                    mockedApiConfig.getResponsesList()) {
+                MockedResponseConfig responseData = new MockedResponseConfig();
                 responseData.setCode(response.getCode());
                 responseData.setValue(response.getValue());
                 if (response.getHeadersList() != null) {
-                    List<PrototypeHeader> headers = new ArrayList<>();
-                    for (org.wso2.choreo.connect.discovery.api.PrototypeHeader header : response.getHeadersList()) {
-                        PrototypeHeader headerConfig = new PrototypeHeader();
+                    List<MockedHeaderConfig> headers = new ArrayList<>();
+                    for (org.wso2.choreo.connect.discovery.api.MockedHeaderConfig header : response.getHeadersList()) {
+                        MockedHeaderConfig headerConfig = new MockedHeaderConfig();
                         headerConfig.setName(header.getName());
                         headerConfig.setValue(header.getValue());
                         headers.add(headerConfig);
                     }
                     responseData.setHeaders(headers);
                 }
-                PrototypePayload payload = new PrototypePayload();
-                payload.setApplicationJSON(response.getPayload().getApplicationJSON());
-                payload.setApplicationXML(response.getPayload().getApplicationXML());
+                MockedPayloadConfig payload = new MockedPayloadConfig();
+                HashMap<String, String> payloadMap = new HashMap<>();
+
+                if (response.getPayload().getApplicationXML() == null &&
+                        response.getPayload().getApplicationJSON() == null) {
+                    logger.error("Mock API payloads not defined in the JSON script.");
+                } else {
+                    payloadMap.put(APIConstants.APPLICATION_XML, response.getPayload().getApplicationXML());
+                    payloadMap.put(APIConstants.APPLICATION_JSON, response.getPayload().getApplicationJSON());
+                }
+                payload.setPayloadMap(payloadMap);
                 responseData.setPayload(payload);
                 responses.add(responseData);
             }
         }
         configData.setResponses(responses);
-        logger.debug("Prototyped config processed successfully for the " + operationName + " operation.");
+        logger.debug("Mock API config processed successfully for the " + operationName + " operation.");
         return configData;
     }
 
     private void initFilters() {
 
-        // These filters will not be added if it's a prototyped API
-        if (!apiConfig.getApiType().equalsIgnoreCase(APIConstants.ApiType.PROTOTYPE)) {
+        // These filters will not be added if it's a mocked API
+        if (!apiConfig.isMockedApi()) {
             AuthFilter authFilter = new AuthFilter();
             authFilter.init(apiConfig, null);
             this.filters.add(authFilter);

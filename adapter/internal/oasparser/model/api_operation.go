@@ -33,7 +33,34 @@ type Operation struct {
 	tier             string
 	disableSecurity  bool
 	vendorExtensions map[string]interface{}
-	xMediationScript PrototypeConfig    
+	mockedAPIConfig  MockedAPIConfig    
+}
+
+// MockedAPIConfig holds configurations defined for a mocked API operation result
+type MockedAPIConfig struct {
+	In          string                    `json:"in,omitempty"`
+	Name        string                    `json:"name,omitempty"`
+	Responses   []MockedResponseConfig    `json:"responses,omitempty"`
+}
+
+// MockedResponseConfig holds response configurations in the mocked API operation
+type MockedResponseConfig struct {
+	Value 	string                        `json:"value,omitempty"`
+	Headers []MockedHeaderConfig          `json:"headers,omitempty"`
+	Code	int                           `json:"code,omitempty"`	
+	Payload MockedPayloadConfig           `json:"payload,omitempty"`
+}
+
+// MockedHeaderConfig holds header configurations in the mocked API operation
+type MockedHeaderConfig struct {
+	Name  string                          `json:"name,omitempty"`
+	Value string                          `json:"value,omitempty"`
+}
+
+// MockedPayloadConfig holds mocked payload configurations in the mocked API operation
+type MockedPayloadConfig struct {
+	ApplicationJSON string                `json:"application/json,omitempty"`
+	ApplicationXML 	string                `json:"application/xml,omitempty"`
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -61,9 +88,9 @@ func (operation *Operation) GetTier() string {
 	return operation.tier
 }
 
-// GetXMediationScript returns the operation level prototype implementation configs
-func (operation *Operation) GetXMediationScript() PrototypeConfig {
-	return operation.xMediationScript
+// GetMockedAPIConfig returns the operation level mocked API implementation configs
+func (operation *Operation) GetMockedAPIConfig() MockedAPIConfig {
+	return operation.mockedAPIConfig
 }
 
 // GetVendorExtensions returns vendor extensions which are explicitly defined under
@@ -80,12 +107,12 @@ func (operation *Operation) GetID() string {
 
 // NewOperation Creates and returns operation type object
 func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}, 
-	prototypeConfig PrototypeConfig) *Operation {
+	mockedAPIConfig MockedAPIConfig) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	if reflect.DeepEqual(PrototypeConfig{},prototypeConfig) {
-		return &Operation{id, method, security, tier, disableSecurity, extensions, PrototypeConfig{}}
+	if reflect.DeepEqual(MockedAPIConfig{},mockedAPIConfig) {
+		return &Operation{id, method, security, tier, disableSecurity, extensions, MockedAPIConfig{}}
 	}
-	return &Operation{id, method, security, tier, disableSecurity, extensions, prototypeConfig}
+	return &Operation{id, method, security, tier, disableSecurity, extensions, mockedAPIConfig}
 }

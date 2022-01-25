@@ -18,27 +18,20 @@
 
 package org.wso2.choreo.connect.enforcer.commons.model;
 
+import java.util.Map;
+
 /**
- * Defines prototype payload structure used in the prototyped APIs.
+ * Defines mock API payload structure.
  */
-public class PrototypePayload {
+public class MockedPayloadConfig {
 
-    private String applicationJSON;           // provides prototype payload in JSON format
-    private String applicationXML;            // provides prototype payload in XML format
+    private Map<String, String> payloadMap;    // holds payload configurations defined in the mocked API payload
 
-    public String getApplicationJSON() {
-        return applicationJSON;
+    public Map<String, String> getPayloadMap() {
+        return payloadMap;
     }
 
-    public void setApplicationJSON(String applicationJSON) {
-        this.applicationJSON = applicationJSON;
-    }
-
-    public String getApplicationXML() {
-        return applicationXML;
-    }
-
-    public void setApplicationXML(String applicationXML) {
-        this.applicationXML = applicationXML;
+    public void setPayloadMap(Map<String, String> payloadMap) {
+        this.payloadMap = payloadMap;
     }
 }

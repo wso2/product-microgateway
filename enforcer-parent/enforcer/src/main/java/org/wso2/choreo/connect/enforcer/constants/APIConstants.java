@@ -374,13 +374,12 @@ public class APIConstants {
     public static class ApiType {
         public static final String WEB_SOCKET = "WS";
         public static final String REST = "HTTP";
-        public static final String PROTOTYPE = "PROTOTYPE";
     }
 
     /**
      * Holds values for prototype APIs
      */
-    public static class PrototypeApiConstants {
+    public static class MockApiConstants {
         public static final String HEADER = "header";
     }
 

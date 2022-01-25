@@ -81,11 +81,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
-	if isPrototypedAPI {
-		swagger.apiType = PROTOTYPE
-	} else {
-		swagger.apiType = HTTP
-	}
+	swagger.apiType = HTTP
 	var productionUrls []Endpoint
 	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
 	// an exception is made where servers url is not processed when the API is prototyped.
@@ -193,16 +189,16 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
-	var prototypeConfig PrototypeConfig
+	var mockedAPIConfig MockedAPIConfig
 
 	// x-mediation-script extension is only available for the prototyped APIs. Below condition will execute only for the
 	// prototyped APIs.
-	if xMedVal, isXMediationAvailable := extensions[xMediationScript]; isXMediationAvailable {
-		getPrototypeConfig(xMedVal, &prototypeConfig, method )
+	if scriptValue, isScriptAvailable := extensions[xMediationScript]; isScriptAvailable {
+		getMockedAPIConfig(scriptValue, &mockedAPIConfig, method )
 	}
 
 	if operation.Security == nil {
-		return NewOperation(method, nil, extensions, prototypeConfig)
+		return NewOperation(method, nil, extensions, mockedAPIConfig)
 	}
 
 	var securityData []openapi3.SecurityRequirement = *(operation.Security)
@@ -211,19 +207,19 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 		securityArray[i] = security
 	}
 	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
-	return NewOperation(method, securityArray, extensions, prototypeConfig)
+	return NewOperation(method, securityArray, extensions, mockedAPIConfig)
 
 }
 
-// getPrototypeConfig recieves xMediationScriptValue, prototypeConfig pointer value and method name and unmrashalls the xMediationScript string 
-// to prototypeConfig struct type.
-func getPrototypeConfig(xMediationScriptValue interface{}, prototypeConfig *PrototypeConfig, method string) {
+// getMockedApiConfig recieves xMediationScriptValue, mockedApiConfig pointer value and method name. It unmrashalls the xMediationScript string 
+// to mockedApiConfig struct type.
+func getMockedAPIConfig(xMediationScriptValue interface{}, mockedAPIConfig *MockedAPIConfig, method string) {
 	if str, ok := xMediationScriptValue.(string); ok {
 		isValidJSONString := json.Valid([]byte(str))
 		if isValidJSONString {
-			unmarshalError := json.Unmarshal([]byte(str), &prototypeConfig)
+			unmarshalError := json.Unmarshal([]byte(str), &mockedAPIConfig)
 			if unmarshalError != nil {
-				logger.LoggerOasparser.Errorf("Error: %v occurred while prototypeConfig unmarshalling for method %v.", unmarshalError, method)
+				logger.LoggerOasparser.Errorf("Error while unmarshalling %v for method %v.", unmarshalError, method)
 			} else {
 				isPrototypedAPI = true
 			}

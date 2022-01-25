@@ -18,13 +18,23 @@
 
 package org.wso2.choreo.connect.enforcer.commons.model;
 
-/**
- * Defines prototype header structure used in prototyped API implementations.
- */
-public class PrototypeHeader {
+import java.util.List;
 
-    private String name;                // name of the header
-    private String value;               // value of a given header
+/**
+ * Defines JSON script structure used in the mock API implementations.
+ */
+public class MockedApiConfig {
+    private String in;                             // position of mock API response determining value (query/header)
+    private String name;                           // value name expected to use when invoking mock API
+    private List<MockedResponseConfig> responses;  // mock responses defined in the JSON script
+
+    public String getIn() {
+        return in;
+    }
+
+    public void setIn(String in) {
+        this.in = in;
+    }
 
     public String getName() {
         return name;
@@ -34,11 +44,11 @@ public class PrototypeHeader {
         this.name = name;
     }
 
-    public String getValue() {
-        return value;
+    public List<MockedResponseConfig> getResponses() {
+        return responses;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setResponses(List<MockedResponseConfig> responses) {
+        this.responses = responses;
     }
 }

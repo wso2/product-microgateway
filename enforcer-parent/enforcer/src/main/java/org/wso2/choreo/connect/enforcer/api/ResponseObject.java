@@ -37,7 +37,7 @@ public class ResponseObject {
     private ArrayList<String> queryParamsToRemove = new ArrayList<>();
     private Map<String, String> queryParams;
     private String requestPath;
-    private String prototypeResponsePayload;
+    private String mockApiResponsePayload;
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -139,11 +139,11 @@ public class ResponseObject {
         this.requestPath = requestPath;
     }
 
-    public String getPrototypeResponsePayload() {
-        return prototypeResponsePayload;
+    public String getMockApiResponsePayload() {
+        return mockApiResponsePayload;
     }
 
-    public void setPrototypeResponsePayload(String prototypeResponsePayload) {
-        this.prototypeResponsePayload = prototypeResponsePayload;
+    public void setMockApiResponsePayload(String mockApiResponsePayload) {
+        this.mockApiResponsePayload = mockApiResponsePayload;
     }
 }

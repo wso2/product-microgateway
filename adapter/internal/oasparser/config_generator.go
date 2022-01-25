@@ -149,7 +149,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
-			operations[i] = GetEnforcerAPIOperation(*op, mgwSwagger.IsPrototyped)
+			operations[i] = GetEnforcerAPIOperation(*op, mgwSwagger.IsMockedAPI)
 		}
 		resource := &api.Resource{
 			Id:      res.GetID(),
@@ -205,11 +205,12 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 		OrganizationId:      mgwSwagger.OrganizationID,
 		Vhost:               vhost,
+		IsMockedApi:         mgwSwagger.IsMockedAPI,
 	}
 }
 
 // GetEnforcerAPIOperation builds the operation object expected by the proto definition
-func GetEnforcerAPIOperation(operation mgw.Operation, isPrototyped bool ) *api.Operation {
+func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool ) *api.Operation {
 	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
 	for i, security := range operation.GetSecurity() {
 		mapOfSecurity := make(map[string]*api.Scopes)
@@ -225,10 +226,10 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isPrototyped bool ) *api.O
 		secSchemas[i] = secSchema
 	}
 
-	var prototypeConfig api.PrototypeConfig
-	if isPrototyped {
-		xMediationScriptValue := operation.GetXMediationScript()
-		generatePrototypeConfig(&prototypeConfig,xMediationScriptValue)
+	var mockedAPIConfig api.MockedApiConfig
+	if isMockedAPI {
+		mockedScriptValue := operation.GetMockedAPIConfig()
+		generateMockedAPIConfig(&mockedAPIConfig, mockedScriptValue)
 	}
 
 	apiOperation := api.Operation{
@@ -236,7 +237,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isPrototyped bool ) *api.O
 		Security:         secSchemas,
 		Tier:             operation.GetTier(),
 		DisableSecurity:  operation.GetDisableSecurity(),
-		XMediationScript: &prototypeConfig,
+		MockedApiConfig: &mockedAPIConfig,
 	}
 	return &apiOperation
 }
@@ -285,31 +286,31 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 	return endpoints
 }
 
-// Generates prototypeConfig (prototype configuration to pass for the enforcer) considering xMediationScript value
-func generatePrototypeConfig(prototypeConfig *api.PrototypeConfig , xMediationScriptValue mgw.PrototypeConfig) {
-	prototypeConfig.In = xMediationScriptValue.In
-	prototypeConfig.Name = xMediationScriptValue.Name
-	responseConfigList := make ([]*api.PrototypeResponse,0)
+// Generates mockedApiConfig (prototype configuration to pass for the enforcer) considering xMediationScript value
+func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig , mgwMockedAPIConfig mgw.MockedAPIConfig) {
+	mockedAPIConfig.In = mgwMockedAPIConfig.In
+	mockedAPIConfig.Name = mgwMockedAPIConfig.Name
+	responseConfigList := make ([]*api.MockedResponseConfig,0)
 
-	for _, val := range xMediationScriptValue.Responses {
-		var responseConfig api.PrototypeResponse
+	for _, val := range mgwMockedAPIConfig.Responses {
+		var responseConfig api.MockedResponseConfig
 		responseConfig.Value = val.Value
 		responseConfig.Code = int32(val.Code)
-		var payload api.PrototypePayload
+		var payload api.MockedPayloadConfig
 		payload.ApplicationJSON = val.Payload.ApplicationJSON
 		payload.ApplicationXML = val.Payload.ApplicationXML
 
 		responseConfig.Payload = &payload
 		headerConfigList := responseConfig.Headers
 		for _, header := range val.Headers {
-			var prototypeHeader api.PrototypeHeader
-			prototypeHeader.Name = header.Name
-			prototypeHeader.Value = header.Value
-			headerConfigList = append(headerConfigList, &prototypeHeader)
+			var mockedAPIHeader api.MockedHeaderConfig
+			mockedAPIHeader.Name = header.Name
+			mockedAPIHeader.Value = header.Value
+			headerConfigList = append(headerConfigList, &mockedAPIHeader)
 		}
 		responseConfig.Headers = headerConfigList
 		responseConfigList = append(responseConfigList, &responseConfig)
 	}
-	prototypeConfig.Responses = responseConfigList
-	logger.LoggerOasparser.Debugf("Prototype configuration generated successfully.")
+	mockedAPIConfig.Responses = responseConfigList
+	logger.LoggerOasparser.Debugf("Mocked API configuration generated successfully.")
 }

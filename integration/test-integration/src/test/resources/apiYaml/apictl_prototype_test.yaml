@@ -55,7 +55,7 @@ data:
     production_endpoints:
       url: http://localhost
     implementation_status: prototyped
-  endpointImplementationType: INLINE
+  endpointImplementationType: TEMPLATE
   scopes: []
   operations:
     -

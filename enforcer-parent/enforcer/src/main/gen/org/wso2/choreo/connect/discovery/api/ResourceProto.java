@@ -41,23 +41,23 @@ public final class ResourceProto {
       "\n!wso2/discovery/api/Resource.proto\022\022wso" +
       "2.discovery.api\032)wso2/discovery/api/endp" +
       "oint_cluster.proto\032(wso2/discovery/api/s" +
-      "ecurity_scheme.proto\032)wso2/discovery/api" +
-      "/prototype_config.proto\"\233\003\n\010Resource\022\n\n\002" +
-      "id\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022.\n\007methods\030\003 \003(\0132" +
-      "\035.wso2.discovery.api.Operation\022\017\n\007summar" +
-      "y\030\004 \001(\t\022\023\n\013description\030\005 \001(\t\022@\n\023producti" +
-      "onEndpoints\030\006 \001(\0132#.wso2.discovery.api.E" +
-      "ndpointCluster\022=\n\020sandboxEndpoints\030\007 \001(\013" +
-      "2#.wso2.discovery.api.EndpointCluster\022<\n" +
-      "\010security\030\010 \003(\0132*.wso2.discovery.api.Res" +
-      "ource.SecurityEntry\022\020\n\010consumes\030\t \003(\t\022\017\n" +
-      "\007schemes\030\n \003(\t\022\014\n\004tags\030\013 \003(\t\032/\n\rSecurity" +
-      "Entry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\265\001" +
-      "\n\tOperation\022\016\n\006method\030\001 \001(\t\0222\n\010security\030" +
-      "\002 \003(\0132 .wso2.discovery.api.SecurityList\022" +
-      "\014\n\004tier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010\022=" +
-      "\n\020xMediationScript\030\005 \001(\0132#.wso2.discover" +
-      "y.api.PrototypeConfigBw\n%org.wso2.choreo" +
+      "ecurity_scheme.proto\032*wso2/discovery/api" +
+      "/mocked_api_config.proto\"\233\003\n\010Resource\022\n\n" +
+      "\002id\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022.\n\007methods\030\003 \003(\013" +
+      "2\035.wso2.discovery.api.Operation\022\017\n\007summa" +
+      "ry\030\004 \001(\t\022\023\n\013description\030\005 \001(\t\022@\n\023product" +
+      "ionEndpoints\030\006 \001(\0132#.wso2.discovery.api." +
+      "EndpointCluster\022=\n\020sandboxEndpoints\030\007 \001(" +
+      "\0132#.wso2.discovery.api.EndpointCluster\022<" +
+      "\n\010security\030\010 \003(\0132*.wso2.discovery.api.Re" +
+      "source.SecurityEntry\022\020\n\010consumes\030\t \003(\t\022\017" +
+      "\n\007schemes\030\n \003(\t\022\014\n\004tags\030\013 \003(\t\032/\n\rSecurit" +
+      "yEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\264" +
+      "\001\n\tOperation\022\016\n\006method\030\001 \001(\t\0222\n\010security" +
+      "\030\002 \003(\0132 .wso2.discovery.api.SecurityList" +
+      "\022\014\n\004tier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010\022" +
+      "<\n\017mockedApiConfig\030\005 \001(\0132#.wso2.discover" +
+      "y.api.MockedApiConfigBw\n%org.wso2.choreo" +
       ".connect.discovery.apiB\rResourceProtoP\001Z" +
       "=github.com/envoyproxy/go-control-plane/" +
       "wso2/discovery/api;apib\006proto3"
@@ -67,7 +67,7 @@ public final class ResourceProto {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor(),
-          org.wso2.choreo.connect.discovery.api.SecurityConfigProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.getDescriptor(),
         });
     internal_static_wso2_discovery_api_Resource_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -86,10 +86,10 @@ public final class ResourceProto {
     internal_static_wso2_discovery_api_Operation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Operation_descriptor,
-        new java.lang.String[] { "Method", "Security", "Tier", "DisableSecurity", "XMediationScript", });
+        new java.lang.String[] { "Method", "Security", "Tier", "DisableSecurity", "MockedApiConfig", });
     org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor();
-    org.wso2.choreo.connect.discovery.api.SecurityConfigProto.getDescriptor();
+    org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

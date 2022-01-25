@@ -21,14 +21,14 @@ package org.wso2.choreo.connect.enforcer.commons.model;
 import java.util.List;
 
 /**
- * Defines prototype response structure used in the prototyped APIs.
+ * Defines mock API response structure.
  */
-public class PrototypeResponse {
+public class MockedResponseConfig {
     private String value;
     private int code;
-    private List<PrototypeHeader> headers;
+    private List<MockedHeaderConfig> headers;
 
-    private PrototypePayload payload;
+    private MockedPayloadConfig payload;
 
     public String getValue() {
         return value;
@@ -46,19 +46,19 @@ public class PrototypeResponse {
         this.code = code;
     }
 
-    public PrototypePayload getPayload() {
+    public MockedPayloadConfig getPayload() {
         return payload;
     }
 
-    public void setPayload(PrototypePayload payload) {
+    public void setPayload(MockedPayloadConfig payload) {
         this.payload = payload;
     }
 
-    public List<PrototypeHeader> getHeaders() {
+    public List<MockedHeaderConfig> getHeaders() {
         return headers;
     }
 
-    public void setHeaders(List<PrototypeHeader> headers) {
+    public void setHeaders(List<MockedHeaderConfig> headers) {
         this.headers = headers;
     }
 }

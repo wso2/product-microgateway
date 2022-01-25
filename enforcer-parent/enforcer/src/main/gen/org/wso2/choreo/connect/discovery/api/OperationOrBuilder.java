@@ -62,17 +62,17 @@ public interface OperationOrBuilder extends
   boolean getDisableSecurity();
 
   /**
-   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
-   * @return Whether the xMediationScript field is set.
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 5;</code>
+   * @return Whether the mockedApiConfig field is set.
    */
-  boolean hasXMediationScript();
+  boolean hasMockedApiConfig();
   /**
-   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
-   * @return The xMediationScript.
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 5;</code>
+   * @return The mockedApiConfig.
    */
-  org.wso2.choreo.connect.discovery.api.PrototypeConfig getXMediationScript();
+  org.wso2.choreo.connect.discovery.api.MockedApiConfig getMockedApiConfig();
   /**
-   * <code>.wso2.discovery.api.PrototypeConfig xMediationScript = 5;</code>
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 5;</code>
    */
-  org.wso2.choreo.connect.discovery.api.PrototypeConfigOrBuilder getXMediationScriptOrBuilder();
+  org.wso2.choreo.connect.discovery.api.MockedApiConfigOrBuilder getMockedApiConfigOrBuilder();
 }

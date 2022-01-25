@@ -55,6 +55,7 @@ const (
 	securityScheme             string = "securityScheme"
 	endpointImplementationType string = "endpointImplementationType"
 	inlineEndpointType         string = "INLINE"
+	templateEndpointType       string = "TEMPLATE"
 	endpointSecurity           string = "endpoint_security"
 	production                 string = "production"
 	sandbox                    string = "sandbox"

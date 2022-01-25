@@ -101,8 +101,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
         API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
-        boolean isPrototypedAPI = matchedAPI.getAPIConfig().getApiType().
-                equalsIgnoreCase(APIConstants.ApiType.PROTOTYPE);
+        boolean isPrototypedAPI = matchedAPI.getAPIConfig().isMockedApi();
         if (responseObject.isDirectResponse()) {
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
@@ -151,7 +150,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
                         .build();
             } else {
-                responseBuilder.setBody(responseObject.getPrototypeResponsePayload());
+                responseBuilder.setBody(responseObject.getMockApiResponsePayload());
 
                 // Below condition is evaluated to stop re-directing successful prototyped responses to upstream.
                 // Here only the checkResponse object's status code is changed. API call's response status code remain

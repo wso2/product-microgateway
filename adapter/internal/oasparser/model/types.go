@@ -31,26 +31,28 @@ import (
 )
 
 const (
-	openAPIDir                 string = "Definitions"
-	openAPIFilename            string = "swagger."
-	apiYAMLFile                string = "api.yaml"
-	deploymentsYAMLFile        string = "deployment_environments.yaml"
-	endpointCertFile           string = "endpoint_certificates."
-	apiJSONFile                string = "api.json"
-	endpointCertDir            string = "Endpoint-certificates"
-	interceptorCertDir         string = "Endpoint-certificates/interceptors"
-	crtExtension               string = ".crt"
-	pemExtension               string = ".pem"
-	apiTypeFilterKey           string = "type"
-	apiTypeYamlKey             string = "type"
-	lifeCycleStatus            string = "lifeCycleStatus"
-	securityScheme             string = "securityScheme"
-	endpointImplementationType string = "endpointImplementationType"
-	inlineEndpointType         string = "INLINE"
-	endpointSecurity           string = "endpoint_security"
-	production                 string = "production"
-	sandbox                    string = "sandbox"
-	zipExt                     string = ".zip"
+	openAPIDir                     string = "Definitions"
+	openAPIFilename                string = "swagger."
+	apiYAMLFile                    string = "api.yaml"
+	deploymentsYAMLFile            string = "deployment_environments.yaml"
+	endpointCertFile               string = "endpoint_certificates."
+	apiJSONFile                    string = "api.json"
+	endpointCertDir                string = "Endpoint-certificates"
+	interceptorCertDir             string = "Endpoint-certificates/interceptors"
+	crtExtension                   string = ".crt"
+	pemExtension                   string = ".pem"
+	apiTypeFilterKey               string = "type"
+	apiTypeYamlKey                 string = "type"
+	lifeCycleStatus                string = "lifeCycleStatus"
+	securityScheme                 string = "securityScheme"
+	endpointImplementationType     string = "endpointImplementationType"
+	prototypedImplementationStatus string = "prototyped"
+	inlineEndpointType             string = "INLINE"
+	templateEndpointType           string = "TEMPLATE"
+	endpointSecurity               string = "endpoint_security"
+	production                     string = "production"
+	sandbox                        string = "sandbox"
+	zipExt                         string = ".zip"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -160,33 +162,6 @@ type EndpointInfo struct {
 		ActionDuration string `json:"actionDuration,omitempty"`
 		RetryTimeOut   string `json:"retryTimeOut,omitempty"`
 	} `json:"config,omitempty"`
-}
-
-// PrototypeConfig holds prototype implementation relevant to a given resource's operation
-type PrototypeConfig struct {
-	In          string                 `json:"in,omitempty"`
-	Name        string                 `json:"name,omitempty"`
-	Responses   []PrototypeResponses   `json:"responses,omitempty"`
-}
-
-// PrototypeResponses hold response configurations for the prototype implementations
-type PrototypeResponses struct {
-	Value 	string                     `json:"value,omitempty"`
-	Headers []PrototypeHeader          `json:"headers,omitempty"`
-	Code	int                        `json:"code,omitempty"`	
-	Payload PrototypePayload           `json:"payload,omitempty"`
-}
-
-// PrototypeHeader holds prototype header configs in prototype implementations
-type PrototypeHeader struct {
-	Name  string                       `json:"name,omitempty"`
-	Value string                       `json:"value,omitempty"`
-}
-
-// PrototypePayload holds prototype payload configs in prototype implementations
-type PrototypePayload struct {
-	ApplicationJSON string             `json:"application/json,omitempty"`
-	ApplicationXML 	string             `json:"application/xml,omitempty"`
 }
 
 // ValidateAPIType checks if the apiProject is properly assigned with the type.

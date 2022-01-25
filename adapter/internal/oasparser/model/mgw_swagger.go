@@ -62,6 +62,7 @@ type MgwSwagger struct {
 	disableSecurity     bool
 	OrganizationID      string
 	IsPrototyped        bool
+	IsMockedAPI        bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -151,8 +152,6 @@ type InterceptEndpoint struct {
 	//"invocation_context" }
 	Includes *interceptor.RequestInclusions
 }
-
-const prototypedAPI = "prototyped"
 
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
@@ -1174,8 +1173,14 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
 
-	if endpointConfig.ImplementationStatus == prototypedAPI {
+	if endpointConfig.ImplementationStatus == prototypedImplementationStatus {
 		swagger.IsPrototyped = true
+	}
+
+	// below condition will evaluate as true for mocked API implementations
+	if endpointConfig.ImplementationStatus == prototypedImplementationStatus || 
+	data.EndpointImplementationType == templateEndpointType {
+		swagger.IsMockedAPI = true
 	}
 
 	if len(endpointConfig.ProductionEndpoints) > 0 {

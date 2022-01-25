@@ -20,37 +20,34 @@ package wso2.discovery.api;
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
 option java_package = "org.wso2.choreo.connect.discovery.api";
-option java_outer_classname = "SecurityConfigProto";
+option java_outer_classname = "MockedApiConfigProto";
 option java_multiple_files = true;
 
-// [#protodoc-title: PrototypeConfig]
+// [#protodoc-title: MockedApiConfig]
 
-// Prototype config model
-
-// PrototypeConfig model holds prototype implementation relevant to a given resource's operation
-message PrototypeConfig {
+// MockedApiConfig holds configurations defined for a mocked API operation result
+message MockedApiConfig {
   string in = 1;
   string name = 2;
-  repeated PrototypeResponse responses = 3;
+  repeated MockedResponseConfig responses = 3;
 }
 
-// PrototypeResponses hold response configurations for the prototype implementations
-message PrototypeResponse {
+// MockedResponseConfig hold response configurations for the mocked API implementations
+message MockedResponseConfig {
   string value = 1;
-  repeated PrototypeHeader headers = 2;
+  repeated MockedHeaderConfig headers = 2;
   int32 code = 3;
-  PrototypePayload payload = 4;
+  MockedPayloadConfig payload = 4;
 }
 
-// PrototypeHeader holds prototype header configs in prototype implementations
-message PrototypeHeader {
+// MockedHeaderConfig holds header configs in mocked API implementations
+message MockedHeaderConfig {
   string name = 1;
   string value = 2;
 }
 
-// PrototypePayload holds prototype payload configs in prototype implementations
-message PrototypePayload {
+// MockedPayloadConfig holds payload configs in mocked API implementations
+message MockedPayloadConfig {
   string applicationJSON = 1;
   string applicationXML = 2;
 }
-
