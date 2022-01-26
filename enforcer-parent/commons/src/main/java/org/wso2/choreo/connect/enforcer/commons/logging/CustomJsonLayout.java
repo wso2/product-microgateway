@@ -63,27 +63,25 @@ public class CustomJsonLayout extends AbstractStringLayout {
         obj.put(LoggingConstants.LogAttributes.LEVEL, event.getLevel().toString());
         obj.put(LoggingConstants.LogAttributes.LOGGER, event.getLoggerName());
         obj.put(LoggingConstants.LogAttributes.MESSAGE, event.getMessage().getFormattedMessage());
-        if (event.getClass() == Log4jLogEvent.class) {
+        if ((event.getClass() == Log4jLogEvent.class) && (event.getLevel() == Level.ERROR)) {
             Log4jLogEvent logEvent = (Log4jLogEvent) event;
-            if (event.getLevel() == Level.ERROR) {
-                if (logEvent.getMessage().getClass() == ParameterizedMessage.class) {
-                    Object[] parameters = ((ParameterizedMessage) logEvent.getMessage()).getParameters();
-                    if (Arrays.stream(parameters).anyMatch(p ->
-                            p.getClass().getName().equals(ErrorDetails.class.getName()))) {
-                        Arrays.stream(parameters)
-                            .filter(p -> p.getClass().getName().equals(ErrorDetails.class.getName())).forEach((c) -> {
-                                ErrorDetails errorDetails = (ErrorDetails) c;
-                                obj.put(LoggingConstants.LogAttributes.SEVERITY, errorDetails.getSeverity());
-                                obj.put(LoggingConstants.LogAttributes.ERROR_CODE, errorDetails.getCode());
-                            });
-                    } else {
-                        obj.put(LoggingConstants.LogAttributes.SEVERITY, LoggingConstants.Severity.DEFAULT);
-                        obj.put(LoggingConstants.LogAttributes.ERROR_CODE, 0);
-                    }
+            if (logEvent.getMessage().getClass() == ParameterizedMessage.class) {
+                Object[] parameters = ((ParameterizedMessage) logEvent.getMessage()).getParameters();
+                if (Arrays.stream(parameters).anyMatch(p ->
+                        p.getClass().getName().equals(ErrorDetails.class.getName()))) {
+                    Arrays.stream(parameters)
+                        .filter(p -> p.getClass().getName().equals(ErrorDetails.class.getName())).forEach((c) -> {
+                            ErrorDetails errorDetails = (ErrorDetails) c;
+                            obj.put(LoggingConstants.LogAttributes.SEVERITY, errorDetails.getSeverity());
+                            obj.put(LoggingConstants.LogAttributes.ERROR_CODE, errorDetails.getCode());
+                        });
                 } else {
                     obj.put(LoggingConstants.LogAttributes.SEVERITY, LoggingConstants.Severity.DEFAULT);
                     obj.put(LoggingConstants.LogAttributes.ERROR_CODE, 0);
                 }
+            } else {
+                obj.put(LoggingConstants.LogAttributes.SEVERITY, LoggingConstants.Severity.DEFAULT);
+                obj.put(LoggingConstants.LogAttributes.ERROR_CODE, 0);
             }
         }
         retValue.append(obj.toString()).append(throwable).append("\n");

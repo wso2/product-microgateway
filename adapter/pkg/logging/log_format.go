@@ -32,33 +32,29 @@ type plainFormatter struct {
 	LevelDesc       []string
 }
 
-// ErrorHook for adding a custom logic to default the error details only for error logs
-type ErrorHook struct {
+// errorHook for adding a custom logic to default the error details only for error logs
+type errorHook struct {
 }
 
-// LogFormatter is to keep the relevant log formatter
+// logFormatter is to keep the relevant log formatter
 var (
-	LogFormatter logrus.Formatter
+	logFormatter logrus.Formatter
 )
 
+// init will read the configs (LogFormalization) and decide which formatter to be used for logging, when initializing
 func init() {
-	InitLogFormatter()
-}
-
-// InitLogFormatter will read the configs (LogFormalization) and decide which formatter to be used for logging
-func InitLogFormatter() {
 	logConf := config.ReadLogConfigs()
 	switch logConf.LogFormat {
-	case jsonType:
+	case JSON:
 		formatter := new(logrus.JSONFormatter)
 		formatter.TimestampFormat = "2006-01-02 15:04:05"
 		formatter.CallerPrettyfier = func(frame *runtime.Frame) (function string, file string) {
 			fileArr := strings.Split(frame.File, "/")
 			return formatFilePath(frame.Function), fileArr[len(fileArr)-1] + ":" + fmt.Sprintf("%d", frame.Line)
 		}
-		LogFormatter = formatter
+		logFormatter = formatter
 
-	case plainTextType:
+	case TEXT:
 		formatter := new(plainFormatter)
 		formatter.TimestampFormat = "2006-01-02 15:04:05"
 		formatter.LevelDesc = []string{
@@ -68,7 +64,7 @@ func InitLogFormatter() {
 			warnLevel,
 			infoLevel,
 			debugLevel}
-		LogFormatter = formatter
+		logFormatter = formatter
 	}
 }
 
@@ -100,18 +96,18 @@ func formatFilePath(path string) string {
 }
 
 // Levels to fire only on ErrorLevel (.Error(), .Errorf(), etc.)
-func (h *ErrorHook) Levels() []logrus.Level {
+func (h *errorHook) Levels() []logrus.Level {
 	return []logrus.Level{logrus.ErrorLevel}
 }
 
 // Fire specifies a custom logic to execute when the hook fires
-func (h *ErrorHook) Fire(e *logrus.Entry) error {
+func (h *errorHook) Fire(e *logrus.Entry) error {
 	// e.Data is a map with all fields attached to entry
 	if _, ok := e.Data[SEVERITY]; !ok {
 		e.Data[SEVERITY] = DEFAULT
 	}
-	if _, ok := e.Data[ErrorCode]; !ok {
-		e.Data[ErrorCode] = 0
+	if _, ok := e.Data[ERRORCODE]; !ok {
+		e.Data[ERRORCODE] = 0
 	}
 	return nil
 }

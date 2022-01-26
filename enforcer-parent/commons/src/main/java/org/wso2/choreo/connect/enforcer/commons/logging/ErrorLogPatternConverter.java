@@ -51,33 +51,29 @@ public class ErrorLogPatternConverter extends LogEventPatternConverter {
 
     @Override
     public void format(LogEvent event, StringBuilder toAppendTo) {
-
-        if (event.getClass() == Log4jLogEvent.class) {
+        if ((event.getClass() == Log4jLogEvent.class) && (event.getLevel() == Level.ERROR)) {
             Log4jLogEvent logEvent = (Log4jLogEvent) event;
-            if (event.getLevel() == Level.ERROR) {
-                if (logEvent.getMessage().getClass() == ParameterizedMessage.class) {
-                    Object[] parameters = ((ParameterizedMessage) logEvent.getMessage()).getParameters();
-                    if (Arrays.stream(parameters).anyMatch(p ->
-                            p.getClass().getName().equals(ErrorDetails.class.getName()))) {
-                        Arrays.stream(parameters)
-                            .filter(p -> p.getClass().getName().equals(ErrorDetails.class.getName())).forEach((c) -> {
-                                ErrorDetails errorDetails = (ErrorDetails) c;
-                                toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
-                                        errorDetails.getSeverity() + " " + LoggingConstants.LogAttributes.ERROR_CODE
-                                        + ":" + errorDetails.getCode());
-                            });
-                    } else {
-                        toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
-                                LoggingConstants.Severity.DEFAULT + " " +
-                                LoggingConstants.LogAttributes.ERROR_CODE + ":" + 0);
-                    }
+            if (logEvent.getMessage().getClass() == ParameterizedMessage.class) {
+                Object[] parameters = ((ParameterizedMessage) logEvent.getMessage()).getParameters();
+                if (Arrays.stream(parameters).anyMatch(p ->
+                        p.getClass().getName().equals(ErrorDetails.class.getName()))) {
+                    Arrays.stream(parameters)
+                        .filter(p -> p.getClass().getName().equals(ErrorDetails.class.getName())).forEach((c) -> {
+                            ErrorDetails errorDetails = (ErrorDetails) c;
+                            toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
+                                    errorDetails.getSeverity() + " " + LoggingConstants.LogAttributes.ERROR_CODE
+                                    + ":" + errorDetails.getCode());
+                        });
                 } else {
                     toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
                             LoggingConstants.Severity.DEFAULT + " " +
                             LoggingConstants.LogAttributes.ERROR_CODE + ":" + 0);
                 }
+            } else {
+                toAppendTo.append(LoggingConstants.LogAttributes.SEVERITY + ":" +
+                        LoggingConstants.Severity.DEFAULT + " " +
+                        LoggingConstants.LogAttributes.ERROR_CODE + ":" + 0);
             }
         }
     }
 }
-

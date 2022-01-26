@@ -43,9 +43,9 @@ func initGlobalLogger(filename string) error {
 	_, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 
 	logrus.SetReportCaller(true)
-	formatter := LogFormatter
+	formatter := logFormatter
 	logrus.SetFormatter(formatter)
-	logrus.AddHook(&ErrorHook{})
+	logrus.AddHook(&errorHook{})
 
 	if err != nil {
 		// Cannot open log file. Logging to stderr
