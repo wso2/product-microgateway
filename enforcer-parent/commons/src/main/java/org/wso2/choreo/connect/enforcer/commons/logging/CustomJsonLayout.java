@@ -58,10 +58,11 @@ public class CustomJsonLayout extends AbstractStringLayout {
         }
         JSONObject obj = new JSONObject();
         StringBuilder retValue = new StringBuilder();
-        obj.put("timestamp", new SimpleDateFormat("dd-MM-yyyy HH:mm:ss:S").format(event.getTimeMillis()));
-        obj.put("level", event.getLevel().toString());
-        obj.put("logger", event.getLoggerName());
-        obj.put("message", event.getMessage().getFormattedMessage());
+        obj.put(LoggingConstants.LogAttributes.TIMESTAMP, new SimpleDateFormat("dd-MM-yyyy HH:mm:ss:S")
+                .format(event.getTimeMillis()));
+        obj.put(LoggingConstants.LogAttributes.LEVEL, event.getLevel().toString());
+        obj.put(LoggingConstants.LogAttributes.LOGGER, event.getLoggerName());
+        obj.put(LoggingConstants.LogAttributes.MESSAGE, event.getMessage().getFormattedMessage());
         if (event.getClass() == Log4jLogEvent.class) {
             Log4jLogEvent logEvent = (Log4jLogEvent) event;
             if (event.getLevel() == Level.ERROR) {

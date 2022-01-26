@@ -48,6 +48,6 @@ const (
 
 // Error Log attribute name constants
 const (
-	SEVERITY = "severity"
-	CODE     = "error_code"
+	SEVERITY  = "severity"
+	ErrorCode = "error_code"
 )

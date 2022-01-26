@@ -107,11 +107,11 @@ func (h *ErrorHook) Levels() []logrus.Level {
 // Fire specifies a custom logic to execute when the hook fires
 func (h *ErrorHook) Fire(e *logrus.Entry) error {
 	// e.Data is a map with all fields attached to entry
-	if _, ok := e.Data["severity"]; !ok {
-		e.Data["severity"] = DEFAULT
+	if _, ok := e.Data[SEVERITY]; !ok {
+		e.Data[SEVERITY] = DEFAULT
 	}
-	if _, ok := e.Data["error_code"]; !ok {
-		e.Data["error_code"] = 0
+	if _, ok := e.Data[ErrorCode]; !ok {
+		e.Data[ErrorCode] = 0
 	}
 	return nil
 }

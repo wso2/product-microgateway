@@ -40,5 +40,9 @@ public class LoggingConstants {
     public final class LogAttributes {
         public static final String SEVERITY = "severity";
         public static final String ERROR_CODE = "error_code";
+        public static final String TIMESTAMP = "timestamp";
+        public static final String LEVEL = "level";
+        public static final String LOGGER = "logger";
+        public static final String MESSAGE = "message";
     }
 }
