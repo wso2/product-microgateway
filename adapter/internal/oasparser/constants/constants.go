@@ -66,6 +66,8 @@ const (
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
 const (
+	XWso2RequestInterceptor   string = "x-wso2-request-interceptor"
+	XWso2ResponseInterceptor  string = "x-wso2-response-interceptor"
 	ServiceURL                string = "serviceURL"
 	ClusterTimeout            string = "clusterTimeout"
 	RequestTimeout            string = "requestTimeout"
@@ -86,4 +88,15 @@ const (
 const (
 	AlreadyExists string = "ALREADY_EXISTS"
 	NotFound      string = "NOT_FOUND"
+)
+
+// operational policy field names
+const (
+	RewriteMethodTemplate      string = "REWRITE_RESOURCE_METHOD"
+	InterceptorServiceTemplate string = "CALL_INTERCEPTOR_SERVICE"
+	RewritePathTemplate        string = "REWRITE_RESOURCE_PATH"
+	RewritePathResourcePath    string = "resourcePath"
+	InterceptorServiceURL      string = "interceptorServiceURL"
+	InterceptorServiceIncludes string = "includes"
+	Order                      string = "order"
 )

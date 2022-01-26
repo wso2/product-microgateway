@@ -32,6 +32,7 @@ public class ResourceConfig {
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
     private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
+    private PolicyConfig policyConfig;
 
     /**
      * ENUM to hold http operations.
@@ -128,5 +129,12 @@ public class ResourceConfig {
         this.endpoints = endpoints;
     }
 
+    public PolicyConfig getPolicyConfig() {
+        return policyConfig;
+    }
+
+    public void setPolicyConfig(PolicyConfig policyConfig) {
+        this.policyConfig = policyConfig;
+    }
 }
 

@@ -19,7 +19,14 @@
 // and create a common model which can represent both types.
 package model
 
-import "github.com/google/uuid"
+import (
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+)
 
 // Operation type object holds data about each http method in the REST API.
 type Operation struct {
@@ -29,6 +36,7 @@ type Operation struct {
 	tier             string
 	disableSecurity  bool
 	vendorExtensions map[string]interface{}
+	policies         OperationPolicies
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -39,6 +47,11 @@ func (operation *Operation) GetMethod() string {
 // GetDisableSecurity returns if the resouce is secured.
 func (operation *Operation) GetDisableSecurity() bool {
 	return operation.disableSecurity
+}
+
+// GetPolicies returns if the resouce is secured.
+func (operation *Operation) GetPolicies() *OperationPolicies {
+	return &operation.policies
 }
 
 // GetSecurity returns the security schemas defined for the http opeartion
@@ -68,10 +81,59 @@ func (operation *Operation) GetID() string {
 	return operation.iD
 }
 
+// GetCallInterceptorService returns the interceptor configs for a given operation.
+func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoint {
+	var policies []Policy
+	if isIn {
+		policies = operation.policies.In
+	} else {
+		policies = operation.policies.Out
+	}
+	if len(policies) > 0 {
+		for _, policy := range policies {
+			if strings.EqualFold(constants.InterceptorServiceTemplate, policy.TemplateName) {
+				if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+					urlValue, urlFound := paramMap[constants.InterceptorServiceURL]
+					includesValue, includesFound := paramMap[constants.InterceptorServiceIncludes]
+					if urlFound {
+						url, isString := urlValue.(string)
+						if isString && url != "" {
+							endpoint, err := getHostandBasepathandPort(url)
+							if err == nil {
+								conf, _ := config.ReadConfigs()
+								clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+								requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+								includesV := &interceptor.RequestInclusions{}
+								if includesFound {
+									includes, isList := includesValue.([]interface{})
+									if isList && len(includes) > 0 {
+										includesV = GenerateInterceptorIncludes(includes)
+									}
+								}
+								if err == nil {
+									return InterceptEndpoint{
+										Enable:          true,
+										EndpointCluster: EndpointCluster{Endpoints: []Endpoint{*endpoint}},
+										ClusterTimeout:  clusterTimeoutV,
+										RequestTimeout:  requestTimeoutV,
+										Includes:        includesV,
+										Level:           constants.OperationLevelInterceptor,
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return InterceptEndpoint{}
+}
+
 // NewOperation Creates and returns operation type object
 func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	return &Operation{id, method, security, tier, disableSecurity, extensions}
+	return &Operation{id, method, security, tier, disableSecurity, extensions, OperationPolicies{}}
 }

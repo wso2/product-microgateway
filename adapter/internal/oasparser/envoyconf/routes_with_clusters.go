@@ -25,10 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/any"
-	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -49,6 +46,10 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/wrappers"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -149,10 +150,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 	}
 
-	var interceptorErr error
-	apiRequestInterceptor, interceptorErr = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor, APILevelInterceptor)
+	apiRequestInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor, APILevelInterceptor)
 	// if lua filter exists on api level, add cluster
-	if interceptorErr == nil && apiRequestInterceptor.Enable {
+	if apiRequestInterceptor.Enable {
 		logger.LoggerOasparser.Debugf("API level request interceptors found for %v : %v", apiTitle, apiVersion)
 		apiRequestInterceptor.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost,
 			apiTitle, apiVersion, "")
@@ -166,9 +166,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			endpoints = append(endpoints, addresses...)
 		}
 	}
-	apiResponseInterceptor, interceptorErr = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor, APILevelInterceptor)
+	apiResponseInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor, APILevelInterceptor)
 	// if lua filter exists on api level, add cluster
-	if interceptorErr == nil && apiResponseInterceptor.Enable {
+	if apiResponseInterceptor.Enable {
 		logger.LoggerOasparser.Debugln("API level response interceptors found for " + mgwSwagger.GetID())
 		apiResponseInterceptor.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID, vHost,
 			apiTitle, apiVersion, "")
@@ -268,9 +268,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			clusterNameSand = ""
 		}
 
-		// create resource level request interceptor cluster
-		reqInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, ResourceLevelInterceptor)
-		if err == nil && reqInterceptorVal.Enable {
+		reqInterceptorVal := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, ResourceLevelInterceptor)
+		if reqInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugf("Resource level request interceptors found for %v:%v-%v", apiTitle, apiVersion, resource.GetPath())
 			reqInterceptorVal.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost,
 				apiTitle, apiVersion, resource.GetID())
@@ -286,8 +285,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 
 		// create operational level response interceptor clusters
-		operationalReqInterceptors := mgwSwagger.GetOperationInterceptors(apiRequestInterceptor, resourceRequestInterceptor, resource.GetMethod(),
-			xWso2requestInterceptor)
+		operationalReqInterceptors := mgwSwagger.GetOperationInterceptors(apiRequestInterceptor, resourceRequestInterceptor, resource.GetMethod(), true)
 		for method, opI := range operationalReqInterceptors {
 			if opI.Enable && opI.Level == OperationLevelInterceptor {
 				logger.LoggerOasparser.Debugf("Operation level request interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
@@ -308,8 +306,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 
 		// create resource level response interceptor cluster
-		respInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor, ResourceLevelInterceptor)
-		if err == nil && respInterceptorVal.Enable {
+		respInterceptorVal := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor, ResourceLevelInterceptor)
+		if respInterceptorVal.Enable {
 			logger.LoggerOasparser.Debugf("Resource level response interceptors found for %v:%v-%v"+apiTitle, apiVersion, resource.GetPath())
 			respInterceptorVal.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID,
 				vHost, apiTitle, apiVersion, resource.GetID())
@@ -326,7 +324,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 
 		// create operation level response interceptor clusters
 		operationalRespInterceptorVal := mgwSwagger.GetOperationInterceptors(apiResponseInterceptor, resourceResponseInterceptor, resource.GetMethod(),
-			xWso2responseInterceptor)
+			false)
 		for method, opI := range operationalRespInterceptorVal {
 			if opI.Enable && opI.Level == OperationLevelInterceptor {
 				logger.LoggerOasparser.Debugf("Operational level response interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
@@ -391,15 +389,15 @@ func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Ad
 	}
 
 	if epHost = conf.Tracing.ConfigProperties[tracerHost]; len(epHost) <= 0 {
-		return nil, nil, errors.New("Invalid host provided for tracing endpoint")
+		return nil, nil, errors.New("invalid host provided for tracing endpoint")
 	}
 	if epPath = conf.Tracing.ConfigProperties[tracerEndpoint]; len(epPath) <= 0 {
-		return nil, nil, errors.New("Invalid endpoint path provided for tracing endpoint")
+		return nil, nil, errors.New("invalid endpoint path provided for tracing endpoint")
 	}
 	if port, err := strconv.ParseUint(conf.Tracing.ConfigProperties[tracerPort], 10, 32); err == nil {
 		epPort = uint32(port)
 	} else {
-		return nil, nil, errors.New("Invalid port provided for tracing endpoint")
+		return nil, nil, errors.New("invalid port provided for tracing endpoint")
 	}
 
 	epCluster.Endpoints[0].Host = epHost
@@ -458,7 +456,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			}
 
 			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
-			marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
+			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
 			}
@@ -497,7 +495,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
-		ConnectTimeout:       ptypes.DurationProto(timeout * time.Second),
+		ConnectTimeout:       durationpb.New(timeout * time.Second),
 		ClusterDiscoveryType: &clusterv3.Cluster_Type{Type: clusterv3.Cluster_STRICT_DNS},
 		DnsLookupFamily:      clusterv3.Cluster_V4_ONLY,
 		LbPolicy:             clusterv3.Cluster_ROUND_ROBIN,
@@ -552,8 +550,8 @@ func createHealthCheck() []*corev3.HealthCheck {
 	conf, _ := config.ReadConfigs()
 	return []*corev3.HealthCheck{
 		{
-			Timeout:            ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
-			Interval:           ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
+			Timeout:            durationpb.New(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
+			Interval:           durationpb.New(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
 			UnhealthyThreshold: wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.UnhealthyThreshold)),
 			HealthyThreshold:   wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.HealthyThreshold)),
 			// we only support tcp default healthcheck
@@ -658,7 +656,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	xWso2Basepath := params.xWSO2BasePath
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
-	resourcePathParam := params.resourcePathParam
+	resourcePath := params.resourcePathParam
 	resourceMethods := params.resourceMethods
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
@@ -675,34 +673,9 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		action                  *routev3.Route_Route
 		match                   *routev3.RouteMatch
 		decorator               *routev3.Decorator
-		resourcePath            string
 		responseHeadersToRemove []string
 	)
 
-	// OPTIONS is always added even if it is not listed under resources
-	// This is required to handle CORS preflight request fail scenario
-	methodRegex := strings.Join(resourceMethods, "|")
-	if !strings.Contains(methodRegex, "OPTIONS") {
-		methodRegex = methodRegex + "|OPTIONS"
-	}
-	headerMatcherArray := routev3.HeaderMatcher{
-		Name: httpMethodHeader,
-		HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
-			StringMatch: &envoy_type_matcherv3.StringMatcher{
-				MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
-					SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
-						Regex: "^(" + methodRegex + ")$",
-					},
-				},
-			},
-		},
-	}
-	resourcePath = resourcePathParam
 	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
@@ -716,7 +689,37 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				Regex: routePath,
 			},
 		},
-		Headers: []*routev3.HeaderMatcher{&headerMatcherArray},
+	}
+
+	// if any of the operations on the route path has a method rewrite policy,
+	// we remove the :method header matching,
+	// because envoy does not allow method rewrting later if the following method regex doesnot have the new method.
+	// hence when method rewriting is enabled for the resource, the method validation will be handled by the enforcer instead of the router.
+	if !params.rewriteMethod {
+		// OPTIONS is always added even if it is not listed under resources
+		// This is required to handle CORS preflight request fail scenario
+		methodRegex := strings.Join(resourceMethods, "|")
+		if !strings.Contains(methodRegex, "OPTIONS") {
+			methodRegex = methodRegex + "|OPTIONS"
+		}
+		headerMatcherArray := routev3.HeaderMatcher{
+			Name: httpMethodHeader,
+			HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
+				StringMatch: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
+						SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+							EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+								GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+									MaxProgramSize: nil,
+								},
+							},
+							Regex: "^(" + methodRegex + ")$",
+						},
+					},
+				},
+			},
+		}
+		match.Headers = []*routev3.HeaderMatcher{&headerMatcherArray}
 	}
 
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
@@ -807,6 +810,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Value:   luaMarshelled.Bytes(),
 	}
 
+	pathRegex := xWso2Basepath
+	substitutionString := endpointBasepath
+	if params.rewritePath != "" {
+		pathRegex = routePath
+		if params.rewritePath != "/" {
+			substitutionString = endpointBasepath + params.rewritePath
+		}
+	}
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
@@ -819,14 +830,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 								MaxProgramSize: nil,
 							},
 						},
-						Regex: xWso2Basepath,
+						Regex: pathRegex,
 					},
-					Substitution: endpointBasepath,
+					Substitution: substitutionString,
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
-				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+				Timeout:           durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+				IdleTimeout:       durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
 	} else {
@@ -1240,11 +1251,14 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		resourceMethods:     getDefaultResourceMethods(swagger.GetAPIType()),
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
+		rewritePath:         "",
+		rewriteMethod:       false,
 	}
 
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
+		params.rewritePath, params.rewriteMethod = resource.GetRewriteResource()
 	}
 
 	if swagger.GetProdEndpoints() != nil {

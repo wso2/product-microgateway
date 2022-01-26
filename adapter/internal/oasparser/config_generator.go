@@ -18,6 +18,8 @@
 package oasparser
 
 import (
+	"strconv"
+
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -224,13 +226,46 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		}
 		secSchemas[i] = secSchema
 	}
+
+	policies := &api.OperationPolicies{
+		In:    castPoliciesToEnforcerPolicies(operation.GetPolicies().In),
+		Out:   castPoliciesToEnforcerPolicies(operation.GetPolicies().Out),
+		Fault: castPoliciesToEnforcerPolicies(operation.GetPolicies().Fault),
+	}
 	apiOperation := api.Operation{
 		Method:          operation.GetMethod(),
 		Security:        secSchemas,
 		Tier:            operation.GetTier(),
 		DisableSecurity: operation.GetDisableSecurity(),
+		Policies:        policies,
 	}
 	return &apiOperation
+}
+
+func castPoliciesToEnforcerPolicies(policies []model.Policy) []*api.Policy {
+	enforcerPolicies := make([]*api.Policy, len(policies))
+	for i, policy := range policies {
+		parameterMap := make(map[string]string)
+		if policy.Parameters != nil {
+			if params, ok := policy.Parameters.(map[string]interface{}); ok {
+				for paramK := range params {
+					if paramV, parsed := params[paramK].(string); parsed {
+						parameterMap[paramK] = paramV
+					} else if paramV, parsed := params[paramK].(bool); parsed {
+						parameterMap[paramK] = strconv.FormatBool(paramV)
+					}
+				}
+
+			}
+		}
+		enforcerPolicies[i] = &api.Policy{
+			PolicyName:   policy.PolicyName,
+			TemplateName: policy.TemplateName,
+			Order:        uint32(policy.Order),
+			Parameters:   parameterMap,
+		}
+	}
+	return enforcerPolicies
 }
 
 func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.EndpointCluster {

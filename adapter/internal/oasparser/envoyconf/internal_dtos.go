@@ -40,4 +40,6 @@ type routeCreateParams struct {
 	requestInterceptor  map[string]model.InterceptEndpoint
 	responseInterceptor map[string]model.InterceptEndpoint
 	corsPolicy          *model.CorsConfig
+	rewritePath         string
+	rewriteMethod       bool
 }
