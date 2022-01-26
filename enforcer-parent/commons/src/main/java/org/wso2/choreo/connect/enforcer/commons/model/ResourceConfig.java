@@ -32,6 +32,7 @@ public class ResourceConfig {
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
     private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
+    private PolicyConfig policyConfig;
     private MockedApiConfig mockedApiConfig;
 
     /**
@@ -142,5 +143,12 @@ public class ResourceConfig {
         this.mockedApiConfig = mockedApiConfig;
     }
 
+    public PolicyConfig getPolicyConfig() {
+        return policyConfig;
+    }
+
+    public void setPolicyConfig(PolicyConfig policyConfig) {
+        this.policyConfig = policyConfig;
+    }
 }
 

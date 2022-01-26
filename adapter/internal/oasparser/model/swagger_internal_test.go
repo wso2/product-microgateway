@@ -118,7 +118,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 			[]*Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []*Operation{{"", "GET", nil, "", false, nil, MockedAPIConfig{}}},
+					methods:     []*Operation{{"", "GET", nil, "", false, nil, OperationPolicies{}, MockedAPIConfig{}}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",

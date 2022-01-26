@@ -35,6 +35,8 @@ public class ResponseObject {
     private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
     private ArrayList<String> queryParamsToRemove = new ArrayList<>();
+    private boolean removeAllQueryParams = false;
+    private Map<String, String> queryParamsToAdd;
     private Map<String, String> queryParams;
     private String requestPath;
     private String mockApiResponsePayload;
@@ -118,9 +120,24 @@ public class ResponseObject {
     public ArrayList<String> getQueryParamsToRemove() {
         return queryParamsToRemove;
     }
+    public Map<String, String> getQueryParamsToAdd() {
+        return queryParamsToAdd;
+    }
 
     public void setQueryParamsToRemove(ArrayList<String> queryParamsToRemove) {
         this.queryParamsToRemove = queryParamsToRemove;
+    }
+
+    public void setRemoveAllQueryParams(boolean queryParamsToRemove) {
+        this.removeAllQueryParams = queryParamsToRemove;
+    }
+
+    public boolean isRemoveAllQueryParams() {
+        return removeAllQueryParams;
+    }
+
+    public void setQueryParamsToAdd(Map<String, String> queryParamsToAdd) {
+        this.queryParamsToAdd = queryParamsToAdd;
     }
 
     public Map<String, String> getQueryParamMap() {
