@@ -19,11 +19,7 @@
 // and create a common model which can represent both types.
 package model
 
-import (
-	"reflect"
-
-	"github.com/google/uuid"
-)
+import "github.com/google/uuid"
 
 // Operation type object holds data about each http method in the REST API.
 type Operation struct {
@@ -111,8 +107,5 @@ func NewOperation(method string, security []map[string][]string, extensions map[
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	if reflect.DeepEqual(MockedAPIConfig{},mockedAPIConfig) {
-		return &Operation{id, method, security, tier, disableSecurity, extensions, MockedAPIConfig{}}
-	}
 	return &Operation{id, method, security, tier, disableSecurity, extensions, mockedAPIConfig}
 }

@@ -115,6 +115,8 @@ public class Utils {
                                            MockedApiConfig mockedApiConfig, String acceptType) {
         String requestValuePosition = mockedApiConfig.getIn();
         String name;
+
+        // condition handles case-sensitiveness of query parameters.
         if (requestValuePosition.equalsIgnoreCase(APIConstants.MockApiConstants.HEADER)) {
             name = mockedApiConfig.getName().toLowerCase();
         } else {
