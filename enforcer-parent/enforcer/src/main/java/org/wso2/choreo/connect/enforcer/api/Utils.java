@@ -129,7 +129,7 @@ public class Utils {
         }
         String nameInRequest = propertiesMap.get(name);
         List<MockedResponseConfig> responseConfigList = mockedApiConfig.getResponses();
-        // iterates over the mock API responses
+        // iterates over the mock API responses.
         for (MockedResponseConfig responseConfig : responseConfigList) {
             if (!responseConfig.getValue().equalsIgnoreCase(nameInRequest)) {
                 log.error("Mocked response config JSON does not contain the value provided in the request.");
@@ -137,7 +137,7 @@ public class Utils {
             }
             responseObject.setStatusCode(responseConfig.getCode());
             Map<String, String> headerMap = new HashMap<>();
-            // iterates over the headers list in the mock API JSON
+            // iterates over the headers list in the mock API JSON.
             for (MockedHeaderConfig header : responseConfig.getHeaders()) {
                 headerMap.put(header.getName(), header.getValue());
             }
