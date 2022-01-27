@@ -139,7 +139,7 @@ public class PublisherUtils {
         try {
             createAPIResponse = publisherRestClient.addAPI(apiRequest);
         } catch (ApiException e) {
-            log.error(e.getMessage());
+            log.error("Error while creating an API. REST response: {}", e.getMessage());
             throw new CCTestException("Error while creating an API", e);
         }
         if (Objects.nonNull(createAPIResponse) && createAPIResponse.getResponseCode() == HttpStatus.SC_CREATED
@@ -172,7 +172,7 @@ public class PublisherUtils {
         try {
             revisionUUID = createAPIRevisionAndDeploy(apiId, vhost, publisherRestClient);
         } catch (JSONException | ApiException e) {
-            log.error(e.getMessage());
+            log.error("Error while deploying the API. REST response: {}", e.getMessage());
             throw new CCTestException("Error while creating and deploying API Revision", e);
         }
         log.info("API Deployed. Name:" + apiName + " VHost:" + vhost);
@@ -353,7 +353,7 @@ public class PublisherUtils {
                             + publishAPIResponse.getResponseCode() + " Response Data :" + publishAPIResponse
                             .getData();
             log.error(errorMsg);
-            throw new CCTestException(errorMsg);
+            throw new CCTestException("Error while Publishing API:" + apiName + "API ID:" + apiId);
         }
         log.info("API Published. Name:" + apiName);
     }
@@ -477,7 +477,7 @@ public class PublisherUtils {
                 }
             }
         } catch (APIManagerIntegrationTestException | ApiException e) {
-            log.error(e.getMessage());
+            log.error("Error while removing all APIs. REST response: {}", e.getMessage());
             throw new CCTestException("Error while removing APIs from Publisher", e);
         }
     }

@@ -30,7 +30,7 @@
 
     <test name="Start API-M and prepare API-M clients" parallel="false">
         <classes>
-            <!-- To avoid apim restarting everytime while writing tests, follow the instructions in integration/test-integration/readme.md -->
+            <!-- To avoid apim restarting everytime while writing tests, follow the instructions in integration/test-integration/README.md -->
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimStartupExecutor"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimClientsPreparer"/>
         </classes>
