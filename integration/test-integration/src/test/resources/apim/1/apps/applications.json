@@ -4,6 +4,10 @@
     "throttleTier": "Unlimited"
   },
   {
+    "appName": "BackendSecurityApp",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "SubscriptionThrottlingApp",
     "throttleTier": "Unlimited"
   },

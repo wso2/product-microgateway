@@ -5,6 +5,11 @@
     "tier": "Unlimited"
   },
   {
+    "apiName": "BackendSecurityApi",
+    "appName": "BackendSecurityApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "BlockedApi",
     "appName": "BlockedApiApp",
     "tier": "Unlimited"
