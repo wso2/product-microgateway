@@ -1102,7 +1102,11 @@ func ListApis(apiType string, organizationID string, limit *int64) *apiModel.API
 }
 
 // IsAPIExist returns whether a given API exists
-func IsAPIExist(vhost, uuid, organizationID string) (exists bool) {
+func IsAPIExist(vhost, uuid, apiName, apiVersion, organizationID string) (exists bool) {
+	if uuid == "" {
+		// If API is imported from apictl generate hash as the unique ID
+		uuid = GenerateHashedAPINameVersionIDWithoutVhost(apiName, apiVersion)
+	}
 	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, uuid)
 	_, exists = orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	return exists
