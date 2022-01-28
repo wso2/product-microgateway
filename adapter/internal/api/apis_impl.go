@@ -193,12 +193,11 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err erro
 		apiProject.Deployments = []model.Deployment{deployment}
 	}
 
-	//TODO: force overwride
 	if !overrideValue {
-		// if the API already exists in the one of vhost, break deployment of the API
+		// if the API already exists in at least one of the vhosts, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiProject.OrganizationID) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiYaml.Name, apiYaml.Version, apiProject.OrganizationID) {
 				exists = true
 				break
 			}

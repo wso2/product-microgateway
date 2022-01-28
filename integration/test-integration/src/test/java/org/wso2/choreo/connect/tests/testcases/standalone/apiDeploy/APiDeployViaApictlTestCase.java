@@ -1,5 +1,6 @@
 package org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy;
 
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -20,6 +21,23 @@ public class APiDeployViaApictlTestCase {
     public void deployAPI() throws CCTestException {
         ApictlUtils.login("apictl_test");
         ApictlUtils.deployAPI("apictl_petstore", "apictl_test");
+    }
+
+    @Test
+    public void deployAPIAgain() {
+        boolean failedToDeployWithoutOverrideFlag = false;
+        try {
+            ApictlUtils.deployAPI("apictl_petstore", "apictl_test");
+        } catch (CCTestException e) {
+            failedToDeployWithoutOverrideFlag = true;
+        }
+        Assert.assertEquals(failedToDeployWithoutOverrideFlag, true,
+                "Deploying API again without the override flag did not fail.");
+    }
+
+    @Test
+    public void overrideAPI() throws CCTestException {
+        ApictlUtils.overrideAPI("apictl_petstore", "apictl_test");
     }
 
     @Test(description = "Undeploy an API from a specific vhost only")
