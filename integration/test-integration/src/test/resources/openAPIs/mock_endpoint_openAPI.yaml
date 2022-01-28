@@ -1,14 +1,14 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Mock API Implementation
+  title: mockApiTest
   license:
     name: MIT
 servers:
   - url: /
-x-wso2-basePath: /mock/1.0.0
+x-wso2-basePath: /mockApiTest/1.0.0
 paths:
-  /testChoreoConnect:
+  /testMockApiWithHeader:
     get:
       summary: Tests Choreo Connect mock API implementation
       operationId: testImpl
@@ -33,14 +33,22 @@ paths:
                        }
                    ],
                    "code": 200,
-                   "payload": {
-                       "application/json": "{\"name\" : \"choreo connect\"}",
-                       "application/xml": "<name>choreo connect</name>"
-                   }
+                   "content":[
+                      {
+                          "contentType":"application/json",
+                          "body":"{\"name\" : \"choreo connect\"}"
+                      },
+                      {
+                          "contentType":"application/xml",
+                          "body":"<name>choreo connect</name>"
+                      }
+                  ]
                }
            ]
         }
-  /testQueryParam:
+      security:
+        - APIKeyAuth: [ ]
+  /testMockWithQueryParam:
     get:
       summary: Tests Choreo Connect mock API implementation with query parameters
       operationId: testImpl2
@@ -58,14 +66,56 @@ paths:
                        }
                    ],
                    "code": 500,
-                   "payload": {
-                       "application/json": "{\"name\" : \"choreo connect\"}",
-                       "application/xml": "<name>choreo connect</name>"
-                   }
+                   "content":[
+                       {
+                           "contentType":"application/json",
+                           "body":"{\"name\" : \"choreo connect\"}"
+                       },
+                       {
+                           "contentType":"application/xml",
+                           "body":"<name>choreo connect</name>"
+                       }
+                   ]
                }
            ]
         }
+      security:
+        - APIKeyAuth: [ ]
+  /testMockDefault:
+    get:
+      summary: Tests Choreo Connect mock default API implementation
+      operationId: testImpl3
+      x-mediation-script: |
+        {
+           "in": "default",
+           "name": "mockApiQueryVal",
+           "responses": [
+               {
+                   "value": "success",
+                   "headers": [
+                       {
+                           "name": "x-wso2-default-header",
+                           "value": "Default header value"
+                       }
+                   ],
+                   "code": 200,
+                   "content":[
+                       {
+                           "contentType":"application/json",
+                           "body":"{\"name\" : \"choreo connect\"}"
+                       }
+                   ]
+               }
+           ]
+        }
+      security:
+        - APIKeyAuth: []
 components:
+  securitySchemes:
+    APIKeyAuth:
+      type: apiKey
+      name: x-api-key
+      in: header
   schemas:
     Data:
       type: object

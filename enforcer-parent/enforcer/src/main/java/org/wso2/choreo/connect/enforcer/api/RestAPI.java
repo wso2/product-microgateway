@@ -32,8 +32,8 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedApiConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedContentConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.MockedPayloadConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
@@ -318,18 +318,19 @@ public class RestAPI implements API {
                     }
                     responseData.setHeaders(headers);
                 }
-                MockedPayloadConfig payload = new MockedPayloadConfig();
-                HashMap<String, String> payloadMap = new HashMap<>();
+                MockedContentConfig content = new MockedContentConfig();
+                HashMap<String, String> contentMap = new HashMap<>();
 
-                if (response.getPayload().getApplicationXML() == null &&
-                        response.getPayload().getApplicationJSON() == null) {
-                    logger.error("Mock API payloads not defined in the JSON script.");
+                if (response.getContentList() == null) {
+                    logger.error("Mock API content not defined in the JSON script.");
                 } else {
-                    payloadMap.put(APIConstants.APPLICATION_XML, response.getPayload().getApplicationXML());
-                    payloadMap.put(APIConstants.APPLICATION_JSON, response.getPayload().getApplicationJSON());
+                    for (org.wso2.choreo.connect.discovery.api.MockedContentConfig contentConfig :
+                            response.getContentList()) {
+                        contentMap.put(contentConfig.getContentType(), contentConfig.getBody());
+                    }
                 }
-                payload.setPayloadMap(payloadMap);
-                responseData.setPayload(payload);
+                content.setContentMap(contentMap);
+                responseData.setContent(content);
                 responses.add(responseData);
             }
         }
@@ -341,11 +342,9 @@ public class RestAPI implements API {
     private void initFilters() {
 
         // These filters will not be added if it's a mocked API
-        if (!apiConfig.isMockedApi()) {
-            AuthFilter authFilter = new AuthFilter();
-            authFilter.init(apiConfig, null);
-            this.filters.add(authFilter);
-        }
+        AuthFilter authFilter = new AuthFilter();
+        authFilter.init(apiConfig, null);
+        this.filters.add(authFilter);
 
         // enable throttle filter
         ThrottleFilter throttleFilter = new ThrottleFilter();

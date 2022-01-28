@@ -30,10 +30,10 @@ public final class MockedApiConfigProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_api_MockedHeaderConfig_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_api_MockedPayloadConfig_descriptor;
+    internal_static_wso2_discovery_api_MockedContentConfig_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_api_MockedPayloadConfig_fieldAccessorTable;
+      internal_static_wso2_discovery_api_MockedContentConfig_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -50,14 +50,14 @@ public final class MockedApiConfigProto {
       "onseConfig\"\246\001\n\024MockedResponseConfig\022\r\n\005v" +
       "alue\030\001 \001(\t\0227\n\007headers\030\002 \003(\0132&.wso2.disco" +
       "very.api.MockedHeaderConfig\022\014\n\004code\030\003 \001(" +
-      "\005\0228\n\007payload\030\004 \001(\0132\'.wso2.discovery.api." +
-      "MockedPayloadConfig\"1\n\022MockedHeaderConfi" +
-      "g\022\014\n\004name\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"F\n\023Mocked" +
-      "PayloadConfig\022\027\n\017applicationJSON\030\001 \001(\t\022\026" +
-      "\n\016applicationXML\030\002 \001(\tB~\n%org.wso2.chore" +
-      "o.connect.discovery.apiB\024MockedApiConfig" +
-      "ProtoP\001Z=github.com/envoyproxy/go-contro" +
-      "l-plane/wso2/discovery/api;apib\006proto3"
+      "\005\0228\n\007content\030\004 \003(\0132\'.wso2.discovery.api." +
+      "MockedContentConfig\"1\n\022MockedHeaderConfi" +
+      "g\022\014\n\004name\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"8\n\023Mocked" +
+      "ContentConfig\022\023\n\013contentType\030\001 \001(\t\022\014\n\004bo" +
+      "dy\030\002 \001(\tB~\n%org.wso2.choreo.connect.disc" +
+      "overy.apiB\024MockedApiConfigProtoP\001Z=githu" +
+      "b.com/envoyproxy/go-control-plane/wso2/d" +
+      "iscovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -74,19 +74,19 @@ public final class MockedApiConfigProto {
     internal_static_wso2_discovery_api_MockedResponseConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_MockedResponseConfig_descriptor,
-        new java.lang.String[] { "Value", "Headers", "Code", "Payload", });
+        new java.lang.String[] { "Value", "Headers", "Code", "Content", });
     internal_static_wso2_discovery_api_MockedHeaderConfig_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_wso2_discovery_api_MockedHeaderConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_MockedHeaderConfig_descriptor,
         new java.lang.String[] { "Name", "Value", });
-    internal_static_wso2_discovery_api_MockedPayloadConfig_descriptor =
+    internal_static_wso2_discovery_api_MockedContentConfig_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_wso2_discovery_api_MockedPayloadConfig_fieldAccessorTable = new
+    internal_static_wso2_discovery_api_MockedContentConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_api_MockedPayloadConfig_descriptor,
-        new java.lang.String[] { "ApplicationJSON", "ApplicationXML", });
+        internal_static_wso2_discovery_api_MockedContentConfig_descriptor,
+        new java.lang.String[] { "ContentType", "Body", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

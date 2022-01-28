@@ -321,20 +321,25 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 }
 
 // Generates mocked API configuration to pass for the enforcer considering xMediationScript value
-func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig , mgwMockedAPIConfig mgw.MockedAPIConfig) {
+func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig , mgwMockedAPIConfig model.MockedAPIConfig) {
 	mockedAPIConfig.In = mgwMockedAPIConfig.In
 	mockedAPIConfig.Name = mgwMockedAPIConfig.Name
 	responseConfigList := make ([]*api.MockedResponseConfig,0)
 
 	for _, val := range mgwMockedAPIConfig.Responses {
 		var responseConfig api.MockedResponseConfig
+		contentConfigList := make([]*api.MockedContentConfig,0)
 		responseConfig.Value = val.Value
 		responseConfig.Code = int32(val.Code)
-		var payload api.MockedPayloadConfig
-		payload.ApplicationJSON = val.Payload.ApplicationJSON
-		payload.ApplicationXML = val.Payload.ApplicationXML
 
-		responseConfig.Payload = &payload
+		for _, content := range val.Content{
+			var contentConfig api.MockedContentConfig
+			contentConfig.ContentType = content.ContentType
+			contentConfig.Body = content.Body
+			contentConfigList = append(contentConfigList, &contentConfig)
+		}
+		responseConfig.Content = contentConfigList
+		
 		headerConfigList := responseConfig.Headers
 		for _, header := range val.Headers {
 			var mockedAPIHeader api.MockedHeaderConfig

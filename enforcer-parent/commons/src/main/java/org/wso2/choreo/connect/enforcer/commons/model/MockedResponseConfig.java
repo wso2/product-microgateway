@@ -28,7 +28,7 @@ public class MockedResponseConfig {
     private int code;
     private List<MockedHeaderConfig> headers;
 
-    private MockedPayloadConfig payload;
+    private MockedContentConfig content;
 
     public String getValue() {
         return value;
@@ -46,12 +46,12 @@ public class MockedResponseConfig {
         this.code = code;
     }
 
-    public MockedPayloadConfig getPayload() {
-        return payload;
+    public MockedContentConfig getContent() {
+        return content;
     }
 
-    public void setPayload(MockedPayloadConfig payload) {
-        this.payload = payload;
+    public void setContent(MockedContentConfig content) {
+        this.content = content;
     }
 
     public List<MockedHeaderConfig> getHeaders() {

@@ -50,17 +50,26 @@ public interface MockedResponseConfigOrBuilder extends
   int getCode();
 
   /**
-   * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
-   * @return Whether the payload field is set.
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
    */
-  boolean hasPayload();
+  java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentConfig> 
+      getContentList();
   /**
-   * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
-   * @return The payload.
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
    */
-  org.wso2.choreo.connect.discovery.api.MockedPayloadConfig getPayload();
+  org.wso2.choreo.connect.discovery.api.MockedContentConfig getContent(int index);
   /**
-   * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
    */
-  org.wso2.choreo.connect.discovery.api.MockedPayloadConfigOrBuilder getPayloadOrBuilder();
+  int getContentCount();
+  /**
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder> 
+      getContentOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder getContentOrBuilder(
+      int index);
 }

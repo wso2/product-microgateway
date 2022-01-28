@@ -22,11 +22,10 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.EndpointClusterConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedApiConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedContentConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.MockedPayloadConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
-import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 
@@ -88,18 +87,19 @@ public class Utils {
     public static void processMockedApiCall(RequestContext requestContext, ResponseObject responseObject) {
         responseObject.setDirectResponse(true);
         String acceptType = "";
-        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
-        MockedApiConfig mockedApiConfig = resourceConfig.getMockedApiConfig();
+        MockedApiConfig mockedApiConfig = requestContext.getMatchedResourcePath().getMockedApiConfig();
         Map<String, String> headersMap = requestContext.getHeaders();
         if (headersMap.containsKey(APIConstants.ACCEPT_HEADER.toLowerCase())) {
             acceptType = headersMap.get(APIConstants.ACCEPT_HEADER.toLowerCase());
         }
 
         if (mockedApiConfig.getIn().equalsIgnoreCase(APIConstants.MockApiConstants.HEADER)) {
-            setMockApiResponse(responseObject, headersMap, mockedApiConfig, acceptType);
-        } else {
+            setMockApiResponse(responseObject, headersMap, mockedApiConfig, acceptType, false);
+        } else if (mockedApiConfig.getIn().equalsIgnoreCase(APIConstants.MockApiConstants.QUERY)) {
             Map<String, String> queryParamMap = requestContext.getQueryParameters();
-            setMockApiResponse(responseObject, queryParamMap, mockedApiConfig, acceptType);
+            setMockApiResponse(responseObject, queryParamMap, mockedApiConfig, acceptType, false);
+        } else {
+            setMockApiResponse(responseObject, null, mockedApiConfig, acceptType, true);
         }
     }
 
@@ -112,44 +112,38 @@ public class Utils {
      * @param acceptType      Denotes accepted contend type as the response
      */
     private static void setMockApiResponse(ResponseObject responseObject, Map<String, String> propertiesMap,
-                                           MockedApiConfig mockedApiConfig, String acceptType) {
+                                           MockedApiConfig mockedApiConfig, String acceptType, boolean isDefault) {
         String requestValuePosition = mockedApiConfig.getIn();
-        String name;
+        String nameFieldInJson;
 
         // condition handles case-sensitiveness of query parameters.
         if (requestValuePosition.equalsIgnoreCase(APIConstants.MockApiConstants.HEADER)) {
-            name = mockedApiConfig.getName().toLowerCase();
+            nameFieldInJson = mockedApiConfig.getName().toLowerCase();
         } else {
-            name = mockedApiConfig.getName();
+            nameFieldInJson = mockedApiConfig.getName();
         }
 
-        if (propertiesMap == null || !propertiesMap.containsKey(name)) {
+        if (!isDefault && (propertiesMap == null || !propertiesMap.containsKey(nameFieldInJson))) {
             log.error("Response determining value not available in the mock API request.");
             return;
         }
-        String nameInRequest = propertiesMap.get(name);
         List<MockedResponseConfig> responseConfigList = mockedApiConfig.getResponses();
         // iterates over the mock API responses.
         for (MockedResponseConfig responseConfig : responseConfigList) {
-            if (!responseConfig.getValue().equalsIgnoreCase(nameInRequest)) {
-                log.error("Mocked response config JSON does not contain the value provided in the request.");
-                return;
-            }
             responseObject.setStatusCode(responseConfig.getCode());
             Map<String, String> headerMap = new HashMap<>();
             // iterates over the headers list in the mock API JSON.
             for (MockedHeaderConfig header : responseConfig.getHeaders()) {
                 headerMap.put(header.getName(), header.getValue());
             }
-            MockedPayloadConfig payload = responseConfig.getPayload();
             // checks and assigns the accepted content type
-            if (acceptType.equalsIgnoreCase(APIConstants.APPLICATION_XML) &&
-                    payload.getPayloadMap().get(APIConstants.APPLICATION_XML) != null) {
-                headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_XML);
-                responseObject.setMockApiResponsePayload(payload.getPayloadMap().get(APIConstants.APPLICATION_XML));
+            MockedContentConfig content = responseConfig.getContent();
+            if (content.getContentMap().containsKey(acceptType)) {
+                headerMap.put(APIConstants.CONTENT_TYPE_HEADER, acceptType);
+                responseObject.setMockApiResponseContent(content.getContentMap().get(acceptType));
             } else {
                 headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_JSON);
-                responseObject.setMockApiResponsePayload(payload.getPayloadMap().get(APIConstants.APPLICATION_JSON));
+                responseObject.setMockApiResponseContent(content.getContentMap().get(APIConstants.APPLICATION_JSON));
             }
             responseObject.setHeaderMap(headerMap);
         }

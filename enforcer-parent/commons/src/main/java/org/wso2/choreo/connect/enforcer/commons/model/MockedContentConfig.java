@@ -21,17 +21,17 @@ package org.wso2.choreo.connect.enforcer.commons.model;
 import java.util.Map;
 
 /**
- * Defines mock API payload structure.
+ * Defines mock API content structure.
  */
-public class MockedPayloadConfig {
+public class MockedContentConfig {
 
-    private Map<String, String> payloadMap;    // holds payload configurations defined in the mocked API payload
+    private Map<String, String> contentMap;    // holds content configurations defined in the mocked API payload
 
-    public Map<String, String> getPayloadMap() {
-        return payloadMap;
+    public Map<String, String> getContentMap() {
+        return contentMap;
     }
 
-    public void setPayloadMap(Map<String, String> payloadMap) {
-        this.payloadMap = payloadMap;
+    public void setContentMap(Map<String, String> contentMap) {
+        this.contentMap = contentMap;
     }
 }

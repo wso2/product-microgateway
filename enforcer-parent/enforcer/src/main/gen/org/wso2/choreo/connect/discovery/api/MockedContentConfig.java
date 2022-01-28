@@ -5,30 +5,30 @@ package org.wso2.choreo.connect.discovery.api;
 
 /**
  * <pre>
- * MockedPayloadConfig holds payload configs in mocked API implementations
+ * MockedContentConfig holds content configs in mocked API implementations
  * </pre>
  *
- * Protobuf type {@code wso2.discovery.api.MockedPayloadConfig}
+ * Protobuf type {@code wso2.discovery.api.MockedContentConfig}
  */
-public final class MockedPayloadConfig extends
+public final class MockedContentConfig extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:wso2.discovery.api.MockedPayloadConfig)
-    MockedPayloadConfigOrBuilder {
+    // @@protoc_insertion_point(message_implements:wso2.discovery.api.MockedContentConfig)
+    MockedContentConfigOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use MockedPayloadConfig.newBuilder() to construct.
-  private MockedPayloadConfig(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use MockedContentConfig.newBuilder() to construct.
+  private MockedContentConfig(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private MockedPayloadConfig() {
-    applicationJSON_ = "";
-    applicationXML_ = "";
+  private MockedContentConfig() {
+    contentType_ = "";
+    body_ = "";
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new MockedPayloadConfig();
+    return new MockedContentConfig();
   }
 
   @java.lang.Override
@@ -36,7 +36,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private MockedPayloadConfig(
+  private MockedContentConfig(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -57,13 +57,13 @@ private static final long serialVersionUID = 0L;
           case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            applicationJSON_ = s;
+            contentType_ = s;
             break;
           }
           case 18: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            applicationXML_ = s;
+            body_ = s;
             break;
           }
           default: {
@@ -87,87 +87,87 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedPayloadConfig_descriptor;
+    return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedContentConfig_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedPayloadConfig_fieldAccessorTable
+    return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedContentConfig_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.class, org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder.class);
+            org.wso2.choreo.connect.discovery.api.MockedContentConfig.class, org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder.class);
   }
 
-  public static final int APPLICATIONJSON_FIELD_NUMBER = 1;
-  private volatile java.lang.Object applicationJSON_;
+  public static final int CONTENTTYPE_FIELD_NUMBER = 1;
+  private volatile java.lang.Object contentType_;
   /**
-   * <code>string applicationJSON = 1;</code>
-   * @return The applicationJSON.
+   * <code>string contentType = 1;</code>
+   * @return The contentType.
    */
   @java.lang.Override
-  public java.lang.String getApplicationJSON() {
-    java.lang.Object ref = applicationJSON_;
+  public java.lang.String getContentType() {
+    java.lang.Object ref = contentType_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      applicationJSON_ = s;
+      contentType_ = s;
       return s;
     }
   }
   /**
-   * <code>string applicationJSON = 1;</code>
-   * @return The bytes for applicationJSON.
+   * <code>string contentType = 1;</code>
+   * @return The bytes for contentType.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getApplicationJSONBytes() {
-    java.lang.Object ref = applicationJSON_;
+      getContentTypeBytes() {
+    java.lang.Object ref = contentType_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      applicationJSON_ = b;
+      contentType_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
   }
 
-  public static final int APPLICATIONXML_FIELD_NUMBER = 2;
-  private volatile java.lang.Object applicationXML_;
+  public static final int BODY_FIELD_NUMBER = 2;
+  private volatile java.lang.Object body_;
   /**
-   * <code>string applicationXML = 2;</code>
-   * @return The applicationXML.
+   * <code>string body = 2;</code>
+   * @return The body.
    */
   @java.lang.Override
-  public java.lang.String getApplicationXML() {
-    java.lang.Object ref = applicationXML_;
+  public java.lang.String getBody() {
+    java.lang.Object ref = body_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      applicationXML_ = s;
+      body_ = s;
       return s;
     }
   }
   /**
-   * <code>string applicationXML = 2;</code>
-   * @return The bytes for applicationXML.
+   * <code>string body = 2;</code>
+   * @return The bytes for body.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getApplicationXMLBytes() {
-    java.lang.Object ref = applicationXML_;
+      getBodyBytes() {
+    java.lang.Object ref = body_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      applicationXML_ = b;
+      body_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -188,11 +188,11 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getApplicationJSONBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, applicationJSON_);
+    if (!getContentTypeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, contentType_);
     }
-    if (!getApplicationXMLBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, applicationXML_);
+    if (!getBodyBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, body_);
     }
     unknownFields.writeTo(output);
   }
@@ -203,11 +203,11 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!getApplicationJSONBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, applicationJSON_);
+    if (!getContentTypeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, contentType_);
     }
-    if (!getApplicationXMLBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, applicationXML_);
+    if (!getBodyBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, body_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -219,15 +219,15 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof org.wso2.choreo.connect.discovery.api.MockedPayloadConfig)) {
+    if (!(obj instanceof org.wso2.choreo.connect.discovery.api.MockedContentConfig)) {
       return super.equals(obj);
     }
-    org.wso2.choreo.connect.discovery.api.MockedPayloadConfig other = (org.wso2.choreo.connect.discovery.api.MockedPayloadConfig) obj;
+    org.wso2.choreo.connect.discovery.api.MockedContentConfig other = (org.wso2.choreo.connect.discovery.api.MockedContentConfig) obj;
 
-    if (!getApplicationJSON()
-        .equals(other.getApplicationJSON())) return false;
-    if (!getApplicationXML()
-        .equals(other.getApplicationXML())) return false;
+    if (!getContentType()
+        .equals(other.getContentType())) return false;
+    if (!getBody()
+        .equals(other.getBody())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -239,78 +239,78 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + APPLICATIONJSON_FIELD_NUMBER;
-    hash = (53 * hash) + getApplicationJSON().hashCode();
-    hash = (37 * hash) + APPLICATIONXML_FIELD_NUMBER;
-    hash = (53 * hash) + getApplicationXML().hashCode();
+    hash = (37 * hash) + CONTENTTYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getContentType().hashCode();
+    hash = (37 * hash) + BODY_FIELD_NUMBER;
+    hash = (53 * hash) + getBody().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(byte[] data)
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(java.io.InputStream input)
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseDelimitedFrom(java.io.InputStream input)
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseDelimitedFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parseFrom(
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -323,7 +323,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(org.wso2.choreo.connect.discovery.api.MockedPayloadConfig prototype) {
+  public static Builder newBuilder(org.wso2.choreo.connect.discovery.api.MockedContentConfig prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -340,29 +340,29 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * MockedPayloadConfig holds payload configs in mocked API implementations
+   * MockedContentConfig holds content configs in mocked API implementations
    * </pre>
    *
-   * Protobuf type {@code wso2.discovery.api.MockedPayloadConfig}
+   * Protobuf type {@code wso2.discovery.api.MockedContentConfig}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:wso2.discovery.api.MockedPayloadConfig)
-      org.wso2.choreo.connect.discovery.api.MockedPayloadConfigOrBuilder {
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.api.MockedContentConfig)
+      org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedPayloadConfig_descriptor;
+      return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedContentConfig_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedPayloadConfig_fieldAccessorTable
+      return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedContentConfig_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.class, org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder.class);
+              org.wso2.choreo.connect.discovery.api.MockedContentConfig.class, org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder.class);
     }
 
-    // Construct using org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.newBuilder()
+    // Construct using org.wso2.choreo.connect.discovery.api.MockedContentConfig.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -380,9 +380,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      applicationJSON_ = "";
+      contentType_ = "";
 
-      applicationXML_ = "";
+      body_ = "";
 
       return this;
     }
@@ -390,17 +390,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedPayloadConfig_descriptor;
+      return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedContentConfig_descriptor;
     }
 
     @java.lang.Override
-    public org.wso2.choreo.connect.discovery.api.MockedPayloadConfig getDefaultInstanceForType() {
-      return org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.getDefaultInstance();
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfig getDefaultInstanceForType() {
+      return org.wso2.choreo.connect.discovery.api.MockedContentConfig.getDefaultInstance();
     }
 
     @java.lang.Override
-    public org.wso2.choreo.connect.discovery.api.MockedPayloadConfig build() {
-      org.wso2.choreo.connect.discovery.api.MockedPayloadConfig result = buildPartial();
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfig build() {
+      org.wso2.choreo.connect.discovery.api.MockedContentConfig result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -408,10 +408,10 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public org.wso2.choreo.connect.discovery.api.MockedPayloadConfig buildPartial() {
-      org.wso2.choreo.connect.discovery.api.MockedPayloadConfig result = new org.wso2.choreo.connect.discovery.api.MockedPayloadConfig(this);
-      result.applicationJSON_ = applicationJSON_;
-      result.applicationXML_ = applicationXML_;
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfig buildPartial() {
+      org.wso2.choreo.connect.discovery.api.MockedContentConfig result = new org.wso2.choreo.connect.discovery.api.MockedContentConfig(this);
+      result.contentType_ = contentType_;
+      result.body_ = body_;
       onBuilt();
       return result;
     }
@@ -450,22 +450,22 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof org.wso2.choreo.connect.discovery.api.MockedPayloadConfig) {
-        return mergeFrom((org.wso2.choreo.connect.discovery.api.MockedPayloadConfig)other);
+      if (other instanceof org.wso2.choreo.connect.discovery.api.MockedContentConfig) {
+        return mergeFrom((org.wso2.choreo.connect.discovery.api.MockedContentConfig)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(org.wso2.choreo.connect.discovery.api.MockedPayloadConfig other) {
-      if (other == org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.getDefaultInstance()) return this;
-      if (!other.getApplicationJSON().isEmpty()) {
-        applicationJSON_ = other.applicationJSON_;
+    public Builder mergeFrom(org.wso2.choreo.connect.discovery.api.MockedContentConfig other) {
+      if (other == org.wso2.choreo.connect.discovery.api.MockedContentConfig.getDefaultInstance()) return this;
+      if (!other.getContentType().isEmpty()) {
+        contentType_ = other.contentType_;
         onChanged();
       }
-      if (!other.getApplicationXML().isEmpty()) {
-        applicationXML_ = other.applicationXML_;
+      if (!other.getBody().isEmpty()) {
+        body_ = other.body_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -483,11 +483,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      org.wso2.choreo.connect.discovery.api.MockedPayloadConfig parsedMessage = null;
+      org.wso2.choreo.connect.discovery.api.MockedContentConfig parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (org.wso2.choreo.connect.discovery.api.MockedPayloadConfig) e.getUnfinishedMessage();
+        parsedMessage = (org.wso2.choreo.connect.discovery.api.MockedContentConfig) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -497,154 +497,154 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object applicationJSON_ = "";
+    private java.lang.Object contentType_ = "";
     /**
-     * <code>string applicationJSON = 1;</code>
-     * @return The applicationJSON.
+     * <code>string contentType = 1;</code>
+     * @return The contentType.
      */
-    public java.lang.String getApplicationJSON() {
-      java.lang.Object ref = applicationJSON_;
+    public java.lang.String getContentType() {
+      java.lang.Object ref = contentType_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        applicationJSON_ = s;
+        contentType_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string applicationJSON = 1;</code>
-     * @return The bytes for applicationJSON.
+     * <code>string contentType = 1;</code>
+     * @return The bytes for contentType.
      */
     public com.google.protobuf.ByteString
-        getApplicationJSONBytes() {
-      java.lang.Object ref = applicationJSON_;
+        getContentTypeBytes() {
+      java.lang.Object ref = contentType_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        applicationJSON_ = b;
+        contentType_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string applicationJSON = 1;</code>
-     * @param value The applicationJSON to set.
+     * <code>string contentType = 1;</code>
+     * @param value The contentType to set.
      * @return This builder for chaining.
      */
-    public Builder setApplicationJSON(
+    public Builder setContentType(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      applicationJSON_ = value;
+      contentType_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string applicationJSON = 1;</code>
+     * <code>string contentType = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearApplicationJSON() {
+    public Builder clearContentType() {
       
-      applicationJSON_ = getDefaultInstance().getApplicationJSON();
+      contentType_ = getDefaultInstance().getContentType();
       onChanged();
       return this;
     }
     /**
-     * <code>string applicationJSON = 1;</code>
-     * @param value The bytes for applicationJSON to set.
+     * <code>string contentType = 1;</code>
+     * @param value The bytes for contentType to set.
      * @return This builder for chaining.
      */
-    public Builder setApplicationJSONBytes(
+    public Builder setContentTypeBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      applicationJSON_ = value;
+      contentType_ = value;
       onChanged();
       return this;
     }
 
-    private java.lang.Object applicationXML_ = "";
+    private java.lang.Object body_ = "";
     /**
-     * <code>string applicationXML = 2;</code>
-     * @return The applicationXML.
+     * <code>string body = 2;</code>
+     * @return The body.
      */
-    public java.lang.String getApplicationXML() {
-      java.lang.Object ref = applicationXML_;
+    public java.lang.String getBody() {
+      java.lang.Object ref = body_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        applicationXML_ = s;
+        body_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string applicationXML = 2;</code>
-     * @return The bytes for applicationXML.
+     * <code>string body = 2;</code>
+     * @return The bytes for body.
      */
     public com.google.protobuf.ByteString
-        getApplicationXMLBytes() {
-      java.lang.Object ref = applicationXML_;
+        getBodyBytes() {
+      java.lang.Object ref = body_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        applicationXML_ = b;
+        body_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string applicationXML = 2;</code>
-     * @param value The applicationXML to set.
+     * <code>string body = 2;</code>
+     * @param value The body to set.
      * @return This builder for chaining.
      */
-    public Builder setApplicationXML(
+    public Builder setBody(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      applicationXML_ = value;
+      body_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string applicationXML = 2;</code>
+     * <code>string body = 2;</code>
      * @return This builder for chaining.
      */
-    public Builder clearApplicationXML() {
+    public Builder clearBody() {
       
-      applicationXML_ = getDefaultInstance().getApplicationXML();
+      body_ = getDefaultInstance().getBody();
       onChanged();
       return this;
     }
     /**
-     * <code>string applicationXML = 2;</code>
-     * @param value The bytes for applicationXML to set.
+     * <code>string body = 2;</code>
+     * @param value The bytes for body to set.
      * @return This builder for chaining.
      */
-    public Builder setApplicationXMLBytes(
+    public Builder setBodyBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      applicationXML_ = value;
+      body_ = value;
       onChanged();
       return this;
     }
@@ -661,41 +661,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:wso2.discovery.api.MockedPayloadConfig)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.api.MockedContentConfig)
   }
 
-  // @@protoc_insertion_point(class_scope:wso2.discovery.api.MockedPayloadConfig)
-  private static final org.wso2.choreo.connect.discovery.api.MockedPayloadConfig DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:wso2.discovery.api.MockedContentConfig)
+  private static final org.wso2.choreo.connect.discovery.api.MockedContentConfig DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new org.wso2.choreo.connect.discovery.api.MockedPayloadConfig();
+    DEFAULT_INSTANCE = new org.wso2.choreo.connect.discovery.api.MockedContentConfig();
   }
 
-  public static org.wso2.choreo.connect.discovery.api.MockedPayloadConfig getDefaultInstance() {
+  public static org.wso2.choreo.connect.discovery.api.MockedContentConfig getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<MockedPayloadConfig>
-      PARSER = new com.google.protobuf.AbstractParser<MockedPayloadConfig>() {
+  private static final com.google.protobuf.Parser<MockedContentConfig>
+      PARSER = new com.google.protobuf.AbstractParser<MockedContentConfig>() {
     @java.lang.Override
-    public MockedPayloadConfig parsePartialFrom(
+    public MockedContentConfig parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new MockedPayloadConfig(input, extensionRegistry);
+      return new MockedContentConfig(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<MockedPayloadConfig> parser() {
+  public static com.google.protobuf.Parser<MockedContentConfig> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<MockedPayloadConfig> getParserForType() {
+  public com.google.protobuf.Parser<MockedContentConfig> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.MockedPayloadConfig getDefaultInstanceForType() {
+  public org.wso2.choreo.connect.discovery.api.MockedContentConfig getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

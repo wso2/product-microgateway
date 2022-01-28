@@ -52,7 +52,7 @@ type MockedResponseConfig struct {
 	Value 	string                        `json:"value,omitempty"`
 	Headers []MockedHeaderConfig          `json:"headers,omitempty"`
 	Code	int                           `json:"code,omitempty"`	
-	Payload MockedPayloadConfig           `json:"payload,omitempty"`
+	Content []MockedContentConfig         `json:"content,omitempty"`
 }
 
 // MockedHeaderConfig holds header configurations in the mocked API operation
@@ -61,10 +61,10 @@ type MockedHeaderConfig struct {
 	Value string                          `json:"value,omitempty"`
 }
 
-// MockedPayloadConfig holds mocked payload configurations in the mocked API operation
-type MockedPayloadConfig struct {
-	ApplicationJSON string                `json:"application/json,omitempty"`
-	ApplicationXML 	string                `json:"application/xml,omitempty"`
+// MockedContentConfig holds mocked content configurations in the mocked API operation
+type MockedContentConfig struct {
+	ContentType string                    `json:"contentType,omitempty"`
+	Body string                           `json:"body,omitempty"`
 }
 
 // GetMethod returns the http method name of the give API operation

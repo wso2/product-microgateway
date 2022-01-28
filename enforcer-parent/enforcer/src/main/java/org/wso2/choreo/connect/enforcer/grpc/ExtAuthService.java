@@ -140,7 +140,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDynamicMetadata(structBuilder.build());
 
-            if (!isMockedApi) {
+            if (!isMockedApi || responseObject.getErrorCode() != null) {
                 // Error handling
                 JSONObject responseJson = new JSONObject();
                 responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
@@ -151,7 +151,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
                         .build();
             } else {
-                responseBuilder.setBody(responseObject.getMockApiResponsePayload());
+                if (responseObject.getMockApiResponsePayload() != null) {
+                    responseBuilder.setBody(responseObject.getMockApiResponsePayload());
+                }
 
                 // Below condition is evaluated to stop re-directing successful mock API responses to upstream.
                 // Here only the checkResponse object's status code is changed. This provides API call's response status

@@ -22,6 +22,7 @@ private static final long serialVersionUID = 0L;
   private MockedResponseConfig() {
     value_ = "";
     headers_ = java.util.Collections.emptyList();
+    content_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -76,16 +77,12 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 34: {
-            org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder subBuilder = null;
-            if (payload_ != null) {
-              subBuilder = payload_.toBuilder();
+            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+              content_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.MockedContentConfig>();
+              mutable_bitField0_ |= 0x00000002;
             }
-            payload_ = input.readMessage(org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(payload_);
-              payload_ = subBuilder.buildPartial();
-            }
-
+            content_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.api.MockedContentConfig.parser(), extensionRegistry));
             break;
           }
           default: {
@@ -105,6 +102,9 @@ private static final long serialVersionUID = 0L;
     } finally {
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
         headers_ = java.util.Collections.unmodifiableList(headers_);
+      }
+      if (((mutable_bitField0_ & 0x00000002) != 0)) {
+        content_ = java.util.Collections.unmodifiableList(content_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -212,30 +212,44 @@ private static final long serialVersionUID = 0L;
     return code_;
   }
 
-  public static final int PAYLOAD_FIELD_NUMBER = 4;
-  private org.wso2.choreo.connect.discovery.api.MockedPayloadConfig payload_;
+  public static final int CONTENT_FIELD_NUMBER = 4;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentConfig> content_;
   /**
-   * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
-   * @return Whether the payload field is set.
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
    */
   @java.lang.Override
-  public boolean hasPayload() {
-    return payload_ != null;
+  public java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentConfig> getContentList() {
+    return content_;
   }
   /**
-   * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
-   * @return The payload.
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.MockedPayloadConfig getPayload() {
-    return payload_ == null ? org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.getDefaultInstance() : payload_;
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder> 
+      getContentOrBuilderList() {
+    return content_;
   }
   /**
-   * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.MockedPayloadConfigOrBuilder getPayloadOrBuilder() {
-    return getPayload();
+  public int getContentCount() {
+    return content_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.MockedContentConfig getContent(int index) {
+    return content_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder getContentOrBuilder(
+      int index) {
+    return content_.get(index);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -261,8 +275,8 @@ private static final long serialVersionUID = 0L;
     if (code_ != 0) {
       output.writeInt32(3, code_);
     }
-    if (payload_ != null) {
-      output.writeMessage(4, getPayload());
+    for (int i = 0; i < content_.size(); i++) {
+      output.writeMessage(4, content_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -284,9 +298,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt32Size(3, code_);
     }
-    if (payload_ != null) {
+    for (int i = 0; i < content_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(4, getPayload());
+        .computeMessageSize(4, content_.get(i));
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -309,11 +323,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getHeadersList())) return false;
     if (getCode()
         != other.getCode()) return false;
-    if (hasPayload() != other.hasPayload()) return false;
-    if (hasPayload()) {
-      if (!getPayload()
-          .equals(other.getPayload())) return false;
-    }
+    if (!getContentList()
+        .equals(other.getContentList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -333,9 +344,9 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + CODE_FIELD_NUMBER;
     hash = (53 * hash) + getCode();
-    if (hasPayload()) {
-      hash = (37 * hash) + PAYLOAD_FIELD_NUMBER;
-      hash = (53 * hash) + getPayload().hashCode();
+    if (getContentCount() > 0) {
+      hash = (37 * hash) + CONTENT_FIELD_NUMBER;
+      hash = (53 * hash) + getContentList().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -470,6 +481,7 @@ private static final long serialVersionUID = 0L;
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
         getHeadersFieldBuilder();
+        getContentFieldBuilder();
       }
     }
     @java.lang.Override
@@ -485,11 +497,11 @@ private static final long serialVersionUID = 0L;
       }
       code_ = 0;
 
-      if (payloadBuilder_ == null) {
-        payload_ = null;
+      if (contentBuilder_ == null) {
+        content_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
       } else {
-        payload_ = null;
-        payloadBuilder_ = null;
+        contentBuilder_.clear();
       }
       return this;
     }
@@ -529,10 +541,14 @@ private static final long serialVersionUID = 0L;
         result.headers_ = headersBuilder_.build();
       }
       result.code_ = code_;
-      if (payloadBuilder_ == null) {
-        result.payload_ = payload_;
+      if (contentBuilder_ == null) {
+        if (((bitField0_ & 0x00000002) != 0)) {
+          content_ = java.util.Collections.unmodifiableList(content_);
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.content_ = content_;
       } else {
-        result.payload_ = payloadBuilder_.build();
+        result.content_ = contentBuilder_.build();
       }
       onBuilt();
       return result;
@@ -615,8 +631,31 @@ private static final long serialVersionUID = 0L;
       if (other.getCode() != 0) {
         setCode(other.getCode());
       }
-      if (other.hasPayload()) {
-        mergePayload(other.getPayload());
+      if (contentBuilder_ == null) {
+        if (!other.content_.isEmpty()) {
+          if (content_.isEmpty()) {
+            content_ = other.content_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureContentIsMutable();
+            content_.addAll(other.content_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.content_.isEmpty()) {
+          if (contentBuilder_.isEmpty()) {
+            contentBuilder_.dispose();
+            contentBuilder_ = null;
+            content_ = other.content_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+            contentBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getContentFieldBuilder() : null;
+          } else {
+            contentBuilder_.addAllMessages(other.content_);
+          }
+        }
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -995,123 +1034,244 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private org.wso2.choreo.connect.discovery.api.MockedPayloadConfig payload_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.MockedPayloadConfig, org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedPayloadConfigOrBuilder> payloadBuilder_;
-    /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
-     * @return Whether the payload field is set.
-     */
-    public boolean hasPayload() {
-      return payloadBuilder_ != null || payload_ != null;
+    private java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentConfig> content_ =
+      java.util.Collections.emptyList();
+    private void ensureContentIsMutable() {
+      if (!((bitField0_ & 0x00000002) != 0)) {
+        content_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.MockedContentConfig>(content_);
+        bitField0_ |= 0x00000002;
+       }
     }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.MockedContentConfig, org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder> contentBuilder_;
+
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
-     * @return The payload.
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.MockedPayloadConfig getPayload() {
-      if (payloadBuilder_ == null) {
-        return payload_ == null ? org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.getDefaultInstance() : payload_;
+    public java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentConfig> getContentList() {
+      if (contentBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(content_);
       } else {
-        return payloadBuilder_.getMessage();
+        return contentBuilder_.getMessageList();
       }
     }
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    public Builder setPayload(org.wso2.choreo.connect.discovery.api.MockedPayloadConfig value) {
-      if (payloadBuilder_ == null) {
+    public int getContentCount() {
+      if (contentBuilder_ == null) {
+        return content_.size();
+      } else {
+        return contentBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfig getContent(int index) {
+      if (contentBuilder_ == null) {
+        return content_.get(index);
+      } else {
+        return contentBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public Builder setContent(
+        int index, org.wso2.choreo.connect.discovery.api.MockedContentConfig value) {
+      if (contentBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        payload_ = value;
+        ensureContentIsMutable();
+        content_.set(index, value);
         onChanged();
       } else {
-        payloadBuilder_.setMessage(value);
+        contentBuilder_.setMessage(index, value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    public Builder setPayload(
-        org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder builderForValue) {
-      if (payloadBuilder_ == null) {
-        payload_ = builderForValue.build();
+    public Builder setContent(
+        int index, org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder builderForValue) {
+      if (contentBuilder_ == null) {
+        ensureContentIsMutable();
+        content_.set(index, builderForValue.build());
         onChanged();
       } else {
-        payloadBuilder_.setMessage(builderForValue.build());
+        contentBuilder_.setMessage(index, builderForValue.build());
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    public Builder mergePayload(org.wso2.choreo.connect.discovery.api.MockedPayloadConfig value) {
-      if (payloadBuilder_ == null) {
-        if (payload_ != null) {
-          payload_ =
-            org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.newBuilder(payload_).mergeFrom(value).buildPartial();
-        } else {
-          payload_ = value;
+    public Builder addContent(org.wso2.choreo.connect.discovery.api.MockedContentConfig value) {
+      if (contentBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
         }
+        ensureContentIsMutable();
+        content_.add(value);
         onChanged();
       } else {
-        payloadBuilder_.mergeFrom(value);
+        contentBuilder_.addMessage(value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    public Builder clearPayload() {
-      if (payloadBuilder_ == null) {
-        payload_ = null;
+    public Builder addContent(
+        int index, org.wso2.choreo.connect.discovery.api.MockedContentConfig value) {
+      if (contentBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureContentIsMutable();
+        content_.add(index, value);
         onChanged();
       } else {
-        payload_ = null;
-        payloadBuilder_ = null;
+        contentBuilder_.addMessage(index, value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder getPayloadBuilder() {
-      
-      onChanged();
-      return getPayloadFieldBuilder().getBuilder();
+    public Builder addContent(
+        org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder builderForValue) {
+      if (contentBuilder_ == null) {
+        ensureContentIsMutable();
+        content_.add(builderForValue.build());
+        onChanged();
+      } else {
+        contentBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
     }
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.MockedPayloadConfigOrBuilder getPayloadOrBuilder() {
-      if (payloadBuilder_ != null) {
-        return payloadBuilder_.getMessageOrBuilder();
+    public Builder addContent(
+        int index, org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder builderForValue) {
+      if (contentBuilder_ == null) {
+        ensureContentIsMutable();
+        content_.add(index, builderForValue.build());
+        onChanged();
       } else {
-        return payload_ == null ?
-            org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.getDefaultInstance() : payload_;
+        contentBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public Builder addAllContent(
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.MockedContentConfig> values) {
+      if (contentBuilder_ == null) {
+        ensureContentIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, content_);
+        onChanged();
+      } else {
+        contentBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public Builder clearContent() {
+      if (contentBuilder_ == null) {
+        content_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+      } else {
+        contentBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public Builder removeContent(int index) {
+      if (contentBuilder_ == null) {
+        ensureContentIsMutable();
+        content_.remove(index);
+        onChanged();
+      } else {
+        contentBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder getContentBuilder(
+        int index) {
+      return getContentFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder getContentOrBuilder(
+        int index) {
+      if (contentBuilder_ == null) {
+        return content_.get(index);  } else {
+        return contentBuilder_.getMessageOrBuilder(index);
       }
     }
     /**
-     * <code>.wso2.discovery.api.MockedPayloadConfig payload = 4;</code>
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
      */
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.MockedPayloadConfig, org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedPayloadConfigOrBuilder> 
-        getPayloadFieldBuilder() {
-      if (payloadBuilder_ == null) {
-        payloadBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.api.MockedPayloadConfig, org.wso2.choreo.connect.discovery.api.MockedPayloadConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedPayloadConfigOrBuilder>(
-                getPayload(),
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder> 
+         getContentOrBuilderList() {
+      if (contentBuilder_ != null) {
+        return contentBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(content_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder addContentBuilder() {
+      return getContentFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.api.MockedContentConfig.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder addContentBuilder(
+        int index) {
+      return getContentFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.api.MockedContentConfig.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder> 
+         getContentBuilderList() {
+      return getContentFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.MockedContentConfig, org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder> 
+        getContentFieldBuilder() {
+      if (contentBuilder_ == null) {
+        contentBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.MockedContentConfig, org.wso2.choreo.connect.discovery.api.MockedContentConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder>(
+                content_,
+                ((bitField0_ & 0x00000002) != 0),
                 getParentForChildren(),
                 isClean());
-        payload_ = null;
+        content_ = null;
       }
-      return payloadBuilder_;
+      return contentBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

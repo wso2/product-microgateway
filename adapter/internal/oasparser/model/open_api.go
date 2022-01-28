@@ -219,11 +219,11 @@ func getMockedAPIConfig(xMediationScriptValue interface{}, mockedAPIConfig *Mock
 			if unmarshalError != nil {
 				logger.LoggerOasparser.Errorf("Error while unmarshalling JSON for method %v. Error: %v", method, unmarshalError)
 			} 
+			logger.LoggerOasparser.Debugf("x-mediation-script value processed successfully for the %v operation.", method)
 		} else {
 			logger.LoggerOasparser.Errorf("Invalid JSON value received for mocked API implementation's %v operation.", method)
 		}
 	}
-	logger.LoggerOasparser.Debugf("x-mediation-script value processed successfully for the %v operation.", method)
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion
