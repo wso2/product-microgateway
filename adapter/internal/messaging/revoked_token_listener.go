@@ -58,7 +58,7 @@ func handleAzureTokenRevocation() {
 	}
 }
 
-func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotification)  {
+func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotification) {
 	var revokedTokens []types.Resource
 	token := &keymgt.RevokedToken{}
 	token.Jti = notification.Event.PayloadData.RevokedToken
@@ -70,7 +70,7 @@ func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotificat
 func parseRevokedTokenJSONEvent(data []byte, notification *msg.EventTokenRevocationNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v. " +
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v. "+
 			"Hence dropping the event.", unmarshalErr)
 	}
 	return unmarshalErr

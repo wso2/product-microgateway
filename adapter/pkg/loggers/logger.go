@@ -41,11 +41,11 @@ const (
 
 // logger package references
 var (
-	LoggerMsg      *logrus.Logger
-	LoggerHealth   *logrus.Logger
-	LoggerTLSUtils *logrus.Logger
-	LoggerAdapter  *logrus.Logger
-	LoggerSync     *logrus.Logger
+	LoggerMsg      logging.Log
+	LoggerHealth   logging.Log
+	LoggerTLSUtils logging.Log
+	LoggerAdapter  logging.Log
+	LoggerSync     logging.Log
 )
 
 func init() {
