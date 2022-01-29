@@ -35,8 +35,6 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
-import org.wso2.choreo.connect.enforcer.api.API;
-import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
@@ -101,8 +99,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
-        API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
-        boolean isMockedApi = matchedAPI.getAPIConfig().isMockedApi();
         if (responseObject.isDirectResponse()) {
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
@@ -140,7 +136,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDynamicMetadata(structBuilder.build());
 
-            if (!isMockedApi || responseObject.getErrorCode() != null) {
+            if (responseObject.getErrorCode() != null) {
                 // Error handling
                 JSONObject responseJson = new JSONObject();
                 responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());

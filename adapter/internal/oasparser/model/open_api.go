@@ -218,6 +218,7 @@ func getMockedAPIConfig(xMediationScriptValue interface{}, mockedAPIConfig *Mock
 			unmarshalError := json.Unmarshal([]byte(str), &mockedAPIConfig)
 			if unmarshalError != nil {
 				logger.LoggerOasparser.Errorf("Error while unmarshalling JSON for method %v. Error: %v", method, unmarshalError)
+				return
 			} 
 			logger.LoggerOasparser.Debugf("x-mediation-script value processed successfully for the %v operation.", method)
 		} else {
