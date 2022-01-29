@@ -88,10 +88,8 @@ paths:
       x-mediation-script: |
         {
            "in": "default",
-           "name": "mockApiQueryVal",
            "responses": [
                {
-                   "value": "success",
                    "headers": [
                        {
                            "name": "x-wso2-default-header",

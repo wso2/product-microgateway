@@ -23,7 +23,6 @@ import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -38,7 +37,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MockApiTestCase extends ApimBaseTest {
+public class MockApiTestCase {
 
     private String testKey;
 
