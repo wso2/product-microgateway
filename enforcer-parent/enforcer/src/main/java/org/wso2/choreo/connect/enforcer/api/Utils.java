@@ -30,7 +30,6 @@ import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,6 +114,7 @@ public class Utils {
                                            MockedApiConfig mockedApiConfig, String acceptType, boolean isDefault) {
         String requestValuePosition = mockedApiConfig.getIn();
         String nameFieldInJson;
+        String valueFieldInJson = "";
 
         // condition handles case-sensitiveness of query parameters.
         if (requestValuePosition.equalsIgnoreCase(APIConstants.MockApiConstants.HEADER)) {
@@ -125,27 +125,40 @@ public class Utils {
 
         if (!isDefault && (propertiesMap == null || !propertiesMap.containsKey(nameFieldInJson))) {
             log.error("Response determining value not available in the mock API request.");
+            responseObject.setStatusCode(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode());
+            responseObject.setErrorMessage(APIConstants.SERVER_ERROR);
+            responseObject.setErrorDescription("Response determining value not available. " +
+                    "Cannot handle the request considering provided request parameters.");
             return;
+        }
+
+        // default mock API config doesn't have a value field.
+        if (!isDefault) {
+            valueFieldInJson = propertiesMap.get(nameFieldInJson);
         }
         List<MockedResponseConfig> responseConfigList = mockedApiConfig.getResponses();
         // iterates over the mock API responses.
         for (MockedResponseConfig responseConfig : responseConfigList) {
-            responseObject.setStatusCode(responseConfig.getCode());
-            Map<String, String> headerMap = new HashMap<>();
-            // iterates over the headers list in the mock API JSON.
-            for (MockedHeaderConfig header : responseConfig.getHeaders()) {
-                headerMap.put(header.getName(), header.getValue());
+            if (isDefault || responseConfig.getValue().equals(valueFieldInJson)) {
+                responseObject.setStatusCode(responseConfig.getCode());
+                Map<String, String> headerMap = responseObject.getHeaderMap();
+                // iterates over the headers list in the mock API JSON.
+                for (MockedHeaderConfig header : responseConfig.getHeaders()) {
+                    headerMap.put(header.getName(), header.getValue());
+                }
+                // checks and assigns the accepted content type
+                MockedContentConfig content = responseConfig.getContent();
+                if (content.getContentMap().containsKey(acceptType)) {
+                    headerMap.put(APIConstants.CONTENT_TYPE_HEADER, acceptType);
+                    responseObject.setMockApiResponseContent(content.getContentMap().get(acceptType));
+                } else {
+                    headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_JSON);
+                    responseObject.setMockApiResponseContent(
+                            content.getContentMap().get(APIConstants.APPLICATION_JSON));
+                }
+                responseObject.setHeaderMap(headerMap);
+                return;
             }
-            // checks and assigns the accepted content type
-            MockedContentConfig content = responseConfig.getContent();
-            if (content.getContentMap().containsKey(acceptType)) {
-                headerMap.put(APIConstants.CONTENT_TYPE_HEADER, acceptType);
-                responseObject.setMockApiResponseContent(content.getContentMap().get(acceptType));
-            } else {
-                headerMap.put(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_JSON);
-                responseObject.setMockApiResponseContent(content.getContentMap().get(APIConstants.APPLICATION_JSON));
-            }
-            responseObject.setHeaderMap(headerMap);
         }
     }
 }

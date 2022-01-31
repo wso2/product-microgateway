@@ -340,8 +340,6 @@ public class RestAPI implements API {
     }
 
     private void initFilters() {
-
-        // These filters will not be added if it's a mocked API
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig, null);
         this.filters.add(authFilter);

@@ -68,7 +68,7 @@ public class MockApiTestCase {
                 3600, null, true);
     }
 
-    //    Invokes mocked API implementation using header value
+    // Invokes mocked API implementation using header value
     @Test(description = "Test to detect wrong API keys")
     public void invokeMockedApiImplementationWithHeader() throws Exception {
         Map<String, String> headers = new HashMap<>();
@@ -84,7 +84,7 @@ public class MockApiTestCase {
         Assert.assertTrue(response.getData().contains("{\"name\" : \"choreo connect\""), "Error response message mismatch");
     }
 
-    //    Invokes with mocked API implementation using query param
+    // Invokes with mocked API implementation using query param
     @Test(description = "Test to detect wrong API keys")
     public void invokeMockedApiImplementationWithQueryParam() throws Exception {
         String headerName = "x-wso2-q-header";
@@ -102,7 +102,7 @@ public class MockApiTestCase {
         Assert.assertTrue(response.getData().contains("<name>choreo connect</name>"), "Error response message mismatch");
     }
 
-    //    Invokes with mocked default API implementation
+    // Invokes with mocked default API implementation
     @Test(description = "Test to detect wrong API keys")
     public void invokeMockedDefaultApiImplementation() throws Exception {
         String headerName = "x-wso2-default-header";
