@@ -20,6 +20,11 @@
     "tier": "Unlimited"
   },
   {
+    "apiName": "JwtScopeAPI",
+    "appName": "JwtScopeApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "VHostAPI1",
     "appName": "VHostApp",
     "tier": "Unlimited"

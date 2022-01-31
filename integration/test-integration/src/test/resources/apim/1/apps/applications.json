@@ -8,11 +8,11 @@
     "throttleTier": "Unlimited"
   },
   {
-    "appName": "SubscriptionThrottlingApp",
+    "appName": "BlockedApiApp",
     "throttleTier": "Unlimited"
   },
   {
-    "appName": "BlockedApiApp",
+    "appName": "EndpointWithTrailingSlashApiApp",
     "throttleTier": "Unlimited"
   },
   {
@@ -20,7 +20,11 @@
     "throttleTier": "Unlimited"
   },
   {
-    "appName": "VHostApp",
+    "appName": "JwtScopeApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "SubscriptionThrottlingApp",
     "throttleTier": "Unlimited"
   },
   {
@@ -28,7 +32,7 @@
     "throttleTier": "Unlimited"
   },
   {
-    "appName": "EndpointWithTrailingSlashApiApp",
+    "appName": "VHostApp",
     "throttleTier": "Unlimited"
   }
 ]
