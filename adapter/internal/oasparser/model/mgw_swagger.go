@@ -1209,13 +1209,13 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiYaml APIYaml) error {
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
 
-	if endpointConfig.ImplementationStatus == prototypedImplementationStatus {
+	if endpointConfig.ImplementationStatus == constants.Prototyped {
 		swagger.IsPrototyped = true
 	}
 
 	// below condition will evaluate as true for mocked API implementations
-	if endpointConfig.ImplementationStatus == prototypedImplementationStatus &&
-		data.EndpointImplementationType == templateEndpointType {
+	if endpointConfig.ImplementationStatus == constants.Prototyped &&
+		data.EndpointImplementationType == constants.TemplateEndpointType {
 		swagger.IsMockedAPI = true
 	}
 
