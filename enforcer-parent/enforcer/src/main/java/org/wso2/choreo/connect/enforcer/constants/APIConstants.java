@@ -80,10 +80,13 @@ public class APIConstants {
 
     public static final String NOT_FOUND_MESSAGE = "Not Found";
     public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";
+    public static final String SERVER_ERROR = "Internal Server Error";
 
     //headers and values
     public static final String CONTENT_TYPE_HEADER = "Content-type";
+    public static final String ACCEPT_HEADER = "Accept";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_XML = "application/xml";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
@@ -348,7 +351,8 @@ public class APIConstants {
         UNAUTHORIZED("403", 403),
         NOTFOUND("404", 404),
         THROTTLED("429", 429),
-        SERVICE_UNAVAILABLE("503", 503);
+        SERVICE_UNAVAILABLE("503", 503),
+        INTERNAL_SERVER_ERROR("500", 500);
 
         private String value;
         private int code;
@@ -372,6 +376,14 @@ public class APIConstants {
     public static class ApiType {
         public static final String WEB_SOCKET = "WS";
         public static final String REST = "HTTP";
+    }
+
+    /**
+     * Holds values for mocked APIs
+     */
+    public static class MockApiConstants {
+        public static final String HEADER = "header";
+        public static final String QUERY = "query";
     }
 
 }

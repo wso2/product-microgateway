@@ -33,26 +33,28 @@ import (
 )
 
 const (
-	openAPIDir                 string = "Definitions"
-	openAPIFilename            string = "swagger."
-	apiYAMLFile                string = "api.yaml"
-	deploymentsYAMLFile        string = "deployment_environments.yaml"
-	endpointCertFile           string = "endpoint_certificates."
-	apiJSONFile                string = "api.json"
-	endpointCertDir            string = "Endpoint-certificates"
-	interceptorCertDir         string = "Endpoint-certificates/interceptors"
-	crtExtension               string = ".crt"
-	pemExtension               string = ".pem"
-	apiTypeFilterKey           string = "type"
-	apiTypeYamlKey             string = "type"
-	lifeCycleStatus            string = "lifeCycleStatus"
-	securityScheme             string = "securityScheme"
-	endpointImplementationType string = "endpointImplementationType"
-	inlineEndpointType         string = "INLINE"
-	endpointSecurity           string = "endpoint_security"
-	production                 string = "production"
-	sandbox                    string = "sandbox"
-	zipExt                     string = ".zip"
+	openAPIDir                     string = "Definitions"
+	openAPIFilename                string = "swagger."
+	apiYAMLFile                    string = "api.yaml"
+	deploymentsYAMLFile            string = "deployment_environments.yaml"
+	endpointCertFile               string = "endpoint_certificates."
+	apiJSONFile                    string = "api.json"
+	endpointCertDir                string = "Endpoint-certificates"
+	interceptorCertDir             string = "Endpoint-certificates/interceptors"
+	crtExtension                   string = ".crt"
+	pemExtension                   string = ".pem"
+	apiTypeFilterKey               string = "type"
+	apiTypeYamlKey                 string = "type"
+	lifeCycleStatus                string = "lifeCycleStatus"
+	securityScheme                 string = "securityScheme"
+	endpointImplementationType     string = "endpointImplementationType"
+	prototypedImplementationStatus string = "prototyped"
+	inlineEndpointType             string = "INLINE"
+	templateEndpointType           string = "TEMPLATE"
+	endpointSecurity               string = "endpoint_security"
+	production                     string = "production"
+	sandbox                        string = "sandbox"
+	zipExt                         string = ".zip"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -278,13 +280,6 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		err = VerifyMandatoryFields(apiYaml)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("%v", err)
-			return err
-		}
-
-		if apiYaml.Data.EndpointImplementationType == inlineEndpointType {
-			errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
-			loggers.LoggerAPI.Warnf(errmsg)
-			err = errors.New(errmsg)
 			return err
 		}
 		apiProject.APIYaml = apiYaml

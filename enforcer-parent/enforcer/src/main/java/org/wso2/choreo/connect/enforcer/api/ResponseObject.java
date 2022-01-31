@@ -39,6 +39,7 @@ public class ResponseObject {
     private Map<String, String> queryParamsToAdd;
     private Map<String, String> queryParams;
     private String requestPath;
+    private String mockApiResponseContent;
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -153,5 +154,13 @@ public class ResponseObject {
 
     public void setRequestPath(String requestPath) {
         this.requestPath = requestPath;
+    }
+
+    public String getMockApiResponsePayload() {
+        return mockApiResponseContent;
+    }
+
+    public void setMockApiResponseContent(String mockApiResponseContent) {
+        this.mockApiResponseContent = mockApiResponseContent;
     }
 }

@@ -33,6 +33,7 @@ public class ResourceConfig {
     private boolean disableSecurity = false;
     private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
     private PolicyConfig policyConfig;
+    private MockedApiConfig mockedApiConfig;
 
     /**
      * ENUM to hold http operations.
@@ -127,6 +128,19 @@ public class ResourceConfig {
 
     public void setEndpoints(Map<String, EndpointCluster> endpoints) {
         this.endpoints = endpoints;
+    }
+
+    /**
+     * Provides mock API configurations defined in the JSON.
+     *
+     * @return MockedApiConfig object with all the configurations defined under operation of a mocked API.
+     */
+    public MockedApiConfig getMockedApiConfig() {
+        return mockedApiConfig;
+    }
+
+    public void setMockApiConfig(MockedApiConfig mockedApiConfig) {
+        this.mockedApiConfig = mockedApiConfig;
     }
 
     public PolicyConfig getPolicyConfig() {

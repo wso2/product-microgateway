@@ -43,6 +43,7 @@ public class APIConfig {
     private String tier;
     private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
+    private boolean isMockedApi;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -186,6 +187,15 @@ public class APIConfig {
     }
 
     /**
+     * Returns whether a given API is a mocked API or not.
+     *
+     * @return boolean value to denote isMockedApi or not.
+     */
+    public boolean isMockedApi() {
+        return isMockedApi;
+    }
+
+    /**
      * Implements builder pattern to build an API Config object.
      */
     public static class Builder {
@@ -206,6 +216,7 @@ public class APIConfig {
         private String tier;
         private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
+        private boolean isMockedApi;
 
         public Builder(String name) {
             this.name = name;
@@ -286,6 +297,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder mockedApi(boolean isMockedApi) {
+            this.isMockedApi = isMockedApi;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -304,6 +320,7 @@ public class APIConfig {
             apiConfig.organizationId = this.organizationId;
             apiConfig.uuid = this.uuid;
             apiConfig.securitySchemeDefinitions = this.securitySchemeDefinitions;
+            apiConfig.isMockedApi = this.isMockedApi;
             return apiConfig;
         }
     }

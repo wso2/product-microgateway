@@ -50,4 +50,5 @@ message Api {
 	bool disableSecurity = 16;
 	string vhost = 17;
 	string organizationId = 18;
+	bool isMockedApi = 19;
 }

@@ -37,6 +37,34 @@ type Operation struct {
 	disableSecurity  bool
 	vendorExtensions map[string]interface{}
 	policies         OperationPolicies
+	mockedAPIConfig  MockedAPIConfig    
+}
+
+// MockedAPIConfig holds configurations defined for a mocked API operation result
+type MockedAPIConfig struct {
+	In          string                    `json:"in,omitempty"`
+	Name        string                    `json:"name,omitempty"`
+	Responses   []MockedResponseConfig    `json:"responses,omitempty"`
+}
+
+// MockedResponseConfig holds response configurations in the mocked API operation
+type MockedResponseConfig struct {
+	Value 	string                        `json:"value,omitempty"`
+	Headers []MockedHeaderConfig          `json:"headers,omitempty"`
+	Code	int                           `json:"code,omitempty"`	
+	Content []MockedContentConfig         `json:"content,omitempty"`
+}
+
+// MockedHeaderConfig holds header configurations in the mocked API operation
+type MockedHeaderConfig struct {
+	Name  string                          `json:"name,omitempty"`
+	Value string                          `json:"value,omitempty"`
+}
+
+// MockedContentConfig holds mocked content configurations in the mocked API operation
+type MockedContentConfig struct {
+	ContentType string                    `json:"contentType,omitempty"`
+	Body string                           `json:"body,omitempty"`
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -67,6 +95,11 @@ func (operation *Operation) SetSecurity(security []map[string][]string) {
 // GetTier returns the operation level throttling tier
 func (operation *Operation) GetTier() string {
 	return operation.tier
+}
+
+// GetMockedAPIConfig returns the operation level mocked API implementation configs
+func (operation *Operation) GetMockedAPIConfig() MockedAPIConfig {
+	return operation.mockedAPIConfig
 }
 
 // GetVendorExtensions returns vendor extensions which are explicitly defined under
@@ -131,9 +164,10 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 }
 
 // NewOperation Creates and returns operation type object
-func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
+func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}, 
+	mockedAPIConfig MockedAPIConfig) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	return &Operation{id, method, security, tier, disableSecurity, extensions, OperationPolicies{}}
+	return &Operation{id, method, security, tier, disableSecurity, extensions, OperationPolicies{}, mockedAPIConfig}
 }

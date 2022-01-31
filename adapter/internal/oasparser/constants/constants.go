@@ -42,6 +42,7 @@ const (
 	XWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
 	DefaultSecurity      string = "default"
+	XMediationScript     string = "x-mediation-script"
 )
 
 // cluster name prefixes

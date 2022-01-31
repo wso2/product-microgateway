@@ -55,6 +55,7 @@ const (
 	securityScheme             string = "securityScheme"
 	endpointImplementationType string = "endpointImplementationType"
 	inlineEndpointType         string = "INLINE"
+	templateEndpointType       string = "TEMPLATE"
 	endpointSecurity           string = "endpoint_security"
 	production                 string = "production"
 	sandbox                    string = "sandbox"
@@ -253,7 +254,7 @@ func ApplyAPIProjectFromAPIM(
 	if apiProject.OrganizationID == "" {
 		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	}
-	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
+	loggers.LoggerAPI.Infof("Deploying API %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
 
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)

@@ -151,7 +151,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
-			operations[i] = GetEnforcerAPIOperation(*op)
+			operations[i] = GetEnforcerAPIOperation(*op, mgwSwagger.IsMockedAPI)
 		}
 		resource := &api.Resource{
 			Id:      res.GetID(),
@@ -207,11 +207,12 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 		OrganizationId:      mgwSwagger.OrganizationID,
 		Vhost:               vhost,
+		IsMockedApi:         mgwSwagger.IsMockedAPI,
 	}
 }
 
 // GetEnforcerAPIOperation builds the operation object expected by the proto definition
-func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
+func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool ) *api.Operation {
 	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
 	for i, security := range operation.GetSecurity() {
 		mapOfSecurity := make(map[string]*api.Scopes)
@@ -227,6 +228,12 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		secSchemas[i] = secSchema
 	}
 
+	var mockedAPIConfig api.MockedApiConfig
+	if isMockedAPI {
+		mockedScriptValue := operation.GetMockedAPIConfig()
+		generateMockedAPIConfig(&mockedAPIConfig, mockedScriptValue)
+	}
+		
 	policies := &api.OperationPolicies{
 		In:    castPoliciesToEnforcerPolicies(operation.GetPolicies().In),
 		Out:   castPoliciesToEnforcerPolicies(operation.GetPolicies().Out),
@@ -238,6 +245,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		Tier:            operation.GetTier(),
 		DisableSecurity: operation.GetDisableSecurity(),
 		Policies:        policies,
+		MockedApiConfig: &mockedAPIConfig,
 	}
 	return &apiOperation
 }
@@ -310,4 +318,38 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 		}
 	}
 	return endpoints
+}
+
+// Generates mocked API configuration to pass for the enforcer considering xMediationScript value
+func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig , mgwMockedAPIConfig model.MockedAPIConfig) {
+	mockedAPIConfig.In = mgwMockedAPIConfig.In
+	mockedAPIConfig.Name = mgwMockedAPIConfig.Name
+	responseConfigList := make ([]*api.MockedResponseConfig,0)
+
+	for _, val := range mgwMockedAPIConfig.Responses {
+		var responseConfig api.MockedResponseConfig
+		contentConfigList := make([]*api.MockedContentConfig,0)
+		responseConfig.Value = val.Value
+		responseConfig.Code = int32(val.Code)
+
+		for _, content := range val.Content{
+			var contentConfig api.MockedContentConfig
+			contentConfig.ContentType = content.ContentType
+			contentConfig.Body = content.Body
+			contentConfigList = append(contentConfigList, &contentConfig)
+		}
+		responseConfig.Content = contentConfigList
+		
+		headerConfigList := responseConfig.Headers
+		for _, header := range val.Headers {
+			var mockedAPIHeader api.MockedHeaderConfig
+			mockedAPIHeader.Name = header.Name
+			mockedAPIHeader.Value = header.Value
+			headerConfigList = append(headerConfigList, &mockedAPIHeader)
+		}
+		responseConfig.Headers = headerConfigList
+		responseConfigList = append(responseConfigList, &responseConfig)
+	}
+	mockedAPIConfig.Responses = responseConfigList
+	logger.LoggerOasparser.Debugf("Mocked API configuration generated successfully.")
 }

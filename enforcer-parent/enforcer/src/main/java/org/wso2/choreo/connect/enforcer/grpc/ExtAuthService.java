@@ -119,11 +119,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                                 .build())
                         .build();
             }
-            // Error handling
-            JSONObject responseJson = new JSONObject();
-            responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
-            responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
-            responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder().setHeader(
                             HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
                                     .setValue(APIConstants.APPLICATION_JSON).build())
@@ -137,11 +132,34 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
 
-            return CheckResponse.newBuilder()
+            CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
-                    .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
-                    .setDynamicMetadata(structBuilder.build())
-                    .build();
+                    .setDynamicMetadata(structBuilder.build());
+
+            if (responseObject.getErrorCode() != null) {
+                // Error handling
+                JSONObject responseJson = new JSONObject();
+                responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
+                responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
+                responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
+
+                return checkResponseBuilder
+                        .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
+                        .build();
+            } else {
+                if (responseObject.getMockApiResponsePayload() != null) {
+                    responseBuilder.setBody(responseObject.getMockApiResponsePayload());
+                }
+
+                // Below condition is evaluated to stop re-directing successful mock API responses to upstream.
+                // Here only the checkResponse object's status code is changed. This provides API call's response status
+                // code as specified in the mock API's JSON script (expected status code).
+                if (responseObject.getStatusCode() >= 200 || responseObject.getStatusCode() <= 299) {
+                    checkResponseBuilder.setStatus(Status.newBuilder().setCode(421));
+                }
+                status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+                return  checkResponseBuilder.setDeniedResponse(responseBuilder.setStatus(status).build()).build();
+            }
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
 
@@ -156,8 +174,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         responseObject.getQueryParamsToRemove(), responseObject.getQueryParamsToAdd());
                 HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                         .setHeader(HeaderValue.newBuilder().setKey(APIConstants.PATH_HEADER).setValue(constructedPath)
-                                .build())
-                        .build();
+                                .build()).build();
                 okResponseBuilder.addHeaders(headerValueOption);
             }
 
