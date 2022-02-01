@@ -1110,9 +1110,9 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 	return nil
 }
 
-//PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
+//PopulateFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiYaml APIYaml) error {
+func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 
 	data := apiYaml.Data
 	// UUID in the generated api.yaml file is considered as swagger.id

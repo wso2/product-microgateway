@@ -24,7 +24,6 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
@@ -47,32 +46,16 @@ const (
 	lifeCycleStatus            string = "lifeCycleStatus"
 	securityScheme             string = "securityScheme"
 	endpointImplementationType string = "endpointImplementationType"
-	inlineEndpointType         string = "INLINE"
 	endpointSecurity           string = "endpoint_security"
 	production                 string = "production"
 	sandbox                    string = "sandbox"
 	zipExt                     string = ".zip"
 )
 
-// ValidateAPIType checks if the apiProject is properly assigned with the type.
-func ValidateAPIType(apiProject *model.ProjectAPI) (err error) {
-	apiType := apiProject.APIYaml.Data.APIType
-	if apiType == "" {
-		// If no api.yaml file is included in the zip folder, return with error.
-		err = errors.New("could not find api.yaml or api.json")
-		return err
-	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.WEBHOOK {
-		errMsg := "API type is not currently supported with Choreo Connect"
-		err = errors.New(errMsg)
-		return err
-	}
-	return nil
-}
-
-// ProcessFileInsideProject method process one file at a time and
+// processFileInsideProject method process one file at a time and
 // update the apiProject instance appropriately. Files could be: /petstore,
 // /petstore/Definition, /petstore/Definition/swagger.yaml, /petstore/api.yaml, etc.
-func ProcessFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, fileName string) (err error) {
+func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, fileName string) (err error) {
 	newLineByteArray := []byte("\n")
 
 	// Deployment file
@@ -139,7 +122,7 @@ func ProcessFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		// api.yaml or api.json
 	} else if (strings.Contains(fileName, apiYAMLFile) || strings.Contains(fileName, apiJSONFile)) &&
 		!strings.Contains(fileName, openAPIDir) {
-		apiYaml, err := ExtractAPIYaml(fileContent)
+		apiYaml, err := model.NewAPIYaml(fileContent)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("Error while reading %v. %v", fileName, err)
 			return errors.New("Error while reading api.yaml or api.json")
@@ -147,37 +130,6 @@ func ProcessFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		apiProject.APIYaml = apiYaml
 	}
 	return nil
-}
-
-// ExtractAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json
-func ExtractAPIYaml(fileContent []byte) (apiYaml model.APIYaml, err error) {
-	apiJsn, err := utills.ToJSON(fileContent)
-	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occurred converting api file to json: %v", err.Error())
-		return apiYaml, err
-	}
-
-	err = json.Unmarshal(apiJsn, &apiYaml)
-	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occurred while parsing api.yaml or api.json %v", err.Error())
-		return apiYaml, err
-	}
-
-	apiYaml.FormatAndUpdateInfo()
-	apiYaml.PopulateEndpointsInfo()
-	err = apiYaml.VerifyMandatoryFields()
-	if err != nil {
-		loggers.LoggerAPI.Errorf("%v", err)
-		return apiYaml, err
-	}
-
-	if apiYaml.Data.EndpointImplementationType == inlineEndpointType {
-		errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
-		loggers.LoggerAPI.Warnf(errmsg)
-		err = errors.New(errmsg)
-		return apiYaml, err
-	}
-	return apiYaml, nil
 }
 
 func parseDeployments(data []byte) ([]model.Deployment, error) {

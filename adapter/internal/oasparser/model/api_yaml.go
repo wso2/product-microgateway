@@ -24,6 +24,8 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
 // APIYaml contains everything necessary to extract api.json/api.yaml file
@@ -108,6 +110,37 @@ type Policy struct {
 	Parameters   interface{} `json:"parameters,omitempty"`
 }
 
+// NewAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json
+func NewAPIYaml(fileContent []byte) (apiYaml APIYaml, err error) {
+	apiJsn, err := utills.ToJSON(fileContent)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occurred converting api file to json: %v", err.Error())
+		return apiYaml, err
+	}
+
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occurred while parsing api.yaml or api.json %v", err.Error())
+		return apiYaml, err
+	}
+
+	apiYaml.FormatAndUpdateInfo()
+	apiYaml.PopulateEndpointsInfo()
+	err = apiYaml.ValidateMandatoryFields()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("%v", err)
+		return apiYaml, err
+	}
+
+	if apiYaml.Data.EndpointImplementationType == constants.InlineEndpointType {
+		errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
+		loggers.LoggerAPI.Warnf(errmsg)
+		err = errors.New(errmsg)
+		return apiYaml, err
+	}
+	return apiYaml, nil
+}
+
 // FormatAndUpdateInfo formats necessary parameters and update from config if null
 func (apiYaml *APIYaml) FormatAndUpdateInfo() {
 	apiYaml.Data.APIType = strings.ToUpper(apiYaml.Data.APIType)
@@ -118,8 +151,8 @@ func (apiYaml *APIYaml) FormatAndUpdateInfo() {
 	}
 }
 
-// VerifyMandatoryFields check and pupulates the mandatory fields if null
-func (apiYaml *APIYaml) VerifyMandatoryFields() error {
+// ValidateMandatoryFields check and populates the mandatory fields if null
+func (apiYaml *APIYaml) ValidateMandatoryFields() error {
 	var errMsg string = ""
 	var apiName string = apiYaml.Data.Name
 	var apiVersion string = apiYaml.Data.Version
@@ -197,4 +230,19 @@ func (apiYaml *APIYaml) PopulateEndpointsInfo() {
 			loggers.LoggerAPI.Warn("No sandbox endpoints provided")
 		}
 	}
+}
+
+// ValidateAPIType checks if the apiProject is properly assigned with the type.
+func (apiYaml APIYaml) ValidateAPIType() (err error) {
+	apiType := apiYaml.Data.APIType
+	if apiType == "" {
+		// If no api.yaml file is included in the zip folder, return with error.
+		err = errors.New("could not find api.yaml or api.json")
+		return err
+	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.WEBHOOK {
+		errMsg := "API type is not currently supported with Choreo Connect"
+		err = errors.New(errMsg)
+		return err
+	}
+	return nil
 }

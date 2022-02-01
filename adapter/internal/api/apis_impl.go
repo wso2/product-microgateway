@@ -63,12 +63,12 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
 			return apiProject, err
 		}
-		err = ProcessFileInsideProject(&apiProject, unzippedFileBytes, file.Name)
+		err = processFileInsideProject(&apiProject, unzippedFileBytes, file.Name)
 		if err != nil {
 			return apiProject, err
 		}
 	}
-	err = ValidateAPIType(&apiProject)
+	err = apiProject.APIYaml.ValidateAPIType()
 	if err != nil {
 		return apiProject, err
 	}
@@ -101,7 +101,7 @@ func ProcessMountedAPIProjects() (err error) {
 					if err != nil {
 						return err
 					}
-					return ProcessFileInsideProject(&apiProject, fileContent, path)
+					return processFileInsideProject(&apiProject, fileContent, path)
 				}
 				return nil
 			})
@@ -109,7 +109,7 @@ func ProcessMountedAPIProjects() (err error) {
 				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
 				continue
 			}
-			err = ValidateAPIType(&apiProject)
+			err = apiProject.APIYaml.ValidateAPIType()
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error while validating the API type - %s during startup : %v",
 					apiProjectFile.Name(), err)

@@ -154,7 +154,7 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 	if parsedURL.Port() != "" {
 		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
 		if err != nil {
-			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
+			logger.LoggerOasparser.Error("Endpoint port is not in the expected format.", err)
 		}
 		port = uint32(u32)
 	} else {
@@ -178,8 +178,8 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType, RawURL: rawURL}, nil
 }
 
-// generateResource used to populate mgwSwagger for both OpenAPI and AsyncAPI
-func generateResource(path string, methods []*Operation, vendorExtensions map[string]interface{}) Resource {
+// unmarshalSwaggerResources used to populate mgwSwagger for both OpenAPI and AsyncAPI
+func unmarshalSwaggerResources(path string, methods []*Operation, vendorExtensions map[string]interface{}) Resource {
 	return Resource{
 		path:    path,
 		methods: methods,

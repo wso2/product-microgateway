@@ -272,7 +272,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		apiEnvProps = apiEnvPropsV
 	}
 
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml)
+	err = mgwSwagger.PopulateFromAPIYaml(apiProject.APIYaml)
 	if err != nil {
 		return nil, err
 	}

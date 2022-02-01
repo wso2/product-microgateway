@@ -43,7 +43,7 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	var mgwSwagger MgwSwagger
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml)
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 
 	dataItems := []setInfoSwaggerWebSocketTestItem{

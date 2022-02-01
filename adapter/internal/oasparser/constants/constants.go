@@ -100,4 +100,5 @@ const (
 	WEBHOOK              string = "WEBHOOK"
 	Prototyped           string = "prototyped"
 	TemplateEndpointType string = "TEMPLATE"
+	InlineEndpointType   string = "INLINE"
 )

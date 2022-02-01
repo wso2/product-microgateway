@@ -194,7 +194,7 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 				methodFound = true
 			}
 			if methodFound {
-				resource := generateResource(path, methodsArray, pathItem.Extensions)
+				resource := unmarshalSwaggerResources(path, methodsArray, pathItem.Extensions)
 				resources = append(resources, &resource)
 			}
 		}
