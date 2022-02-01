@@ -89,6 +89,25 @@ public class CcInstance extends ChoreoConnectImpl {
         addCcLoggersToEnv();
     }
 
+    /**
+     * Initialize a docker compose container environment from the given docker-compose file
+     *
+     * @param dockerComposeFile
+     * @throws IOException
+     * @throws CCTestException
+     */
+    private CcInstance(String dockerComposeFile) throws IOException, CCTestException{
+        String targetDir = Utils.getTargetDirPath();
+        if (!StringUtils.isEmpty(dockerComposeFile)) {
+            Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH
+                            + TestConstant.TEST_DOCKER_COMPOSE_DIR + File.separator + dockerComposeFile,
+                    ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.DOCKER_COMPOSE_YAML_PATH);
+        }
+        String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
+                + TestConstant.DOCKER_COMPOSE_YAML_PATH;
+        environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true);
+    }
+
     public static CcInstance getInstance() throws CCTestException {
         if (instance != null) {
             return instance;
@@ -138,6 +157,11 @@ public class CcInstance extends ChoreoConnectImpl {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.withCustomJwtTransformer, this.withAnalyticsMetricImpl, this.startupAPIProjectFiles,
                     this.isInterceptorCertRequired);
+            return instance;
+        }
+
+        public CcInstance buildContainer() throws IOException, CCTestException {
+            instance = new CcInstance(this.dockerComposeFile);
             return instance;
         }
     }

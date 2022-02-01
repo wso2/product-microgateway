@@ -1,0 +1,10 @@
+      - "5006:5006"
+  mockBackend:
+    image: wso2/choreo-connect-mock-backend:1.1.0-m1
+    ports:
+      - "2383:2383"
+      - "2399:2399"
+    links:
+      - router
+    networks:
+      - cc-gitlab

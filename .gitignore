@@ -43,3 +43,5 @@ envoy-filters/.idea
 
 # executable
 adapter/micro-gw
+
+!integration/test-integration/src/test/resources/git-artifacts/**
