@@ -56,6 +56,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/internal/sourcewatcher"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -254,10 +255,18 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
 	} else {
-		err := api.ProcessMountedAPIProjects()
-		if err != nil {
-			logger.LoggerMgw.Error("Readiness probe is not set as local api artifacts processing has failed.")
-			return
+		if conf.Adapter.SourceControl.Enabled{
+			err := sourcewatcher.Start(conf)
+			if err != nil {
+				logger.LoggerMgw.Error("Error while starting the source watcher. ", err)
+				return
+			}
+		} else {
+			_, err := api.ProcessMountedAPIProjects()
+			if err != nil {
+				logger.LoggerMgw.Error("Readiness probe is not set as local api artifacts processing has failed.")
+				return
+			}
 		}
 		// We need to deploy the readiness probe when eventhub is disabled
 		xds.DeployReadinessAPI(envs)

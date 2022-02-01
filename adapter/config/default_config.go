@@ -58,6 +58,9 @@ var defaultConfig = &Config{
 			Location: "/home/wso2/security/truststore",
 		},
 		ArtifactsDirectory: "/home/wso2/artifacts",
+		SourceControl: sourceControl{
+			Enabled: false,
+		},
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
