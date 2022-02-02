@@ -27,7 +27,7 @@ const (
 	SecurityConfig        string = "securityConfig"
 )
 
-// Constants for OpenAPI vendor extension keys
+// Constants for OpenAPI vendor extension keys and values
 const (
 	XWso2ProdEndpoints   string = "x-wso2-production-endpoints"
 	XWso2SandbxEndpoints string = "x-wso2-sandbox-endpoints"
@@ -76,15 +76,6 @@ const (
 	OperationLevelInterceptor string = "operation"
 )
 
-const (
-	// HTTP - API type for http/https APIs
-	HTTP string = "HTTP"
-	// WS - API type for websocket APIs
-	WS string = "WS"
-	// WEBHOOK - API type for WEBHOOK APIs
-	WEBHOOK string = "WEBHOOK"
-)
-
 // Constants to represent errors
 const (
 	AlreadyExists string = "ALREADY_EXISTS"
@@ -100,4 +91,14 @@ const (
 	InterceptorServiceURL      string = "interceptorServiceURL"
 	InterceptorServiceIncludes string = "includes"
 	Order                      string = "order"
+)
+
+// Constants that occur as values in api.yaml
+const (
+	HTTP                 string = "HTTP"
+	WS                   string = "WS"
+	WEBHOOK              string = "WEBHOOK"
+	Prototyped           string = "prototyped"
+	TemplateEndpointType string = "TEMPLATE"
+	InlineEndpointType   string = "INLINE"
 )
