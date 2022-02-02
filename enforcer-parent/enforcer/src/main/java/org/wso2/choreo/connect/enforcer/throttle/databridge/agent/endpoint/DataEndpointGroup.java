@@ -29,16 +29,18 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeThreadFactory;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.DataEndpointAgent;
+import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.DataEndpointConfiguration;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.exception.DataEndpointConfigurationException;
+import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.exception.DataEndpointException;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.exception.EventQueueFullException;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.DataEndpointConstants;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.DataPublisherUtil;
+import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.EndpointUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * This class holds the endpoints associated within a group. Also it has a queue
@@ -76,6 +82,8 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
 
     private boolean isShutdown = false;
 
+    private SSLSocketFactory sslSocketFactory;
+
     /**
      * HA Type.
      */
@@ -96,6 +104,13 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
         this.reconnectionService.scheduleAtFixedRate(new ReconnectionTask(), reconnectionInterval,
                 reconnectionInterval, TimeUnit.SECONDS);
         currentDataPublisherIndex.set(startIndex);
+
+        try {
+            SSLContext ctx = EndpointUtils.createSSLContext(AgentConfiguration.getInstance().getTrustStore());
+            this.sslSocketFactory = ctx.getSocketFactory();
+        } catch (DataEndpointException e) {
+            log.error("Error when initializing SSL socket factory");
+        }
     }
 
     public void addDataEndpoint(DataEndpoint dataEndpoint) {
@@ -409,23 +424,28 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
                 if (protocol.equals(DataEndpointConfiguration.Protocol.TCP.toString())) {
                     Socket socket = new Socket(ip, port);
                     socket.close();
-                    return true;
                 } else {
                     // this block is executed when connection is SSL
-                    DataEndpointConfiguration dataEndpointConfiguration = dataEndpoint.getDataEndpointConfiguration();
-                    Socket socket = (Socket) dataEndpointConfiguration.getSecuredTransportPool().borrowObject(
-                            dataEndpointConfiguration.getPublisherKey());
-                    OutputStream outputStream = socket.getOutputStream();
-                    String sessionId = dataEndpointConfiguration.getSessionId();
-                    ByteBuffer buf = ByteBuffer.allocate(sessionId.length());
-                    outputStream.write(buf.array());
-                    outputStream.flush();
-                    return true;
+                    SSLSocket socket = null;
+                    try {
+                        socket = (SSLSocket) sslSocketFactory.createSocket(ip, port);
+                        OutputStream outputStream = socket.getOutputStream();
+                        String sessionId = dataEndpoint.getDataEndpointConfiguration().getSessionId();
+                        ByteBuffer buf = ByteBuffer.allocate(sessionId.length());
+                        outputStream.write(buf.array());
+                        outputStream.flush();
+                    } finally {
+                        try {
+                            if ((socket != null) && (socket.isConnected())) {
+                                socket.close();
+                            }
+                        } catch (IOException e) {
+                            log.error("Can not close the SSL socket which is used to check the server status ",
+                                    e);
+                        }
+                    }
                 }
-            } catch (UnknownHostException e) {
-                return false;
-            } catch (IOException e) {
-                return false;
+                return true;
             } catch (Exception e) {
                 return false;
             }
