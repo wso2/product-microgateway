@@ -239,8 +239,8 @@ func (apiYaml APIYaml) ValidateAPIType() (err error) {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.WEBHOOK {
-		errMsg := "API type is not currently supported with Choreo Connect"
+	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.WEBHOOK && apiType == constants.SSE {
+		errMsg := "The given API type is currently not supported in Choreo Connect. API type: " + apiType
 		err = errors.New(errMsg)
 		return err
 	}

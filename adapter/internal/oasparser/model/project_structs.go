@@ -26,7 +26,7 @@ type ProjectAPI struct {
 	APIYaml          APIYaml
 	APIEnvProps      map[string]synchronizer.APIEnvProps
 	Deployments      []Deployment
-	OpenAPIJsn       []byte
+	APIDefinition    []byte
 	InterceptorCerts []byte
 	UpstreamCerts    map[string][]byte // cert filename -> cert bytes
 	EndpointCerts    map[string]string // url -> cert filename

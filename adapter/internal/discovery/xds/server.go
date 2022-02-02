@@ -277,37 +277,41 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		return nil, err
 	}
 
-	if apiYaml.APIType == constants.HTTP || apiYaml.APIType == constants.WEBHOOK {
-		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
-
-		// Set the following in case they were overridden by the above line
-		mgwSwagger.SetID(apiYaml.ID)
-		mgwSwagger.SetName(apiYaml.Name)
-		mgwSwagger.SetVersion(apiYaml.Version)
-		if err != nil {
-			return nil, err
-		}
-		// the following will be used for APIM specific security config.
-		// it will enable folowing securities globally for the API, overriding swagger securities.
-		isYamlAPIKey := false
-		isYamlOauth := false
-		for _, value := range apiYaml.SecurityScheme {
-			if value == constants.APIMAPIKeyType {
-				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
-				isYamlAPIKey = true
-			} else if value == constants.APIMOauth2Type {
-				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
-				isYamlOauth = true
-			}
-		}
-		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
-		mgwSwagger.SetOperationPolicies(apiYaml.Operations)
-		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-	} else if apiYaml.APIType != constants.WS {
-		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
+	err = apiProject.APIYaml.ValidateAPIType()
+	if err != nil {
+		return nil, err
 	}
+
+	err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the following in case they were overridden by the above line
+	mgwSwagger.SetID(apiYaml.ID)
+	mgwSwagger.SetName(apiYaml.Name)
+	mgwSwagger.SetVersion(apiYaml.Version)
+
+	// the following will be used for APIM specific security config.
+	// it will enable folowing securities globally for the API, overriding swagger securities.
+	isYamlAPIKey := false
+	isYamlOauth := false
+	for _, value := range apiYaml.SecurityScheme {
+		if value == constants.APIMAPIKeyType {
+			logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+			isYamlAPIKey = true
+		} else if value == constants.APIMOauth2Type {
+			logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+			isYamlOauth = true
+		}
+	}
+	mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
+	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
+
+	if apiYaml.APIType == constants.HTTP {
+		mgwSwagger.SetOperationPolicies(apiYaml.Operations)
+	}
 	mgwSwagger.OrganizationID = apiYaml.OrganizationID
 	organizationID := apiYaml.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
