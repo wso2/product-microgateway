@@ -114,6 +114,15 @@ public class PublisherUtils {
         return apiDTO.getId();
     }
 
+    /**
+     * Updates the OpenAPI definition of an already created API
+     * 
+     * @param apiId ID of the API to update the OpenAPI definition
+     * @param openAPIFileName Name of the OpenAPI file. ex. scopes_openAPI.yaml
+     * @param publisherRestClient An instance of RestAPIPublisherImpl
+     * @return ID of the API that was updated
+     * @throws CCTestException if the OpenAPI file specified was not present, or an error occurs when updating the API
+     */
     public static String updateOpenAPIDefinition(String apiId, String openAPIFileName,
                                                RestAPIPublisherImpl publisherRestClient) throws CCTestException {
         String targetDir = Utils.getTargetDirPath();

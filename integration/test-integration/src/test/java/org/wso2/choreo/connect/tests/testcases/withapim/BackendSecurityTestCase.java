@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BackendSecurityTestCase extends ApimBaseTest {
-    public static final String API_NAME = "BackendSecurityApi";
+    public static final String API_NAME = "BackendSecurityAPI";
     private static final String API_CONTEXT = "backend_security";
     public static final String APP_NAME = "BackendSecurityApp";
 

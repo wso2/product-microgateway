@@ -1,21 +1,21 @@
 [
   {
-    "apiName": "AdvancedThrottlingApi",
+    "apiName": "AdvancedThrottlingAPI",
     "appName": "AdvanceThrottlingApp",
     "tier": "Unlimited"
   },
   {
-    "apiName": "BackendSecurityApi",
+    "apiName": "BackendSecurityAPI",
     "appName": "BackendSecurityApp",
     "tier": "Unlimited"
   },
   {
-    "apiName": "BlockedApi",
+    "apiName": "BlockedAPI",
     "appName": "BlockedApiApp",
     "tier": "Unlimited"
   },
   {
-    "apiName": "ExistingApi",
+    "apiName": "ExistingAPI",
     "appName": "ExistingApiApp",
     "tier": "Unlimited"
   },

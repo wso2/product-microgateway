@@ -36,9 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ExistingApiTestCase extends ApimBaseTest {
-    private static final String API_NAME = "ExistingApi";
     private static final String API_CONTEXT = "existing_api";
-    private static final String API_VERSION = "1.0.0";
     private static final String APP_NAME = "ExistingApiApp";
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")

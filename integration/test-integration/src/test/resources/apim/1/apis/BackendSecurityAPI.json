@@ -1,5 +1,5 @@
 {
-  "name": "BackendSecurityApi",
+  "name": "BackendSecurityAPI",
   "version": "1.0.0",
   "context": "backend_security",
   "type": "HTTP",
