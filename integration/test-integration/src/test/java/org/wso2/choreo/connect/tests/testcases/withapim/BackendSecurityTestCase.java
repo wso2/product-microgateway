@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
@@ -44,13 +45,9 @@ import java.util.List;
 import java.util.Map;
 
 public class BackendSecurityTestCase extends ApimBaseTest {
-    private String apiId;
-    private String applicationId;
-
-    public static final String API_NAME = "BackendSecurityApi";
+    public static final String API_NAME = "BackendSecurityAPI";
     private static final String API_CONTEXT = "backend_security";
-    public static final String APP_NAME = "backendSecurityApp";
-    private static final String API_VERSION = "1.0.0";
+    public static final String APP_NAME = "BackendSecurityApp";
 
     private String prodAccessToken;
     private String sandAccessToken;
@@ -58,61 +55,12 @@ public class BackendSecurityTestCase extends ApimBaseTest {
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
         super.initWithSuperTenant();
-        JSONObject prodEndpoints = new JSONObject();
-        prodEndpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
-        JSONObject sandEndpoints = new JSONObject();
-        sandEndpoints.put("url", new URL(Utils.getDockerMockService2URLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
 
-        JSONObject epsecurity = new JSONObject();
-        epsecurity.put("type", "BASIC");
-        epsecurity.put("username", "admin");
-        epsecurity.put("password", "admin");
-        epsecurity.put("enabled", true);
-
-        JSONObject epSecurity = new JSONObject();
-        epSecurity.put("production", epsecurity);
-        epSecurity.put("sandbox", epsecurity);
-
-        JSONObject endpointConfig = new JSONObject();
-        endpointConfig.put("endpoint_type", "http");
-        endpointConfig.put("production_endpoints", prodEndpoints);
-        endpointConfig.put("sandbox_endpoints", sandEndpoints);
-        endpointConfig.put("endpoint_security", epSecurity);
-
-        APIOperationsDTO apiOperation = new APIOperationsDTO();
-        apiOperation.setVerb("GET");
-        apiOperation.setTarget("/echo");
-        apiOperation.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
-        APIOperationsDTO apiOperation2 = new APIOperationsDTO();
-        apiOperation2.setVerb("GET");
-        apiOperation2.setTarget("/echo2");
-        apiOperation2.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-        apiOperation2.setAuthType("None");
-
-        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(apiOperation);
-        operationsDTOS.add(apiOperation2);
-
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(API_NAME, API_CONTEXT,
-                API_VERSION, user.getUserName());
-        apiRequest.setEndpoint(endpointConfig);
-        apiRequest.setOperationsDTOS(operationsDTOS);
-        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
-
-        //Create App. Subscribe.
-        Application app = new Application(APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        AppWithConsumerKey appWithConsumerKey = StoreUtils.createApplicationWithKeys(app, storeRestClient);
-        applicationId = appWithConsumerKey.getApplicationId();
-
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-        prodAccessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
-                new String[]{}, user, storeRestClient);
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
+        prodAccessToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
         sandAccessToken = StoreUtils.generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId, user,
                 storeRestClient);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME * 2, "Interrupted when waiting for the " +
-                "subscription to be deployed");
     }
 
     @Test(description = "oauth2 secured resource backend basic auth")
@@ -120,7 +68,7 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + prodAccessToken);
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo");
-        HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint);
 
         // test headers

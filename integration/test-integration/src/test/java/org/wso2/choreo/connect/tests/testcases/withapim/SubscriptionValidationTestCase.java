@@ -42,7 +42,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     private Map<String, String> requestHeaders;
     private String endpointURL;
 
-    public static final String API_NAME = "SubscriptionValidationApi";
+    public static final String API_NAME = "SubscriptionValidationAPI";
     private static final String API_CONTEXT = "subs_validation";
     public static final String APPLICATION_NAME = "SubscriptionValidationApp";
     public static final String X_ENVOY_UPSTREAM_SERVICE_TIME_HEADER= "x-envoy-upstream-service-time";

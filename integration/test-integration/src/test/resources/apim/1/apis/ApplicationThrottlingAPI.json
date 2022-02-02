@@ -1,7 +1,7 @@
 {
-  "name": "AdvancedThrottlingApi",
+  "name": "ApplicationThrottlingAPI",
   "version": "1.0.0",
-  "context": "advanced_throttling",
+  "context": "application_throttling",
   "type": "HTTP",
   "tiersCollection": "Unlimited",
   "operationsDTOS": [
