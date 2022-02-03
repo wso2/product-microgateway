@@ -123,16 +123,12 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 		if channelItem.Publish != nil {
 			vendorExtensions := channelItem.Publish.(map[string]interface{})
 			security := getSecurityArray(vendorExtensions)
-			// relevant security schemes are added by default by the mgwSwagger.SanitizeAPISecurity at server.go
-
 			methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions, MockedAPIConfig{}))
 			methodFound = true
 		}
 		if channelItem.Subscribe != nil {
 			vendorExtensions := channelItem.Subscribe.(map[string]interface{})
 			security := getSecurityArray(vendorExtensions)
-			// relevant security schemes are added by default by the mgwSwagger.SanitizeAPISecurity at server.go
-
 			methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions, MockedAPIConfig{}))
 			methodFound = true
 		}

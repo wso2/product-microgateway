@@ -292,26 +292,26 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
 
-	// the following will be used for APIM specific security config.
-	// it will enable folowing securities globally for the API, overriding swagger securities.
-	isYamlAPIKey := false
-	isYamlOauth := false
-	for _, value := range apiYaml.SecurityScheme {
-		if value == constants.APIMAPIKeyType {
-			logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
-			isYamlAPIKey = true
-		} else if value == constants.APIMOauth2Type {
-			logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
-			isYamlOauth = true
-		}
-	}
-	mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
-	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
-
 	if apiYaml.APIType == constants.HTTP {
+		// avoid the following for AsyncAPI types
+		// the following will be used for APIM specific security config.
+		// it will enable folowing securities globally for the API, overriding swagger securities.
+		isYamlAPIKey := false
+		isYamlOauth := false
+		for _, value := range apiYaml.SecurityScheme {
+			if value == constants.APIMAPIKeyType {
+				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlAPIKey = true
+			} else if value == constants.APIMOauth2Type {
+				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlOauth = true
+			}
+		}
+		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetOperationPolicies(apiYaml.Operations)
 	}
+	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
+	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
 	mgwSwagger.OrganizationID = apiYaml.OrganizationID
 	organizationID := apiYaml.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
