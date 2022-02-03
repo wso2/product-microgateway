@@ -76,6 +76,7 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	apiProject.UpstreamCerts = make(map[string][]byte)
 	apiProject.EndpointCerts = make(map[string]string)
+	apiProject.Policies = make(map[string]model.PolicyContainer)
 	for _, file := range zipReader.File {
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
 		unzippedFileBytes, err := readZipFile(file)
@@ -88,7 +89,9 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 			return apiProject, err
 		}
 	}
+	apiProject.StandardizeAPIYamlOperationPolicies()
 	err = apiProject.ValidateAPIType()
+	fmt.Print(apiProject)
 	if err != nil {
 		return apiProject, err
 	}
@@ -129,6 +132,7 @@ func ProcessMountedAPIProjects() (err error) {
 				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
 				continue
 			}
+			err = apiProject.StandardizeAPIYamlOperationPolicies()
 			err = apiProject.ValidateAPIType()
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error while validation type of the api artifact - %s during startup : %v",

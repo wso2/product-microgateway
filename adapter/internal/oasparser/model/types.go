@@ -17,10 +17,12 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"os"
 	"strings"
+	"text/template"
 
 	"gopkg.in/yaml.v2"
 
@@ -41,6 +43,9 @@ const (
 	apiJSONFile                    string = "api.json"
 	endpointCertDir                string = "Endpoint-certificates"
 	interceptorCertDir             string = "Endpoint-certificates/interceptors"
+	policiesDir                    string = "Policies"
+	policySpecFileExtension        string = ".yaml"
+	policyDefFileExtension         string = ".gotmpl"
 	crtExtension                   string = ".crt"
 	pemExtension                   string = ".pem"
 	apiTypeFilterKey               string = "type"
@@ -64,9 +69,10 @@ type ProjectAPI struct {
 	Deployments        []Deployment
 	OpenAPIJsn         []byte
 	InterceptorCerts   []byte
-	APIType            string // read from api.yaml and formatted to upper case
-	APILifeCycleStatus string // read from api.yaml and formatted to upper case
-	OrganizationID     string // read from api.yaml or config
+	APIType            string                     // read from api.yaml and formatted to upper case
+	APILifeCycleStatus string                     // read from api.yaml and formatted to upper case
+	OrganizationID     string                     // read from api.yaml or config
+	Policies           map[string]PolicyContainer // read from policy dir
 
 	//UpstreamCerts cert filename -> cert bytes
 	UpstreamCerts map[string][]byte
@@ -180,6 +186,30 @@ type Policy struct {
 	Parameters   interface{} `json:"parameters,omitempty"`
 }
 
+// PolicyContainer holds the definition and specification of policy
+type PolicyContainer struct {
+	Specification PolicySpecification
+	Definition    PolicyDefinition
+}
+
+// PolicySpecification holds policy specification from ./Policy/<policy>.yaml files
+type PolicySpecification struct {
+	ApimMeta
+	Data struct {
+		SupportedGateways []string
+	}
+}
+
+// PolicyDefinition holds the content of policy definition which is rendered from ./Policy/<policy>.gotmpl files
+type PolicyDefinition struct {
+	ApimMeta
+	Data struct {
+		Action     string
+		Parameters map[string]string
+	}
+	RawData []byte `yaml:"_"`
+}
+
 // EndpointInfo holds config values regards to the endpoint
 type EndpointInfo struct {
 	Endpoint string `json:"url,omitempty"`
@@ -201,6 +231,42 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 		err = errors.New(errMsg)
 		return err
 	}
+	return nil
+}
+
+// StandardizeAPIYamlOperationPolicies updates API yaml with the CC standards by removing user defined templates.
+func (apiProject *ProjectAPI) StandardizeAPIYamlOperationPolicies() error {
+	for i, operation := range apiProject.APIYaml.Data.Operations {
+		for j, policy := range operation.OperationPolicies.In {
+			userP := policy.Parameters
+			data := apiProject.Policies[policy.PolicyName].Definition.RawData
+			t, err := template.New("policy-def").Parse(string(data))
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error parsing the operation policy definition %v into go template: %v", policy.PolicyName, err)
+				continue
+			}
+
+			var out bytes.Buffer
+			err = t.Execute(&out, userP)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error operation policy definition %v: %v", policy.PolicyName, err)
+				continue
+			}
+
+			def := PolicyDefinition{}
+			if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
+				loggers.LoggerAPI.Errorf("Error parsing standardized operation policy definition %v into yaml: %v", policy.PolicyName, err)
+				continue
+			}
+
+			// update API yaml file with choreo connect standadize parameter names
+			policy.Parameters = def.Data.Parameters
+			policy.TemplateName = def.Data.Action
+			operation.OperationPolicies.In[j] = policy
+			apiProject.APIYaml.Data.Operations[i] = operation
+		}
+	}
+
 	return nil
 }
 
@@ -266,13 +332,13 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		loggers.LoggerAPI.Debugf("fileName : %v", fileName)
 		apiJsn, conversionErr := utills.ToJSON(fileContent)
 		if conversionErr != nil {
-			loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
+			loggers.LoggerAPI.Errorf("Error occurred converting api file to json: %v", conversionErr.Error())
 			return conversionErr
 		}
 		var apiYaml APIYaml
 		err = json.Unmarshal(apiJsn, &apiYaml)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
+			loggers.LoggerAPI.Errorf("Error occurred while parsing api.yaml or api.json %v", err.Error())
 			return err
 		}
 		apiYaml = PopulateEndpointsInfo(apiYaml)
@@ -284,6 +350,44 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.APIYaml = apiYaml
 		ExtractAPIInformation(apiProject, apiYaml)
+	} else if strings.Contains(fileName, policiesDir+string(os.PathSeparator)) {
+		if strings.HasSuffix(fileName, policySpecFileExtension) {
+			// process policy specificationn
+			spec := PolicySpecification{}
+			if err := yaml.Unmarshal(fileContent, &spec); err != nil {
+				loggers.LoggerAPI.Errorf("Error parsing content of policy specification %v: %v", fileName, err.Error())
+				return err
+			}
+
+			key := utills.FileNameWithoutExtension(fileName)
+			if policy, ok := apiProject.Policies[key]; ok {
+				policy.Specification = spec
+				apiProject.Policies[key] = policy
+			} else {
+				apiProject.Policies[key] = PolicyContainer{
+					Specification: spec,
+				}
+			}
+
+		}
+		if strings.HasSuffix(fileName, policyDefFileExtension) {
+			// process policy definition
+			def := PolicyDefinition{RawData: fileContent}
+			// if err := yaml.Unmarshal(fileContent, &def); err != nil {
+			// 	loggers.LoggerAPI.Errorf("Error parsing content of policy definition %v: %v", fileName, err.Error())
+			// 	return err
+			// }
+
+			key := utills.FileNameWithoutExtension(fileName)
+			if policy, ok := apiProject.Policies[key]; ok {
+				policy.Definition = def
+				apiProject.Policies[key] = policy
+			} else {
+				apiProject.Policies[key] = PolicyContainer{
+					Definition: def,
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -317,4 +421,8 @@ func parseDeployments(data []byte) ([]Deployment, error) {
 		deployments = append(deployments, deployment)
 	}
 	return deployments, nil
+}
+
+func parsePolicies() {
+
 }

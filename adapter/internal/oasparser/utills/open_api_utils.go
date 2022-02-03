@@ -21,6 +21,8 @@ package utills
 import (
 	"bytes"
 	"encoding/json"
+	"path/filepath"
+	"strings"
 
 	// TODO: (VirajSalaka) remove outdated dependency
 	"unicode"
@@ -72,4 +74,8 @@ func FindSwaggerVersion(jsn []byte) string {
 
 	}
 	return version
+}
+
+func FileNameWithoutExtension(path string) string {
+	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }
