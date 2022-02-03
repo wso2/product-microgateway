@@ -20,8 +20,12 @@
 package model
 
 import (
+	"encoding/json"
+	"strconv"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
@@ -65,6 +69,72 @@ type MockedHeaderConfig struct {
 type MockedContentConfig struct {
 	ContentType string `json:"contentType,omitempty"`
 	Body        string `json:"body,omitempty"`
+}
+
+// SetMockedAPIConfig generate mock impl endpoint configurations
+func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Operation) {
+	if len(openAPIOperation.Responses) > 0 {
+		operation.mockedAPIConfig = MockedAPIConfig{
+			In:        "query",
+			Name:      "responseCode",
+			Responses: make([]MockedResponseConfig, 0),
+		}
+		for responseCode, responseRef := range openAPIOperation.Responses {
+			code, err := strconv.ParseInt(responseCode, 10, 32)
+			mockedResponse := MockedResponseConfig{
+				Value:   responseCode,
+				Code:    int(code),
+				Content: make([]MockedContentConfig, 0),
+			}
+			if err == nil {
+				for mediaType, content := range responseRef.Value.Content {
+					example, _ := asJSON(content.Example)
+					mockedResponse.Content = append(mockedResponse.Content, MockedContentConfig{
+						ContentType: mediaType,
+						Body:        example,
+					})
+				}
+			}
+			operation.mockedAPIConfig.Responses = append(operation.mockedAPIConfig.Responses, mockedResponse)
+		}
+	}
+}
+
+// SetMockedAPIConfig generate mock impl endpoint configurations
+func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operation) {
+	if len(openAPIOperation.Responses.StatusCodeResponses) > 0 {
+		operation.mockedAPIConfig = MockedAPIConfig{
+			In:        "query",
+			Name:      "responseCode",
+			Responses: make([]MockedResponseConfig, 0),
+		}
+		for responseCode, responseRef := range openAPIOperation.Responses.StatusCodeResponses {
+			mockedResponse := MockedResponseConfig{
+				Value:   strconv.Itoa(responseCode),
+				Code:    responseCode,
+				Content: make([]MockedContentConfig, 0),
+			}
+			for mediaType, content := range responseRef.ResponseProps.Examples {
+				example, _ := asJSON(content)
+				mockedResponse.Content = append(mockedResponse.Content, MockedContentConfig{
+					ContentType: mediaType,
+					Body:        example,
+				})
+			}
+			operation.mockedAPIConfig.Responses = append(operation.mockedAPIConfig.Responses, mockedResponse)
+		}
+	}
+}
+
+func asJSON(data interface{}) (string, error) {
+	if data != nil {
+		b, err := json.Marshal(data)
+		if err != nil {
+			return "", err
+		}
+		return string(b), nil
+	}
+	return "", nil
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -164,10 +234,9 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 }
 
 // NewOperation Creates and returns operation type object
-func NewOperation(method string, security []map[string][]string, extensions map[string]interface{},
-	mockedAPIConfig MockedAPIConfig) *Operation {
+func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	return &Operation{id, method, security, tier, disableSecurity, extensions, OperationPolicies{}, mockedAPIConfig}
+	return &Operation{id, method, security, tier, disableSecurity, extensions, OperationPolicies{}, MockedAPIConfig{}}
 }

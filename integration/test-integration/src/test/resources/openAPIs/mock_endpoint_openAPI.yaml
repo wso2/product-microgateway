@@ -1,130 +1,139 @@
-openapi: "3.0.0"
+openapi: 3.0.1
 info:
-  version: 1.0.0
-  title: mockApiTest
-  license:
-    name: MIT
+  title: mock2
+  version: v
 servers:
   - url: /
-x-wso2-basePath: /mockApiTest/1.0.0
+security:
+  - default: []
 paths:
-  /testMockApiWithHeader:
+  /*:
     get:
-      summary: Tests Choreo Connect mock API implementation
-      operationId: testImpl
       responses:
         '200':
-          description: Expected response to a valid request
+          description: OK
           content:
             application/json:
+              example:
+                id: 0
+                username: "string"
               schema:
-                $ref: "#/components/schemas/Data"
-      x-mediation-script: |
-        {
-           "in": "header",
-           "name": "mockApiValue",
-           "responses": [
-               {
-                   "value": "success",
-                   "headers": [
-                       {
-                           "name": "x-wso2-header1",
-                           "value": "Sample header value"
-                       }
-                   ],
-                   "code": 200,
-                   "content":[
-                      {
-                          "contentType":"application/json",
-                          "body":"{\"name\" : \"choreo connect\"}"
-                      },
-                      {
-                          "contentType":"application/xml",
-                          "body":"<name>choreo connect</name>"
-                      }
-                  ]
-               }
-           ]
-        }
+                $ref: '#/components/schemas/User'
       security:
-        - APIKeyAuth: [ ]
-  /testMockWithQueryParam:
-    get:
-      summary: Tests Choreo Connect mock API implementation with query parameters
-      operationId: testImpl2
-      x-mediation-script: |
-        {
-           "in": "query",
-           "name": "mockApiQueryVal",
-           "responses": [
-               {
-                   "value": "success",
-                   "headers": [
-                       {
-                           "name": "x-wso2-q-header",
-                           "value": "Header value for query param"
-                       }
-                   ],
-                   "code": 500,
-                   "content":[
-                       {
-                           "contentType":"application/json",
-                           "body":"{\"name\" : \"choreo connect\"}"
-                       },
-                       {
-                           "contentType":"application/xml",
-                           "body":"<name>choreo connect</name>"
-                       }
-                   ]
-               }
-           ]
-        }
+        - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+    put:
+      responses:
+        '200':
+          description: OK
       security:
-        - APIKeyAuth: [ ]
-  /testMockDefault:
-    get:
-      summary: Tests Choreo Connect mock default API implementation
-      operationId: testImpl3
-      x-mediation-script: |
-        {
-           "in": "default",
-           "responses": [
-               {
-                   "headers": [
-                       {
-                           "name": "x-wso2-default-header",
-                           "value": "Default header value"
-                       }
-                   ],
-                   "code": 200,
-                   "content":[
-                       {
-                           "contentType":"application/json",
-                           "body":"{\"name\" : \"choreo connect\"}"
-                       }
-                   ]
-               }
-           ]
-        }
+        - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+    post:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: ""
+            application/xml:
+              example: ""
       security:
-        - APIKeyAuth: []
+        - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+    delete:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: ""
+            application/xml:
+              example: ""
+      security:
+        - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+    patch:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: ""
+            application/xml:
+              example: ""
+      security:
+        - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
 components:
-  securitySchemes:
-    APIKeyAuth:
-      type: apiKey
-      name: x-api-key
-      in: header
   schemas:
-    Data:
+    User:
       type: object
-      required:
-        - id
-        - name
       properties:
         id:
           type: integer
-          format: int64
-        name:
+          description: The user ID.
+          example: 1
+        username:
           type: string
-        tag:
-          type: string
+          description: The user name.
+          example: "yuy"
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'https://test.com'
+          scopes: {}
+x-wso2-auth-header: Authorization
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+    - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+    - authorization
+    - Access-Control-Allow-Origin
+    - Content-Type
+    - SOAPAction
+    - apikey
+    - Internal-Key
+  accessControlAllowMethods:
+    - GET
+    - PUT
+    - POST
+    - DELETE
+    - PATCH
+    - OPTIONS
+x-wso2-basePath: /m/v
+x-wso2-transports:
+  - http
+  - https
+x-wso2-response-cache:
+  enabled: false
+  cacheTimeoutInSeconds: 300

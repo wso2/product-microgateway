@@ -42,7 +42,6 @@ const (
 	XWso2DisableSecurity              string = "x-wso2-disable-security"
 	None                              string = "None"
 	DefaultSecurity                   string = "default"
-	XMediationScript                  string = "x-mediation-script"
 	XWso2PassRequestPayloadToEnforcer string = "x-wso2-pass-request-payload-to-enforcer"
 )
 

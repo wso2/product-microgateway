@@ -55,7 +55,7 @@ data:
     production_endpoints:
       url: http://localhost
     implementation_status: prototyped
-  endpointImplementationType: TEMPLATE
+  endpointImplementationType: MOCKED_OAS
   scopes: []
   operations:
     -

@@ -39,6 +39,8 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
+const prototypedAPI = "prototyped"
+
 // MgwSwagger represents the object structure holding the information related to the
 // openAPI object. The values are populated from the extensions/properties mentioned at
 // the root level of the openAPI definition. The pathItem level information is represented
@@ -64,7 +66,7 @@ type MgwSwagger struct {
 	disableSecurity      bool
 	OrganizationID       string
 	IsPrototyped         bool
-	IsMockedAPI          bool
+	EndpointType         string
 	LifecycleStatus      string
 	xWso2RequestBodyPass bool
 }
@@ -1139,11 +1141,7 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 		swagger.IsPrototyped = true
 	}
 
-	// below condition will evaluate as true for mocked API implementations
-	if endpointConfig.ImplementationStatus == constants.Prototyped &&
-		data.EndpointImplementationType == constants.TemplateEndpointType {
-		swagger.IsMockedAPI = true
-	}
+	swagger.EndpointType = endpointConfig.EndpointType
 
 	if len(endpointConfig.ProductionEndpoints) > 0 {
 		var endpoints []Endpoint
