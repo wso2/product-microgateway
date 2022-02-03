@@ -81,7 +81,7 @@ type OperationAsync struct {
 func (swagger *MgwSwagger) SetInfoAsyncAPI(asyncAPI AsyncAPI) error {
 	swagger.vendorExtensions = asyncAPI.VendorExtensions
 	swagger.securityScheme = asyncAPI.getSecuritySchemes()
-	swagger.resources = asyncAPI.getResourcesSwagger()
+	swagger.resources = asyncAPI.getResources()
 
 	if asyncAPI.Servers.Production.URL != "" {
 		endpoint, err := getWebSocketEndpoint(asyncAPI.Servers.Production.URL)
@@ -115,7 +115,7 @@ func (asyncAPI AsyncAPI) getSecuritySchemes() []SecurityScheme {
 	return securitySchemes
 }
 
-func (asyncAPI AsyncAPI) getResourcesSwagger() []*Resource {
+func (asyncAPI AsyncAPI) getResources() []*Resource {
 	resources := []*Resource{}
 	for channel, channelItem := range asyncAPI.Channels {
 		var methodsArray []*Operation

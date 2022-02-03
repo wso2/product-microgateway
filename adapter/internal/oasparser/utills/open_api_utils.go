@@ -73,7 +73,6 @@ func FindAPIDefinitionVersion(jsn []byte) string {
 		logger.LoggerOasparser.Warn("AsyncAPI version is not supported.")
 		return constants.NotSupported
 	}
-	logger.LoggerOasparser.Info(result)
 	logger.LoggerOasparser.Warn("API definition version is not defined.")
 	return constants.NotDefined
 }
