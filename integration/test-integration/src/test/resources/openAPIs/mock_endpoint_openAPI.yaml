@@ -1,139 +1,76 @@
-openapi: 3.0.1
+openapi: "3.0.0"
 info:
-  title: mock2
-  version: v
+  version: 1.0.0
+  title: Swagger Petstore Prototyped Implementation
+  license:
+    name: MIT
 servers:
   - url: /
-security:
-  - default: []
+x-wso2-production-endpoints:
+  urls:
+    - '/'
+x-wso2-basePath: /prototyped
 paths:
-  /*:
+  /pet/findByStatus:
     get:
+      summary: Finds Pets by status
+      operationId: findPetsByStatus
+      tags:
+        - pets
       responses:
         '200':
-          description: OK
+          description: Expected response to a valid request
           content:
             application/json:
-              example:
-                id: 0
-                username: "string"
               schema:
-                $ref: '#/components/schemas/User'
-      security:
-        - default: []
-      x-auth-type: Application & Application User
-      x-throttling-tier: Unlimited
-      x-wso2-application-security:
-        security-types:
-          - oauth2
-        optional: false
-    put:
-      responses:
-        '200':
-          description: OK
-      security:
-        - default: []
-      x-auth-type: Application & Application User
-      x-throttling-tier: Unlimited
-      x-wso2-application-security:
-        security-types:
-          - oauth2
-        optional: false
-    post:
-      responses:
-        '200':
-          description: OK
+                $ref: "#/components/schemas/Pet"
+              example:
+                name: "slcd"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Pet"
+              example:
+                name: "slcd"
+        '500':
+          description: Expected response to a valid request
           content:
             application/json:
-              example: ""
+              schema:
+                $ref: "#/components/schemas/Pet"
+              example:
+                name1: "value1"
             application/xml:
-              example: ""
-      security:
-        - default: []
-      x-auth-type: Application & Application User
-      x-throttling-tier: Unlimited
-      x-wso2-application-security:
-        security-types:
-          - oauth2
-        optional: false
-    delete:
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              example: ""
-            application/xml:
-              example: ""
-      security:
-        - default: []
-      x-auth-type: Application & Application User
-      x-throttling-tier: Unlimited
-      x-wso2-application-security:
-        security-types:
-          - oauth2
-        optional: false
-    patch:
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              example: ""
-            application/xml:
-              example: ""
-      security:
-        - default: []
-      x-auth-type: Application & Application User
-      x-throttling-tier: Unlimited
-      x-wso2-application-security:
-        security-types:
-          - oauth2
-        optional: false
+              schema:
+                $ref: "#/components/schemas/Pet"
+              example:
+                name1: "value1"
 components:
   schemas:
-    User:
+    Pet:
       type: object
+      required:
+        - id
+        - name
       properties:
         id:
           type: integer
-          description: The user ID.
-          example: 1
-        username:
+          format: int64
+        name:
           type: string
-          description: The user name.
-          example: "yuy"
-  securitySchemes:
-    default:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: 'https://test.com'
-          scopes: {}
-x-wso2-auth-header: Authorization
-x-wso2-cors:
-  corsConfigurationEnabled: false
-  accessControlAllowOrigins:
-    - '*'
-  accessControlAllowCredentials: false
-  accessControlAllowHeaders:
-    - authorization
-    - Access-Control-Allow-Origin
-    - Content-Type
-    - SOAPAction
-    - apikey
-    - Internal-Key
-  accessControlAllowMethods:
-    - GET
-    - PUT
-    - POST
-    - DELETE
-    - PATCH
-    - OPTIONS
-x-wso2-basePath: /m/v
-x-wso2-transports:
-  - http
-  - https
-x-wso2-response-cache:
-  enabled: false
-  cacheTimeoutInSeconds: 300
+        tag:
+          type: string
+    Pets:
+      type: array
+      items:
+        $ref: "#/components/schemas/Pet"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
