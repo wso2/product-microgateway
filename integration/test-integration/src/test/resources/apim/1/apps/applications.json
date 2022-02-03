@@ -32,11 +32,19 @@
     "throttleTier": "Unlimited"
   },
   {
+    "appName": "RetryApp",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "SubscriptionThrottlingApp",
     "throttleTier": "Unlimited"
   },
   {
     "appName": "SubscriptionValidationApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "TimeoutApp",
     "throttleTier": "Unlimited"
   },
   {

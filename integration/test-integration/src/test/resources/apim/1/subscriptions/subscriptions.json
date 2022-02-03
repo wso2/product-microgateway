@@ -35,6 +35,16 @@
     "tier": "Unlimited"
   },
   {
+    "apiName": "RetryAPI",
+    "appName": "RetryApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "TimeoutAPI",
+    "appName": "TimeoutApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "VHostAPI1",
     "appName": "VHostApp",
     "tier": "Unlimited"

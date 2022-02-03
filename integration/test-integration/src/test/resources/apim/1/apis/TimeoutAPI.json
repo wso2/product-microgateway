@@ -1,0 +1,31 @@
+{
+  "name": "TimeoutAPI",
+  "version": "1.0.0",
+  "context": "timeout",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/delay-4",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2383/v2",
+      "config": {
+        "retryTimeOut": "",
+        "actionDuration": "3000",
+        "actionSelect": "discard",
+        "factor": "",
+        "retryDelay": "",
+        "retryErroCode": [],
+        "suspendDuration": "",
+        "suspendErrorCode": [],
+        "suspendMaxDuration": ""
+      }
+    }
+  }
+}
