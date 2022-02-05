@@ -190,9 +190,25 @@ type OperationYaml struct {
 
 // OperationPolicies holds policies of the APIM operations
 type OperationPolicies struct {
-	In    []Policy `json:"in,omitempty"`
-	Out   []Policy `json:"out,omitempty"`
-	Fault []Policy `json:"fault,omitempty"`
+	In    PolicyList `json:"in,omitempty"`
+	Out   PolicyList `json:"out,omitempty"`
+	Fault PolicyList `json:"fault,omitempty"`
+}
+
+// PolicyList holds list of Polices in a flow of operation
+type PolicyList []Policy
+
+func (pl PolicyList) getStats() map[string]policyStats {
+	stats := map[string]policyStats{}
+	for i, policy := range pl {
+		stat, ok := stats[policy.PolicyName]
+		if ok {
+			stats[policy.PolicyName] = policyStats{firstIndex: stat.firstIndex, count: stat.count + 1}
+		} else {
+			stats[policy.PolicyName] = policyStats{firstIndex: i, count: 1}
+		}
+	}
+	return stats
 }
 
 // Policy holds APIM policies
@@ -202,6 +218,12 @@ type Policy struct {
 	Order        int         `json:"order,omitempty"`
 	Parameters   interface{} `json:"parameters,omitempty"`
 	isIncluded   bool        `json:"-"` // used to check whether multiple instance of policy applied
+}
+
+// policyStats used to optimize and reduce loops by storing stats by calculating only once
+type policyStats struct {
+	firstIndex int
+	count      int
 }
 
 // PolicyContainer holds the definition and specification of policy
@@ -248,8 +270,7 @@ type EndpointInfo struct {
 }
 
 // validatePolicy validates the given policy against the spec
-func (spec *PolicySpecification) validatePolicy(policyList []Policy, pIndex int, flow PolicyFlow) error {
-	policy := policyList[pIndex]
+func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int) error {
 	if spec.Data.Name != policy.PolicyName {
 		return fmt.Errorf("invalid policy specification, spec name %s and policy name %s mismatch", spec.Data.Name, policy.PolicyName)
 	}
@@ -261,20 +282,14 @@ func (spec *PolicySpecification) validatePolicy(policyList []Policy, pIndex int,
 		return errors.New("choreo connect gateway not supported")
 	}
 	if !spec.Data.MultipleAllowed {
-		count := 0
-		for i, p := range policyList {
-			if p.PolicyName == spec.Data.Name {
-				count += 1
-				// TODO: check the behaviour sith APIM
-				// in here allow first instance of policy to be applied if multiple is found
-				if count > 1 {
-					if pIndex >= i {
-						return errors.New("multiple policies not allowed")
-					}
-					loggers.LoggerAPI.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
-					break
-				}
+		// TODO: check the behaviour sith APIM
+		// in here allow first instance of policy to be applied if multiple is found
+		pStat := stats[policy.PolicyName]
+		if pStat.count > 1 {
+			if index != pStat.firstIndex {
+				return errors.New("multiple policies not allowed")
 			}
+			loggers.LoggerAPI.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
 		}
 	}
 
@@ -337,21 +352,23 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 func (apiProject *ProjectAPI) getFormattedOperationalPolicies(policies OperationPolicies) OperationPolicies {
 	fmtPolicies := OperationPolicies{}
 
-	for i := range policies.In {
-		// using index i instead of struct to validate policy against multiple allowed and apply only first if multiple exists
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policies.In, i, PolicyInFlow); err == nil {
+	inFlowStats := policies.In.getStats()
+	for i, policy := range policies.In {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyInFlow, inFlowStats, i); err == nil {
 			fmtPolicies.In = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
 
-	for i := range policies.Out {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policies.Out, i, PolicyOutFlow); err == nil {
+	outFlowStats := policies.Out.getStats()
+	for i, policy := range policies.Out {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyOutFlow, outFlowStats, i); err == nil {
 			fmtPolicies.Out = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
 
-	for i := range policies.Fault {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policies.Fault, i, PolicyFaultFlow); err == nil {
+	faultFlowStats := policies.Out.getStats()
+	for i, policy := range policies.Fault {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyFaultFlow, faultFlowStats, i); err == nil {
 			fmtPolicies.Fault = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
@@ -360,11 +377,10 @@ func (apiProject *ProjectAPI) getFormattedOperationalPolicies(policies Operation
 }
 
 // getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
-func (apiProject *ProjectAPI) getFormattedPolicyFromTemplated(policyList []Policy, pIndex int, flow PolicyFlow) (Policy, error) {
+func (apiProject *ProjectAPI) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int) (Policy, error) {
 	// using index i instead of struct to validate policy against multiple allowed and apply only first if multiple exists
-	policy := policyList[pIndex]
 	spec := apiProject.Policies[policy.PolicyName].Specification
-	if err := spec.validatePolicy(policyList, pIndex, flow); err != nil {
+	if err := spec.validatePolicy(policy, flow, stats, index); err != nil {
 		loggers.LoggerAPI.Errorf("Operation policy validation failed, ignoring the policy \"%v\": %v", policy.PolicyName, err)
 		return policy, err
 	}
