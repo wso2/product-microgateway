@@ -20,7 +20,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -46,6 +48,7 @@ const (
 	policiesDir                    string = "Policies"
 	policySpecFileExtension        string = ".yaml"
 	policyDefFileExtension         string = ".gotmpl"
+	policyCCGateway                string = "CC"
 	crtExtension                   string = ".crt"
 	pemExtension                   string = ".pem"
 	apiTypeFilterKey               string = "type"
@@ -60,6 +63,19 @@ const (
 	production                     string = "production"
 	sandbox                        string = "sandbox"
 	zipExt                         string = ".zip"
+)
+
+const (
+	policyValTypeString string = "String"
+	policyValTypeInt    string = "Integer"
+)
+
+type PolicyFlow string
+
+var (
+	PolicyInFlow    PolicyFlow = "request"
+	PolicyOutFlow   PolicyFlow = "response"
+	PolicyFaultFlow PolicyFlow = "fault"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -181,7 +197,7 @@ type OperationPolicies struct {
 // Policy holds APIM policies
 type Policy struct {
 	PolicyName   string      `json:"policyName,omitempty"`
-	TemplateName string      `json:"templateName,omitempty"`
+	TemplateName string      `json:"_,omitempty"`
 	Order        int         `json:"order,omitempty"`
 	Parameters   interface{} `json:"parameters,omitempty"`
 }
@@ -196,7 +212,16 @@ type PolicyContainer struct {
 type PolicySpecification struct {
 	ApimMeta
 	Data struct {
-		SupportedGateways []string
+		Name              string   `yaml:"name"`
+		ApplicableFlows   []string `yaml:"applicableFlows"`
+		SupportedGateways []string `yaml:"supportedGateways"`
+		SupportedApiTypes []string `yaml:"supportedApiTypes"`
+		PolicyAttributes  []struct {
+			Name            string `yaml:"name"`
+			ValidationRegex string `yaml:"validationRegex"`
+			Type            string `yaml:"type"`
+			Required        bool   `yaml:"required"`
+		} `yaml:"policyAttributes"`
 	}
 }
 
@@ -219,6 +244,49 @@ type EndpointInfo struct {
 	} `json:"config,omitempty"`
 }
 
+// validatePolicy validates the given policy against the spec
+func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) error {
+	if spec.Data.Name != policy.PolicyName {
+		return fmt.Errorf("invalid policy specification, spec name %s and policy name %s mismatch", spec.Data.Name, policy.PolicyName)
+	}
+	// TODO: check ApplicableFlows are (in, out, fault) or (request, response, fault)
+	if !arrayContains(spec.Data.ApplicableFlows, string(flow)) {
+		return fmt.Errorf("policy flow \"%s\" not supported", flow)
+	}
+	if !arrayContains(spec.Data.SupportedGateways, policyCCGateway) {
+		return errors.New("choreo connect gateway not supported")
+	}
+
+	policyPrams, ok := policy.Parameters.(map[string]interface{}) // TODO: check if we can change prams to map so no need this check
+	if ok {
+		for _, attrib := range spec.Data.PolicyAttributes {
+			val, found := policyPrams[attrib.Name]
+			if attrib.Required && !found {
+				return fmt.Errorf("required paramater %s not found", attrib.Name)
+			}
+
+			if strings.EqualFold(attrib.Type, policyValTypeString) {
+				valStr, typeOk := val.(string)
+				if !typeOk {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+				if attrib.ValidationRegex != "" {
+					regexStr := strings.Trim(attrib.ValidationRegex, "/")
+					reg, err := regexp.Compile(regexStr)
+					if err != nil {
+						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\"", spec.Data.Name, attrib.ValidationRegex)
+					}
+					if !reg.MatchString(valStr) {
+						return fmt.Errorf("invalid parameter value of attribute \"%s\", regex match failed", attrib.Name)
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 // ValidateAPIType checks if the apiProject is properly assigned with the type.
 func (apiProject *ProjectAPI) ValidateAPIType() error {
 	var err error
@@ -232,6 +300,66 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 		return err
 	}
 	return nil
+}
+
+// getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
+func (apiProject *ProjectAPI) getFormattedOperationalPolicies(policies OperationPolicies) OperationPolicies {
+	fmtPolicies := OperationPolicies{}
+
+	for _, policy := range policies.In {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyInFlow); err == nil {
+			fmtPolicies.In = append(fmtPolicies.In, fmtPolicy)
+		}
+	}
+
+	for _, policy := range policies.Out {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyOutFlow); err == nil {
+			fmtPolicies.Out = append(fmtPolicies.In, fmtPolicy)
+		}
+	}
+
+	for _, policy := range policies.Fault {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyFaultFlow); err == nil {
+			fmtPolicies.Fault = append(fmtPolicies.In, fmtPolicy)
+		}
+	}
+
+	return fmtPolicies
+}
+
+// getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
+func (apiProject *ProjectAPI) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow) (Policy, error) {
+	spec := apiProject.Policies[policy.PolicyName].Specification
+	if err := spec.validatePolicy(policy, flow); err != nil {
+		loggers.LoggerAPI.Errorf("Operation policy validation failed, policy \"%v\": %v", policy.PolicyName, err)
+		return policy, err
+	}
+
+	defRaw := apiProject.Policies[policy.PolicyName].Definition.RawData
+	t, err := template.New("policy-def").Parse(string(defRaw))
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error parsing the operation policy definition \"%v\" into go template: %v", policy.PolicyName, err)
+		return Policy{}, err
+	}
+
+	var out bytes.Buffer
+	err = t.Execute(&out, policy.Parameters)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error operation policy definition \"%v\": %v", policy.PolicyName, err)
+		return Policy{}, err
+	}
+
+	def := PolicyDefinition{}
+	if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
+		loggers.LoggerAPI.Errorf("Error parsing standardized operation policy definition \"%v\" into yaml: %v", policy.PolicyName, err)
+		return Policy{}, err
+	}
+
+	// update templated policy itself and return, not updating a pointer to keep the original template values as it is.
+	policy.Parameters = def.Data.Parameters
+	policy.TemplateName = def.Data.Action
+
+	return policy, nil
 }
 
 // StandardizeAPIYamlOperationPolicies updates API yaml with the CC standards by removing user defined templates.
@@ -350,7 +478,7 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.APIYaml = apiYaml
 		ExtractAPIInformation(apiProject, apiYaml)
-	} else if strings.Contains(fileName, policiesDir+string(os.PathSeparator)) {
+	} else if strings.Contains(fileName, policiesDir+string(os.PathSeparator)) { // handle policy dir
 		if strings.HasSuffix(fileName, policySpecFileExtension) {
 			// process policy specificationn
 			spec := PolicySpecification{}

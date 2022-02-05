@@ -282,14 +282,14 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 }
 
 // SetOperationPolicies this will merge operation level policies provided in api yaml
-func (swagger *MgwSwagger) SetOperationPolicies(yamlOperations []OperationYaml) {
+func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 	for _, resource := range swagger.resources {
 		path := strings.TrimSuffix(resource.path, "/")
 		for _, operation := range resource.methods {
 			method := operation.method
-			for _, yamlOperation := range yamlOperations {
+			for _, yamlOperation := range apiProject.APIYaml.Data.Operations {
 				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
-					operation.policies = yamlOperation.OperationPolicies
+					operation.policies = apiProject.getFormattedOperationalPolicies(yamlOperation.OperationPolicies)
 					break
 				}
 			}
