@@ -68,6 +68,7 @@ const (
 const (
 	policyValTypeString string = "String"
 	policyValTypeInt    string = "Integer"
+	policyValTypeBool   string = "Boolean" // TODO: check type names with APIM
 )
 
 type PolicyFlow string
@@ -200,6 +201,7 @@ type Policy struct {
 	TemplateName string      `json:"_,omitempty"`
 	Order        int         `json:"order,omitempty"`
 	Parameters   interface{} `json:"parameters,omitempty"`
+	isIncluded   bool        `json:"-"` // used to check whether multiple instance of policy applied
 }
 
 // PolicyContainer holds the definition and specification of policy
@@ -211,16 +213,17 @@ type PolicyContainer struct {
 // PolicySpecification holds policy specification from ./Policy/<policy>.yaml files
 type PolicySpecification struct {
 	ApimMeta
-	Data struct {
+	Data struct { // TODO: check all fields are required or omit empty in APIM side
 		Name              string   `yaml:"name"`
 		ApplicableFlows   []string `yaml:"applicableFlows"`
 		SupportedGateways []string `yaml:"supportedGateways"`
 		SupportedApiTypes []string `yaml:"supportedApiTypes"`
+		MultipleAllowed   bool     `yaml:"multipleAllowed"`
 		PolicyAttributes  []struct {
 			Name            string `yaml:"name"`
-			ValidationRegex string `yaml:"validationRegex"`
+			ValidationRegex string `yaml:"validationRegex,omitempty"`
 			Type            string `yaml:"type"`
-			Required        bool   `yaml:"required"`
+			Required        bool   `yaml:"required,omitempty"`
 		} `yaml:"policyAttributes"`
 	}
 }
@@ -245,7 +248,8 @@ type EndpointInfo struct {
 }
 
 // validatePolicy validates the given policy against the spec
-func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) error {
+func (spec *PolicySpecification) validatePolicy(policyList []Policy, pIndex int, flow PolicyFlow) error {
+	policy := policyList[pIndex]
 	if spec.Data.Name != policy.PolicyName {
 		return fmt.Errorf("invalid policy specification, spec name %s and policy name %s mismatch", spec.Data.Name, policy.PolicyName)
 	}
@@ -256,6 +260,23 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) 
 	if !arrayContains(spec.Data.SupportedGateways, policyCCGateway) {
 		return errors.New("choreo connect gateway not supported")
 	}
+	if !spec.Data.MultipleAllowed {
+		count := 0
+		for i, p := range policyList {
+			if p.PolicyName == spec.Data.Name {
+				count += 1
+				// TODO: check the behaviour sith APIM
+				// in here allow first instance of policy to be applied if multiple is found
+				if count > 1 {
+					if pIndex >= i {
+						return errors.New("multiple policies not allowed")
+					}
+					loggers.LoggerAPI.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
+					break
+				}
+			}
+		}
+	}
 
 	policyPrams, ok := policy.Parameters.(map[string]interface{}) // TODO: check if we can change prams to map so no need this check
 	if ok {
@@ -265,9 +286,9 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) 
 				return fmt.Errorf("required paramater %s not found", attrib.Name)
 			}
 
-			if strings.EqualFold(attrib.Type, policyValTypeString) {
-				valStr, typeOk := val.(string)
-				if !typeOk {
+			switch v := val.(type) {
+			case string:
+				if !strings.EqualFold(attrib.Type, policyValTypeString) {
 					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
 				}
 				if attrib.ValidationRegex != "" {
@@ -276,10 +297,20 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) 
 					if err != nil {
 						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\"", spec.Data.Name, attrib.ValidationRegex)
 					}
-					if !reg.MatchString(valStr) {
+					if !reg.MatchString(v) {
 						return fmt.Errorf("invalid parameter value of attribute \"%s\", regex match failed", attrib.Name)
 					}
 				}
+			case int:
+				if !strings.EqualFold(attrib.Type, policyValTypeInt) {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+			case bool:
+				if !strings.EqualFold(attrib.Type, policyValTypeBool) {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+			default:
+				return fmt.Errorf("invalid value type of paramater %s, unsupported type %s", attrib.Name, attrib.Type)
 			}
 		}
 	}
@@ -306,20 +337,21 @@ func (apiProject *ProjectAPI) ValidateAPIType() error {
 func (apiProject *ProjectAPI) getFormattedOperationalPolicies(policies OperationPolicies) OperationPolicies {
 	fmtPolicies := OperationPolicies{}
 
-	for _, policy := range policies.In {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyInFlow); err == nil {
+	for i := range policies.In {
+		// using index i instead of struct to validate policy against multiple allowed and apply only first if multiple exists
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policies.In, i, PolicyInFlow); err == nil {
 			fmtPolicies.In = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
 
-	for _, policy := range policies.Out {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyOutFlow); err == nil {
+	for i := range policies.Out {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policies.Out, i, PolicyOutFlow); err == nil {
 			fmtPolicies.Out = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
 
-	for _, policy := range policies.Fault {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyFaultFlow); err == nil {
+	for i := range policies.Fault {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policies.Fault, i, PolicyFaultFlow); err == nil {
 			fmtPolicies.Fault = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
@@ -328,10 +360,12 @@ func (apiProject *ProjectAPI) getFormattedOperationalPolicies(policies Operation
 }
 
 // getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
-func (apiProject *ProjectAPI) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow) (Policy, error) {
+func (apiProject *ProjectAPI) getFormattedPolicyFromTemplated(policyList []Policy, pIndex int, flow PolicyFlow) (Policy, error) {
+	// using index i instead of struct to validate policy against multiple allowed and apply only first if multiple exists
+	policy := policyList[pIndex]
 	spec := apiProject.Policies[policy.PolicyName].Specification
-	if err := spec.validatePolicy(policy, flow); err != nil {
-		loggers.LoggerAPI.Errorf("Operation policy validation failed, policy \"%v\": %v", policy.PolicyName, err)
+	if err := spec.validatePolicy(policyList, pIndex, flow); err != nil {
+		loggers.LoggerAPI.Errorf("Operation policy validation failed, ignoring the policy \"%v\": %v", policy.PolicyName, err)
 		return policy, err
 	}
 
