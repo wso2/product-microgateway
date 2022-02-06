@@ -662,9 +662,6 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
 func createRoute(params *routeCreateParams) *routev3.Route {
-	// func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
-	// 	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string,
-	// 	corsPolicy *routev3.CorsPolicy) *routev3.Route {
 	title := params.title
 	version := params.version
 	vHost := params.vHost
@@ -691,7 +688,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		responseHeadersToRemove []string
 	)
 
-	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
+	routePath := generateRoutePath(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
@@ -708,7 +705,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	// if any of the operations on the route path has a method rewrite policy,
 	// we remove the :method header matching,
-	// because envoy does not allow method rewrting later if the following method regex doesnot have the new method.
+	// because envoy does not allow method rewrting later if the following method regex does not have the new method.
 	// hence when method rewriting is enabled for the resource, the method validation will be handled by the enforcer instead of the router.
 	if !params.rewriteMethod {
 		// OPTIONS is always added even if it is not listed under resources
@@ -1138,15 +1135,14 @@ func CreateReadyEndpoint() *routev3.Route {
 	return &router
 }
 
-// generateRoutePaths generates route paths for the api resources.
-func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
+// generateRoutePath generates route paths for the api resources.
+func generateRoutePath(xWso2Basepath, basePath, resourcePath string) string {
 	prefix := ""
 	newPath := ""
 	if strings.TrimSpace(xWso2Basepath) != "" {
-		prefix = basepathConsistent(xWso2Basepath)
-
+		prefix = getFilteredBasePath(xWso2Basepath)
 	} else {
-		prefix = basepathConsistent(basePath)
+		prefix = getFilteredBasePath(basePath)
 		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
 	}
 	if strings.Contains(resourcePath, "?") {
@@ -1157,7 +1153,7 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 	return newPath
 }
 
-func basepathConsistent(basePath string) string {
+func getFilteredBasePath(basePath string) string {
 	modifiedBasePath := basePath
 	if !strings.HasPrefix(basePath, "/") {
 		modifiedBasePath = "/" + modifiedBasePath

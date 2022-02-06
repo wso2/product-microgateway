@@ -46,7 +46,7 @@ func TestGenerateRoutePaths(t *testing.T) {
 	basePath := "/basePath"
 	resourcePath := "/resource"
 
-	completeRoutePath := generateRoutePaths(xWso2BasePath, basePath, resourcePath)
+	completeRoutePath := generateRoutePath(xWso2BasePath, basePath, resourcePath)
 	// TODO: (VirajSalaka) check if it is possible to perform an equals operation instead of prefix
 	if !strings.HasPrefix(completeRoutePath, "^/xWso2BasePath/resource") {
 		t.Error("The generated path should contain xWso2BasePath as a prefix if xWso2Basepath is available.")
@@ -58,7 +58,7 @@ func TestGenerateRoutePaths(t *testing.T) {
 	}
 
 	xWso2BasePath = ""
-	completeRoutePath = generateRoutePaths(xWso2BasePath, basePath, resourcePath)
+	completeRoutePath = generateRoutePath(xWso2BasePath, basePath, resourcePath)
 	if !strings.HasPrefix(completeRoutePath, "^/basePath/resource") {
 		t.Error("The generated path should contain basePath as a prefix if xWso2Basepath is unavailable.")
 	}
