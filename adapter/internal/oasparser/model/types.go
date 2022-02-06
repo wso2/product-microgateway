@@ -71,12 +71,13 @@ const (
 	policyValTypeBool   string = "Boolean" // TODO: check type names with APIM
 )
 
+// PolicyFlow holds list of Policies in a operation (in one flow: In, Out or Fault)
 type PolicyFlow string
 
 var (
-	PolicyInFlow    PolicyFlow = "request"
-	PolicyOutFlow   PolicyFlow = "response"
-	PolicyFaultFlow PolicyFlow = "fault"
+	policyInFlow    PolicyFlow = "request"
+	policyOutFlow   PolicyFlow = "response"
+	policyFaultFlow PolicyFlow = "fault"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -213,11 +214,10 @@ func (pl PolicyList) getStats() map[string]policyStats {
 
 // Policy holds APIM policies
 type Policy struct {
-	PolicyName   string      `json:"policyName,omitempty"`
-	TemplateName string      `json:"_,omitempty"`
-	Order        int         `json:"order,omitempty"`
-	Parameters   interface{} `json:"parameters,omitempty"`
-	isIncluded   bool        `json:"-"` // used to check whether multiple instance of policy applied
+	PolicyName string      `json:"policyName,omitempty"`
+	Action     string      `json:"-,omitempty"`
+	Order      int         `json:"order,omitempty"`
+	Parameters interface{} `json:"parameters,omitempty"`
 }
 
 // policyStats used to optimize and reduce loops by storing stats by calculating only once
@@ -239,7 +239,7 @@ type PolicySpecification struct {
 		Name              string   `yaml:"name"`
 		ApplicableFlows   []string `yaml:"applicableFlows"`
 		SupportedGateways []string `yaml:"supportedGateways"`
-		SupportedApiTypes []string `yaml:"supportedApiTypes"`
+		SupportedAPITypes []string `yaml:"supportedApiTypes"`
 		MultipleAllowed   bool     `yaml:"multipleAllowed"`
 		PolicyAttributes  []struct {
 			Name            string `yaml:"name"`
@@ -354,21 +354,21 @@ func (apiProject *ProjectAPI) getFormattedOperationalPolicies(policies Operation
 
 	inFlowStats := policies.In.getStats()
 	for i, policy := range policies.In {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyInFlow, inFlowStats, i); err == nil {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, policyInFlow, inFlowStats, i); err == nil {
 			fmtPolicies.In = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
 
 	outFlowStats := policies.Out.getStats()
 	for i, policy := range policies.Out {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyOutFlow, outFlowStats, i); err == nil {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i); err == nil {
 			fmtPolicies.Out = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
 
 	faultFlowStats := policies.Out.getStats()
 	for i, policy := range policies.Fault {
-		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, PolicyFaultFlow, faultFlowStats, i); err == nil {
+		if fmtPolicy, err := apiProject.getFormattedPolicyFromTemplated(policy, policyFaultFlow, faultFlowStats, i); err == nil {
 			fmtPolicies.Fault = append(fmtPolicies.In, fmtPolicy)
 		}
 	}
@@ -407,7 +407,7 @@ func (apiProject *ProjectAPI) getFormattedPolicyFromTemplated(policy Policy, flo
 
 	// update templated policy itself and return, not updating a pointer to keep the original template values as it is.
 	policy.Parameters = def.Data.Parameters
-	policy.TemplateName = def.Data.Action
+	policy.Action = def.Data.Action
 
 	return policy, nil
 }
@@ -439,7 +439,7 @@ func (apiProject *ProjectAPI) StandardizeAPIYamlOperationPolicies() error {
 
 			// update API yaml file with choreo connect standadize parameter names
 			policy.Parameters = def.Data.Parameters
-			policy.TemplateName = def.Data.Action
+			policy.Action = def.Data.Action
 			operation.OperationPolicies.In[j] = policy
 			apiProject.APIYaml.Data.Operations[i] = operation
 		}

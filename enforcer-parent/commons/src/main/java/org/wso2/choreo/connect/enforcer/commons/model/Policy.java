@@ -25,16 +25,16 @@ import java.util.Map;
 public class Policy {
 
     private String policyName;
-    private String templateName;
+    private String action;
     private int order;
     private Map<String, String> parameters;
 
     public Policy() {
     }
 
-    public Policy(String policyName, String templateName, int order, Map<String, String> parameters) {
+    public Policy(String policyName, String action, int order, Map<String, String> parameters) {
         this.policyName = policyName;
-        this.templateName = templateName;
+        this.action = action;
         this.order = order;
         this.parameters = parameters;
     }
@@ -47,12 +47,12 @@ public class Policy {
         this.policyName = policyName;
     }
 
-    public String getTemplateName() {
-        return templateName;
+    public String getAction() {
+        return action;
     }
 
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
+    public void setAction(String action) {
+        this.action = action;
     }
 
     public int getOrder() {

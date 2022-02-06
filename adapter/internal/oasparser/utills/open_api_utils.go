@@ -76,6 +76,8 @@ func FindSwaggerVersion(jsn []byte) string {
 	return version
 }
 
+// FileNameWithoutExtension returns the file name without the extension
+// ex: when provided the path "/foo/hello.world" it returns "hello"
 func FileNameWithoutExtension(path string) string {
 	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }

@@ -47,7 +47,7 @@ public class MediationPolicyFilter implements Filter {
 
     private void applyPolicy(RequestContext requestContext, Policy policy) {
         //todo(amali) check policy order
-        switch (policy.getTemplateName()) {
+        switch (policy.getAction()) {
             case "SET_HEADER": {
                 addOrModifyHeader(requestContext, policy.getParameters());
                 break;

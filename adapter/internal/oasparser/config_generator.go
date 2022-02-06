@@ -212,7 +212,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 }
 
 // GetEnforcerAPIOperation builds the operation object expected by the proto definition
-func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool ) *api.Operation {
+func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Operation {
 	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
 	for i, security := range operation.GetSecurity() {
 		mapOfSecurity := make(map[string]*api.Scopes)
@@ -233,7 +233,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool ) *api.Op
 		mockedScriptValue := operation.GetMockedAPIConfig()
 		generateMockedAPIConfig(&mockedAPIConfig, mockedScriptValue)
 	}
-		
+
 	policies := &api.OperationPolicies{
 		In:    castPoliciesToEnforcerPolicies(operation.GetPolicies().In),
 		Out:   castPoliciesToEnforcerPolicies(operation.GetPolicies().Out),
@@ -267,10 +267,10 @@ func castPoliciesToEnforcerPolicies(policies []model.Policy) []*api.Policy {
 			}
 		}
 		enforcerPolicies[i] = &api.Policy{
-			PolicyName:   policy.PolicyName,
-			TemplateName: policy.TemplateName,
-			Order:        uint32(policy.Order),
-			Parameters:   parameterMap,
+			PolicyName: policy.PolicyName,
+			Action:     policy.Action,
+			Order:      uint32(policy.Order),
+			Parameters: parameterMap,
 		}
 	}
 	return enforcerPolicies
@@ -321,25 +321,25 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 }
 
 // Generates mocked API configuration to pass for the enforcer considering xMediationScript value
-func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig , mgwMockedAPIConfig model.MockedAPIConfig) {
+func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig, mgwMockedAPIConfig model.MockedAPIConfig) {
 	mockedAPIConfig.In = mgwMockedAPIConfig.In
 	mockedAPIConfig.Name = mgwMockedAPIConfig.Name
-	responseConfigList := make ([]*api.MockedResponseConfig,0)
+	responseConfigList := make([]*api.MockedResponseConfig, 0)
 
 	for _, val := range mgwMockedAPIConfig.Responses {
 		var responseConfig api.MockedResponseConfig
-		contentConfigList := make([]*api.MockedContentConfig,0)
+		contentConfigList := make([]*api.MockedContentConfig, 0)
 		responseConfig.Value = val.Value
 		responseConfig.Code = int32(val.Code)
 
-		for _, content := range val.Content{
+		for _, content := range val.Content {
 			var contentConfig api.MockedContentConfig
 			contentConfig.ContentType = content.ContentType
 			contentConfig.Body = content.Body
 			contentConfigList = append(contentConfigList, &contentConfig)
 		}
 		responseConfig.Content = contentConfigList
-		
+
 		headerConfigList := responseConfig.Headers
 		for _, header := range val.Headers {
 			var mockedAPIHeader api.MockedHeaderConfig
