@@ -293,6 +293,9 @@ public class MockBackendProd extends Thread {
             httpServer.createContext(context + "/echo", Utils::echo);
             httpServer.createContext(context + "/echo2", Utils::echo);
 
+            // below context is used to test response body passing test case
+            httpServer.createContext(context + "/requestBodyPass", Utils::echo);
+
             httpServer.start();
         } catch (Exception ex) {
             log.error("Error occurred while setting up mock server", ex);

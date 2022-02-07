@@ -11,6 +11,12 @@
   maxRouteTimeoutInSeconds = 60
   routeIdleTimeoutInSeconds = 300
 
+# enables request body passing from router to enforcer
+[router.bodyPassing]
+  passRequestBodyToEnforcer = true
+  maxRequestBytes = 1024
+  packAsBytes = true
+
 [enforcer]
 [enforcer.jwtGenerator]
   enable = true

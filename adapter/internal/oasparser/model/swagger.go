@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
+	conf "github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
@@ -47,6 +48,11 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.security = swagger2.Security
 	swagger.apiType = constants.HTTP
 	swagger.resources = setResourcesSwagger(swagger2, swagger.IsMockedAPI)
+
+	configs, _ := conf.ReadConfigs() 
+	if configs.Envoy.BodyPassing.PassRequestBodyToEnforcer {
+		swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
+	}
 
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme

@@ -139,4 +139,21 @@ public class CustomFilterTestCase {
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.API_SANDBOX_RESPONSE, "Response body mismatched for dynamic endpoint");
     }
+
+    @Test(description = "Tests request body passing feature")
+    public void testRequestBodyPass() throws MalformedURLException, CCTestException {
+        String requestBody = "{\"hmac \": \"sample_hmac_value\"}";
+        String customHeaderName = "x-wso2-hmac-header";
+        String customHeaderValue = "wso2ChoreoConnectHmac";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
+                .doPost(Utils.getServiceURLHttps("/v2/standard/requestBodyPass"), requestBody,headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey(customHeaderName),
+                "Header is not attached from the custom filter.");
+        Assert.assertEquals(response.getHeaders().get(customHeaderName), customHeaderValue,
+                "mismatch against the custom header attached from the filter");
+    }
 }

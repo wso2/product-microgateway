@@ -44,27 +44,28 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id                  string
-	UUID                string
-	apiType             string
-	description         string
-	title               string
-	version             string
-	vendorExtensions    map[string]interface{}
-	productionEndpoints *EndpointCluster
-	sandboxEndpoints    *EndpointCluster
-	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []*Resource
-	xWso2Basepath       string
-	xWso2Cors           *CorsConfig
-	securityScheme      []SecurityScheme
-	security            []map[string][]string
-	xWso2ThrottlingTier string
-	xWso2AuthHeader     string
-	disableSecurity     bool
-	OrganizationID      string
-	IsPrototyped        bool
-	IsMockedAPI         bool
+	id                   string
+	UUID                 string
+	apiType              string
+	description          string
+	title                string
+	version              string
+	vendorExtensions     map[string]interface{}
+	productionEndpoints  *EndpointCluster
+	sandboxEndpoints     *EndpointCluster
+	xWso2Endpoints       map[string]*EndpointCluster
+	resources            []*Resource
+	xWso2Basepath        string
+	xWso2Cors            *CorsConfig
+	securityScheme       []SecurityScheme
+	security             []map[string][]string
+	xWso2ThrottlingTier  string
+	xWso2AuthHeader      string
+	disableSecurity      bool
+	OrganizationID       string
+	IsPrototyped         bool
+	IsMockedAPI          bool
+	xWso2RequestBodyPass bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -224,6 +225,12 @@ func (swagger *MgwSwagger) GetDisableSecurity() bool {
 // GetID returns the Id of the API
 func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
+}
+
+// GetXWso2RequestBodyPass returns boolean value to indicate
+// whether it is allowed to pass request body to the enforcer or not.
+func (swagger *MgwSwagger) GetXWso2RequestBodyPass() bool {
+	return swagger.xWso2RequestBodyPass
 }
 
 // SetID set the Id of the API

@@ -27,6 +27,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
+	conf "github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
@@ -56,8 +57,8 @@ const (
 // The title, version, description, vendor extension map, endpoints based on servers property,
 // and pathItem level information are populated here.
 //
-// for each pathItem; vendor extensions, endpoints (based on servers object), available http Methods,
-// are populated. Each resource corresponding to a pathItem, has the property called iD, which is a
+// For each pathItem; vendor extensions, endpoints (based on servers object), available http Methods,
+// are populated. Each resource corresponding to a pathItem, has the property called ID, which is a
 // UUID.
 //
 // No operation specific information is extracted.
@@ -79,6 +80,11 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
+	configs, _ := conf.ReadConfigs() 
+	if configs.Envoy.BodyPassing.PassRequestBodyToEnforcer {
+		swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
+	}
+	
 	swagger.apiType = constants.HTTP
 	var productionUrls []Endpoint
 	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
@@ -183,6 +189,18 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	}
 	logger.LoggerOasparser.Debugf("Security schemes in setSecuritySchemesOpenAPI method %v:", securitySchemes)
 	return securitySchemes
+}
+
+
+// getRequestBodyBufferConfig method returns a boolean value indicating whether a given API is configured to
+// pass request body to the enforcer or not.
+func getRequestBodyBufferConfig(vendorExtensions map[string]interface{}) bool {
+	if val, found := vendorExtensions[constants.XWso2EnforcerBodyPasser]; found {
+		if isAllowedToPassRequestBody,ok := val.(bool); ok {
+			return isAllowedToPassRequestBody
+		}
+	}
+	return false
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {

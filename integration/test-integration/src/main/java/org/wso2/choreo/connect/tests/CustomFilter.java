@@ -63,6 +63,15 @@ public class CustomFilter implements Filter {
         if (configProperties.containsKey("fooKey")) {
             requestContext.addOrModifyHeaders("fooKey", configProperties.get("fooKey"));
         }
+        // custom filter response body supporting condition
+        if (!requestContext.getRequestBody().isBlank()) {
+            String requestBody = requestContext.getRequestBody();
+            if (requestBody.contains("hmac")) {
+                String hmacHeaderValue = "wso2ChoreoConnectHmac";
+                requestContext.addOrModifyHeaders("x-wso2-hmac-header", hmacHeaderValue);
+                log.info("Update \"x-wso2-hmac-header\" value with " + hmacHeaderValue);
+            }
+        }
         log.info("Custom-header-1 is added as a header.");
         return true;
     }
