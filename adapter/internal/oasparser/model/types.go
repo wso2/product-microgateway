@@ -415,42 +415,6 @@ func (apiProject *ProjectAPI) getFormattedPolicyFromTemplated(policy Policy, flo
 	return policy, nil
 }
 
-// StandardizeAPIYamlOperationPolicies updates API yaml with the CC standards by removing user defined templates.
-func (apiProject *ProjectAPI) StandardizeAPIYamlOperationPolicies() error {
-	for i, operation := range apiProject.APIYaml.Data.Operations {
-		for j, policy := range operation.OperationPolicies.In {
-			userP := policy.Parameters
-			data := apiProject.Policies[policy.PolicyName].Definition.RawData
-			t, err := template.New("policy-def").Parse(string(data))
-			if err != nil {
-				loggers.LoggerAPI.Errorf("Error parsing the operation policy definition %v into go template: %v", policy.PolicyName, err)
-				continue
-			}
-
-			var out bytes.Buffer
-			err = t.Execute(&out, userP)
-			if err != nil {
-				loggers.LoggerAPI.Errorf("Error operation policy definition %v: %v", policy.PolicyName, err)
-				continue
-			}
-
-			def := PolicyDefinition{}
-			if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
-				loggers.LoggerAPI.Errorf("Error parsing standardized operation policy definition %v into yaml: %v", policy.PolicyName, err)
-				continue
-			}
-
-			// update API yaml file with choreo connect standadize parameter names
-			policy.Parameters = def.Data.Parameters
-			policy.Action = def.Data.Action
-			operation.OperationPolicies.In[j] = policy
-			apiProject.APIYaml.Data.Operations[i] = operation
-		}
-	}
-
-	return nil
-}
-
 // ProcessFilesInsideProject process single file inside API Project and update the apiProject instance appropriately.
 func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, fileName string) (err error) {
 	newLineByteArray := []byte("\n")
@@ -554,11 +518,6 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		if strings.HasSuffix(fileName, policyDefFileExtension) {
 			// process policy definition
 			def := PolicyDefinition{RawData: fileContent}
-			// if err := yaml.Unmarshal(fileContent, &def); err != nil {
-			// 	loggers.LoggerAPI.Errorf("Error parsing content of policy definition %v: %v", fileName, err.Error())
-			// 	return err
-			// }
-
 			key := utills.FileNameWithoutExtension(fileName)
 			if policy, ok := apiProject.Policies[key]; ok {
 				policy.Definition = def
