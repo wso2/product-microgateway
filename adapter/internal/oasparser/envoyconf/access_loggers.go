@@ -18,6 +18,8 @@
 package envoyconf
 
 import (
+	"fmt"
+
 	config_access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	file_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
@@ -25,6 +27,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -60,7 +63,11 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error marsheling access log configs. %v", err.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1280,
+		})
 		return nil
 	}
 
@@ -99,7 +106,11 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 	}
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marshalling gRPC access log configs. ", err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error marshalling gRPC access log configs. %v", err.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1281,
+		})
 		return nil
 	}
 

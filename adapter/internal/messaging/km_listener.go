@@ -21,11 +21,13 @@ package messaging
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
@@ -50,7 +52,11 @@ func handleKMConfiguration() {
 		var kmConfigMap map[string]interface{}
 		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
-			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling key manager event data %v", unmarshalErr.Error())
+			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while unmarshalling key manager event data %v", unmarshalErr.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1240,
+			})
 			return
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
@@ -66,10 +72,17 @@ func handleKMConfiguration() {
 
 		if err != nil {
 			if _, ok := err.(base64.CorruptInputError); ok {
-				logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
+				logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+					Message:   "\nbase64 input is corrupt, check the provided key",
+					Severity:  logging.TRIVIAL,
+					ErrorCode: 1241,
+				})
 			}
-
-			logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v", err)
+			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while decoding the notification event %v", err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1242,
+			})
 			return
 		}
 
@@ -86,7 +99,11 @@ func handleKMConfiguration() {
 				logger.LoggerInternalMsg.Infof("decoded stream %s", string(decodedByte))
 				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
 				if kmConfigMapErr != nil {
-					logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr)
+					logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+						Message:   fmt.Sprintf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr.Error()),
+						Severity:  logging.MINOR,
+						ErrorCode: 1243,
+					})
 					return
 				}
 

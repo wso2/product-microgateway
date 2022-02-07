@@ -20,6 +20,7 @@
 package envoyconf
 
 import (
+	"fmt"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -37,6 +38,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
 	//mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
 	"github.com/golang/protobuf/ptypes/any"
@@ -75,7 +77,11 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 
 	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error marshaling route filter configs. %v", err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1282,
+		})
 	}
 	filter := hcmv3.HttpFilter{
 		Name:       wellknown.Router,
@@ -125,7 +131,11 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	}
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
 	if err2 != nil {
-		logger.LoggerOasparser.Error(err2)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error marshalling external authz configs. %v", err2.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1283,
+		})
 	}
 	extAuthzFilter := hcmv3.HttpFilter{
 		Name: extAuthzFilterName,
@@ -147,7 +157,11 @@ func getLuaFilter() *hcmv3.HttpFilter {
 	}
 	ext, err2 := ptypes.MarshalAny(luaConfig)
 	if err2 != nil {
-		logger.LoggerOasparser.Error(err2)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error marshalling lua configs. %v", err2.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1284,
+		})
 	}
 	luaFilter := hcmv3.HttpFilter{
 		Name: luaFilterName,
@@ -169,6 +183,7 @@ func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
 	}
 	a, err := proto.Marshal(config)
 	if err != nil {
+		// check the log statement
 		logger.LoggerOasparser.Error(err)
 	}
 	mgwWebsocketWASMConfig := wasmv3.PluginConfig{
@@ -202,7 +217,11 @@ func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
 
 	ext, err2 := proto.Marshal(mgwWebSocketWASMFilterConfig)
 	if err2 != nil {
-		logger.LoggerOasparser.Error(err2)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error marshalling web socker WASM filter config %v", err2.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1285,
+		})
 	}
 	mgwWebSocketFilter := hcmv3.HttpFilter{
 		Name: mgwWebSocketWASMFilterName,

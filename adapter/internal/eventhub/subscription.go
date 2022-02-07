@@ -21,6 +21,7 @@ package eventhub
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -34,6 +35,7 @@ import (
 	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -125,11 +127,19 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 				retrieveSubscriptionDataFromChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1180,
+				})
 				health.SetControlPlaneRestAPIStatus(false)
 			} else {
 				// Keep the iteration going on until a response is recieved.
-				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred while fetching data from control plane: %v", data.Error),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1181,
+				})
 				go func(d response) {
 					// Retry fetching from control plane after a configured time interval
 					if conf.ControlPlane.RetryInterval == 0 {
@@ -164,11 +174,19 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 				retrieveAPIList(data, initialAPIUUIDListMap)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1180,
+				})
 				health.SetControlPlaneRestAPIStatus(false)
 			} else {
 				// Keep the iteration going on until a response is recieved.
-				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred while fetching data from control plane: %v", data.Error),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1181,
+				})
 				go func(d response) {
 					// Retry fetching from control plane after a configured time interval
 					if conf.ControlPlane.RetryInterval == 0 {
@@ -209,7 +227,11 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	}
 	if err != nil {
 		c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
-		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
+		logger.LoggerSubscription.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while creating an HTTP request for serviceURL: %s %v"+serviceURL, err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1182,
+		})
 		return
 	}
 
@@ -229,7 +251,11 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		} else {
 			c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
 		}
-		logger.LoggerSubscription.Errorf("Error occurred while calling the REST API: "+serviceURL, err)
+		logger.LoggerSubscription.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while calling the REST API: "+serviceURL, err),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1183,
+		})
 		return
 	}
 
@@ -237,15 +263,22 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	if resp.StatusCode == http.StatusOK {
 		if err != nil {
 			c <- response{err, nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
-			logger.LoggerSubscription.Errorf("Error occurred while reading the response received for: "+serviceURL, err)
+			logger.LoggerSubscription.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while reading the response received for: "+serviceURL, err),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1184,
+			})
 			return
 		}
 		logger.LoggerSubscription.Debug("Request to the control plane over the REST API: " + serviceURL + " is successful.")
 		c <- response{nil, responseBytes, resp.StatusCode, endpoint, gatewayLabel, responseType}
 	} else {
 		c <- response{errors.New(string(responseBytes)), nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
-		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
-			err)
+		logger.LoggerSubscription.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode), err),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1185,
+		})
 	}
 }
 
@@ -262,8 +295,11 @@ func retrieveAPIList(response response, initialAPIUUIDListMap map[string]int) {
 	if response.Error == nil && response.Payload != nil {
 		err := json.Unmarshal(response.Payload, &newResponse)
 		if err != nil {
-			logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+
-				response.Endpoint, err)
+			logger.LoggerSubscription.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while unmarshalling the APIList response received for: %s %v", response.Endpoint, err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1186,
+			})
 		} else {
 			switch t := newResponse.(type) {
 			case *types.APIList:
@@ -289,7 +325,11 @@ func retrieveSubscriptionDataFromChannel(response response) {
 	err := json.Unmarshal(response.Payload, &newResponse)
 
 	if err != nil {
-		logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
+		logger.LoggerSubscription.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling the response received for: %s %v", response.Endpoint, err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1187,
+		})
 	} else {
 		switch t := newResponse.(type) {
 		case *types.SubscriptionList:

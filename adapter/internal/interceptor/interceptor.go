@@ -19,9 +19,11 @@ package interceptor
 
 import (
 	"bytes"
+	"fmt"
 	"text/template"
 
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 //Interceptor hold values used for interceptor
@@ -148,14 +150,22 @@ func GetInterceptor(values *Interceptor) string {
 	t, err := template.New("lua-filter").Parse(getTemplate(values.IsRequestFlowEnabled,
 		values.IsResponseFlowEnabled))
 	if err != nil {
-		logger.LoggerInterceptor.Error("error while parsing the interceptor template:", err)
+		logger.LoggerInterceptor.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while parsing the interceptor template: %v", err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1220,
+		})
 		return emptyInterceptorTemplate
 	}
 	templ := template.Must(t, err)
 	var out bytes.Buffer
 	err = templ.Execute(&out, values)
 	if err != nil {
-		logger.LoggerInterceptor.Error("executing request interceptor template:", err)
+		logger.LoggerInterceptor.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("failed executing request interceptor template: %v", err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1221,
+		})
 		return emptyInterceptorTemplate
 	}
 	return out.String()

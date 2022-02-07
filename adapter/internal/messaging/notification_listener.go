@@ -31,6 +31,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
@@ -108,10 +109,17 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
 	if err != nil {
 		if _, ok := err.(base64.CorruptInputError); ok {
-			logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
+			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				Message:   "\nbase64 input is corrupt, check the provided key",
+				Severity:  logging.TRIVIAL,
+				ErrorCode: 1241,
+			})
 		}
-		logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v. "+
-			"Hence dropping the event", err)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while decoding the notification event %v. "+"Hence dropping the event", err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1242,
+		})
 		return err
 	}
 	logger.LoggerInternalMsg.Debugf("\n\n[%s]", decodedByte)
@@ -139,7 +147,11 @@ func handleAPIEvents(data []byte, eventType string) {
 
 	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
 	if apiEventErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling API event data %v", apiEventErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling API event data %v", apiEventErr),
+			Severity:  logging.MINOR,
+			ErrorCode: 1244,
+		})
 		return
 	}
 
@@ -207,7 +219,11 @@ func handleLifeCycleEvents(data []byte) {
 	var apiEvent msg.APIEvent
 	apiLCEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
 	if apiLCEventErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Lifecycle event data %v", apiLCEventErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling Lifecycle event data %v", apiLCEventErr.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1245,
+		})
 		return
 	}
 	if !belongsToTenant(apiEvent.TenantDomain) {
@@ -236,7 +252,11 @@ func handleApplicationEvents(data []byte, eventType string) {
 		var applicationRegistrationEvent msg.ApplicationRegistrationEvent
 		appRegEventErr := json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
 		if appRegEventErr != nil {
-			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Application Registration event data %v", appRegEventErr)
+			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while unmarshalling Application Registration event data %v", appRegEventErr.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1246,
+			})
 			return
 		}
 
@@ -269,7 +289,11 @@ func handleApplicationEvents(data []byte, eventType string) {
 		var applicationEvent msg.ApplicationEvent
 		appEventErr := json.Unmarshal([]byte(string(data)), &applicationEvent)
 		if appEventErr != nil {
-			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Application event data %v", appEventErr)
+			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while unmarshalling Application event data %v", appEventErr.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1247,
+			})
 			return
 		}
 
@@ -310,7 +334,11 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent msg.SubscriptionEvent
 	subEventErr := json.Unmarshal([]byte(string(data)), &subscriptionEvent)
 	if subEventErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Subscription event data %v", subEventErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling Subscription event data %v", subEventErr.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1248,
+		})
 		return
 	}
 	if !belongsToTenant(subscriptionEvent.TenantDomain) {
@@ -348,7 +376,11 @@ func handlePolicyEvents(data []byte, eventType string) {
 	var policyEvent msg.PolicyInfo
 	policyEventErr := json.Unmarshal([]byte(string(data)), &policyEvent)
 	if policyEventErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Throttling Policy event data %v", policyEventErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling Throttling Policy event data %v", policyEventErr.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1249,
+		})
 		return
 	}
 	// TODO: Handle policy events
@@ -427,8 +459,11 @@ func belongsToTenant(tenantDomain string) bool {
 func parseNotificationJSONEvent(data []byte, notification *msg.EventNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling "+
-			"notification event data %v. Hence dropping the event", unmarshalErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling notification event data %v. Hence dropping the event", unmarshalErr.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1250,
+		})
 	}
 	return unmarshalErr
 }

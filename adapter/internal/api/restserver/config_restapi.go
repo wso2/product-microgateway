@@ -19,6 +19,7 @@ package restserver
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -33,6 +34,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -86,7 +88,11 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.BearerTokenAuth = func(token string, scopes []string) (*models.Principal, error) {
 		valid, err := auth.ValidateToken(token, scopes, mgwConfig)
 		if err != nil {
-			logger.LoggerAPI.Error(err.Error())
+			logger.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occured while reading the token : %s", err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1030,
+			})
 			return nil, errors.New(500, "error occured while reading the token")
 		}
 		if !valid {

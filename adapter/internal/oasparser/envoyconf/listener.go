@@ -35,6 +35,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // CreateRoutesConfigForRds generates the default RouteConfiguration.
@@ -121,7 +122,11 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			manager.Tracing = tracing
 			manager.GenerateRequestId = &wrappers.BoolValue{Value: conf.Tracing.Enabled}
 		} else {
-			logger.LoggerOasparser.Error("Failed to initialize tracing. Router tracing will be disabled. ", err)
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Failed to initialize tracing. Router tracing will be disabled. %v", err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1286,
+			})
 			conf.Tracing.Enabled = false
 		}
 	}

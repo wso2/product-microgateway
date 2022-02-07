@@ -50,6 +50,7 @@ import (
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
@@ -305,7 +306,11 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	} else if apiYaml.APIType != constants.WS {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   "API type not currently supported by Choreo Connect",
+			Severity:  logging.MINOR,
+			ErrorCode: 1160,
+		})
 	}
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
 	mgwSwagger.OrganizationID = apiYaml.OrganizationID
@@ -330,8 +335,11 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
-		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s",
-			apiYaml.Name, apiYaml.Version, organizationID)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Swagger validation failed for the API %s:%s of Organization %s", apiYaml.Name, apiYaml.Version, organizationID),
+			Severity:  logging.MINOR,
+			ErrorCode: 1161,
+		})
 		return nil, validationErr
 	}
 
@@ -395,7 +403,11 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 				interceptCertMap[url] = certBytes
 				delete(apiProject.UpstreamCerts, certFile)
 			} else {
-				logger.LoggerXds.Errorf("Certificate file %v not found for the url %v", certFile, url)
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Certificate file %v not found for the url %v", certFile, url),
+					Severity:  logging.MAJOR,
+					ErrorCode: 1162,
+				})
 			}
 		}
 	}
@@ -486,8 +498,11 @@ func addBasepathToMap(mgwSwagger model.MgwSwagger, organizationID, vHost, apiIde
 	if existingAPIIdentifier, ok := orgIDvHostBasepathMap[organizationID][vHost+":"+newBasepath]; ok {
 		// Check if it is NOT just an update for the already existing API
 		if existingAPIIdentifier != apiIdentifier {
-			logger.LoggerXds.Errorf("An API exists with the same basepath. Basepath: %v Existing_API: %v New_API: %v orgID: %v VHost: %v",
-				newBasepath, existingAPIIdentifier, apiIdentifier, organizationID, vHost)
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("An API exists with the same basepath. Basepath: %v Existing_API: %v New_API: %v orgID: %v VHost: %v", newBasepath, existingAPIIdentifier, apiIdentifier, organizationID, vHost),
+				Severity:  logging.TRIVIAL,
+				ErrorCode: 1163,
+			})
 			err := errors.New("An API exists with the same basepath. Existing_API: " + existingAPIIdentifier + "New_API:" + apiIdentifier +
 				" orgID: " + organizationID + " VHost: " + vHost)
 			return err
@@ -534,7 +549,11 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 			// TODO: (renuka) optimize to update cache only once after updating all maps
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
-				logger.LoggerXds.Errorf("Error deleting API: %v of organization: %v", apiIdentifier, organizationID)
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error deleting API: %v of organization: %v", apiIdentifier, organizationID),
+					Severity:  logging.TRIVIAL,
+					ErrorCode: 1164,
+				})
 				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v in organization: %v",
 					apiIdentifier, organizationID)
 				remainingVhosts := make(map[string]struct{})
@@ -598,7 +617,11 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 			// TODO: (renuka) optimize to update cache only once after updating all maps
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
-				logger.LoggerXds.Errorf("Error deleting API: %v of organization: %v", apiIdentifier, organizationID)
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error deleting API: %v of organization: %v", uuid, organizationID),
+					Severity:  logging.TRIVIAL,
+					ErrorCode: 1165,
+				})
 				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v in organization: %v",
 					apiIdentifier, organizationID)
 				remainingVhosts := make(map[string]struct{})
@@ -653,7 +676,11 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 	}
 	for apiIdentifier := range apiIdentifiers {
 		if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
-			logger.LoggerXds.Errorf("Error undeploying API %v of Organization %v from environments %v", apiIdentifier, organizationID, environments)
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error undeploying API %v of Organization %v from environments %v", apiIdentifier, organizationID, environments),
+				Severity:  logging.TRIVIAL,
+				ErrorCode: 1166,
+			})
 		} else {
 			// if no error, update internal vhost maps
 			// error only happens when API not found in deleteAPI func
@@ -800,8 +827,11 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			if arrayContains(labels, label) {
 				vhost, err := ExtractVhostFromAPIIdentifier(apiKey)
 				if err != nil {
-					logger.LoggerXds.Errorf("Error extracting vhost from API identifier: %v for Organization %v. Ignore deploying the API",
-						err.Error(), organizationID)
+					logger.LoggerXds.ErrorC(logging.ErrorDetails{
+						Message:   fmt.Sprintf("Error extracting vhost from API identifier: %v for Organization %v. Ignore deploying the API", err.Error(), organizationID),
+						Severity:  logging.TRIVIAL,
+						ErrorCode: 1167,
+					})
 					continue
 				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
@@ -866,21 +896,36 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap, err := envoy_cachev3.NewSnapshot(fmt.Sprint(version), map[envoy_resource.Type][]types.Resource{
+	snap, errNewSnap := envoy_cachev3.NewSnapshot(fmt.Sprint(version), map[envoy_resource.Type][]types.Resource{
 		envoy_resource.EndpointType: endpoints,
 		envoy_resource.ClusterType:  clusters,
 		envoy_resource.ListenerType: listeners,
 		envoy_resource.RouteType:    routes,
 	})
-	if err != nil {
-		logger.LoggerXds.Errorf("Error while updating the snapshot : %v", err.Error())
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
 		return false
 	}
-	err = snap.Consistent()
 	//TODO: (VirajSalaka) check
-	err = cache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Errorf("Error while updating the snapshot : %v", err.Error())
+	errSetSnap := cache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while setting the snapshot : %v", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 		return false
 	}
 	logger.LoggerXds.Infof("New Router cache updated for the label: " + label + " version: " + fmt.Sprint(version))
@@ -893,17 +938,32 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	label := commonEnforcerLabel
 	configs := []types.Resource{MarshalConfig(configFile)}
 	version := rand.Intn(maxRandomInt)
-	snap, err := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.ConfigType: configs,
 	})
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
 	}
-	snap.Consistent()
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
 
-	err = enforcerCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSetSnap := enforcerCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while setting the snapshot : %v", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 
 	enforcerConfigMap[label] = configs
@@ -917,14 +977,33 @@ func UpdateEnforcerApis(label string, apis []types.Resource, version string) {
 		version = fmt.Sprint(rand.Intn(maxRandomInt))
 	}
 
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.APIType: apis,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	logger.LoggerXds.Infof("New API cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
@@ -939,14 +1018,33 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 
 	// TODO: (VirajSalaka) Decide if a map is required to keep version (just to avoid having the same version)
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.SubscriptionListType: subscriptionList,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerSubscriptionCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerSubscriptionCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerSubscriptionMap[label] = subscriptionList
 	logger.LoggerXds.Infof("New Subscription cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -960,14 +1058,33 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	applicationList = append(applicationList, applications)
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.ApplicationListType: applicationList,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerApplicationCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerApplicationCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerApplicationMap[label] = applicationList
 	logger.LoggerXds.Infof("New Application cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -980,14 +1097,33 @@ func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	apiList = append(apiList, apis)
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.APIListType: apiList,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerAPICache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerAPICache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerAPIListMap[label] = apiList
 	logger.LoggerXds.Infof("New API List cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -1001,14 +1137,33 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.ApplicationPolicyListType: applicationPolicyList,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerApplicationPolicyCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerApplicationPolicyCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerApplicationPolicyMap[label] = applicationPolicyList
 	logger.LoggerXds.Infof("New Application Policy cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -1022,14 +1177,33 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.SubscriptionPolicyListType: subscriptionPolicyList,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerSubscriptionPolicyCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerSubscriptionPolicyCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerSubscriptionPolicyMap[label] = subscriptionPolicyList
 	logger.LoggerXds.Infof("New Subscription Policy cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -1043,14 +1217,33 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.ApplicationKeyMappingListType: applicationKeyMappingList,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerApplicationKeyMappingCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerApplicationKeyMappingCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerApplicationKeyMappingMap[label] = applicationKeyMappingList
 	logger.LoggerXds.Infof("New Application Key Mapping cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -1166,14 +1359,33 @@ func UpdateEnforcerKeyManagers(keyManagerConfigList []types.Resource) {
 	label := commonEnforcerLabel
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.KeyManagerType: keyManagerConfigList,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerKeyManagerCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerKeyManagerCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerKeyManagerMap[label] = keyManagerConfigList
 	logger.LoggerXds.Infof("New key manager cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -1188,14 +1400,33 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 	tokens = append(tokens, revokedTokens...)
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.RevokedTokensType: revokedTokens,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerRevokedTokensCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerRevokedTokensCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerRevokedTokensMap[label] = tokens
 	logger.LoggerXds.Infof("New Revoked token cache update for the label: " + label + " version: " + fmt.Sprint(version))
@@ -1235,14 +1466,33 @@ func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 	data = append(data, t)
 
 	version := rand.Intn(maxRandomInt)
-	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
+	snap, errNewSnap := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
 		wso2_resource.ThrottleDataType: data,
 	})
-	snap.Consistent()
+	if errNewSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error creating new snapshot : %s", errNewSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1169,
+		})
+	}
 
-	err := enforcerThrottleDataCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
-		logger.LoggerXds.Error(err)
+	errSnapConsistent := snap.Consistent()
+	if errSnapConsistent != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while verifying the snapshot, not consistant : %v", errSnapConsistent.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1168,
+		})
+	}
+
+	errSetSnap := enforcerThrottleDataCache.SetSnapshot(context.Background(), label, snap)
+	if errSetSnap != nil {
+		logger.LoggerXds.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error setting snapshot : %s", errSetSnap.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1170,
+		})
 	}
 	enforcerThrottleData = t
 	logger.LoggerXds.Infof("New Throttle Data cache update for the label: " + label + " version: " + fmt.Sprint(version))

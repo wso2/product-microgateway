@@ -20,11 +20,13 @@ package messaging
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
@@ -70,8 +72,11 @@ func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotificat
 func parseRevokedTokenJSONEvent(data []byte, notification *msg.EventTokenRevocationNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v. "+
-			"Hence dropping the event.", unmarshalErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling revoked token event data %v. Hence dropping the event.", unmarshalErr.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1253,
+		})
 	}
 	return unmarshalErr
 }

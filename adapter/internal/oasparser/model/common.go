@@ -22,6 +22,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -30,6 +31,7 @@ import (
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 func arrayContains(a []string, x string) bool {
@@ -139,13 +141,21 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1305,
+		})
 		return nil, err
 	}
 
 	// Hostname validation
 	if err == nil && !regexp.MustCompile(hostNameValidator).MatchString(parsedURL.Hostname()) {
-		logger.LoggerOasparser.Error("Malformed endpoint detected (Invalid host name) : ", rawURL)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Invalid hostname in the endpoint : %s", rawURL),
+			Severity:  logging.MINOR,
+			ErrorCode: 1306,
+		})
 		return nil, errors.New("malformed endpoint detected (Invalid host name) : " + rawURL)
 	}
 
@@ -154,7 +164,11 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 	if parsedURL.Port() != "" {
 		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
 		if err != nil {
-			logger.LoggerOasparser.Error("Endpoint port is not in the expected format.", err)
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Endpoint port is not in the expected format. %v", err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1307,
+			})
 		}
 		port = uint32(u32)
 	} else {

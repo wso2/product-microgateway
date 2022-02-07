@@ -40,6 +40,7 @@ import (
 	wso2_server "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/server/v3"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	healthservice "github.com/wso2/product-microgateway/adapter/pkg/health/api/wso2/health/service"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
@@ -117,6 +118,10 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
+		logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+			Message:   "failed to listen: " + err.Error(),
+			Severity:  logging.BLOCKER,
+			ErrorCode: 1010})
 		logger.LoggerMgw.Fatal("failed to listen: ", err)
 	}
 
@@ -146,7 +151,10 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 		}
 		logger.LoggerMgw.Info("Starting XDS GRPC server.")
 		if err = grpcServer.Serve(lis); err != nil {
-			logger.LoggerMgw.Error(err)
+			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Failed to start XDS GRPC server. %s", err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1011})
 		}
 	}()
 }
@@ -169,7 +177,11 @@ func Run(conf *config.Config) {
 	}
 
 	if errC != nil {
-		logger.LoggerMgw.Error("Error reading the log configs. ", errC)
+		logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error reading the log configs : %s", errC.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1012,
+		})
 	}
 
 	logger.LoggerMgw.Info("Starting adapter ....")
@@ -222,6 +234,12 @@ func Run(conf *config.Config) {
 	if conf.Adapter.Server.Enabled {
 		if err := auth.Init(); err != nil {
 			logger.LoggerMgw.Error("Error while initializing authorization component.", err)
+			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while initializing authorization component, when intializing "+
+					"adapter REST API : %s", err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1013,
+			})
 		}
 		go restserver.StartRestServer(conf)
 	}
@@ -256,7 +274,12 @@ func Run(conf *config.Config) {
 	} else {
 		err := api.ProcessMountedAPIProjects()
 		if err != nil {
-			logger.LoggerMgw.Error("Readiness probe is not set as local api artifacts processing has failed.")
+			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Readiness probe is not set as local api artifacts "+
+					"processing has failed : %s", err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1014,
+			})
 			return
 		}
 		// We need to deploy the readiness probe when eventhub is disabled
@@ -317,17 +340,29 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
 			err := synchronizer.PushAPIProjects(data.Resp, envs)
 			if err != nil {
-				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
+				logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred while pushing API data: %s ", err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 1015,
+				})
 			}
 			health.SetControlPlaneRestAPIStatus(err == nil)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-			logger.LoggerMgw.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
+			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred when retrieving APIs from control plane: %s", data.Err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1016,
+			})
 			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
 			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
-			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred when retrieving APIs from control plane: %s", data.Err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1016,
+			})
 			health.SetControlPlaneRestAPIStatus(false)
 			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
 				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)

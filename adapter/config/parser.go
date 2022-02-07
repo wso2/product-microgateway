@@ -21,6 +21,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -30,6 +31,7 @@ import (
 	toml "github.com/pelletier/go-toml"
 	logger "github.com/sirupsen/logrus"
 	pkgconf "github.com/wso2/product-microgateway/adapter/pkg/config"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 var (
@@ -74,6 +76,10 @@ func ReadConfigs() (*Config, error) {
 		adapterConfig = defaultConfig
 		_, err := os.Stat(pkgconf.GetMgwHome() + relativeConfigPath)
 		if err != nil {
+			loggerConfig.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Configuration file not found : %s", err.Error()),
+				Severity:  logging.BLOCKER,
+				ErrorCode: 1000})
 			logger.Fatal("Configuration file not found.", err)
 		}
 		content, readErr := ioutil.ReadFile(pkgconf.GetMgwHome() + relativeConfigPath)
@@ -122,7 +128,7 @@ func GetDefaultVhost(environment string) (string, bool, error) {
 }
 
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
-// the consistancy is ensured.
+// the consistency is ensured.
 //
 // If the "MGW_HOME" variable is set, the log configuration file location would be picked relative to the
 // variable's value ("/conf/log_config.toml"). otherwise, the "MGW_HOME" variable would be set to the directory

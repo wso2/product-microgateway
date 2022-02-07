@@ -19,11 +19,14 @@ package messaging
 
 import (
 	"encoding/json"
+	"fmt"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
@@ -34,8 +37,11 @@ func handleAzureOrganizationPurge() {
 		error := parseOrganizationPurgeJSONEvent(d, &event)
 
 		if error != nil {
-			logger.LoggerInternalMsg.Errorf("Error while processing "+
-				"the organization purge event %v. Hence dropping the event", error)
+			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while processing the organization purge event %v. Hence dropping the event", error.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1251,
+			})
 			continue
 		}
 
@@ -58,7 +64,11 @@ func handleAzureOrganizationPurge() {
 func parseOrganizationPurgeJSONEvent(data []byte, event *msg.EventOrganizationPurge) error {
 	unmarshalErr := json.Unmarshal(data, &event)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling organization purge event data %v", unmarshalErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling organization purge event data %v", unmarshalErr.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1252,
+		})
 	}
 	return unmarshalErr
 }

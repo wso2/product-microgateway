@@ -17,6 +17,7 @@
 package xds
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 var (
@@ -47,7 +49,11 @@ func startConsulServiceDiscovery(organizationID string) {
 				})
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
 				if errConSyn != nil {
-					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
+					logger.LoggerXds.ErrorC(logging.ErrorDetails{
+						Message:   fmt.Sprintf("consul syntax parse error : %v", errConSyn.Error()),
+						Severity:  logging.MAJOR,
+						ErrorCode: 1140,
+					})
 					return
 				}
 				logger.LoggerXds.Debugln("consul query values: ", query)
@@ -81,7 +87,11 @@ func updateCertsForServiceMesh(organizationID string) {
 
 			marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
 			if err != nil {
-				logger.LoggerXds.Error("Internal Error while marshalling the upstream TLS Context.")
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Internal Error while marshalling the upstream TLS Context : %s", err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 1141,
+				})
 			} else {
 				//envoy config
 				upstreamTransportSocket := &corev3.TransportSocket{

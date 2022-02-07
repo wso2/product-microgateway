@@ -18,10 +18,12 @@
 package model
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
@@ -37,7 +39,11 @@ func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 
 		productionEndpoint, err := getHTTPEndpoint(productionEndpointURL)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURL, err.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("error while reading production endpoint : %v in env variables, %v", productionEndpointURL, err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1300,
+			})
 		} else if productionEndpoint != nil {
 			productionEndpoints = append(productionEndpoints, *productionEndpoint)
 		}
@@ -54,7 +60,11 @@ func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 
 		sandboxEndpoint, err := getHTTPEndpoint(sandboxEndpointURL)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("error while reading sandbox endpoint : %v in env variables, %v", sandboxEndpointURL, err.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("error while reading sandbox endpoint : %v in env variables, %v", sandboxEndpointURL, err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1301,
+			})
 		} else if sandboxEndpoint != nil {
 			sandboxEndpoints = append(sandboxEndpoints, *sandboxEndpoint)
 		}

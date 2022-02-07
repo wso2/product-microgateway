@@ -20,10 +20,12 @@ package messaging
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
@@ -44,7 +46,11 @@ func handleThrottleData() {
 		var throttleData *throttle.ThrottleData
 		e := json.Unmarshal([]byte(string(d.Body)), &data)
 		if e != nil {
-			logger.LoggerInternalMsg.Errorf("Couldn't parse throttle data message. %v", e)
+			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Couldn't parse throttle data message. %v", e.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1254,
+			})
 			return
 		}
 		logger.LoggerInternalMsg.Debugf("Throttle Data: %s", string(d.Body))
@@ -62,7 +68,11 @@ func handleThrottleData() {
 				var ipCondition synchronizer.IPCondition
 				ipError := json.Unmarshal([]byte(payload.ConditionValue), &ipCondition)
 				if ipError != nil {
-					logger.LoggerInternalMsg.Errorf("Couldn't parse condition value as IPCondition. %v", ipError)
+					logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+						Message:   fmt.Sprintf("Couldn't parse condition value as IPCondition. %v", ipError.Error()),
+						Severity:  logging.MAJOR,
+						ErrorCode: 1255,
+					})
 					return
 				}
 				ip := &throttle.IPCondition{

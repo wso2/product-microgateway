@@ -19,9 +19,11 @@ package enforcercallbacks
 
 import (
 	"context"
+	"fmt"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // Callbacks is used to debug the xds server related communication.
@@ -47,7 +49,11 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 	logger.LoggerEnforcerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
 		id, request.GetNode(), request.GetVersionInfo(), request.GetTypeUrl())
 	if request.ErrorDetail != nil {
-		logger.LoggerEnforcerXdsCallbacks.Errorf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(), id, request.ErrorDetail.Message)
+		logger.LoggerEnforcerXdsCallbacks.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(), id, request.ErrorDetail.Message),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 2000,
+		})
 	}
 	// TODO: (VirajSalaka) Remove the commented logic once the fallback is implemented.
 	// requestEventChannel := xds.GetRequestEventChannel()

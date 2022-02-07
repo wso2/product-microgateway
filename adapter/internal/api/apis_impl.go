@@ -35,6 +35,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
@@ -50,7 +51,11 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occurred while unzipping the apictl project. Error: %v", err.Error())
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unzipping the apictl project : %s", err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1040,
+		})
 		return apiProject, err
 	}
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
@@ -60,7 +65,11 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
 		unzippedFileBytes, err := readZipFile(file)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while reading the file : %s %s", file.Name, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1041,
+			})
 			return apiProject, err
 		}
 		err = processFileInsideProject(&apiProject, unzippedFileBytes, file.Name)
@@ -81,7 +90,11 @@ func ProcessMountedAPIProjects() (err error) {
 	apisDirName := filepath.FromSlash(conf.Adapter.ArtifactsDirectory + "/" + apisArtifactDir)
 	files, err := ioutil.ReadDir((apisDirName))
 	if err != nil {
-		loggers.LoggerAPI.Error("Error while reading api artifacts during startup. ", err)
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while reading api artifacts during startup : %s", err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1042,
+		})
 		// If Adapter Server which accepts apictl projects is closed then the adapter should not proceed.
 		if !conf.Adapter.Server.Enabled {
 			return err
@@ -106,20 +119,31 @@ func ProcessMountedAPIProjects() (err error) {
 				return nil
 			})
 			if err != nil {
-				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error while processing api artifact - %s during startup : %s", apiProjectFile.Name(), err.Error()),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1043,
+				})
 				continue
 			}
 			err = apiProject.APIYaml.ValidateAPIType()
 			if err != nil {
-				loggers.LoggerAPI.Errorf("Error while validating the API type - %s during startup : %v",
-					apiProjectFile.Name(), err)
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error while validating the API type - %s during startup : %s", apiProjectFile.Name(), err.Error()),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1044,
+				})
 				continue
 			}
 
 			overrideValue := false
 			err = validateAndUpdateXds(apiProject, &overrideValue)
 			if err != nil {
-				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error while processing api artifact - %s during startup : %s", apiProjectFile.Name(), err.Error()),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1045,
+				})
 				continue
 			}
 			continue
@@ -128,7 +152,11 @@ func ProcessMountedAPIProjects() (err error) {
 		}
 		data, err := ioutil.ReadFile(filepath.FromSlash(apisDirName + "/" + apiProjectFile.Name()))
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error while reading api artifact - %s during startup : %v", apiProjectFile.Name(), err)
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while reading api artifact - %s during startup : %s", apiProjectFile.Name(), err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1046,
+			})
 			continue
 		}
 
@@ -136,7 +164,11 @@ func ProcessMountedAPIProjects() (err error) {
 		overrideAPIParam := false
 		err = ApplyAPIProjectInStandaloneMode(data, &overrideAPIParam)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while processing api artifact - %s during startup : %s", apiProjectFile.Name(), err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1047,
+			})
 			continue
 		}
 	}
@@ -149,7 +181,11 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err erro
 	// handle panic
 	defer func() {
 		if r := recover(); r != nil {
-			loggers.LoggerAPI.Error("Recovered from panic. ", r)
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Recovered from panic. %v", r),
+				Severity:  logging.MINOR,
+				ErrorCode: 1050,
+			})
 			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
 	}()
@@ -225,7 +261,11 @@ func ApplyAPIProjectFromAPIM(
 	// handle panic
 	defer func() {
 		if r := recover(); r != nil {
-			loggers.LoggerAPI.Error("Recovered from panic. ", r)
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Recovered from panic. %v", r),
+				Severity:  logging.MINOR,
+				ErrorCode: 1050,
+			})
 			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
 	}()

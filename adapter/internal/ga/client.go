@@ -20,6 +20,7 @@ package ga
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	stub "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"google.golang.org/genproto/googleapis/rpc/status"
@@ -88,7 +90,11 @@ func initConnection() (*grpc.ClientConn, error) {
 	// TODO: (VirajSalaka) Bring in connection level configurations
 	conn, err := getGRPCConnection()
 	if err != nil {
-		logger.LoggerGA.Error("Error while connecting to the Global Adapter.", err)
+		logger.LoggerGA.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while connecting to the Global Adapter. %v", err.Error()),
+			Severity:  logging.BLOCKER,
+			ErrorCode: 1200,
+		})
 		return nil, err
 	}
 
@@ -98,7 +104,11 @@ func initConnection() (*grpc.ClientConn, error) {
 
 	if err != nil {
 		// TODO: (VirajSalaka) handle error.
-		logger.LoggerGA.Error("Error while starting client. ", err)
+		logger.LoggerGA.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while starting client. %v", err.Error()),
+			Severity:  logging.BLOCKER,
+			ErrorCode: 1201,
+		})
 		return nil, err
 	}
 	logger.LoggerGA.Info("Connection to the global adapter is successful.")
@@ -134,20 +144,35 @@ func watchAPIs() {
 			// read done.
 			// TODO: (VirajSalaka) observe the behavior when grpc connection terminates
 			logger.LoggerGA.Error("EOF is received from the global adapter.")
+			logger.LoggerGA.ErrorC(logging.ErrorDetails{
+				Message:   "EOF is received from the global adapter.",
+				Severity:  logging.MAJOR,
+				ErrorCode: 1202,
+			})
 			connectionFaultChannel <- true
 			return
 		}
 		if err != nil {
-			logger.LoggerGA.Error("Failed to receive the discovery response ", err)
+			logger.LoggerGA.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Failed to receive the discovery response :%v", err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1203,
+			})
 			errStatus, _ := grpcStatus.FromError(err)
 			if errStatus.Code() == codes.Unavailable {
-				logger.LoggerGA.Errorf("Connection unavailable. errorCode: %s errorMessage: %s",
-					errStatus.Code().String(), errStatus.Message())
+				logger.LoggerGA.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Connection unavailable. errorCode: %s errorMessage: %s", errStatus.Code().String(), errStatus.Message()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 1204,
+				})
 				connectionFaultChannel <- true
 				return
 			}
-			logger.LoggerGA.Errorf("Error while XDS communication; errorCode: %s errorMessage: %s",
-				errStatus.Code().String(), errStatus.Message())
+			logger.LoggerGA.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while XDS communication; errorCode: %s errorMessage: %s", errStatus.Code().String(), errStatus.Message()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1205,
+			})
 			nack(errStatus.Message())
 		} else {
 			lastReceivedResponse = discoveryResponse
@@ -229,7 +254,11 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		err := ptypes.UnmarshalAny(res, api)
 
 		if err != nil {
-			logger.LoggerGA.Errorf("Error while unmarshalling: %s\n", err.Error())
+			logger.LoggerGA.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while unmarshalling: %s", err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1206,
+			})
 			continue
 		}
 

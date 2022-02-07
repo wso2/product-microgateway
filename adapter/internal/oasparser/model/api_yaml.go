@@ -20,12 +20,14 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // APIYaml contains everything necessary to extract api.json/api.yaml file
@@ -114,13 +116,21 @@ type Policy struct {
 func NewAPIYaml(fileContent []byte) (apiYaml APIYaml, err error) {
 	apiJsn, err := utills.ToJSON(fileContent)
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occurred converting api file to json: %v", err.Error())
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred converting api file to json: %v", err.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1302,
+		})
 		return apiYaml, err
 	}
 
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occurred while parsing api.yaml or api.json %v", err.Error())
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while parsing api.yaml or api.json %v", err.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1303,
+		})
 		return apiYaml, err
 	}
 
@@ -128,7 +138,11 @@ func NewAPIYaml(fileContent []byte) (apiYaml APIYaml, err error) {
 	apiYaml.PopulateEndpointsInfo()
 	err = apiYaml.ValidateMandatoryFields()
 	if err != nil {
-		loggers.LoggerAPI.Errorf("%v", err)
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occured while vaidating mandatory fields in API %v", err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1304,
+		})
 		return apiYaml, err
 	}
 

@@ -36,6 +36,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
@@ -388,19 +389,31 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 
 	xWso2EPErr := swagger.setXWso2Endpoints()
 	if xWso2EPErr != nil {
-		logger.LoggerOasparser.Error("Error while adding x-wso2-endpoints. ", xWso2EPErr)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while adding x-wso2-endpoints. %v", xWso2EPErr.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1320,
+		})
 		return xWso2EPErr
 	}
 
 	apiLevelProdEPFound, productionEndpointErr := swagger.setXWso2ProductionEndpoint()
 	if productionEndpointErr != nil {
-		logger.LoggerOasparser.Error("Error while adding x-wso2-production-endpoints. ", productionEndpointErr)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while adding x-wso2-production-endpoints. %v", productionEndpointErr),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1321,
+		})
 		return productionEndpointErr
 	}
 
 	apiLevelSandEPFound, sandboxEndpointErr := swagger.setXWso2SandboxEndpoint()
 	if sandboxEndpointErr != nil {
-		logger.LoggerOasparser.Error("Error while adding x-wso2-sandbox-endpoints. ", sandboxEndpointErr)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while adding x-wso2-sandbox-endpoints. %v", sandboxEndpointErr.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1322,
+		})
 		return sandboxEndpointErr
 	}
 
@@ -431,8 +444,11 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 		if err == nil {
 			productionUrls = append(productionUrls, *endpoint)
 		} else {
-			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties for %v : %v",
-				swagger.title, swagger.version)
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("error encountered when parsing the production endpoints in env properties for %v : %v", swagger.title, swagger.version),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1323,
+			})
 		}
 	}
 
@@ -447,8 +463,11 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 		if err == nil {
 			sandboxUrls = append(sandboxUrls, *endpoint)
 		} else {
-			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties %v : %v",
-				swagger.title, swagger.version)
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("error encountered when parsing the sandbox endpoints in env properties %v : %v", swagger.title, swagger.version),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1324,
+			})
 		}
 	}
 
@@ -634,40 +653,59 @@ func (swagger *MgwSwagger) Validate() error {
 	if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
 		(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
 
-		logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
-			swagger.title, swagger.version)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("No Endpoints are provided for the API %s:%s", swagger.title, swagger.version),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1325,
+		})
 		return errors.New("no endpoints are provided for the API")
 	}
 	err := swagger.productionEndpoints.validateEndpointCluster("API level production")
 	if err != nil {
-		logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
-			swagger.title, swagger.version, err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while parsing the production endpoints(API level) of the API %s:%s - %v", swagger.title, swagger.version, err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1326,
+		})
 		return err
 	}
 	err = swagger.sandboxEndpoints.validateEndpointCluster("API level sandbox")
 	if err != nil {
-		logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
-			swagger.title, swagger.version, err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while parsing the sandbox endpoints(API level) of the API %s:%s - %v", swagger.title, swagger.version, err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1327,
+		})
 		return err
 	}
 	for _, res := range swagger.resources {
 		err := res.productionEndpoints.validateEndpointCluster("Resource level production")
 		if err != nil {
-			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
-				swagger.title, swagger.version, err)
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while parsing the production endpoints(resource level) of the API %s:%s - %v", swagger.title, swagger.version, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1328,
+			})
 			return err
 		}
 		err = res.sandboxEndpoints.validateEndpointCluster("Resource level sandbox")
 		if err != nil {
-			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
-				swagger.title, swagger.version, err)
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while parsing the sandbox endpoints(resource level) of the API %s:%s - %v", swagger.title, swagger.version, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1329,
+			})
 			return err
 		}
 	}
 
 	err = swagger.validateBasePath()
 	if err != nil {
-		logger.LoggerOasparser.Errorf("Error while parsing the API %s:%s - %v", swagger.title, swagger.version, err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while validating basepath for the API %s:%s - %v", swagger.title, swagger.version, err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1330,
+		})
 		return err
 	}
 	return nil
@@ -705,15 +743,21 @@ func (retryConfig *RetryConfig) validateRetryConfig() {
 	conf, _ := config.ReadConfigs()
 	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxRetryCount
 	if retryConfig.Count > int32(maxConfigurableCount) || retryConfig.Count < 0 {
-		logger.LoggerOasparser.Errorf("Retry count for the API must be within the range 0 - %v."+
-			"Reconfiguring retry count as %v", maxConfigurableCount, maxConfigurableCount)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Retry count for the API must be within the range 0 - %v. Reconfiguring retry count as %v", maxConfigurableCount, maxConfigurableCount),
+			Severity:  logging.TRIVIAL,
+			ErrorCode: 1331,
+		})
 		retryConfig.Count = int32(maxConfigurableCount)
 	}
 	var validStatusCodes []uint32
 	for _, statusCode := range retryConfig.StatusCodes {
 		if statusCode > 598 || statusCode < 401 {
-			logger.LoggerOasparser.Errorf("Given status code for the API retry config is invalid." +
-				"Must be in the range 401 - 598. Dropping the status code.")
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message:   "Given status code for the API retry config is invalid. Must be in the range 401 - 598. Dropping the status code.",
+				Severity:  logging.MAJOR,
+				ErrorCode: 1332,
+			})
 		} else {
 			validStatusCodes = append(validStatusCodes, statusCode)
 		}
@@ -730,8 +774,11 @@ func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName str
 		for _, endpoint := range endpointCluster.Endpoints {
 			err = endpoint.validateEndpoint()
 			if err != nil {
-				logger.LoggerOasparser.Errorf("Error while parsing the %s endpoints. %v",
-					endpointName, err)
+				logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error while validating the %s endpoints. %v", endpointName, err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 1333,
+				})
 				return err
 			}
 		}
@@ -789,7 +836,6 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 			} else {
 				// TODO: (VirajSalaka) Throw an error and catch from an upper layer where the API name is visible.
 				errMsg := "urls property is not provided with the " + endpointName + " extension"
-				logger.LoggerOasparser.Error(errMsg)
 				return nil, errors.New(errMsg)
 			}
 
@@ -842,7 +888,11 @@ func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{},
 			}
 
 		}
-		logger.LoggerOasparser.Errorf("%v OpenAPI extension does not adhere with the schema", endpointName)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("%v OpenAPI extension does not adhere with the schema", endpointName),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1334,
+		})
 		return nil, errors.New("invalid map structure detected")
 	}
 	return nil, nil // the vendor extension for prod or sandbox just isn't present
