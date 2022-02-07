@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
@@ -119,23 +120,25 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 	resources := []*Resource{}
 	for channel, channelItem := range asyncAPI.Channels {
 		var methodsArray []*Operation
-		methodFound := false
-		if channelItem.Publish != nil {
-			vendorExtensions := channelItem.Publish.(map[string]interface{})
-			security := getSecurityArray(vendorExtensions)
-			methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions, MockedAPIConfig{}))
-			methodFound = true
+		var vendorExtensions map[string]interface{}
+		if channelItem.Publish == nil && channelItem.Subscribe == nil {
+			loggers.LoggerOasparser.Warnf(
+				"The topic does not include a Publish or a Subscribe definition. Discarding the topic %v.", channel)
+			continue
+		} else if channelItem.Publish != nil && channelItem.Subscribe != nil {
+			loggers.LoggerOasparser.Warnf(
+				"Both Publish and Subscribe types exists for the same topic. Prioritizing type Publish for topic %v.", channel)
+			vendorExtensions = channelItem.Publish.(map[string]interface{})
+		} else if channelItem.Publish != nil { // only Publish has been defined
+			vendorExtensions = channelItem.Publish.(map[string]interface{})
+		} else { // only Subscribe has been defined
+			vendorExtensions = channelItem.Subscribe.(map[string]interface{})
 		}
-		if channelItem.Subscribe != nil {
-			vendorExtensions := channelItem.Subscribe.(map[string]interface{})
-			security := getSecurityArray(vendorExtensions)
-			methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions, MockedAPIConfig{}))
-			methodFound = true
-		}
-		if methodFound {
-			resource := unmarshalSwaggerResources(channel, methodsArray, channelItem.VendorExtensions)
-			resources = append(resources, &resource)
-		}
+
+		security := getSecurityArray(vendorExtensions)
+		methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions, MockedAPIConfig{}))
+		resource := unmarshalSwaggerResources(channel, methodsArray, channelItem.VendorExtensions)
+		resources = append(resources, &resource)
 	}
 
 	return SortResources(resources)

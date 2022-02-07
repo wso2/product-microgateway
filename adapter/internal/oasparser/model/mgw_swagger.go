@@ -1123,9 +1123,9 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
 	swagger.LifecycleStatus = data.LifeCycleStatus
-	if data.APIThrottlingPolicy != "" { // Added with both HTTP and WS APIs. x-throttling-tier is not used with WS.
-		swagger.xWso2ThrottlingTier = data.APIThrottlingPolicy
-	}
+
+	// Added with both HTTP and WS APIs. x-throttling-tier is not used with WS.
+	swagger.xWso2ThrottlingTier = data.APIThrottlingPolicy
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig

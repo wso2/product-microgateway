@@ -71,9 +71,6 @@ func TestSetInfoAsyncAPI(t *testing.T) {
 					methods: []*Operation{
 						{
 							method: "GET",
-						},
-						{
-							method: "GET",
 							security: []map[string][]string{
 								{
 									"oauth2": {"abc"},
@@ -85,9 +82,6 @@ func TestSetInfoAsyncAPI(t *testing.T) {
 				{
 					path: "/rooms/{roomID}",
 					methods: []*Operation{
-						{
-							method: "GET",
-						},
 						{
 							method: "GET",
 						},
@@ -112,7 +106,10 @@ func TestSetInfoAsyncAPI(t *testing.T) {
 		dataItem.actual.resources[0].methods[0].method,
 		"AsyncAPI MgwSwagger resource method mismatch")
 
-	assert.Equal(t, dataItem.expected.resources[0].methods[1].security[0]["oauth2"],
-		dataItem.actual.resources[0].methods[1].security[0]["oauth2"],
-		"AsyncAPI MgwSwagger subscribe security scope mismatch")
+	assert.Equal(t, dataItem.expected.resources[0].methods[0].security[0]["oauth2"],
+		dataItem.actual.resources[0].methods[0].security[0]["oauth2"],
+		"AsyncAPI MgwSwagger publish security scope mismatch")
+
+	assert.Equal(t, len(dataItem.expected.resources[0].methods), 1,
+		"AsyncAPI MgwSwagger resource has more that one method")
 }

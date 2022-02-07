@@ -9,11 +9,11 @@ servers:
 channels:
   /notifications:
     parameters: {}
-    publish: {}
-    subscribe:
+    publish: 
       x-uri-mapping: /notifications
       x-scopes:
        - abc
+    subscribe: {}
   /rooms/{roomID}:
     parameters:
       roomID:

@@ -70,9 +70,9 @@ func FindAPIDefinitionVersion(jsn []byte) string {
 		if strings.HasPrefix(versionNumber.(string), "2") {
 			return constants.AsyncAPI2
 		}
-		logger.LoggerOasparser.Warn("AsyncAPI version is not supported.")
+		logger.LoggerOasparser.Errorf("AsyncAPI version %v is not supported.", versionNumber.(string))
 		return constants.NotSupported
 	}
-	logger.LoggerOasparser.Warn("API definition version is not defined.")
+	logger.LoggerOasparser.Error("API definition version is not defined.")
 	return constants.NotDefined
 }
