@@ -255,9 +255,9 @@ type PolicyDefinition struct {
 	ApimMeta
 	Data struct {
 		Action     string
-		Parameters map[string]string
+		Parameters map[string]interface{}
 	}
-	RawData []byte `yaml:"_"`
+	RawData []byte `yaml:"-"`
 }
 
 // EndpointInfo holds config values regards to the endpoint
@@ -297,8 +297,11 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
 			val, found := policyPrams[attrib.Name]
-			if attrib.Required && !found {
-				return fmt.Errorf("required paramater %s not found", attrib.Name)
+			if !found {
+				if attrib.Required {
+					return fmt.Errorf("required paramater %s not found", attrib.Name)
+				}
+				continue
 			}
 
 			switch v := val.(type) {
@@ -599,8 +602,4 @@ func parseDeployments(data []byte) ([]Deployment, error) {
 		deployments = append(deployments, deployment)
 	}
 	return deployments, nil
-}
-
-func parsePolicies() {
-
 }
