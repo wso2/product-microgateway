@@ -41,13 +41,18 @@ import org.wso2.am.integration.test.utils.bean.APIRevisionRequest;
 import org.wso2.am.integration.test.utils.bean.APIRevisionDeployUndeployRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -107,6 +112,33 @@ public class PublisherUtils {
             throw new CCTestException("Error while creating an API", e);
         }
         return apiDTO.getId();
+    }
+
+    /**
+     * Updates the OpenAPI definition of an already created API
+     * 
+     * @param apiId ID of the API to update the OpenAPI definition
+     * @param openAPIFileName Name of the OpenAPI file. ex. scopes_openAPI.yaml
+     * @param publisherRestClient An instance of RestAPIPublisherImpl
+     * @return ID of the API that was updated
+     * @throws CCTestException if the OpenAPI file specified was not present, or an error occurs when updating the API
+     */
+    public static String updateOpenAPIDefinition(String apiId, String openAPIFileName,
+                                               RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        String targetDir = Utils.getTargetDirPath();
+        Path definitionPath = Paths.get(targetDir + ApictlUtils.OPENAPIS_PATH + openAPIFileName);
+        String responseApiId;
+        try {
+            String openAPIContent = Files.readString(definitionPath);
+            responseApiId = publisherRestClient.updateSwagger(apiId, openAPIContent);
+        } catch (ApiException e) {
+            log.error("Error occurred while creating API with an OpenAPI definition. Response: {}", e.getResponseBody());
+            throw new CCTestException("Error while creating an API with an OpenAPI", e);
+        } catch (IOException e) {
+            log.error("Error occurred while reading OpenAPI definition for: {}", openAPIFileName);
+            throw new CCTestException("Error while reading OpenAPI definition", e);
+        }
+        return responseApiId;
     }
 
     /**

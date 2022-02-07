@@ -1,5 +1,5 @@
 {
-  "name": "SubscriptionValidationApi",
+  "name": "SubscriptionValidationAPI",
   "version": "1.0.0",
   "context": "subs_validation",
   "type": "HTTP",

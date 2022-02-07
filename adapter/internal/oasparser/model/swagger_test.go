@@ -23,7 +23,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
@@ -44,7 +43,7 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	err = json.Unmarshal(apiJsn, &apiYaml)
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	var mgwSwagger MgwSwagger
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, constants.WS)
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 
 	dataItems := []setInfoSwaggerWebSocketTestItem{

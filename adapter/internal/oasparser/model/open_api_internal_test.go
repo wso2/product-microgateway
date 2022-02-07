@@ -178,7 +178,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := getHostandBasepathandPort(item.input)
+		resultResources, err := getHTTPEndpoint(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 		if resultResources != nil {
 			assert.Nil(t, err, "Error encountered when processing the endpoint")
@@ -219,7 +219,7 @@ func TestMalformedUrl(t *testing.T) {
 	}
 
 	for index := range suspectedRawUrls {
-		response, _ := getHostandBasepathandPort(suspectedRawUrls[index])
+		response, _ := getHTTPEndpoint(suspectedRawUrls[index])
 		assert.Nil(t, response)
 	}
 

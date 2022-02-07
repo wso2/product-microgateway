@@ -1,5 +1,5 @@
 {
-  "name": "BlockedApi",
+  "name": "BlockedAPI",
   "version": "1.0.0",
   "context": "blocked",
   "type": "HTTP",
