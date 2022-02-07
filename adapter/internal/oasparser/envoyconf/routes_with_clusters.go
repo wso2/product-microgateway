@@ -648,8 +648,8 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // sandbox clusterName needs to be provided.
 func createRoute(params *routeCreateParams) *routev3.Route {
 	// func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
-	// resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string,
-	// corsPolicy *routev3.CorsPolicy) *routev3.Route {
+	// 	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string,
+	// 	corsPolicy *routev3.CorsPolicy) *routev3.Route {
 	title := params.title
 	version := params.version
 	vHost := params.vHost
