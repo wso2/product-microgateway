@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
@@ -38,7 +39,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result:  "2",
+			result:  constants.Swagger2,
 			message: "when swagger version is 2",
 		},
 		{
@@ -48,8 +49,24 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result:  "3",
+			result:  constants.OpenAPI3,
 			message: "when openAPi version is 3",
+		},
+		{
+			inputSwagger: `{
+				"asyncapi": "2.0.0"
+				
+				}`,
+			result:  constants.AsyncAPI2,
+			message: "when asyncAPI version is 2",
+		},
+		{
+			inputSwagger: `{
+				"asyncapi": "5.0.0"
+							
+				}`,
+			result:  constants.NotSupported,
+			message: "when asyncAPI version is not supported",
 		},
 		{
 			inputSwagger: `{
@@ -57,15 +74,15 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result:  "2",
+			result:  constants.NotDefined,
 			message: "when openAPi version is not provided",
 		},
 	}
 
 	for _, item := range dataItems {
 		apiJsn, _ := utills.ToJSON([]byte(item.inputSwagger))
-		resultswaggerVerison := utills.FindSwaggerVersion(apiJsn)
+		actualApiVersion := utills.FindAPIDefinitionVersion(apiJsn)
 
-		assert.Equal(t, item.result, resultswaggerVerison, item.message)
+		assert.Equal(t, item.result, actualApiVersion, item.message)
 	}
 }

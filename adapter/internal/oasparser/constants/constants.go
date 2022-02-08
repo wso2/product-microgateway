@@ -43,6 +43,7 @@ const (
 	None                 string = "None"
 	DefaultSecurity      string = "default"
 	XMediationScript     string = "x-mediation-script"
+	XScopes              string = "x-scopes"
 )
 
 // cluster name prefixes
@@ -98,7 +99,20 @@ const (
 	HTTP                 string = "HTTP"
 	WS                   string = "WS"
 	WEBHOOK              string = "WEBHOOK"
+	SSE                  string = "SSE"
 	Prototyped           string = "prototyped"
 	TemplateEndpointType string = "TEMPLATE"
 	InlineEndpointType   string = "INLINE"
+)
+
+// Constants used for version identification of API definitions
+const (
+	Swagger      string = "swagger"
+	OpenAPI      string = "openapi"
+	AsyncAPI     string = "asyncapi"
+	Swagger2     string = "swagger_2"
+	OpenAPI3     string = "openapi_3"
+	AsyncAPI2    string = "asyncapi_2"
+	NotDefined   string = "not_defined"
+	NotSupported string = "not_supported"
 )

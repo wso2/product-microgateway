@@ -25,6 +25,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
@@ -170,22 +171,18 @@ func testGetOpenAPIVersionAndJSONContent(t *testing.T, apiYamlFilePath string) {
 
 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
 	assert.Nil(t, err, "Error while reading the yaml file : %v"+apiYamlFilePath)
-	swaggerVerison, apiJsn, err := operator.GetOpenAPIVersionAndJSONContent(apiYamlByteArr)
+	versionOfAPI, apiJsn, err := operator.GetOpenAPIVersionAndJSONContent(apiYamlByteArr)
 
-	assert.NotNil(t, swaggerVerison, "Swagger version should not be empty")
+	assert.NotNil(t, versionOfAPI, "Swagger version should not be empty")
 	assert.NotNil(t, apiJsn, "Swagger version should not be empty")
 
 	// Check for swagger version
 	if strings.HasSuffix(apiYamlFilePath, "/openapi.yaml") {
-		assert.Equal(t, swaggerVerison, "3", "OpenAPI swagger version mismatch")
-	}
-
-	if strings.HasSuffix(apiYamlFilePath, "/api.yaml") {
-		assert.Equal(t, swaggerVerison, "2", "Default swaggerVersion should be 2")
+		assert.Equal(t, constants.OpenAPI3, versionOfAPI, "OpenAPI version mismatch")
 	}
 
 	if strings.HasSuffix(apiYamlFilePath, "/openapi_with_prod_sand_extensions.yaml") {
-		assert.Equal(t, swaggerVerison, "2", "swaggerVersion mismatch")
+		assert.Equal(t, constants.Swagger2, versionOfAPI, "Swagger version mismatch")
 	}
 
 	//validate apiJsn

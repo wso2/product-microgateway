@@ -1063,43 +1063,42 @@ func GenerateInterceptorIncludes(includes []interface{}) *interceptor.RequestInc
 	return includesV
 }
 
-// GetMgwSwagger converts the openAPI v3 and v2 content
+// GetMgwSwagger converts the openAPI v3, v2 and asyncAPI content
 // To MgwSwagger objects
 func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
-	apiJsn, err := utills.ToJSON(apiContent)
+	definitionJsn, err := utills.ToJSON(apiContent)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error converting api file to json", err)
 		return err
 	}
-	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+	definitionVersion := utills.FindAPIDefinitionVersion(definitionJsn)
 
-	if swaggerVersion == "2" {
-		// map json to struct
-		var apiData2 spec.Swagger
-		err = json.Unmarshal(apiJsn, &apiData2)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
-		} else {
-			infoSwaggerErr := swagger.SetInfoSwagger(apiData2)
-			if infoSwaggerErr != nil {
-				return infoSwaggerErr
-			}
+	if definitionVersion == constants.Swagger2 {
+		var swaggerSpec spec.Swagger
+		err = json.Unmarshal(definitionJsn, &swaggerSpec)
+		if err == nil {
+			err = swagger.SetInfoSwagger(swaggerSpec)
 		}
-
-	} else if swaggerVersion == "3" {
-		// map json to struct
-		var apiData3 openapi3.Swagger
-
-		err = json.Unmarshal(apiJsn, &apiData3)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error openAPI unmarshalling", err)
-		} else {
-			infoOpenAPIErr := swagger.SetInfoOpenAPI(apiData3)
-			if infoOpenAPIErr != nil {
-				return infoOpenAPIErr
-			}
+	} else if definitionVersion == constants.OpenAPI3 {
+		var openAPISpec openapi3.Swagger
+		err = json.Unmarshal(definitionJsn, &openAPISpec)
+		if err == nil {
+			err = swagger.SetInfoOpenAPI(openAPISpec)
 		}
+	} else if definitionVersion == constants.AsyncAPI2 {
+		var asyncAPISpec AsyncAPI
+		err = json.Unmarshal(definitionJsn, &asyncAPISpec)
+		if err == nil {
+			err = swagger.SetInfoAsyncAPI(asyncAPISpec)
+		}
+	} else {
+		return errors.New("API version not specified or not supported")
+	}
+
+	if err != nil {
+		logger.LoggerOasparser.Error("Error occurred while extracting the API definition to MgwSwagger ", err)
+		return err
 	}
 	err = swagger.SetXWso2Extensions()
 	if err != nil {
@@ -1124,6 +1123,9 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
 	swagger.LifecycleStatus = data.LifeCycleStatus
+
+	// Added with both HTTP and WS APIs. x-throttling-tier is not used with WS.
+	swagger.xWso2ThrottlingTier = data.APIThrottlingPolicy
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
