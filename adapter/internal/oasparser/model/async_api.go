@@ -127,7 +127,7 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 			continue
 		} else if channelItem.Publish != nil && channelItem.Subscribe != nil {
 			loggers.LoggerOasparser.Warnf(
-				"Both Publish and Subscribe types exists for the same topic. Prioritizing type Publish for topic %v.", channel)
+				"Both Publish and Subscribe types exists for the same topic. Prioritizing the extensions under type Publish for the topic %v.", channel)
 			vendorExtensions = channelItem.Publish.(map[string]interface{})
 		} else if channelItem.Publish != nil { // only Publish has been defined
 			vendorExtensions = channelItem.Publish.(map[string]interface{})
