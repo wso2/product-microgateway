@@ -91,6 +91,11 @@ func ProcessMountedAPIProjects() (artifactsMap map[string]model.ProjectAPI,err e
 	artifactsMap = make(map[string]model.ProjectAPI)
 
 	for _, apiProjectFile := range files {
+		// Ignore processing dot files and directories
+		if strings.HasPrefix(apiProjectFile.Name(), ".") {
+			continue
+		}
+
 		if apiProjectFile.IsDir() {
 			apiProject := model.ProjectAPI{
 				EndpointCerts: make(map[string]string),
