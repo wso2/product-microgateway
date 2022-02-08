@@ -31,17 +31,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 public class SourceControlUtils {
 
     private static final Logger log = LoggerFactory.getLogger(SourceControlUtils.class);
 
-    public static final String GIT_URL = "http://localhost";
-    public static final String GIT_API_URL = "http://localhost/api/v4";
-    public static final String GIT_HEALTH_URL = "http://localhost/-/liveness";
+    public static final String GIT_URL = "http://localhost:8285";
+    public static final String GIT_API_URL = "http://localhost:8285/api/v4";
+    public static final String GIT_HEALTH_URL = "http://localhost:8285/-/liveness";
     public static final String ARTIFACTS_DIR = File.separator + "git-artifacts";
     public static final String GIT_USERNAME = "root";
     public static final String GIT_PASSWORD = "svcAdmin";
@@ -132,7 +130,7 @@ public class SourceControlUtils {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_CREATED);
 
-        log.info("Artifacts committed to Git repository successfully");
+        log.info(commitMessage + " : Artifacts committed to Git repository successfully");
     }
 
     /**

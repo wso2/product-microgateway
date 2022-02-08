@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.tests.context;
 
 import org.apache.commons.lang3.StringUtils;
 import org.testcontainers.containers.DockerComposeContainer;
+import org.wso2.choreo.connect.tests.gitservice.GitService;
 import org.wso2.choreo.connect.tests.mockbackend.MockBackendServer;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -41,10 +42,11 @@ public class CcInstance extends ChoreoConnectImpl {
      * @param confFileName  - a conf.toml filename in integration/test-integration/src/test/resources/configs
      * @param backendServiceFile - a file in integration/test-integration/src/test/resources/dockerCompose
      *                          with docker-compose service section
+     * @param gitServiceFile - a file in integration/test-integration/src/test/resources/dockerCompose with git service
      * @throws IOException if an error occurs while appending backend service to docker-compose file
      * @throws CCTestException if an error occurs while appending backend service to docker-compose file
      */
-    private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile,
+    private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, String gitServiceFile,
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
                        boolean isInterceptorCertRequired)
             throws IOException, CCTestException {
@@ -85,27 +87,11 @@ public class CcInstance extends ChoreoConnectImpl {
         String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
                         + TestConstant.DOCKER_COMPOSE_YAML_PATH;
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, backendServiceFile);
+        if (!StringUtils.isEmpty(gitServiceFile)) {
+            GitService.addGitServiceToDockerCompose(dockerComposePath, gitServiceFile);
+        }
         environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true);
         addCcLoggersToEnv();
-    }
-
-    /**
-     * Initialize a docker compose container environment from the given docker-compose file
-     *
-     * @param dockerComposeFile
-     * @throws IOException
-     * @throws CCTestException
-     */
-    private CcInstance(String dockerComposeFile) throws IOException, CCTestException{
-        String targetDir = Utils.getTargetDirPath();
-        if (!StringUtils.isEmpty(dockerComposeFile)) {
-            Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH
-                            + TestConstant.TEST_DOCKER_COMPOSE_DIR + File.separator + dockerComposeFile,
-                    ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.DOCKER_COMPOSE_YAML_PATH);
-        }
-        String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
-                + TestConstant.DOCKER_COMPOSE_YAML_PATH;
-        environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true);
     }
 
     public static CcInstance getInstance() throws CCTestException {
@@ -118,6 +104,7 @@ public class CcInstance extends ChoreoConnectImpl {
         String dockerComposeFile;
         String confFileName;
         String backendServiceFile;
+        String gitServiceFile;
         List<String> startupAPIProjectFiles = new ArrayList<>();
         boolean withCustomJwtTransformer = false;
         boolean withAnalyticsMetricImpl = false;
@@ -134,6 +121,10 @@ public class CcInstance extends ChoreoConnectImpl {
         }
         public Builder withBackendServiceFile(String backendServiceFile){
             this.backendServiceFile = backendServiceFile;
+            return this;
+        }
+        public Builder withGitServiceFile(String gitServiceFile){
+            this.gitServiceFile = gitServiceFile;
             return this;
         }
         // Currently, both added via the same jar
@@ -154,14 +145,9 @@ public class CcInstance extends ChoreoConnectImpl {
         }
 
         public CcInstance build() throws IOException, CCTestException {
-            instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
+            instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile, this.gitServiceFile,
                     this.withCustomJwtTransformer, this.withAnalyticsMetricImpl, this.startupAPIProjectFiles,
                     this.isInterceptorCertRequired);
-            return instance;
-        }
-
-        public CcInstance buildContainer() throws IOException, CCTestException {
-            instance = new CcInstance(this.dockerComposeFile);
             return instance;
         }
     }

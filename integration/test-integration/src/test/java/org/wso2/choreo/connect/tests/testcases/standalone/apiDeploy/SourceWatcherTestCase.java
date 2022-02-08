@@ -20,8 +20,6 @@ package org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -36,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 
 public class SourceWatcherTestCase {
 
-    private static final Logger log = LoggerFactory.getLogger(SourceWatcherTestCase.class);
     protected String jwtToken;
 
     @BeforeClass(description = "Initialize the setup")
@@ -99,7 +96,7 @@ public class SourceWatcherTestCase {
         commitZipArtifact();
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/store/inventory") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -124,9 +121,9 @@ public class SourceWatcherTestCase {
         commitUpdatedArtifact();
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/store/inventory") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,"Response code mismatched");
     }
 }
