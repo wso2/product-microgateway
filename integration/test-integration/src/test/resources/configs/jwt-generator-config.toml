@@ -12,9 +12,10 @@
   routeIdleTimeoutInSeconds = 300
 
 # enables request body passing from router to enforcer
-[router.bodyPassing]
+[router.payloadPassing]
   passRequestBodyToEnforcer = true
-  maxRequestBytes = 1024
+  maxRequestBytes = 10240
+  allowPartialMessage = false
   packAsBytes = true
 
 [enforcer]

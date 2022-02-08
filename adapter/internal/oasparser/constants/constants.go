@@ -29,21 +29,21 @@ const (
 
 // Constants for OpenAPI vendor extension keys and values
 const (
-	XWso2ProdEndpoints      string = "x-wso2-production-endpoints"
-	XWso2SandbxEndpoints    string = "x-wso2-sandbox-endpoints"
-	XWso2endpoints          string = "x-wso2-endpoints"
-	XWso2BasePath           string = "x-wso2-basePath"
-	XWso2Label              string = "x-wso2-label"
-	XWso2Cors               string = "x-wso2-cors"
-	XThrottlingTier         string = "x-throttling-tier"
-	XWso2ThrottlingTier     string = "x-wso2-throttling-tier"
-	XAuthHeader             string = "x-wso2-auth-header"
-	XAuthType               string = "x-auth-type"
-	XWso2DisableSecurity    string = "x-wso2-disable-security"
-	None                    string = "None"
-	DefaultSecurity         string = "default"
-	XMediationScript        string = "x-mediation-script"
-	XWso2EnforcerBodyPasser string = "x-wso2-enforcer-request-body-passer"
+	XWso2ProdEndpoints             string = "x-wso2-production-endpoints"
+	XWso2SandbxEndpoints           string = "x-wso2-sandbox-endpoints"
+	XWso2endpoints                 string = "x-wso2-endpoints"
+	XWso2BasePath                  string = "x-wso2-basePath"
+	XWso2Label                     string = "x-wso2-label"
+	XWso2Cors                      string = "x-wso2-cors"
+	XThrottlingTier                string = "x-throttling-tier"
+	XWso2ThrottlingTier            string = "x-wso2-throttling-tier"
+	XAuthHeader                    string = "x-wso2-auth-header"
+	XAuthType                      string = "x-auth-type"
+	XWso2DisableSecurity           string = "x-wso2-disable-security"
+	None                           string = "None"
+	DefaultSecurity                string = "default"
+	XMediationScript               string = "x-mediation-script"
+	XWso2PassRequestBodyToEnforcer string = "x-wso2-pass-request-body-to-enforcer"
 )
 
 // cluster name prefixes

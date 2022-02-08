@@ -31,7 +31,6 @@ x-wso2-endpoints:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
 x-wso2-basePath: /v2/standard
-x-wso2-enforcer-request-body-passer: true # enables request body passing (requires config.toml configurations also)
 tags:
   - name: pet
     description: Everything about your Pets
@@ -643,12 +642,14 @@ paths:
           description: Resource not found
       security:
         - petstore_auth: [ ]
-  /requestBodyPass:
+  /echo:
     post:
-      summary: Used in request body passing test case
+      summary: Provides echo response
       responses:
         '200':
           description: successful operation
+      security:
+        - petstore_auth: [ ]
 securityDefinitions:
   api_key:
     type: apiKey

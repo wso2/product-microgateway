@@ -108,7 +108,7 @@ type envoy struct {
 	Cors                             globalCors
 	Upstream                         envoyUpstream
 	Connection                       connection
-	BodyPassing                      bodyPassing
+	PayloadPassing                   payloadPassing
 }
 
 type connectionTimeouts struct {
@@ -191,9 +191,10 @@ type globalCors struct {
 }
 
 // Envoy request body manipulating configurations
-type bodyPassing struct {
+type payloadPassing struct {
 	PassRequestBodyToEnforcer bool
 	MaxRequestBytes           uint32
+	AllowPartialMessage       bool
 	PackAsBytes               bool
 }
 

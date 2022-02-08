@@ -59,7 +59,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
-        String requestBody = "";
+        String requestBody = null;
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();

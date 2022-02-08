@@ -64,12 +64,12 @@ public class CustomFilter implements Filter {
             requestContext.addOrModifyHeaders("fooKey", configProperties.get("fooKey"));
         }
         // custom filter response body supporting condition
-        if (!requestContext.getRequestBody().isBlank()) {
+        if (requestContext.getRequestBody() != null && !requestContext.getRequestBody().isBlank()) {
             String requestBody = requestContext.getRequestBody();
-            if (requestBody.contains("hmac")) {
-                String hmacHeaderValue = "wso2ChoreoConnectHmac";
-                requestContext.addOrModifyHeaders("x-wso2-hmac-header", hmacHeaderValue);
-                log.info("Update \"x-wso2-hmac-header\" value with " + hmacHeaderValue);
+            if (requestBody.contains("dataField")) {
+                String headerValueForRequestBody = "validated";
+                requestContext.addOrModifyHeaders("x-wso2-request-body-validated-header", headerValueForRequestBody);
+                log.info("Update \"x-wso2-request-body-validated-header\" value with " + headerValueForRequestBody);
             }
         }
         log.info("Custom-header-1 is added as a header.");

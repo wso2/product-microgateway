@@ -759,7 +759,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{
 			CheckSettings: &extAuthService.CheckSettings{
 				ContextExtensions:           contextExtensions,
-				DisableRequestBodyBuffering: params.isRequestBodyBufferDisabled,
+				// negation is performing to match the envoy config name (disable_request_body_buffering)
+				DisableRequestBodyBuffering: !params.isAllowedToPassRequestPayload,
 			},
 		},
 	}
@@ -1237,29 +1238,25 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
 	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 	params := &routeCreateParams{
-		organizationID:              organizationID,
-		title:                       swagger.GetTitle(),
-		apiType:                     swagger.GetAPIType(),
-		version:                     swagger.GetVersion(),
-		vHost:                       vHost,
-		xWSO2BasePath:               swagger.GetXWso2Basepath(),
-		AuthHeader:                  swagger.GetXWSO2AuthHeader(),
-		prodClusterName:             prodClusterName,
-		sandClusterName:             sandClusterName,
-		endpointBasePath:            endpointBasePath,
-		corsPolicy:                  swagger.GetCorsConfig(),
-		resourcePathParam:           "",
-		resourceMethods:             getDefaultResourceMethods(swagger.GetAPIType()),
-		requestInterceptor:          requestInterceptor,
-		responseInterceptor:         responseInterceptor,
-		rewritePath:                 "",
-		rewriteMethod:               false,
-		// negation is performing to match the envoy config name (disable_request_body_buffering)
-		isRequestBodyBufferDisabled: !swagger.GetXWso2RequestBodyPass(),
+		organizationID:                organizationID,
+		title:                         swagger.GetTitle(),
+		apiType:                       swagger.GetAPIType(),
+		version:                       swagger.GetVersion(),
+		vHost:                         vHost,
+		xWSO2BasePath:                 swagger.GetXWso2Basepath(),
+		AuthHeader:                    swagger.GetXWSO2AuthHeader(),
+		prodClusterName:               prodClusterName,
+		sandClusterName:               sandClusterName,
+		endpointBasePath:              endpointBasePath,
+		corsPolicy:                    swagger.GetCorsConfig(),
+		resourcePathParam:             "",
+		resourceMethods:               getDefaultResourceMethods(swagger.GetAPIType()),
+		requestInterceptor:            requestInterceptor,
+		responseInterceptor:           responseInterceptor,
+		rewritePath:                   "",
+		rewriteMethod:                 false,
+		isAllowedToPassRequestPayload: swagger.GetXWso2RequestBodyPass(),
 	}
-
-	logger.LoggerOasparser.Infof("Disabled config value : %v", params.isRequestBodyBufferDisabled)
-	logger.LoggerOasparser.Infof("isRequestBodyBufferDisabled : %v", swagger.GetXWso2RequestBodyPass())
 
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()

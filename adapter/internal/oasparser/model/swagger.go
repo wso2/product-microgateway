@@ -49,7 +49,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.resources = getResourcesSwagger(swagger2, swagger.IsMockedAPI)
 
 	configs, _ := conf.ReadConfigs() 
-	if configs.Envoy.BodyPassing.PassRequestBodyToEnforcer {
+	if configs.Envoy.PayloadPassing.PassRequestBodyToEnforcer {
 		swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
 	}
 

@@ -142,18 +142,18 @@ public class CustomFilterTestCase {
 
     @Test(description = "Tests request body passing feature")
     public void testRequestBodyPass() throws MalformedURLException, CCTestException {
-        String requestBody = "{\"hmac \": \"sample_hmac_value\"}";
-        String customHeaderName = "x-wso2-hmac-header";
-        String customHeaderValue = "wso2ChoreoConnectHmac";
+        String requestBody = "{\"dataField \": \"helloWorld\"}";
+        String customHeaderName = "x-wso2-request-body-validated-header";
+        String customHeaderValue = "validated";
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
-                .doPost(Utils.getServiceURLHttps("/v2/standard/requestBodyPass"), requestBody,headers);
+                .doPost(Utils.getServiceURLHttps("/v2/standard/echo"), requestBody,headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
         Assert.assertTrue(response.getHeaders().containsKey(customHeaderName),
                 "Header is not attached from the custom filter.");
         Assert.assertEquals(response.getHeaders().get(customHeaderName), customHeaderValue,
-                "mismatch against the custom header attached from the filter");
+                "Mismatched the custom header value attached from the filter");
     }
 }
