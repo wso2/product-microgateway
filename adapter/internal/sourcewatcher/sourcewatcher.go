@@ -23,14 +23,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/api"
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/pkg/auth"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
 const (
@@ -41,9 +43,9 @@ const (
 var artifactsMap map[string]model.ProjectAPI
 
 // Start fetches the API artifacts at the startup and polls for changes from the remote repository
-func Start(conf *config.Config) error{
+func Start() error{
 	loggers.LoggerAPI.Info("Starting source watcher")
-	repository, err := fetchArtifacts(conf)
+	repository, err := fetchArtifacts()
 
 	if err != nil{
 		loggers.LoggerAPI.Error("Error while fetching API artifacts during startup. ", err)
@@ -57,27 +59,21 @@ func Start(conf *config.Config) error{
 	}
 
 	loggers.LoggerAPI.Info("Polling for changes")
-	go pollChanges(conf, repository)
+	go pollChanges(repository)
 	return nil
 }
 
-// getAuth returns the authentication for the repository
-func getAuth(conf *config.Config) *http.BasicAuth{
-	username := conf.Adapter.SourceControl.Repository.Username
-	if username != "" {
-		accessToken := conf.Adapter.SourceControl.Repository.AccessToken
-		return &http.BasicAuth{
-			Username: username,
-			Password: accessToken,
-		}
-	}
-	return &http.BasicAuth{}
-}
-
 // fetchArtifacts clones the API artifacts from the remote repository into the artifacts directory in the adapter
-func fetchArtifacts(conf *config.Config) (repository *git.Repository,err error) {
+func fetchArtifacts() (repository *git.Repository,err error) {
+	conf, err := config.ReadConfigs()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error reading configs: %v", err)
+		return nil, err
+	}
+
 	artifactsDirName := filepath.FromSlash(conf.Adapter.SourceControl.ArtifactsDirectory + "/" + apisArtifactDir)
 	repositoryURL := conf.Adapter.SourceControl.Repository.URL
+	branch := conf.Adapter.SourceControl.Repository.Branch
 
 	// Opens the local repository, if exists
 	repository, _ = git.PlainOpen(artifactsDirName)
@@ -86,7 +82,7 @@ func fetchArtifacts(conf *config.Config) (repository *git.Repository,err error) 
 	if repository != nil {
 		loggers.LoggerAPI.Info("Starting to fetch changes from remote repository")
 
-		compareRepository(conf, repository)
+		compareRepository(repository)
 
 		return repository, nil
 	}
@@ -94,14 +90,26 @@ func fetchArtifacts(conf *config.Config) (repository *git.Repository,err error) 
 	// If a local repository does not exist, clone the remote repository
 	loggers.LoggerAPI.Info("Fetching API artifacts from remote repository")
 
+	gitAuth, err := auth.GetGitAuth()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error while authenticating the remote repository: %v", err)
+		return nil, err
+	}
+
+	cloneOptions := &git.CloneOptions{
+		URL: repositoryURL,
+		Auth: gitAuth,
+	}
+
+	if branch != "" {
+		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + branch)
+	}
+
 	// Clones the  remote repository
-	repository, err = git.PlainClone(artifactsDirName, false, &git.CloneOptions{
-		URL:  repositoryURL,
-		Auth: getAuth(conf),
-	})
+	repository, err = git.PlainClone(artifactsDirName, false, cloneOptions)
 
 	if err != nil {
-		loggers.LoggerAPI.Error("Error while fetching artifacts from the remote repository ", err)
+		loggers.LoggerAPI.Errorf("Error while fetching artifacts from the remote repository: %v", err)
 	}
 
 	return repository, err
@@ -109,32 +117,39 @@ func fetchArtifacts(conf *config.Config) (repository *git.Repository,err error) 
 }
 
 // pollChanges polls for changes from the remote repository
-func pollChanges(conf *config.Config, repository *git.Repository){
+func pollChanges(repository *git.Repository){
+	conf, err := config.ReadConfigs()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error reading configs: %v", err)
+		return
+	}
+
 	pollInterval := conf.Adapter.SourceControl.PollInterval
 	for {
 		<- time.After(time.Duration(pollInterval) * time.Second)
-		go compareRepository(conf, repository)
+		go compareRepository(repository)
 	}
 }
 
 // compareRepository compares the hashes of the local and remote repositories and pulls if there are any changes
-func compareRepository(conf *config.Config, localRepository *git.Repository){
-
+func compareRepository(localRepository *git.Repository){
 	remote, err := localRepository.Remote("origin")
 	if err != nil{
-		loggers.LoggerAPI.Error("Error while returning remote. ", err)
+		loggers.LoggerAPI.Errorf("Error while returning remote: %v", err)
 	}
 
+	gitAuth, err := auth.GetGitAuth()
+
 	remoteList, err := remote.List(&git.ListOptions{
-		Auth: getAuth(conf),
+		Auth: gitAuth,
 	})
 	if err != nil {
-		loggers.LoggerAPI.Error("Error while listing remote. ", err)
+		loggers.LoggerAPI.Errorf("Error while listing remote: %v", err)
 	}
 
 	ref, err := localRepository.Head()
 	if err != nil {
-		loggers.LoggerAPI.Error("Error while retrieving Head. ", err)
+		loggers.LoggerAPI.Errorf("Error while retrieving Head: %v", err)
 	}
 
 	refName := ref.Name()
@@ -143,18 +158,18 @@ func compareRepository(conf *config.Config, localRepository *git.Repository){
 
 	for _, r := range remoteList {
 		if r.Name() == refName && !r.Hash().IsZero() && localRepositoryHash != r.Hash().String() {
-			loggers.LoggerAPI.Info("Fetching changes from remote repository")
-			pullChanges(conf, localRepository)
+			loggers.LoggerAPI.Info("Fetching commit with hash: ", r.Hash().String(), " from remote repository")
+			pullChanges(localRepository)
 
-			err := processArtifactChanges(conf)
+			err := processArtifactChanges()
 			if err != nil {
-				loggers.LoggerAPI.Error("Error while processing artifact changes. ", err)
+				loggers.LoggerAPI.Errorf("Error while processing artifact changes: %v", err)
 			}
 
 			//Redeploy changes
 			artifactsMap, err = api.ProcessMountedAPIProjects()
 			if err != nil {
-				loggers.LoggerAPI.Error("Local api artifacts processing has failed.", err)
+				loggers.LoggerAPI.Errorf("Local api artifacts processing has failed: %v", err)
 				return
 			}
 		}
@@ -163,26 +178,51 @@ func compareRepository(conf *config.Config, localRepository *git.Repository){
 }
 
 // pullChanges pulls changes from the given repository
-func pullChanges(conf *config.Config, localRepository *git.Repository){
-	workTree, err := localRepository.Worktree()
+func pullChanges(localRepository *git.Repository){
+	conf, err := config.ReadConfigs()
 	if err != nil {
-		loggers.LoggerAPI.Error("Error while retrieving the worktree. ", err)
+		loggers.LoggerAPI.Errorf("Error reading configs: %v", err)
+		return
 	}
 
-	err = workTree.Pull(&git.PullOptions{
-		Auth: getAuth(conf),
-	})
+	branch := conf.Adapter.SourceControl.Repository.Branch
+
+	workTree, err := localRepository.Worktree()
 	if err != nil {
-		loggers.LoggerAPI.Error("Error while pulling changes from repository. ", err)
+		loggers.LoggerAPI.Errorf("Error while retrieving the worktree: %v", err)
+	}
+
+	gitAuth, err := auth.GetGitAuth()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error while authenticating the remote repository: %v", err)
+	}
+
+	pullOptions := &git.PullOptions{
+		Auth: gitAuth,
+	}
+
+	if branch != "" {
+		pullOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + branch)
+	}
+
+	err = workTree.Pull(pullOptions)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error while pulling changes from repository: %v", err)
 	}
 }
 
 // processArtifactChanges undeploy the APIs whose artifacts are not present in the repository
-func processArtifactChanges(conf *config.Config) (err error){
+func processArtifactChanges() (err error){
+	conf, err := config.ReadConfigs()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error reading configs: %v", err)
+		return err
+	}
+
 	apisDirName := filepath.FromSlash(conf.Adapter.SourceControl.ArtifactsDirectory + "/" + apisArtifactDir)
 	files, err := ioutil.ReadDir(apisDirName)
 	if err != nil {
-		loggers.LoggerAPI.Error("Error while reading api artifacts during startup. ", err)
+		loggers.LoggerAPI.Errorf("Error while reading api artifacts during startup: %v", err)
 	}
 
 	// Assign the API artifacts to a temporary map
@@ -221,7 +261,7 @@ func processArtifactChanges(conf *config.Config) (err error){
 			err = xds.DeleteAPIs(vhost, apiYaml.Name, apiYaml.Version, environments, apiProject.OrganizationID)
 
 			if err != nil {
-				return err
+				loggers.LoggerAPI.Errorf("Error while deleting API: %v", err)
 			}
 		}
 	}

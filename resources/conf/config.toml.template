@@ -74,8 +74,12 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Configurations of the repository
   [adapter.sourceControl.repository]
     URL = "https://github.com/username/repository-name.git" # Repository URL where artifacts are stored
+    branch = "main" # Branch of the repository where the artifacts are stored (Use "" for default branch)
+    # Use either username and accessToken, or ssh key for authentication
     username = "username" # Git username (Use "" in the case of a public repository)
-    accessToken = "access_token" # Git personal access token or password
+    accessToken = $env{git_access_token} # Git personal access token or password
+    sshKeyFile = "/home/wso2/.ssh/id_ed25519" # Path to the private key used for authentication (Use "" in the case of a public repository)
+
 
 # Configurations required for router to route the traffic from different clients to services
 [router] # --------------------------------------------------------

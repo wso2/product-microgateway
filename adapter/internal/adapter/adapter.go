@@ -256,7 +256,7 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateBlockingConditions()
 	} else {
 		if conf.Adapter.SourceControl.Enabled{
-			err := sourcewatcher.Start(conf)
+			err := sourcewatcher.Start()
 			if err != nil {
 				logger.LoggerMgw.Error("Error while starting the source watcher. ", err)
 				return

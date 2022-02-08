@@ -17,7 +17,17 @@
 
 package auth
 
-import "encoding/base64"
+import (
+	"encoding/base64"
+	"errors"
+	"io/ioutil"
+
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+)
 
 // GetBasicAuth function returns the basicAuth header for the
 // given usename and password.
@@ -25,4 +35,40 @@ import "encoding/base64"
 func GetBasicAuth(username, password string) string {
 	auth := username + ":" + password
 	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
+// GetGitAuth returns the authentication for the repository
+func GetGitAuth() (transport.AuthMethod, error) {
+	conf, err := config.ReadConfigs()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error reading configs: %v", err)
+		return nil, err
+	}
+
+	username := conf.Adapter.SourceControl.Repository.Username
+	sshKeyFile := conf.Adapter.SourceControl.Repository.SSHKeyFile
+	if username == "" && sshKeyFile == "" {
+		return &http.BasicAuth{}, nil
+	} else if username != "" {
+		accessToken := conf.Adapter.SourceControl.Repository.AccessToken
+		return &http.BasicAuth{
+			Username: username,
+			Password: accessToken,
+		}, nil
+	} else if sshKeyFile != "" {
+		sshKey, err := ioutil.ReadFile(sshKeyFile)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("Error reading ssh key file: %v", err)
+			return nil, err
+		}
+
+		publicKey, err := ssh.NewPublicKeys(ssh.DefaultUsername, sshKey, "")
+		if err != nil {
+			loggers.LoggerAPI.Errorf("Error creating public key: %v", err)
+			return nil, err
+		}
+
+		return publicKey, nil
+	}
+	return nil, errors.New("No username or ssh key file provided")
 }
