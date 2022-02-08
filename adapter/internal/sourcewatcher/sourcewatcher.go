@@ -43,24 +43,39 @@ const (
 var artifactsMap map[string]model.ProjectAPI
 
 // Start fetches the API artifacts at the startup and polls for changes from the remote repository
-func Start() error{
+func Start() {
+	conf, err := config.ReadConfigs()
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error reading configs: %v", err)
+	}
+
+	retryInterval := conf.Adapter.SourceControl.RetryInterval
+
 	loggers.LoggerAPI.Info("Starting source watcher")
+	// Fetch the API artifacts at the startup
 	repository, err := fetchArtifacts()
 
-	if err != nil{
-		loggers.LoggerAPI.Error("Error while fetching API artifacts during startup. ", err)
-		return err
+	// Retry fetching the API artifacts if the first attempt fails
+	for {
+		if err == nil {
+			break
+		} else {
+			if err != nil{
+				loggers.LoggerAPI.Errorf("Error while fetching API artifacts during startup: %v", err)
+			}
+			time.Sleep(time.Duration(retryInterval) * time.Second)
+			loggers.LoggerAPI.Info("Retrying fetching artifacts from the remote repository")
+			repository, err = fetchArtifacts()
+		}
 	}
 
 	artifactsMap, err = api.ProcessMountedAPIProjects()
 	if err != nil {
 		logger.LoggerMgw.Error("Readiness probe is not set as local api artifacts processing has failed.")
-		return err
 	}
 
 	loggers.LoggerAPI.Info("Polling for changes")
 	go pollChanges(repository)
-	return nil
 }
 
 // fetchArtifacts clones the API artifacts from the remote repository into the artifacts directory in the adapter
@@ -88,8 +103,6 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 	}
 
 	// If a local repository does not exist, clone the remote repository
-	loggers.LoggerAPI.Info("Fetching API artifacts from remote repository")
-
 	gitAuth, err := auth.GetGitAuth()
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Error while authenticating the remote repository: %v", err)
@@ -104,6 +117,8 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 	if branch != "" {
 		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + branch)
 	}
+
+	loggers.LoggerAPI.Info("Fetching API artifacts from remote repository")
 
 	// Clones the  remote repository
 	repository, err = git.PlainClone(artifactsDirName, false, cloneOptions)
