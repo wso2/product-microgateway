@@ -60,6 +60,4 @@ public class BodyPassDisabledTestCase {
         Assert.assertFalse(response.getHeaders().containsKey(customHeaderName),
                 "Request body pass validation header is not expected in the response.");
     }
-
-
 }
