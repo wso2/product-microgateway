@@ -391,15 +391,11 @@ public class JWTAuthenticator implements Authenticator {
     private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(RequestContext requestContext,
             JWTValidationInfo jwtValidationInfo) throws APISecurityException {
 
-        String apiContext = requestContext.getMatchedAPI().getBasePath();
-        String apiVersion = requestContext.getMatchedAPI().getVersion();
-        String uuid = requestContext.getMatchedAPI().getUuid();
-
         String consumerKey = jwtValidationInfo.getConsumerKey();
         String keyManager = jwtValidationInfo.getKeyManager();
 
         if (consumerKey != null && keyManager != null) {
-            return KeyValidator.validateSubscription(uuid, apiContext, apiVersion, consumerKey, keyManager);
+            return KeyValidator.validateSubscription(requestContext.getMatchedAPI(), consumerKey, keyManager);
         }
         log.debug("Cannot call Key Manager to validate subscription. "
                 + "Payload of the token does not contain the Authorized party - the party to which the ID Token was "

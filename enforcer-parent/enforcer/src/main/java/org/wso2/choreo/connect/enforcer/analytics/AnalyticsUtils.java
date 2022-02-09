@@ -19,11 +19,10 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
-import org.wso2.choreo.connect.enforcer.models.API;
-import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 
 /**
  * Common Utility functions
@@ -42,12 +41,12 @@ public class AnalyticsUtils {
         return value == null ? AnalyticsConstants.DEFAULT_FOR_UNASSIGNED : value;
     }
 
-    public static String getAPIProvider(String uuid) {
-        API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().getApiByContextAndVersion(uuid);
-        if (api == null) {
+    public static String getAPIProvider(RequestContext requestContext) {
+        String apiProvider = requestContext.getMatchedAPI().getApiProvider();
+        if (StringUtils.isEmpty(apiProvider)) {
             return AnalyticsConstants.DEFAULT_FOR_UNASSIGNED;
         }
-        return setDefaultIfNull(api.getApiProvider());
+        return apiProvider;
     }
 
     /**

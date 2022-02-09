@@ -24,12 +24,8 @@ import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
-import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
-import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -65,20 +61,21 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
                 Utils.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
-            String uuid = requestContext.getMatchedAPI().getUuid();
-            String context = requestContext.getMatchedAPI().getBasePath();
-            String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
-            SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
-                    .getTenantSubscriptionStore(apiTenantDomain);
-            API api = datastore.getApiByContextAndVersion(uuid);
-            if (api != null && APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
-                requestContext.getProperties()
-                        .put(APIConstants.MessageFormat.ERROR_MESSAGE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
-                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
-                        GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
-                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
-                        GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
-            }
+            // TODO: (VirajSalaka) checking for blocked APIs implementation is temporarily removed.
+//            String uuid = requestContext.getMatchedAPI().getUuid();
+//            String context = requestContext.getMatchedAPI().getBasePath();
+//            String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
+//            SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
+//                    .getTenantSubscriptionStore(apiTenantDomain);
+//            API api = datastore.getApiByContextAndVersion(uuid);
+//            if (api != null && APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
+//                requestContext.getProperties()
+//                        .put(APIConstants.MessageFormat.ERROR_MESSAGE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+//                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+//                        GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+//                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+//                        GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+//            }
             return FilterUtils.generateAuthenticationContextForUnsecured(requestContext);
         } finally {
             if (Utils.tracingEnabled()) {
