@@ -145,46 +145,49 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 		}
 	}
 
+	// TODO: (VirajSalaka) Calling /apis endpoint is temporarily removed.
+
 	// Take the configured labels from the adapter
-	configuredEnvs := conf.ControlPlane.EnvironmentLabels
+	// configuredEnvs := conf.ControlPlane.EnvironmentLabels
 
 	// If no environments are configured, default gateway label value is assigned.
-	if len(configuredEnvs) == 0 {
-		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
-	}
-	for _, configuredEnv := range configuredEnvs {
-		queryParamMap := make(map[string]string, 1)
-		queryParamMap[GatewayLabelParam] = configuredEnv
-		go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
-		for {
-			data := <-APIListChannel
-			logger.LoggerSync.Debug("Receiving API information for an environment")
-			if data.Payload != nil {
-				logger.LoggerSync.Info("Payload data with API information recieved")
-				retrieveAPIList(data, initialAPIUUIDListMap)
-				break
-			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
-				health.SetControlPlaneRestAPIStatus(false)
-			} else {
-				// Keep the iteration going on until a response is recieved.
-				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
-				go func(d response) {
-					// Retry fetching from control plane after a configured time interval
-					if conf.ControlPlane.RetryInterval == 0 {
-						// Assign default retry interval
-						conf.ControlPlane.RetryInterval = 5
-					}
-					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
-					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
-					go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
-				}(data)
-			}
-		}
-	}
-	// InitialAPIUUIDList is already processed (if available). Then onwards, that list is not required.
-	go retrieveAPIListFromChannel(APIListChannel, nil)
+	// if len(configuredEnvs) == 0 {
+	// 	configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
+	// }
+	// for _, configuredEnv := range configuredEnvs {
+	// 	queryParamMap := make(map[string]string, 1)
+	// 	queryParamMap[GatewayLabelParam] = configuredEnv
+	// 	go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
+	// 	for {
+	// 		data := <-APIListChannel
+	// 		logger.LoggerSync.Debug("Receiving API information for an environment")
+	// 		if data.Payload != nil {
+	// 			logger.LoggerSync.Info("Payload data with API information recieved")
+	// 			retrieveAPIList(data, initialAPIUUIDListMap)
+	// 			break
+	// 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+	// 			logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
+	// 			health.SetControlPlaneRestAPIStatus(false)
+	// 		} else {
+	// 			// Keep the iteration going on until a response is recieved.
+	// 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
+	// 			go func(d response) {
+	// 				// Retry fetching from control plane after a configured time interval
+	// 				if conf.ControlPlane.RetryInterval == 0 {
+	// 					// Assign default retry interval
+	// 					conf.ControlPlane.RetryInterval = 5
+	// 				}
+	// 				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
+	// 				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
+	// 				logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
+	// 				go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
+	// 			}(data)
+	// 		}
+	// 	}
+	// }
+	// TODO: (VirajSalaka) APIList (/apis response) processing is temporarily blocked.
+	// // InitialAPIUUIDList is already processed (if available). Then onwards, that list is not required.
+	// go retrieveAPIListFromChannel(APIListChannel, nil)
 }
 
 // InvokeService invokes the internal data resource
