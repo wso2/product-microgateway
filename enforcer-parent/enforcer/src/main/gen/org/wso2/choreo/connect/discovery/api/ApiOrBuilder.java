@@ -261,4 +261,16 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getOrganizationIdBytes();
+
+  /**
+   * <code>string apiProvider = 19;</code>
+   * @return The apiProvider.
+   */
+  java.lang.String getApiProvider();
+  /**
+   * <code>string apiProvider = 19;</code>
+   * @return The bytes for apiProvider.
+   */
+  com.google.protobuf.ByteString
+      getApiProviderBytes();
 }

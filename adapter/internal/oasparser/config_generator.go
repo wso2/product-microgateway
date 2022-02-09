@@ -204,6 +204,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 		OrganizationId:      mgwSwagger.OrganizationID,
+		ApiProvider:         mgwSwagger.APIProvider,
 		Vhost:               vhost,
 	}
 }

@@ -38,6 +38,7 @@ public class APIConfig {
     private EndpointSecurity endpointSecurity;
     private String organizationId;
     private String uuid;
+    private String apiProvider;
 
     private Map<String, List<String>> apiSecurity = new HashMap<>();
     private String tier;
@@ -186,6 +187,14 @@ public class APIConfig {
     }
 
     /**
+     * Returns the API Provider of the API. If there is no provider, it would return an empty string.
+     * @return API Provider
+     */
+    public String getApiProvider() {
+        return apiProvider;
+    }
+
+    /**
      * Implements builder pattern to build an API Config object.
      */
     public static class Builder {
@@ -205,6 +214,7 @@ public class APIConfig {
         private Map<String, List<String>> apiSecurity = new HashMap<>();
         private String tier;
         private boolean disableSecurity = false;
+        private String apiProvider;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
@@ -286,6 +296,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder apiProvider(String apiProvider) {
+            this.apiProvider = apiProvider;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -304,6 +319,7 @@ public class APIConfig {
             apiConfig.organizationId = this.organizationId;
             apiConfig.uuid = this.uuid;
             apiConfig.securitySchemeDefinitions = this.securitySchemeDefinitions;
+            apiConfig.apiProvider = this.apiProvider;
             return apiConfig;
         }
     }

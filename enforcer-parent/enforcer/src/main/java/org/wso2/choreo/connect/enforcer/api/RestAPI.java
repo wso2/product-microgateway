@@ -148,7 +148,7 @@ public class RestAPI implements API {
                 .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
                 .endpoints(endpoints).endpointSecurity(endpointSecurity)
-                .organizationId(api.getOrganizationId()).build();
+                .organizationId(api.getOrganizationId()).apiProvider(api.getApiProvider()).build();
 
         initFilters();
         return basePath;
