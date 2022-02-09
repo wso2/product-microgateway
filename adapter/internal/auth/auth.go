@@ -22,6 +22,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 const (
@@ -117,7 +119,11 @@ func GenerateToken(username string) (accessToken string, err error) {
 
 	payload, err = jwt.Sign(token, jwa.RS256, privateKey)
 	if err != nil {
-		loggers.LoggerAuth.Errorf("failed to generate signed payload: %s", err)
+		loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("failed to generate signed payload: %s", err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1300,
+		})
 		return "", err
 	}
 	// loggers.LoggerAuth.Infof("failed to generate signed payload: %s", payload)
@@ -131,7 +137,11 @@ func ValidateToken(accessToken string, resourceScopes []string, conf *config.Con
 
 	privateKey, err := getPrivateKey()
 	if err != nil {
-		loggers.LoggerAuth.Errorf("Failed to retrive private key: %s", err)
+		loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Failed to retrive private key: %s", err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1301,
+		})
 		return false, err
 	}
 	token, err := jwt.ParseString(
@@ -140,17 +150,29 @@ func ValidateToken(accessToken string, resourceScopes []string, conf *config.Con
 		jwt.WithVerify(jwa.RS256, &privateKey.PublicKey),
 	)
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Failed to parse JWT token: %s", err)
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Failed to parse JWT token: %s", err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1302,
+		})
 		return false, nil
 	}
 	tokenUser, _ := token.Get(usernameConst)
 	if !validateUser(tokenUser.(string), conf) {
-		loggers.LoggerAPI.Error("Invalid username in token.")
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   "Invalid username in token.",
+			Severity:  logging.MINOR,
+			ErrorCode: 1303,
+		})
 		return false, nil
 	}
 	tokenScope, _ := token.Get(scopeConst)
 	if !stringInSlice(tokenScope.(string), resourceScopes) {
-		loggers.LoggerAPI.Error("Invalid scope in token.")
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   "Invalid scope in token.",
+			Severity:  logging.MINOR,
+			ErrorCode: 1304,
+		})
 		return false, nil
 	}
 	loggers.LoggerAPI.Info("Valid token recieved")

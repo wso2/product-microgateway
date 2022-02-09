@@ -19,6 +19,7 @@ package envoyconf
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"regexp"
 	"strconv"
@@ -46,6 +47,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
@@ -98,7 +100,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				upstreamCerts, timeout, apiLevelbasePath)
 			if err != nil {
 				apiLevelClusterNameProd = ""
-				logger.LoggerOasparser.Errorf("Error while adding api level production endpoints for %s. %v", apiTitle, err.Error())
+				logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error while adding api level production endpoints for %s. %v", apiTitle, err.Error()),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 2202,
+				})
 			} else {
 				clusters = append(clusters, cluster)
 				endpoints = append(endpoints, address...)
@@ -120,7 +126,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				upstreamCerts, timeout, apiLevelbasePath)
 			if err != nil {
 				apiLevelClusterNameSand = ""
-				logger.LoggerOasparser.Errorf("Error while adding api level sandbox endpoints for %s. %v", apiTitle, err.Error())
+				logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error while adding api level sandbox endpoints for %s. %v", apiTitle, err.Error()),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 2203,
+				})
 			} else {
 				clusters = append(clusters, cluster)
 				endpoints = append(endpoints, address...)
