@@ -197,9 +197,7 @@ func getSampleTestPolicySpec() PolicySpecification {
 
 func getSampleTestPolicyDef() []byte {
 	return []byte(`
-type: operation_policy_definition
-version: v4.1.0
-data:
+definition:
   action: SET_HEADER
   parameters:
     headerName: {{ .fooName }}

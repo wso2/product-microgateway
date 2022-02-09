@@ -116,8 +116,8 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	}
 
 	// update templated policy itself and return, not updating a pointer to keep the original template values as it is.
-	policy.Parameters = def.Data.Parameters
-	policy.Action = def.Data.Action
+	policy.Parameters = def.Definition.Parameters
+	policy.Action = def.Definition.Action
 
 	return policy, nil
 }
@@ -143,9 +143,7 @@ type PolicySpecification struct {
 
 // PolicyDefinition holds the content of policy definition which is rendered from ./Policy/<policy>.gotmpl files
 type PolicyDefinition struct {
-	Type    string `yaml:"type" json:"type"`
-	Version string `yaml:"version" json:"version"`
-	Data    struct {
+	Definition struct {
 		Action     string
 		Parameters map[string]interface{}
 	}
@@ -165,7 +163,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 		return errors.New("choreo connect gateway not supported")
 	}
 	if !spec.Data.MultipleAllowed {
-		// TODO: check the behaviour sith APIM
+		// TODO: check the behaviour with APIM
 		// in here allow first instance of policy to be applied if multiple is found
 		pStat := stats[policy.PolicyName]
 		if pStat.count > 1 {
@@ -187,13 +185,19 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 				continue
 			}
 
+			// TODO: check this Value and Regex validation is needed
 			switch v := val.(type) {
 			case string:
 				if !strings.EqualFold(attrib.Type, policyValTypeString) {
 					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
 				}
-				if attrib.ValidationRegex != "" {
-					regexStr := strings.Trim(attrib.ValidationRegex, "/")
+				regexStr := attrib.ValidationRegex
+				if regexStr != "" {
+					if !strings.HasPrefix(regexStr, "/") || !strings.HasSuffix(regexStr, "/") {
+						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\", regex expression should starts and end with '/'", spec.Data.Name, attrib.ValidationRegex)
+					}
+					regexStr = regexStr[1 : len(regexStr)-1]
+
 					reg, err := regexp.Compile(regexStr)
 					if err != nil {
 						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\"", spec.Data.Name, attrib.ValidationRegex)
