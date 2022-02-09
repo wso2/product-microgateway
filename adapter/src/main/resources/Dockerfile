@@ -56,4 +56,7 @@ COPY maven/adapter-linux-amd64 adapter
 COPY maven/check_health.sh .
 COPY maven/LICENSE.txt .
 
+# DEBUG_LEVEL is for debugging go-amqp library.
+ENV DEBUG_LEVEL=0
+
 CMD ./adapter
