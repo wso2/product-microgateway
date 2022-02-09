@@ -25,8 +25,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ghodss/yaml"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -38,6 +38,8 @@ const (
 	policyValTypeString string = "String"
 	policyValTypeInt    string = "Integer"
 	policyValTypeBool   string = "Boolean" // TODO: check type names with APIM
+	policyValTypeArray  string = "Array"
+	policyValTypeMap    string = "Map"
 )
 
 // PolicyFlow holds list of Policies in a operation (in one flow: In, Out or Fault)
@@ -144,9 +146,9 @@ type PolicySpecification struct {
 // PolicyDefinition holds the content of policy definition which is rendered from ./Policy/<policy>.gotmpl files
 type PolicyDefinition struct {
 	Definition struct {
-		Action     string
-		Parameters map[string]interface{}
-	}
+		Action     string                 `yaml:"action"`
+		Parameters map[string]interface{} `yaml:"parameters"`
+	} `yaml:"definition"`
 	RawData []byte `yaml:"-"`
 }
 
@@ -212,6 +214,14 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 				}
 			case bool:
 				if !strings.EqualFold(attrib.Type, policyValTypeBool) {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+			case []interface{}:
+				if !strings.EqualFold(attrib.Type, policyValTypeArray) {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+			case map[interface{}]interface{}:
+				if !strings.EqualFold(attrib.Type, policyValTypeMap) {
 					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
 				}
 			default:
