@@ -125,11 +125,11 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	}
 
 	// configures envoy to handle request body
-	if conf.Envoy.PayloadPassing.PassRequestBodyToEnforcer {
+	if conf.Envoy.PayloadPassingToEnforcer.PassRequestBody {
 		extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
-			MaxRequestBytes:     conf.Envoy.PayloadPassing.MaxRequestBytes,
-			AllowPartialMessage: conf.Envoy.PayloadPassing.AllowPartialMessage,
-			PackAsBytes:         conf.Envoy.PayloadPassing.PackAsBytes,
+			MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
+			AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
+			PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
 		}
 	}
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)

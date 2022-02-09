@@ -116,11 +116,11 @@ var defaultConfig = &Config{
 				IdleTimeoutInSeconds:           3600,
 			},
 		},
-		PayloadPassing: payloadPassing{
-			PassRequestBodyToEnforcer: false,
-			MaxRequestBytes:           10240,
-			AllowPartialMessage:       false,
-			PackAsBytes:               false,
+		PayloadPassingToEnforcer: payloadPassingToEnforcer{
+			PassRequestBody:     false,
+			MaxRequestBytes:     10240,
+			AllowPartialMessage: false,
+			PackAsBytes:         false,
 		},
 	},
 	Enforcer: enforcer{

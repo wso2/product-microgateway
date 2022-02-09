@@ -108,7 +108,7 @@ type envoy struct {
 	Cors                             globalCors
 	Upstream                         envoyUpstream
 	Connection                       connection
-	PayloadPassing                   payloadPassing
+	PayloadPassingToEnforcer         payloadPassingToEnforcer
 }
 
 type connectionTimeouts struct {
@@ -190,12 +190,12 @@ type globalCors struct {
 	ExposeHeaders    []string
 }
 
-// Envoy request body manipulating configurations
-type payloadPassing struct {
-	PassRequestBodyToEnforcer bool
-	MaxRequestBytes           uint32
-	AllowPartialMessage       bool
-	PackAsBytes               bool
+// Router to enforcer request body passing configurations
+type payloadPassingToEnforcer struct {
+	PassRequestBody     bool
+	MaxRequestBytes     uint32
+	AllowPartialMessage bool
+	PackAsBytes         bool
 }
 
 // Envoy Upstream Related Configurations

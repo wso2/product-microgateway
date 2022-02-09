@@ -77,7 +77,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	}
 
 	configs, _ := conf.ReadConfigs() 
-	if configs.Envoy.PayloadPassing.PassRequestBodyToEnforcer {
+	if configs.Envoy.PayloadPassingToEnforcer.PassRequestBody {
 		swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
 	}
 	
