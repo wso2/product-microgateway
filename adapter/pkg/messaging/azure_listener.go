@@ -69,23 +69,23 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 			for {
 				messages, err := receiver.ReceiveMessages(ctx, 10, nil)
 				if err != nil {
-					logger.LoggerMsg.Errorf("Failed to receive messages from ASB. %v", err)
+					logger.LoggerMsg.Errorf("Failed to receive messages from ASB. Subscription: %s, topic: %s error: %v", subName, topic, err)
 					time.Sleep(reconnectInterval)
 					continue
 				}
 				for _, message := range messages {
 					body, err := message.Body()
 					if err != nil {
-						logger.LoggerMsg.Errorf("Failed to parse the ASB message. %v", err)
+						logger.LoggerMsg.Errorf("Failed to parse the ASB message. Subscription: %s, topic: %s error: %v", subName, topic, err)
 					}
 
-					logger.LoggerMsg.Debugf("Message %s from ASB waits to be processed.", message.MessageID)
+					logger.LoggerMsg.Debugf("Message %s from ASB waits to be processed. Subscription: %s, topic: %s", message.MessageID, subName, topic)
 					dataChannel <- body
-					logger.LoggerMsg.Debugf("Message %s from ASB is complete", message.MessageID)
+					logger.LoggerMsg.Debugf("Message %s from ASB is complete. Subscription: %s, topic: %s", message.MessageID, subName, topic)
 
 					err = receiver.CompleteMessage(ctx, message)
 					if err != nil {
-						logger.LoggerMsg.Warnf("Failed to complete the ASB message. %v", err)
+						logger.LoggerMsg.Warnf("Failed to complete the ASB message. Subscription: %s, topic: %s error: %v", subName, topic, err)
 					}
 				}
 			}
