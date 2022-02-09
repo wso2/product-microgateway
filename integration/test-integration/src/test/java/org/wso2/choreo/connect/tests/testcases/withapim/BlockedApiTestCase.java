@@ -42,7 +42,7 @@ import java.util.Map;
  *
  */
 public class BlockedApiTestCase extends ApimBaseTest {
-    private static final String API_NAME = "BlockedApi";
+    private static final String API_NAME = "BlockedAPI";
     private static final String API_CONTEXT = "blocked";
     private static final String APPLICATION_NAME = "BlockedApiApp";
     private final Map<String, String> requestHeaders = new HashMap<>();

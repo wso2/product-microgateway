@@ -32,6 +32,7 @@ import org.wso2.choreo.connect.tests.apim.dto.Subscription;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
@@ -55,6 +56,7 @@ public class ApimResourceProcessor {
     RestAPIPublisherImpl publisherRestClient;
     RestAPIStoreImpl storeRestClient;
     Map<String, ArrayList<String>> apiToVhosts;
+    Map<String, String> apiToOpenAPI;
 
     private static final String APIM_ARTIFACTS_FOLDER = File.separator + "apim" + File.separator;
     private static final String APIS_FOLDER = File.separator + "apis";
@@ -86,6 +88,7 @@ public class ApimResourceProcessor {
         Path apisLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
                 APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + APIS_FOLDER);
         try (Stream<Path> paths = Files.walk(apisLocation)) {
+            readApiWithOpenAPIMap();
             readApiToVhostMap();
             for (Iterator<Path> apiFiles = paths.filter(Files::isRegularFile).iterator(); apiFiles.hasNext();) {
                 Path apiFilePath = apiFiles.next();
@@ -95,9 +98,18 @@ public class ApimResourceProcessor {
                 apiRequest.setProvider(apiProvider);
                 apiRequest.setTags("tags"); // otherwise, throws a NPE
 
-                String apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
-                ArrayList<String> vHosts = apiToVhosts.get(apiRequest.getName());
+                // Create API
+                String apiId;
+                if(apiToOpenAPI.containsKey(apiRequest.getName())) {
+                    String openAPIFileName = apiToOpenAPI.get(apiRequest.getName());
+                    apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                    PublisherUtils.updateOpenAPIDefinition(apiId, openAPIFileName, publisherRestClient);
+                } else {
+                    apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                }
 
+                // Deploy API
+                ArrayList<String> vHosts = apiToVhosts.get(apiRequest.getName());
                 String revisionUUID = PublisherUtils.createAPIRevision(apiId, publisherRestClient);
                 if (vHosts == null || vHosts.size() == 0) {
                     PublisherUtils.deployRevision(apiId, revisionUUID,"localhost", publisherRestClient);
@@ -106,6 +118,8 @@ public class ApimResourceProcessor {
                         PublisherUtils.deployRevision(apiId, revisionUUID, vHost, publisherRestClient);
                     }
                 }
+
+                // Publish API
                 PublisherUtils.publishAPI(apiId, apiRequest.getName(), publisherRestClient);
                 apiNameToId.put(apiRequest.getName(), apiId);
             }
@@ -156,6 +170,13 @@ public class ApimResourceProcessor {
         } catch (IOException e) {
             throw new CCTestException("Error occurred while reading json file " + filename, e);
         }
+    }
+
+    private void readApiWithOpenAPIMap() throws IOException {
+        Path mapLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + File.separator
+                + "apim" + File.separator + apimArtifactsIndex + File.separator + "apiToOpenAPI.json");
+        String apiToVhostString = Files.readString(mapLocation);
+        apiToOpenAPI = new ObjectMapper().readValue(apiToVhostString, new TypeReference<>() {});
     }
 
     private void readApiToVhostMap() throws IOException {

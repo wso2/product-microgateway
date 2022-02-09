@@ -24,8 +24,11 @@ import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
@@ -40,10 +43,9 @@ import java.util.Map;
  */
 public class JwtAndScopeTestCase extends ApimBaseTest {
 
-    private static final String SAMPLE_API_NAME = "JWTTestAPI";
-    private static final String SAMPLE_API_CONTEXT = "/jwt";
+    private static final String SAMPLE_API_CONTEXT = "/jwt_scope";
     private static final String SAMPLE_API_VERSION = "1.0.0";
-    private static final String APP_NAME = "JWTTestApp";
+    private static final String APP_NAME = "JwtScopeApp";
 
     private String endPoint;
     private String jwtWithoutScope;
@@ -56,29 +58,11 @@ public class JwtAndScopeTestCase extends ApimBaseTest {
     void start() throws Exception {
         super.initWithSuperTenant();
 
-        String targetDir = Utils.getTargetDirPath();
-        String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "scopes_openAPI.yaml";
-
-        JSONObject apiProperties = new JSONObject();
-        apiProperties.put("name", SAMPLE_API_NAME);
-        apiProperties.put("context", SAMPLE_API_CONTEXT);
-        apiProperties.put("version", SAMPLE_API_VERSION);
-        apiProperties.put("provider", user.getUserName());
-        String apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
-
-        publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
-
-        // creating the application
-        Application app = new Application(APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        AppWithConsumerKey appWithConsumerKey = StoreUtils.createApplicationWithKeys(app, storeRestClient);
-        String applicationId = appWithConsumerKey.getApplicationId();
-
-        PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
-
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-
         endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/" + SAMPLE_API_VERSION);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
+
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
+        ApplicationKeyDTO appWithConsumerKey = StoreUtils.generateKeysForApp(applicationId,
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
 
         // Obtain JWT keys
         jwtWithoutScope = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
@@ -94,6 +78,7 @@ public class JwtAndScopeTestCase extends ApimBaseTest {
         jwtWithMultipleInvalidScopes = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
                 new String[]{"foo", "bar"}, user, storeRestClient);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
     @Test(description = "Test to check the JWT auth working")

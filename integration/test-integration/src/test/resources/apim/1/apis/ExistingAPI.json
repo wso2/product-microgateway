@@ -1,7 +1,7 @@
 {
-  "name": "ApplicationThrottlingApi",
+  "name": "ExistingAPI",
   "version": "1.0.0",
-  "context": "application_throttling",
+  "context": "existing_api",
   "type": "HTTP",
   "tiersCollection": "Unlimited",
   "operationsDTOS": [
@@ -14,6 +14,9 @@
   "endpoint": {
     "endpoint_type": "http",
     "production_endpoints": {
+      "url": "http://mockBackend:2383/v2"
+    },
+    "sandbox_endpoints": {
       "url": "http://mockBackend:2383/v2"
     }
   }

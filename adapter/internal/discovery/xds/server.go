@@ -272,13 +272,18 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		apiEnvProps = apiEnvPropsV
 	}
 
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
+	err = mgwSwagger.PopulateFromAPIYaml(apiProject.APIYaml)
 	if err != nil {
 		return nil, err
 	}
 
-	if apiProject.APIType == constants.HTTP || apiProject.APIType == constants.WEBHOOK {
+	if apiYaml.APIType == constants.HTTP || apiYaml.APIType == constants.WEBHOOK {
 		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
+
+		// Set the following in case they were overridden by the above line
+		mgwSwagger.SetID(apiYaml.ID)
+		mgwSwagger.SetName(apiYaml.Name)
+		mgwSwagger.SetVersion(apiYaml.Version)
 		if err != nil {
 			return nil, err
 		}
@@ -298,16 +303,13 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetOperationPolicies(apiProject)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-	} else if apiProject.APIType != constants.WS {
+	} else if apiYaml.APIType != constants.WS {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
-	mgwSwagger.SetID(apiYaml.ID)
-	mgwSwagger.SetName(apiYaml.Name)
-	mgwSwagger.SetVersion(apiYaml.Version)
-	mgwSwagger.OrganizationID = apiProject.OrganizationID
-	organizationID := apiProject.OrganizationID
+	mgwSwagger.OrganizationID = apiYaml.OrganizationID
+	organizationID := apiYaml.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 
 	if mgwSwagger.GetProdEndpoints() != nil {
@@ -432,12 +434,10 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	}
 
 	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
-		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger,
-			apiProject.APILifeCycleStatus, vHost)
+		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, vHost)
 	} else {
 		enforcerAPIMap := make(map[string]types.Resource)
-		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
-			vHost)
+		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, vHost)
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 

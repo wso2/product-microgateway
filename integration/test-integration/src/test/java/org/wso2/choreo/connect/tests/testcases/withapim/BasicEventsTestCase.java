@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BasicEventsTestCase extends ApimBaseTest {
-    private static final String API_NAME = "BasicEventsApi";
+    private static final String API_NAME = "BasicEventsAPI";
     private static final String API_CONTEXT = "basicEvents";
     private static final String API_VERSION = "1.0.0";
     private static final String APP_NAME = "BasicEventsApp";

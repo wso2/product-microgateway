@@ -23,16 +23,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPolicyListGetStats(t *testing.T) {
-	pl := PolicyList{{PolicyName: "addHeader"}, {PolicyName: "rewriteMethod"}, {PolicyName: "addHeader"}}
-	expSt := map[string]policyStats{
-		"addHeader":     {firstIndex: 0, count: 2},
-		"rewriteMethod": {firstIndex: 1, count: 1},
-	}
-	st := pl.getStats()
-	assert.Equal(t, expSt, st)
-}
-
 func TestPolicySpecificationValidatePolicy(t *testing.T) {
 	spec := getSampleTestPolicySpec()
 
@@ -167,7 +157,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 			},
 		},
 	}
-	actualFormattedP := proj.getFormattedOperationalPolicies(apiYaml.Data.Operations[0].OperationPolicies)
+	actualFormattedP := proj.Policies.GetFormattedOperationalPolicies(apiYaml.Data.Operations[0].OperationPolicies)
 	assert.Equal(t, expFormattedP, actualFormattedP, "Converting operational policies to Choreo Connect format failed")
 }
 

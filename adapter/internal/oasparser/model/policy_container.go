@@ -1,0 +1,220 @@
+/*
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package model
+
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"regexp"
+	"strings"
+	"text/template"
+
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"gopkg.in/yaml.v2"
+)
+
+const (
+	policyCCGateway string = "CC"
+)
+
+// policy value validation types
+const (
+	policyValTypeString string = "String"
+	policyValTypeInt    string = "Integer"
+	policyValTypeBool   string = "Boolean" // TODO: check type names with APIM
+)
+
+// PolicyFlow holds list of Policies in a operation (in one flow: In, Out or Fault)
+type PolicyFlow string
+
+var (
+	policyInFlow    PolicyFlow = "request"
+	policyOutFlow   PolicyFlow = "response"
+	policyFaultFlow PolicyFlow = "fault"
+)
+
+// PolicyContainer holds the definition and specification of policy
+type PolicyContainer struct {
+	Specification PolicySpecification
+	Definition    PolicyDefinition
+}
+
+// PolicyContainerMap maps PolicyName -> PolicyContainer
+type PolicyContainerMap map[string]PolicyContainer
+
+// GetFormattedOperationalPolicies returns formatted, Choreo Connect policy from a user templated policy
+func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPolicies) OperationPolicies {
+	fmtPolicies := OperationPolicies{}
+
+	inFlowStats := policies.In.getStats()
+	for i, policy := range policies.In {
+		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyInFlow, inFlowStats, i); err == nil {
+			fmtPolicies.In = append(fmtPolicies.In, fmtPolicy)
+		}
+	}
+
+	outFlowStats := policies.Out.getStats()
+	for i, policy := range policies.Out {
+		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i); err == nil {
+			fmtPolicies.Out = append(fmtPolicies.In, fmtPolicy)
+		}
+	}
+
+	faultFlowStats := policies.Out.getStats()
+	for i, policy := range policies.Fault {
+		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyFaultFlow, faultFlowStats, i); err == nil {
+			fmtPolicies.Fault = append(fmtPolicies.In, fmtPolicy)
+		}
+	}
+
+	return fmtPolicies
+}
+
+// getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
+func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int) (Policy, error) {
+	// using index i instead of struct to validate policy against multiple allowed and apply only first if multiple exists
+	spec := p[policy.PolicyName].Specification
+	if err := spec.validatePolicy(policy, flow, stats, index); err != nil {
+		loggers.LoggerAPI.Errorf("Operation policy validation failed, ignoring the policy \"%v\": %v", policy.PolicyName, err)
+		return policy, err
+	}
+
+	defRaw := p[policy.PolicyName].Definition.RawData
+	t, err := template.New("policy-def").Parse(string(defRaw))
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error parsing the operation policy definition \"%v\" into go template: %v", policy.PolicyName, err)
+		return Policy{}, err
+	}
+
+	var out bytes.Buffer
+	err = t.Execute(&out, policy.Parameters)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error operation policy definition \"%v\": %v", policy.PolicyName, err)
+		return Policy{}, err
+	}
+
+	def := PolicyDefinition{}
+	if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
+		loggers.LoggerAPI.Errorf("Error parsing standardized operation policy definition \"%v\" into yaml: %v", policy.PolicyName, err)
+		return Policy{}, err
+	}
+
+	// update templated policy itself and return, not updating a pointer to keep the original template values as it is.
+	policy.Parameters = def.Data.Parameters
+	policy.Action = def.Data.Action
+
+	return policy, nil
+}
+
+// PolicySpecification holds policy specification from ./Policy/<policy>.yaml files
+type PolicySpecification struct {
+	Type    string   `yaml:"type" json:"type"`
+	Version string   `yaml:"version" json:"version"`
+	Data    struct { // TODO: check all fields are required or omit empty in APIM side
+		Name              string   `yaml:"name"`
+		ApplicableFlows   []string `yaml:"applicableFlows"`
+		SupportedGateways []string `yaml:"supportedGateways"`
+		SupportedAPITypes []string `yaml:"supportedApiTypes"`
+		MultipleAllowed   bool     `yaml:"multipleAllowed"`
+		PolicyAttributes  []struct {
+			Name            string `yaml:"name"`
+			ValidationRegex string `yaml:"validationRegex,omitempty"`
+			Type            string `yaml:"type"`
+			Required        bool   `yaml:"required,omitempty"`
+		} `yaml:"policyAttributes"`
+	}
+}
+
+// PolicyDefinition holds the content of policy definition which is rendered from ./Policy/<policy>.gotmpl files
+type PolicyDefinition struct {
+	Type    string `yaml:"type" json:"type"`
+	Version string `yaml:"version" json:"version"`
+	Data    struct {
+		Action     string
+		Parameters map[string]interface{}
+	}
+	RawData []byte `yaml:"-"`
+}
+
+// validatePolicy validates the given policy against the spec
+func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int) error {
+	if spec.Data.Name != policy.PolicyName {
+		return fmt.Errorf("invalid policy specification, spec name %s and policy name %s mismatch", spec.Data.Name, policy.PolicyName)
+	}
+	// TODO: check ApplicableFlows are (in, out, fault) or (request, response, fault)
+	if !arrayContains(spec.Data.ApplicableFlows, string(flow)) {
+		return fmt.Errorf("policy flow \"%s\" not supported", flow)
+	}
+	if !arrayContains(spec.Data.SupportedGateways, policyCCGateway) {
+		return errors.New("choreo connect gateway not supported")
+	}
+	if !spec.Data.MultipleAllowed {
+		// TODO: check the behaviour sith APIM
+		// in here allow first instance of policy to be applied if multiple is found
+		pStat := stats[policy.PolicyName]
+		if pStat.count > 1 {
+			if index != pStat.firstIndex {
+				return errors.New("multiple policies not allowed")
+			}
+			loggers.LoggerAPI.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
+		}
+	}
+
+	policyPrams, ok := policy.Parameters.(map[string]interface{}) // TODO: check if we can change prams to map so no need this check
+	if ok {
+		for _, attrib := range spec.Data.PolicyAttributes {
+			val, found := policyPrams[attrib.Name]
+			if !found {
+				if attrib.Required {
+					return fmt.Errorf("required paramater %s not found", attrib.Name)
+				}
+				continue
+			}
+
+			switch v := val.(type) {
+			case string:
+				if !strings.EqualFold(attrib.Type, policyValTypeString) {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+				if attrib.ValidationRegex != "" {
+					regexStr := strings.Trim(attrib.ValidationRegex, "/")
+					reg, err := regexp.Compile(regexStr)
+					if err != nil {
+						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\"", spec.Data.Name, attrib.ValidationRegex)
+					}
+					if !reg.MatchString(v) {
+						return fmt.Errorf("invalid parameter value of attribute \"%s\", regex match failed", attrib.Name)
+					}
+				}
+			case int:
+				if !strings.EqualFold(attrib.Type, policyValTypeInt) {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+			case bool:
+				if !strings.EqualFold(attrib.Type, policyValTypeBool) {
+					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
+				}
+			default:
+				return fmt.Errorf("invalid value type of paramater %s, unsupported type %s", attrib.Name, attrib.Type)
+			}
+		}
+	}
+
+	return nil
+}

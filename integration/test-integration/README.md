@@ -44,6 +44,8 @@ configured to run with API-M.
 ### How to Add a Testcase
 
 #### How to write the testcase
+> Start by first creating the testcase class as given here, and then move to the next section which describes how to create
+> the API you need for your testcase.
 1. Add a testcase class to `src/test/java/org/wso2/choreo/connect/tests/testcases/withapim`
 2. Extend the class `org.wso2.choreo.connect.tests.apim.ApimBaseTest` and use `super.initWithSuperTenant()` **or**
    `super.init(userMode)` as required.
@@ -60,7 +62,15 @@ is added. Check `apimArtifactsIndex` value for the `ApimPreparer` that is right 
 2. Then update the files in the following locations.
    1. APIs - `integration/test-integration/src/test/resources/apim/<apimArtifactsIndex>/apis`
       1. Here each file contains a minimal REST API JSON payload sent to API-M Publisher
+         1. Note: Make sure the file name is the name of the API. Example: If the API name is `BlockedApi` then 
+         the file name is `BlockedApi.json`.
       2. Avoid adding the fields `provider` and `tags` because they automatically get added in a way supported by the test utils.
+      3. To include an OpenAPI definition together with the API request payload,
+         1. Add the OpenAPI definition to `integration/test-integration/src/test/resources/openAPIs`.
+         2. Add a mapping entry to `integration/test-integration/src/test/resources/apim/<apimArtifactsIndex>/apiToOpenAPI.json`
+         as given below.
+            1. Format -> `<api-name>: <openapi-file-name>` (in other words, `<api-request-file-name>: <openapi-file-name>`)
+            2. Example -> `"JwtScopeAPI": "scopes_openAPI.yaml"`
    2. Applications - `integration/test-integration/src/test/resources/apim/<apimArtifactsIndex>/app`
       1. Currently, only the App name and throttleTier are supported
    3. Subscriptions - `integration/test-integration/src/test/resources/apim/<apimArtifactsIndex>/subscriptions`
