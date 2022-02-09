@@ -76,11 +76,11 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
-	configs, _ := conf.ReadConfigs() 
-	if configs.Envoy.PayloadPassingToEnforcer.PassRequestBody {
+	configs, _ := conf.ReadConfigs()
+	if configs.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
 		swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
 	}
-	
+
 	swagger.apiType = constants.HTTP
 	var productionUrls []Endpoint
 	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
@@ -187,12 +187,11 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	return securitySchemes
 }
 
-
 // getRequestBodyBufferConfig method returns a boolean value indicating whether a given API is configured to
 // pass request body to the enforcer or not.
 func getRequestBodyBufferConfig(vendorExtensions map[string]interface{}) bool {
-	if val, found := vendorExtensions[constants.XWso2PassRequestBodyToEnforcer]; found {
-		if passerValue,ok := val.(bool); ok {
+	if val, found := vendorExtensions[constants.XWso2PassRequestPayloadToEnforcer]; found {
+		if passerValue, ok := val.(bool); ok {
 			return passerValue
 		}
 	}

@@ -760,7 +760,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			CheckSettings: &extAuthService.CheckSettings{
 				ContextExtensions:           contextExtensions,
 				// negation is performing to match the envoy config name (disable_request_body_buffering)
-				DisableRequestBodyBuffering: !params.requestBodyPassToEnforcer,
+				DisableRequestBodyBuffering: !params.passRequestPayloadToEnforcer,
 			},
 		},
 	}
@@ -1255,7 +1255,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		responseInterceptor:       responseInterceptor,
 		rewritePath:               "",
 		rewriteMethod:             false,
-		requestBodyPassToEnforcer: swagger.GetXWso2RequestBodyPass(),
+		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 	}
 
 	if resource != nil {

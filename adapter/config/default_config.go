@@ -117,7 +117,7 @@ var defaultConfig = &Config{
 			},
 		},
 		PayloadPassingToEnforcer: payloadPassingToEnforcer{
-			PassRequestBody:     false,
+			PassRequestPayload:  false,
 			MaxRequestBytes:     10240,
 			AllowPartialMessage: false,
 			PackAsBytes:         false,

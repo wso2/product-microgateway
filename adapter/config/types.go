@@ -192,7 +192,7 @@ type globalCors struct {
 
 // Router to enforcer request body passing configurations
 type payloadPassingToEnforcer struct {
-	PassRequestBody     bool
+	PassRequestPayload  bool
 	MaxRequestBytes     uint32
 	AllowPartialMessage bool
 	PackAsBytes         bool

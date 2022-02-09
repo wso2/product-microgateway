@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://mockBackend:2383/v2
 x-wso2-basePath: /bodyPassDisable/1.0.0
-x-wso2-pass-request-body-to-enforcer: false # disables request body passing
+x-wso2-pass-request-payload-to-enforcer: false # disables request body passing
 paths:
   /echo:
     post:

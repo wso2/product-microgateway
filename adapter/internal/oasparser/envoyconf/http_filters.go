@@ -125,7 +125,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	}
 
 	// configures envoy to handle request body
-	if conf.Envoy.PayloadPassingToEnforcer.PassRequestBody {
+	if conf.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
 		extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
 			MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
 			AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
