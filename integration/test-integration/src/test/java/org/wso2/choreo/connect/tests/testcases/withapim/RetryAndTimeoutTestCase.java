@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
@@ -45,11 +46,8 @@ import java.util.List;
 import java.util.Map;
 
 public class RetryAndTimeoutTestCase extends ApimBaseTest {
-    static final String RETRY_API_NAME = "RetryApi";
     static final String RETRY_API_CONTEXT = "retry";
-    static final String TIMEOUT_API_NAME = "TimeoutApi";
     static final String TIMEOUT_API_CONTEXT = "timeout";
-    static final String API_VERSION = "1.0.0";
     static final String RETRY_APP_NAME = "RetryApp";
     static final String TIMEOUT_APP_NAME = "TimeoutApp";
 
@@ -60,54 +58,13 @@ public class RetryAndTimeoutTestCase extends ApimBaseTest {
 
     @Test
     public void testRetry() throws CCTestException, MalformedURLException {
-        //Create, deploy and publish API - only to specifically test events.
-        // For other testcases the json is used to create APIs, Apps, Subscriptions
-        JSONObject config = new JSONObject();
-        config.put("retryTimeOut", "3"); // Max retries allowed is 3
-        config.put("actionDuration", "30000");
-        config.put("actionSelect", "discard");
-        config.put("factor", "");
-        config.put("retryDelay", "");
-        config.put("retryErroCode", new JSONArray());
-        config.put("suspendDuration", "");
-        config.put("suspendErrorCode", new JSONArray());
-        config.put("suspendMaxDuration", "");
-
-        JSONObject prodEndpoints = new JSONObject();
-        prodEndpoints.put("config", config);
-        prodEndpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
-
-        JSONObject endpointConfig = new JSONObject();
-        endpointConfig.put("endpoint_type", "http");
-        endpointConfig.put("production_endpoints", prodEndpoints);
-
-        APIOperationsDTO apiOperation = new APIOperationsDTO();
-        apiOperation.setVerb("GET");
-        apiOperation.setTarget("/retry-four");
-        apiOperation.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
-        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(apiOperation);
-
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(RETRY_API_NAME, RETRY_API_CONTEXT,
-                API_VERSION, user.getUserName());
-        apiRequest.setEndpoint(endpointConfig);
-        apiRequest.setOperationsDTOS(operationsDTOS);
-        String apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
-
-        //Create App. Subscribe.
-        Application app = new Application(RETRY_APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        AppWithConsumerKey appWithConsumerKey = StoreUtils.createApplicationWithKeys(app, storeRestClient);
-        String applicationId = appWithConsumerKey.getApplicationId();
-
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
-                new String[]{}, user, storeRestClient);
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(RETRY_APP_NAME);
+        String accessToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps,
+                applicationId, user, storeRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME*2, "Interrupted when waiting for the " +
-                "subscription to be deployed");
+                "token event to be deployed");
 
-        //Invoke API
+        //Invoke RetryAPI
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         String endpoint = Utils.getServiceURLHttps(RETRY_API_CONTEXT + "/1.0.0/retry-four");
@@ -119,54 +76,13 @@ public class RetryAndTimeoutTestCase extends ApimBaseTest {
 
     @Test
     public void testTimeout() throws CCTestException, MalformedURLException {
-        //Create, deploy and publish API - only to specifically test events.
-        // For other testcases the json is used to create APIs, Apps, Subscriptions
-        JSONObject config = new JSONObject();
-        config.put("actionDuration", "3000"); // 3s upstream request timeout
-        config.put("actionSelect", "discard");
-        config.put("retryTimeOut", "");
-        config.put("factor", "");
-        config.put("retryDelay", "");
-        config.put("retryErroCode", new JSONArray());
-        config.put("suspendDuration", "");
-        config.put("suspendErrorCode", new JSONArray());
-        config.put("suspendMaxDuration", "");
-
-        JSONObject prodEndpoints = new JSONObject();
-        prodEndpoints.put("config", config);
-        prodEndpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
-
-        JSONObject endpointConfig = new JSONObject();
-        endpointConfig.put("endpoint_type", "http");
-        endpointConfig.put("production_endpoints", prodEndpoints);
-
-        APIOperationsDTO apiOperation = new APIOperationsDTO();
-        apiOperation.setVerb("GET");
-        apiOperation.setTarget("/delay-4");
-        apiOperation.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
-        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(apiOperation);
-
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(TIMEOUT_API_NAME, TIMEOUT_API_CONTEXT,
-                API_VERSION, user.getUserName());
-        apiRequest.setEndpoint(endpointConfig);
-        apiRequest.setOperationsDTOS(operationsDTOS);
-        String apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
-
-        //Create App. Subscribe.
-        Application app = new Application(TIMEOUT_APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        AppWithConsumerKey appWithConsumerKey = StoreUtils.createApplicationWithKeys(app, storeRestClient);
-        String applicationId = appWithConsumerKey.getApplicationId();
-
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
-                new String[]{}, user, storeRestClient);
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(TIMEOUT_APP_NAME);
+        String accessToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps,
+                applicationId, user, storeRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME*2, "Interrupted when waiting for the " +
-                "subscription to be deployed");
+                "token event to be deployed");
 
-        //Invoke API
+        //Invoke TimeoutAPI
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         String endpoint = Utils.getServiceURLHttps(TIMEOUT_API_CONTEXT + "/1.0.0/delay-4");
