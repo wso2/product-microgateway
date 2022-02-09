@@ -273,7 +273,7 @@ func processArtifactChanges() (err error){
 				// ignore if vhost is empty, since it deletes all vhosts of API
 				continue
 			}
-			err = xds.DeleteAPIs(vhost, apiYaml.Name, apiYaml.Version, environments, apiProject.OrganizationID)
+			err = xds.DeleteAPIs(vhost, apiYaml.Name, apiYaml.Version, environments, apiProject.APIYaml.Data.OrganizationID)
 
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error while deleting API: %v", err)
