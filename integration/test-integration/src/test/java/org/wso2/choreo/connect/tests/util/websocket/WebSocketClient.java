@@ -17,6 +17,8 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import javax.net.ssl.SSLException;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public final class WebSocketClient {
+    private static final Logger log = LogManager.getLogger(WebSocketClient.class);
 
     private final String url;
     private final Map<String, String> headers;
@@ -36,6 +39,7 @@ public final class WebSocketClient {
     }
 
     public ArrayList<String> connectAndSendMessages(String[] messages) throws CCTestException {
+        log.info("Starting websocket client");
         EventLoopGroup group = new NioEventLoopGroup();
         ArrayList<String> receivedMessages = null;
         try {
@@ -64,15 +68,17 @@ public final class WebSocketClient {
                                 p.addLast(sslCtx.newHandler(ch.alloc(), uri.getHost(), uri.getPort()));
                             }
                             p.addLast(
-                                    new HttpClientCodec(),
-                                    new HttpObjectAggregator(8192),
-                                    WebSocketClientCompressionHandler.INSTANCE,
+//                                    new HttpClientCodec(),
+//                                    new HttpObjectAggregator(8192),
+//                                    WebSocketClientCompressionHandler.INSTANCE,
                                     handler);
                         }
                     });
 
+            log.info("Websocket client initiating connection");
             Channel ch = b.connect(uri.getHost(), uri.getPort()).sync().channel();
             handler.handshakeFuture().sync();
+            log.info("Websocket client handshake complete");
 
             sendMessages(ch, messages);
         } catch (URISyntaxException e) {
@@ -87,14 +93,17 @@ public final class WebSocketClient {
 
     private void sendMessages(Channel ch, String[] messagesToSend) throws InterruptedException {
         for (String messageToSend: messagesToSend) {
-            if ("bye".equalsIgnoreCase(messageToSend)) {
+            if ("close".equalsIgnoreCase(messageToSend)) {
+                log.info("Sending close frame.");
                 ch.writeAndFlush(new CloseWebSocketFrame());
                 ch.closeFuture().sync();
                 break;
             } else if ("ping".equalsIgnoreCase(messageToSend)) {
+                log.info("Sending ping frame.");
                 WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[] { 8, 1, 8, 1 }));
                 ch.writeAndFlush(frame);
             } else {
+                log.info("Sending test frame.");
                 WebSocketFrame frame = new TextWebSocketFrame(messageToSend);
                 ch.writeAndFlush(frame);
             }

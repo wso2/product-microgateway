@@ -80,6 +80,8 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyAppLevelThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeySubLevelThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RetryAndTimeoutTestCase"/>
+<!--           TODO: (suksw) Uncomment once the websocket enforcer and router implementations are added -->
+<!--           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketBasicTestCase"/>-->
        </classes>
    </test>
 
