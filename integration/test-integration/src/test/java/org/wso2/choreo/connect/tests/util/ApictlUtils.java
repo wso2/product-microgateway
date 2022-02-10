@@ -56,6 +56,8 @@ public class ApictlUtils {
     public static final String API_PROJECTS_PATH = File.separator + "apiProjects" + File.separator;
     public static final String OPENAPIS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
             "openAPIs" + File.separator;
+    public static final String ASYNCAPIS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "asyncAPIs" + File.separator;
     public static final String BACKEND_CERTS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
             "certs" + File.separator;
     public static final String DEPLOYMENT_ENVIRONMENTS_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +

@@ -22,11 +22,13 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.wso2.choreo.connect.mockbackend.Constants;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -365,6 +367,12 @@ public class Utils {
         } catch (JSONException e) {
             throw new CCTestException("Exception thrown when resolving the JSON object in the HTTP response ", e);
         }
+    }
+
+    public static String convertYamlToJson(String yamlString) {
+        Yaml yaml= new Yaml();
+        Object obj = yaml.load(yamlString);
+        return JSONValue.toJSONString(obj);
     }
 
     public static String getTargetDirPath() {

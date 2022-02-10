@@ -1,0 +1,20 @@
+asyncapi: 2.0.0
+info:
+  title: WebSocketBasicAPI
+  version: '1.0.0'
+servers:
+  production:
+    url: 'ws://mockBackend:2385/v2'
+    protocol: ws
+channels:
+  /notifications:
+    publish: {}
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'http://localhost:9999'
+          scopes: {}
+          x-scopes-bindings: {}
