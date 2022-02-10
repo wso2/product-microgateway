@@ -18,11 +18,7 @@
 
 package org.wso2.choreo.connect.mockbackend;
 
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
-
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.logging.Level;

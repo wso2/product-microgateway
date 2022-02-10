@@ -19,8 +19,6 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import com.sun.net.httpserver.HttpExchange;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManager;
@@ -61,7 +59,7 @@ public class Utils {
     }
 
     public static void respondWithBodyAndClose(int statusCode, byte[] response, HttpExchange exchange) throws IOException {
-        exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+        exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
                 Constants.CONTENT_TYPE_APPLICATION_JSON);
         exchange.sendResponseHeaders(statusCode, response.length);
         exchange.getResponseBody().write(response);
