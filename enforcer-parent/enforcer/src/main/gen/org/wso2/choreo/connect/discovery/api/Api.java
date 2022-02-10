@@ -34,6 +34,7 @@ private static final long serialVersionUID = 0L;
     authorizationHeader_ = "";
     vhost_ = "";
     organizationId_ = "";
+    apiProvider_ = "";
   }
 
   @java.lang.Override
@@ -202,6 +203,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             organizationId_ = s;
+            break;
+          }
+          case 154: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            apiProvider_ = s;
             break;
           }
           default: {
@@ -872,6 +879,44 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int APIPROVIDER_FIELD_NUMBER = 19;
+  private volatile java.lang.Object apiProvider_;
+  /**
+   * <code>string apiProvider = 19;</code>
+   * @return The apiProvider.
+   */
+  @java.lang.Override
+  public java.lang.String getApiProvider() {
+    java.lang.Object ref = apiProvider_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      apiProvider_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string apiProvider = 19;</code>
+   * @return The bytes for apiProvider.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApiProviderBytes() {
+    java.lang.Object ref = apiProvider_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      apiProvider_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -939,6 +984,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getOrganizationIdBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 18, organizationId_);
+    }
+    if (!getApiProviderBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 19, apiProvider_);
     }
     unknownFields.writeTo(output);
   }
@@ -1010,6 +1058,9 @@ private static final long serialVersionUID = 0L;
     if (!getOrganizationIdBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, organizationId_);
     }
+    if (!getApiProviderBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, apiProvider_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1070,6 +1121,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getVhost())) return false;
     if (!getOrganizationId()
         .equals(other.getOrganizationId())) return false;
+    if (!getApiProvider()
+        .equals(other.getApiProvider())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1130,6 +1183,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getVhost().hashCode();
     hash = (37 * hash) + ORGANIZATIONID_FIELD_NUMBER;
     hash = (53 * hash) + getOrganizationId().hashCode();
+    hash = (37 * hash) + APIPROVIDER_FIELD_NUMBER;
+    hash = (53 * hash) + getApiProvider().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1330,6 +1385,8 @@ private static final long serialVersionUID = 0L;
 
       organizationId_ = "";
 
+      apiProvider_ = "";
+
       return this;
     }
 
@@ -1411,6 +1468,7 @@ private static final long serialVersionUID = 0L;
       result.disableSecurity_ = disableSecurity_;
       result.vhost_ = vhost_;
       result.organizationId_ = organizationId_;
+      result.apiProvider_ = apiProvider_;
       onBuilt();
       return result;
     }
@@ -1591,6 +1649,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getOrganizationId().isEmpty()) {
         organizationId_ = other.organizationId_;
+        onChanged();
+      }
+      if (!other.getApiProvider().isEmpty()) {
+        apiProvider_ = other.apiProvider_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -3563,6 +3625,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       organizationId_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object apiProvider_ = "";
+    /**
+     * <code>string apiProvider = 19;</code>
+     * @return The apiProvider.
+     */
+    public java.lang.String getApiProvider() {
+      java.lang.Object ref = apiProvider_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        apiProvider_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string apiProvider = 19;</code>
+     * @return The bytes for apiProvider.
+     */
+    public com.google.protobuf.ByteString
+        getApiProviderBytes() {
+      java.lang.Object ref = apiProvider_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        apiProvider_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string apiProvider = 19;</code>
+     * @param value The apiProvider to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiProvider(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      apiProvider_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiProvider = 19;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApiProvider() {
+      
+      apiProvider_ = getDefaultInstance().getApiProvider();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiProvider = 19;</code>
+     * @param value The bytes for apiProvider to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiProviderBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      apiProvider_ = value;
       onChanged();
       return this;
     }

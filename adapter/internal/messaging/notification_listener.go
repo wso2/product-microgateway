@@ -26,7 +26,6 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
-	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
@@ -170,36 +169,38 @@ func handleAPIEvents(data []byte, eventType string) {
 		// to delete. Hence we could simply delete after checking against just one iteration.
 		if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
 			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels, "")
-			for _, env := range apiEvent.GatewayLabels {
-				xdsAPIList := xds.DeleteAPIAndReturnList(apiEvent.UUID, apiEvent.TenantDomain, env)
-				if xdsAPIList != nil {
-					xds.UpdateEnforcerAPIList(env, xdsAPIList)
-				}
-			}
+			// TODO: (VirajSalaka) Temporarily Removed.
+			// for _, env := range apiEvent.GatewayLabels {
+			// 	xdsAPIList := xds.DeleteAPIAndReturnList(apiEvent.UUID, apiEvent.TenantDomain, env)
+			// 	if xdsAPIList != nil {
+			// 		xds.UpdateEnforcerAPIList(env, xdsAPIList)
+			// 	}
+			// }
 			return
 		}
-		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
-			conf, _ := config.ReadConfigs()
-			configuredEnvs := conf.ControlPlane.EnvironmentLabels
-			if len(configuredEnvs) == 0 {
-				configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
-			}
-			for _, configuredEnv := range configuredEnvs {
-				if configuredEnv == env {
-					if xds.CheckIfAPIMetadataIsAlreadyAvailable(apiEvent.UUID, env) {
-						logger.LoggerInternalMsg.Debugf("API Metadata for api Id: %s is not updated as it already exists", apiEvent.UUID)
-						continue
-					}
-					queryParamMap := make(map[string]string, 3)
-					queryParamMap[eh.GatewayLabelParam] = configuredEnv
-					queryParamMap[eh.ContextParam] = apiEvent.Context
-					queryParamMap[eh.VersionParam] = apiEvent.Version
-					var apiList *types.APIList
-					go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
-						eh.APIListChannel, 0)
-				}
-			}
-		}
+		// TODO: (VirajSalaka) Temporarily removed.
+		// if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
+		// 	conf, _ := config.ReadConfigs()
+		// 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
+		// 	if len(configuredEnvs) == 0 {
+		// 		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
+		// 	}
+		// 	for _, configuredEnv := range configuredEnvs {
+		// 		if configuredEnv == env {
+		// 			if xds.CheckIfAPIMetadataIsAlreadyAvailable(apiEvent.UUID, env) {
+		// 				logger.LoggerInternalMsg.Debugf("API Metadata for api Id: %s is not updated as it already exists", apiEvent.UUID)
+		// 				continue
+		// 			}
+		// 			queryParamMap := make(map[string]string, 3)
+		// 			queryParamMap[eh.GatewayLabelParam] = configuredEnv
+		// 			queryParamMap[eh.ContextParam] = apiEvent.Context
+		// 			queryParamMap[eh.VersionParam] = apiEvent.Version
+		// 			var apiList *types.APIList
+		// 			go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
+		// 				eh.APIListChannel, 0)
+		// 		}
+		// 	}
+		// }
 	}
 }
 
@@ -215,18 +216,20 @@ func handleLifeCycleEvents(data []byte) {
 			apiEvent.APIName, apiEvent.APIVersion, apiEvent.TenantDomain)
 		return
 	}
-	conf, _ := config.ReadConfigs()
-	configuredEnvs := conf.ControlPlane.EnvironmentLabels
-	logger.LoggerInternalMsg.Debugf("%s : %s API life cycle state change event triggered", apiEvent.APIName, apiEvent.APIVersion)
-	if len(configuredEnvs) == 0 {
-		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
-	}
-	for _, configuredEnv := range configuredEnvs {
-		xdsAPIList := xds.MarshalAPIForLifeCycleChangeEventAndReturnList(apiEvent.UUID, apiEvent.APIStatus, configuredEnv)
-		if xdsAPIList != nil {
-			xds.UpdateEnforcerAPIList(configuredEnv, xdsAPIList)
-		}
-	}
+	// conf, _ := config.ReadConfigs()
+	// configuredEnvs := conf.ControlPlane.EnvironmentLabels
+	logger.LoggerInternalMsg.Debugf("%s : %s API life cycle state change event is discarded", apiEvent.APIName, apiEvent.APIVersion)
+
+	// TODO: (VirajSalaka) Temporarily removed as API Blocked LC state change is ignored atm.
+	// if len(configuredEnvs) == 0 {
+	// 	configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
+	// }
+	// for _, configuredEnv := range configuredEnvs {
+	// 	xdsAPIList := xds.MarshalAPIForLifeCycleChangeEventAndReturnList(apiEvent.UUID, apiEvent.APIStatus, configuredEnv)
+	// 	if xdsAPIList != nil {
+	// 		xds.UpdateEnforcerAPIList(configuredEnv, xdsAPIList)
+	// 	}
+	// }
 }
 
 // handleApplicationEvents to process application related events

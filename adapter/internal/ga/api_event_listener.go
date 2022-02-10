@@ -20,10 +20,8 @@ package ga
 import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
-	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
-	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 )
 
 //handleAPIEventsFromGA handles the API events from GA that are coming through the channel
@@ -37,27 +35,29 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 		}
 		if !event.IsDeployEvent {
 			xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, configuredEnvs, event.RevisionUUID)
-			for _, env := range configuredEnvs {
-				xds.DeleteAPIAndReturnList(event.APIUUID, event.OrganizationUUID, env)
-			}
+			// TODO: (VirajSalaka) Temporarily removed.
+			// for _, env := range configuredEnvs {
+			// 	xds.DeleteAPIAndReturnList(event.APIUUID, event.OrganizationUUID, env)
+			// }
 			continue
 		}
 
 		go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs)
 
-		for _, env := range configuredEnvs {
-			if xds.CheckIfAPIMetadataIsAlreadyAvailable(event.APIUUID, env) {
-				logger.LoggerGA.Debugf("APIList for API UUID: %s is not updated as it already "+
-					"exists", event.APIUUID)
-				continue
-			}
-			queryParamMap := make(map[string]string, 2)
-			queryParamMap[eh.GatewayLabelParam] = env
-			queryParamMap[eh.APIUUIDParam] = event.APIUUID
-			logger.LoggerGA.Infof("Invoking the apis service endpoint")
-			var apiList *types.APIList
-			go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
-				eh.APIListChannel, 0)
-		}
+		// TODO: (VirajSalaka) temporarily removed.
+		// for _, env := range configuredEnvs {
+		// 	if xds.CheckIfAPIMetadataIsAlreadyAvailable(event.APIUUID, env) {
+		// 		logger.LoggerGA.Debugf("APIList for API UUID: %s is not updated as it already "+
+		// 			"exists", event.APIUUID)
+		// 		continue
+		// 	}
+		// 	queryParamMap := make(map[string]string, 2)
+		// 	queryParamMap[eh.GatewayLabelParam] = env
+		// 	queryParamMap[eh.APIUUIDParam] = event.APIUUID
+		// 	logger.LoggerGA.Infof("Invoking the apis service endpoint")
+		// 	var apiList *types.APIList
+		// 	go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
+		// 		eh.APIListChannel, 0)
+		// }
 	}
 }

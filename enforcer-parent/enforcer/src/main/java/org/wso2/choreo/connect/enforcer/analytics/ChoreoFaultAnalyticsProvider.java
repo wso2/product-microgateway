@@ -99,7 +99,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         ExtendedAPI api = new ExtendedAPI();
         String apiUUID = AnalyticsUtils.getAPIId(requestContext);
         api.setApiId(apiUUID);
-        api.setApiCreator(AnalyticsUtils.getAPIProvider(apiUUID));
+        api.setApiCreator(AnalyticsUtils.getAPIProvider(requestContext));
         api.setApiType(requestContext.getMatchedAPI().getApiType());
         api.setApiName(requestContext.getMatchedAPI().getName());
         api.setApiVersion(requestContext.getMatchedAPI().getVersion());

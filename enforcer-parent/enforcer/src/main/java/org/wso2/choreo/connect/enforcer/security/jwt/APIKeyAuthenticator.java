@@ -178,7 +178,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 validateAPIKeyRestrictions(payload, requestContext, apiContext, apiVersion);
                 APIKeyValidationInfoDTO validationInfoDto;
                 if (apiKeySubValidationEnabled) {
-                    validationInfoDto = KeyValidator.validateSubscription(apiUuid, apiContext, payload);
+                    validationInfoDto = KeyValidator.validateSubscription(requestContext.getMatchedAPI(), payload);
                 } else {
                     validationInfoDto = getAPIKeyValidationDTO(requestContext, payload);
                 }

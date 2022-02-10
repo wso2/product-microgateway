@@ -62,6 +62,8 @@ type MgwSwagger struct {
 	disableSecurity     bool
 	OrganizationID      string
 	IsProtoTyped        bool
+	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
+	APIProvider string
 }
 
 // EndpointCluster represent an upstream cluster

@@ -306,6 +306,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
 	mgwSwagger.OrganizationID = apiProject.OrganizationID
+	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 

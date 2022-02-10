@@ -136,6 +136,7 @@ type APIYaml struct {
 		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
 		SecurityScheme             []string `json:"securityScheme,omitempty"`
 		OrganizationID             string   `json:"organizationId,omitempty"`
+		Provider                   string   `json:"provider,omitempty"`
 		EndpointConfig             struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
