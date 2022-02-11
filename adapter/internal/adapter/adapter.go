@@ -351,7 +351,6 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 				Severity:  logging.CRITICAL,
 				ErrorCode: 1106,
 			})
-			logger.LoggerMgw.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
 			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
 			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
 		} else {
