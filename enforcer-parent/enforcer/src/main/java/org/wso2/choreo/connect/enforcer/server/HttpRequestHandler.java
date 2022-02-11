@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.server;
 
+import com.google.protobuf.ByteString;
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
+        String requestPayload = null;
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
@@ -74,6 +76,18 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 request.getAttributes().getSource().getAddress().hasSocketAddress()) {
             address = request.getAttributes().getSource().getAddress().getSocketAddress().getAddress();
         }
+        if (!request.getAttributes().getRequest().getHttp().getRawBody().isEmpty()) {
+            ByteString byteString = request.getAttributes().getRequest().getHttp().getRawBody();
+            if (byteString.isValidUtf8()) {
+                requestPayload = byteString.toStringUtf8();
+            }
+        }
+        if (!request.getAttributes().getRequest().getHttp().getBody().isEmpty()) {
+            ByteString byteString = request.getAttributes().getRequest().getHttp().getBodyBytes();
+            if (byteString.isValidUtf8()) {
+                requestPayload = byteString.toStringUtf8();
+            }
+        }
         address = FilterUtils.getClientIp(headers, address);
         ResourceConfig resourceConfig = null;
         if (APIConstants.ApiType.WEB_SOCKET.equals(api.getAPIConfig().getApiType())) {
@@ -84,6 +98,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).build();
+                .pathTemplate(pathTemplate).requestPayload(requestPayload).build();
     }
 }

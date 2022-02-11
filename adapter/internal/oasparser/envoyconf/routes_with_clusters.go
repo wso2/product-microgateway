@@ -33,8 +33,8 @@ import (
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
@@ -758,7 +758,9 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	extAuthPerFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{
 			CheckSettings: &extAuthService.CheckSettings{
-				ContextExtensions: contextExtensions,
+				ContextExtensions:           contextExtensions,
+				// negation is performing to match the envoy config name (disable_request_body_buffering)
+				DisableRequestBodyBuffering: !params.passRequestPayloadToEnforcer,
 			},
 		},
 	}
@@ -1236,23 +1238,24 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
 	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 	params := &routeCreateParams{
-		organizationID:      organizationID,
-		title:               swagger.GetTitle(),
-		apiType:             swagger.GetAPIType(),
-		version:             swagger.GetVersion(),
-		vHost:               vHost,
-		xWSO2BasePath:       swagger.GetXWso2Basepath(),
-		AuthHeader:          swagger.GetXWSO2AuthHeader(),
-		prodClusterName:     prodClusterName,
-		sandClusterName:     sandClusterName,
-		endpointBasePath:    endpointBasePath,
-		corsPolicy:          swagger.GetCorsConfig(),
-		resourcePathParam:   "",
-		resourceMethods:     getDefaultResourceMethods(swagger.GetAPIType()),
-		requestInterceptor:  requestInterceptor,
-		responseInterceptor: responseInterceptor,
-		rewritePath:         "",
-		rewriteMethod:       false,
+		organizationID:            organizationID,
+		title:                     swagger.GetTitle(),
+		apiType:                   swagger.GetAPIType(),
+		version:                   swagger.GetVersion(),
+		vHost:                     vHost,
+		xWSO2BasePath:             swagger.GetXWso2Basepath(),
+		AuthHeader:                swagger.GetXWSO2AuthHeader(),
+		prodClusterName:           prodClusterName,
+		sandClusterName:           sandClusterName,
+		endpointBasePath:          endpointBasePath,
+		corsPolicy:                swagger.GetCorsConfig(),
+		resourcePathParam:         "",
+		resourceMethods:           getDefaultResourceMethods(swagger.GetAPIType()),
+		requestInterceptor:        requestInterceptor,
+		responseInterceptor:       responseInterceptor,
+		rewritePath:               "",
+		rewriteMethod:             false,
+		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 	}
 
 	if resource != nil {

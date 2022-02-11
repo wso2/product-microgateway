@@ -286,7 +286,7 @@ public class MockBackendProd extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
-            // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor tests.
+            // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor & request body passing tests.
             // sent request headers in response headers <- this is because in interceptor tests it is required to test
             //                                             response flow headers to interceptor service
             // sent request body in response body

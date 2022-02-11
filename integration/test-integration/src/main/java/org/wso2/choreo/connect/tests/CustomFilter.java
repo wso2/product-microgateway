@@ -63,6 +63,15 @@ public class CustomFilter implements Filter {
         if (configProperties.containsKey("fooKey")) {
             requestContext.addOrModifyHeaders("fooKey", configProperties.get("fooKey"));
         }
+        // custom filter response body supporting condition
+        if (requestContext.getRequestPayload() != null && !requestContext.getRequestPayload().isBlank()) {
+            String requestBody = requestContext.getRequestPayload();
+            if (requestBody.contains("dataField")) {
+                String headerValueForRequestBody = "validated";
+                requestContext.addOrModifyHeaders("x-wso2-request-body-validated-header", headerValueForRequestBody);
+                log.info("Update \"x-wso2-request-body-validated-header\" value with " + headerValueForRequestBody);
+            }
+        }
         log.info("Custom-header-1 is added as a header.");
         return true;
     }

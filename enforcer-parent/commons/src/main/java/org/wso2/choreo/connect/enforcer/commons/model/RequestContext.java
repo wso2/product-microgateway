@@ -46,6 +46,7 @@ public class RequestContext {
     private AuthenticationContext authenticationContext;
     private String requestID;
     private String clientIp;
+    private String requestPayload;
     // Denotes the cluster header name for each environment. Both properties can be null if
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
@@ -169,6 +170,15 @@ public class RequestContext {
      */
     public String getClientIp() {
         return clientIp;
+    }
+
+    /**
+     * Returns the request payload (request data submitted with the request).
+     *
+     * @return request payload (data).
+     */
+    public String getRequestPayload() {
+        return requestPayload;
     }
 
     /**
@@ -380,6 +390,7 @@ public class RequestContext {
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
         private String clientIp;
+        private String requestPayload;
         private WebSocketFrameContext webSocketFrameContext;
 
         public Builder(String requestPath) {
@@ -445,6 +456,11 @@ public class RequestContext {
             return this;
         }
 
+        public Builder requestPayload(String requestPayload) {
+            this.requestPayload = requestPayload;
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -460,6 +476,7 @@ public class RequestContext {
             requestContext.authenticationContext = this.authenticationContext;
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
+            requestContext.requestPayload = this.requestPayload;
             requestContext.addHeaders = new HashMap<>();
             requestContext.removeHeaders = new ArrayList<>();
             requestContext.queryParamsToRemove = new ArrayList<>();

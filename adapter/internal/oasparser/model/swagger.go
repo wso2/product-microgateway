@@ -47,6 +47,8 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.apiType = constants.HTTP
 	swagger.resources = getResourcesSwagger(swagger2, swagger.IsMockedAPI)
 
+	swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
+
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
