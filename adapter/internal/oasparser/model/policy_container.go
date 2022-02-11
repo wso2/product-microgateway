@@ -52,14 +52,42 @@ const (
 	policyFaultFlow PolicyFlow = "fault"
 )
 
+// PolicyContainerMap maps PolicyName -> PolicyContainer
+type PolicyContainerMap map[string]PolicyContainer
+
 // PolicyContainer holds the definition and specification of policy
 type PolicyContainer struct {
 	Specification PolicySpecification
 	Definition    PolicyDefinition
 }
 
-// PolicyContainerMap maps PolicyName -> PolicyContainer
-type PolicyContainerMap map[string]PolicyContainer
+// PolicySpecification holds policy specification from ./Policy/<policy>.yaml files
+type PolicySpecification struct {
+	Type    string `yaml:"type" json:"type"`
+	Version string `yaml:"version" json:"version"`
+	Data    struct {
+		Name              string   `yaml:"name"`
+		ApplicableFlows   []string `yaml:"applicableFlows"`
+		SupportedGateways []string `yaml:"supportedGateways"`
+		SupportedAPITypes []string `yaml:"supportedApiTypes"`
+		MultipleAllowed   bool     `yaml:"multipleAllowed"`
+		PolicyAttributes  []struct {
+			Name            string `yaml:"name"`
+			ValidationRegex string `yaml:"validationRegex,omitempty"`
+			Type            string `yaml:"type"`
+			Required        bool   `yaml:"required,omitempty"`
+		} `yaml:"policyAttributes"`
+	}
+}
+
+// PolicyDefinition holds the content of policy definition which is rendered from ./Policy/<policy>.gotmpl files
+type PolicyDefinition struct {
+	Definition struct {
+		Action     string                 `yaml:"action"`
+		Parameters map[string]interface{} `yaml:"parameters"`
+	} `yaml:"definition"`
+	RawData []byte `yaml:"-"`
+}
 
 // GetFormattedOperationalPolicies returns formatted, Choreo Connect policy from a user templated policy
 func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPolicies) OperationPolicies {
@@ -75,14 +103,14 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 	outFlowStats := policies.Out.getStats()
 	for i, policy := range policies.Out {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i); err == nil {
-			fmtPolicies.Out = append(fmtPolicies.In, fmtPolicy)
+			fmtPolicies.Out = append(fmtPolicies.Out, fmtPolicy)
 		}
 	}
 
-	faultFlowStats := policies.Out.getStats()
+	faultFlowStats := policies.Fault.getStats()
 	for i, policy := range policies.Fault {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyFaultFlow, faultFlowStats, i); err == nil {
-			fmtPolicies.Fault = append(fmtPolicies.In, fmtPolicy)
+			fmtPolicies.Fault = append(fmtPolicies.Fault, fmtPolicy)
 		}
 	}
 
@@ -141,40 +169,11 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	return policy, nil
 }
 
-// PolicySpecification holds policy specification from ./Policy/<policy>.yaml files
-type PolicySpecification struct {
-	Type    string `yaml:"type" json:"type"`
-	Version string `yaml:"version" json:"version"`
-	Data    struct {
-		Name              string   `yaml:"name"`
-		ApplicableFlows   []string `yaml:"applicableFlows"`
-		SupportedGateways []string `yaml:"supportedGateways"`
-		SupportedAPITypes []string `yaml:"supportedApiTypes"`
-		MultipleAllowed   bool     `yaml:"multipleAllowed"`
-		PolicyAttributes  []struct {
-			Name            string `yaml:"name"`
-			ValidationRegex string `yaml:"validationRegex,omitempty"`
-			Type            string `yaml:"type"`
-			Required        bool   `yaml:"required"`
-		} `yaml:"policyAttributes"`
-	}
-}
-
-// PolicyDefinition holds the content of policy definition which is rendered from ./Policy/<policy>.gotmpl files
-type PolicyDefinition struct {
-	Definition struct {
-		Action     string                 `yaml:"action"`
-		Parameters map[string]interface{} `yaml:"parameters"`
-	} `yaml:"definition"`
-	RawData []byte `yaml:"-"`
-}
-
 // validatePolicy validates the given policy against the spec
 func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int) error {
 	if spec.Data.Name != policy.PolicyName {
 		return fmt.Errorf("invalid policy specification, spec name %s and policy name %s mismatch", spec.Data.Name, policy.PolicyName)
 	}
-	// TODO: check ApplicableFlows are (in, out, fault) or (request, response, fault)
 	if !arrayContains(spec.Data.ApplicableFlows, string(flow)) {
 		return fmt.Errorf("policy flow \"%s\" not supported", flow)
 	}
@@ -182,7 +181,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 		return errors.New("choreo connect gateway not supported")
 	}
 	if !spec.Data.MultipleAllowed {
-		// TODO: check the behaviour with APIM
+		// TODO (renuka): check the behaviour with APIM
 		// in here allow first instance of policy to be applied if multiple is found
 		pStat := stats[policy.PolicyName]
 		if pStat.count > 1 {
@@ -193,7 +192,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 		}
 	}
 
-	policyPrams, ok := policy.Parameters.(map[string]interface{}) // TODO: check if we can change prams to map so no need this check
+	policyPrams, ok := policy.Parameters.(map[string]interface{})
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
 			val, found := policyPrams[attrib.Name]

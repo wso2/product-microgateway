@@ -111,19 +111,6 @@ type policyStats struct {
 // PolicyList holds list of Polices in a flow of operation
 type PolicyList []Policy
 
-func (pl PolicyList) getStats() map[string]policyStats {
-	stats := map[string]policyStats{}
-	for i, policy := range pl {
-		stat, ok := stats[policy.PolicyName]
-		if ok {
-			stats[policy.PolicyName] = policyStats{firstIndex: stat.firstIndex, count: stat.count + 1}
-		} else {
-			stats[policy.PolicyName] = policyStats{firstIndex: i, count: 1}
-		}
-	}
-	return stats
-}
-
 // Policy holds APIM policies
 type Policy struct {
 	PolicyName string      `json:"policyName,omitempty"`
@@ -267,4 +254,17 @@ func (apiYaml APIYaml) ValidateAPIType() (err error) {
 		return err
 	}
 	return nil
+}
+
+func (pl PolicyList) getStats() map[string]policyStats {
+	stats := map[string]policyStats{}
+	for i, policy := range pl {
+		stat, ok := stats[policy.PolicyName]
+		if ok {
+			stats[policy.PolicyName] = policyStats{firstIndex: stat.firstIndex, count: stat.count + 1}
+		} else {
+			stats[policy.PolicyName] = policyStats{firstIndex: i, count: 1}
+		}
+	}
+	return stats
 }
