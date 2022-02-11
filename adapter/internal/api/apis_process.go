@@ -19,6 +19,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -26,6 +27,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 	"gopkg.in/yaml.v2"
 )
@@ -142,7 +144,11 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			// process policy specificationn
 			spec := model.PolicySpecification{}
 			if err := yaml.Unmarshal(fileContent, &spec); err != nil { // check that, JSON files are also supported
-				loggers.LoggerAPI.Errorf("Error parsing content of policy specification %v: %v", fileName, err.Error())
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error parsing content of policy specification %v: %v", fileName, err.Error()),
+					Severity:  logging.MINOR,
+					ErrorCode: 1221,
+				})
 				return err
 			}
 

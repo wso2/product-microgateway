@@ -27,6 +27,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 const (
@@ -93,27 +94,43 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	// using index i instead of struct to validate policy against multiple allowed and apply only first if multiple exists
 	spec := p[policy.PolicyName].Specification
 	if err := spec.validatePolicy(policy, flow, stats, index); err != nil {
-		loggers.LoggerAPI.Errorf("Operation policy validation failed, ignoring the policy \"%v\": %v", policy.PolicyName, err)
+		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Operation policy validation failed, ignoring the policy \"%v\": %v", policy.PolicyName, err),
+			Severity:  logging.MINOR,
+			ErrorCode: 2204,
+		})
 		return policy, err
 	}
 
 	defRaw := p[policy.PolicyName].Definition.RawData
 	t, err := template.New("policy-def").Parse(string(defRaw))
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error parsing the operation policy definition \"%v\" into go template: %v", policy.PolicyName, err)
+		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error parsing the operation policy definition \"%v\" into go template: %v", policy.PolicyName, err),
+			Severity:  logging.MINOR,
+			ErrorCode: 2205,
+		})
 		return Policy{}, err
 	}
 
 	var out bytes.Buffer
 	err = t.Execute(&out, policy.Parameters)
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error operation policy definition \"%v\": %v", policy.PolicyName, err)
+		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error parsing operation policy definition \"%v\": %v", policy.PolicyName, err),
+			Severity:  logging.MINOR,
+			ErrorCode: 2206,
+		})
 		return Policy{}, err
 	}
 
 	def := PolicyDefinition{}
 	if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
-		loggers.LoggerAPI.Errorf("Error parsing standardized operation policy definition \"%v\" into yaml: %v", policy.PolicyName, err)
+		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error parsing formalized operation policy definition \"%v\" into yaml: %v", policy.PolicyName, err),
+			Severity:  logging.MINOR,
+			ErrorCode: 2207,
+		})
 		return Policy{}, err
 	}
 
@@ -172,7 +189,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 			if index != pStat.firstIndex {
 				return errors.New("multiple policies not allowed")
 			}
-			loggers.LoggerAPI.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
+			loggers.LoggerOasparser.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
 		}
 	}
 
