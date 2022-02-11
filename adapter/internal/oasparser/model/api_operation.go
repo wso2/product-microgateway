@@ -21,6 +21,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 	"strings"
 
@@ -71,10 +72,10 @@ type MockedContentConfig struct {
 	Body        string `json:"body,omitempty"`
 }
 
-// SetMockedAPIConfig generate mock impl endpoint configurations
+// SetMockedAPIConfigOAS3 generate mock impl endpoint configurations
 func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Operation) {
 	if len(openAPIOperation.Responses) > 0 {
-		operation.mockedAPIConfig = MockedAPIConfig{
+		mockedAPIConfig := MockedAPIConfig{
 			In:        "query",
 			Name:      "responseCode",
 			Responses: make([]MockedResponseConfig, 0),
@@ -88,22 +89,38 @@ func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Op
 			}
 			if err == nil {
 				for mediaType, content := range responseRef.Value.Content {
-					example, _ := asJSON(content.Example)
-					mockedResponse.Content = append(mockedResponse.Content, MockedContentConfig{
-						ContentType: mediaType,
-						Body:        example,
-					})
+					example, err := asJSON(content.Example)
+					if err == nil {
+						mockedResponse.Content = append(mockedResponse.Content, MockedContentConfig{
+							ContentType: mediaType,
+							Body:        example,
+						})
+					}
+				}
+				for headerName, headerValues := range responseRef.Value.Headers {
+					example, err := asJSON(headerValues.Value.Example)
+					if err == nil {
+						mockedResponse.Headers = append(mockedResponse.Headers, MockedHeaderConfig{
+							Name:  headerName,
+							Value: example,
+						})
+					}
 				}
 			}
-			operation.mockedAPIConfig.Responses = append(operation.mockedAPIConfig.Responses, mockedResponse)
+			if len(mockedResponse.Content) > 0 {
+				mockedAPIConfig.Responses = append(mockedAPIConfig.Responses, mockedResponse)
+			}
+		}
+		if len(mockedAPIConfig.Responses) > 0 {
+			operation.mockedAPIConfig = mockedAPIConfig
 		}
 	}
 }
 
-// SetMockedAPIConfig generate mock impl endpoint configurations
+// SetMockedAPIConfigOAS2 generate mock impl endpoint configurations
 func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operation) {
-	if len(openAPIOperation.Responses.StatusCodeResponses) > 0 {
-		operation.mockedAPIConfig = MockedAPIConfig{
+	if openAPIOperation.Responses != nil && len(openAPIOperation.Responses.StatusCodeResponses) > 0 {
+		mockedAPIConfig := MockedAPIConfig{
 			In:        "query",
 			Name:      "responseCode",
 			Responses: make([]MockedResponseConfig, 0),
@@ -115,13 +132,31 @@ func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operat
 				Content: make([]MockedContentConfig, 0),
 			}
 			for mediaType, content := range responseRef.ResponseProps.Examples {
-				example, _ := asJSON(content)
-				mockedResponse.Content = append(mockedResponse.Content, MockedContentConfig{
-					ContentType: mediaType,
-					Body:        example,
-				})
+				example, err := asJSON(content)
+				if err == nil {
+					mockedResponse.Content = append(mockedResponse.Content, MockedContentConfig{
+						ContentType: mediaType,
+						Body:        example,
+					})
+				}
+
 			}
-			operation.mockedAPIConfig.Responses = append(operation.mockedAPIConfig.Responses, mockedResponse)
+			// TODO(amali) go-apenapi spec does not support header examples yet
+			// for headerName, headerValues := range responseRef.ResponseProps.Headers {
+			// 	example, err := asJSON(headerValues.HeaderProps.Example)
+			// 	if err == nil {
+			// 		mockedResponse.Headers = append(mockedResponse.Headers, MockedHeaderConfig{
+			// 			Name:  headerName,
+			// 			Value: example,
+			// 		})
+			// 	}
+			// }
+			if len(mockedResponse.Content) > 0 {
+				mockedAPIConfig.Responses = append(mockedAPIConfig.Responses, mockedResponse)
+			}
+		}
+		if len(mockedAPIConfig.Responses) > 0 {
+			operation.mockedAPIConfig = mockedAPIConfig
 		}
 	}
 }
@@ -134,7 +169,7 @@ func asJSON(data interface{}) (string, error) {
 		}
 		return string(b), nil
 	}
-	return "", nil
+	return "", errors.New("Null object passed")
 }
 
 // GetMethod returns the http method name of the give API operation

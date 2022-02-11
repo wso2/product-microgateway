@@ -1,52 +1,85 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Swagger Petstore Prototyped Implementation
+  title: mockApiTest
   license:
     name: MIT
 servers:
   - url: /
-x-wso2-production-endpoints:
-  urls:
-    - '/'
-x-wso2-basePath: /prototyped
+x-wso2-basePath: /mockApiTest/1.0.0
 paths:
-  /pet/findByStatus:
+  /testMockApiWithHeader:
     get:
-      summary: Finds Pets by status
-      operationId: findPetsByStatus
-      tags:
-        - pets
+      summary: Tests Choreo Connect mock API implementation
+      operationId: testImpl
       responses:
         '200':
           description: Expected response to a valid request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
+                $ref: "#/components/schemas/Data"
               example:
-                name: "slcd"
+                name: choreo connect
             application/xml:
+              example: "<name>choreo connect</name>"
+          headers:
+            x-wso2-header1:
               schema:
-                $ref: "#/components/schemas/Pet"
-              example:
-                name: "slcd"
+                type: string
+              example: Sample header value
+      security:
+        - APIKeyAuth: [ ]
+  /testMockWithQueryParam:
+    get:
+      summary: Tests Choreo Connect mock API implementation with query parameters
+      operationId: testImpl2
+      responses:
         '500':
-          description: Expected response to a valid request
+          description: Internal error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
+                $ref: "#/components/schemas/Data"
               example:
-                name1: "value1"
+                name: choreo connect
             application/xml:
+              example: "<name>choreo connect</name>"
+          headers:
+            x-wso2-q-header:
               schema:
-                $ref: "#/components/schemas/Pet"
+                type: string
+              example: Header value for query param
+      security:
+        - APIKeyAuth: [ ]
+  /testMockDefault:
+    get:
+      summary: Tests Choreo Connect mock default API implementation
+      operationId: testImpl3
+      responses:
+        '200':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Data"
               example:
-                name1: "value1"
+                name: choreo connect
+          headers:
+            x-wso2-default-header:
+              schema:
+                type: string
+              example: Default header value
+      security:
+        - APIKeyAuth: []
 components:
+  securitySchemes:
+    APIKeyAuth:
+      type: apiKey
+      name: x-api-key
+      in: header
   schemas:
-    Pet:
+    Data:
       type: object
       required:
         - id
@@ -58,19 +91,4 @@ components:
         name:
           type: string
         tag:
-          type: string
-    Pets:
-      type: array
-      items:
-        $ref: "#/components/schemas/Pet"
-    Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
           type: string

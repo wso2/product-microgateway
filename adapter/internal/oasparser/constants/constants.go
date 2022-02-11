@@ -95,10 +95,10 @@ const (
 
 // Constants that occur as values in api.yaml
 const (
-	HTTP                 string = "HTTP"
-	WS                   string = "WS"
-	WEBHOOK              string = "WEBHOOK"
-	Prototyped           string = "prototyped"
-	TemplateEndpointType string = "TEMPLATE"
-	InlineEndpointType   string = "INLINE"
+	HTTP                  string = "HTTP"
+	WS                    string = "WS"
+	WEBHOOK               string = "WEBHOOK"
+	Prototyped            string = "prototyped"
+	MockedOASEndpointType string = "MOCKED_OAS"
+	InlineEndpointType    string = "INLINE"
 )

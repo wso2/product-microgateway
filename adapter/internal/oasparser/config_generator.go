@@ -27,6 +27,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -122,6 +123,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 	resources := []*api.Resource{}
 	securitySchemes := []*api.SecurityScheme{}
 	securityList := []*api.SecurityList{}
+	isMockedAPI := mgwSwagger.EndpointImplementationType == constants.MockedOASEndpointType
 
 	logger.LoggerOasparser.Debugf("Security schemes in GetEnforcerAPI method %v:", mgwSwagger.GetSecurityScheme())
 	for _, securityScheme := range mgwSwagger.GetSecurityScheme() {
@@ -151,7 +153,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
-			operations[i] = GetEnforcerAPIOperation(*op)
+			operations[i] = GetEnforcerAPIOperation(*op, isMockedAPI)
 		}
 		resource := &api.Resource{
 			Id:      res.GetID(),
@@ -207,11 +209,12 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 		OrganizationId:      mgwSwagger.OrganizationID,
 		Vhost:               vhost,
+		IsMockedApi:         isMockedAPI,
 	}
 }
 
 // GetEnforcerAPIOperation builds the operation object expected by the proto definition
-func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
+func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Operation {
 	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
 	for i, security := range operation.GetSecurity() {
 		mapOfSecurity := make(map[string]*api.Scopes)
@@ -228,7 +231,9 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 	}
 
 	var mockedAPIConfig api.MockedApiConfig
-	generateMockedAPIConfig(&mockedAPIConfig, operation.GetMockedAPIConfig())
+	if isMockedAPI {
+		generateMockedAPIConfig(&mockedAPIConfig, operation.GetMockedAPIConfig())
+	}
 
 	policies := &api.OperationPolicies{
 		In:    castPoliciesToEnforcerPolicies(operation.GetPolicies().In),

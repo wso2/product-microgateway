@@ -39,36 +39,35 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
-const prototypedAPI = "prototyped"
-
 // MgwSwagger represents the object structure holding the information related to the
 // openAPI object. The values are populated from the extensions/properties mentioned at
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id                   string
-	UUID                 string
-	apiType              string
-	description          string
-	title                string
-	version              string
-	vendorExtensions     map[string]interface{}
-	productionEndpoints  *EndpointCluster
-	sandboxEndpoints     *EndpointCluster
-	xWso2Endpoints       map[string]*EndpointCluster
-	resources            []*Resource
-	xWso2Basepath        string
-	xWso2Cors            *CorsConfig
-	securityScheme       []SecurityScheme
-	security             []map[string][]string
-	xWso2ThrottlingTier  string
-	xWso2AuthHeader      string
-	disableSecurity      bool
-	OrganizationID       string
-	IsPrototyped         bool
-	EndpointType         string
-	LifecycleStatus      string
-	xWso2RequestBodyPass bool
+	id                         string
+	UUID                       string
+	apiType                    string
+	description                string
+	title                      string
+	version                    string
+	vendorExtensions           map[string]interface{}
+	productionEndpoints        *EndpointCluster
+	sandboxEndpoints           *EndpointCluster
+	xWso2Endpoints             map[string]*EndpointCluster
+	resources                  []*Resource
+	xWso2Basepath              string
+	xWso2Cors                  *CorsConfig
+	securityScheme             []SecurityScheme
+	security                   []map[string][]string
+	xWso2ThrottlingTier        string
+	xWso2AuthHeader            string
+	disableSecurity            bool
+	OrganizationID             string
+	IsPrototyped               bool
+	EndpointType               string
+	EndpointImplementationType string
+	LifecycleStatus            string
+	xWso2RequestBodyPass       bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1142,6 +1141,7 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 	}
 
 	swagger.EndpointType = endpointConfig.EndpointType
+	swagger.EndpointImplementationType = data.EndpointImplementationType
 
 	if len(endpointConfig.ProductionEndpoints) > 0 {
 		var endpoints []Endpoint
