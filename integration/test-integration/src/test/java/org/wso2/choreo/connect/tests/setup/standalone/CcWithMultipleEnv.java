@@ -49,7 +49,7 @@ public class CcWithMultipleEnv {
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore2", null,
-                "apictl_test_deploy_multiple_env.yaml", null);
+                "apictl_test_deploy_multiple_env.yaml", null, null);
 
         ApictlUtils.addEnv("test2");
         ApictlUtils.login("test2");
@@ -79,7 +79,7 @@ public class CcWithMultipleEnv {
         // Undeploy the API from specific environment
         ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "test2", "localhost",
                 "Default");
-        response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+        response = HttpsClientRequest.retryUntil404(Utils.getServiceURLHttps(
                 "/v2/new/pet/findByStatus?status=available") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,"Response code mismatched " +

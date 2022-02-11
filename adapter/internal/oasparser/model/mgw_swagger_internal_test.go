@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 func TestGetXWso2Endpoints(t *testing.T) {
@@ -210,7 +211,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 					"type": "loadbalance", "urls": []interface{}{"https://www.youtube.com:80/base"}},
-					xWso2Cors: map[string]interface{}{
+					constants.XWso2Cors: map[string]interface{}{
 						"Enabled":                       "true",
 						"AccessControlAllowCredentials": "true",
 						"AccessControlAllowHeaders":     []interface{}{"Authorization"},
@@ -264,7 +265,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 
 	for _, item := range dataItems {
 		mgwSwag := item.input
-		if cors, corsFound := mgwSwag.vendorExtensions[xWso2Cors]; corsFound {
+		if cors, corsFound := mgwSwag.vendorExtensions[constants.XWso2Cors]; corsFound {
 			assert.NotNil(t, cors, "cors should not be empty")
 		}
 		err := mgwSwag.SetXWso2Extensions()

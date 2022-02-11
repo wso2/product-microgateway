@@ -1,0 +1,20 @@
+{
+  "name": "EndpointWithTrailingSlashAPI",
+  "version": "1.0.0",
+  "context": "endpointWithTrailingSlash",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/pet/findByStatus",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2390/v2"
+    }
+  }
+}

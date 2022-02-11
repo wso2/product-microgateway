@@ -33,39 +33,20 @@ import (
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 // API Controller related constants
 const (
-	openAPIDir                 string = "Definitions"
-	openAPIFilename            string = "swagger."
-	apiYAMLFile                string = "api.yaml"
-	deploymentsYAMLFile        string = "deployment_environments.yaml"
-	apiJSONFile                string = "api.json"
-	endpointCertDir            string = "Endpoint-certificates"
-	interceptorCertDir         string = "Endpoint-certificates/interceptors"
-	crtExtension               string = ".crt"
-	pemExtension               string = ".pem"
-	apiTypeFilterKey           string = "type"
-	apiTypeYamlKey             string = "type"
-	lifeCycleStatus            string = "lifeCycleStatus"
-	securityScheme             string = "securityScheme"
-	endpointImplementationType string = "endpointImplementationType"
-	inlineEndpointType         string = "INLINE"
-	endpointSecurity           string = "endpoint_security"
-	production                 string = "production"
-	sandbox                    string = "sandbox"
-	zipExt                     string = ".zip"
-	apisArtifactDir            string = "apis"
+	apisArtifactDir string = "apis"
 )
 
 // extractAPIProject accepts the API project as a zip file and returns the extracted content.
 // The apictl project must be in zipped format.
 // API type is decided by the type field in the api.yaml file.
-func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
+func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 
 	if err != nil {
@@ -82,12 +63,12 @@ func extractAPIProject(payload []byte) (apiProject mgw.ProjectAPI, err error) {
 			loggers.LoggerAPI.Errorf("Error occurred while reading the file : %v %v", file.Name, err.Error())
 			return apiProject, err
 		}
-		err = apiProject.ProcessFilesInsideProject(unzippedFileBytes, file.Name)
+		err = processFileInsideProject(&apiProject, unzippedFileBytes, file.Name)
 		if err != nil {
 			return apiProject, err
 		}
 	}
-	err = apiProject.ValidateAPIType()
+	err = apiProject.APIYaml.ValidateAPIType()
 	if err != nil {
 		return apiProject, err
 	}
@@ -109,7 +90,7 @@ func ProcessMountedAPIProjects() (err error) {
 
 	for _, apiProjectFile := range files {
 		if apiProjectFile.IsDir() {
-			apiProject := mgw.ProjectAPI{
+			apiProject := model.ProjectAPI{
 				EndpointCerts: make(map[string]string),
 				UpstreamCerts: make(map[string][]byte),
 			}
@@ -120,7 +101,7 @@ func ProcessMountedAPIProjects() (err error) {
 					if err != nil {
 						return err
 					}
-					return apiProject.ProcessFilesInsideProject(fileContent, path)
+					return processFileInsideProject(&apiProject, fileContent, path)
 				}
 				return nil
 			})
@@ -128,9 +109,9 @@ func ProcessMountedAPIProjects() (err error) {
 				loggers.LoggerAPI.Errorf("Error while processing api artifact - %s during startup : %v", apiProjectFile.Name(), err)
 				continue
 			}
-			err = apiProject.ValidateAPIType()
+			err = apiProject.APIYaml.ValidateAPIType()
 			if err != nil {
-				loggers.LoggerAPI.Errorf("Error while validation type of the api artifact - %s during startup : %v",
+				loggers.LoggerAPI.Errorf("Error while validating the API type - %s during startup : %v",
 					apiProjectFile.Name(), err)
 				continue
 			}
@@ -162,9 +143,8 @@ func ProcessMountedAPIProjects() (err error) {
 	return nil
 }
 
-func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error) {
+func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err error) {
 	apiYaml := apiProject.APIYaml.Data
-	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 
 	// handle panic
 	defer func() {
@@ -185,7 +165,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 	// environment
 	if apiProject.Deployments == nil {
 		vhost, _, _ := config.GetDefaultVhost(config.DefaultGatewayName)
-		deployment := mgw.Deployment{
+		deployment := model.Deployment{
 			DisplayOnDevportal:    true,
 			DeploymentEnvironment: config.DefaultGatewayName,
 			DeploymentVhost:       vhost,
@@ -193,12 +173,11 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 		apiProject.Deployments = []model.Deployment{deployment}
 	}
 
-	//TODO: force overwride
 	if !overrideValue {
-		// if the API already exists in the one of vhost, break deployment of the API
+		// if the API already exists in at least one of the vhosts, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiProject.OrganizationID) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiYaml.ID, apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID) {
 				exists = true
 				break
 			}
@@ -207,7 +186,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 		if exists {
 			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.",
 				apiYaml.Name, apiYaml.Version)
-			return errors.New(mgw.AlreadyExists)
+			return errors.New(constants.AlreadyExists)
 		}
 	}
 	vhostToEnvsMap := make(map[string][]string)
@@ -251,10 +230,7 @@ func ApplyAPIProjectFromAPIM(
 		}
 	}()
 
-	if apiProject.OrganizationID == "" {
-		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
-	}
-	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
+	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID)
 
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
@@ -294,7 +270,7 @@ func ApplyAPIProjectFromAPIM(
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiProject.OrganizationID); err != nil {
+		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiYaml.OrganizationID); err != nil {
 			return deployedRevisionList, err
 		}
 	}

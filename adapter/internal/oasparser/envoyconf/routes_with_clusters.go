@@ -22,10 +22,13 @@ import (
 	"net"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
-	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -36,20 +39,17 @@ import (
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-	"github.com/golang/protobuf/ptypes/any"
-	"github.com/golang/protobuf/ptypes/wrappers"
-	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 
-	"strings"
-	"time"
-
 	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/wrappers"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -150,10 +150,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 	}
 
-	var interceptorErr error
-	apiRequestInterceptor, interceptorErr = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor)
+	apiRequestInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor, APILevelInterceptor)
 	// if lua filter exists on api level, add cluster
-	if interceptorErr == nil && apiRequestInterceptor.Enable {
+	if apiRequestInterceptor.Enable {
 		logger.LoggerOasparser.Debugf("API level request interceptors found for %v : %v", apiTitle, apiVersion)
 		apiRequestInterceptor.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost,
 			apiTitle, apiVersion, "")
@@ -167,9 +166,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			endpoints = append(endpoints, addresses...)
 		}
 	}
-	apiResponseInterceptor, interceptorErr = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor)
+	apiResponseInterceptor = mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor, APILevelInterceptor)
 	// if lua filter exists on api level, add cluster
-	if interceptorErr == nil && apiResponseInterceptor.Enable {
+	if apiResponseInterceptor.Enable {
 		logger.LoggerOasparser.Debugln("API level response interceptors found for " + mgwSwagger.GetID())
 		apiResponseInterceptor.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID, vHost,
 			apiTitle, apiVersion, "")
@@ -183,136 +182,186 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 	}
 
-	if mgwSwagger.GetAPIType() != model.WS {
-		for _, resource := range mgwSwagger.GetResources() {
-			resourceRequestInterceptor := apiRequestInterceptor
-			resourceResponseInterceptor := apiResponseInterceptor
-			clusterNameProd := apiLevelClusterNameProd
-			clusterNameSand := apiLevelClusterNameSand
-			resourceBasePath := ""
-			resourcePath := resource.GetPath()
-			if strictBasePath || ((resource.GetProdEndpoints() == nil || len(resource.GetProdEndpoints().Endpoints) < 1) &&
-				(resource.GetSandEndpoints() == nil || len(resource.GetSandEndpoints().Endpoints) < 1)) {
-				resourceBasePath = apiLevelbasePath
-			}
-
-			// resource level check production endpoints
-			if resource.GetProdEndpoints() != nil && len(resource.GetProdEndpoints().Endpoints) > 0 {
-				prevResourceBasePath := resourceBasePath
-				endpointProd := resource.GetProdEndpoints()
-				if resourceBasePath == "" {
-					resourceBasePath = strings.TrimSuffix(endpointProd.Endpoints[0].Basepath, "/")
-				}
-				clusterNameProd = getClusterName(endpointProd.EndpointPrefix, organizationID, vHost,
-					mgwSwagger.GetTitle(), apiVersion, "")
-				if !strings.Contains(endpointProd.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
-					clusterNameProd = getClusterName(endpointProd.EndpointPrefix, organizationID, vHost,
-						mgwSwagger.GetTitle(), apiVersion, resource.GetID())
-					clusterProd, addressProd, err := processEndpoints(clusterNameProd, endpointProd, upstreamCerts, timeout, resourceBasePath)
-					if err != nil {
-						clusterNameProd = apiLevelClusterNameProd
-						// reverting resource base path setting as production cluster creation has failed
-						resourceBasePath = prevResourceBasePath
-						logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. %v",
-							apiTitle, apiVersion, resourcePath, err.Error())
-					} else {
-						clusters = append(clusters, clusterProd)
-						endpoints = append(endpoints, addressProd...)
-					}
-				}
-			}
-			if clusterNameProd == "" {
-				logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
-					apiTitle, apiVersion, resourcePath)
-			}
-
-			// resource level check sandbox endpoints
-			if resource.GetSandEndpoints() != nil && len(resource.GetSandEndpoints().Endpoints) > 0 {
-				prevResourceBasePath := resourceBasePath
-				endpointSand := resource.GetSandEndpoints()
-				if resourceBasePath == "" {
-					resourceBasePath = strings.TrimSuffix(endpointSand.Endpoints[0].Basepath, "/")
-				}
-				clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
-					apiVersion, "")
-				if !strings.Contains(endpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
-					clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
-						apiVersion, resource.GetID())
-					clusterSand, addressSand, err := processEndpoints(clusterNameSand, endpointSand, upstreamCerts, timeout, resourceBasePath)
-					if err != nil {
-						clusterNameSand = apiLevelClusterNameSand
-						// reverting resource base path setting as sandbox cluster creation has failed
-						resourceBasePath = prevResourceBasePath
-						logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. %v",
-							apiTitle, apiVersion, resourcePath, err.Error())
-					} else {
-						clusters = append(clusters, clusterSand)
-						endpoints = append(endpoints, addressSand...)
-					}
-				}
-			}
-			if clusterNameSand == "" {
-				logger.LoggerOasparser.Debugf("Sandbox environment endpoints are not available for the resource %v:%v-%v",
-					apiTitle, apiVersion, resourcePath)
-			}
-
-			// if both resource level sandbox and production are same as api level, api level clusters will be applied with the api level basepath
-			if clusterNameProd == apiLevelClusterNameProd && clusterNameSand == apiLevelClusterNameSand {
-				resourceBasePath = apiLevelbasePath
-			}
-			if clusterNameProd != "" && clusterNameProd == apiLevelClusterNameProd && resourceBasePath != apiLevelbasePath {
-				logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. sandbox endpoint basepath : %v and production basepath : %v mismatched",
-					apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
-				clusterNameProd = ""
-			} else if clusterNameSand != "" && clusterNameSand == apiLevelClusterNameSand && resourceBasePath != apiLevelbasePath {
-				logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. production endpoint basepath : %v and sandbox basepath : %v mismatched",
-					apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
-				clusterNameSand = ""
-			}
-
-			reqInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor)
-			if err == nil && reqInterceptorVal.Enable {
-				logger.LoggerOasparser.Debugf("Resource level request interceptors found for %v:%v-%v", apiTitle, apiVersion, resource.GetPath())
-				reqInterceptorVal.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost,
-					apiTitle, apiVersion, resource.GetID())
-				cluster, addresses, err := CreateLuaCluster(interceptorCerts, reqInterceptorVal)
-				if err != nil {
-					logger.LoggerOasparser.Errorf("Error while adding resource level request intercept external cluster for %s. %v",
-						apiTitle, err.Error())
-				} else {
-					resourceRequestInterceptor = reqInterceptorVal
-					clusters = append(clusters, cluster)
-					endpoints = append(endpoints, addresses...)
-				}
-			}
-			respInterceptorVal, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor)
-			if err == nil && respInterceptorVal.Enable {
-				logger.LoggerOasparser.Debugf("Resource level response interceptors found for %v:%v-%v"+apiTitle, apiVersion, resource.GetPath())
-				respInterceptorVal.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID,
-					vHost, apiTitle, apiVersion, resource.GetID())
-				cluster, addresses, err := CreateLuaCluster(interceptorCerts, respInterceptorVal)
-				if err != nil {
-					logger.LoggerOasparser.Errorf("Error while adding resource level response intercept external cluster for %s. %v",
-						apiTitle, err.Error())
-				} else {
-					resourceResponseInterceptor = respInterceptorVal
-					clusters = append(clusters, cluster)
-					endpoints = append(endpoints, addresses...)
-				}
-			}
-
-			routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
-				clusterNameSand, resourceRequestInterceptor, resourceResponseInterceptor, organizationID))
-			routes = append(routes, routeP)
-		}
-	}
-	if mgwSwagger.GetAPIType() == model.WS {
+	// Websocket APIs are processed in a different manner compared to REST APIs.
+	// No interceptors engaged.
+	// There is a single method, which is a GET.
+	// No topic level endpoints.
+	if mgwSwagger.GetAPIType() == constants.WS {
 		for _, resource := range mgwSwagger.GetResources() {
 			routesP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelbasePath, apiLevelClusterNameProd,
-				apiLevelClusterNameSand, apiRequestInterceptor, apiResponseInterceptor, organizationID))
+				apiLevelClusterNameSand, nil, nil, organizationID))
 			routes = append(routes, routesP)
 		}
+		return routes, clusters, endpoints
 	}
+
+	for _, resource := range mgwSwagger.GetResources() {
+		resourceRequestInterceptor := apiRequestInterceptor
+		resourceResponseInterceptor := apiResponseInterceptor
+		clusterNameProd := apiLevelClusterNameProd
+		clusterNameSand := apiLevelClusterNameSand
+		resourceBasePath := ""
+		resourcePath := resource.GetPath()
+		if strictBasePath || ((resource.GetProdEndpoints() == nil || len(resource.GetProdEndpoints().Endpoints) < 1) &&
+			(resource.GetSandEndpoints() == nil || len(resource.GetSandEndpoints().Endpoints) < 1)) {
+			resourceBasePath = apiLevelbasePath
+		}
+
+		// resource level check production endpoints
+		if resource.GetProdEndpoints() != nil && len(resource.GetProdEndpoints().Endpoints) > 0 {
+			prevResourceBasePath := resourceBasePath
+			endpointProd := resource.GetProdEndpoints()
+			if resourceBasePath == "" {
+				resourceBasePath = strings.TrimSuffix(endpointProd.Endpoints[0].Basepath, "/")
+			}
+			clusterNameProd = getClusterName(endpointProd.EndpointPrefix, organizationID, vHost,
+				mgwSwagger.GetTitle(), apiVersion, "")
+			if !strings.Contains(endpointProd.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
+				clusterNameProd = getClusterName(endpointProd.EndpointPrefix, organizationID, vHost,
+					mgwSwagger.GetTitle(), apiVersion, resource.GetID())
+				clusterProd, addressProd, err := processEndpoints(clusterNameProd, endpointProd, upstreamCerts, timeout, resourceBasePath)
+				if err != nil {
+					clusterNameProd = apiLevelClusterNameProd
+					// reverting resource base path setting as production cluster creation has failed
+					resourceBasePath = prevResourceBasePath
+					logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. %v",
+						apiTitle, apiVersion, resourcePath, err.Error())
+				} else {
+					clusters = append(clusters, clusterProd)
+					endpoints = append(endpoints, addressProd...)
+				}
+			}
+		}
+		if clusterNameProd == "" {
+			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
+				apiTitle, apiVersion, resourcePath)
+		}
+
+		// resource level check sandbox endpoints
+		if resource.GetSandEndpoints() != nil && len(resource.GetSandEndpoints().Endpoints) > 0 {
+			prevResourceBasePath := resourceBasePath
+			endpointSand := resource.GetSandEndpoints()
+			if resourceBasePath == "" {
+				resourceBasePath = strings.TrimSuffix(endpointSand.Endpoints[0].Basepath, "/")
+			}
+			clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
+				apiVersion, "")
+			if !strings.Contains(endpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
+				clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
+					apiVersion, resource.GetID())
+				clusterSand, addressSand, err := processEndpoints(clusterNameSand, endpointSand, upstreamCerts, timeout, resourceBasePath)
+				if err != nil {
+					clusterNameSand = apiLevelClusterNameSand
+					// reverting resource base path setting as sandbox cluster creation has failed
+					resourceBasePath = prevResourceBasePath
+					logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. %v",
+						apiTitle, apiVersion, resourcePath, err.Error())
+				} else {
+					clusters = append(clusters, clusterSand)
+					endpoints = append(endpoints, addressSand...)
+				}
+			}
+		}
+		if clusterNameSand == "" {
+			logger.LoggerOasparser.Debugf("Sandbox environment endpoints are not available for the resource %v:%v-%v",
+				apiTitle, apiVersion, resourcePath)
+		}
+
+		// if both resource level sandbox and production are same as api level, api level clusters will be applied with the api level basepath
+		if clusterNameProd == apiLevelClusterNameProd && clusterNameSand == apiLevelClusterNameSand {
+			resourceBasePath = apiLevelbasePath
+		}
+		if clusterNameProd != "" && clusterNameProd == apiLevelClusterNameProd && resourceBasePath != apiLevelbasePath {
+			logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. sandbox endpoint basepath : %v and production basepath : %v mismatched",
+				apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
+			clusterNameProd = ""
+		} else if clusterNameSand != "" && clusterNameSand == apiLevelClusterNameSand && resourceBasePath != apiLevelbasePath {
+			logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. production endpoint basepath : %v and sandbox basepath : %v mismatched",
+				apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
+			clusterNameSand = ""
+		}
+
+		reqInterceptorVal := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, ResourceLevelInterceptor)
+		if reqInterceptorVal.Enable {
+			logger.LoggerOasparser.Debugf("Resource level request interceptors found for %v:%v-%v", apiTitle, apiVersion, resource.GetPath())
+			reqInterceptorVal.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost,
+				apiTitle, apiVersion, resource.GetID())
+			cluster, addresses, err := CreateLuaCluster(interceptorCerts, reqInterceptorVal)
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while adding resource level request intercept external cluster for %s. %v",
+					apiTitle, err.Error())
+			} else {
+				resourceRequestInterceptor = reqInterceptorVal
+				clusters = append(clusters, cluster)
+				endpoints = append(endpoints, addresses...)
+			}
+		}
+
+		// create operational level response interceptor clusters
+		operationalReqInterceptors := mgwSwagger.GetOperationInterceptors(apiRequestInterceptor, resourceRequestInterceptor, resource.GetMethod(), true)
+		for method, opI := range operationalReqInterceptors {
+			if opI.Enable && opI.Level == OperationLevelInterceptor {
+				logger.LoggerOasparser.Debugf("Operation level request interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
+					opI.ClusterName)
+				opID := opI.ClusterName
+				opI.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opID)
+				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
+				if err != nil {
+					logger.LoggerOasparser.Errorf("Error while adding operational level request intercept external cluster for %v:%v-%v-%v. %v",
+						apiTitle, apiVersion, resource.GetPath(), opID, err.Error())
+					// setting resource level interceptor to failed operation level interceptor.
+					operationalReqInterceptors[method] = resourceRequestInterceptor
+				} else {
+					clusters = append(clusters, cluster)
+					endpoints = append(endpoints, addresses...)
+				}
+			}
+		}
+
+		// create resource level response interceptor cluster
+		respInterceptorVal := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor, ResourceLevelInterceptor)
+		if respInterceptorVal.Enable {
+			logger.LoggerOasparser.Debugf("Resource level response interceptors found for %v:%v-%v"+apiTitle, apiVersion, resource.GetPath())
+			respInterceptorVal.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID,
+				vHost, apiTitle, apiVersion, resource.GetID())
+			cluster, addresses, err := CreateLuaCluster(interceptorCerts, respInterceptorVal)
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while adding resource level response intercept external cluster for %s. %v",
+					apiTitle, err.Error())
+			} else {
+				resourceResponseInterceptor = respInterceptorVal
+				clusters = append(clusters, cluster)
+				endpoints = append(endpoints, addresses...)
+			}
+		}
+
+		// create operation level response interceptor clusters
+		operationalRespInterceptorVal := mgwSwagger.GetOperationInterceptors(apiResponseInterceptor, resourceResponseInterceptor, resource.GetMethod(),
+			false)
+		for method, opI := range operationalRespInterceptorVal {
+			if opI.Enable && opI.Level == OperationLevelInterceptor {
+				logger.LoggerOasparser.Debugf("Operational level response interceptors found for %v:%v-%v-%v", apiTitle, apiVersion, resource.GetPath(),
+					opI.ClusterName)
+				opID := opI.ClusterName
+				opI.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opID)
+				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
+				if err != nil {
+					logger.LoggerOasparser.Errorf("Error while adding operational level response intercept external cluster for %v:%v-%v-%v. %v",
+						apiTitle, apiVersion, resource.GetPath(), opID, err.Error())
+					// setting resource level interceptor to failed operation level interceptor.
+					operationalRespInterceptorVal[method] = resourceResponseInterceptor
+				} else {
+					clusters = append(clusters, cluster)
+					endpoints = append(endpoints, addresses...)
+				}
+			}
+		}
+
+		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
+			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID))
+		routes = append(routes, routeP)
+	}
+
 	return routes, clusters, endpoints
 }
 
@@ -349,15 +398,15 @@ func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Ad
 	}
 
 	if epHost = conf.Tracing.ConfigProperties[tracerHost]; len(epHost) <= 0 {
-		return nil, nil, errors.New("Invalid host provided for tracing endpoint")
+		return nil, nil, errors.New("invalid host provided for tracing endpoint")
 	}
 	if epPath = conf.Tracing.ConfigProperties[tracerEndpoint]; len(epPath) <= 0 {
-		return nil, nil, errors.New("Invalid endpoint path provided for tracing endpoint")
+		return nil, nil, errors.New("invalid endpoint path provided for tracing endpoint")
 	}
 	if port, err := strconv.ParseUint(conf.Tracing.ConfigProperties[tracerPort], 10, 32); err == nil {
 		epPort = uint32(port)
 	} else {
-		return nil, nil, errors.New("Invalid port provided for tracing endpoint")
+		return nil, nil, errors.New("invalid port provided for tracing endpoint")
 	}
 
 	epCluster.Endpoints[0].Host = epHost
@@ -416,7 +465,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			}
 
 			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
-			marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
+			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
 			}
@@ -455,7 +504,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
-		ConnectTimeout:       ptypes.DurationProto(timeout * time.Second),
+		ConnectTimeout:       durationpb.New(timeout * time.Second),
 		ClusterDiscoveryType: &clusterv3.Cluster_Type{Type: clusterv3.Cluster_STRICT_DNS},
 		DnsLookupFamily:      clusterv3.Cluster_V4_ONLY,
 		LbPolicy:             clusterv3.Cluster_ROUND_ROBIN,
@@ -510,8 +559,8 @@ func createHealthCheck() []*corev3.HealthCheck {
 	conf, _ := config.ReadConfigs()
 	return []*corev3.HealthCheck{
 		{
-			Timeout:            ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
-			Interval:           ptypes.DurationProto(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
+			Timeout:            durationpb.New(time.Duration(conf.Envoy.Upstream.Health.Timeout) * time.Second),
+			Interval:           durationpb.New(time.Duration(conf.Envoy.Upstream.Health.Interval) * time.Second),
 			UnhealthyThreshold: wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.UnhealthyThreshold)),
 			HealthyThreshold:   wrapperspb.UInt32(uint32(conf.Envoy.Upstream.Health.HealthyThreshold)),
 			// we only support tcp default healthcheck
@@ -616,7 +665,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	xWso2Basepath := params.xWSO2BasePath
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
-	resourcePathParam := params.resourcePathParam
+	resourcePath := params.resourcePathParam
 	resourceMethods := params.resourceMethods
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
@@ -633,34 +682,9 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		action                  *routev3.Route_Route
 		match                   *routev3.RouteMatch
 		decorator               *routev3.Decorator
-		resourcePath            string
 		responseHeadersToRemove []string
 	)
 
-	// OPTIONS is always added even if it is not listed under resources
-	// This is required to handle CORS preflight request fail scenario
-	methodRegex := strings.Join(resourceMethods, "|")
-	if !strings.Contains(methodRegex, "OPTIONS") {
-		methodRegex = methodRegex + "|OPTIONS"
-	}
-	headerMatcherArray := routev3.HeaderMatcher{
-		Name: httpMethodHeader,
-		HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
-			StringMatch: &envoy_type_matcherv3.StringMatcher{
-				MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
-					SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
-						Regex: "^(" + methodRegex + ")$",
-					},
-				},
-			},
-		},
-	}
-	resourcePath = resourcePathParam
 	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
@@ -674,7 +698,37 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				Regex: routePath,
 			},
 		},
-		Headers: []*routev3.HeaderMatcher{&headerMatcherArray},
+	}
+
+	// if any of the operations on the route path has a method rewrite policy,
+	// we remove the :method header matching,
+	// because envoy does not allow method rewrting later if the following method regex doesnot have the new method.
+	// hence when method rewriting is enabled for the resource, the method validation will be handled by the enforcer instead of the router.
+	if !params.rewriteMethod {
+		// OPTIONS is always added even if it is not listed under resources
+		// This is required to handle CORS preflight request fail scenario
+		methodRegex := strings.Join(resourceMethods, "|")
+		if !strings.Contains(methodRegex, "OPTIONS") {
+			methodRegex = methodRegex + "|OPTIONS"
+		}
+		headerMatcherArray := routev3.HeaderMatcher{
+			Name: httpMethodHeader,
+			HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
+				StringMatch: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
+						SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+							EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+								GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+									MaxProgramSize: nil,
+								},
+							},
+							Regex: "^(" + methodRegex + ")$",
+						},
+					},
+				},
+			},
+		}
+		match.Headers = []*routev3.HeaderMatcher{&headerMatcherArray}
 	}
 
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
@@ -727,7 +781,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	var luaPerFilterConfig lua.LuaPerRoute
-	if !requestInterceptor.Enable && !responseInterceptor.Enable {
+	if len(requestInterceptor) < 1 && len(responseInterceptor) < 1 {
 		luaPerFilterConfig = lua.LuaPerRoute{
 			Override: &lua.LuaPerRoute_Disabled{Disabled: true},
 		}
@@ -765,6 +819,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Value:   luaMarshelled.Bytes(),
 	}
 
+	pathRegex := xWso2Basepath
+	substitutionString := endpointBasepath
+	if params.rewritePath != "" {
+		pathRegex = routePath
+		if params.rewritePath != "/" {
+			substitutionString = endpointBasepath + params.rewritePath
+		}
+	}
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
@@ -777,14 +839,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 								MaxProgramSize: nil,
 							},
 						},
-						Regex: xWso2Basepath,
+						Regex: pathRegex,
 					},
-					Substitution: endpointBasepath,
+					Substitution: substitutionString,
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
-				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+				Timeout:           durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+				IdleTimeout:       durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
 	} else {
@@ -845,35 +907,41 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	return &router
 }
 
-func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInterceptor model.InterceptEndpoint,
+func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, responseInterceptor map[string]model.InterceptEndpoint,
 	requestContext *interceptor.InvocationContext) string {
 
 	i := &interceptor.Interceptor{
-		Context:              requestContext,
-		RequestExternalCall:  &interceptor.HTTPCallConfig{}, // assign default values ("false" if req flow disabled)
-		ResponseExternalCall: &interceptor.HTTPCallConfig{},
-		ReqFlowInclude:       &interceptor.RequestInclusions{}, // assign default values ("false" if headers not included req details)
-		RespFlowInclude:      &interceptor.RequestInclusions{},
+		Context:      requestContext,
+		RequestFlow:  make(map[string]interceptor.Config),
+		ResponseFlow: make(map[string]interceptor.Config),
 	}
-	if requestInterceptor.Enable {
-		i.RequestExternalCall = &interceptor.HTTPCallConfig{
-			Enable:      true,
-			ClusterName: requestInterceptor.ClusterName,
-			// multiplying in seconds here because in configs we are directly getting config to time.Duration
-			// which is in nano seconds, so multiplying it in seconds here
-			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
+	if len(requestInterceptor) > 0 {
+		i.IsRequestFlowEnabled = true
+		for method, op := range requestInterceptor {
+			i.RequestFlow[method] = interceptor.Config{
+				ExternalCall: &interceptor.HTTPCallConfig{
+					ClusterName: op.ClusterName,
+					// multiplying in seconds here because in configs we are directly getting config to time.Duration
+					// which is in nano seconds, so multiplying it in seconds here
+					Timeout: strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+				},
+				Include: op.Includes,
+			}
 		}
-		i.ReqFlowInclude = requestInterceptor.Includes
 	}
-	if responseInterceptor.Enable {
-		i.ResponseExternalCall = &interceptor.HTTPCallConfig{
-			Enable:      true,
-			ClusterName: responseInterceptor.ClusterName,
-			// multiplying in seconds here because in configs we are directly getting config to time.Duration
-			// which is in nano seconds, so multiplying it in seconds here
-			Timeout: strconv.FormatInt((requestInterceptor.RequestTimeout * time.Second).Milliseconds(), 10),
+	if len(responseInterceptor) > 0 {
+		i.IsResponseFlowEnabled = true
+		for method, op := range responseInterceptor {
+			i.ResponseFlow[method] = interceptor.Config{
+				ExternalCall: &interceptor.HTTPCallConfig{
+					ClusterName: op.ClusterName,
+					// multiplying in seconds here because in configs we are directly getting config to time.Duration
+					// which is in nano seconds, so multiplying it in seconds here
+					Timeout: strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+				},
+				Include: op.Includes,
+			}
 		}
-		i.RespFlowInclude = responseInterceptor.Includes
 	}
 	return interceptor.GetInterceptor(i)
 }
@@ -1114,7 +1182,7 @@ func generateRegex(fullpath string) string {
 
 func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 	var upgradeConfig []*routev3.RouteAction_UpgradeConfig
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
 			UpgradeType: "websocket",
 			Enabled:     &wrappers.BoolValue{Value: true},
@@ -1174,8 +1242,8 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 }
 
 func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
-	prodClusterName string, sandClusterName string, requestInterceptor model.InterceptEndpoint,
-	responseInterceptor model.InterceptEndpoint, organizationID string) *routeCreateParams {
+	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
+	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 	params := &routeCreateParams{
 		organizationID:      organizationID,
 		title:               swagger.GetTitle(),
@@ -1192,11 +1260,14 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		resourceMethods:     getDefaultResourceMethods(swagger.GetAPIType()),
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
+		rewritePath:         "",
+		rewriteMethod:       false,
 	}
 
 	if resource != nil {
 		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
+		params.rewritePath, params.rewriteMethod = resource.GetRewriteResource()
 	}
 
 	if swagger.GetProdEndpoints() != nil {
@@ -1225,7 +1296,7 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 // getMaxStreamDuration configures a maximum duration for a websocket route.
 func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration {
 	var maxStreamDuration *routev3.RouteAction_MaxStreamDuration = nil
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		maxStreamDuration = &routev3.RouteAction_MaxStreamDuration{
 			MaxStreamDuration: &durationpb.Duration{
 				Seconds: 60 * 60 * 24,
@@ -1237,7 +1308,7 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 
 func getDefaultResourceMethods(apiType string) []string {
 	var defaultResourceMethods []string = nil
-	if apiType == model.WS {
+	if apiType == constants.WS {
 		defaultResourceMethods = []string{"GET"}
 	}
 	return defaultResourceMethods

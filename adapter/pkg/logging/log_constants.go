@@ -29,3 +29,25 @@ const (
 	infoLevel       = "INFO"
 	debugLevel      = "DEBG"
 )
+
+// Log Formalization Constants
+const (
+	TEXT = "TEXT"
+	JSON = "JSON"
+)
+
+// Log (Error) severity level constants
+const (
+	BLOCKER  = "Blocker"
+	CRITICAL = "Critical"
+	MAJOR    = "Major"
+	MINOR    = "Minor"
+	TRIVIAL  = "Trivial"
+	DEFAULT  = "Default"
+)
+
+// Error Log attribute name constants
+const (
+	SEVERITY  = "severity"
+	ERRORCODE = "error_code"
+)

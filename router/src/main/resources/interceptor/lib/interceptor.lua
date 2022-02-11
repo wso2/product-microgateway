@@ -261,17 +261,33 @@ end
 
 ---interceptor handler for request flow
 ---@param request_handle table - request_handle
----@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
----@param req_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean}
----@param resp_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
+---@param intercept_service_list {method: {cluster_name: string, resource_path: string, timeout: number}}
+---@param req_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean}}
+---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
 ---@param inv_context table
 ---@param skip_interceptor_call boolean
-function interceptor.handle_request_interceptor(request_handle, intercept_service, req_flow_includes, resp_flow_includes, inv_context, skip_interceptor_call)
+function interceptor.handle_request_interceptor(request_handle, intercept_service_list, req_flow_includes_list, resp_flow_includes_list, inv_context, skip_interceptor_call)
     local shared_info = {}
 
     local request_headers = request_handle:headers()
     local request_id = request_headers:get("x-request-id")
+    local method = request_headers:get(":method")
     shared_info[SHARED.REQUEST_ID] = request_id
+
+    local intercept_service = {}
+    local req_flow_includes = {}
+    if intercept_service_list[method] == nil or req_flow_includes_list[method] == nil then
+        skip_interceptor_call = true
+        request_handle:logDebug("Method " .. method .. "is not included in configs. Hence request interceptor is not applied.")
+    else
+        intercept_service = intercept_service_list[method]
+        req_flow_includes = req_flow_includes_list[method]
+    end
+
+    local resp_flow_includes = {}
+    if resp_flow_includes_list[method] ~= nil then
+        resp_flow_includes = resp_flow_includes_list[method]
+    end
 
     local interceptor_request_body = {}
     -- including invocation context first it is required to read headers
@@ -280,14 +296,11 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
 
     --#region read request headers and update shared_info
     local request_headers_table = {}
-    if req_flow_includes[INCLUDES.REQ_HEADERS] or resp_flow_includes[INCLUDES.REQ_HEADERS] then
-        for key, value in pairs(request_headers) do
-            request_headers_table[key] = value
-        end
+    for key, value in pairs(request_headers) do
+        request_headers_table[key] = value
     end
-    if resp_flow_includes[INCLUDES.REQ_HEADERS] then
-        shared_info[REQUEST.REQ_HEADERS] = request_headers_table
-    end
+    shared_info[REQUEST.REQ_HEADERS] = request_headers_table
+    
     --#endregion
 
     --#region read request body and update shared_info
@@ -350,7 +363,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
     end
     modify_headers(request_handle, interceptor_response_body)
     modify_trailers(request_handle, interceptor_response_body)
-    
+
     --#region handle dynamic endpoint
     -- handle this after update headers, in case if user modify the header "x-wso2-cluster-header"
     handle_dynamic_endpoint(request_handle, interceptor_response_body, inv_context, shared_info)
@@ -366,9 +379,9 @@ end
 
 ---interceptor handler for response flow
 ---@param response_handle table - response_handle
----@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
----@param resp_flow_includes {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}
-function interceptor.handle_response_interceptor(response_handle, intercept_service, resp_flow_includes)
+---@param intercept_service_list {method: {cluster_name: string, resource_path: string, timeout: number}}
+---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
+function interceptor.handle_response_interceptor(response_handle, intercept_service_list, resp_flow_includes_list)
     local meta = response_handle:streamInfo():dynamicMetadata():get(LUA_FILTER_NAME)
     local shared_info = meta and meta[SHARED_INFO_META_KEY]
     if not shared_info then
@@ -376,6 +389,18 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         -- TODO: (renuka) check again, if we want to go response flow if enforcer validation failed, have to set request info metadata from enforcer
         return
     end
+    local method = shared_info[REQUEST.REQ_HEADERS][":method"]
+    if method == nil then
+        response_handle:logErr("Error getting header ':method' in response flow interceptor. The header is not found in shared info's request headers.")
+        return
+    end
+    local resp_flow_includes = resp_flow_includes_list[method]
+    local intercept_service = intercept_service_list[method]
+    if resp_flow_includes == nil or intercept_service == nil then
+        response_handle:logDebug("Method " .. method .. " is missing in response configs. Hence response interceptor is not applied.")
+        return
+    end
+
     local request_id = shared_info[SHARED.REQUEST_ID]
     if shared_info[RESPONSE.DIRECT_RESPOND] then
         response_handle:logDebug("Ignoring response path intercept since direct responded for the request_id: " .. request_id)

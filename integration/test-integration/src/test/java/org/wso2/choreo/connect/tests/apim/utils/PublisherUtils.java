@@ -18,7 +18,6 @@
 package org.wso2.choreo.connect.tests.apim.utils;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,23 +25,37 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.*;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIProductInfoDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIProductListDTO;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
-import org.wso2.am.integration.test.utils.bean.*;
+import org.wso2.am.integration.test.utils.bean.APILifeCycleAction;
+import org.wso2.am.integration.test.utils.bean.APILifeCycleState;
+import org.wso2.am.integration.test.utils.bean.APIRequest;
+import org.wso2.am.integration.test.utils.bean.APIRevisionRequest;
+import org.wso2.am.integration.test.utils.bean.APIRevisionDeployUndeployRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
-import org.wso2.choreo.connect.tests.apim.dto.Api;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import javax.ws.rs.core.Response;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static org.testng.Assert.assertEquals;
 
@@ -63,44 +76,6 @@ public class PublisherUtils {
     }
 
     /**
-     * Create and publish an API
-     *
-     * @param api                   An API object
-     * @param provider              The provider
-     * @param publisherRestClient   An instance of RestAPIPublisherImpl
-     * @return API id
-     * @throws CCTestException if an error occurs while creating or publishing the API
-     */
-    public static String createAPI(Api api, String provider, RestAPIPublisherImpl publisherRestClient)
-            throws CCTestException, MalformedURLException {
-        APIRequest apiRequest;
-        String endpointUrl;
-
-        if (Objects.isNull(api.getEndpointUrl())) {
-            endpointUrl = Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH);
-        } else endpointUrl = api.getEndpointUrl();
-
-        try {
-            apiRequest = new APIRequest(api.getName(), api.getContext(), new URL(endpointUrl));
-        } catch (MalformedURLException | APIManagerIntegrationTestException e) {
-            throw new CCTestException("Error while creating API Request", e);
-        }
-        apiRequest.setVersion(api.getVersion());
-        apiRequest.setProvider(provider);
-        apiRequest.setOperationsDTOS(api.getOperationsDTOS());
-
-        if (Objects.isNull(api.getTiersCollection())) {
-            apiRequest.setTiersCollection(TestConstant.API_TIER.UNLIMITED);
-        } else apiRequest.setTiersCollection(api.getTiersCollection());
-
-        if (Objects.isNull(api.getTier())) {
-            apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
-        } else apiRequest.setTier(api.getTier());
-
-        return createAPI(apiRequest, publisherRestClient);
-    }
-
-    /**
      * Creates API using a given OAS file in publisher.
      *
      * @param apiProperties API Properties containing apiName, apiContext, apiVersion,
@@ -113,7 +88,7 @@ public class PublisherUtils {
      */
     public static String createAPIUsingOAS(JSONObject apiProperties,
                                            String filePath, RestAPIPublisherImpl publisherRestClient)
-                                           throws MalformedURLException, ApiException {
+                                           throws MalformedURLException, CCTestException {
         File definition = new File(filePath);
         JSONObject endpoints = new JSONObject();
         endpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
@@ -129,8 +104,41 @@ public class PublisherUtils {
         apiProperties.put("endpointConfig", endpointConfig);
         apiProperties.put("policies", tierList);
 
-        APIDTO apiDTO = publisherRestClient.importOASDefinition(definition, apiProperties.toString());
-        return  apiDTO.getId();
+        APIDTO apiDTO;
+        try {
+            apiDTO = publisherRestClient.importOASDefinition(definition, apiProperties.toString());
+        } catch (ApiException e) {
+            log.error("Error occurred while importing OpenAPI definition to APIM. Response: {}", e.getResponseBody());
+            throw new CCTestException("Error while creating an API", e);
+        }
+        return apiDTO.getId();
+    }
+
+    /**
+     * Updates the OpenAPI definition of an already created API
+     * 
+     * @param apiId ID of the API to update the OpenAPI definition
+     * @param openAPIFileName Name of the OpenAPI file. ex. scopes_openAPI.yaml
+     * @param publisherRestClient An instance of RestAPIPublisherImpl
+     * @return ID of the API that was updated
+     * @throws CCTestException if the OpenAPI file specified was not present, or an error occurs when updating the API
+     */
+    public static String updateOpenAPIDefinition(String apiId, String openAPIFileName,
+                                               RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        String targetDir = Utils.getTargetDirPath();
+        Path definitionPath = Paths.get(targetDir + ApictlUtils.OPENAPIS_PATH + openAPIFileName);
+        String responseApiId;
+        try {
+            String openAPIContent = Files.readString(definitionPath);
+            responseApiId = publisherRestClient.updateSwagger(apiId, openAPIContent);
+        } catch (ApiException e) {
+            log.error("Error occurred while creating API with an OpenAPI definition. Response: {}", e.getResponseBody());
+            throw new CCTestException("Error while creating an API with an OpenAPI", e);
+        } catch (IOException e) {
+            log.error("Error occurred while reading OpenAPI definition for: {}", openAPIFileName);
+            throw new CCTestException("Error while reading OpenAPI definition", e);
+        }
+        return responseApiId;
     }
 
     /**
@@ -163,6 +171,7 @@ public class PublisherUtils {
         try {
             createAPIResponse = publisherRestClient.addAPI(apiRequest);
         } catch (ApiException e) {
+            log.error("Error while creating an API. REST response: {}", e.getMessage());
             throw new CCTestException("Error while creating an API", e);
         }
         if (Objects.nonNull(createAPIResponse) && createAPIResponse.getResponseCode() == HttpStatus.SC_CREATED
@@ -170,9 +179,10 @@ public class PublisherUtils {
             log.info("API Created. " + getAPIIdentifierStringFromAPIRequest(apiRequest));
             return createAPIResponse.getData();
         } else {
-            throw new CCTestException(
-                    "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
-                            + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData());
+            String errorMsg = "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
+                            + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData();
+            log.error(errorMsg);
+            throw new CCTestException(errorMsg);
         }
     }
 
@@ -194,6 +204,7 @@ public class PublisherUtils {
         try {
             revisionUUID = createAPIRevisionAndDeploy(apiId, vhost, publisherRestClient);
         } catch (JSONException | ApiException e) {
+            log.error("Error while deploying the API. REST response: {}", e.getMessage());
             throw new CCTestException("Error while creating and deploying API Revision", e);
         }
         log.info("API Deployed. Name:" + apiName + " VHost:" + vhost);
@@ -258,6 +269,17 @@ public class PublisherUtils {
     public static String createAPIRevisionAndDeploy(String apiId, String vhost, RestAPIPublisherImpl publisherRestClient)
             throws ApiException, JSONException {
 
+        String revisionUUID = createAPIRevision(apiId, publisherRestClient);
+
+        // Deploy API revision
+        List<APIRevisionDeployUndeployRequest> deployRequestList = getDeployRequestList("Default", vhost);
+        publisherRestClient.deployAPIRevision(apiId, revisionUUID, deployRequestList);
+        return revisionUUID;
+    }
+
+    public static String createAPIRevision(String apiId, RestAPIPublisherImpl publisherRestClient)
+            throws ApiException, JSONException {
+
         //Add the API Revision using the API publisher.
         APIRevisionRequest apiRevisionRequest = new APIRevisionRequest();
         apiRevisionRequest.setApiUUID(apiId);
@@ -270,10 +292,6 @@ public class PublisherUtils {
         // Read revision ID from response
         JSONObject apiRevisionJsonObject = new JSONObject(apiRevisionResponse.getData());
         String revisionUUID = apiRevisionJsonObject.getString("id");
-
-        // Deploy API revision
-        List<APIRevisionDeployUndeployRequest> deployRequestList = getDeployRequestList("Default", vhost);
-        publisherRestClient.deployAPIRevision(apiId, revisionUUID, deployRequestList);
         return revisionUUID;
     }
 
@@ -353,13 +371,21 @@ public class PublisherUtils {
 
     public static void publishAPI(String apiId, String apiName,
                                   RestAPIPublisherImpl publisherRestClient) throws CCTestException {
-        HttpResponse publishAPIResponse = changeLCStateAPI(apiId,
-                APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, false);
+        HttpResponse publishAPIResponse;
+        try {
+            publishAPIResponse = changeLCStateAPI(apiId,
+                    APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, false);
+        } catch (CCTestException e) {
+            log.error("Error while Publishing API:" + apiName + "API ID:" + apiId);
+            throw e;
+        }
+
         if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK && APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
-            throw new CCTestException(
-                    "Error while Publishing API:" + apiName + "Response Code:"
+            String errorMsg = "Error while Publishing API:" + apiName + "Response Code:"
                             + publishAPIResponse.getResponseCode() + " Response Data :" + publishAPIResponse
-                            .getData());
+                            .getData();
+            log.error(errorMsg);
+            throw new CCTestException("Error while Publishing API:" + apiName + "API ID:" + apiId);
         }
         log.info("API Published. Name:" + apiName);
     }
@@ -456,11 +482,13 @@ public class PublisherUtils {
             HttpResponse response = publisherRestClient
                     .changeAPILifeCycleStatus(apiId, targetState, lifecycleChecklist);
             if (Objects.isNull(response)) {
-                throw new CCTestException("Error while publishing the API. API Id : " + apiId);
+                log.error("Received a null response when changing lifecycle status to " + targetState);
+                throw new CCTestException("Error while changing lifecycle status to " + targetState + ". API Id : " + apiId);
             }
             return response;
         } catch (ApiException e) {
-            throw new CCTestException("Error while publishing the API. API Id : " + apiId);
+            log.error(e.getResponseBody());
+            throw new CCTestException("Error while changing lifecycle status to " + targetState + ". API Id : " + apiId);
         }
     }
 
@@ -481,6 +509,7 @@ public class PublisherUtils {
                 }
             }
         } catch (APIManagerIntegrationTestException | ApiException e) {
+            log.error("Error while removing all APIs. REST response: {}", e.getMessage());
             throw new CCTestException("Error while removing APIs from Publisher", e);
         }
     }

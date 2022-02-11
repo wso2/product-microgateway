@@ -60,7 +60,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final String THROTTLED_QUERY_PARAM = "name";
     private final String THROTTLED_QUERY_PARAM_VALUE = "admin";
     private final String THROTTLED_CLAIM = "ClaimApp";
-    private static final String API_NAME = "AdvancedThrottlingApi";
+    private static final String API_NAME = "AdvancedThrottlingAPI";
     private static final String API_CONTEXT = "advanced_throttling";
     private static final String APPLICATION_NAME = "AdvanceThrottlingApp";
     private final Map<String, String> requestHeaders = new HashMap<>();

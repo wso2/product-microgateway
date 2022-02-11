@@ -41,12 +41,12 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	oasParser "github.com/wso2/product-microgateway/adapter/internal/oasparser"
-	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
-	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
-	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
@@ -78,7 +78,7 @@ var (
 	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID -> gateway-env -> vhost (for un-deploying APIs from APIM or Choreo)
 	apiToVhostsMap           map[string]map[string]struct{} // API_UUID -> VHosts set (for un-deploying APIs from API-CTL)
 
-	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
+	orgIDAPIMgwSwaggerMap       map[string]map[string]model.MgwSwagger     // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
 	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:API_UUID -> Envoy Label Array map
 	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:API_UUID -> Envoy Routes map
 	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:API_UUID -> Envoy Clusters map
@@ -156,7 +156,7 @@ func init() {
 	envoyClusterConfigMap = make(map[string][]*clusterv3.Cluster)
 	envoyEndpointConfigMap = make(map[string][]*corev3.Address)
 
-	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
+	orgIDAPIMgwSwaggerMap = make(map[string]map[string]model.MgwSwagger)       // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
 	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map
 	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:API_UUID -> Envoy Routes map
 	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:API_UUID -> Envoy Clusters map
@@ -247,8 +247,8 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (*notifier.DeployedAPIRevision, error) {
-	var mgwSwagger mgw.MgwSwagger
+func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string) (*notifier.DeployedAPIRevision, error) {
+	var mgwSwagger model.MgwSwagger
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
 	var newLabels []string
@@ -272,41 +272,48 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		apiEnvProps = apiEnvPropsV
 	}
 
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
+	err = apiProject.APIYaml.ValidateAPIType()
 	if err != nil {
 		return nil, err
 	}
 
-	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
-		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
-		if err != nil {
-			return nil, err
-		}
+	err = mgwSwagger.PopulateFromAPIYaml(apiProject.APIYaml)
+	if err != nil {
+		return nil, err
+	}
+
+	err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the following in case they were overridden by the above line
+	mgwSwagger.SetID(apiYaml.ID)
+	mgwSwagger.SetName(apiYaml.Name)
+	mgwSwagger.SetVersion(apiYaml.Version)
+
+	if apiYaml.APIType == constants.HTTP {
+		// avoid the following for AsyncAPI types
 		// the following will be used for APIM specific security config.
 		// it will enable folowing securities globally for the API, overriding swagger securities.
 		isYamlAPIKey := false
 		isYamlOauth := false
 		for _, value := range apiYaml.SecurityScheme {
-			if value == model.APIMAPIKeyType {
+			if value == constants.APIMAPIKeyType {
 				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
 				isYamlAPIKey = true
-			} else if value == model.APIMOauth2Type {
+			} else if value == constants.APIMOauth2Type {
 				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
 				isYamlOauth = true
 			}
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
-		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-	} else if apiProject.APIType != mgw.WS {
-		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
+		mgwSwagger.SetOperationPolicies(apiYaml.Operations)
 	}
+	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
-	mgwSwagger.SetID(apiYaml.ID)
-	mgwSwagger.SetName(apiYaml.Name)
-	mgwSwagger.SetVersion(apiYaml.Version)
-	mgwSwagger.OrganizationID = apiProject.OrganizationID
-	organizationID := apiProject.OrganizationID
+	mgwSwagger.OrganizationID = apiYaml.OrganizationID
+	organizationID := apiYaml.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 
 	if mgwSwagger.GetProdEndpoints() != nil {
@@ -357,7 +364,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	if _, ok := orgIDAPIMgwSwaggerMap[organizationID]; ok {
 		orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier] = mgwSwagger
 	} else {
-		mgwSwaggerMap := make(map[string]mgw.MgwSwagger)
+		mgwSwaggerMap := make(map[string]model.MgwSwagger)
 		mgwSwaggerMap[apiIdentifier] = mgwSwagger
 		orgIDAPIMgwSwaggerMap[organizationID] = mgwSwaggerMap
 	}
@@ -431,12 +438,10 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 
 	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
-		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger,
-			apiProject.APILifeCycleStatus, vHost)
+		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, vHost)
 	} else {
 		enforcerAPIMap := make(map[string]types.Resource)
-		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
-			vHost)
+		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, vHost)
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 
@@ -478,7 +483,7 @@ func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 	return "", false
 }
 
-func addBasepathToMap(mgwSwagger mgw.MgwSwagger, organizationID, vHost, apiIdentifier string) error {
+func addBasepathToMap(mgwSwagger model.MgwSwagger, organizationID, vHost, apiIdentifier string) error {
 	newBasepath := mgwSwagger.GetXWso2Basepath()
 
 	// Check if the basepath exists
@@ -521,7 +526,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 	vhosts, found := apiToVhostsMap[apiNameVersionHashedID]
 	if !found {
 		logger.LoggerXds.Infof("Unable to delete API %v from Organization %v. API does not exist.", apiNameVersionID, organizationID)
-		return errors.New(mgw.NotFound)
+		return errors.New(constants.NotFound)
 	}
 
 	if vhost == "" {
@@ -585,7 +590,7 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 	vhosts, found := apiToVhostsMap[uuid]
 	if !found {
 		logger.LoggerXds.Infof("Unable to delete API with UUID %v from Organization %v. API does not exist.", uuid, organizationID)
-		return errors.New(mgw.NotFound)
+		return errors.New(constants.NotFound)
 	}
 
 	if vhost == "" {
@@ -634,8 +639,11 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 }
 
 // DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
-func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string) {
+func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, revisionUUID string) {
 	apiIdentifiers := make(map[string]struct{})
+
+	conf, _ := config.ReadConfigs()
+	gaEnabled := conf.GlobalAdapter.Enabled
 
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
@@ -653,10 +661,13 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string) 
 		} else {
 			// if no error, update internal vhost maps
 			// error only happens when API not found in deleteAPI func
-			logger.LoggerXds.Infof("Successfully undeployed API %v of Organization %v from environments %v", apiIdentifier, organizationID, environments)
+			logger.LoggerXds.Infof("Successfully undeployed the revision %s of API %v under Organization %s and environment %s ", revisionUUID, apiIdentifier, organizationID, environments)
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
+				if gaEnabled && revisionUUID != "" {
+					notifier.SendRevisionUndeploy(uuid, revisionUUID, environment)
+				}
 			}
 		}
 	}
@@ -667,7 +678,7 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	_, exists := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API: %v from Organization: %v. API Does not exist.", apiIdentifier, organizationID)
-		return errors.New(mgw.NotFound)
+		return errors.New(constants.NotFound)
 	}
 
 	existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
@@ -1095,7 +1106,11 @@ func ListApis(apiType string, organizationID string, limit *int64) *apiModel.API
 }
 
 // IsAPIExist returns whether a given API exists
-func IsAPIExist(vhost, uuid, organizationID string) (exists bool) {
+func IsAPIExist(vhost, uuid, apiName, apiVersion, organizationID string) (exists bool) {
+	if uuid == "" {
+		// If API is imported from apictl generate hash as the unique ID
+		uuid = GenerateHashedAPINameVersionIDWithoutVhost(apiName, apiVersion)
+	}
 	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, uuid)
 	_, exists = orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	return exists

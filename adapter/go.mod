@@ -3,17 +3,17 @@ module github.com/wso2/product-microgateway/adapter
 go 1.15
 
 require (
-	github.com/Azure/azure-service-bus-go v0.10.14
+	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v0.3.2
 	github.com/envoyproxy/go-control-plane v0.10.0
 	github.com/envoyproxy/protoc-gen-validate v0.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getkin/kin-openapi v0.8.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-openapi/errors v0.19.7
+	github.com/go-openapi/errors v0.19.8
 	github.com/go-openapi/loads v0.19.5
 	github.com/go-openapi/runtime v0.19.22
 	github.com/go-openapi/spec v0.19.8
-	github.com/go-openapi/strfmt v0.19.6
+	github.com/go-openapi/strfmt v0.21.1
 	github.com/go-openapi/swag v0.19.9
 	github.com/go-openapi/validate v0.19.11
 	github.com/golang/protobuf v1.5.0
@@ -26,11 +26,11 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
-	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
+	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
 	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e
 	google.golang.org/grpc v1.36.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )

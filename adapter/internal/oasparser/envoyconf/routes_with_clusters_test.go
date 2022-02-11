@@ -22,14 +22,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/wrapperspb"
+
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
@@ -51,23 +52,23 @@ func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath, true)
 }
 
-// func TestCreateRouteswithClustersWebsocketProdSand(t *testing.T) {
-// 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api.yaml"
-// 	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
-// 	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
-// }
+func TestCreateRouteswithClustersWebsocketProdSand(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api.yaml"
+	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
+}
 
-// func TestCreateRouteswithClustersWebsocketProd(t *testing.T) {
-// 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_prod.yaml"
-// 	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
-// 	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
-// }
+func TestCreateRouteswithClustersWebsocketProd(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_prod.yaml"
+	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
+}
 
-// func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
-// 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_sand.yaml"
-// 	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
-// 	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
-// }
+func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_sand.yaml"
+	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
+}
 
 // commonTestForCreateRoutesWithClusters
 // withExtensions - if definition has endpoints x-wso2 extension
@@ -239,82 +240,91 @@ func TestCreateRoutesWithClustersForEndpointRef(t *testing.T) {
 		"The route regex for the two routes should not be the same")
 }
 
-// func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string) {
-// 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
-// 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
-// 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
-// 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
+func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string) {
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+	assert.Nil(t, err, "Error occurred while processing api.yaml")
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
 
-// 	var apiYaml model.APIYaml
-// 	err = json.Unmarshal(apiJsn, &apiYaml)
-// 	apiYaml = model.PopulateEndpointsInfo(apiYaml)
-// 	assert.Nil(t, err, "Error occured while parsing api.yaml")
-// 	var mgwSwagger model.MgwSwagger
-// 	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
-// 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-// 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+	asyncapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/asyncapi_websocket.yaml"
+	asyncapiByteArr, err := ioutil.ReadFile(asyncapiFilePath)
+	assert.Nil(t, err, "Error while reading file : %v"+asyncapiFilePath)
+	apiJsn, conversionErr := utills.ToJSON(asyncapiByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+asyncapiFilePath)
 
-// 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
-// 		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
-// 		productionCluster := clusters[0]
-// 		sandBoxCluster := clusters[1]
-// 		assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_EchoWebSocket1.0", "Production cluster name mismatch")
-// 		assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_EchoWebSocket1.0", "Sandbox cluster name mismatch")
+	var asyncapi model.AsyncAPI
+	err = json.Unmarshal(apiJsn, &asyncapi)
+	assert.Nil(t, err, "Error occurred while parsing api.yaml")
 
-// 		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
-// 		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+	err = mgwSwagger.SetInfoAsyncAPI(asyncapi)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
-// 		assert.Equal(t, productionClusterHost, "echo.websocket.org", "Production cluster host mismatch")
-// 		assert.Equal(t, productionClusterPort, uint32(80), "Production cluster port mismatch")
+	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
+		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+		productionCluster := clusters[0]
+		sandBoxCluster := clusters[1]
+		assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_EchoWebSocket1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_EchoWebSocket1.0", "Sandbox cluster name mismatch")
 
-// 		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
-// 		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
 
-// 		assert.Equal(t, sandBoxClusterHost, "echo.websocket.org", "Sandbox cluster host mismatch")
-// 		assert.Equal(t, sandBoxClusterPort, uint32(80), "Sandbox cluster port mismatch")
+		assert.Equal(t, productionClusterHost, "ws.ifelse.io", "Production cluster host mismatch")
+		assert.Equal(t, productionClusterPort, uint32(443), "Production cluster port mismatch")
 
-// 		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
 
-// 		// TODO: (VirajSalaka) upgrade this properly
-// 		// route := routes[0].GetMatch().GetSafeRegex().Regex
-// 		// assert.Equal(t, route, "^/echowebsocket/1.0(\\?([^/]+))?$", "route created mismatch")
-// 	}
-// 	if strings.HasSuffix(apiYamlFilePath, "api_prod.yaml") {
-// 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
-// 		productionCluster := clusters[0]
-// 		assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_prodws1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxClusterHost, "echo.websocket.org", "Sandbox cluster host mismatch")
+		assert.Equal(t, sandBoxClusterPort, uint32(80), "Sandbox cluster port mismatch")
 
-// 		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
-// 		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+		assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
-// 		assert.Equal(t, productionClusterHost, "echo.websocket.org", "Production cluster host mismatch")
-// 		assert.Equal(t, productionClusterPort, uint32(80), "Production cluster port mismatch")
+		route := routes[0].GetMatch().GetSafeRegex().Regex
+		// TODO: (VirajSalaka) fix the topic's url mapping
+		assert.Equal(t, route, "^/echowebsocket/1.0/notifications(\\?([^/]+))?$", "route created mismatch")
+	}
+	if strings.HasSuffix(apiYamlFilePath, "api_prod.yaml") {
+		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
+		productionCluster := clusters[0]
+		assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_prodws1.0", "Production cluster name mismatch")
 
-// 		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
 
-// 		// route := routes[0].GetMatch().GetSafeRegex().Regex
-// 		// assert.Equal(t, route, "^/echowebsocketprod/1.0(\\?([^/]+))?$", "route created mismatch")
+		assert.Equal(t, productionClusterHost, "ws.ifelse.io", "Production cluster host mismatch")
+		assert.Equal(t, productionClusterPort, uint32(443), "Production cluster port mismatch")
 
-// 	}
-// 	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
-// 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
-// 		sandBoxCluster := clusters[0]
-// 		assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_sandbox1.0", "Sandbox cluster name mismatch")
+		assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
-// 		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
-// 		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+		route := routes[0].GetMatch().GetSafeRegex().Regex
+		assert.Equal(t, route, "^/echowebsocketprod/1.0/notifications(\\?([^/]+))?$", "route created mismatch")
 
-// 		assert.Equal(t, sandBoxClusterHost, "echo.websocket.org", "Production cluster host mismatch")
-// 		assert.Equal(t, sandBoxClusterPort, uint32(80), "Production cluster port mismatch")
+		// TODO: (VirajSalaka) add Unit test for second resource too.
 
-// 		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+	}
+	// if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
+	// 	assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
+	// 	sandBoxCluster := clusters[0]
+	// 	assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_sandbox1.0", "Sandbox cluster name mismatch")
 
-// 		// route := routes[0].GetMatch().GetSafeRegex().Regex
-// 		// assert.Equal(t, route, "^/echowebsocketsand/1.0(\\?([^/]+))?$", "route created mismatch")
+	// 	sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	// 	sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
 
-// 	}
+	// 	assert.Equal(t, sandBoxClusterHost, "echo.websocket.org", "Production cluster host mismatch")
+	// 	assert.Equal(t, sandBoxClusterPort, uint32(80), "Production cluster port mismatch")
 
-// }
+	// 	assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+
+	// 	route := routes[0].GetMatch().GetSafeRegex().Regex
+	// 	assert.Equal(t, route, "^/echowebsocketsand/1.0(\\?([^/]+))?$", "route created mismatch")
+
+	// }
+
+}
 
 // this tests env props getting overriden for api.yaml provided values for websocket apis
 func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFilePath string) {
@@ -328,15 +338,22 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 
 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v", apiYamlFilePath)
-	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
-	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v", apiYamlFilePath)
-
-	var apiYaml model.APIYaml
-	err = json.Unmarshal(apiJsn, &apiYaml)
-	apiYaml = model.PopulateEndpointsInfo(apiYaml)
-	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+	assert.Nil(t, err, "Error occurred while processing api.yaml")
 	var mgwSwagger model.MgwSwagger
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
+	mgwSwagger.PopulateFromAPIYaml(apiYaml)
+
+	asyncapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/asyncapi_websocket.yaml"
+	asyncapiByteArr, err := ioutil.ReadFile(asyncapiFilePath)
+	assert.Nil(t, err, "Error while reading file : %v"+asyncapiFilePath)
+	apiJsn, conversionErr := utills.ToJSON(asyncapiByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+asyncapiFilePath)
+
+	var asyncapi model.AsyncAPI
+	err = json.Unmarshal(apiJsn, &asyncapi)
+	assert.Nil(t, err, "Error occurred while parsing api.yaml")
+	mgwSwagger.SetInfoAsyncAPI(asyncapi)
+
 	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
@@ -356,7 +373,7 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 
 	assert.Equal(t, sandBoxClusterHost, "env.websocket.org", "Sandbox cluster host mismatch")
 	assert.Equal(t, sandBoxClusterPort, uint32(443), "Sandbox cluster port mismatch")
-	assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+	assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
 }
 
@@ -447,25 +464,20 @@ func TestCreateHealthEndpoint(t *testing.T) {
 // 		"Sandbox Cluster mismatch in route ext authz context. (Path Level Endpoints)")
 // }
 
-func TestCreateRoutesWithClusters(t *testing.T) {
+// func TestCreateRoutesWithClusters(t *testing.T) {
 
-	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api.yaml"
-	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
-	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
-	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
-	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-
-	var apiYaml model.APIYaml
-	err = json.Unmarshal(apiJsn, &apiYaml)
-	apiYaml = model.PopulateEndpointsInfo(apiYaml)
-	assert.Nil(t, err, "Error occured while parsing api.yaml")
-	var mgwSwagger model.MgwSwagger
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
-	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
-	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
-	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
-}
+// 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api.yaml"
+// 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+// 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+// 	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+// 	assert.Nil(t, err, "Error occurred while processing api.yaml")
+// 	var mgwSwagger model.MgwSwagger
+// 	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
+// 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
+// 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+// 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
+// 	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
+// }
 
 func TestLoadBalancedCluster(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/ws_api_loadbalance.yaml"
@@ -482,15 +494,10 @@ func TestFailoverCluster(t *testing.T) {
 func commonTestForClusterPrioritiesInWebSocketAPI(t *testing.T, apiYamlFilePath string) {
 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
-	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
-	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-
-	var apiYaml model.APIYaml
-	err = json.Unmarshal(apiJsn, &apiYaml)
-	apiYaml = model.PopulateEndpointsInfo(apiYaml)
-	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+	assert.Nil(t, err, "Error occurred while processing api.yaml")
 	var mgwSwagger model.MgwSwagger
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
@@ -549,15 +556,10 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 
 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v", apiYamlFilePath)
-	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
-	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v", apiYamlFilePath)
-
-	var apiYaml model.APIYaml
-	err = json.Unmarshal(apiJsn, &apiYaml)
-	apiYaml = model.PopulateEndpointsInfo(apiYaml)
-	assert.Nil(t, err, "Error occured while parsing api.yaml")
+	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+	assert.Nil(t, err, "Error occurred while processing api.yaml")
 	var mgwSwagger model.MgwSwagger
-	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
 	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")

@@ -47,6 +47,7 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +69,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
                             request.getAttributes().getRequest().getHttp().getId());
             if (Utils.tracingEnabled()) {
-                TracingTracer tracer =  Utils.getGlobalTracer();
+                TracingTracer tracer = Utils.getGlobalTracer();
                 Context parentContext = TracingContextHolder.getInstance().getContext();
                 // This span will be the parent span for all the filters
                 extAuthServiceSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, parentContext, tracer);
@@ -114,18 +115,13 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                         .setDeniedResponse(responseBuilder.setStatus(status).build())
                         .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
-                                Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
+                                        Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
                                 .build())
                         .build();
             }
-            // Error handling
-            JSONObject responseJson = new JSONObject();
-            responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
-            responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
-            responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder().setHeader(
-                    HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
-                            .setValue(APIConstants.APPLICATION_JSON).build())
+                            HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
+                                    .setValue(APIConstants.APPLICATION_JSON).build())
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
             responseBuilder.addHeaders(headerValueOption);
@@ -136,11 +132,34 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
 
-            return CheckResponse.newBuilder()
+            CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
-                    .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
-                    .setDynamicMetadata(structBuilder.build())
-                    .build();
+                    .setDynamicMetadata(structBuilder.build());
+
+            if (responseObject.getErrorCode() != null) {
+                // Error handling
+                JSONObject responseJson = new JSONObject();
+                responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
+                responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
+                responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
+
+                return checkResponseBuilder
+                        .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
+                        .build();
+            } else {
+                if (responseObject.getMockApiResponsePayload() != null) {
+                    responseBuilder.setBody(responseObject.getMockApiResponsePayload());
+                }
+
+                // Below condition is evaluated to stop re-directing successful mock API responses to upstream.
+                // Here only the checkResponse object's status code is changed. This provides API call's response status
+                // code as specified in the mock API's JSON script (expected status code).
+                if (responseObject.getStatusCode() >= 200 || responseObject.getStatusCode() <= 299) {
+                    checkResponseBuilder.setStatus(Status.newBuilder().setCode(421));
+                }
+                status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+                return  checkResponseBuilder.setDeniedResponse(responseBuilder.setStatus(status).build()).build();
+            }
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
 
@@ -148,13 +167,14 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
             // query parameter. In this scenario, apiKey query parameter is sent within the property called
             // 'queryParamsToRemove' so that the custom filters also can utilize the method.
-            if (responseObject.getQueryParamsToRemove().size() > 0) {
-                String constructedPath = constructQueryParamString(responseObject.getRequestPath(),
-                        responseObject.getQueryParamMap(), responseObject.getQueryParamsToRemove());
+            if (responseObject.getQueryParamsToRemove().size() > 0 || responseObject.getQueryParamsToAdd().size() > 0 ||
+                    responseObject.isRemoveAllQueryParams()) {
+                String constructedPath = constructQueryParamString(responseObject.isRemoveAllQueryParams(),
+                        responseObject.getRequestPath(), responseObject.getQueryParamMap(),
+                        responseObject.getQueryParamsToRemove(), responseObject.getQueryParamsToAdd());
                 HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                         .setHeader(HeaderValue.newBuilder().setKey(APIConstants.PATH_HEADER).setValue(constructedPath)
-                                .build())
-                        .build();
+                                .build()).build();
                 okResponseBuilder.addHeaders(headerValueOption);
             }
 
@@ -199,17 +219,22 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         return Code.INTERNAL_VALUE;
     }
 
-    private String constructQueryParamString(String requestPath, Map<String, String> queryParamMap,
-                                             List<String> queryParamsToRemove) {
-        // If no query parameters needs to be removed, then the request path can be applied as it is.
-        if (queryParamsToRemove.size() == 0) {
+    private String constructQueryParamString(boolean removeAllQueryParams, String requestPath,
+                                             Map<String, String> currentQueryParamMap, List<String> queryParamsToRemove,
+                                             Map<String, String> queryParamsToAdd) {
+        // If no query parameters needs to be removed/added, then the request path can be applied as it is.
+        if (!removeAllQueryParams && queryParamsToRemove.size() == 0 && queryParamsToAdd.size() == 0) {
             return requestPath;
         }
+
+        Map<String, String> queryParamMap = new HashMap<>();
+        queryParamMap.putAll(currentQueryParamMap);
+        queryParamMap.putAll(queryParamsToAdd);
 
         String pathWithoutQueryParams = requestPath.split("\\?")[0];
         StringBuilder requestPathBuilder = new StringBuilder(pathWithoutQueryParams);
         int count = 0;
-        if (queryParamMap.size() > 0) {
+        if (!removeAllQueryParams && queryParamMap.size() > 0) {
             for (String queryParam : queryParamMap.keySet()) {
                 if (queryParamsToRemove.contains(queryParam)) {
                     continue;

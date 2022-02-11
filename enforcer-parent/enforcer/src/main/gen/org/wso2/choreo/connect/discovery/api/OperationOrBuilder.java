@@ -60,4 +60,34 @@ public interface OperationOrBuilder extends
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
+
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   * @return Whether the policies field is set.
+   */
+  boolean hasPolicies();
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   * @return The policies.
+   */
+  org.wso2.choreo.connect.discovery.api.OperationPolicies getPolicies();
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.OperationPoliciesOrBuilder getPoliciesOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+   * @return Whether the mockedApiConfig field is set.
+   */
+  boolean hasMockedApiConfig();
+  /**
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+   * @return The mockedApiConfig.
+   */
+  org.wso2.choreo.connect.discovery.api.MockedApiConfig getMockedApiConfig();
+  /**
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.MockedApiConfigOrBuilder getMockedApiConfigOrBuilder();
 }

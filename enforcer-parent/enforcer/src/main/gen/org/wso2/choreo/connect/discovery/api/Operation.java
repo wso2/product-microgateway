@@ -82,6 +82,32 @@ private static final long serialVersionUID = 0L;
             disableSecurity_ = input.readBool();
             break;
           }
+          case 42: {
+            org.wso2.choreo.connect.discovery.api.OperationPolicies.Builder subBuilder = null;
+            if (policies_ != null) {
+              subBuilder = policies_.toBuilder();
+            }
+            policies_ = input.readMessage(org.wso2.choreo.connect.discovery.api.OperationPolicies.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(policies_);
+              policies_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 50: {
+            org.wso2.choreo.connect.discovery.api.MockedApiConfig.Builder subBuilder = null;
+            if (mockedApiConfig_ != null) {
+              subBuilder = mockedApiConfig_.toBuilder();
+            }
+            mockedApiConfig_ = input.readMessage(org.wso2.choreo.connect.discovery.api.MockedApiConfig.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(mockedApiConfig_);
+              mockedApiConfig_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -244,6 +270,58 @@ private static final long serialVersionUID = 0L;
     return disableSecurity_;
   }
 
+  public static final int POLICIES_FIELD_NUMBER = 5;
+  private org.wso2.choreo.connect.discovery.api.OperationPolicies policies_;
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   * @return Whether the policies field is set.
+   */
+  @java.lang.Override
+  public boolean hasPolicies() {
+    return policies_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   * @return The policies.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.OperationPolicies getPolicies() {
+    return policies_ == null ? org.wso2.choreo.connect.discovery.api.OperationPolicies.getDefaultInstance() : policies_;
+  }
+  /**
+   * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.OperationPoliciesOrBuilder getPoliciesOrBuilder() {
+    return getPolicies();
+  }
+
+  public static final int MOCKEDAPICONFIG_FIELD_NUMBER = 6;
+  private org.wso2.choreo.connect.discovery.api.MockedApiConfig mockedApiConfig_;
+  /**
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+   * @return Whether the mockedApiConfig field is set.
+   */
+  @java.lang.Override
+  public boolean hasMockedApiConfig() {
+    return mockedApiConfig_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+   * @return The mockedApiConfig.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.MockedApiConfig getMockedApiConfig() {
+    return mockedApiConfig_ == null ? org.wso2.choreo.connect.discovery.api.MockedApiConfig.getDefaultInstance() : mockedApiConfig_;
+  }
+  /**
+   * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.MockedApiConfigOrBuilder getMockedApiConfigOrBuilder() {
+    return getMockedApiConfig();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -270,6 +348,12 @@ private static final long serialVersionUID = 0L;
     if (disableSecurity_ != false) {
       output.writeBool(4, disableSecurity_);
     }
+    if (policies_ != null) {
+      output.writeMessage(5, getPolicies());
+    }
+    if (mockedApiConfig_ != null) {
+      output.writeMessage(6, getMockedApiConfig());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -292,6 +376,14 @@ private static final long serialVersionUID = 0L;
     if (disableSecurity_ != false) {
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(4, disableSecurity_);
+    }
+    if (policies_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(5, getPolicies());
+    }
+    if (mockedApiConfig_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(6, getMockedApiConfig());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -316,6 +408,16 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTier())) return false;
     if (getDisableSecurity()
         != other.getDisableSecurity()) return false;
+    if (hasPolicies() != other.hasPolicies()) return false;
+    if (hasPolicies()) {
+      if (!getPolicies()
+          .equals(other.getPolicies())) return false;
+    }
+    if (hasMockedApiConfig() != other.hasMockedApiConfig()) return false;
+    if (hasMockedApiConfig()) {
+      if (!getMockedApiConfig()
+          .equals(other.getMockedApiConfig())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -338,6 +440,14 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getDisableSecurity());
+    if (hasPolicies()) {
+      hash = (37 * hash) + POLICIES_FIELD_NUMBER;
+      hash = (53 * hash) + getPolicies().hashCode();
+    }
+    if (hasMockedApiConfig()) {
+      hash = (37 * hash) + MOCKEDAPICONFIG_FIELD_NUMBER;
+      hash = (53 * hash) + getMockedApiConfig().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -488,6 +598,18 @@ private static final long serialVersionUID = 0L;
 
       disableSecurity_ = false;
 
+      if (policiesBuilder_ == null) {
+        policies_ = null;
+      } else {
+        policies_ = null;
+        policiesBuilder_ = null;
+      }
+      if (mockedApiConfigBuilder_ == null) {
+        mockedApiConfig_ = null;
+      } else {
+        mockedApiConfig_ = null;
+        mockedApiConfigBuilder_ = null;
+      }
       return this;
     }
 
@@ -527,6 +649,16 @@ private static final long serialVersionUID = 0L;
       }
       result.tier_ = tier_;
       result.disableSecurity_ = disableSecurity_;
+      if (policiesBuilder_ == null) {
+        result.policies_ = policies_;
+      } else {
+        result.policies_ = policiesBuilder_.build();
+      }
+      if (mockedApiConfigBuilder_ == null) {
+        result.mockedApiConfig_ = mockedApiConfig_;
+      } else {
+        result.mockedApiConfig_ = mockedApiConfigBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -611,6 +743,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getDisableSecurity() != false) {
         setDisableSecurity(other.getDisableSecurity());
+      }
+      if (other.hasPolicies()) {
+        mergePolicies(other.getPolicies());
+      }
+      if (other.hasMockedApiConfig()) {
+        mergeMockedApiConfig(other.getMockedApiConfig());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1063,6 +1201,244 @@ private static final long serialVersionUID = 0L;
       disableSecurity_ = false;
       onChanged();
       return this;
+    }
+
+    private org.wso2.choreo.connect.discovery.api.OperationPolicies policies_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.OperationPolicies, org.wso2.choreo.connect.discovery.api.OperationPolicies.Builder, org.wso2.choreo.connect.discovery.api.OperationPoliciesOrBuilder> policiesBuilder_;
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     * @return Whether the policies field is set.
+     */
+    public boolean hasPolicies() {
+      return policiesBuilder_ != null || policies_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     * @return The policies.
+     */
+    public org.wso2.choreo.connect.discovery.api.OperationPolicies getPolicies() {
+      if (policiesBuilder_ == null) {
+        return policies_ == null ? org.wso2.choreo.connect.discovery.api.OperationPolicies.getDefaultInstance() : policies_;
+      } else {
+        return policiesBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     */
+    public Builder setPolicies(org.wso2.choreo.connect.discovery.api.OperationPolicies value) {
+      if (policiesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        policies_ = value;
+        onChanged();
+      } else {
+        policiesBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     */
+    public Builder setPolicies(
+        org.wso2.choreo.connect.discovery.api.OperationPolicies.Builder builderForValue) {
+      if (policiesBuilder_ == null) {
+        policies_ = builderForValue.build();
+        onChanged();
+      } else {
+        policiesBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     */
+    public Builder mergePolicies(org.wso2.choreo.connect.discovery.api.OperationPolicies value) {
+      if (policiesBuilder_ == null) {
+        if (policies_ != null) {
+          policies_ =
+            org.wso2.choreo.connect.discovery.api.OperationPolicies.newBuilder(policies_).mergeFrom(value).buildPartial();
+        } else {
+          policies_ = value;
+        }
+        onChanged();
+      } else {
+        policiesBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     */
+    public Builder clearPolicies() {
+      if (policiesBuilder_ == null) {
+        policies_ = null;
+        onChanged();
+      } else {
+        policies_ = null;
+        policiesBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.OperationPolicies.Builder getPoliciesBuilder() {
+      
+      onChanged();
+      return getPoliciesFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.OperationPoliciesOrBuilder getPoliciesOrBuilder() {
+      if (policiesBuilder_ != null) {
+        return policiesBuilder_.getMessageOrBuilder();
+      } else {
+        return policies_ == null ?
+            org.wso2.choreo.connect.discovery.api.OperationPolicies.getDefaultInstance() : policies_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.OperationPolicies policies = 5;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.OperationPolicies, org.wso2.choreo.connect.discovery.api.OperationPolicies.Builder, org.wso2.choreo.connect.discovery.api.OperationPoliciesOrBuilder> 
+        getPoliciesFieldBuilder() {
+      if (policiesBuilder_ == null) {
+        policiesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.OperationPolicies, org.wso2.choreo.connect.discovery.api.OperationPolicies.Builder, org.wso2.choreo.connect.discovery.api.OperationPoliciesOrBuilder>(
+                getPolicies(),
+                getParentForChildren(),
+                isClean());
+        policies_ = null;
+      }
+      return policiesBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.api.MockedApiConfig mockedApiConfig_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.MockedApiConfig, org.wso2.choreo.connect.discovery.api.MockedApiConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedApiConfigOrBuilder> mockedApiConfigBuilder_;
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     * @return Whether the mockedApiConfig field is set.
+     */
+    public boolean hasMockedApiConfig() {
+      return mockedApiConfigBuilder_ != null || mockedApiConfig_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     * @return The mockedApiConfig.
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedApiConfig getMockedApiConfig() {
+      if (mockedApiConfigBuilder_ == null) {
+        return mockedApiConfig_ == null ? org.wso2.choreo.connect.discovery.api.MockedApiConfig.getDefaultInstance() : mockedApiConfig_;
+      } else {
+        return mockedApiConfigBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     */
+    public Builder setMockedApiConfig(org.wso2.choreo.connect.discovery.api.MockedApiConfig value) {
+      if (mockedApiConfigBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        mockedApiConfig_ = value;
+        onChanged();
+      } else {
+        mockedApiConfigBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     */
+    public Builder setMockedApiConfig(
+        org.wso2.choreo.connect.discovery.api.MockedApiConfig.Builder builderForValue) {
+      if (mockedApiConfigBuilder_ == null) {
+        mockedApiConfig_ = builderForValue.build();
+        onChanged();
+      } else {
+        mockedApiConfigBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     */
+    public Builder mergeMockedApiConfig(org.wso2.choreo.connect.discovery.api.MockedApiConfig value) {
+      if (mockedApiConfigBuilder_ == null) {
+        if (mockedApiConfig_ != null) {
+          mockedApiConfig_ =
+            org.wso2.choreo.connect.discovery.api.MockedApiConfig.newBuilder(mockedApiConfig_).mergeFrom(value).buildPartial();
+        } else {
+          mockedApiConfig_ = value;
+        }
+        onChanged();
+      } else {
+        mockedApiConfigBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     */
+    public Builder clearMockedApiConfig() {
+      if (mockedApiConfigBuilder_ == null) {
+        mockedApiConfig_ = null;
+        onChanged();
+      } else {
+        mockedApiConfig_ = null;
+        mockedApiConfigBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedApiConfig.Builder getMockedApiConfigBuilder() {
+      
+      onChanged();
+      return getMockedApiConfigFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.MockedApiConfigOrBuilder getMockedApiConfigOrBuilder() {
+      if (mockedApiConfigBuilder_ != null) {
+        return mockedApiConfigBuilder_.getMessageOrBuilder();
+      } else {
+        return mockedApiConfig_ == null ?
+            org.wso2.choreo.connect.discovery.api.MockedApiConfig.getDefaultInstance() : mockedApiConfig_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.MockedApiConfig mockedApiConfig = 6;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.MockedApiConfig, org.wso2.choreo.connect.discovery.api.MockedApiConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedApiConfigOrBuilder> 
+        getMockedApiConfigFieldBuilder() {
+      if (mockedApiConfigBuilder_ == null) {
+        mockedApiConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.MockedApiConfig, org.wso2.choreo.connect.discovery.api.MockedApiConfig.Builder, org.wso2.choreo.connect.discovery.api.MockedApiConfigOrBuilder>(
+                getMockedApiConfig(),
+                getParentForChildren(),
+                isClean());
+        mockedApiConfig_ = null;
+      }
+      return mockedApiConfigBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

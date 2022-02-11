@@ -261,4 +261,10 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getOrganizationIdBytes();
+
+  /**
+   * <code>bool isMockedApi = 19;</code>
+   * @return The isMockedApi.
+   */
+  boolean getIsMockedApi();
 }

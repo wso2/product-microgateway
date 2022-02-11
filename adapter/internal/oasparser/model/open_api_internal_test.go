@@ -106,7 +106,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 			[]*Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []*Operation{{"GET", nil, "", false}},
+					methods:     []*Operation{{"", "GET", nil, "", false, nil, OperationPolicies{}, MockedAPIConfig{}}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",
@@ -120,6 +120,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 		assert.Nil(t, err, "No error should be encountered when setting resources")
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
+			resultResources[0].GetMethod()[0].iD = item.result[0].methods[0].iD
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
 			assert.Equal(t, item.result[0].description, resultResources[0].description, item.message)
 			assert.Equal(t, item.result[0].summary, resultResources[0].summary, item.message)
@@ -177,7 +178,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := getHostandBasepathandPort(item.input)
+		resultResources, err := getHTTPEndpoint(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 		if resultResources != nil {
 			assert.Nil(t, err, "Error encountered when processing the endpoint")
@@ -218,7 +219,7 @@ func TestMalformedUrl(t *testing.T) {
 	}
 
 	for index := range suspectedRawUrls {
-		response, _ := getHostandBasepathandPort(suspectedRawUrls[index])
+		response, _ := getHTTPEndpoint(suspectedRawUrls[index])
 		assert.Nil(t, response)
 	}
 

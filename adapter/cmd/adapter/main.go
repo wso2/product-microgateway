@@ -23,8 +23,8 @@ import (
 
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
-	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/internal/adapter"
+	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 func main() {

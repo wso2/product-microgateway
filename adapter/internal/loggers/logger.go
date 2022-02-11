@@ -50,20 +50,20 @@ const (
 
 // logger package references
 var (
-	LoggerAPI                  *logrus.Logger
-	LoggerAuth                 *logrus.Logger
-	LoggerMgw                  *logrus.Logger
-	LoggerOasparser            *logrus.Logger
-	LoggerInterceptor          *logrus.Logger
-	LoggerXds                  *logrus.Logger
-	LoggerSync                 *logrus.Logger
-	LoggerInternalMsg          *logrus.Logger
-	LoggerSvcDiscovery         *logrus.Logger
-	LoggerSubscription         *logrus.Logger
-	LoggerRouterXdsCallbacks   *logrus.Logger
-	LoggerEnforcerXdsCallbacks *logrus.Logger
-	LoggerGA                   *logrus.Logger
-	LoggerNotifier             *logrus.Logger
+	LoggerAPI                  logging.Log
+	LoggerAuth                 logging.Log
+	LoggerMgw                  logging.Log
+	LoggerOasparser            logging.Log
+	LoggerInterceptor          logging.Log
+	LoggerXds                  logging.Log
+	LoggerSync                 logging.Log
+	LoggerInternalMsg          logging.Log
+	LoggerSvcDiscovery         logging.Log
+	LoggerSubscription         logging.Log
+	LoggerRouterXdsCallbacks   logging.Log
+	LoggerEnforcerXdsCallbacks logging.Log
+	LoggerGA                   logging.Log
+	LoggerNotifier             logging.Log
 )
 
 func init() {

@@ -22,6 +22,11 @@ package model
 import (
 	"regexp"
 	"sort"
+
+	"strings"
+
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // Resource represents the object structure holding the information related to the
@@ -86,13 +91,49 @@ func (resource *Resource) GetMethodList() []string {
 	return methodList
 }
 
+// GetRewriteResource returns the rewrite upstream path for a given resource.
+func (resource *Resource) GetRewriteResource() (string, bool) {
+	rewritePath := ""
+	rewriteMethod := false
+	pathOrder := 0
+	for _, method := range resource.methods {
+		if len(method.policies.In) > 0 {
+			for _, policy := range method.policies.In {
+				if strings.EqualFold(constants.RewritePathTemplate, policy.TemplateName) {
+					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
+							if v, orderExists := paramMap[constants.Order]; orderExists {
+								if pathOrder > v.(int) {
+									continue
+								}
+								pathOrder = v.(int)
+							}
+							rewritePath, found = paramValue.(string)
+							if found {
+								rewritePath = "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePath, "/"), "/")
+								if matched, _ := regexp.MatchString("^[a-zA-Z0-9~/_.-]*$", rewritePath); !matched {
+									logger.LoggerOasparser.Error("Rewrite path includes invalid characters")
+									rewritePath = ""
+								}
+							}
+						}
+					}
+				} else if strings.EqualFold(constants.RewriteMethodTemplate, policy.TemplateName) {
+					rewriteMethod = true
+				}
+			}
+		}
+	}
+	return rewritePath, rewriteMethod
+}
+
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values
 // which could be used for unit tests.
 func CreateMinimalDummyResourceForTests(path string, methods []*Operation, id string, productionUrls,
 	sandboxUrls []Endpoint) Resource {
 
-	prodEndpints := generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
-	sandboxEndpints := generateEndpointCluster(sandClustersConfigNamePrefix, sandboxUrls, LoadBalance)
+	prodEndpints := generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
+	sandboxEndpints := generateEndpointCluster(constants.SandClustersConfigNamePrefix, sandboxUrls, constants.LoadBalance)
 
 	return Resource{
 		path:                path,
