@@ -119,7 +119,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		logger.LoggerMgw.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Failed to listen: %v", err.Error()),
+			Message:   fmt.Sprintf("Failed to listen on port: %v, error: %v", port, err.Error()),
 			Severity:  logging.BLOCKER,
 			ErrorCode: 1100,
 		})

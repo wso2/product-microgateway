@@ -50,7 +50,7 @@ func startConsulServiceDiscovery(organizationID string) {
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
 				if errConSyn != nil {
 					logger.LoggerXds.ErrorC(logging.ErrorDetails{
-						Message:   fmt.Sprintf("consul syntax parse error %v", errConSyn.Error()),
+						Message:   fmt.Sprintf("Consul syntax parse error %v", errConSyn.Error()),
 						Severity:  logging.CRITICAL,
 						ErrorCode: 1402,
 					})

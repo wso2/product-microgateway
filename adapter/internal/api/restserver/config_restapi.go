@@ -89,11 +89,11 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		valid, err := auth.ValidateToken(token, scopes, mgwConfig)
 		if err != nil {
 			logger.LoggerAPI.ErrorC(logging.ErrorDetails{
-				Message:   fmt.Sprintf("Error occurect while reading the token %v", err.Error()),
+				Message:   fmt.Sprintf("Error occurred while reading the token %v", err.Error()),
 				Severity:  logging.CRITICAL,
 				ErrorCode: 1203,
 			})
-			return nil, errors.New(500, "error occured while reading the token")
+			return nil, errors.New(500, "error occurred while reading the token")
 		}
 		if !valid {
 			logger.LoggerAPI.Info("The provided token is not valid")

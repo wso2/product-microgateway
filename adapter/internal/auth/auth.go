@@ -120,7 +120,7 @@ func GenerateToken(username string) (accessToken string, err error) {
 	payload, err = jwt.Sign(token, jwa.RS256, privateKey)
 	if err != nil {
 		loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("failed to generate signed payload: %s", err.Error()),
+			Message:   fmt.Sprintf("Failed to generate signed payload: %s", err.Error()),
 			Severity:  logging.CRITICAL,
 			ErrorCode: 1300,
 		})
