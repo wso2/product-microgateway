@@ -94,6 +94,7 @@ func ProcessMountedAPIProjects() (err error) {
 			apiProject := model.ProjectAPI{
 				EndpointCerts: make(map[string]string),
 				UpstreamCerts: make(map[string][]byte),
+				Policies:      make(map[string]model.PolicyContainer),
 			}
 			err = filepath.Walk(filepath.FromSlash(apisDirName+"/"+apiProjectFile.Name()), func(path string, info os.FileInfo, err error) error {
 

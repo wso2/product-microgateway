@@ -143,7 +143,7 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		if strings.HasSuffix(fileName, policySpecFileExtension) {
 			// process policy specificationn
 			spec := model.PolicySpecification{}
-			if err := yaml.Unmarshal(fileContent, &spec); err != nil { // check that, JSON files are also supported
+			if err := yaml.Unmarshal(fileContent, &spec); err != nil { // only yaml files are supported
 				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
 					Message:   fmt.Sprintf("Error parsing content of policy specification %v: %v", fileName, err.Error()),
 					Severity:  logging.MINOR,
@@ -151,7 +151,6 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 				})
 				return err
 			}
-
 			policy.Specification = spec
 			apiProject.Policies[policyName] = policy
 		}

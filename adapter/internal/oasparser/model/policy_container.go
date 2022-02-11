@@ -46,7 +46,7 @@ const (
 // PolicyFlow holds list of Policies in a operation (in one flow: In, Out or Fault)
 type PolicyFlow string
 
-var (
+const (
 	policyInFlow    PolicyFlow = "request"
 	policyOutFlow   PolicyFlow = "response"
 	policyFaultFlow PolicyFlow = "fault"
@@ -143,9 +143,9 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 
 // PolicySpecification holds policy specification from ./Policy/<policy>.yaml files
 type PolicySpecification struct {
-	Type    string   `yaml:"type" json:"type"`
-	Version string   `yaml:"version" json:"version"`
-	Data    struct { // TODO: check all fields are required or omit empty in APIM side
+	Type    string `yaml:"type" json:"type"`
+	Version string `yaml:"version" json:"version"`
+	Data    struct {
 		Name              string   `yaml:"name"`
 		ApplicableFlows   []string `yaml:"applicableFlows"`
 		SupportedGateways []string `yaml:"supportedGateways"`
@@ -155,7 +155,7 @@ type PolicySpecification struct {
 			Name            string `yaml:"name"`
 			ValidationRegex string `yaml:"validationRegex,omitempty"`
 			Type            string `yaml:"type"`
-			Required        bool   `yaml:"required,omitempty"`
+			Required        bool   `yaml:"required"`
 		} `yaml:"policyAttributes"`
 	}
 }
