@@ -339,7 +339,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			err := synchronizer.PushAPIProjects(data.Resp, envs)
 			if err != nil {
 				logger.LoggerMgw.ErrorC(logging.ErrorDetails{
-					Message:   fmt.Sprintf("Error occurred while pushing API data: %v ", err.Error()),
+					Message:   fmt.Sprintf("Error occurred while pushing API data to router and enforcer: %v ", err.Error()),
 					Severity:  logging.MAJOR,
 					ErrorCode: 1105,
 				})
