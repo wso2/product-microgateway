@@ -97,17 +97,26 @@ type OperationYaml struct {
 
 // OperationPolicies holds policies of the APIM operations
 type OperationPolicies struct {
-	In    []Policy `json:"in,omitempty"`
-	Out   []Policy `json:"out,omitempty"`
-	Fault []Policy `json:"fault,omitempty"`
+	In    PolicyList `json:"in,omitempty"`
+	Out   PolicyList `json:"out,omitempty"`
+	Fault PolicyList `json:"fault,omitempty"`
 }
+
+// policyStats used to optimize and reduce loops by storing stats by calculating only once
+type policyStats struct {
+	firstIndex int
+	count      int
+}
+
+// PolicyList holds list of Polices in a flow of operation
+type PolicyList []Policy
 
 // Policy holds APIM policies
 type Policy struct {
-	PolicyName   string      `json:"policyName,omitempty"`
-	TemplateName string      `json:"templateName,omitempty"`
-	Order        int         `json:"order,omitempty"`
-	Parameters   interface{} `json:"parameters,omitempty"`
+	PolicyName string      `json:"policyName,omitempty"`
+	Action     string      `json:"-,omitempty"`
+	Order      int         `json:"order,omitempty"`
+	Parameters interface{} `json:"parameters,omitempty"`
 }
 
 // NewAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json
@@ -245,4 +254,17 @@ func (apiYaml APIYaml) ValidateAPIType() (err error) {
 		return err
 	}
 	return nil
+}
+
+func (pl PolicyList) getStats() map[string]policyStats {
+	stats := map[string]policyStats{}
+	for i, policy := range pl {
+		stat, ok := stats[policy.PolicyName]
+		if ok {
+			stats[policy.PolicyName] = policyStats{firstIndex: stat.firstIndex, count: stat.count + 1}
+		} else {
+			stats[policy.PolicyName] = policyStats{firstIndex: i, count: 1}
+		}
+	}
+	return stats
 }

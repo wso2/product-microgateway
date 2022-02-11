@@ -72,8 +72,13 @@ fi
 go mod tidy
 
 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o target/adapter-linux-amd64 github.com/wso2/product-microgateway/adapter/cmd/adapter
+if [ $? -ne 0 ]; then 
+  echo "FAILED: Build failure for GOARCH=amd64"
+  exit 1
+fi 
+
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -v -o target/adapter-linux-arm64 github.com/wso2/product-microgateway/adapter/cmd/adapter
 if [ $? -ne 0 ]; then 
-  echo "FAILED: Build failure"
+  echo "FAILED: Build failure for GOARCH=arm64"
   exit 1
 fi  

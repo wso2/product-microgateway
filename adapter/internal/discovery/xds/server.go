@@ -301,7 +301,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 			}
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
-		mgwSwagger.SetOperationPolicies(apiYaml.Operations)
+		mgwSwagger.SetOperationPolicies(apiProject)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	} else if apiYaml.APIType != constants.WS {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.

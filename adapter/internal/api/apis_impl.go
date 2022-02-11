@@ -56,6 +56,7 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	apiProject.UpstreamCerts = make(map[string][]byte)
 	apiProject.EndpointCerts = make(map[string]string)
+	apiProject.Policies = make(map[string]model.PolicyContainer)
 	for _, file := range zipReader.File {
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
 		unzippedFileBytes, err := readZipFile(file)
@@ -93,6 +94,7 @@ func ProcessMountedAPIProjects() (err error) {
 			apiProject := model.ProjectAPI{
 				EndpointCerts: make(map[string]string),
 				UpstreamCerts: make(map[string][]byte),
+				Policies:      make(map[string]model.PolicyContainer),
 			}
 			err = filepath.Walk(filepath.FromSlash(apisDirName+"/"+apiProjectFile.Name()), func(path string, info os.FileInfo, err error) error {
 

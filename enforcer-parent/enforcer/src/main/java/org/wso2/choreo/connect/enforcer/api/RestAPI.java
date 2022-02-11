@@ -290,7 +290,7 @@ public class RestAPI implements API {
     private ArrayList<Policy> genPolicyList(List<org.wso2.choreo.connect.discovery.api.Policy> operationPoliciesList) {
         ArrayList<Policy> policyList = new ArrayList<>();
         for (org.wso2.choreo.connect.discovery.api.Policy policy : operationPoliciesList) {
-            policyList.add(new Policy(policy.getPolicyName(), policy.getTemplateName(), policy.getOrder(),
+            policyList.add(new Policy(policy.getPolicyName(), policy.getAction(), policy.getOrder(),
                     policy.getParametersMap()));
         }
         return policyList;

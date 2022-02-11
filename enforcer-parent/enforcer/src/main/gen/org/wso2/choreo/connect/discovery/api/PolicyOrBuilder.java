@@ -20,16 +20,16 @@ public interface PolicyOrBuilder extends
       getPolicyNameBytes();
 
   /**
-   * <code>string templateName = 2;</code>
-   * @return The templateName.
+   * <code>string action = 2;</code>
+   * @return The action.
    */
-  java.lang.String getTemplateName();
+  java.lang.String getAction();
   /**
-   * <code>string templateName = 2;</code>
-   * @return The bytes for templateName.
+   * <code>string action = 2;</code>
+   * @return The bytes for action.
    */
   com.google.protobuf.ByteString
-      getTemplateNameBytes();
+      getActionBytes();
 
   /**
    * <code>uint32 order = 3;</code>

@@ -69,3 +69,34 @@ func TestFindSwaggerVersion(t *testing.T) {
 		assert.Equal(t, item.result, resultswaggerVerison, item.message)
 	}
 }
+
+func TestFileNameWithoutExtension(t *testing.T) {
+	type testItem struct {
+		filePath    string
+		expFileName string
+		message     string
+	}
+
+	tests := []testItem{
+		{
+			filePath:    "/foo/hello.world",
+			expFileName: "hello",
+			message:     "given path with file extension with dir in path",
+		},
+		{
+			filePath:    "hello.world",
+			expFileName: "hello",
+			message:     "given path with extensions with no dir in path",
+		},
+		{
+			filePath:    "/foo/hello",
+			expFileName: "hello",
+			message:     "given path with no extensions",
+		},
+	}
+
+	for _, test := range tests {
+		actualFileName := utills.FileNameWithoutExtension(test.filePath)
+		assert.Equal(t, test.expFileName, actualFileName, test.message)
+	}
+}
