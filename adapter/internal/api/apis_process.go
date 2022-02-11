@@ -68,8 +68,11 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		loggers.LoggerAPI.Debug("Setting deployments of API")
 		deployments, err := parseDeployments(fileContent)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occurred while parsing the deployment environments: %v %v",
-				fileName, err.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while parsing the deployment environments: %v %v", fileName, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1212,
+			})
 		}
 		apiProject.Deployments = deployments
 	}
@@ -79,7 +82,11 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		loggers.LoggerAPI.Debugf("openAPI file : %v", fileName)
 		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
 		if conversionErr != nil {
-			loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error converting api file to json: %v", conversionErr.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1213,
+			})
 			return conversionErr
 		}
 		apiProject.OpenAPIJsn = swaggerJsn
@@ -88,7 +95,11 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
 		if !tlsutils.IsPublicCertificate(fileContent) {
-			loggers.LoggerAPI.Errorf("Provided interceptor certificate: %v is not in the PEM file format. ", fileName)
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Provided interceptor certificate: %v is not in the PEM file format. ", fileName),
+				Severity:  logging.MINOR,
+				ErrorCode: 1214,
+			})
 			return errors.New("interceptor certificate Validation Error")
 		}
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, fileContent...)
@@ -99,13 +110,21 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		if strings.Contains(fileName, endpointCertFile) {
 			epCertJSON, conversionErr := utills.ToJSON(fileContent)
 			if conversionErr != nil {
-				loggers.LoggerAPI.Errorf("Error converting %v file to json: %v", fileName, conversionErr.Error())
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error converting %v file to json: %v", fileName, conversionErr.Error()),
+					Severity:  logging.MINOR,
+					ErrorCode: 1215,
+				})
 				return conversionErr
 			}
 			endpointCertificates := &model.EndpointCertificatesDetails{}
 			err := json.Unmarshal(epCertJSON, endpointCertificates)
 			if err != nil {
-				loggers.LoggerAPI.Error("Error parsing content of endpoint certificates: ", err)
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error parsing content of endpoint certificates: %v", err.Error()),
+					Severity:  logging.MINOR,
+					ErrorCode: 1216,
+				})
 			} else if endpointCertificates != nil && len(endpointCertificates.Data) > 0 {
 				for _, val := range endpointCertificates.Data {
 					apiProject.EndpointCerts[val.Endpoint] = val.Certificate
@@ -113,7 +132,11 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			}
 		} else if strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension) {
 			if !tlsutils.IsPublicCertificate(fileContent) {
-				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", fileName)
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Provided certificate: %v is not in the PEM file format. ", fileName),
+					Severity:  logging.MINOR,
+					ErrorCode: 1217,
+				})
 				// TODO: (VirajSalaka) Create standard error handling mechanism
 				return errors.New("certificate Validation Error")
 			}
@@ -129,7 +152,11 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		!strings.Contains(fileName, openAPIDir) {
 		apiYaml, err := model.NewAPIYaml(fileContent)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error while reading %v. %v", fileName, err)
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while reading %v. %v", fileName, err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1218,
+			})
 			return errors.New("Error while reading api.yaml or api.json")
 		}
 		apiProject.APIYaml = apiYaml
@@ -167,7 +194,11 @@ func parseDeployments(data []byte) ([]model.Deployment, error) {
 	// deployEnvsFromAPI represents deployments read from API Project
 	deployEnvsFromAPI := &model.DeploymentEnvironments{}
 	if err := yaml.Unmarshal(data, deployEnvsFromAPI); err != nil {
-		loggers.LoggerAPI.Errorf("Error parsing content of deployment environments: %v", err.Error())
+		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error parsing content of deployment environments: %v", err.Error()),
+			Severity:  logging.MAJOR,
+			ErrorCode: 1219,
+		})
 		return nil, err
 	}
 
@@ -175,8 +206,11 @@ func parseDeployments(data []byte) ([]model.Deployment, error) {
 	for _, deployFromAPI := range deployEnvsFromAPI.Data {
 		defaultVhost, exists, err := config.GetDefaultVhost(deployFromAPI.DeploymentEnvironment)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error reading default vhost of environment %v: %v",
-				deployFromAPI.DeploymentEnvironment, err.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error reading default vhost of environment %v: %v", deployFromAPI.DeploymentEnvironment, err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 1220,
+			})
 			return nil, err
 		}
 		// if the environment is not configured, ignore it

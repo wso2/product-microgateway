@@ -19,6 +19,7 @@ package restserver
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -33,6 +34,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -86,8 +88,12 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.BearerTokenAuth = func(token string, scopes []string) (*models.Principal, error) {
 		valid, err := auth.ValidateToken(token, scopes, mgwConfig)
 		if err != nil {
-			logger.LoggerAPI.Error(err.Error())
-			return nil, errors.New(500, "error occured while reading the token")
+			logger.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while reading the token %v", err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1203,
+			})
+			return nil, errors.New(500, "error occurred while reading the token")
 		}
 		if !valid {
 			logger.LoggerAPI.Info("The provided token is not valid")
@@ -203,7 +209,11 @@ func StartRestServer(config *config.Config) {
 	mgwConfig = config
 	swaggerSpec, err := loads.Embedded(SwaggerJSON, FlatSwaggerJSON)
 	if err != nil {
-		logger.LoggerAPI.Fatal(err)
+		logger.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while loading openAPI specification for Adapter REST API %v", err.Error()),
+			Severity:  logging.BLOCKER,
+			ErrorCode: 1201,
+		})
 	}
 
 	api := operations.NewRestapiAPI(swaggerSpec)
@@ -214,7 +224,11 @@ func StartRestServer(config *config.Config) {
 	server.TLSHost = mgwConfig.Adapter.Server.Host
 	port, err := strconv.Atoi(mgwConfig.Adapter.Server.Port)
 	if err != nil {
-		logger.LoggerAPI.Fatalf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Adapter.Server.Port, err)
+		logger.LoggerAPI.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Adapter.Server.Port, err.Error()),
+			Severity:  logging.BLOCKER,
+			ErrorCode: 1200,
+		})
 		return
 	}
 	server.TLSPort = port

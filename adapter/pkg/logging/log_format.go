@@ -20,6 +20,7 @@ package logging
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"runtime"
 	"strings"
 
@@ -108,6 +109,20 @@ func (h *errorHook) Fire(e *logrus.Entry) error {
 	}
 	if _, ok := e.Data[ERRORCODE]; !ok {
 		e.Data[ERRORCODE] = 0
+	}
+	pcLogPkg, _, _, _ := runtime.Caller(7)
+	detailsLogPkgFunc := runtime.FuncForPC(pcLogPkg)
+	if strings.Contains(detailsLogPkgFunc.Name(), runtime.FuncForPC(reflect.ValueOf((*Log).ErrorC).Pointer()).Name()) {
+		pc, filename, line, _ := runtime.Caller(8)
+		details := runtime.FuncForPC(pc)
+		e.Caller = &runtime.Frame{
+			PC:       pc,
+			Func:     details,
+			Function: details.Name(),
+			File:     filename,
+			Line:     line,
+			Entry:    0,
+		}
 	}
 	return nil
 }

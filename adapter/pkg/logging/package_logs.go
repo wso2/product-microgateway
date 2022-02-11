@@ -41,6 +41,9 @@ type Log struct {
 // ErrorC can be used for formal error logs
 func (l *Log) ErrorC(e ErrorDetails) {
 	l.WithFields(logrus.Fields{SEVERITY: e.Severity, ERRORCODE: e.ErrorCode}).Errorf(e.Message)
+	if e.Severity == BLOCKER {
+		l.Exit(1)
+	}
 }
 
 func logLevelMapper(pkgLevel string) logrus.Level {
