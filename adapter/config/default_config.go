@@ -60,6 +60,9 @@ var defaultConfig = &Config{
 		ArtifactsDirectory: "/home/wso2/artifacts",
 		SourceControl: sourceControl{
 			Enabled: false,
+			PollInterval: 30,
+			RetryInterval: 5,
+			ArtifactsDirectory: "/home/wso2/git-artifacts",
 		},
 	},
 	Envoy: envoy{
