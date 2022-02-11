@@ -64,8 +64,8 @@ public class CustomFilter implements Filter {
             requestContext.addOrModifyHeaders("fooKey", configProperties.get("fooKey"));
         }
         // custom filter response body supporting condition
-        if (requestContext.getRequestBody() != null && !requestContext.getRequestBody().isBlank()) {
-            String requestBody = requestContext.getRequestBody();
+        if (requestContext.getRequestPayload() != null && !requestContext.getRequestPayload().isBlank()) {
+            String requestBody = requestContext.getRequestPayload();
             if (requestBody.contains("dataField")) {
                 String headerValueForRequestBody = "validated";
                 requestContext.addOrModifyHeaders("x-wso2-request-body-validated-header", headerValueForRequestBody);

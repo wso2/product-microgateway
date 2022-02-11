@@ -76,10 +76,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
-	configs, _ := conf.ReadConfigs()
-	if configs.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
-		swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
-	}
+	swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
 
 	swagger.apiType = constants.HTTP
 	var productionUrls []Endpoint
@@ -190,6 +187,10 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 // getRequestBodyBufferConfig method returns a boolean value indicating whether a given API is configured to
 // pass request body to the enforcer or not.
 func getRequestBodyBufferConfig(vendorExtensions map[string]interface{}) bool {
+	configs, _ := conf.ReadConfigs()
+	if !configs.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
+		return false
+	}
 	if val, found := vendorExtensions[constants.XWso2PassRequestPayloadToEnforcer]; found {
 		if passerValue, ok := val.(bool); ok {
 			return passerValue

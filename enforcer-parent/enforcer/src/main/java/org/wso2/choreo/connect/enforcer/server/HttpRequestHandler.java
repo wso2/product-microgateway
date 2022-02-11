@@ -59,7 +59,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
-        String requestBody = null;
+        String requestPayload = null;
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
@@ -78,11 +78,15 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         }
         if (!request.getAttributes().getRequest().getHttp().getRawBody().isEmpty()) {
             ByteString byteString = request.getAttributes().getRequest().getHttp().getRawBody();
-            requestBody = byteString.toStringUtf8();
+            if (byteString.isValidUtf8()) {
+                requestPayload = byteString.toStringUtf8();
+            }
         }
         if (!request.getAttributes().getRequest().getHttp().getBody().isEmpty()) {
             ByteString byteString = request.getAttributes().getRequest().getHttp().getBodyBytes();
-            requestBody = byteString.toStringUtf8();
+            if (byteString.isValidUtf8()) {
+                requestPayload = byteString.toStringUtf8();
+            }
         }
         address = FilterUtils.getClientIp(headers, address);
         ResourceConfig resourceConfig = null;
@@ -94,6 +98,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).requestBody(requestBody).build();
+                .pathTemplate(pathTemplate).requestPayload(requestPayload).build();
     }
 }
