@@ -290,7 +290,7 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 			method := operation.method
 			for _, yamlOperation := range apiProject.APIYaml.Data.Operations {
 				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
-					operation.policies = apiProject.Policies.GetFormattedOperationalPolicies(yamlOperation.OperationPolicies)
+					operation.policies = apiProject.Policies.GetFormattedOperationalPolicies(yamlOperation.OperationPolicies, swagger)
 					break
 				}
 			}

@@ -157,7 +157,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 			},
 		},
 	}
-	actualFormattedP := proj.Policies.GetFormattedOperationalPolicies(apiYaml.Data.Operations[0].OperationPolicies)
+	actualFormattedP := proj.Policies.GetFormattedOperationalPolicies(apiYaml.Data.Operations[0].OperationPolicies, &MgwSwagger{})
 	assert.Equal(t, expFormattedP, actualFormattedP, "Converting operational policies to Choreo Connect format failed")
 }
 
