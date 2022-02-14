@@ -79,7 +79,8 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
 
             @Override
             public void onError(Throwable throwable) {
-                logger.error("Error while receiving access log entries from router. " + throwable.getMessage(), errorLog(LoggingConstants.Severity.CRITICAL, 5101));
+                logger.error("Error while receiving access log entries from router. " + throwable.getMessage(),
+                        errorLog(LoggingConstants.Severity.CRITICAL, 5101));
                 responseObserver.onCompleted();
             }
 
