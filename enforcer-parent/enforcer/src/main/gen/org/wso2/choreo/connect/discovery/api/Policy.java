@@ -21,7 +21,7 @@ private static final long serialVersionUID = 0L;
   }
   private Policy() {
     policyName_ = "";
-    templateName_ = "";
+    action_ = "";
   }
 
   @java.lang.Override
@@ -64,7 +64,7 @@ private static final long serialVersionUID = 0L;
           case 18: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            templateName_ = s;
+            action_ = s;
             break;
           }
           case 24: {
@@ -167,38 +167,38 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int TEMPLATENAME_FIELD_NUMBER = 2;
-  private volatile java.lang.Object templateName_;
+  public static final int ACTION_FIELD_NUMBER = 2;
+  private volatile java.lang.Object action_;
   /**
-   * <code>string templateName = 2;</code>
-   * @return The templateName.
+   * <code>string action = 2;</code>
+   * @return The action.
    */
   @java.lang.Override
-  public java.lang.String getTemplateName() {
-    java.lang.Object ref = templateName_;
+  public java.lang.String getAction() {
+    java.lang.Object ref = action_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      templateName_ = s;
+      action_ = s;
       return s;
     }
   }
   /**
-   * <code>string templateName = 2;</code>
-   * @return The bytes for templateName.
+   * <code>string action = 2;</code>
+   * @return The bytes for action.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getTemplateNameBytes() {
-    java.lang.Object ref = templateName_;
+      getActionBytes() {
+    java.lang.Object ref = action_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      templateName_ = b;
+      action_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -314,8 +314,8 @@ private static final long serialVersionUID = 0L;
     if (!getPolicyNameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, policyName_);
     }
-    if (!getTemplateNameBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, templateName_);
+    if (!getActionBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, action_);
     }
     if (order_ != 0) {
       output.writeUInt32(3, order_);
@@ -338,8 +338,8 @@ private static final long serialVersionUID = 0L;
     if (!getPolicyNameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, policyName_);
     }
-    if (!getTemplateNameBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, templateName_);
+    if (!getActionBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, action_);
     }
     if (order_ != 0) {
       size += com.google.protobuf.CodedOutputStream
@@ -372,8 +372,8 @@ private static final long serialVersionUID = 0L;
 
     if (!getPolicyName()
         .equals(other.getPolicyName())) return false;
-    if (!getTemplateName()
-        .equals(other.getTemplateName())) return false;
+    if (!getAction()
+        .equals(other.getAction())) return false;
     if (getOrder()
         != other.getOrder()) return false;
     if (!internalGetParameters().equals(
@@ -391,8 +391,8 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + POLICYNAME_FIELD_NUMBER;
     hash = (53 * hash) + getPolicyName().hashCode();
-    hash = (37 * hash) + TEMPLATENAME_FIELD_NUMBER;
-    hash = (53 * hash) + getTemplateName().hashCode();
+    hash = (37 * hash) + ACTION_FIELD_NUMBER;
+    hash = (53 * hash) + getAction().hashCode();
     hash = (37 * hash) + ORDER_FIELD_NUMBER;
     hash = (53 * hash) + getOrder();
     if (!internalGetParameters().getMap().isEmpty()) {
@@ -560,7 +560,7 @@ private static final long serialVersionUID = 0L;
       super.clear();
       policyName_ = "";
 
-      templateName_ = "";
+      action_ = "";
 
       order_ = 0;
 
@@ -593,7 +593,7 @@ private static final long serialVersionUID = 0L;
       org.wso2.choreo.connect.discovery.api.Policy result = new org.wso2.choreo.connect.discovery.api.Policy(this);
       int from_bitField0_ = bitField0_;
       result.policyName_ = policyName_;
-      result.templateName_ = templateName_;
+      result.action_ = action_;
       result.order_ = order_;
       result.parameters_ = internalGetParameters();
       result.parameters_.makeImmutable();
@@ -649,8 +649,8 @@ private static final long serialVersionUID = 0L;
         policyName_ = other.policyName_;
         onChanged();
       }
-      if (!other.getTemplateName().isEmpty()) {
-        templateName_ = other.templateName_;
+      if (!other.getAction().isEmpty()) {
+        action_ = other.action_;
         onChanged();
       }
       if (other.getOrder() != 0) {
@@ -764,78 +764,78 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object templateName_ = "";
+    private java.lang.Object action_ = "";
     /**
-     * <code>string templateName = 2;</code>
-     * @return The templateName.
+     * <code>string action = 2;</code>
+     * @return The action.
      */
-    public java.lang.String getTemplateName() {
-      java.lang.Object ref = templateName_;
+    public java.lang.String getAction() {
+      java.lang.Object ref = action_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        templateName_ = s;
+        action_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string templateName = 2;</code>
-     * @return The bytes for templateName.
+     * <code>string action = 2;</code>
+     * @return The bytes for action.
      */
     public com.google.protobuf.ByteString
-        getTemplateNameBytes() {
-      java.lang.Object ref = templateName_;
+        getActionBytes() {
+      java.lang.Object ref = action_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        templateName_ = b;
+        action_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string templateName = 2;</code>
-     * @param value The templateName to set.
+     * <code>string action = 2;</code>
+     * @param value The action to set.
      * @return This builder for chaining.
      */
-    public Builder setTemplateName(
+    public Builder setAction(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      templateName_ = value;
+      action_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string templateName = 2;</code>
+     * <code>string action = 2;</code>
      * @return This builder for chaining.
      */
-    public Builder clearTemplateName() {
+    public Builder clearAction() {
       
-      templateName_ = getDefaultInstance().getTemplateName();
+      action_ = getDefaultInstance().getAction();
       onChanged();
       return this;
     }
     /**
-     * <code>string templateName = 2;</code>
-     * @param value The bytes for templateName to set.
+     * <code>string action = 2;</code>
+     * @param value The bytes for action to set.
      * @return This builder for chaining.
      */
-    public Builder setTemplateNameBytes(
+    public Builder setActionBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      templateName_ = value;
+      action_ = value;
       onChanged();
       return this;
     }

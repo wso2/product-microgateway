@@ -44,28 +44,29 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id                  string
-	UUID                string
-	apiType             string
-	description         string
-	title               string
-	version             string
-	vendorExtensions    map[string]interface{}
-	productionEndpoints *EndpointCluster
-	sandboxEndpoints    *EndpointCluster
-	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []*Resource
-	xWso2Basepath       string
-	xWso2Cors           *CorsConfig
-	securityScheme      []SecurityScheme
-	security            []map[string][]string
-	xWso2ThrottlingTier string
-	xWso2AuthHeader     string
-	disableSecurity     bool
-	OrganizationID      string
-	IsPrototyped        bool
-	IsMockedAPI         bool
-	LifecycleStatus     string
+	id                   string
+	UUID                 string
+	apiType              string
+	description          string
+	title                string
+	version              string
+	vendorExtensions     map[string]interface{}
+	productionEndpoints  *EndpointCluster
+	sandboxEndpoints     *EndpointCluster
+	xWso2Endpoints       map[string]*EndpointCluster
+	resources            []*Resource
+	xWso2Basepath        string
+	xWso2Cors            *CorsConfig
+	securityScheme       []SecurityScheme
+	security             []map[string][]string
+	xWso2ThrottlingTier  string
+	xWso2AuthHeader      string
+	disableSecurity      bool
+	OrganizationID       string
+	IsPrototyped         bool
+	IsMockedAPI          bool
+	LifecycleStatus      string
+	xWso2RequestBodyPass bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -227,6 +228,12 @@ func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
 }
 
+// GetXWso2RequestBodyPass returns boolean value to indicate
+// whether it is allowed to pass request body to the enforcer or not.
+func (swagger *MgwSwagger) GetXWso2RequestBodyPass() bool {
+	return swagger.xWso2RequestBodyPass
+}
+
 // SetID set the Id of the API
 func (swagger *MgwSwagger) SetID(id string) {
 	swagger.id = id
@@ -283,14 +290,14 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 }
 
 // SetOperationPolicies this will merge operation level policies provided in api yaml
-func (swagger *MgwSwagger) SetOperationPolicies(yamlOperations []OperationYaml) {
+func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 	for _, resource := range swagger.resources {
 		path := strings.TrimSuffix(resource.path, "/")
 		for _, operation := range resource.methods {
 			method := operation.method
-			for _, yamlOperation := range yamlOperations {
+			for _, yamlOperation := range apiProject.APIYaml.Data.Operations {
 				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
-					operation.policies = yamlOperation.OperationPolicies
+					operation.policies = apiProject.Policies.GetFormattedOperationalPolicies(yamlOperation.OperationPolicies, swagger)
 					break
 				}
 			}

@@ -3,6 +3,7 @@ package notifier
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/auth"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -74,11 +76,19 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 
 		success := true
 		if err != nil {
-			logger.LoggerNotifier.Errorf("Error response from %v for attempt %v : %v", revisionEP, retries, err.Error())
+			logger.LoggerNotifier.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error response from %v for attempt %v : %v", revisionEP, retries, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 2100,
+			})
 			success = false
 		}
 		if resp != nil && resp.StatusCode != http.StatusOK {
-			logger.LoggerNotifier.Errorf("Error response status code %v from %v for attempt %v", resp.StatusCode, revisionEP, retries)
+			logger.LoggerNotifier.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error response status code %v from %v for attempt %v", resp.StatusCode, revisionEP, retries),
+				Severity:  logging.MINOR,
+				ErrorCode: 2101,
+			})
 			success = false
 		}
 		if success {
@@ -102,7 +112,6 @@ func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment strin
 		revisionEP += "/" + unDeployedRevisionEP
 	}
 
-
 	removedRevision := UnDeployedAPIRevision{
 		APIUUID:      apiUUID,
 		RevisionUUID: revisionUUID,
@@ -121,11 +130,19 @@ func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment strin
 
 		success := true
 		if err != nil {
-			logger.LoggerNotifier.Errorf("Error response from %s for attempt %d : %v", revisionEP, retries, err.Error())
+			logger.LoggerNotifier.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error response from %s for attempt %d : %v", revisionEP, retries, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 2100,
+			})
 			success = false
 		}
 		if resp != nil && resp.StatusCode != http.StatusOK {
-			logger.LoggerNotifier.Errorf("Error response status code %v from %s for attempt %d", resp.StatusCode, revisionEP, retries)
+			logger.LoggerNotifier.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error response status code %v from %s for attempt %d", resp.StatusCode, revisionEP, retries),
+				Severity:  logging.MINOR,
+				ErrorCode: 2101,
+			})
 			success = false
 		}
 		if success {

@@ -21,6 +21,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -30,6 +31,7 @@ import (
 	toml "github.com/pelletier/go-toml"
 	logger "github.com/sirupsen/logrus"
 	pkgconf "github.com/wso2/product-microgateway/adapter/pkg/config"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 var (
@@ -74,16 +76,28 @@ func ReadConfigs() (*Config, error) {
 		adapterConfig = defaultConfig
 		_, err := os.Stat(pkgconf.GetMgwHome() + relativeConfigPath)
 		if err != nil {
-			logger.Fatal("Configuration file not found.", err)
+			loggerConfig.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Configuration file not found : %s", err.Error()),
+				Severity:  logging.BLOCKER,
+				ErrorCode: 1000,
+			})
 		}
 		content, readErr := ioutil.ReadFile(pkgconf.GetMgwHome() + relativeConfigPath)
 		if readErr != nil {
-			logger.Fatal("Error reading configurations. ", readErr)
+			loggerConfig.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error reading configurations : %s", readErr.Error()),
+				Severity:  logging.BLOCKER,
+				ErrorCode: 1001,
+			})
 			return
 		}
 		parseErr := toml.Unmarshal(content, adapterConfig)
 		if parseErr != nil {
-			logger.Fatal("Error parsing the configuration ", parseErr)
+			loggerConfig.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error parsing the configurations : %s", parseErr.Error()),
+				Severity:  logging.BLOCKER,
+				ErrorCode: 1002,
+			})
 			return
 		}
 

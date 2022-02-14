@@ -28,8 +28,9 @@ type ProjectAPI struct {
 	Deployments      []Deployment
 	OpenAPIJsn       []byte
 	InterceptorCerts []byte
-	UpstreamCerts    map[string][]byte // cert filename -> cert bytes
-	EndpointCerts    map[string]string // url -> cert filename
+	UpstreamCerts    map[string][]byte  // cert filename -> cert bytes
+	EndpointCerts    map[string]string  // url -> cert filename
+	Policies         PolicyContainerMap // read from policy dir, policyName -> {policy spec, policy definition}
 }
 
 // DeploymentEnvironments represents content of deployment_environments.yaml file

@@ -182,6 +182,17 @@ artifactsDirectory = "/home/wso2/artifacts"
   # If the connection is an HTTP/2 downstream connection a drain sequence will occur prior to closing the connection
   idleTimeoutInSeconds = 3600
 
+# Configs for request body passing from router to enforcer.
+[router.payloadPassingToEnforcer]
+  # Enable/Disable request body passing feature.
+  PassRequestPayload = false
+  # Sets the allowed maximum size of a request body in bytes.
+  maxRequestBytes = 10240
+  # If enabled, request body will buffer the message until maxRequestBytes is reached.
+  allowPartialMessage = false
+  # If enabled, request body will send as raw bytes, otherwise it will be a UTF-8 string request body.
+  packAsBytes = false
+
 [enforcer] # --------------------------------------------------------
 
 # If Custom Filters needs to be engaged, mention them here with position.

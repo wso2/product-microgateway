@@ -102,8 +102,8 @@ func TestInitPackageLogger(t *testing.T) {
 	defer func() {
 		LoggerTest2.SetOutput(os.Stderr)
 	}()
-	LoggerTest2.ErrorC(ErrorDetails{Message: "Test error log2", Severity: BLOCKER, ErrorCode: 345678})
-	assert.Contains(t, buf.String(), "severity="+BLOCKER, "Invalid error log in plain format"+
+	LoggerTest2.ErrorC(ErrorDetails{Message: "Test error log2", Severity: MAJOR, ErrorCode: 345678})
+	assert.Contains(t, buf.String(), "severity="+MAJOR, "Invalid error log in plain format"+
 		"(included severity, but not found)")
 }
 

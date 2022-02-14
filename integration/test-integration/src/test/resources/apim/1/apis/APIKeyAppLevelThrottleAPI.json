@@ -1,0 +1,21 @@
+{
+  "name": "APIKeyAppLevelThrottleAPI",
+  "version": "1.0.0",
+  "context": "apikey_app_level_throttling",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "securityScheme": ["oauth_basic_auth_api_key_mandatory", "api_key"],
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/pet/findByStatus",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2383/v2"
+    }
+  }
+}

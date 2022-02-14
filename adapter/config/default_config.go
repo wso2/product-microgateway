@@ -122,6 +122,12 @@ var defaultConfig = &Config{
 				IdleTimeoutInSeconds:           3600,
 			},
 		},
+		PayloadPassingToEnforcer: payloadPassingToEnforcer{
+			PassRequestPayload:  false,
+			MaxRequestBytes:     10240,
+			AllowPartialMessage: false,
+			PackAsBytes:         false,
+		},
 	},
 	Enforcer: enforcer{
 		Management: management{

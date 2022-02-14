@@ -82,6 +82,7 @@
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.BodyPassDisabledTestCase"/>
         </classes>
     </test>
     <test name="cc-with-multiple-env" preserve-order="true" parallel="false">

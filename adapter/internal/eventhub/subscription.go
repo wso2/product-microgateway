@@ -21,6 +21,7 @@ package eventhub
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -34,6 +35,7 @@ import (
 	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -125,11 +127,19 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 				retrieveSubscriptionDataFromChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1600,
+				})
 				health.SetControlPlaneRestAPIStatus(false)
 			} else {
 				// Keep the iteration going on until a response is recieved.
-				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred while fetching data from control plane: %v", data.Error),
+					Severity:  logging.MAJOR,
+					ErrorCode: 1601,
+				})
 				go func(d response) {
 					// Retry fetching from control plane after a configured time interval
 					if conf.ControlPlane.RetryInterval == 0 {
@@ -164,11 +174,19 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 				retrieveAPIList(data, initialAPIUUIDListMap)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1600,
+				})
 				health.SetControlPlaneRestAPIStatus(false)
 			} else {
 				// Keep the iteration going on until a response is recieved.
-				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
+				logger.LoggerSync.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error occurred while fetching data from control plane: %v", data.Error),
+					Severity:  logging.MAJOR,
+					ErrorCode: 1601,
+				})
 				go func(d response) {
 					// Retry fetching from control plane after a configured time interval
 					if conf.ControlPlane.RetryInterval == 0 {
@@ -262,8 +280,11 @@ func retrieveAPIList(response response, initialAPIUUIDListMap map[string]int) {
 	if response.Error == nil && response.Payload != nil {
 		err := json.Unmarshal(response.Payload, &newResponse)
 		if err != nil {
-			logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+
-				response.Endpoint, err)
+			logger.LoggerSubscription.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while unmarshalling the APIList response received for: %v %v", response.Endpoint, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1602,
+			})
 		} else {
 			switch t := newResponse.(type) {
 			case *types.APIList:
