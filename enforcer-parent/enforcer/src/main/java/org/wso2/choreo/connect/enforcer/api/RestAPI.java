@@ -273,7 +273,7 @@ public class RestAPI implements API {
         return resource;
     }
 
-    private PolicyConfig genPolicyConfig(OperationPolicies operationPolicies) {
+    private static PolicyConfig genPolicyConfig(OperationPolicies operationPolicies) {
         PolicyConfig policyConfig = new PolicyConfig();
         if (operationPolicies.getInCount() > 0) {
             policyConfig.setIn(genPolicyList(operationPolicies.getInList()));
@@ -287,7 +287,8 @@ public class RestAPI implements API {
         return policyConfig;
     }
 
-    private ArrayList<Policy> genPolicyList(List<org.wso2.choreo.connect.discovery.api.Policy> operationPoliciesList) {
+    private static ArrayList<Policy> genPolicyList
+            (List<org.wso2.choreo.connect.discovery.api.Policy> operationPoliciesList) {
         ArrayList<Policy> policyList = new ArrayList<>();
         for (org.wso2.choreo.connect.discovery.api.Policy policy : operationPoliciesList) {
             policyList.add(new Policy(policy.getPolicyName(), policy.getTemplateName(), policy.getOrder(),
