@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.choreo.connect.discovery.keymgt.KeyManagerConfig;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -44,6 +45,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * KeyManager holder class for Micro gateway.
@@ -148,7 +151,7 @@ public class KeyManagerHolder {
                             tokenIssuerDto.setCertificate(TLSUtils.convertCertificate(certificate));
                         } catch (CertificateException e) {
                             logger.error("Error reading the certificate for issuer " + issuer + ". Error cause: " +
-                                    e.getMessage());
+                                    e.getMessage(), errorLog(LoggingConstants.Severity.MAJOR, 6200));
                         }
                     }
                 }
