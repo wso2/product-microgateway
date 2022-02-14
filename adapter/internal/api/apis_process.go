@@ -161,13 +161,20 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		}
 		apiProject.APIYaml = apiYaml
 	} else if strings.Contains(fileName, policiesDir+string(os.PathSeparator)) { // handle "./Policy" dir
+		// handle policy spec and def
+		isSpec := strings.HasSuffix(fileName, policySpecFileExtension)
+		isDef := strings.HasSuffix(fileName, policyDefFileExtension)
+		if !isSpec && !isDef {
+			return nil
+		}
+
 		policyName := utills.FileNameWithoutExtension(fileName)
 		policy := model.PolicyContainer{}
 		if _, ok := apiProject.Policies[policyName]; ok {
 			policy = apiProject.Policies[policyName]
 		}
 
-		if strings.HasSuffix(fileName, policySpecFileExtension) {
+		if isSpec {
 			// process policy specificationn
 			spec := model.PolicySpecification{}
 			if err := yaml.Unmarshal(fileContent, &spec); err != nil { // only yaml files are supported
@@ -181,7 +188,7 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			policy.Specification = spec
 			apiProject.Policies[policyName] = policy
 		}
-		if strings.HasSuffix(fileName, policyDefFileExtension) {
+		if isDef {
 			// process policy definition
 			policy.Definition = model.PolicyDefinition{RawData: fileContent}
 			apiProject.Policies[policyName] = policy

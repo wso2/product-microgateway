@@ -114,7 +114,7 @@ type PolicyList []Policy
 // Policy holds APIM policies
 type Policy struct {
 	PolicyName string      `json:"policyName,omitempty"`
-	Action     string      `json:"-,omitempty"`
+	Action     string      `json:"-"`
 	Order      int         `json:"order,omitempty"`
 	Parameters interface{} `json:"parameters,omitempty"`
 }

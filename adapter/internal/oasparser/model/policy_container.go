@@ -25,9 +25,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/ghodss/yaml"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -38,7 +38,7 @@ const (
 const (
 	policyValTypeString string = "String"
 	policyValTypeInt    string = "Integer"
-	policyValTypeBool   string = "Boolean" // TODO: check type names with APIM
+	policyValTypeBool   string = "Boolean" // TODO: (renuka) check type names with APIM
 	policyValTypeArray  string = "Array"
 	policyValTypeMap    string = "Map"
 )
@@ -205,7 +205,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 				continue
 			}
 
-			// TODO: check this Value and Regex validation is needed
+			// TODO: (renuka) check this Value and Regex validation is needed
 			switch v := val.(type) {
 			case string:
 				if !strings.EqualFold(attrib.Type, policyValTypeString) {
@@ -217,7 +217,6 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\", regex expression should starts and end with '/'", spec.Data.Name, attrib.ValidationRegex)
 					}
 					regexStr = regexStr[1 : len(regexStr)-1]
-
 					reg, err := regexp.Compile(regexStr)
 					if err != nil {
 						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\"", spec.Data.Name, attrib.ValidationRegex)
