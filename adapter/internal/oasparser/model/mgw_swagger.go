@@ -1245,7 +1245,6 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 		}
 	}
 
-	// TODO: (VirajSalaka) Check the impact on RestAPIs
 	if len(data.APIThrottlingPolicy) != 0 {
 		swagger.xWso2ThrottlingTier = data.APIThrottlingPolicy
 	}
