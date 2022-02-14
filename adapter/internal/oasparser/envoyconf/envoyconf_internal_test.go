@@ -46,19 +46,16 @@ func TestGenerateRoutePaths(t *testing.T) {
 	basePath := "/basePath"
 	resourcePath := "/resource"
 
-	completeRoutePath := generateRoutePath(xWso2BasePath, basePath, resourcePath)
+	filteredBasePath := getFilteredBasePath(xWso2BasePath, basePath)
+	completeRoutePath := generateRoutePath(filteredBasePath, resourcePath)
 	// TODO: (VirajSalaka) check if it is possible to perform an equals operation instead of prefix
 	if !strings.HasPrefix(completeRoutePath, "^/xWso2BasePath/resource") {
 		t.Error("The generated path should contain xWso2BasePath as a prefix if xWso2Basepath is available.")
 	}
 
-	xWso2BasePath = "/xWso2BasePath/"
-	if !strings.HasPrefix(completeRoutePath, "^/xWso2BasePath/resource") {
-		t.Error("The generated path should not contain the trailing '\\' of xWso2BasePath property within the generated route path.")
-	}
-
 	xWso2BasePath = ""
-	completeRoutePath = generateRoutePath(xWso2BasePath, basePath, resourcePath)
+	filteredBasePath = getFilteredBasePath(xWso2BasePath, basePath)
+	completeRoutePath = generateRoutePath(filteredBasePath, resourcePath)
 	if !strings.HasPrefix(completeRoutePath, "^/basePath/resource") {
 		t.Error("The generated path should contain basePath as a prefix if xWso2Basepath is unavailable.")
 	}

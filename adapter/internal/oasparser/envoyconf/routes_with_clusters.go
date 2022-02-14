@@ -677,6 +677,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	endpointBasepath := params.endpointBasePath
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
+	isDefaultVersion := params.isDefaultVersion
 	config, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
@@ -688,7 +689,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		responseHeadersToRemove []string
 	)
 
-	routePath := generateRoutePath(xWso2Basepath, endpointBasepath, resourcePath)
+	basePath := getFilteredBasePath(xWso2Basepath, endpointBasepath)
+	if isDefaultVersion {
+		basePath = getDefaultVersionBasepath(basePath, version)
+	}
+	routePath := generateRoutePath(basePath, resourcePath)
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
@@ -824,7 +829,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Value:   luaMarshelled.Bytes(),
 	}
 
-	pathRegex := xWso2Basepath
+	pathRegex := basePath
 	substitutionString := endpointBasepath
 	if params.rewritePath != "" {
 		pathRegex = routePath
@@ -1136,26 +1141,27 @@ func CreateReadyEndpoint() *routev3.Route {
 }
 
 // generateRoutePath generates route paths for the api resources.
-func generateRoutePath(xWso2Basepath, basePath, resourcePath string) string {
-	prefix := ""
+func generateRoutePath(basePath, resourcePath string) string {
 	newPath := ""
-	if strings.TrimSpace(xWso2Basepath) != "" {
-		prefix = getFilteredBasePath(xWso2Basepath)
-	} else {
-		prefix = getFilteredBasePath(basePath)
-		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
-	}
 	if strings.Contains(resourcePath, "?") {
 		resourcePath = strings.Split(resourcePath, "?")[0]
 	}
-	fullpath := prefix + resourcePath
+	fullpath := basePath + resourcePath
 	newPath = generateRegex(fullpath)
 	return newPath
 }
 
-func getFilteredBasePath(basePath string) string {
-	modifiedBasePath := basePath
-	if !strings.HasPrefix(basePath, "/") {
+func getFilteredBasePath(xWso2Basepath string, basePath string) string {
+	var modifiedBasePath string
+
+	if strings.TrimSpace(xWso2Basepath) != "" {
+		modifiedBasePath = xWso2Basepath
+	} else {
+		modifiedBasePath = basePath
+		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
+	}
+
+	if !strings.HasPrefix(modifiedBasePath, "/") {
 		modifiedBasePath = "/" + modifiedBasePath
 	}
 	modifiedBasePath = strings.TrimSuffix(modifiedBasePath, "/")
@@ -1267,6 +1273,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		rewritePath:                  "",
 		rewriteMethod:                false,
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
+		isDefaultVersion:             swagger.IsDefaultVersion,
 	}
 
 	if resource != nil {
@@ -1317,4 +1324,9 @@ func getDefaultResourceMethods(apiType string) []string {
 		defaultResourceMethods = []string{"GET"}
 	}
 	return defaultResourceMethods
+}
+
+func getDefaultVersionBasepath(basePath string, version string) string {
+	context := strings.ReplaceAll(basePath, "/"+version, "")
+	return "(" + basePath + "|" + context + ")"
 }
