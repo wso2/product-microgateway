@@ -87,3 +87,4 @@ artifactsDirectory = "/home/wso2/git-artifacts"
 
 [enforcer.metrics]
   enabled = false
+

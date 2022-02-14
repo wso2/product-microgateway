@@ -8,3 +8,4 @@
         gitlab_rails['monitoring_whitelist'] = ['0.0.0.0/0']
     ports:
       - "8285:80"
+
