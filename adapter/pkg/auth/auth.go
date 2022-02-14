@@ -20,13 +20,15 @@ package auth
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io/ioutil"
 
-	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/pkg/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // GetBasicAuth function returns the basicAuth header for the
@@ -41,7 +43,11 @@ func GetBasicAuth(username, password string) string {
 func GetGitAuth() (transport.AuthMethod, error) {
 	conf, err := config.ReadConfigs()
 	if err != nil {
-		loggers.LoggerAPI.Errorf("Error reading configs: %v", err)
+		loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+			Message: fmt.Sprintf("Error while reading configs: %s", err.Error()),
+			Severity: logging.BLOCKER,
+			ErrorCode: 3000,
+		})
 		return nil, err
 	}
 
@@ -58,13 +64,20 @@ func GetGitAuth() (transport.AuthMethod, error) {
 	} else if sshKeyFile != "" {
 		sshKey, err := ioutil.ReadFile(sshKeyFile)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error reading ssh key file: %v", err)
-			return nil, err
+			loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error reading ssh key file: %s", err.Error()),
+				Severity: logging.CRITICAL,
+				ErrorCode: 3001,
+			})
 		}
 
 		publicKey, err := ssh.NewPublicKeys(ssh.DefaultUsername, sshKey, "")
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error creating public key: %v", err)
+			loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error creating ssh public key: %s", err.Error()),
+				Severity: logging.CRITICAL,
+				ErrorCode: 3002,
+			})
 			return nil, err
 		}
 

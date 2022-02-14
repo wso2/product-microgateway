@@ -63,13 +63,13 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Optional path to the private key for Consul communication. If this is set, then you need to also set certFile
   keyFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
-# Configuration related to the repository where the api artifacts are stored
+# Configuration related to the repository where the API artifacts are stored
 [adapter.sourceControl]
   # Enable/Disable Source Control for API Artifacts
   enabled = true
   # Time interval (in seconds) in which the Adapter should fetch updates from the remote repository
   pollInterval = 30
-  # Time interval (in seconds) in which the adapter should retry fetching artifacts from the remote repository
+  # Time interval (in seconds) in which the adapter should retry fetching artifacts from the remote repository at startup
   retryInterval = 5
   # The directory path where the git artifacts are stored
   artifactsDirectory = "/home/wso2/git-artifacts"
