@@ -129,7 +129,7 @@ func getResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
 				}
 				op := NewOperation(methodName, pathItem.Put.Security, pathItem.Put.Extensions)
-				op.SetMockedAPIConfigOAS2(pathItem.Post)
+				op.SetMockedAPIConfigOAS2(pathItem.Put)
 				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
@@ -139,7 +139,7 @@ func getResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
 				op := NewOperation(methodName, pathItem.Delete.Security, pathItem.Delete.Extensions)
-				op.SetMockedAPIConfigOAS2(pathItem.Post)
+				op.SetMockedAPIConfigOAS2(pathItem.Delete)
 				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
@@ -149,7 +149,7 @@ func getResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
 				}
 				op := NewOperation(methodName, pathItem.Head.Security, pathItem.Head.Extensions)
-				op.SetMockedAPIConfigOAS2(pathItem.Post)
+				op.SetMockedAPIConfigOAS2(pathItem.Head)
 				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
@@ -159,7 +159,7 @@ func getResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
 				op := NewOperation(methodName, pathItem.Patch.Security, pathItem.Patch.Extensions)
-				op.SetMockedAPIConfigOAS2(pathItem.Post)
+				op.SetMockedAPIConfigOAS2(pathItem.Patch)
 				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
@@ -169,7 +169,7 @@ func getResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
 				op := NewOperation(methodName, pathItem.Options.Security, pathItem.Options.Extensions)
-				op.SetMockedAPIConfigOAS2(pathItem.Post)
+				op.SetMockedAPIConfigOAS2(pathItem.Options)
 				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}

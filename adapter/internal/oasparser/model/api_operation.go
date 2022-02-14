@@ -87,7 +87,7 @@ func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Op
 				Code:    int(code),
 				Content: make([]MockedContentConfig, 0),
 			}
-			if err == nil {
+			if err == nil && responseRef != nil && responseRef.Value != nil {
 				for mediaType, content := range responseRef.Value.Content {
 					example, err := asJSON(content.Example)
 					if err == nil {
@@ -139,18 +139,8 @@ func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operat
 						Body:        example,
 					})
 				}
-
 			}
-			// TODO(amali) go-apenapi spec does not support header examples yet
-			// for headerName, headerValues := range responseRef.ResponseProps.Headers {
-			// 	example, err := asJSON(headerValues.HeaderProps.Example)
-			// 	if err == nil {
-			// 		mockedResponse.Headers = append(mockedResponse.Headers, MockedHeaderConfig{
-			// 			Name:  headerName,
-			// 			Value: example,
-			// 		})
-			// 	}
-			// }
+			// swagger does not support header example/examples
 			if len(mockedResponse.Content) > 0 {
 				mockedAPIConfig.Responses = append(mockedAPIConfig.Responses, mockedResponse)
 			}
@@ -169,7 +159,7 @@ func asJSON(data interface{}) (string, error) {
 		}
 		return string(b), nil
 	}
-	return "", errors.New("Null object passed")
+	return "", errors.New("null object passed")
 }
 
 // GetMethod returns the http method name of the give API operation
