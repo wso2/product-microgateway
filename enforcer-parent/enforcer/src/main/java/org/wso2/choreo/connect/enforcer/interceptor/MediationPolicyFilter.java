@@ -18,14 +18,31 @@
 package org.wso2.choreo.connect.enforcer.interceptor;
 
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.interceptor.opa.OPAClient;
+import org.wso2.choreo.connect.enforcer.interceptor.opa.OPASecurityException;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * Apply mediation policies.
@@ -39,44 +56,51 @@ public class MediationPolicyFilter implements Filter {
         // apply in policies
         if (policyConfig.getIn() != null && policyConfig.getIn().size() > 0) {
             for (Policy policy : policyConfig.getIn()) {
-                applyPolicy(requestContext, policy);
+                if (!applyPolicy(requestContext, policy)) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
-    private void applyPolicy(RequestContext requestContext, Policy policy) {
+    private boolean applyPolicy(RequestContext requestContext, Policy policy) {
         //todo(amali) check policy order
         switch (policy.getAction()) {
             case "SET_HEADER": {
                 addOrModifyHeader(requestContext, policy.getParameters());
-                break;
+                return true;
             }
             case "RENAME_HEADER": {
                 renameHeader(requestContext, policy.getParameters());
-                break;
+                return true;
             }
             case "REMOVE_HEADER": {
                 removeHeader(requestContext, policy.getParameters());
-                break;
+                return true;
             }
             case "ADD_QUERY": {
                 addOrModifyQuery(requestContext, policy.getParameters());
-                break;
+                return true;
             }
             case "REMOVE_QUERY": {
                 removeQuery(requestContext, policy.getParameters());
-                break;
+                return true;
             }
             case "REWRITE_RESOURCE_PATH": {
                 removeAllQueries(requestContext, policy.getParameters());
-                break;
+                return true;
             }
             case "REWRITE_RESOURCE_METHOD": {
                 modifyMethod(requestContext, policy.getParameters());
-                break;
+                return true;
+            }
+            case "OPA": {
+                return opaAuthValidation(requestContext, policy.getParameters());
             }
         }
+        // TODO: invalid policy, log error here
+        return false;
     }
 
     private void addOrModifyHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
@@ -128,6 +152,43 @@ public class MediationPolicyFilter implements Filter {
             }
         } catch (IllegalArgumentException ex) {
             log.error("Error while getting mediation policy rewrite method", ex);
+        }
+    }
+
+    private boolean opaAuthValidation(RequestContext requestContext, Map<String, String> policyAttrib) {
+        try {
+            boolean isValid = OPAClient.getInstance().validateRequest(requestContext, policyAttrib);
+            if (!isValid) {
+                log.error("OPA validation failed for the request: " + requestContext.getRequestPath());
+                FilterUtils.setUnauthenticatedErrorToContext(requestContext); // make this unauthorized
+            }
+            return isValid;
+        } catch (OPASecurityException e) {
+            // TODO: (renuka) do we want to log error if opa correctly responds with auth failed without connection error
+            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(), e);
+            FilterUtils.setErrorToContext(requestContext, e);
+            return false;
+        }
+    }
+
+    // TODO: temp for testing purpose
+    private static String callOpa(String endpoint) throws IOException {
+        URL url = new URL(endpoint);
+        try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
+            HttpPost httpPost = new HttpPost(endpoint);
+            String payload = "{\"input\":{\"servers\":[{\"id\":\"app\",\"protocols\":[\"https\",\"ssh\"],\"ports\":[\"p1\",\"p2\",\"p3\"]},{\"id\":\"db\",\"protocols\":[\"mysql\"],\"ports\":[\"p3\"]},{\"id\":\"cache\",\"protocols\":[\"memcache\"],\"ports\":[\"p3\"]},{\"id\":\"ci\",\"protocols\":[\"http\"],\"ports\":[\"p1\",\"p2\"]},{\"id\":\"busybox\",\"protocols\":[\"telnet\"],\"ports\":[\"p1\"]}],\"networks\":[{\"id\":\"net1\",\"public\":false},{\"id\":\"net2\",\"public\":false},{\"id\":\"net3\",\"public\":true},{\"id\":\"net4\",\"public\":true}],\"ports\":[{\"id\":\"p1\",\"network\":\"net1\"},{\"id\":\"p2\",\"network\":\"net3\"},{\"id\":\"p3\",\"network\":\"net2\"}]}}";
+            HttpEntity reqEntity = new ByteArrayEntity(payload.getBytes(StandardCharsets.UTF_8));
+            httpPost.setEntity(reqEntity);
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    HttpEntity entity = response.getEntity();
+                    try (InputStream content = entity.getContent()) {
+                        return IOUtils.toString(content, Charset.defaultCharset());
+                    }
+                } else {
+                    return null;
+                }
+            }
         }
     }
 }
