@@ -10,28 +10,37 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+/**
+ * HTTP Client which send requests to OPA server by selecting the implementation of {@link OPARequestGenerator}
+ * which is provided with policy attributes.
+ */
 public class OPAClient {
     private static final Logger log = LogManager.getLogger(OPAClient.class);
-    private static final OPAClient opaClient = new OPAClient();
     private static final String DEFAULT_REQUEST_GENERATOR_CLASS = "org.wso2.choreo.connect.enforcer.commons.model.RequestContext.OPADefaultRequestGenerator";
+    private static final OPAClient opaClient = new OPAClient();
 
+    private final OPARequestGenerator DEFAULT_REQUEST_GENERATOR = new OPADefaultRequestGenerator();
     private final Map<String, OPARequestGenerator> requestGeneratorMap = new HashMap<>();
 
-    private OPAClient(){
-        loadRequestGenerators();
+    private OPAClient() {
+    }
+
+    public static void init() {
+        getInstance().loadRequestGenerators();
     }
 
     public static OPAClient getInstance() {
@@ -64,16 +73,19 @@ public class OPAClient {
 
     private void loadRequestGenerators() {
         ServiceLoader<OPARequestGenerator> loader = ServiceLoader.load(OPARequestGenerator.class);
-        for (OPARequestGenerator generator: loader) {
+        for (OPARequestGenerator generator : loader) {
             requestGeneratorMap.put(generator.getClass().getName(), generator);
         }
-        requestGeneratorMap.put("", requestGeneratorMap.get(DEFAULT_REQUEST_GENERATOR_CLASS));
+        requestGeneratorMap.put("", DEFAULT_REQUEST_GENERATOR);
+        requestGeneratorMap.put(null, DEFAULT_REQUEST_GENERATOR);
+        requestGeneratorMap.put(DEFAULT_REQUEST_GENERATOR_CLASS, DEFAULT_REQUEST_GENERATOR);
     }
 
     private static String callOPAServer(String serverEp, String payload, String token) throws OPASecurityException {
         try {
             URL url = new URL(serverEp);
-            try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
+            KeyStore opaKeyStore = ConfigHolder.getInstance().getOpaKeyStore();
+            try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol(), opaKeyStore)) {
                 HttpPost httpPost = new HttpPost(serverEp);
                 HttpEntity reqEntity = new ByteArrayEntity(payload.getBytes(Charset.defaultCharset()));
                 httpPost.setEntity(reqEntity);

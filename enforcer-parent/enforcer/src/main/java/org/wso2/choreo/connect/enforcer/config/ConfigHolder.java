@@ -65,6 +65,7 @@ import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
@@ -97,6 +98,7 @@ public class ConfigHolder {
     EnforcerConfig config = new EnforcerConfig();
     private KeyStore trustStore = null;
     private KeyStore trustStoreForJWT = null;
+    private KeyStore opaKeyStore = null;
     private TrustManagerFactory trustManagerFactory = null;
     private ArrayList<ExtendedTokenIssuerDto> configIssuerList;
 
@@ -105,6 +107,7 @@ public class ConfigHolder {
 
     private ConfigHolder() {
         loadTrustStore();
+        loadOpaClientKeyStore();
     }
 
     public static ConfigHolder getInstance() {
@@ -344,6 +347,12 @@ public class ConfigHolder {
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             logger.error("Error in loading certs to the trust store.", e);
         }
+    }
+
+    private void loadOpaClientKeyStore() {
+        String certPath = getEnvVarConfig().getOpaClientPublicKeyPath();
+        String keyPath = getEnvVarConfig().getOpaClientPrivateKeyPath();
+        opaKeyStore = FilterUtils.createClientKeyStore(certPath, keyPath);
     }
 
     /**
@@ -586,6 +595,10 @@ public class ConfigHolder {
 
     public KeyStore getTrustStoreForJWT() {
         return trustStoreForJWT;
+    }
+
+    public KeyStore getOpaKeyStore() {
+        return opaKeyStore;
     }
 
     public void setTrustStoreForJWT(KeyStore trustStoreForJWT) {

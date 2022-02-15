@@ -10,6 +10,9 @@ import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 
 import java.util.Map;
 
+/**
+ * Default implementation of the {@link OPARequestGenerator}.
+ */
 public class OPADefaultRequestGenerator implements OPARequestGenerator {
     private static final Logger log = LogManager.getLogger(OPADefaultRequestGenerator.class);
 

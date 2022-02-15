@@ -27,7 +27,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
-import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
@@ -42,13 +41,16 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
-
 /**
  * Apply mediation policies.
  */
 public class MediationPolicyFilter implements Filter {
     private static final Logger log = LogManager.getLogger(MediationPolicyFilter.class);
+
+    public MediationPolicyFilter() {
+        OPAClient.init();
+    }
+
     @Override
     public boolean handleRequest(RequestContext requestContext) {
         // get operation policies
