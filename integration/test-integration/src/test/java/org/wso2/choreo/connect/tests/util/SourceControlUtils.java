@@ -62,9 +62,8 @@ public class SourceControlUtils {
     private static String accessToken = "";
 
     /**
-     * Get an access token for invoking the Gitlab REST API
+     * Generate an access token for invoking the Gitlab REST API
      *
-     * @return              Access token required to invoke the Gitlab REST API
      * @throws IOException  If an error occurs while sending the POST request
      */
     public static void generateAccessToken() throws IOException {
@@ -110,10 +109,11 @@ public class SourceControlUtils {
      * Commits files to the given Gitlab repository
      *
      * @param artifactsDirectoryPath    Path of the artifacts directory
-     * @param commitMessage         Commit Message
-     * @throws Exception
+     * @param commitMessage             Commit Message
+     * @param fileActions               Map of file paths and their corresponding actions
+     * @throws IOException              If an error occurs while reading the directory or committing the files
      */
-    public static void commitFiles(String artifactsDirectoryPath, String commitMessage, Map<String, String> fileActions) throws Exception{
+    public static void commitFiles(String artifactsDirectoryPath, String commitMessage, Map<String, String> fileActions) throws IOException {
         JSONObject payload = new JSONObject();
 
         JSONArray actions = new JSONArray();
@@ -138,14 +138,15 @@ public class SourceControlUtils {
     }
 
     /**
-     * Reads the given directory
+     * Reads the artifacts directory and creates a JSONArray of file actions for the Gitlab REST API
      *
      * @param directory                Path of the directory
      * @param baseDirectory            Path of the base directory (artifacts directory)
      * @param actions                  JSON Array of actions for committing the files to the repository
-     * @throws FileNotFoundException   If an error occurs when reading the directory
+     * @param fileActions              Map of file paths and their corresponding actions
+     * @throws IOException             If an error occurs while reading the directory
      */
-    public static void readArtifactsDirectory(File directory, String baseDirectory, JSONArray actions, Map<String, String> fileActions) throws Exception {
+    public static void readArtifactsDirectory(File directory, String baseDirectory, JSONArray actions, Map<String, String> fileActions) throws IOException {
         List<String> filePaths = new ArrayList<>();
         getFiles(directory, filePaths);
         for (String filePath : filePaths){
@@ -172,8 +173,8 @@ public class SourceControlUtils {
     /**
      * Reads the given directory and adds the file paths to the given list
      *
-     * @param directory               Path of the directory
-     * @param filesList               List of file paths
+     * @param directory     Path of the directory
+     * @param filesList     List of file paths
      */
     public static void getFiles(File directory, List<String> filesList){
         File[] files = directory.listFiles();
@@ -188,9 +189,9 @@ public class SourceControlUtils {
     }
 
     /**
-     * Reads the content of the given file
+     * Reads the content of the given file and returns it as a string
      *
-     * @param file
+     * @param file                      The file to read
      * @return                          The content of the file
      * @throws FileNotFoundException    If any error occurs when reading the file
      */
@@ -206,11 +207,11 @@ public class SourceControlUtils {
     }
 
     /**
-     * Reads the given zip file in base64 format
+     * Reads the given zip file and returns the content as a base64 encoded string
      *
-     * @param file
-     * @return              The content of the file in base64 format
-     * @throws IOException  If any error occurs when reading the file
+     * @param file          The zip file to read
+     * @return              The content of the zip file in base64 format
+     * @throws IOException  If any error occurs when reading the zip file
      */
     public static String readZip(File file) throws IOException {
         String encodedBase64 = "";
@@ -222,11 +223,11 @@ public class SourceControlUtils {
     }
 
     /**
-     * Creates a JSON object for adding a file to the repository
+     * Returns a JSON object for adding a file to the repository
      *
-     * @param file
-     * @param filePath
-     * @return
+     * @param file          The file to be added
+     * @param filePath      The path of the file to be added in the repository
+     * @return              A JSON object for adding a file to the repository
      * @throws IOException  If any error occurs when reading the file
      */
     public static JSONObject addFile(File file, String filePath) throws IOException {
@@ -245,11 +246,11 @@ public class SourceControlUtils {
     }
 
     /**
-     * Creates a JSON object for updating a file in the repository
+     * Returns a JSON object for updating a file in the repository
      *
-     * @param file
-     * @param filePath
-     * @return
+     * @param file          The file to be updated
+     * @param filePath      The path of the file to be updated in the repository
+     * @return              A JSON object for updating a file in the repository
      * @throws IOException  If any error occurs when reading the file
      */
     public static JSONObject updateFile(File file, String filePath) throws IOException {
@@ -268,10 +269,10 @@ public class SourceControlUtils {
     }
 
     /**
-     * Creates a JSON object for deleting a file from the repository
+     * Returns a JSON object for deleting a file from the repository
      *
-     * @param filePath
-     * @return
+     * @param filePath      The path of the file to be deleted in the repository
+     * @return              A JSON object for deleting a file from the repository
      */
     public static JSONObject deleteFile(String filePath){
         JSONObject action = new JSONObject();

@@ -34,6 +34,14 @@ import java.util.List;
 
 public class GitService {
 
+    /**
+     * Append git service to the docker-compose file
+     *
+     * @param dockerComposePath Path to the docker-compose file
+     * @param gitServiceFile    Path to the git service file to be appended to the docker-compose file
+     * @throws IOException      If an error occurs while appending the git service file to the docker-compose file
+     * @throws CCTestException  If an error occurs while copying the config file
+     */
     public static void addGitServiceToDockerCompose(String dockerComposePath, String gitServiceFile) throws IOException, CCTestException {
         File targetClassesDir = new File(GitService.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
@@ -41,10 +49,7 @@ public class GitService {
         String gitService = GitService.class.getClassLoader()
                 .getResource("dockerCompose/" + gitServiceFile).getPath();
         // Input files
-        List<Path> inputs = Arrays.asList(
-                Paths.get(dockerComposePath),
-                Paths.get(gitService)
-        );
+        List<Path> inputs = Arrays.asList(Paths.get(dockerComposePath), Paths.get(gitService));
 
         // Output file
         String tmpDockerCompose = targetDir + File.separator + System.currentTimeMillis() + ".yaml";
@@ -52,15 +57,13 @@ public class GitService {
         fileTmp.createNewFile();
         Path output = Paths.get(tmpDockerCompose);
 
-
         // Charset for read and write
         Charset charset = StandardCharsets.UTF_8;
 
         // Join files (lines)
         for (Path path : inputs) {
             List<String> lines = Files.readAllLines(path, charset);
-            Files.write(output, lines, charset, StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
+            Files.write(output, lines, charset, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
 
         Utils.copyFile(tmpDockerCompose, dockerComposePath);

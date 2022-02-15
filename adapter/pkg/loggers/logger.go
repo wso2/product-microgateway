@@ -32,7 +32,7 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAuth		= "github.com/wso2/product-microgateway/adapter/pkg/auth"
+	pkgAuth     = "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	pkgMsg      = "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 	pkgHealth   = "github.com/wso2/product-microgateway/adapter/pkg/health"
 	pkgTLSUtils = "github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
@@ -42,7 +42,7 @@ const (
 
 // logger package references
 var (
-	LoggerAuth	   logging.Log
+	LoggerAuth     logging.Log
 	LoggerMsg      logging.Log
 	LoggerHealth   logging.Log
 	LoggerTLSUtils logging.Log

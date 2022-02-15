@@ -73,7 +73,7 @@ public class CcWithSourceControl {
         }
 
         SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY, "Initial Commit", fileActions);
-        TimeUnit.SECONDS.sleep(30);
+        TimeUnit.SECONDS.sleep(10);
     }
 
     @AfterTest(description = "stop the setup")

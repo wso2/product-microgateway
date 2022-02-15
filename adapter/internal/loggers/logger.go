@@ -46,7 +46,7 @@ const (
 	pkgEnforcerXdsCallbacks = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	pkgGA                   = "github.com/wso2/product-microgateway/adapter/internal/ga"
 	pkgNotifier             = "github.com/wso2/product-microgateway/adapter/internal/notifier"
-	pkgSourceWatcher 		= "github.com/wso2/product-microgateway/adapter/internal/sourcewatcher"
+	pkgSourceWatcher        = "github.com/wso2/product-microgateway/adapter/internal/sourcewatcher"
 )
 
 // logger package references

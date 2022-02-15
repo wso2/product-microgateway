@@ -277,12 +277,12 @@ func Run(conf *config.Config) {
 		} else {
 			_, err := api.ProcessMountedAPIProjects()
 		  	if err != nil {
-			  logger.LoggerMgw.ErrorC(logging.ErrorDetails{
-				  Message:   fmt.Sprintf("Readiness probe is not set as local api artifacts processing has failed. %v", err.Error()),
-				  Severity:  logging.CRITICAL,
-				  ErrorCode: 1104,
-			  })
-			  return
+				logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Readiness probe is not set as local api artifacts processing has failed. %v", err.Error()),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1104,
+				})
+				return
 			}
 		}
 		// We need to deploy the readiness probe when eventhub is disabled

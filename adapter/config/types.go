@@ -433,12 +433,11 @@ type APICtlUser struct {
 }
 
 type repository struct {
-	URL string
-	Branch string
-	Username string
+	URL         string
+	Branch      string
+	Username    string
 	AccessToken string
-	// SSHKeyFile path to the private key file
-	SSHKeyFile string
+	SSHKeyFile  string // SSHKeyFile path to the private key file
 }
 
 // ControlPlane struct contains configurations related to the API Manager
