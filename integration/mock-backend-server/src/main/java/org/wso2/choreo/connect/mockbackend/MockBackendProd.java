@@ -22,9 +22,10 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import javax.net.ssl.SSLContext;
@@ -36,7 +37,7 @@ import javax.net.ssl.SSLParameters;
  */
 public class MockBackendProd extends Thread {
 
-    private static final Logger log = LogManager.getLogger("MockBackend");
+    private static final Logger log = LoggerFactory.getLogger(MockBackendProd.class);
     private HttpServer httpServer;
     private final int backendServerPort;
     private boolean secured = false;
@@ -56,6 +57,7 @@ public class MockBackendProd extends Thread {
     }
 
     public void run() {
+        log.info("Starting MockBackendProd on port: {} TLS: {} mTLS: {}", backendServerPort, secured, mtlsEnabled);
         if (backendServerPort < 0) {
             throw new RuntimeException("Server port is not defined");
         }

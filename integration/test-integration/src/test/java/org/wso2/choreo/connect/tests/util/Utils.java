@@ -396,6 +396,11 @@ public class Utils {
                 .toString();
     }
 
+    public static String getServiceURLWs(String servicePath) throws MalformedURLException {
+        return new URL(new URL("ws://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT), servicePath)
+                .toString();
+    }
+
     public static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
     }
