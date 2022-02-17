@@ -29,6 +29,7 @@ import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
@@ -43,8 +44,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * This is the gRPC streaming server written to match with the envoy grpc access logger filter proto file.
@@ -80,7 +79,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
             @Override
             public void onError(Throwable throwable) {
                 logger.error("Error while receiving access log entries from router. " + throwable.getMessage(),
-                        errorLog(LoggingConstants.Severity.CRITICAL, 5101));
+                        ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5101));
                 responseObserver.onCompleted();
             }
 

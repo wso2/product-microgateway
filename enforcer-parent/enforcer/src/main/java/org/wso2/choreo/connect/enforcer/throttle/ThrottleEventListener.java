@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.ThrottleCondition;
@@ -38,8 +39,6 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * JMS event listener for throttle data.
@@ -86,7 +85,7 @@ public class ThrottleEventListener implements MessageListener {
             }
         } catch (JMSException | JsonProcessingException e) {
             log.error("Error occurred when processing the received message ",
-                    errorLog(LoggingConstants.Severity.MAJOR, 6602), e);
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6602), e);
         }
     }
 

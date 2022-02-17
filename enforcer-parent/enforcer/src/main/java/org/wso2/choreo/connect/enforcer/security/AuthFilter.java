@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
@@ -47,8 +48,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -151,7 +150,7 @@ public class AuthFilter implements Filter {
         }
         log.error(
                 "None of the authenticators were able to authenticate the request: " + requestContext.getRequestPath(),
-                errorLog(LoggingConstants.Severity.MINOR, 6600));
+                ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6600));
         //set WWW_AUTHENTICATE header to error response
         requestContext.addOrModifyHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                 ", error=\"invalid_token\"" +

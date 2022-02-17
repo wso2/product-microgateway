@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
@@ -47,8 +48,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -396,7 +395,7 @@ public class ThrottleFilter implements Filter {
             } catch (UnknownHostException e) {
                 //send empty value as ip
                 log.error("Error while parsing host IP {}", remoteIP,
-                        errorLog(LoggingConstants.Severity.MAJOR, 6901), e);
+                        ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6901), e);
                 jsonObMap.put(ThrottleConstants.IPV6, 0);
                 jsonObMap.put(ThrottleConstants.IP, 0);
             }

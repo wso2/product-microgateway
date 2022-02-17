@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
@@ -48,8 +49,6 @@ import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
-
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * Implements the authenticator interface to authenticate request using an Internal Key.
@@ -232,7 +231,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                             requestContext.getMatchedAPI().getUuid(), internalKey);
                 } else {
                     log.error("Internal Key authentication failed. " + FilterUtils.getMaskedToken(splitToken[0]),
-                            errorLog(LoggingConstants.Severity.MINOR, 6602));
+                            ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6602));
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                     CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), internalKey);
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),

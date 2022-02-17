@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
@@ -45,8 +46,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * This is the filter is for Analytics.
@@ -96,7 +95,7 @@ public class AnalyticsFilter {
             publisher.handleGRPCLogMsg(message);
         } else {
             logger.error("Cannot publish the analytics event as analytics publisher is null.",
-                    errorLog(LoggingConstants.Severity.CRITICAL, 5102));
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5102));
         }
     }
 
@@ -189,7 +188,7 @@ public class AnalyticsFilter {
             }
             if (publisher == null) {
                 logger.error("Cannot publish the failure event as analytics publisher is null.",
-                        errorLog(LoggingConstants.Severity.CRITICAL, 5103));
+                        ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5103));
                 return;
             }
             ChoreoFaultAnalyticsProvider provider = new ChoreoFaultAnalyticsProvider(requestContext);
@@ -232,11 +231,11 @@ public class AnalyticsFilter {
             return publisher;
         } catch (ClassNotFoundException e) {
             logger.error("Error while loading the custom analytics publisher class.",
-                    errorLog(LoggingConstants.Severity.MAJOR, 5105), e);
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5105), e);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException e) {
             logger.error("Error while generating AnalyticsEventPublisherInstance from the class",
-                    errorLog(LoggingConstants.Severity.CRITICAL, 5106), e);
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5106), e);
         }
         return null;
     }

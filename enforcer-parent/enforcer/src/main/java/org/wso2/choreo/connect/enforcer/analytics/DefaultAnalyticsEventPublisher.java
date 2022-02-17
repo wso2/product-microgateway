@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDat
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 
@@ -38,7 +39,6 @@ import java.util.Map;
 
 import static org.wso2.choreo.connect.enforcer.analytics.AnalyticsConstants.ERROR_SCHEMA;
 import static org.wso2.choreo.connect.enforcer.analytics.AnalyticsConstants.RESPONSE_SCHEMA;
-import static org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails.errorLog;
 
 /**
  * Default Analytics Event publisher to the analytics cloud.
@@ -84,7 +84,7 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 logger.debug("Event is published.");
             } catch (AnalyticsException e) {
                 logger.error("Error while publishing the event to the analytics portal.",
-                        errorLog(LoggingConstants.Severity.CRITICAL, 5100), e);
+                        ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5100), e);
             }
         }
     }
