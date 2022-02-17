@@ -20,6 +20,8 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Operation;
+import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
@@ -28,6 +30,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -71,6 +74,7 @@ public class WebSocketAPI implements API {
         Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
         Map<String, List<String>> apiSecurity = new HashMap<>();
         Map<String, EndpointCluster> endpoints = new HashMap<>();
+        List<ResourceConfig> resources = new ArrayList<>();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -119,13 +123,21 @@ public class WebSocketAPI implements API {
                     APIProcessUtils.convertProtoEndpointSecurity(
                             api.getEndpointSecurity().getSandBoxSecurityInfo()));
         }
+        for (Resource res : api.getResourcesList()) {
+            for (Operation operation : res.getMethodsList()) {
+                ResourceConfig resConfig = RestAPI.buildResource(operation, res.getPath(), apiSecurity);
+                resConfig.setTier(api.getTier());
+                resources.add(resConfig);
+            }
+        }
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .apiSecurity(apiSecurity).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).endpoints(endpoints).build();
+                .organizationId(api.getOrganizationId()).endpoints(endpoints).resources(resources)
+                .securitySchemeDefinitions(securitySchemes).build();
         initFilters();
         initUpgradeFilters();
         return basePath;
@@ -136,6 +148,7 @@ public class WebSocketAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
+            responseObject.setQueryParamsToAdd(requestContext.getQueryParamsToAdd());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
             }

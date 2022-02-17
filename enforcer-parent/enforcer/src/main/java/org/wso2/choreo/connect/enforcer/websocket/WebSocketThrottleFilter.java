@@ -99,6 +99,7 @@ public class WebSocketThrottleFilter implements Filter {
             String apiVersion = api.getVersion();
             int appId = authContext.getApplicationId();
             String apiTier = getApiTier(api);
+            String resourceTier = getApiTier(api);
             String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
             String subTier = authContext.getTier();
             String appTier = authContext.getApplicationTier();
@@ -197,9 +198,9 @@ public class WebSocketThrottleFilter implements Filter {
     }
 
     private String getSubscriptionThrottleKey(int appId, String apiContext, String apiVersion) {
-        String subThrottleKey = appId + ':' + apiContext;
+        String subThrottleKey = appId + ":" + apiContext;
         if (!apiVersion.isBlank()) {
-            subThrottleKey += ':' + apiVersion;
+            subThrottleKey += ":" + apiVersion;
         }
         return subThrottleKey;
     }
@@ -241,6 +242,8 @@ public class WebSocketThrottleFilter implements Filter {
         throttleEvent.put(ThrottleEventConstants.APP_TIER, authContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
+        throttleEvent.put(ThrottleEventConstants.RESOURCE_TIER, apiTier);
+        throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ":" +
                 apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authContext.getTier());
