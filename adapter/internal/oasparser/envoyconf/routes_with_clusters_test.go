@@ -478,7 +478,7 @@ func TestCreateRoutesWithClustersUsingAsyncAPI(t *testing.T) {
 
 	var asyncapi model.AsyncAPI
 	err = json.Unmarshal(apiJsn, &asyncapi)
-	assert.Nil(t, err, "Error occurred while parsing api.yaml")
+	assert.Nil(t, err, "Error occurred while parsing asyncapi_websocket.yaml")
 	err = mgwSwagger.SetInfoAsyncAPI(asyncapi)
 
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
