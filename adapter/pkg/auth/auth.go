@@ -69,6 +69,7 @@ func GetGitAuth() (transport.AuthMethod, error) {
 				Severity: logging.CRITICAL,
 				ErrorCode: 3001,
 			})
+			return nil, err
 		}
 
 		publicKey, err := ssh.NewPublicKeys(ssh.DefaultUsername, sshKey, "")

@@ -113,7 +113,8 @@ public class SourceControlUtils {
      * @param fileActions               Map of file paths and their corresponding actions
      * @throws IOException              If an error occurs while reading the directory or committing the files
      */
-    public static void commitFiles(String artifactsDirectoryPath, String commitMessage, Map<String, String> fileActions) throws IOException {
+    public static void commitFiles(String artifactsDirectoryPath, String commitMessage,
+                                   Map<String, String> fileActions) throws IOException {
         JSONObject payload = new JSONObject();
 
         JSONArray actions = new JSONArray();
@@ -129,7 +130,8 @@ public class SourceControlUtils {
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         headers.put("Content-Type", "application/json");
 
-        HttpResponse response = HttpClientRequest.doPost(GIT_API_URL + "/projects/" + GIT_USERNAME + "%2F" + GIT_PROJECT_PATH + "/repository/commits", payloadString, headers);
+        HttpResponse response = HttpClientRequest.doPost(GIT_API_URL + "/projects/"
+                + GIT_USERNAME + "%2F" + GIT_PROJECT_PATH + "/repository/commits", payloadString, headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_CREATED);
@@ -146,7 +148,8 @@ public class SourceControlUtils {
      * @param fileActions              Map of file paths and their corresponding actions
      * @throws IOException             If an error occurs while reading the directory
      */
-    public static void readArtifactsDirectory(File directory, String baseDirectory, JSONArray actions, Map<String, String> fileActions) throws IOException {
+    public static void readArtifactsDirectory(File directory, String baseDirectory, JSONArray actions,
+                                              Map<String, String> fileActions) throws IOException {
         List<String> filePaths = new ArrayList<>();
         getFiles(directory, filePaths);
         for (String filePath : filePaths){

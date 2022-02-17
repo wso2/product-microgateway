@@ -46,7 +46,8 @@ public class SourceWatcherTestCase {
     public void AddAPIProjectTest() throws Exception{
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(
+                Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -54,7 +55,8 @@ public class SourceWatcherTestCase {
 
     void commitDeletedFiles() throws Exception {
         List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY);
+        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY);
         SourceControlUtils.getFiles(artifactsDir, filePaths);
         Map<String, String> fileActions = new HashMap<>();
 
@@ -62,16 +64,19 @@ public class SourceWatcherTestCase {
             fileActions.put(filePath, SourceControlUtils.DELETE_FILE);
         }
 
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY, "Delete artifacts", fileActions);
+        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY, "Delete artifacts", fileActions);
         TimeUnit.SECONDS.sleep(4);
     }
 
-    @Test(description = "Test if artifacts deleted from source version control are undeployed", dependsOnMethods = {"AddAPIProjectTest"})
+    @Test(description = "Test if artifacts deleted from source version control are undeployed",
+            dependsOnMethods = {"AddAPIProjectTest"})
     public void DeleteAPIProjectTest() throws Exception{
         commitDeletedFiles();
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(
+                Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,"Response code mismatched");
@@ -79,7 +84,8 @@ public class SourceWatcherTestCase {
 
     void commitZipArtifact() throws Exception {
         List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.ZIP);
+        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.ZIP);
         SourceControlUtils.getFiles(artifactsDir, filePaths);
         Map<String, String> fileActions = new HashMap<>();
 
@@ -87,11 +93,13 @@ public class SourceWatcherTestCase {
             fileActions.put(filePath, SourceControlUtils.ADD_FILE);
         }
 
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.ZIP, "Add zip artifacts", fileActions);
+        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.ZIP, "Add zip artifacts", fileActions);
         TimeUnit.SECONDS.sleep(4);
     }
 
-    @Test(description = "Test if zip artifacts added from source version control are deployed", dependsOnMethods = {"DeleteAPIProjectTest"})
+    @Test(description = "Test if zip artifacts added from source version control are deployed",
+            dependsOnMethods = {"DeleteAPIProjectTest"})
     public void AddAPIZipProjectTest() throws Exception{
         commitZipArtifact();
         Map<String, String> headers = new HashMap<>();
@@ -104,7 +112,8 @@ public class SourceWatcherTestCase {
 
     void commitUpdatedArtifact() throws Exception {
         List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.UPDATE);
+        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.UPDATE);
         SourceControlUtils.getFiles(artifactsDir, filePaths);
         Map<String, String> fileActions = new HashMap<>();
 
@@ -112,11 +121,13 @@ public class SourceWatcherTestCase {
             fileActions.put(filePath, SourceControlUtils.UPDATE_FILE);
         }
 
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.UPDATE, "Update zip artifacts", fileActions);
+        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.UPDATE, "Update zip artifacts", fileActions);
         TimeUnit.SECONDS.sleep(4);
     }
 
-    @Test(description = "Test if zip artifacts updated from source version control are deployed", dependsOnMethods = {"AddAPIZipProjectTest"})
+    @Test(description = "Test if zip artifacts updated from source version control are deployed",
+            dependsOnMethods = {"AddAPIZipProjectTest"})
     public void UpdateAPIZipProjectTest() throws Exception{
         commitUpdatedArtifact();
         Map<String, String> headers = new HashMap<>();

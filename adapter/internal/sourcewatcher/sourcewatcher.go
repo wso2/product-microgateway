@@ -39,20 +39,14 @@ import (
 const (
 	apisArtifactDir string = "apis"
 	zipExt          string = ".zip"
+	branchHead      string = "refs/heads/"
 )
 
 var artifactsMap map[string]model.ProjectAPI
 
 // Start fetches the API artifacts at the startup and polls for changes from the remote repository
 func Start() {
-	conf, err := config.ReadConfigs()
-	if err != nil {
-		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
-			Message: fmt.Sprintf("Error reading configs : %s", err.Error()),
-			Severity: logging.BLOCKER,
-			ErrorCode: 2500,
-		})
-	}
+	conf, _ := config.ReadConfigs()
 
 	retryInterval := conf.Adapter.SourceControl.RetryInterval
 
@@ -76,7 +70,7 @@ func Start() {
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Processing API artifacts failed : %s", err.Error()),
 			Severity: logging.CRITICAL,
-			ErrorCode: 2501,
+			ErrorCode: 2500,
 		})
 	}
 
@@ -86,15 +80,7 @@ func Start() {
 
 // fetchArtifacts clones the API artifacts from the remote repository into the artifacts directory in the adapter
 func fetchArtifacts() (repository *git.Repository,err error) {
-	conf, err := config.ReadConfigs()
-	if err != nil {
-		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
-			Message: fmt.Sprintf("Error reading configs : %s", err.Error()),
-			Severity: logging.BLOCKER,
-			ErrorCode: 2500,
-		})
-		return nil, err
-	}
+	conf, _ := config.ReadConfigs()
 
 	artifactsDirName := filepath.FromSlash(conf.Adapter.SourceControl.ArtifactsDirectory + "/" + apisArtifactDir)
 	repositoryURL := conf.Adapter.SourceControl.Repository.URL
@@ -118,7 +104,7 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while authenticating with the remote repository : %s", err.Error()),
 			Severity: logging.CRITICAL,
-			ErrorCode: 2502,
+			ErrorCode: 2501,
 		})
 		return nil, err
 	}
@@ -129,7 +115,7 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 	}
 
 	if branch != "" {
-		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + branch)
+		cloneOptions.ReferenceName = plumbing.ReferenceName(branchHead + branch)
 	}
 
 	loggers.LoggerSourceWatcher.Infof("Fetching API artifacts from remote repository %s", repositoryURL)
@@ -141,7 +127,7 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while fetching artifacts from the remote repository %s : %s", repositoryURL, err.Error()),
 			Severity: logging.CRITICAL,
-			ErrorCode: 2503,
+			ErrorCode: 2502,
 		})
 	}
 
@@ -151,15 +137,7 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 
 // pollChanges polls for changes from the remote repository
 func pollChanges(repository *git.Repository){
-	conf, err := config.ReadConfigs()
-	if err != nil {
-		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
-			Message: fmt.Sprintf("Error reading configs : %s", err.Error()),
-			Severity: logging.BLOCKER,
-			ErrorCode: 2500,
-		})
-		return
-	}
+	conf, _ := config.ReadConfigs()
 
 	pollInterval := conf.Adapter.SourceControl.PollInterval
 	for {
@@ -176,7 +154,7 @@ func compareRepository(localRepository *git.Repository){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while returning remote : %s", err.Error()),
 			Severity: logging.CRITICAL,
-			ErrorCode: 2504,
+			ErrorCode: 2503,
 		})
 	}
 
@@ -185,7 +163,7 @@ func compareRepository(localRepository *git.Repository){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while authenticating with the remote repository : %s", err.Error()),
 			Severity: logging.CRITICAL,
-			ErrorCode: 2502,
+			ErrorCode: 2501,
 		})
 	}
 
@@ -196,7 +174,7 @@ func compareRepository(localRepository *git.Repository){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while listing remote : %s", err.Error()),
 			Severity: logging.MAJOR,
-			ErrorCode: 2505,
+			ErrorCode: 2504,
 		})
 	}
 
@@ -205,7 +183,7 @@ func compareRepository(localRepository *git.Repository){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while retrieving local repository head : %s", err.Error()),
 			Severity: logging.MAJOR,
-			ErrorCode: 2506,
+			ErrorCode: 2505,
 		})
 	}
 
@@ -223,7 +201,7 @@ func compareRepository(localRepository *git.Repository){
 				loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 					Message: fmt.Sprintf("Error while processing artifact changes : %s", err.Error()),
 					Severity: logging.MAJOR,
-					ErrorCode: 2507,
+					ErrorCode: 2506,
 				})
 			}
 
@@ -233,7 +211,7 @@ func compareRepository(localRepository *git.Repository){
 				loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 					Message: fmt.Sprintf("Processing API artifacts failed : %s", err.Error()),
 					Severity: logging.CRITICAL,
-					ErrorCode: 2501,
+					ErrorCode: 2500,
 				})
 				return
 			}
@@ -244,15 +222,7 @@ func compareRepository(localRepository *git.Repository){
 
 // pullChanges pulls changes from the given repository
 func pullChanges(localRepository *git.Repository){
-	conf, err := config.ReadConfigs()
-	if err != nil {
-		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
-			Message: fmt.Sprintf("Error reading configs : %s", err.Error()),
-			Severity: logging.BLOCKER,
-			ErrorCode: 2500,
-		})
-		return
-	}
+	conf, _ := config.ReadConfigs()
 
 	branch := conf.Adapter.SourceControl.Repository.Branch
 
@@ -261,7 +231,7 @@ func pullChanges(localRepository *git.Repository){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while authenticating with the remote repository : %s", err.Error()),
 			Severity: logging.CRITICAL,
-			ErrorCode: 2502,
+			ErrorCode: 2501,
 		})
 	}
 
@@ -270,7 +240,7 @@ func pullChanges(localRepository *git.Repository){
 	}
 
 	if branch != "" {
-		pullOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + branch)
+		pullOptions.ReferenceName = plumbing.ReferenceName(branchHead + branch)
 	}
 
 	workTree, err := localRepository.Worktree()
@@ -278,7 +248,7 @@ func pullChanges(localRepository *git.Repository){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while retrieving local repository worktree : %s", err.Error()),
 			Severity: logging.MAJOR,
-			ErrorCode: 2508,
+			ErrorCode: 2507,
 		})
 	}
 
@@ -287,22 +257,14 @@ func pullChanges(localRepository *git.Repository){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while pulling changes from the remote repository : %s", err.Error()),
 			Severity: logging.MAJOR,
-			ErrorCode: 2509,
+			ErrorCode: 2508,
 		})
 	}
 }
 
 // processArtifactChanges undeploy the APIs whose artifacts are not present in the repository
 func processArtifactChanges() (err error){
-	conf, err := config.ReadConfigs()
-	if err != nil {
-		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
-			Message: fmt.Sprintf("Error reading configs : %s", err.Error()),
-			Severity: logging.BLOCKER,
-			ErrorCode: 2500,
-		})
-		return err
-	}
+	conf, _ := config.ReadConfigs()
 
 	apisDirName := filepath.FromSlash(conf.Adapter.SourceControl.ArtifactsDirectory + "/" + apisArtifactDir)
 	files, err := ioutil.ReadDir(apisDirName)
@@ -310,7 +272,7 @@ func processArtifactChanges() (err error){
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 			Message: fmt.Sprintf("Error while reading API artifacts directory : %s", err.Error()),
 			Severity: logging.MAJOR,
-			ErrorCode: 2510,
+			ErrorCode: 2509,
 		})
 	}
 
@@ -344,17 +306,13 @@ func processArtifactChanges() (err error){
 		}
 
 		for vhost, environments := range vhostToEnvsMap {
-			if vhost == "" {
-				// ignore if vhost is empty, since it deletes all vhosts of API
-				continue
-			}
 			err = xds.DeleteAPIs(vhost, apiYaml.Name, apiYaml.Version, environments, apiProject.APIYaml.Data.OrganizationID)
 
 			if err != nil {
 				loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
 					Message: fmt.Sprintf("Error while deleting API : %s", err.Error()),
 					Severity: logging.MAJOR,
-					ErrorCode: 2511,
+					ErrorCode: 2510,
 				})
 			}
 		}

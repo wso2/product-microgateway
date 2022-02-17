@@ -145,9 +145,9 @@ public class CcInstance extends ChoreoConnectImpl {
         }
 
         public CcInstance build() throws IOException, CCTestException {
-            instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile, this.gitServiceFile,
-                    this.withCustomJwtTransformer, this.withAnalyticsMetricImpl, this.startupAPIProjectFiles,
-                    this.isInterceptorCertRequired);
+            instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
+                    this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
+                    this.startupAPIProjectFiles, this.isInterceptorCertRequired);
             return instance;
         }
     }

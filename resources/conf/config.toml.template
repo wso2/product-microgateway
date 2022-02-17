@@ -66,7 +66,7 @@ artifactsDirectory = "/home/wso2/artifacts"
 # Configuration related to the repository where the API artifacts are stored
 [adapter.sourceControl]
   # Enable/Disable Source Control for API Artifacts
-  enabled = true
+  enabled = false
   # Time interval (in seconds) in which the Adapter should fetch updates from the remote repository
   pollInterval = 30
   # Time interval (in seconds) in which the adapter should retry fetching artifacts from the remote repository at startup

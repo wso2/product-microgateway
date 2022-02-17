@@ -64,7 +64,8 @@ public class CcWithSourceControl {
 
     private void commitInitialFiles() throws Exception {
         List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY);
+        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY);
         SourceControlUtils.getFiles(artifactsDir, filePaths);
         Map<String, String> fileActions = new HashMap<>();
 
@@ -72,7 +73,8 @@ public class CcWithSourceControl {
             fileActions.put(filePath, SourceControlUtils.ADD_FILE);
         }
 
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY, "Initial Commit", fileActions);
+        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
+                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY, "Initial Commit", fileActions);
         TimeUnit.SECONDS.sleep(10);
     }
 
