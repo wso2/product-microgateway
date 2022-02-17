@@ -21,6 +21,7 @@ import com.google.protobuf.ByteString;
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
@@ -41,6 +42,12 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
 
     public ResponseObject process(CheckRequest request) {
         API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
+
+        // putting API details into ThreadContext for logging purposes
+        ThreadContext.push(matchedAPI.getAPIConfig().getName());
+        ThreadContext.push(matchedAPI.getAPIConfig().getOrganizationId());
+        ThreadContext.push(matchedAPI.getAPIConfig().getBasePath());
+
         if (matchedAPI == null) {
             ResponseObject responseObject = new ResponseObject();
             responseObject.setStatusCode(APIConstants.StatusCodes.NOTFOUND.getCode());
@@ -55,7 +62,11 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         }
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
-        return matchedAPI.process(requestContext);
+        ResponseObject responseObject = matchedAPI.process(requestContext);
+
+        // to clear the ThreadContext's stack used for logging
+        ThreadContext.removeStack();
+        return responseObject;
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
