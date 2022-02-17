@@ -1244,9 +1244,5 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 				endpointConfig.APIEndpointSecurity.Sandbox.Type)
 		}
 	}
-
-	if len(data.APIThrottlingPolicy) != 0 {
-		swagger.xWso2ThrottlingTier = data.APIThrottlingPolicy
-	}
 	return nil
 }
