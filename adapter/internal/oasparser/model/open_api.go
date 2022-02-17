@@ -19,15 +19,12 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
-	"net/url"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // hostNameValidator regex is for validate the host name of the URL
@@ -78,16 +75,16 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 		return err
 	}
 
-	swagger.apiType = HTTP
+	swagger.apiType = constants.HTTP
 	var productionUrls []Endpoint
-	// For prototyped APIs, the prototype endpoint is only assinged from api.Yaml. Hence,
+	// For prototyped APIs, the prototype endpoint is only assigned from api.Yaml. Hence,
 	// an exception is made where servers url is not processed when the API is prototyped.
-	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsProtoTyped {
+	if isServerURLIsAvailable(swagger3.Servers) && !swagger.IsPrototyped {
 		for _, serverEntry := range swagger3.Servers {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
 			}
-			endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+			endpoint, err := getHTTPEndpoint(serverEntry.URL)
 			if err == nil {
 				productionUrls = append(productionUrls, *endpoint)
 				swagger.xWso2Basepath = endpoint.Basepath
@@ -96,7 +93,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 			}
 		}
 		if len(productionUrls) > 0 {
-			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+			swagger.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
 			swagger.sandboxEndpoints = nil
 		}
 	}
@@ -154,7 +151,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 					if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 						continue
 					}
-					endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+					endpoint, err := getHTTPEndpoint(serverEntry.URL)
 					if err == nil {
 						productionUrls = append(productionUrls, *endpoint)
 
@@ -164,7 +161,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 
 				}
 				if productionUrls != nil && len(productionUrls) > 0 {
-					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+					resource.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
 				}
 			}
 			resources = append(resources, &resource)
@@ -186,9 +183,16 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
+	var mockedAPIConfig MockedAPIConfig
+
+	// x-mediation-script extension is only available for the mocked APIs. Below condition will execute only for the
+	// mocked APIs.
+	if scriptValue, isScriptAvailable := extensions[constants.XMediationScript]; isScriptAvailable {
+		getMockedAPIConfig(scriptValue, &mockedAPIConfig, method)
+	}
 
 	if operation.Security == nil {
-		return NewOperation(method, nil, extensions)
+		return NewOperation(method, nil, extensions, mockedAPIConfig)
 	}
 
 	var securityData []openapi3.SecurityRequirement = *(operation.Security)
@@ -197,62 +201,26 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 		securityArray[i] = security
 	}
 	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
-	return NewOperation(method, securityArray, extensions)
+	return NewOperation(method, securityArray, extensions, mockedAPIConfig)
 
 }
 
-// getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion
-// from of the production endpoints url entry, combination of schemes and host (in openapi v2)
-// or server property.
-//
-// if no scheme is mentioned before the hostname, urlType would be assigned as http
-func getHostandBasepathandPort(rawURL string) (*Endpoint, error) {
-	var (
-		basepath string
-		host     string
-		port     uint32
-		urlType  string
-	)
-
-	if !strings.Contains(rawURL, "://") {
-		rawURL = "http://" + rawURL
-	}
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
-		return nil, err
-	}
-
-	// Hostname validation
-	if err == nil && !regexp.MustCompile(hostNameValidator).MatchString(parsedURL.Hostname()) {
-		logger.LoggerOasparser.Error("Malformed endpoint detected (Invalid host name) : ", rawURL)
-		return nil, errors.New("malformed endpoint detected (Invalid host name) : " + rawURL)
-	}
-
-	host = parsedURL.Hostname()
-	basepath = parsedURL.Path
-	if parsedURL.Port() != "" {
-		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
-		}
-		port = uint32(u32)
-	} else {
-		if strings.HasPrefix(rawURL, "https://") {
-			port = uint32(443)
+// getMockedApiConfig recieves xMediationScriptValue, mockedApiConfig pointer value and method name. It unmrashalls the xMediationScript string
+// to mockedApiConfig struct type.
+func getMockedAPIConfig(xMediationScriptValue interface{}, mockedAPIConfig *MockedAPIConfig, method string) {
+	if str, ok := xMediationScriptValue.(string); ok {
+		isValidJSONString := json.Valid([]byte(str))
+		if isValidJSONString {
+			unmarshalError := json.Unmarshal([]byte(str), &mockedAPIConfig)
+			if unmarshalError != nil {
+				logger.LoggerOasparser.Errorf("Error while unmarshalling JSON for method %v. Error: %v", method, unmarshalError)
+				return
+			}
+			logger.LoggerOasparser.Debugf("x-mediation-script value processed successfully for the %v operation.", method)
 		} else {
-			port = uint32(80)
+			logger.LoggerOasparser.Errorf("Invalid JSON value received for mocked API implementation's %v operation.", method)
 		}
 	}
-
-	urlType = "http"
-	if strings.HasPrefix(rawURL, "https://") {
-		urlType = "https"
-	} else if !strings.HasPrefix(rawURL, "http://") {
-		rawURL = "http://" + rawURL
-	}
-
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType, RawURL: rawURL}, nil
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3
@@ -288,7 +256,7 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 // 2nd bool represent if the vendor extension present.
 func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
 	extensions := convertExtensibletoReadableFormat(vendorExtensions)
-	if y, found := extensions[xWso2DisableSecurity]; found {
+	if y, found := extensions[constants.XWso2DisableSecurity]; found {
 		if val, ok := y.(bool); ok {
 			return val, found
 		}
@@ -301,7 +269,7 @@ func resolveDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, boo
 func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, val bool) openapi3.ExtensionProps {
 	_, found := resolveDisableSecurity(vendorExtensions)
 	if !found {
-		vendorExtensions.Extensions[xWso2DisableSecurity] = val
+		vendorExtensions.Extensions[constants.XWso2DisableSecurity] = val
 	}
 	return vendorExtensions
 }
@@ -312,7 +280,7 @@ func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, va
 func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 	vendorExtensionsMap := convertExtensibletoReadableFormat(vendorExtensions)
 	var labelArray []string
-	if y, found := vendorExtensionsMap[xWso2Label]; found {
+	if y, found := vendorExtensionsMap[constants.XWso2Label]; found {
 		if val, ok := y.([]interface{}); ok {
 			for _, label := range val {
 				labelArray = append(labelArray, label.(string))
@@ -322,48 +290,4 @@ func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
 	}
 	return []string{"default"}
-}
-
-func getEndpointForWebsocketURL(rawURL string) (*Endpoint, error) {
-	var (
-		basepath string
-		host     string
-		port     uint32
-		urlType  string
-	)
-	if !strings.Contains(rawURL, "://") {
-		rawURL = "ws://" + rawURL
-	}
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
-		return nil, err
-	}
-
-	host = parsedURL.Hostname()
-	if parsedURL.Path == "" {
-		basepath = "/"
-	} else {
-		basepath = parsedURL.Path
-	}
-	if parsedURL.Port() != "" {
-		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
-		if err != nil {
-			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
-		}
-		port = uint32(u32)
-	} else {
-		if strings.HasPrefix(rawURL, "wss://") {
-			port = uint32(443)
-		} else {
-			port = uint32(80)
-		}
-	}
-	urlType = "ws"
-	if strings.HasPrefix(rawURL, "wss://") {
-		urlType = "wss"
-	} else if !strings.HasPrefix(rawURL, "ws://") {
-		rawURL = "ws://" + rawURL
-	}
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType, RawURL: rawURL}, nil
 }

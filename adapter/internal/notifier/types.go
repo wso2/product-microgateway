@@ -12,3 +12,10 @@ type DeployedEnvInfo struct {
 	Name  string `json:"name"`
 	VHost string `json:"vhost"`
 }
+
+// UnDeployedAPIRevision info
+type UnDeployedAPIRevision struct {
+	APIUUID      string `json:"apiUUID"`
+	RevisionUUID string `json:"revisionUUID"`
+	Environment  string `json:"environment"`
+}

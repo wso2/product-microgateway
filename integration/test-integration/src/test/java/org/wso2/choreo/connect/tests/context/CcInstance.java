@@ -45,7 +45,8 @@ public class CcInstance extends ChoreoConnectImpl {
      * @throws CCTestException if an error occurs while appending backend service to docker-compose file
      */
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile,
-                       boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs)
+                       boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
+                       boolean isInterceptorCertRequired)
             throws IOException, CCTestException {
         createTmpMgwSetup();
         String targetDir = Utils.getTargetDirPath();
@@ -76,6 +77,11 @@ public class CcInstance extends ChoreoConnectImpl {
                         TestConstant.STARTUP_APIS_DIR + File.separator + dirName);
             }
         }
+
+        if (isInterceptorCertRequired) {
+            addInterceptorCertToRouterTruststore();
+        }
+
         String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
                         + TestConstant.DOCKER_COMPOSE_YAML_PATH;
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, backendServiceFile);
@@ -96,6 +102,7 @@ public class CcInstance extends ChoreoConnectImpl {
         List<String> startupAPIProjectFiles = new ArrayList<>();
         boolean withCustomJwtTransformer = false;
         boolean withAnalyticsMetricImpl = false;
+        boolean isInterceptorCertRequired = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -110,7 +117,7 @@ public class CcInstance extends ChoreoConnectImpl {
             this.backendServiceFile = backendServiceFile;
             return this;
         }
-        //Currently both added via same jar
+        // Currently, both added via the same jar
         public Builder withAllCustomImpls() {
             this.withCustomJwtTransformer = true;
             this.withAnalyticsMetricImpl = true;
@@ -122,10 +129,15 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
+        public Builder withInterceptorCertInRouterTruststore() {
+            this.isInterceptorCertRequired = true;
+            return this;
+        }
 
         public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
-                                this.withCustomJwtTransformer, this.withAnalyticsMetricImpl, this.startupAPIProjectFiles);
+                    this.withCustomJwtTransformer, this.withAnalyticsMetricImpl, this.startupAPIProjectFiles,
+                    this.isInterceptorCertRequired);
             return instance;
         }
     }

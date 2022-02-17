@@ -26,6 +26,23 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/config"
 )
 
+// ErrorDetails used to keep error details for error logs
+type ErrorDetails struct {
+	Message   string
+	Severity  string
+	ErrorCode int
+}
+
+// Log represents the extended type of logrus.logger
+type Log struct {
+	*logrus.Logger
+}
+
+// ErrorC can be used for formal error logs
+func (l *Log) ErrorC(e ErrorDetails) {
+	l.WithFields(logrus.Fields{SEVERITY: e.Severity, ERRORCODE: e.ErrorCode}).Errorf(e.Message)
+}
+
 func logLevelMapper(pkgLevel string) logrus.Level {
 	logLevel := defaultLogLevel
 	switch pkgLevel {
@@ -49,16 +66,18 @@ func logLevelMapper(pkgLevel string) logrus.Level {
 // InitPackageLogger initialises the package loggers for given package name.
 // If the package log level is defined in the log_config.toml file, it override the
 // root log level.
-func InitPackageLogger(pkgName string) *logrus.Logger {
+func InitPackageLogger(pkgName string) Log {
 
 	pkgLogLevel := defaultLogLevel //default log level
-	isPackegeLevelDefined := false
+	isPackageLevelDefined := false
 
-	logger := logrus.New()
+	logger := Log{logrus.New()}
 	logger.SetReportCaller(true)
 
-	formatter := loggerFormat()
+	formatter := logFormatter
 	logger.SetFormatter(formatter)
+
+	logger.AddHook(&errorHook{})
 
 	logConf := config.ReadLogConfigs()
 
@@ -78,12 +97,12 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 	for _, pkg := range logConf.Pkg {
 		if pkg.Name == pkgName {
 			pkgLogLevel = logLevelMapper(pkg.LogLevel)
-			isPackegeLevelDefined = true
+			isPackageLevelDefined = true
 			break
 		}
 	}
 
-	if !isPackegeLevelDefined {
+	if !isPackageLevelDefined {
 		pkgLogLevel = logLevelMapper(logConf.LogLevel)
 	}
 

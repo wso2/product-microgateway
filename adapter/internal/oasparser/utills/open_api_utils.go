@@ -21,12 +21,14 @@ package utills
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 
 	// TODO: (VirajSalaka) remove outdated dependency
 	"unicode"
 
 	"github.com/ghodss/yaml"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // ToJSON converts a single YAML document into a JSON document
@@ -51,25 +53,26 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 	return bytes.HasPrefix(trim, prefix)
 }
 
-// FindSwaggerVersion finds the openapi version ("2" or "3") for the given
-// openAPI json content.
-func FindSwaggerVersion(jsn []byte) string {
-	var version string = "2"
+// FindAPIDefinitionVersion finds the API definition version for the given json content.
+func FindAPIDefinitionVersion(jsn []byte) string {
 	var result map[string]interface{}
 
 	err := json.Unmarshal(jsn, &result)
 	if err != nil {
-		logger.LoggerOasparser.Error("json unmarsheliing err when finding the swaggerVersion : ", err)
+		logger.LoggerOasparser.Error("Error while JSON unmarshalling to find the API definition version.", err)
 	}
 
-	if _, ok := result["swagger"]; ok {
-		version = "2"
-	} else if _, ok := result["openapi"]; ok {
-		version = "3"
-	} else {
-		logger.LoggerOasparser.Warn("swagger file version is not defined. Default version set as to 2 ")
-		return version
-
+	if _, ok := result[constants.Swagger]; ok {
+		return constants.Swagger2
+	} else if _, ok := result[constants.OpenAPI]; ok {
+		return constants.OpenAPI3
+	} else if versionNumber, ok := result[constants.AsyncAPI]; ok {
+		if strings.HasPrefix(versionNumber.(string), "2") {
+			return constants.AsyncAPI2
+		}
+		logger.LoggerOasparser.Errorf("AsyncAPI version %v is not supported.", versionNumber.(string))
+		return constants.NotSupported
 	}
-	return version
+	logger.LoggerOasparser.Error("API definition version is not defined.")
+	return constants.NotDefined
 }

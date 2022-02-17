@@ -204,6 +204,11 @@ private static final long serialVersionUID = 0L;
             organizationId_ = s;
             break;
           }
+          case 152: {
+
+            isMockedApi_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -872,6 +877,17 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int ISMOCKEDAPI_FIELD_NUMBER = 19;
+  private boolean isMockedApi_;
+  /**
+   * <code>bool isMockedApi = 19;</code>
+   * @return The isMockedApi.
+   */
+  @java.lang.Override
+  public boolean getIsMockedApi() {
+    return isMockedApi_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -939,6 +955,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getOrganizationIdBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 18, organizationId_);
+    }
+    if (isMockedApi_ != false) {
+      output.writeBool(19, isMockedApi_);
     }
     unknownFields.writeTo(output);
   }
@@ -1010,6 +1029,10 @@ private static final long serialVersionUID = 0L;
     if (!getOrganizationIdBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, organizationId_);
     }
+    if (isMockedApi_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(19, isMockedApi_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1070,6 +1093,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getVhost())) return false;
     if (!getOrganizationId()
         .equals(other.getOrganizationId())) return false;
+    if (getIsMockedApi()
+        != other.getIsMockedApi()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1130,6 +1155,9 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getVhost().hashCode();
     hash = (37 * hash) + ORGANIZATIONID_FIELD_NUMBER;
     hash = (53 * hash) + getOrganizationId().hashCode();
+    hash = (37 * hash) + ISMOCKEDAPI_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getIsMockedApi());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1330,6 +1358,8 @@ private static final long serialVersionUID = 0L;
 
       organizationId_ = "";
 
+      isMockedApi_ = false;
+
       return this;
     }
 
@@ -1411,6 +1441,7 @@ private static final long serialVersionUID = 0L;
       result.disableSecurity_ = disableSecurity_;
       result.vhost_ = vhost_;
       result.organizationId_ = organizationId_;
+      result.isMockedApi_ = isMockedApi_;
       onBuilt();
       return result;
     }
@@ -1592,6 +1623,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getOrganizationId().isEmpty()) {
         organizationId_ = other.organizationId_;
         onChanged();
+      }
+      if (other.getIsMockedApi() != false) {
+        setIsMockedApi(other.getIsMockedApi());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3563,6 +3597,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       organizationId_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean isMockedApi_ ;
+    /**
+     * <code>bool isMockedApi = 19;</code>
+     * @return The isMockedApi.
+     */
+    @java.lang.Override
+    public boolean getIsMockedApi() {
+      return isMockedApi_;
+    }
+    /**
+     * <code>bool isMockedApi = 19;</code>
+     * @param value The isMockedApi to set.
+     * @return This builder for chaining.
+     */
+    public Builder setIsMockedApi(boolean value) {
+      
+      isMockedApi_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool isMockedApi = 19;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearIsMockedApi() {
+      
+      isMockedApi_ = false;
       onChanged();
       return this;
     }

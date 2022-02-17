@@ -198,9 +198,9 @@ public class WebSocketThrottleFilter implements Filter {
     }
 
     private String getSubscriptionThrottleKey(int appId, String apiContext, String apiVersion) {
-        String subThrottleKey = appId + ':' + apiContext;
+        String subThrottleKey = appId + ":" + apiContext;
         if (!apiVersion.isBlank()) {
-            subThrottleKey += ':' + apiVersion;
+            subThrottleKey += ":" + apiVersion;
         }
         return subThrottleKey;
     }

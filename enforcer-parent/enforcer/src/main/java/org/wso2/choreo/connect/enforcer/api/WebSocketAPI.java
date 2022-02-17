@@ -127,23 +127,9 @@ public class WebSocketAPI implements API {
         }
         for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = RestAPI.buildResource(operation, res.getPath(), new HashMap<>());
+                ResourceConfig resConfig = RestAPI.buildResource(operation, res.getPath(), apiSecurity);
                 resConfig.setTier(api.getTier());
                 resources.add(resConfig);
-            }
-        }
-
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
-
-        for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
-            if (securityScheme.getType() != null) {
-                String definitionName = securityScheme.getDefinitionName();
-                SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
-                securitySchemaConfig.setDefinitionName(definitionName);
-                securitySchemaConfig.setType(securityScheme.getType());
-                securitySchemaConfig.setName(securityScheme.getName());
-                securitySchemaConfig.setIn(securityScheme.getIn());
-                securitySchemeDefinitions.put(definitionName, securitySchemaConfig);
             }
         }
 
@@ -153,7 +139,7 @@ public class WebSocketAPI implements API {
                 .apiSecurity(apiSecurity).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).endpoints(endpoints).resources(resources)
-                .securitySchemeDefinitions(securitySchemeDefinitions).build();
+                .securitySchemeDefinitions(securitySchemes).build();
         initFilters();
         initUpgradeFilters();
         return basePath;
@@ -168,6 +154,7 @@ public class WebSocketAPI implements API {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
             }
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
+            responseObject.setQueryParamsToAdd(requestContext.getQueryParamsToAdd());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
             }

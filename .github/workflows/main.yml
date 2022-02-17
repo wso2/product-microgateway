@@ -15,7 +15,7 @@ jobs:
       - name: Setup Go environment
         uses: actions/setup-go@v2
         with:
-          go-version: '1.15.x'
+          go-version: '1.16.x'
       - name: Cache M2 Repo
         uses: actions/cache@v1
         with:
@@ -37,7 +37,7 @@ jobs:
         run: echo ${{ steps.extract-project-version.outputs.version }}
       - name: Build with Maven
         run: |
-          #export PATH="${HOME}/go/bin:${PATH}"
+          export GOFLAGS=-mod=mod
           mvn clean install -PRelease -s .maven/settings.xml \
             -pl '!:integration' -pl '!:mock-backend-server' -pl '!:test-integration'
       - name: Run integration tests

@@ -20,6 +20,7 @@ package wso2.discovery.api;
 
 import "wso2/discovery/api/endpoint_cluster.proto";
 import "wso2/discovery/api/security_scheme.proto";
+import "wso2/discovery/api/mocked_api_config.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
 option java_package = "org.wso2.choreo.connect.discovery.api";
@@ -45,8 +46,25 @@ message Resource {
 
 // Operation model which maps to a particular http methods
 message Operation {
-    string method = 1;
-    repeated SecurityList security = 2;
-    string tier = 3;
-    bool disableSecurity = 4;
+	string method = 1;
+	repeated SecurityList security = 2;
+	string tier = 3;
+	bool disableSecurity = 4;
+	OperationPolicies policies = 5;
+	MockedApiConfig mockedApiConfig = 6;
+}
+
+// OperationPolicies holds policies of the APIM operations
+message OperationPolicies {
+	repeated Policy in = 1;
+	repeated Policy out = 2;
+	repeated Policy fault = 3;
+}
+
+// Policy holds APIM policies
+message Policy {
+	string policyName = 1;
+	string templateName = 2;
+	uint32 order = 3;
+	map<string, string> parameters = 4;
 }

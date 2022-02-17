@@ -64,13 +64,8 @@ public class StoreUtils {
 
     public static String generateUserAccessToken(String apimServiceURLHttps, String applicationId, User user,
                                                  RestAPIStoreImpl storeRestClient) throws CCTestException {
-        ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId,
-                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for the " +
-                "Applications Registration event to be received by the CC");
-        return StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                applicationKeyDTO.getConsumerKey(), applicationKeyDTO.getConsumerSecret(),
-                new String[]{"PRODUCTION"}, user, storeRestClient);
+        return generateUserAccessTokenProduction(apimServiceURLHttps, applicationId, user,
+                new String[]{}, storeRestClient);
     }
 
     public static String generateUserAccessTokenProduction(String apimServiceURLHttps, String applicationId, User user,
@@ -80,13 +75,31 @@ public class StoreUtils {
 
     public static String generateUserAccessTokenSandbox(String apimServiceURLHttps, String applicationId, User user,
                                                  RestAPIStoreImpl storeRestClient) throws CCTestException {
+        return generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId, user,
+                new String[]{}, storeRestClient);
+    }
+
+    public static String generateUserAccessTokenProduction(String apimServiceURLHttps, String applicationId, User user,
+                                                       String[] scopes, RestAPIStoreImpl storeRestClient)
+            throws CCTestException {
+        ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId,
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for the " +
+                "Applications Registration event to be received by the CC");
+        return generateUserAccessToken(apimServiceURLHttps,
+                applicationKeyDTO.getConsumerKey(), applicationKeyDTO.getConsumerSecret(),
+                scopes, user, storeRestClient);
+    }
+
+    public static String generateUserAccessTokenSandbox(String apimServiceURLHttps, String applicationId, User user,
+                                                        String[] scopes, RestAPIStoreImpl storeRestClient) throws CCTestException {
         ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId,
                 ApplicationKeyGenerateRequestDTO.KeyTypeEnum.SANDBOX, storeRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for the " +
                 "Applications Registration event to be received by the CC");
-        return StoreUtils.generateUserAccessToken(apimServiceURLHttps,
+        return generateUserAccessToken(apimServiceURLHttps,
                 applicationKeyDTO.getConsumerKey(), applicationKeyDTO.getConsumerSecret(),
-                new String[]{"SANDBOX"}, user, storeRestClient);
+                scopes, user, storeRestClient);
     }
 
     /**
@@ -132,6 +145,7 @@ public class StoreUtils {
                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
         if (Objects.isNull(response)) {
+            log.error("Error while subscribing to the API. API may not have been published.");
             throw new CCTestException(
                     "Error while subscribing to the API. API Id : " + apiId + ", Application Id: " + applicationId);
         }

@@ -101,26 +101,28 @@ public class TestConstant {
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
 
     public static final String LINE = "\r\n";
-    public static final String MOCK_BACKEND_DOCKER_IMAGE = "wso2/choreo-connect-mock-backend";
-
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
+    public static final String CONF_DIR = File.separator + "conf";
     public static final String DATABASE_DIR = File.separator + "database";
     public static final String TEST_DOCKER_COMPOSE_DIR = File.separator + "dockerCompose";
+    public static final String DOCKER_COMPOSE_DIR = File.separator + "docker-compose";
+    public static final String RESOURCES_DIR = File.separator + "resources";
+    public static final String SECURITY_DIR = File.separator + "security";
     public static final String CC_TEMP_PATH = File.separator + "choreo-connect-temp";
 
-    public static final String DOCKER_COMPOSE_DIR = File.separator + "docker-compose";
-    public static final String CONFIG_TOML_PATH = File.separator + "conf" + File.separator + "config.toml";
-    public static final String DEPLYMNT_TOML_PATH = File.separator + "conf" + File.separator + "deployment.toml";
+    public static final String CONFIG_TOML_PATH = CONF_DIR + File.separator + "config.toml";
+    public static final String DEPLYMNT_TOML_PATH = CONF_DIR + File.separator + "deployment.toml";
     public static final String DOCKER_COMPOSE_YAML_PATH = File.separator + "docker-compose.yaml";
+    public static final String CA_CERTS_FILE = File.separator + "ca-certificates.crt";
 
+    public static final String ROUTER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "router"
+            + SECURITY_DIR + File.separator + "truststore";
     public static final String DOCKER_COMPOSE_CC_DIR = DOCKER_COMPOSE_DIR + File.separator + "choreo-connect";
-    public static final String DOCKER_COMPOSE_CC_WITH_APIM_DIR = DOCKER_COMPOSE_DIR + File.separator
-            + "choreo-connect-with-apim";
-    public static final String DROPINS_FOLDER_PATH = DOCKER_COMPOSE_DIR + File.separator
-            + "resources" + File.separator + "enforcer" + File.separator + "dropins";
-    public static final String STARTUP_APIS_DIR = File.separator + "resources" + File.separator
+    public static final String DROPINS_FOLDER_PATH = DOCKER_COMPOSE_DIR + RESOURCES_DIR
+            + File.separator + "enforcer" + File.separator + "dropins";
+    public static final String STARTUP_APIS_DIR = RESOURCES_DIR + File.separator
             + "adapter" + File.separator + "artifacts" + File.separator + "apis";
 
     public static final String HEALTH_ENDPOINT_RESPONSE = "{\"status\": \"healthy\"}";
