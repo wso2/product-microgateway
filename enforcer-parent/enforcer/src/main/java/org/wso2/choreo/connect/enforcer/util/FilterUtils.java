@@ -143,7 +143,8 @@ public class FilterUtils {
             KeyManagerFactory keyMgrFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             keyMgrFactory.init(opaKeyStore, null);
             return opaKeyStore;
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | EnforcerException | UnrecoverableKeyException e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | EnforcerException
+                | UnrecoverableKeyException e) {
             log.error("Error creating client KeyStore by loading cert and key from file", e);
             return null;
         }
@@ -155,15 +156,15 @@ public class FilterUtils {
      * @param protocol- service endpoint protocol. It can be http/https
      * @return PoolManager
      */
-    private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(String protocol, KeyStore clientKeyStore)
-            throws EnforcerException {
+    private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(
+            String protocol, KeyStore clientKeyStore) throws EnforcerException {
 
         PoolingHttpClientConnectionManager poolManager;
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             SSLConnectionSocketFactory socketFactory = createSocketFactory(clientKeyStore);
             org.apache.http.config.Registry<ConnectionSocketFactory> socketFactoryRegistry =
                     RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register(APIConstants.HTTPS_PROTOCOL, socketFactory).build();
+                            .register(APIConstants.HTTPS_PROTOCOL, socketFactory).build();
             poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         } else {
             poolManager = new PoolingHttpClientConnectionManager();
@@ -457,20 +458,32 @@ public class FilterUtils {
      * @param e - APISecurityException thrown when validation failure happens at filter level.
      */
     public static void setErrorToContext(RequestContext requestContext, APISecurityException e) {
-        Map<String, Object> requestContextProperties = requestContext.getProperties();
-        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
-            requestContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE, e.getStatusCode());
+        setErrorToContext(requestContext, e.getErrorCode(), e.getStatusCode(), e.getMessage());
+    }
+
+    /**
+     * Set error related details to the {@link RequestContext}.
+     *
+     * @param context request context object to set the details.
+     * @param errorCode internal wso2 throttle error code.
+     * @param statusCode HTTP status code.
+     * @param desc description of error.
+     */
+    public static void setErrorToContext(RequestContext context, int errorCode, int statusCode, String desc) {
+        Map<String, Object> properties = context.getProperties();
+        if (!properties.containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
+            properties.put(APIConstants.MessageFormat.STATUS_CODE, statusCode);
         }
-        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
-            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, e.getErrorCode());
+        if (!properties.containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+            properties.put(APIConstants.MessageFormat.ERROR_CODE, errorCode);
         }
-        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_MESSAGE)) {
-            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                    APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+        if (!properties.containsKey(APIConstants.MessageFormat.ERROR_MESSAGE)) {
+            properties.put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                    APISecurityConstants.getAuthenticationFailureMessage(errorCode));
         }
-        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_DESCRIPTION)) {
-            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
+        if (!properties.containsKey(APIConstants.MessageFormat.ERROR_DESCRIPTION)) {
+            properties.put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                    APISecurityConstants.getFailureMessageDetailDescription(errorCode, desc));
         }
     }
 

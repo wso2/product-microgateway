@@ -30,10 +30,11 @@ import java.util.ServiceLoader;
  */
 public class OPAClient {
     private static final Logger log = LogManager.getLogger(OPAClient.class);
-    private static final String DEFAULT_REQUEST_GENERATOR_CLASS = "org.wso2.choreo.connect.enforcer.commons.model.RequestContext.OPADefaultRequestGenerator";
+    private static final String DEFAULT_REQUEST_GENERATOR_CLASS =
+            "org.wso2.choreo.connect.enforcer.commons.model.RequestContext.OPADefaultRequestGenerator";
     private static final OPAClient opaClient = new OPAClient();
 
-    private final OPARequestGenerator DEFAULT_REQUEST_GENERATOR = new OPADefaultRequestGenerator();
+    private final OPARequestGenerator defaultRequestGenerator = new OPADefaultRequestGenerator();
     private final Map<String, OPARequestGenerator> requestGeneratorMap = new HashMap<>();
 
     private OPAClient() {
@@ -47,16 +48,16 @@ public class OPAClient {
         return opaClient;
     }
 
-    public boolean validateRequest(RequestContext requestContext, Map<String, String> policyAttrib) throws OPASecurityException {
+    public boolean validateRequest(RequestContext requestContext, Map<String, String> policyAttrib)
+            throws OPASecurityException {
         String requestGeneratorClassName = policyAttrib.get("requestGenerator");
         OPARequestGenerator requestGenerator = requestGeneratorMap.get(requestGeneratorClassName);
         if (requestGenerator == null) {
             log.error("OPA Request Generator Implementation is not found in the classPath under the provided name: {}",
                     requestGeneratorClassName);
-            // TODO: (renuka) check error code?
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                    APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
+                    "Error creating request to remote authorization service");
         }
 
         String serverUrl = policyAttrib.get("serverUrl");
@@ -76,16 +77,17 @@ public class OPAClient {
         for (OPARequestGenerator generator : loader) {
             requestGeneratorMap.put(generator.getClass().getName(), generator);
         }
-        requestGeneratorMap.put("", DEFAULT_REQUEST_GENERATOR);
-        requestGeneratorMap.put(null, DEFAULT_REQUEST_GENERATOR);
-        requestGeneratorMap.put(DEFAULT_REQUEST_GENERATOR_CLASS, DEFAULT_REQUEST_GENERATOR);
+        requestGeneratorMap.put("", defaultRequestGenerator);
+        requestGeneratorMap.put(null, defaultRequestGenerator);
+        requestGeneratorMap.put(DEFAULT_REQUEST_GENERATOR_CLASS, defaultRequestGenerator);
     }
 
     private static String callOPAServer(String serverEp, String payload, String token) throws OPASecurityException {
         try {
             URL url = new URL(serverEp);
             KeyStore opaKeyStore = ConfigHolder.getInstance().getOpaKeyStore();
-            try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol(), opaKeyStore)) {
+            try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol(),
+                    opaKeyStore)) {
                 HttpPost httpPost = new HttpPost(serverEp);
                 HttpEntity reqEntity = new ByteArrayEntity(payload.getBytes(Charset.defaultCharset()));
                 httpPost.setEntity(reqEntity);
@@ -107,8 +109,8 @@ public class OPAClient {
         } catch (IOException e) {
             log.error("Error calling the OPA server with server endpoint: {}", serverEp);
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    APIConstants.SERVER_ERROR, e);
+                    APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
+                    "Error while calling remote authorization server", e);
         }
     }
 }

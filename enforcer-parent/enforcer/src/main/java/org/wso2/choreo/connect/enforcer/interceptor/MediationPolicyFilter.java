@@ -18,27 +18,18 @@
 package org.wso2.choreo.connect.enforcer.interceptor;
 
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.interceptor.opa.OPAClient;
 import org.wso2.choreo.connect.enforcer.interceptor.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -162,35 +153,16 @@ public class MediationPolicyFilter implements Filter {
             boolean isValid = OPAClient.getInstance().validateRequest(requestContext, policyAttrib);
             if (!isValid) {
                 log.error("OPA validation failed for the request: " + requestContext.getRequestPath());
-                FilterUtils.setUnauthenticatedErrorToContext(requestContext); // make this unauthorized
+                FilterUtils.setErrorToContext(requestContext,
+                        APISecurityConstants.REMOTE_AUTHORIZATION_AUTH_FORBIDDEN,
+                        APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        "Request authorization failure at the remote authorization server");
             }
             return isValid;
         } catch (OPASecurityException e) {
-            // TODO: (renuka) do we want to log error if opa correctly responds with auth failed without connection error
             log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(), e);
             FilterUtils.setErrorToContext(requestContext, e);
             return false;
-        }
-    }
-
-    // TODO: temp for testing purpose
-    private static String callOpa(String endpoint) throws IOException {
-        URL url = new URL(endpoint);
-        try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
-            HttpPost httpPost = new HttpPost(endpoint);
-            String payload = "{\"input\":{\"servers\":[{\"id\":\"app\",\"protocols\":[\"https\",\"ssh\"],\"ports\":[\"p1\",\"p2\",\"p3\"]},{\"id\":\"db\",\"protocols\":[\"mysql\"],\"ports\":[\"p3\"]},{\"id\":\"cache\",\"protocols\":[\"memcache\"],\"ports\":[\"p3\"]},{\"id\":\"ci\",\"protocols\":[\"http\"],\"ports\":[\"p1\",\"p2\"]},{\"id\":\"busybox\",\"protocols\":[\"telnet\"],\"ports\":[\"p1\"]}],\"networks\":[{\"id\":\"net1\",\"public\":false},{\"id\":\"net2\",\"public\":false},{\"id\":\"net3\",\"public\":true},{\"id\":\"net4\",\"public\":true}],\"ports\":[{\"id\":\"p1\",\"network\":\"net1\"},{\"id\":\"p2\",\"network\":\"net3\"},{\"id\":\"p3\",\"network\":\"net2\"}]}}";
-            HttpEntity reqEntity = new ByteArrayEntity(payload.getBytes(StandardCharsets.UTF_8));
-            httpPost.setEntity(reqEntity);
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    HttpEntity entity = response.getEntity();
-                    try (InputStream content = entity.getContent()) {
-                        return IOUtils.toString(content, Charset.defaultCharset());
-                    }
-                } else {
-                    return null;
-                }
-            }
         }
     }
 }

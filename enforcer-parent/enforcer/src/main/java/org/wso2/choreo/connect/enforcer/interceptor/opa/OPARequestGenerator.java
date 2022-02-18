@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * OPA request generator interface to handle OPA policy validation payload and validation response.
  */
-public interface OPARequestGenerator { // TODO: (renuka) interface name in synapse is "OPARequestGenerator" https://github.com/wso2/wso2-synapse/pull/1899/files
+public interface OPARequestGenerator {
 
     /**
      * Generate the OPA request payload from the provided request context and the additional Properties Map.
@@ -37,7 +37,8 @@ public interface OPARequestGenerator { // TODO: (renuka) interface name in synap
      * @return json payload as an array of bytes be sent to the OPA server for validation
      * @throws OPASecurityException If an authentication failure or some other error occurs
      */
-    String generateRequest(String policyName, String rule, Map<String, Object> advancedProperties, RequestContext requestContext) throws OPASecurityException;
+    String generateRequest(String policyName, String rule, Map<String, Object> advancedProperties,
+                           RequestContext requestContext) throws OPASecurityException;
     // TODO: (renuka) returns byte[]? string in https://github.com/wso2/wso2-synapse/pull/1899/files
     // TODO: (renuka) method name
 
@@ -50,7 +51,8 @@ public interface OPARequestGenerator { // TODO: (renuka) interface name in synap
      * @param requestContext Request context details to be validated
      * @throws OPASecurityException If an authentication failure or some other error occurs
      */
-    boolean validateResponse(String policyName, String rule, String opaResponse, RequestContext requestContext) throws OPASecurityException;
-    // TODO: (renuka) returns void? bool in https://github.com/wso2/wso2-synapse/pull/1899/files
-    // TODO: (renuka) method name
+    boolean validateResponse(String policyName, String rule, String opaResponse, RequestContext requestContext)
+            throws OPASecurityException;
+    // TODO: (renuka) method name in https://github.com/wso2/wso2-synapse/pull/1899/files
+    // TODO: (renuka) return exception for auth error, without bool (but we can log minor level, if bool is returned)
 }
