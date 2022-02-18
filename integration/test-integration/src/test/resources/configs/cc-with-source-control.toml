@@ -19,6 +19,7 @@ artifactsDirectory = "/home/wso2/git-artifacts"
   enabled = true
   pollInterval = 2
   retryInterval = 5
+  maxRetryCount = 60
   artifactsDirectory = "/home/wso2/git-artifacts"
   [adapter.sourceControl.repository]
     URL = "http://gitlab/root/testProject"

@@ -49,13 +49,14 @@ func Start() {
 	conf, _ := config.ReadConfigs()
 
 	retryInterval := conf.Adapter.SourceControl.RetryInterval
+	maxRetryCount := conf.Adapter.SourceControl.MaxRetryCount
 
 	loggers.LoggerSourceWatcher.Info("Starting source watcher")
 	// Fetch the API artifacts at the startup
 	repository, err := fetchArtifacts()
 
 	// Retry fetching the API artifacts if the first attempt fails
-	for {
+	for retries := 0; retries < maxRetryCount; retries++ {
 		if err == nil {
 			break
 		} else {
@@ -63,6 +64,15 @@ func Start() {
 			loggers.LoggerSourceWatcher.Info("Retrying fetching artifacts from the remote repository")
 			repository, err = fetchArtifacts()
 		}
+	}
+
+	if err != nil {
+		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
+			Message: fmt.Sprintf("Error while fetching artifacts from the remote repository at startup : %s", err.Error()),
+			Severity: logging.CRITICAL,
+			ErrorCode: 2511,
+		})
+		return
 	}
 
 	artifactsMap, err = api.ProcessMountedAPIProjects()
@@ -91,9 +101,9 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 
 	// If a local repository exists, pull the changes from the remote repository
 	if repository != nil {
-		loggers.LoggerSourceWatcher.Info("Starting to fetch changes from remote repository")
+		loggers.LoggerSourceWatcher.Info("Local repository exists, pulling changes from the remote repository %s.", repositoryURL)
 
-		compareRepository(repository)
+		pullRepositoryIfUpdated(repository)
 
 		return repository, nil
 	}
@@ -118,14 +128,14 @@ func fetchArtifacts() (repository *git.Repository,err error) {
 		cloneOptions.ReferenceName = plumbing.ReferenceName(branchHead + branch)
 	}
 
-	loggers.LoggerSourceWatcher.Infof("Fetching API artifacts from remote repository %s", repositoryURL)
+	loggers.LoggerSourceWatcher.Infof("Cloning remote repository with API artifacts from  %s", repositoryURL)
 
 	// Clones the  remote repository
 	repository, err = git.PlainClone(artifactsDirName, false, cloneOptions)
 
 	if err != nil {
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{
-			Message: fmt.Sprintf("Error while fetching artifacts from the remote repository %s : %s", repositoryURL, err.Error()),
+			Message: fmt.Sprintf("Error while cloning the remote repository with API artifacts from %s : %s", repositoryURL, err.Error()),
 			Severity: logging.CRITICAL,
 			ErrorCode: 2502,
 		})
@@ -141,14 +151,14 @@ func pollChanges(repository *git.Repository){
 
 	pollInterval := conf.Adapter.SourceControl.PollInterval
 	for {
-		loggers.LoggerSourceWatcher.Debugf("Polling changes from the remote repository")
+		loggers.LoggerSourceWatcher.Debugf("Polling changes from the remote repository %s", conf.Adapter.SourceControl.Repository.URL)
 		<- time.After(time.Duration(pollInterval) * time.Second)
-		go compareRepository(repository)
+		go pullRepositoryIfUpdated(repository)
 	}
 }
 
-// compareRepository compares the hashes of the local and remote repositories and pulls if there are any changes
-func compareRepository(localRepository *git.Repository){
+// pullRepositoryIfUpdated compares the hashes of the local and remote repositories and pulls if there are any changes
+func pullRepositoryIfUpdated(localRepository *git.Repository){
 	remote, err := localRepository.Remote("origin")
 	if err != nil{
 		loggers.LoggerSourceWatcher.ErrorC(logging.ErrorDetails{

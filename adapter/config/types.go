@@ -189,6 +189,8 @@ type sourceControl struct {
 	PollInterval int
 	// RetryInterval how frequently the source watcher should retry to fetching artifacts from the remote repository (in seconds)
 	RetryInterval int
+	// MaxRetryCount is the maximum number of times the source watcher should retry to fetching artifacts from the remote repository
+	MaxRetryCount int
 	// ArtifactsDirectory is the FilePath where the api artifacts are created when fetched from the remote repository
 	ArtifactsDirectory string
 	// Repository configurations

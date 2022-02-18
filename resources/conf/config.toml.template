@@ -71,6 +71,8 @@ artifactsDirectory = "/home/wso2/artifacts"
   pollInterval = 30
   # Time interval (in seconds) in which the adapter should retry fetching artifacts from the remote repository at startup
   retryInterval = 5
+  # Maximum number of retries for fetching artifacts from the remote repository at startup
+  maxRetryCount = 20
   # The directory path where the git artifacts are stored
   artifactsDirectory = "/home/wso2/git-artifacts"
   # Configurations of the repository

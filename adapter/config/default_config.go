@@ -62,6 +62,7 @@ var defaultConfig = &Config{
 			Enabled: false,
 			PollInterval: 30,
 			RetryInterval: 5,
+			MaxRetryCount: 20,
 			ArtifactsDirectory: "/home/wso2/git-artifacts",
 		},
 	},
