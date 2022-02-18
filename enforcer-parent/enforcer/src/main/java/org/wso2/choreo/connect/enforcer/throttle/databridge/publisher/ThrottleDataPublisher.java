@@ -21,6 +21,8 @@ package org.wso2.choreo.connect.enforcer.throttle.databridge.publisher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.DataPublisher;
@@ -77,7 +79,7 @@ public class ThrottleDataPublisher {
         } catch (DataEndpointException | DataEndpointConfigurationException | DataEndpointAuthenticationException
                 | TransportException e) {
             LOG.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                    e.getMessage(), e);
+                    e.getMessage(), ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 6902), e);
         }
     }
 
@@ -108,7 +110,8 @@ public class ThrottleDataPublisher {
                 LOG.debug("Throttle data publisher pool is not initialized.");
             }
         } catch (Exception e) {
-            LOG.error("Error while publishing throttling events to global policy server", e);
+            LOG.error("Error while publishing throttling events to global policy server",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 6903), e);
         }
     }
 
@@ -135,7 +138,8 @@ public class ThrottleDataPublisher {
                 DataProcessAndPublishingAgent agent = (DataProcessAndPublishingAgent) r;
                 ThrottleDataPublisher.dataPublisherPool.release(agent);
             } catch (Exception e) {
-                LOG.error("Error while returning Throttle data publishing agent back to pool" + e.getMessage());
+                LOG.error("Error while returning Throttle data publishing agent back to pool" + e.getMessage(),
+                        ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 6904));
             }
         }
     }
