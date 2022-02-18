@@ -86,7 +86,7 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 }
 
 // ProcessMountedAPIProjects iterates through the api artifacts directory and apply the projects located within the directory.
-func ProcessMountedAPIProjects() (err error) {
+func ProcessMountedAPIProjects() (artifactsMap map[string]model.ProjectAPI, err error) {
 	conf, _ := config.ReadConfigs()
 	apisDirName := filepath.FromSlash(conf.Adapter.ArtifactsDirectory + "/" + apisArtifactDir)
 	files, err := ioutil.ReadDir((apisDirName))
@@ -98,11 +98,18 @@ func ProcessMountedAPIProjects() (err error) {
 		})
 		// If Adapter Server which accepts apictl projects is closed then the adapter should not proceed.
 		if !conf.Adapter.Server.Enabled {
-			return err
+			return nil, err
 		}
 	}
 
+	artifactsMap = make(map[string]model.ProjectAPI)
+
 	for _, apiProjectFile := range files {
+		// Ignore processing dot files and directories
+		if strings.HasPrefix(apiProjectFile.Name(), ".") {
+			continue
+		}
+
 		if apiProjectFile.IsDir() {
 			apiProject := model.ProjectAPI{
 				EndpointCerts: make(map[string]string),
@@ -138,8 +145,8 @@ func ProcessMountedAPIProjects() (err error) {
 				continue
 			}
 
-			overrideValue := false
-			err = validateAndUpdateXds(apiProject, &overrideValue)
+			overrideValue := true
+			apiProject, err = validateAndUpdateXds(apiProject, &overrideValue)
 			if err != nil {
 				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
 					Message:   fmt.Sprintf("Error while processing(validate and update xds) api artifact - %s during startup : %v", apiProjectFile.Name(), err.Error()),
@@ -148,6 +155,7 @@ func ProcessMountedAPIProjects() (err error) {
 				})
 				continue
 			}
+			artifactsMap[apiProjectFile.Name()] = apiProject
 			continue
 		} else if !strings.HasSuffix(apiProjectFile.Name(), zipExt) {
 			continue
@@ -163,8 +171,8 @@ func ProcessMountedAPIProjects() (err error) {
 		}
 
 		// logger.LoggerMgw.Debugf("API artifact  - %s is read successfully.", file.Name())
-		overrideAPIParam := false
-		err = ApplyAPIProjectInStandaloneMode(data, &overrideAPIParam)
+		overrideAPIParam := true
+		apiProject, err := ApplyAPIProjectInStandaloneMode(data, &overrideAPIParam)
 		if err != nil {
 			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
 				Message:   fmt.Sprintf("Error while processing(apply api project in standalone mode) api artifact - %s during startup : %v", apiProjectFile.Name(), err.Error()),
@@ -173,11 +181,12 @@ func ProcessMountedAPIProjects() (err error) {
 			})
 			continue
 		}
+		artifactsMap[apiProjectFile.Name()] = apiProject
 	}
-	return nil
+	return artifactsMap, nil
 }
 
-func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err error) {
+func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (updatedAPIProject model.ProjectAPI, err error) {
 	apiYaml := apiProject.APIYaml.Data
 
 	// handle panic
@@ -220,7 +229,7 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err erro
 		if exists {
 			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.",
 				apiYaml.Name, apiYaml.Version)
-			return errors.New(constants.AlreadyExists)
+			return updatedAPIProject, errors.New(constants.AlreadyExists)
 		}
 	}
 	vhostToEnvsMap := make(map[string][]string)
@@ -236,7 +245,8 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (err erro
 			return
 		}
 	}
-	return nil
+	updatedAPIProject = apiProject
+	return updatedAPIProject, nil
 }
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
@@ -313,10 +323,10 @@ func ApplyAPIProjectFromAPIM(
 
 // ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
 // between create and update using the override param
-func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error) {
-	apiProject, err := extractAPIProject(payload)
+func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (apiProject model.ProjectAPI, err error) {
+	apiProject, err = extractAPIProject(payload)
 	if err != nil {
-		return err
+		return apiProject, err
 	}
 	return validateAndUpdateXds(apiProject, override)
 }
