@@ -7,7 +7,7 @@ servers:
     url: 'ws://mockBackend:2385/v2'
     protocol: ws
 channels:
-  /notifications:
+  /*:
     publish: {}
 components:
   securitySchemes:

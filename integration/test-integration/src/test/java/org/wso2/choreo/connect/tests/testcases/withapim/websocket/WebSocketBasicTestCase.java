@@ -51,7 +51,7 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
                 user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        endpointURL = Utils.getServiceURLWs(API_CONTEXT);
+        endpointURL = Utils.getServiceURLWebSocket(API_CONTEXT + "/1.0.0");
     }
 
     @Test(description = "Dummy test")

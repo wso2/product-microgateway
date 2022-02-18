@@ -29,6 +29,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
@@ -74,8 +75,16 @@ public final class WsClient {
             if (!"ws".equalsIgnoreCase(scheme) && !"wss".equalsIgnoreCase(scheme)) {
                 throw new CCTestException("Only ws and wss schemes are supported.");
             }
+            if (uri.getPort() == -1) {
+                log.error("Invalid port provided. URI: {}", url);
+                throw new CCTestException("Invalid port provided");
+            }
+            HttpHeaders httpHeaders = new DefaultHttpHeaders();
+            for (Map.Entry<String, String> header: headers.entrySet()) {
+                httpHeaders.add(header.getKey(), header.getValue());
+            }
             WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(
-                    uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders(),
+                    uri, WebSocketVersion.V13, null, true, httpHeaders,
                     65536, true, false, 10000L);
             final WsClientHandler handler = new WsClientHandler(handshaker, receivedMessages);
 

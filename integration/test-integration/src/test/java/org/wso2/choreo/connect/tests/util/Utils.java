@@ -38,6 +38,8 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -396,9 +398,8 @@ public class Utils {
                 .toString();
     }
 
-    public static String getServiceURLWs(String servicePath) throws MalformedURLException {
-        return new URL(new URL("ws://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT), servicePath)
-                .toString();
+    public static String getServiceURLWebSocket(String servicePath) throws URISyntaxException {
+        return new URI("ws://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT + "/" + servicePath).toString();
     }
 
     public static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
