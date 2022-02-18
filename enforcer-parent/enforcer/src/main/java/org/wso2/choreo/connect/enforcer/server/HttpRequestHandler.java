@@ -42,12 +42,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
 
     public ResponseObject process(CheckRequest request) {
         API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
-
-        // putting API details into ThreadContext for logging purposes
-        ThreadContext.push(matchedAPI.getAPIConfig().getName());
-        ThreadContext.push(matchedAPI.getAPIConfig().getOrganizationId());
-        ThreadContext.push(matchedAPI.getAPIConfig().getBasePath());
-
         if (matchedAPI == null) {
             ResponseObject responseObject = new ResponseObject();
             responseObject.setStatusCode(APIConstants.StatusCodes.NOTFOUND.getCode());
@@ -56,10 +50,14 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
             responseObject.setErrorMessage(APIConstants.NOT_FOUND_MESSAGE);
             responseObject.setErrorDescription(APIConstants.NOT_FOUND_DESCRIPTION);
             return responseObject;
-        } else if (logger.isDebugEnabled()) {
-            APIConfig api = matchedAPI.getAPIConfig();
-            logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
         }
+        APIConfig api = matchedAPI.getAPIConfig();
+        logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
+
+        // putting API details into ThreadContext for logging purposes
+        ThreadContext.push(api.getName());
+        ThreadContext.push(api.getOrganizationId());
+        ThreadContext.push(api.getBasePath());
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
         ResponseObject responseObject = matchedAPI.process(requestContext);
