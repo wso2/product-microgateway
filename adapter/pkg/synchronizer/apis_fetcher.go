@@ -35,6 +35,7 @@ import (
 	"time"
 
 	parser "github.com/mitchellh/mapstructure"
+	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/pkg/auth"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
@@ -64,33 +65,28 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	userName string, password string, skipSSL bool, truststoreLocation string,
 	resourceEndpoint string, sendType bool, apiUUIDList []string, requestTimeOut time.Duration) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
-	respSyncAPI := SyncAPIResponse{}
-	var (
-		req       *http.Request
-		err       error
-		resp      *http.Response
-		respBytes []byte
-		bodyJSON  []byte
-	)
-	// postData contains the API UUID list in the payload of the post request.
-	type postData struct {
-		Uuids []string `json:"uuids"`
+	req := ConstructControlPlaneRequest(id, gwLabel, serviceURL, userName, password, skipSSL, truststoreLocation, resourceEndpoint, sendType, apiUUIDList)
+	workerReq := WorkerRequest{
+		Req:                *req,
+		APIUUID:            id,
+		SyncAPIRespChannel: c,
 	}
-	// NOTE: Getting resourceEndpoint as a parameter since GA and LA use different endpoints.
-	if strings.HasSuffix(serviceURL, "/") {
-		serviceURL += resourceEndpoint
-	} else {
-		serviceURL += "/" + resourceEndpoint
+	if gwLabel != nil {
+		workerReq.labels = gwLabel
 	}
-	logger.LoggerSync.Debugf("Fetching APIs from the URL %v: ", serviceURL)
 
-	basicAuth := "Basic " + auth.GetBasicAuth(userName, password)
+	WorkerPool.Enqueue(workerReq)
+}
 
-	// Check if TLS is enabled
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
+// SendRequestToControlPlane is the function triggered to send the request to the control plane.
+// It returns true if a response is received from the api manager.
+func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []string, c chan SyncAPIResponse) bool {
+	var tr *http.Transport
+	conf, _ := config.ReadConfigs()
+	skipSSL := conf.ControlPlane.SkipSSLVerification
+	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 	if !skipSSL {
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
+		caCertPool := tlsutils.GetTrustedCertPool(conf.Adapter.Truststore.Location)
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}
@@ -105,6 +101,80 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 		Transport: tr,
 		Timeout:   requestTimeOut * time.Second,
 	}
+	// Make the request
+	logger.LoggerSync.Debug("Sending the controle plane request")
+	resp, err := client.Do(req)
+
+	respSyncAPI := SyncAPIResponse{}
+
+	if apiID != nil {
+		respSyncAPI.APIUUID = *apiID
+	}
+	if len(gwLabels) > 0 {
+		respSyncAPI.GatewayLabels = gwLabels
+	}
+
+	// In the event of a connection error, the error would not be nil, then return the error
+	// If the error is not null, proceed
+	if err != nil {
+		logger.LoggerSync.Errorf("Error occurred while retrieving APIs from API manager: %v", err)
+		respSyncAPI.Err = err
+		respSyncAPI.Resp = nil
+		c <- respSyncAPI
+		return false
+	}
+
+	// get the response in the form of a byte slice
+	respBytes, err := ioutil.ReadAll(resp.Body)
+
+	// If the reading response gives an error
+	if err != nil {
+		logger.LoggerSync.Errorf("Error occurred while reading the response: %v", err)
+		respSyncAPI.Err = err
+		respSyncAPI.ErrorCode = resp.StatusCode
+		respSyncAPI.Resp = nil
+		c <- respSyncAPI
+		return false
+	}
+	// For successful response, return the byte slice and nil as error
+	if resp.StatusCode == http.StatusOK {
+		respSyncAPI.Err = nil
+		respSyncAPI.Resp = respBytes
+		c <- respSyncAPI
+		return true
+	}
+	// If the response is not successful, create a new error with the response and log it and return
+	// Ex: for 401 scenarios, 403 scenarios.
+	logger.LoggerSync.Errorf("Failure response: %v", string(respBytes))
+	respSyncAPI.Err = errors.New(string(respBytes))
+	respSyncAPI.Resp = nil
+	respSyncAPI.ErrorCode = resp.StatusCode
+	c <- respSyncAPI
+	return true
+}
+
+// ConstructControlPlaneRequest constructs the http Request used to send to the control plane
+func ConstructControlPlaneRequest(id *string, gwLabel []string, serviceURL string,
+	userName string, password string, skipSSL bool, truststoreLocation string,
+	resourceEndpoint string, sendType bool, apiUUIDList []string) *http.Request {
+	var (
+		req      *http.Request
+		err      error
+		bodyJSON []byte
+	)
+	// postData contains the API UUID list in the payload of the post request.
+	type postData struct {
+		Uuids []string `json:"uuids"`
+	}
+	// NOTE: Getting resourceEndpoint as a parameter since GA and LA use different endpoints.
+	if strings.HasSuffix(serviceURL, "/") {
+		serviceURL += resourceEndpoint
+	} else {
+		serviceURL += "/" + resourceEndpoint
+	}
+	logger.LoggerSync.Debugf("Fetching APIs from the URL %v: ", serviceURL)
+
+	basicAuth := "Basic " + auth.GetBasicAuth(userName, password)
 
 	// Populating the payload body with API UUID list
 	if apiUUIDList != nil {
@@ -132,13 +202,13 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	// If an API ID is present, make a query parameter
 	if id != nil {
 		logger.LoggerSync.Debugf("API ID: %v", *id)
-		respSyncAPI.APIUUID = *id
+		// respSyncAPI.APIUUID = *id
 		q.Add(apiID, *id)
 	}
 	// If the gateway label is present, make a query parameter
 	if len(gwLabel) > 0 {
 		logger.LoggerSync.Debugf("Gateway Label: %v", gwLabel)
-		respSyncAPI.GatewayLabels = gwLabel
+		// respSyncAPI.GatewayLabels = gwLabel
 		gatewaysQStr := strings.Join(gwLabel, "|")
 		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(gatewaysQStr)))
 	}
@@ -154,46 +224,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	if apiUUIDList != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	// Make the request
-	logger.LoggerSync.Debug("Sending the controle plane request")
-	resp, err = client.Do(req)
-	// In the event of a connection error, the error would not be nil, then return the error
-	// If the error is not null, proceed
-	if err != nil {
-		logger.LoggerSync.Errorf("Error occurred while retrieving APIs from API manager: %v", err)
-		respSyncAPI.Err = err
-		respSyncAPI.Resp = nil
-		c <- respSyncAPI
-		return
-	}
-
-	// get the response in the form of a byte slice
-	respBytes, err = ioutil.ReadAll(resp.Body)
-
-	// If the reading response gives an error
-	if err != nil {
-		logger.LoggerSync.Errorf("Error occurred while reading the response: %v", err)
-		respSyncAPI.Err = err
-		respSyncAPI.ErrorCode = resp.StatusCode
-		respSyncAPI.Resp = nil
-		c <- respSyncAPI
-		return
-	}
-	// For successful response, return the byte slice and nil as error
-	if resp.StatusCode == http.StatusOK {
-		respSyncAPI.Err = nil
-		respSyncAPI.Resp = respBytes
-		c <- respSyncAPI
-		return
-	}
-	// If the response is not successful, create a new error with the response and log it and return
-	// Ex: for 401 scenarios, 403 scenarios.
-	logger.LoggerSync.Errorf("Failure response: %v", string(respBytes))
-	respSyncAPI.Err = errors.New(string(respBytes))
-	respSyncAPI.Resp = nil
-	respSyncAPI.ErrorCode = resp.StatusCode
-	c <- respSyncAPI
-	return
+	return req
 }
 
 // RetryFetchingAPIs function keeps retrying to fetch APIs from runtime-artifact endpoint.
