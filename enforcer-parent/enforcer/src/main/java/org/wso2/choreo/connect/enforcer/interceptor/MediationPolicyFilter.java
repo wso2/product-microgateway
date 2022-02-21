@@ -92,7 +92,8 @@ public class MediationPolicyFilter implements Filter {
                 return opaAuthValidation(requestContext, policy.getParameters());
             }
         }
-        // TODO: invalid policy, log error here
+
+        log.error("Operation policy action \"{}\" is not supported", policy.getAction());
         return false;
     }
 

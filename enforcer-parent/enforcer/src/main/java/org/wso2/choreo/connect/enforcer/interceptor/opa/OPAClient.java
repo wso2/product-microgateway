@@ -67,7 +67,7 @@ public class OPAClient {
         // TODO: (renuka) handle additionalProperties, check with APIM
 
         String requestBody = requestGenerator.generateRequest(policyName, ruleName, null, requestContext);
-        String evaluatingPolicyUrl = serverUrl + "/" + policyName + "/" + ruleName;
+        String evaluatingPolicyUrl = serverUrl + "/" + policyName + "/" + ruleName; // including multiple "/" is fine.
         String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token);
         return requestGenerator.validateResponse(policyName, ruleName, opaResponse, requestContext);
     }

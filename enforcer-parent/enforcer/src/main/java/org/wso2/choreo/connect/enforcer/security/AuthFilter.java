@@ -285,8 +285,10 @@ public class AuthFilter implements Filter {
     private void setInterceptorAuthContextMetadata(Authenticator authenticator, RequestContext requestContext) {
         // add auth context to metadata, lua script will add it to the auth context of the interceptor
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        String tokenType = authenticator.getName();
+        authContext.setTokenType(tokenType);
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN_TYPE,
-                Objects.toString(authenticator.getName(), ""));
+                Objects.toString(tokenType, ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN,
                 Objects.toString(authContext.getRawToken(), ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,

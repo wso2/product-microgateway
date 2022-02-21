@@ -176,7 +176,7 @@ public class FilterUtils {
         SSLContext sslContext;
         try {
             KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
-            // TODO: (renuka) SSLContextBuilder is deprecated
+            // TODO: (renuka) existing SSLContextBuilder is deprecated
             SSLContextBuilder sslContextBuilder = SSLContexts.custom().loadTrustMaterial(trustStore);
             if (clientKeyStore != null) {
                 sslContextBuilder.loadKeyMaterial(clientKeyStore, null);
