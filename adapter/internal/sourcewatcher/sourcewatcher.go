@@ -45,7 +45,7 @@ const (
 var artifactsMap map[string]model.ProjectAPI
 
 // Start fetches the API artifacts at the startup and polls for changes from the remote repository
-func Start() {
+func Start() error{
 	conf, _ := config.ReadConfigs()
 
 	retryInterval := conf.Adapter.SourceControl.RetryInterval
@@ -72,7 +72,7 @@ func Start() {
 			Severity: logging.CRITICAL,
 			ErrorCode: 2511,
 		})
-		return
+		return err
 	}
 
 	artifactsMap, err = api.ProcessMountedAPIProjects()
@@ -82,10 +82,12 @@ func Start() {
 			Severity: logging.CRITICAL,
 			ErrorCode: 2500,
 		})
+		return err
 	}
 
 	loggers.LoggerSourceWatcher.Info("Polling for changes")
 	go pollChanges(repository)
+	return nil
 }
 
 // fetchArtifacts clones the API artifacts from the remote repository into the artifacts directory in the adapter

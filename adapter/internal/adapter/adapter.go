@@ -273,7 +273,15 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateBlockingConditions()
 	} else {
 		if conf.Adapter.SourceControl.Enabled{
-			sourcewatcher.Start()
+			err := sourcewatcher.Start()
+			if err != nil {
+				logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error while starting source watcher. %v", err.Error()),
+					Severity:  logging.CRITICAL,
+					ErrorCode: 1108,
+				})
+				return
+			}
 		} else {
 			_, err := api.ProcessMountedAPIProjects()
 		  	if err != nil {
