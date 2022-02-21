@@ -32,7 +32,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedApiConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.MockedContentConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.MockedContentExamples;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
@@ -51,6 +51,7 @@ import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.MockImplUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,13 +135,12 @@ public class RestAPI implements API {
                 endpointClusterMap.put(APIConstants.API_KEY_TYPE_SANDBOX, sandEndpointCluster);
             }
 
+
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setEndpoints(endpointClusterMap);
-                if (operation.getMockedApiConfig() != null) {
-                    resConfig.setMockApiConfig(getMockedApiOperationConfig(operation.getMockedApiConfig(),
-                            operation.getMethod()));
-                }
+                resConfig.setMockApiConfig(getMockedApiOperationConfig(operation.getMockedApiConfig(),
+                        operation.getMethod()));
                 resources.add(resConfig);
             }
         }
@@ -202,12 +202,12 @@ public class RestAPI implements API {
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
             }
-            if (requestContext.getMatchedAPI().isMockedApi()) {
-                Utils.processMockedApiCall(requestContext, responseObject);
-                return responseObject;
-            }
             // set metadata for interceptors
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
+            if (requestContext.getMatchedAPI().isMockedApi()) {
+                MockImplUtils.processMockedApiCall(requestContext, responseObject);
+                return responseObject;
+            }
         } else {
             // If enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
@@ -299,40 +299,31 @@ public class RestAPI implements API {
     private MockedApiConfig getMockedApiOperationConfig(
             org.wso2.choreo.connect.discovery.api.MockedApiConfig mockedApiConfig, String operationName) {
         MockedApiConfig configData = new MockedApiConfig();
-        configData.setIn(mockedApiConfig.getIn());
-        configData.setName(mockedApiConfig.getName());
-        List<MockedResponseConfig> responses = new ArrayList<>();
-        if (mockedApiConfig.getResponsesList() != null) {
-            for (org.wso2.choreo.connect.discovery.api.MockedResponseConfig response :
-                    mockedApiConfig.getResponsesList()) {
-                MockedResponseConfig responseData = new MockedResponseConfig();
-                responseData.setCode(response.getCode());
-                responseData.setValue(response.getValue());
-                if (response.getHeadersList() != null) {
-                    List<MockedHeaderConfig> headers = new ArrayList<>();
-                    for (org.wso2.choreo.connect.discovery.api.MockedHeaderConfig header : response.getHeadersList()) {
-                        MockedHeaderConfig headerConfig = new MockedHeaderConfig();
-                        headerConfig.setName(header.getName());
-                        headerConfig.setValue(header.getValue());
-                        headers.add(headerConfig);
-                    }
-                    responseData.setHeaders(headers);
-                }
-                MockedContentConfig content = new MockedContentConfig();
-                HashMap<String, String> contentMap = new HashMap<>();
-
-                if (response.getContentList() == null) {
-                    logger.error("Mock API content not defined in the JSON script.");
-                } else {
-                    for (org.wso2.choreo.connect.discovery.api.MockedContentConfig contentConfig :
-                            response.getContentList()) {
-                        contentMap.put(contentConfig.getContentType(), contentConfig.getBody());
-                    }
-                }
-                content.setContentMap(contentMap);
-                responseData.setContent(content);
-                responses.add(responseData);
+        Map<String, MockedResponseConfig> responses = new HashMap<>();
+        for (org.wso2.choreo.connect.discovery.api.MockedResponseConfig response : mockedApiConfig.getResponsesList()) {
+            MockedResponseConfig responseData = new MockedResponseConfig();
+            List<MockedHeaderConfig> headers = new ArrayList<>();
+            for (org.wso2.choreo.connect.discovery.api.MockedHeaderConfig header : response.getHeadersList()) {
+                MockedHeaderConfig headerConfig = new MockedHeaderConfig();
+                headerConfig.setName(header.getName());
+                headerConfig.setValue(header.getValue());
+                headers.add(headerConfig);
             }
+            responseData.setHeaders(headers);
+            HashMap<String, MockedContentExamples> contentMap = new HashMap<>();
+
+            for (org.wso2.choreo.connect.discovery.api.MockedContentConfig contentConfig : response.getContentList()) {
+                MockedContentExamples mockedContentExamples = new MockedContentExamples();
+                HashMap<String, String> exampleMap = new HashMap<>();
+                for (org.wso2.choreo.connect.discovery.api.MockedContentExample exampleConfig :
+                        contentConfig.getExamplesList()) {
+                    exampleMap.put(exampleConfig.getRef(), exampleConfig.getBody());
+                }
+                mockedContentExamples.setExampleMap(exampleMap);
+                contentMap.put(contentConfig.getContentType(), mockedContentExamples);
+            }
+            responseData.setContentMap(contentMap);
+            responses.put(response.getCode(), responseData);
         }
         configData.setResponses(responses);
         logger.debug("Mock API config processed successfully for the " + operationName + " operation.");

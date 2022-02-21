@@ -134,7 +134,9 @@ func NewAPIYaml(fileContent []byte) (apiYaml APIYaml, err error) {
 	}
 
 	apiYaml.FormatAndUpdateInfo()
-	apiYaml.PopulateEndpointsInfo()
+	if apiYaml.Data.EndpointImplementationType != constants.MockedOASEndpointType {
+		apiYaml.PopulateEndpointsInfo()
+	}
 	err = apiYaml.ValidateMandatoryFields()
 	if err != nil {
 		loggers.LoggerAPI.Errorf("%v", err)
@@ -142,7 +144,7 @@ func NewAPIYaml(fileContent []byte) (apiYaml APIYaml, err error) {
 	}
 
 	if apiYaml.Data.EndpointImplementationType == constants.InlineEndpointType {
-		errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
+		errmsg := "inline endpointImplementationType is not supported with Choreo Connect"
 		loggers.LoggerAPI.Warnf(errmsg)
 		err = errors.New(errmsg)
 		return apiYaml, err
@@ -180,7 +182,8 @@ func (apiYaml *APIYaml) ValidateMandatoryFields() error {
 		errMsg = errMsg + "API Context "
 	}
 
-	if len(apiYaml.Data.EndpointConfig.ProductionEndpoints) < 1 &&
+	if apiYaml.Data.EndpointImplementationType != constants.MockedOASEndpointType &&
+		len(apiYaml.Data.EndpointConfig.ProductionEndpoints) < 1 &&
 		len(apiYaml.Data.EndpointConfig.SandBoxEndpoints) < 1 {
 		errMsg = errMsg + "API production and sandbox endpoints "
 	}
@@ -190,14 +193,16 @@ func (apiYaml *APIYaml) ValidateMandatoryFields() error {
 		return errors.New(errMsg)
 	}
 
-	for _, ep := range apiYaml.Data.EndpointConfig.ProductionEndpoints {
-		if strings.HasPrefix(ep.Endpoint, "/") || len(strings.TrimSpace(ep.Endpoint)) < 1 {
-			return errors.New("relative urls or empty values are not supported for API production endpoints")
+	if apiYaml.Data.EndpointImplementationType != constants.MockedOASEndpointType {
+		for _, ep := range apiYaml.Data.EndpointConfig.ProductionEndpoints {
+			if strings.HasPrefix(ep.Endpoint, "/") || len(strings.TrimSpace(ep.Endpoint)) < 1 {
+				return errors.New("relative urls or empty values are not supported for API production endpoints")
+			}
 		}
-	}
-	for _, ep := range apiYaml.Data.EndpointConfig.SandBoxEndpoints {
-		if strings.HasPrefix(ep.Endpoint, "/") || len(strings.TrimSpace(ep.Endpoint)) < 1 {
-			return errors.New("relative urls or empty values are not supported for API sandbox endpoints")
+		for _, ep := range apiYaml.Data.EndpointConfig.SandBoxEndpoints {
+			if strings.HasPrefix(ep.Endpoint, "/") || len(strings.TrimSpace(ep.Endpoint)) < 1 {
+				return errors.New("relative urls or empty values are not supported for API sandbox endpoints")
+			}
 		}
 	}
 	return nil

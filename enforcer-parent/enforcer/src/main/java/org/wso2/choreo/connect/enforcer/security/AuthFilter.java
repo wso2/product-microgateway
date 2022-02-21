@@ -163,9 +163,11 @@ public class AuthFilter implements Filter {
             AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
             requestContext.setAuthenticationContext(authenticate);
             if (authenticate.isAuthenticated()) {
-                updateClusterHeaderAndCheckEnv(requestContext, authenticate);
-                // set backend security
-                EndpointSecurityUtils.addEndpointSecurity(requestContext);
+                if (!requestContext.getMatchedAPI().isMockedApi()) {
+                    updateClusterHeaderAndCheckEnv(requestContext, authenticate);
+                    // set backend security
+                    EndpointSecurityUtils.addEndpointSecurity(requestContext);
+                }
                 return new AuthenticationResponse(true, false,
                         false);
             }

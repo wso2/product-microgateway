@@ -8,48 +8,62 @@ servers:
   - url: /
 x-wso2-basePath: /mockApiTest/1.0.0
 paths:
-  /testMockApiWithHeader:
+  /testMockApi:
     get:
       summary: Tests Choreo Connect mock API implementation
       operationId: testImpl
       responses:
-        '200':
+        '50X':
+          description: Expected response to a valid request
+          content:
+            text/html:
+              examples:
+                example1:
+                  value:
+                    description: content for example 1
+                example2:
+                  value:
+                    description: content for example 2
+            application/xml:
+              example:
+                description: choreo connect
+          headers:
+            x-wso2-header:
+              schema:
+                type: string
+              example: Sample header value
+        'default':
           description: Expected response to a valid request
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Data"
               example:
-                name: choreo connect
-            application/xml:
-              example: "<name>choreo connect</name>"
+                description: default content
           headers:
-            x-wso2-header1:
+            x-wso2-header:
               schema:
                 type: string
               example: Sample header value
       security:
         - APIKeyAuth: [ ]
-  /testMockWithQueryParam:
+  /testOneExample:
     get:
+      x-wso2-disable-security: true
       summary: Tests Choreo Connect mock API implementation with query parameters
       operationId: testImpl2
       responses:
         '500':
-          description: Internal error
+          description: only one example code for the resource
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Data"
-              example:
-                name: choreo connect
-            application/xml:
-              example: "<name>choreo connect</name>"
+              examples:
+                example1:
+                  value:
+                    description: json mediatype example1
           headers:
-            x-wso2-q-header:
+            x-wso2-header:
               schema:
                 type: string
-              example: Header value for query param
+              example: Sample header value
       security:
         - APIKeyAuth: [ ]
   /testMockDefault:

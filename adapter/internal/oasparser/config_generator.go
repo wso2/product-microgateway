@@ -230,9 +230,9 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Ope
 		secSchemas[i] = secSchema
 	}
 
-	var mockedAPIConfig api.MockedApiConfig
+	var mockedAPIConfig *api.MockedApiConfig
 	if isMockedAPI {
-		generateMockedAPIConfig(&mockedAPIConfig, operation.GetMockedAPIConfig())
+		mockedAPIConfig = operation.GetMockedAPIConfig()
 	}
 
 	policies := &api.OperationPolicies{
@@ -246,7 +246,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Ope
 		Tier:            operation.GetTier(),
 		DisableSecurity: operation.GetDisableSecurity(),
 		Policies:        policies,
-		MockedApiConfig: &mockedAPIConfig,
+		MockedApiConfig: mockedAPIConfig,
 	}
 	return &apiOperation
 }
@@ -319,37 +319,4 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 		}
 	}
 	return endpoints
-}
-
-func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig, mgwMockedAPIConfig model.MockedAPIConfig) {
-	mockedAPIConfig.In = mgwMockedAPIConfig.In
-	mockedAPIConfig.Name = mgwMockedAPIConfig.Name
-	responseConfigList := make([]*api.MockedResponseConfig, 0)
-
-	for _, val := range mgwMockedAPIConfig.Responses {
-		var responseConfig api.MockedResponseConfig
-		contentConfigList := make([]*api.MockedContentConfig, 0)
-		responseConfig.Value = val.Value
-		responseConfig.Code = int32(val.Code)
-
-		for _, content := range val.Content {
-			var contentConfig api.MockedContentConfig
-			contentConfig.ContentType = content.ContentType
-			contentConfig.Body = content.Body
-			contentConfigList = append(contentConfigList, &contentConfig)
-		}
-		responseConfig.Content = contentConfigList
-
-		headerConfigList := responseConfig.Headers
-		for _, header := range val.Headers {
-			var mockedAPIHeader api.MockedHeaderConfig
-			mockedAPIHeader.Name = header.Name
-			mockedAPIHeader.Value = header.Value
-			headerConfigList = append(headerConfigList, &mockedAPIHeader)
-		}
-		responseConfig.Headers = headerConfigList
-		responseConfigList = append(responseConfigList, &responseConfig)
-	}
-	mockedAPIConfig.Responses = responseConfigList
-	logger.LoggerOasparser.Debugf("Mocked API configuration generated successfully.")
 }

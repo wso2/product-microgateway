@@ -163,7 +163,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 					}
 
 				}
-				if productionUrls != nil && len(productionUrls) > 0 {
+				if len(productionUrls) > 0 {
 					resource.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
 				}
 			}
@@ -215,24 +215,6 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
 	mgwOperation.SetSecurity(securityArray)
 	return mgwOperation
-}
-
-// getMockedApiConfig recieves xMediationScriptValue, mockedApiConfig pointer value and method name. It unmrashalls the xMediationScript string
-// to mockedApiConfig struct type.
-func getMockedAPIConfig(xMediationScriptValue interface{}, mockedAPIConfig *MockedAPIConfig, method string) {
-	if str, ok := xMediationScriptValue.(string); ok {
-		isValidJSONString := json.Valid([]byte(str))
-		if isValidJSONString {
-			unmarshalError := json.Unmarshal([]byte(str), &mockedAPIConfig)
-			if unmarshalError != nil {
-				logger.LoggerOasparser.Errorf("Error while unmarshalling JSON for method %v. Error: %v", method, unmarshalError)
-				return
-			}
-			logger.LoggerOasparser.Debugf("x-mediation-script value processed successfully for the %v operation.", method)
-		} else {
-			logger.LoggerOasparser.Errorf("Invalid JSON value received for mocked API implementation's %v operation.", method)
-		}
-	}
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3

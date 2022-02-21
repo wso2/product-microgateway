@@ -49,11 +49,6 @@ data:
   createdTime: 2022-01-19 12:20:13.744
   lastUpdatedTime: 2022-01-19 12:20:23.452
   endpointConfig:
-    endpoint_type: http
-    sandbox_endpoints:
-      url: http://localhost
-    production_endpoints:
-      url: http://localhost
     implementation_status: prototyped
   endpointImplementationType: MOCKED_OAS
   scopes: []

@@ -17,11 +17,13 @@
  */
 package org.wso2.choreo.connect.enforcer.constants;
 
+import java.util.List;
+
 /**
  * Holds the common set of constants for the enforcer package.
  */
 public class APIConstants {
-
+    public static final String DEFAULT = "default";
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
 
@@ -80,13 +82,17 @@ public class APIConstants {
 
     public static final String NOT_FOUND_MESSAGE = "Not Found";
     public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";
-    public static final String SERVER_ERROR = "Internal Server Error";
+    public static final String NOT_IMPLEMENTED_MESSAGE = "Not Implemented";
+    public static final String BAD_REQUEST_MESSAGE = "Bad Request";
 
     //headers and values
     public static final String CONTENT_TYPE_HEADER = "Content-type";
-    public static final String ACCEPT_HEADER = "Accept";
+    public static final String ACCEPT_HEADER = "accept";
+    public static final String PREFER_HEADER = "prefer";
+    public static final List<String> PREFER_KEYS = List.of("code", "example");
+    public static final String PREFER_CODE = "code";
+    public static final String PREFER_EXAMPLE = "example";
     public static final String APPLICATION_JSON = "application/json";
-    public static final String APPLICATION_XML = "application/xml";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
@@ -352,7 +358,9 @@ public class APIConstants {
         NOTFOUND("404", 404),
         THROTTLED("429", 429),
         SERVICE_UNAVAILABLE("503", 503),
-        INTERNAL_SERVER_ERROR("500", 500);
+        INTERNAL_SERVER_ERROR("500", 500),
+        BAD_REQUEST_ERROR("400", 400),
+        NOT_IMPLEMENTED_ERROR("501", 501);
 
         private String value;
         private int code;

@@ -639,41 +639,43 @@ func (swagger *MgwSwagger) setDisableSecurity() {
 // Validate method confirms that the mgwSwagger has all required fields in the required format.
 // This needs to be checked prior to generate router/enforcer related resources.
 func (swagger *MgwSwagger) Validate() error {
-	if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
-		(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
+	if swagger.EndpointImplementationType != constants.MockedOASEndpointType {
+		if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
+			(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
 
-		logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
-			swagger.title, swagger.version)
-		return errors.New("no endpoints are provided for the API")
-	}
-	err := swagger.productionEndpoints.validateEndpointCluster("API level production")
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
-			swagger.title, swagger.version, err)
-		return err
-	}
-	err = swagger.sandboxEndpoints.validateEndpointCluster("API level sandbox")
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
-			swagger.title, swagger.version, err)
-		return err
-	}
-	for _, res := range swagger.resources {
-		err := res.productionEndpoints.validateEndpointCluster("Resource level production")
+			logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
+				swagger.title, swagger.version)
+			return errors.New("no endpoints are provided for the API")
+		}
+		err := swagger.productionEndpoints.validateEndpointCluster("API level production")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
 			return err
 		}
-		err = res.sandboxEndpoints.validateEndpointCluster("Resource level sandbox")
+		err = swagger.sandboxEndpoints.validateEndpointCluster("API level sandbox")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
 			return err
 		}
-	}
 
-	err = swagger.validateBasePath()
+		for _, res := range swagger.resources {
+			err := res.productionEndpoints.validateEndpointCluster("Resource level production")
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
+					swagger.title, swagger.version, err)
+				return err
+			}
+			err = res.sandboxEndpoints.validateEndpointCluster("Resource level sandbox")
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
+					swagger.title, swagger.version, err)
+				return err
+			}
+		}
+	}
+	err := swagger.validateBasePath()
 	if err != nil {
 		logger.LoggerOasparser.Errorf("Error while parsing the API %s:%s - %v", swagger.title, swagger.version, err)
 		return err
@@ -1142,6 +1144,12 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 
 	swagger.EndpointType = endpointConfig.EndpointType
 	swagger.EndpointImplementationType = data.EndpointImplementationType
+
+	// from here onwards it will process endpoint info
+	// So discontinue if the implementation type is mocked_oas
+	if data.EndpointImplementationType == constants.MockedOASEndpointType {
+		return nil
+	}
 
 	if len(endpointConfig.ProductionEndpoints) > 0 {
 		var endpoints []Endpoint
