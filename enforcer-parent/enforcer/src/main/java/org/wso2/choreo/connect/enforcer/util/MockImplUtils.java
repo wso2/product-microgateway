@@ -119,7 +119,8 @@ public class MockImplUtils {
             } else if (responseConfigList.containsKey(preferCode.charAt(0) + "xx")) {
                 responseConfig = responseConfigList.get(preferCode.charAt(0) + "xx");
             } else {
-                setMockApiErrorResponse(responseObject, "Preferred code "+ preferCode + " is not supported for this resource.");
+                setMockApiErrorResponse(responseObject, "Preferred code " + preferCode +
+                        " is not supported for this resource.");
                 return;
             }
         } else if (responseConfigList.containsKey(APIConstants.DEFAULT)) {
