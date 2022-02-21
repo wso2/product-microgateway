@@ -45,7 +45,7 @@ public class CcWithSourceControl {
         ccInstance.start();
 
         Awaitility.await().pollDelay(10, TimeUnit.SECONDS).pollInterval(10, TimeUnit.SECONDS)
-                .atMost(4, TimeUnit.MINUTES).until(ccInstance.isGitHealthy());
+                .atMost(6, TimeUnit.MINUTES).until(ccInstance.isGitHealthy());
 
         // Generate an access token for accessing the git instance
         SourceControlUtils.generateAccessToken();
