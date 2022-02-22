@@ -22,7 +22,7 @@ package org.wso2.choreo.connect.enforcer.exception;
  * Represents an API security violation or a system error that may have occurred
  * while validating security requirements.
  */
-public class APISecurityException extends Exception {
+public class APISecurityException extends Exception { // TODO: Move to common module
 
     private int errorCode;
     private int statusCode;

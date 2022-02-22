@@ -95,9 +95,12 @@ public class MediationPolicyFilter implements Filter {
             }
         }
 
-        // TODO: check placeholders in logs are working
+        // TODO: (renuka) check with amali for any reason not to break filter and continue if the provided action
+        //  not matched any of the above
         log.error("Operation policy action \"{}\" is not supported", policy.getAction(),
                 ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6100));
+        FilterUtils.setErrorToContext(requestContext, MediationConstants.GENERAL_ERROR,
+                APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), MediationConstants.GENERAL_ERROR_MESSAGE);
         return false;
     }
 

@@ -29,7 +29,7 @@ public class EnvVarConfig {
     private static final String ADAPTER_HOST_NAME = "ADAPTER_HOST_NAME";
     private static final String ENFORCER_PRIVATE_KEY_PATH = "ENFORCER_PRIVATE_KEY_PATH";
     private static final String ENFORCER_PUBLIC_CERT_PATH = "ENFORCER_PUBLIC_CERT_PATH";
-    private static final String OPA_CLIENT_PRIVATE_KEY_PATH = "OPA_CLIENT_PRIVATE_KEY_PATH"; // TODO: add to configs?
+    private static final String OPA_CLIENT_PRIVATE_KEY_PATH = "OPA_CLIENT_PRIVATE_KEY_PATH";
     private static final String OPA_CLIENT_PUBLIC_CERT_PATH = "OPA_CLIENT_PUBLIC_CERT_PATH";
     private static final String ADAPTER_HOST = "ADAPTER_HOST";
     private static final String ADAPTER_XDS_PORT = "ADAPTER_XDS_PORT";

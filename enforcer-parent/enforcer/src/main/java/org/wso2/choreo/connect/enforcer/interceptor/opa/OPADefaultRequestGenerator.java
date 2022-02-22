@@ -44,7 +44,7 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         inputPayload.put("pathTemplate", requestContext.getRequestPathTemplate());
         inputPayload.put("prodClusterName", requestContext.getProdClusterHeader());
         inputPayload.put("sandClusterName", requestContext.getSandClusterHeader());
-        inputPayload.put("requestBody", requestContext.getRequestPayload()); // TODO: do we need payload?
+        inputPayload.put("requestBody", requestContext.getRequestPayload());
 
         // Authentication Context
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
@@ -57,12 +57,12 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
     }
 
     @Override
-    public boolean validateResponse(String policyName, String rule, String opaResponse, RequestContext requestContext)
+    public boolean handleResponse(String policyName, String rule, String opaResponse, RequestContext requestContext)
             throws OPASecurityException {
-        JSONObject response = new JSONObject(opaResponse);
         try {
+            JSONObject response = new JSONObject(opaResponse);
             return response.getBoolean("result");
-        } catch (JSONException e) { //TODO: catch runtime ex?
+        } catch (JSONException e) {
             log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean",
                     ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),

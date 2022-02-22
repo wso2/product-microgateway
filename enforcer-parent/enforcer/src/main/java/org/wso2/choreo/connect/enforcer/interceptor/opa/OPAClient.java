@@ -73,7 +73,7 @@ public class OPAClient {
         String requestBody = requestGenerator.generateRequest(policyName, ruleName, null, requestContext);
         String evaluatingPolicyUrl = serverUrl + "/" + policyName + "/" + ruleName; // including multiple "/" is fine.
         String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token);
-        return requestGenerator.validateResponse(policyName, ruleName, opaResponse, requestContext);
+        return requestGenerator.handleResponse(policyName, ruleName, opaResponse, requestContext);
     }
 
     private void loadRequestGenerators() {
@@ -100,13 +100,18 @@ public class OPAClient {
                     httpPost.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, token);
                 }
                 try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                    if (response.getStatusLine().getStatusCode() == 200) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode == 200) {
                         HttpEntity entity = response.getEntity();
                         try (InputStream content = entity.getContent()) {
                             return IOUtils.toString(content, Charset.defaultCharset());
                         }
                     } else {
-                        return null;
+                        log.error("Unexpected HTTP response code responded by the OPA server, HTTP code: {}",
+                                statusCode, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6106));
+                        throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
+                                APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
+                                "Error while calling remote authorization server");
                     }
                 }
             }
