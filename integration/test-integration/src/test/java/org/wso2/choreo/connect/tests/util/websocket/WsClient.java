@@ -110,16 +110,15 @@ public final class WsClient {
 
             log.info("Websocket client initiating connection");
             Channel ch = b.connect(uri.getHost(), uri.getPort()).sync().channel();
-            Utils.delay(1000, "aa");
             handler.handshakeFuture().sync();
 
             log.info("Websocket client handshake complete");
 
             sendMessages(ch, messages);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Error while parsing websocket URI", e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("Interrupted while syncing channel connect, close or handshake", e);
         } finally {
             group.shutdownGracefully();
         }

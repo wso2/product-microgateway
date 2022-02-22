@@ -139,7 +139,7 @@ public class PublisherUtils {
     }
 
     /**
-     * Updates the OpenAPI definition of an already created AsyncAPI
+     * Updates the AsyncAPI definition of an already created AsyncAPI
      *
      * @param apiId ID of the API to update the AsyncAPI definition
      * @param asyncAPIFileName Name of the AsyncAPI file. ex. websocket_basic_asyncAPI.yaml
@@ -160,8 +160,8 @@ public class PublisherUtils {
             log.error("Error occurred while updating AsyncAPI definition. Response: {}", e.getResponseBody());
             throw new CCTestException("Error while while updating AsyncAPI", e);
         } catch (IOException e) {
-            log.error("Error occurred while reading OpenAPI definition for: {}", asyncAPIFileName);
-            throw new CCTestException("Error while reading OpenAPI definition", e);
+            log.error("Error occurred while reading AsyncAPI definition for: {}", asyncAPIFileName);
+            throw new CCTestException("Error while reading AsyncAPI definition", e);
         }
     }
 

@@ -60,7 +60,7 @@ public class MockAsyncServer extends Thread {
             Channel ch = b.bind(serverPort).sync().channel();
             ch.closeFuture().sync();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("Interrupted while syncing channel bind or channel close", e);
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
