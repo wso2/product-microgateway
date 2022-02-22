@@ -26,10 +26,10 @@ import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.interceptor.opa.OPAClient;
-import org.wso2.choreo.connect.enforcer.interceptor.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.Map;

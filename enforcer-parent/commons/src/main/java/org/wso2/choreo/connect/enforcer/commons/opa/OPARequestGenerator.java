@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.interceptor.opa;
+package org.wso2.choreo.connect.enforcer.commons.opa;
 
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 

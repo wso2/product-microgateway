@@ -43,6 +43,7 @@ import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
+import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -450,6 +451,18 @@ public class FilterUtils {
             return jwtInfoDto.getJwtValidationInfo().getClaims();
         }
         return null;
+    }
+
+    /**
+     * Set the error code, message and description to the request context. The enforcer response will
+     * retrieve this error details from the request context. Make sure to call this method and set the proper error
+     * details when enforcer filters returns an error.
+     *
+     * @param requestContext - The context object holds details about the specific request.
+     * @param e - APISecurityException thrown when validation failure happens at filter level.
+     */
+    public static void setErrorToContext(RequestContext requestContext, OPASecurityException e) {
+        setErrorToContext(requestContext, e.getErrorCode(), e.getStatusCode(), e.getMessage());
     }
 
     /**
