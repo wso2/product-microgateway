@@ -95,7 +95,7 @@ public class MediationPolicyFilter implements Filter {
             }
         }
 
-        // TODO: (renuka) check with amali for any reason not to break filter and continue if the provided action
+        // TODO: (renuka) check with amali what's the reason not to break filter and continue if the provided action
         //  not matched any of the above
         log.error("Operation policy action \"{}\" is not supported", policy.getAction(),
                 ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6100));
@@ -169,7 +169,6 @@ public class MediationPolicyFilter implements Filter {
             }
             return isValid;
         } catch (OPASecurityException e) {
-            // TODO: check placeholders
             log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(), e,
                     ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101));
             FilterUtils.setErrorToContext(requestContext, e);

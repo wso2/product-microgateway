@@ -38,20 +38,19 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
-import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
-import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 
 import java.io.IOException;
@@ -180,7 +179,6 @@ public class FilterUtils {
         SSLContext sslContext;
         try {
             KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
-            // TODO: (renuka) existing SSLContextBuilder is deprecated
             SSLContextBuilder sslContextBuilder = SSLContexts.custom().loadTrustMaterial(trustStore);
             if (clientKeyStore != null) {
                 sslContextBuilder.loadKeyMaterial(clientKeyStore, null);
@@ -451,18 +449,6 @@ public class FilterUtils {
             return jwtInfoDto.getJwtValidationInfo().getClaims();
         }
         return null;
-    }
-
-    /**
-     * Set the error code, message and description to the request context. The enforcer response will
-     * retrieve this error details from the request context. Make sure to call this method and set the proper error
-     * details when enforcer filters returns an error.
-     *
-     * @param requestContext - The context object holds details about the specific request.
-     * @param e - APISecurityException thrown when validation failure happens at filter level.
-     */
-    public static void setErrorToContext(RequestContext requestContext, OPASecurityException e) {
-        setErrorToContext(requestContext, e.getErrorCode(), e.getStatusCode(), e.getMessage());
     }
 
     /**

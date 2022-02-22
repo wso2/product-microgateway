@@ -18,31 +18,19 @@
 
 package org.wso2.choreo.connect.enforcer.commons.opa;
 
+import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
+
 /**
  * Represents an Operation Policy Agent security violation or system error that may have occurred
  * while validating.
  */
-public class OPASecurityException extends Exception { // TODO: was APISecurityException
-    private final int errorCode;
-    private final int statusCode;
+public class OPASecurityException extends APISecurityException {
 
     public OPASecurityException(int statusCode, int errorCode, String message) {
-        super(message);
-        this.statusCode = statusCode;
-        this.errorCode = errorCode;
+        super(statusCode, errorCode, message);
     }
 
     public OPASecurityException(int statusCode, int errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.statusCode = statusCode;
-        this.errorCode = errorCode;
-    }
-
-    public int getErrorCode() {
-        return errorCode;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
+        super(statusCode, errorCode, message, cause);
     }
 }

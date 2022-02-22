@@ -109,6 +109,5 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
                 .pathTemplate(pathTemplate).requestPayload(requestPayload).httpProtocol(httpProtocol).build();
-        // TODO: web socket http protocol?
     }
 }

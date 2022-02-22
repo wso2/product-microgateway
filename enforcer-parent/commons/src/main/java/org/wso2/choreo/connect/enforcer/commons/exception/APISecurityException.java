@@ -16,13 +16,13 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.exception;
+package org.wso2.choreo.connect.enforcer.commons.exception;
 
 /**
  * Represents an API security violation or a system error that may have occurred
  * while validating security requirements.
  */
-public class APISecurityException extends Exception { // TODO: Move to common module
+public class APISecurityException extends Exception {
 
     private int errorCode;
     private int statusCode;

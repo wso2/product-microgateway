@@ -18,6 +18,9 @@
 
 package org.wso2.choreo.connect.enforcer.interceptor;
 
+/**
+ * Common set of constants related to the Mediation Policies.
+ */
 public class MediationConstants {
     // TODO: (renuka) check error codes with APIM
     public static final int GENERAL_ERROR = 901100;

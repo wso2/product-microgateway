@@ -40,7 +40,7 @@ public interface OPARequestGenerator {
     String generateRequest(String policyName, String rule, Map<String, Object> advancedProperties,
                            RequestContext requestContext) throws OPASecurityException;
     /**
-     * Authenticates the given request using the authenticators which have been initialized.
+     * Validate the OPA response and handle request context based on the response.
      *
      * @param policyName     Name of the policy validated.
      * @param rule           Rule of the policy.

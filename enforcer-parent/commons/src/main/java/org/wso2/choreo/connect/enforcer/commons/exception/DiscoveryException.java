@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.exception;
+package org.wso2.choreo.connect.enforcer.commons.exception;
 
 /**
  * An exception definition for discovery service related errors.
