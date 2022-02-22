@@ -21,6 +21,8 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
@@ -93,7 +95,9 @@ public class MediationPolicyFilter implements Filter {
             }
         }
 
-        log.error("Operation policy action \"{}\" is not supported", policy.getAction());
+        // TODO: check placeholders in logs are working
+        log.error("Operation policy action \"{}\" is not supported", policy.getAction(),
+                ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6100));
         return false;
     }
 
@@ -153,7 +157,8 @@ public class MediationPolicyFilter implements Filter {
         try {
             boolean isValid = OPAClient.getInstance().validateRequest(requestContext, policyAttrib);
             if (!isValid) {
-                log.error("OPA validation failed for the request: " + requestContext.getRequestPath());
+                log.error("OPA validation failed for the request: " + requestContext.getRequestPath(),
+                        ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101));
                 FilterUtils.setErrorToContext(requestContext,
                         APISecurityConstants.REMOTE_AUTHORIZATION_AUTH_FORBIDDEN,
                         APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
@@ -161,7 +166,9 @@ public class MediationPolicyFilter implements Filter {
             }
             return isValid;
         } catch (OPASecurityException e) {
-            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(), e);
+            // TODO: check placeholders
+            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(), e,
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101));
             FilterUtils.setErrorToContext(requestContext, e);
             return false;
         }

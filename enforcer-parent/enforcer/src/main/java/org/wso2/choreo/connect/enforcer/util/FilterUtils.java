@@ -38,6 +38,8 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -145,7 +147,8 @@ public class FilterUtils {
             return opaKeyStore;
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | EnforcerException
                 | UnrecoverableKeyException e) {
-            log.error("Error creating client KeyStore by loading cert and key from file", e);
+            log.error("Error creating client KeyStore by loading cert and key from file",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 7100), e);
             return null;
         }
     }

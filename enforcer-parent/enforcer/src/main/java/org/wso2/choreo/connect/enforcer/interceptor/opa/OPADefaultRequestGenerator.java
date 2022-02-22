@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -59,7 +61,8 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         try {
             return response.getBoolean("result");
         } catch (JSONException e) { //TODO: catch runtime ex?
-            log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean", e);
+            log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.REMOTE_AUTHORIZATION_RESPONSE_FAILURE,
                     "Error while evaluating remote authorization response", e);

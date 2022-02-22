@@ -9,6 +9,8 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -54,7 +56,7 @@ public class OPAClient {
         OPARequestGenerator requestGenerator = requestGeneratorMap.get(requestGeneratorClassName);
         if (requestGenerator == null) {
             log.error("OPA Request Generator Implementation is not found in the classPath under the provided name: {}",
-                    requestGeneratorClassName);
+                    requestGeneratorClassName, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6103));
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
                     "Error creating request to remote authorization service");
@@ -107,7 +109,8 @@ public class OPAClient {
                 }
             }
         } catch (IOException e) {
-            log.error("Error calling the OPA server with server endpoint: {}", serverEp);
+            log.error("Error calling the OPA server with server endpoint: {}", serverEp,
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104));
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
                     "Error while calling remote authorization server", e);
