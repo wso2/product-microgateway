@@ -156,7 +156,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
+		_, err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
 			if err.Error() == constants.AlreadyExists {
 				return api_individual.NewPostApisConflict()

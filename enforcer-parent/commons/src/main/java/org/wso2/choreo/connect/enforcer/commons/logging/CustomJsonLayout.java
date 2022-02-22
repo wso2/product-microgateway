@@ -63,6 +63,9 @@ public class CustomJsonLayout extends AbstractStringLayout {
         obj.put(LoggingConstants.LogAttributes.LEVEL, event.getLevel().toString());
         obj.put(LoggingConstants.LogAttributes.LOGGER, event.getLoggerName());
         obj.put(LoggingConstants.LogAttributes.MESSAGE, event.getMessage().getFormattedMessage());
+        obj.put(LoggingConstants.LogAttributes.TRACE_ID,
+                event.getContextData().getValue(LoggingConstants.LogAttributes.TRACE_ID));
+        obj.put(LoggingConstants.LogAttributes.CONTEXT, event.getContextStack().asList());
         if ((event.getClass() == Log4jLogEvent.class) && (event.getLevel() == Level.ERROR)) {
             Log4jLogEvent logEvent = (Log4jLogEvent) event;
             if (logEvent.getMessage().getClass() == ParameterizedMessage.class) {
@@ -84,7 +87,7 @@ public class CustomJsonLayout extends AbstractStringLayout {
                 obj.put(LoggingConstants.LogAttributes.ERROR_CODE, 0);
             }
         }
-        retValue.append(obj.toString()).append(throwable).append("\n");
+        retValue.append(obj.toJSONString()).append(throwable).append("\n");
         return retValue.toString();
     }
 

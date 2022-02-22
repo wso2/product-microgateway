@@ -29,6 +29,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
@@ -118,7 +120,8 @@ public abstract class APIKeyHandler implements Authenticator {
                     .getIfPresent(tokenIdentifier) != null &&
                     apiKey.equals(CacheProvider.getInvalidGatewayAPIKeyCache().getIfPresent(tokenIdentifier));
             if (isInvalidInternalAPIKey || isInvalidAPIKey) {
-                log.error("API key found in cache for invalid API keys. " + FilterUtils.getMaskedToken(splitToken[0]));
+                log.error("API key found in cache for invalid API keys. " + FilterUtils.getMaskedToken(splitToken[0]),
+                        ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6601));
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);

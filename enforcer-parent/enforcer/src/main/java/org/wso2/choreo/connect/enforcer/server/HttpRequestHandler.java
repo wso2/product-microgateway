@@ -21,6 +21,7 @@ import com.google.protobuf.ByteString;
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
@@ -49,13 +50,21 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
             responseObject.setErrorMessage(APIConstants.NOT_FOUND_MESSAGE);
             responseObject.setErrorDescription(APIConstants.NOT_FOUND_DESCRIPTION);
             return responseObject;
-        } else if (logger.isDebugEnabled()) {
-            APIConfig api = matchedAPI.getAPIConfig();
-            logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
         }
+        APIConfig api = matchedAPI.getAPIConfig();
+        logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
+
+        // putting API details into ThreadContext for logging purposes
+        ThreadContext.push(api.getName());
+        ThreadContext.push(api.getOrganizationId());
+        ThreadContext.push(api.getBasePath());
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
-        return matchedAPI.process(requestContext);
+        ResponseObject responseObject = matchedAPI.process(requestContext);
+
+        // to clear the ThreadContext's stack used for logging
+        ThreadContext.removeStack();
+        return responseObject;
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {

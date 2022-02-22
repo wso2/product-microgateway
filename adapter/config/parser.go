@@ -112,6 +112,16 @@ func ReadConfigs() (*Config, error) {
 	return adapterConfig, e
 }
 
+// SetConfig sets the given configuration to the adapter configuration
+func SetConfig(conf *Config) {
+	adapterConfig = conf
+}
+
+// SetDefaultConfig sets the default configuration to the adapter configuration
+func SetDefaultConfig() {
+	adapterConfig = defaultConfig
+}
+
 // GetDefaultVhost returns the default vhost of given environment read from Adapter
 // configurations. Store the configuration in a map, so do not want to loop through
 // the config value Config.Adapter.VhostMapping

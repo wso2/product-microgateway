@@ -27,6 +27,8 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.choreo.connect.discovery.keymgt.KeyManagerConfig;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -148,7 +150,7 @@ public class KeyManagerHolder {
                             tokenIssuerDto.setCertificate(TLSUtils.convertCertificate(certificate));
                         } catch (CertificateException e) {
                             logger.error("Error reading the certificate for issuer " + issuer + ". Error cause: " +
-                                    e.getMessage());
+                                    e.getMessage(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6200));
                         }
                     }
                 }
