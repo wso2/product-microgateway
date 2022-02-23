@@ -107,6 +107,9 @@ var defaultConfig = &Config{
 				BaseIntervalInMillis: 25,
 				StatusCodes:          []uint32{504},
 			},
+			DNS: upstreamDNS{
+				DNSRefreshRate: 5000,
+			},
 		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{
