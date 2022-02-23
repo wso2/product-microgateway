@@ -120,13 +120,11 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Disable SSL verification
   disableSslVerification = false
 
-# configs for upstream clusters 
-[router.upstream]
 [router.upstream.dns]
   #  DNS refresh rate in miliseconds
-  dnsRefreshRate = 5000
+  dNSRefreshRate = 5000
   # set cluster’s DNS refresh rate to resource record’s TTL which comes from DNS resolution
-  RespectDNSTtl = true
+  respectDNSTtl = true
   
 # health configs for upstream clusters 
 [router.upstream.health]
