@@ -1,6 +1,6 @@
 
   gitlab:
-    image: "gitlab/gitlab-ee:latest"
+    image: "gitlab/gitlab-ce:14.7.3-ce.0"
     restart: always
     environment:
       GITLAB_OMNIBUS_CONFIG: |
