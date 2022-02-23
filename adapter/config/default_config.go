@@ -109,6 +109,7 @@ var defaultConfig = &Config{
 			},
 			DNS: upstreamDNS{
 				DNSRefreshRate: 5000,
+				RespectDNSTtl:  true,
 			},
 		},
 		Connection: connection{
