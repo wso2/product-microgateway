@@ -124,7 +124,7 @@ artifactsDirectory = "/home/wso2/artifacts"
   #  DNS refresh rate in miliseconds
   dNSRefreshRate = 5000
   # set cluster’s DNS refresh rate to resource record’s TTL which comes from DNS resolution
-  respectDNSTtl = true
+  respectDNSTtl = false
   
 # health configs for upstream clusters 
 [router.upstream.health]
