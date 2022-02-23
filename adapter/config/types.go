@@ -195,6 +195,7 @@ type envoyUpstream struct {
 	TLS      upstreamTLS
 	Timeouts upstreamTimeout
 	Health   upstreamHealth
+	DNS      upstreamDNS
 	Retry    upstreamRetry
 }
 
@@ -218,6 +219,10 @@ type upstreamHealth struct {
 	Interval           int32
 	UnhealthyThreshold int32
 	HealthyThreshold   int32
+}
+
+type upstreamDNS struct {
+	DNSRefreshRate int32
 }
 
 type upstreamRetry struct {
