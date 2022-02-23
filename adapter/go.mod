@@ -3,7 +3,7 @@ module github.com/wso2/product-microgateway/adapter
 go 1.15
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v0.3.2
+	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v0.3.6-0.20220211233725-ad8d573a3cea
 	github.com/envoyproxy/go-control-plane v0.10.0
 	github.com/envoyproxy/protoc-gen-validate v0.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
@@ -20,13 +20,14 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/lestrrat-go/jwx v1.1.3
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/pelletier/go-toml v1.8.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/net v0.0.0-20210929193557-e81a3d93ecf6
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
 	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e
 	google.golang.org/grpc v1.36.0
 	google.golang.org/protobuf v1.27.1
