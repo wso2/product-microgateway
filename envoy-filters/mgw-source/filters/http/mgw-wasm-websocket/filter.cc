@@ -98,20 +98,24 @@ FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
     auto pairs = buffer.value()->pairs();
     for (auto &p : pairs) {
       (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
-      LOG_TRACE(std::string("Request Headers : ") + std::string(p.first) + std::string(" -> ") + std::string(p.second));
     }
   }
-                     
+  auto requestHeaderResult = getRequestHeaderPairs();
+  auto headerPairs = requestHeaderResult->pairs();
+  for (auto& p : headerPairs) {
+    if (std::string(p.first) == "x-request-id") {
+      this->x_request_id_ = std::string(p.second);
+    }
+  }
+  LOG_TRACE(std::string("onRequestHeaders is complete for  mgw_WASM_websocke ") + std::to_string(id()) + std::string(" : ") + this->x_request_id_);                    
   return FilterHeadersStatus::Continue;
 }
 
 FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
-  LOG_TRACE(std::string("onResponseHeaders called mgw_WASM_websocket") + std::to_string(id()));
+  LOG_TRACE(std::string("onResponseHeaders called mgw_WASM_websocket ") + std::to_string(id()) + std::string(" : ") + this->x_request_id_ );
   auto result = getResponseHeaderPairs();
   auto pairs = result->pairs();
   for (auto& p : pairs) {
-    LOG_TRACE(std::string("Response Headers : ") + std::string(p.first) + std::string(" -> ") + std::string(p.second));
-    
     if (std::string(p.first) == ":status" && std::string(p.second) == "101") {
       std::string upstream_address;
       auto buffer = getValue({"upstream", "address"}, &upstream_address);
@@ -127,6 +131,7 @@ FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
       sendEnforcerRequest(this, request);
     }
   }
+  LOG_TRACE(std::string("onResponseHeaders complete for mgw_WASM_websocket ") + std::to_string(id()) + std::string(" : ") + this->x_request_id_ );
   return FilterHeadersStatus::Continue;
 }
 
@@ -136,7 +141,7 @@ FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
 FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
                                                bool /* end_of_stream */) {
   auto body = getBufferBytes(WasmBufferType::HttpRequestBody, 0, body_buffer_length);
-  LOG_TRACE(std::string("onRequestBody called mgw_WASM_websocket") + std::string(body->view()));
+  LOG_TRACE(std::string("onRequestBody called mgw_WASM_websocket ") + std::string(body->view()) + std::string(" : ") + this->x_request_id_ );
   auto data = body->view();
   
   if(isDataFrame(data)){
@@ -193,7 +198,7 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
         }
       }else{
         // It is unlikely that the return value would be zero https://man7.org/linux/man-pages/man2/gettimeofday.2.html
-        LOG_ERROR("Current Time cannot be processed. Hence the websocket stream is closed.");
+        LOG_ERROR("Current Time cannot be processed. Hence the websocket stream is closed." + std::string(" : ") + this->x_request_id_);
         return FilterDataStatus::StopIterationNoBuffer;
       }
     }
@@ -209,7 +214,7 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
 FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
                                                 bool /* end_of_stream */) {
   auto body = getBufferBytes(WasmBufferType::HttpResponseBody, 0, body_buffer_length);
-  LOG_TRACE(std::string("onResponseBody called mgw_WASM_websocket") + std::string(body->view()));
+  LOG_TRACE(std::string("onResponseBody called mgw_WASM_websocket") + std::string(body->view()) + std::string(" : ") + this->x_request_id_);
   auto data = body->view();
   
   if(isDataFrame(data)){
@@ -276,9 +281,9 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
   }
 }
 
-void MgwWebSocketContext::onDone() { LOG_TRACE(std::string("onDone " + std::to_string(id()))); }
+void MgwWebSocketContext::onDone() { LOG_TRACE(std::string("onDone " + std::to_string(id())) + std::string(" : ") + this->x_request_id_); }
 
-void MgwWebSocketContext::onLog() { LOG_TRACE(std::string("onLog " + std::to_string(id()))); }
+void MgwWebSocketContext::onLog() { LOG_TRACE(std::string("onLog " + std::to_string(id())) + std::string(" : ") + this->x_request_id_); }
 
 void MgwWebSocketContext::onDelete() { 
   LOG_TRACE(std::string("onDelete " + std::to_string(id())));
@@ -286,15 +291,15 @@ void MgwWebSocketContext::onDelete() {
 
 // Callback used by the handler to pass the throttle response received by the gRPC stream.
 void MgwWebSocketContext::updateFilterState(ResponseStatus status){
-  LOG_TRACE(std::string("updateFilterState") + std::to_string(static_cast<int>(status)));
+  LOG_TRACE(std::string("updateFilterState") + std::to_string(static_cast<int>(status)) + std::string(" : ") + this->x_request_id_);
   if(status == ResponseStatus::OK){
     this->throttle_state_ = ThrottleState::UnderLimit;
-    LOG_TRACE("mgw_wasm_websocket filter state changed to UnderLimit");
+    LOG_TRACE("mgw_wasm_websocket filter state changed to UnderLimit" + std::string(" : ") + this->x_request_id_);
   }else if(status == ResponseStatus::OverLimit){
     this->throttle_state_ = ThrottleState::OverLimit;
-    LOG_TRACE("mgw_wasm_websocket filter state changed to OverLimit !!!");
+    LOG_TRACE("mgw_wasm_websocket filter state changed to OverLimit !!!" + std::string(" : ") + this->x_request_id_);
   }else{
-    LOG_TRACE("Enforcer throttle decision unknown");
+    LOG_TRACE("Enforcer throttle decision unknown" + std::string(" : ") + this->x_request_id_);
   }
 }
 
@@ -350,24 +355,24 @@ void MgwWebSocketContext::establishNewStream() {
 // Callback used by the handler to update throttle period.
 void MgwWebSocketContext::updateThrottlePeriod(const int throttle_period){
   this->throttle_period_ = throttle_period;
-  LOG_TRACE("Throttle period updated to"+ std::to_string(throttle_period));
+  LOG_TRACE("Throttle period updated to"+ std::to_string(throttle_period) + std::string(" : ") + this->x_request_id_);
 }
 
 void MgwWebSocketContext::sendEnforcerRequest(MgwWebSocketContext* websocContext, WebSocketFrameRequest request) {
   if(websocContext->handler_state_ == HandlerState::OK){
-        LOG_TRACE(std::string("gRPC bidi stream available. publishing frame data..."));
+        LOG_TRACE(std::string("gRPC bidi stream available. publishing frame data...") + std::string(" : ") + this->x_request_id_);
         auto ack = websocContext->stream_handler_->send(request, false);
         if (ack != WasmResult::Ok) {
-          LOG_WARN(std::string("error sending frame data")+ toString(ack));
+          LOG_WARN(std::string("error sending frame data")+ toString(ack) + std::string(" : ") + this->x_request_id_);
         }
-        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)));
+        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)) + std::string(" : ") + this->x_request_id_);
       }else{
         establishNewStream();
         auto ack = websocContext->stream_handler_->send(request, false);
         if (ack != WasmResult::Ok) {
-          LOG_WARN(std::string("error sending frame data")+ toString(ack));
+          LOG_WARN(std::string("error sending frame data")+ toString(ack) + std::string(" : ") + this->x_request_id_);
         }
-        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)));
+        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)) + std::string(" : ") + this->x_request_id_);
       }
 
 }

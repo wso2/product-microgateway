@@ -51,6 +51,7 @@ private:
   std::unique_ptr<Metadata> metadata_{new Metadata};
   int throttle_period_;
   int apim_error_code_;
+  std::string x_request_id_;
   
   bool isDataFrame(const std::string_view data);
   void establishNewStream();
