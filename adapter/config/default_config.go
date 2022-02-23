@@ -59,10 +59,10 @@ var defaultConfig = &Config{
 		},
 		ArtifactsDirectory: "/home/wso2/artifacts",
 		SourceControl: sourceControl{
-			Enabled: false,
-			PollInterval: 30,
-			RetryInterval: 5,
-			MaxRetryCount: 20,
+			Enabled:            false,
+			PollInterval:       30,
+			RetryInterval:      5,
+			MaxRetryCount:      20,
 			ArtifactsDirectory: "/home/wso2/git-artifacts",
 		},
 	},
@@ -113,6 +113,9 @@ var defaultConfig = &Config{
 				MaxRetryCount:        5,
 				BaseIntervalInMillis: 25,
 				StatusCodes:          []uint32{504},
+			},
+			DNS: upstreamDNS{
+				DNSRefreshRate: 5000,
 			},
 		},
 		Connection: connection{
