@@ -249,6 +249,7 @@ type upstreamHealth struct {
 
 type upstreamDNS struct {
 	DNSRefreshRate int32
+	RespectDNSTtl  bool
 }
 
 type upstreamRetry struct {
