@@ -495,6 +495,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			priority = priority + 1
 		}
 	}
+	conf, _ := config.ReadConfigs()
 
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
@@ -506,9 +507,13 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			ClusterName: clusterName,
 			Endpoints:   lbEPs,
 		},
-		// adding health check for cluster endpoints
-		HealthChecks:           createHealthCheck(),
 		TransportSocketMatches: transportSocketMatches,
+		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
+		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+	}
+
+	if len(clusterDetails.Endpoints) > 1 {
+		cluster.HealthChecks = createHealthCheck()
 	}
 
 	if clusterDetails.Config != nil && clusterDetails.Config.CircuitBreakers != nil {
