@@ -34,6 +34,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakeException;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
@@ -45,16 +46,19 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.CCTestException;
-import org.wso2.choreo.connect.tests.util.Utils;
 
 import javax.net.ssl.SSLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public final class WsClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
+
+    private static final int MAX_RETRY_COUNT = 10;
+    private static final int RETRY_INTERVAL_MILLIS = 3000;
 
     private final String url;
     private final Map<String, String> headers;
@@ -64,7 +68,7 @@ public final class WsClient {
         this.headers = headers;
     }
 
-    public ArrayList<String> connectAndSendMessages(String[] messages) throws CCTestException {
+    public ArrayList<String> connectAndSendMessages(List<String> messages) throws CCTestException {
         log.info("Starting websocket client");
         EventLoopGroup group = new NioEventLoopGroup();
         ArrayList<String> receivedMessages = new ArrayList<>();
@@ -125,7 +129,7 @@ public final class WsClient {
         return receivedMessages;
     }
 
-    private void sendMessages(Channel ch, String[] messagesToSend) throws InterruptedException {
+    private void sendMessages(Channel ch, List<String> messagesToSend) throws InterruptedException {
         for (String messageToSend: messagesToSend) {
             if ("close".equalsIgnoreCase(messageToSend)) {
                 log.info("Sending close frame.");
@@ -137,11 +141,41 @@ public final class WsClient {
                 WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[] { 8, 1, 8, 1 }));
                 ch.writeAndFlush(frame);
             } else {
-                log.info("Sending test frame.");
+                log.info("Sending text frame.");
                 WebSocketFrame frame = new TextWebSocketFrame(messageToSend);
                 ch.writeAndFlush(frame);
             }
         }
+    }
+
+    public ArrayList<String> retryConnectUntilDeployed(List<String> messages) throws InterruptedException {
+        int retryCount = 0;
+        boolean respondedNotFound = false;
+        ArrayList<String> responses = null;
+        do {
+            try {
+                log.info("Trying websocket connect with url : " + url);
+                responses = connectAndSendMessages(messages);
+                respondedNotFound = false;
+            } catch (WebSocketClientHandshakeException | CCTestException e) {
+                if("Invalid handshake response getStatus: 404 Not Found".equals(e.getMessage())) {
+                    retryCount++;
+                    respondedNotFound = true;
+                } else {
+                    log.error("Error during websocket handshake");
+                }
+            }
+        } while (respondedNotFound && shouldRetry(retryCount));
+        return responses;
+    }
+
+    private static boolean shouldRetry(int retryCount) throws InterruptedException {
+        if(retryCount >= MAX_RETRY_COUNT) {
+            log.info("Retrying of the request is finished");
+            return false;
+        }
+        Thread.sleep(RETRY_INTERVAL_MILLIS);
+        return true;
     }
 }
 
