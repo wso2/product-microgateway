@@ -60,45 +60,52 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private boolean applyPolicy(RequestContext requestContext, Policy policy) {
-        //todo(amali) check policy order
-        switch (policy.getAction()) {
-            case "SET_HEADER": {
-                addOrModifyHeader(requestContext, policy.getParameters());
-                return true;
+        try {
+            switch (policy.getAction()) {
+                case "SET_HEADER": {
+                    addOrModifyHeader(requestContext, policy.getParameters());
+                    return true;
+                }
+                case "RENAME_HEADER": {
+                    renameHeader(requestContext, policy.getParameters());
+                    return true;
+                }
+                case "REMOVE_HEADER": {
+                    removeHeader(requestContext, policy.getParameters());
+                    return true;
+                }
+                case "ADD_QUERY": {
+                    addOrModifyQuery(requestContext, policy.getParameters());
+                    return true;
+                }
+                case "REMOVE_QUERY": {
+                    removeQuery(requestContext, policy.getParameters());
+                    return true;
+                }
+                case "REWRITE_RESOURCE_PATH": {
+                    removeAllQueries(requestContext, policy.getParameters());
+                    return true;
+                }
+                case "REWRITE_RESOURCE_METHOD": {
+                    modifyMethod(requestContext, policy.getParameters());
+                    return true;
+                }
+                case "OPA": {
+                    return opaAuthValidation(requestContext, policy.getParameters());
+                }
             }
-            case "RENAME_HEADER": {
-                renameHeader(requestContext, policy.getParameters());
-                return true;
-            }
-            case "REMOVE_HEADER": {
-                removeHeader(requestContext, policy.getParameters());
-                return true;
-            }
-            case "ADD_QUERY": {
-                addOrModifyQuery(requestContext, policy.getParameters());
-                return true;
-            }
-            case "REMOVE_QUERY": {
-                removeQuery(requestContext, policy.getParameters());
-                return true;
-            }
-            case "REWRITE_RESOURCE_PATH": {
-                removeAllQueries(requestContext, policy.getParameters());
-                return true;
-            }
-            case "REWRITE_RESOURCE_METHOD": {
-                modifyMethod(requestContext, policy.getParameters());
-                return true;
-            }
-            case "OPA": {
-                return opaAuthValidation(requestContext, policy.getParameters());
-            }
+        } catch (NullPointerException e) { // TODO: (renuka) policy args should be validated from adapter
+            // to be fixed with https://github.com/wso2/product-microgateway/issues/2692
+            log.error("Operation policy action \"{}\" contains invalid policy argument",
+                    policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6107), e);
+            FilterUtils.setErrorToContext(requestContext, MediationConstants.GENERAL_ERROR,
+                    APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), MediationConstants.GENERAL_ERROR_MESSAGE);
+            return false;
         }
 
-        // TODO: (renuka) check with amali what's the reason not to break filter and continue if the provided action
-        //  not matched any of the above
-        log.error("Operation policy action \"{}\" is not supported", policy.getAction(),
-                ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6100));
+        // should not reach here, if reached, it is due to a validation error in Adapter
+        log.error("Operation policy action \"{}\" is not supported. Adapter has failed to validate the policy action",
+                policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6100));
         FilterUtils.setErrorToContext(requestContext, MediationConstants.GENERAL_ERROR,
                 APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), MediationConstants.GENERAL_ERROR_MESSAGE);
         return false;
