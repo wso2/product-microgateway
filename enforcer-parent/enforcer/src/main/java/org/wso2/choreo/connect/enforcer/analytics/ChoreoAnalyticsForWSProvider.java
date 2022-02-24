@@ -57,7 +57,6 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
 
     @Override
     public EventCategory getEventCategory() {
-        // TODO: (VirajSalaka) Fix
         if (isSuccessRequest()) {
             return EventCategory.SUCCESS;
         } else if (isFaultRequest()) {
@@ -72,7 +71,6 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
     }
 
     private boolean isFaultRequest() {
-        // TODO: (VirajSalaka) Fix
         return !isSuccessRequest();
     }
 
@@ -134,8 +132,9 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
         String method = webSocketFrameRequest.getDirection().name();
         operation.setApiMethod(method);
         String matchingResource = extAuthMetadata.get(MetadataConstants.API_RESOURCE_TEMPLATE_KEY);
-        if ("HANDSHAKE".equals(webSocketFrameRequest.getDirection().name())) {
-            matchingResource = "init-request:" + matchingResource;
+        if (WebSocketFrameRequest.MessageDirection.HANDSHAKE.name()
+                .equals(webSocketFrameRequest.getDirection().name())) {
+            matchingResource = AnalyticsConstants.WEBSOCKET_HANDSHAKE_RESOURCE_PREFIX + matchingResource;
         }
         operation.setApiResourceTemplate(matchingResource);
         return operation;

@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -135,9 +136,10 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         // This could be null if  OPTIONS request comes
         if (requestContext.getMatchedResourcePath() != null) {
             Operation operation = new Operation();
+            // TODO: (VirajSalaka) decide on the action we need to do when the Stream Idle Timeout happens.
             if (isWebsocketUpgradeRequest) {
-                operation.setApiMethod("HANDSHAKE");
-                operation.setApiResourceTemplate("init-request:" +
+                operation.setApiMethod(WebSocketFrameRequest.MessageDirection.HANDSHAKE.name());
+                operation.setApiResourceTemplate(AnalyticsConstants.WEBSOCKET_HANDSHAKE_RESOURCE_PREFIX +
                         requestContext.getMatchedResourcePath().getPath());
                 return operation;
             }

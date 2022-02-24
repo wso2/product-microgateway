@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.Map;
@@ -68,7 +69,9 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 .get(AdapterConstants.SAND_CLUSTER_HEADER_KEY);
         long requestTimeInMillis = request.getAttributes().getRequest().getTime().getSeconds() * 1000 +
                 request.getAttributes().getRequest().getTime().getNanos() / 1000000;
-        String requestID = request.getAttributes().getRequest().getHttp().getId();
+        String requestID =  request.getAttributes().getRequest().getHttp().
+                getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
+                request.getAttributes().getRequest().getHttp().getId());
         String address = "";
         if (request.getAttributes().getSource().hasAddress() &&
                 request.getAttributes().getSource().getAddress().hasSocketAddress()) {
