@@ -210,13 +210,13 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public String getUserAgentHeader() {
-        // User agent is not required for fault scenario
+        // UserAgent header is not validated for fault events.
         return null;
     }
 
     @Override
     public String getEndUserIP() {
-        // EndUserIP is not required for fault event type
+        // EndUserIP is not validated for fault events.
         return null;
     }
 }

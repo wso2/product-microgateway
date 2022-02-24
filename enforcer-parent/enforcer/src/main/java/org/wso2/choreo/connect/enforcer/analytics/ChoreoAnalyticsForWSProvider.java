@@ -91,9 +91,9 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
         if (webSocketFrameRequest.getApimErrorCode() >= 900800
                 && webSocketFrameRequest.getApimErrorCode() < 900900) {
             return FaultCategory.THROTTLED;
-        } else if (webSocketFrameRequest.getApimErrorCode() == 101503) {
-            return FaultCategory.TARGET_CONNECTIVITY;
         }
+        // When the Websocket Messages are blocked due to enforcer connections would result in
+        // sending 102500 status code. Those errors would be listed under faultCategory Other.
         return FaultCategory.OTHER;
     }
 
@@ -160,6 +160,7 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
     @Override
     public MetaInfo getMetaInfo() {
         MetaInfo metaInfo = new MetaInfo();
+        // Correlation ID is as same as X-Request-ID
         metaInfo.setCorrelationId(extAuthMetadata.get(MetadataConstants.CORRELATION_ID_KEY));
         metaInfo.setGatewayType("ENVOY");
         metaInfo.setRegionId(extAuthMetadata.get(MetadataConstants.REGION_KEY));
@@ -215,13 +216,5 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
     @Override
     public String getEndUserIP() {
         return extAuthMetadata.get(MetadataConstants.CLIENT_IP_KEY);
-    }
-
-    private String getExtAuthzMetadata(String key) {
-        if (!webSocketFrameRequest.hasMetadata() ||
-                !webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap().containsKey(key)) {
-            return null;
-        }
-        return webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap().get(key);
     }
 }
