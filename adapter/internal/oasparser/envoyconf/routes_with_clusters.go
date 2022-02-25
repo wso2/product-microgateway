@@ -502,6 +502,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			priority = priority + 1
 		}
 	}
+	conf, _ := config.ReadConfigs()
 
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
@@ -513,9 +514,13 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			ClusterName: clusterName,
 			Endpoints:   lbEPs,
 		},
-		// adding health check for cluster endpoints
-		HealthChecks:           createHealthCheck(),
 		TransportSocketMatches: transportSocketMatches,
+		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
+		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+	}
+
+	if len(clusterDetails.Endpoints) > 1 {
+		cluster.HealthChecks = createHealthCheck()
 	}
 
 	if clusterDetails.Config != nil && clusterDetails.Config.CircuitBreakers != nil {
@@ -768,7 +773,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	extAuthPerFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{
 			CheckSettings: &extAuthService.CheckSettings{
-				ContextExtensions:           contextExtensions,
+				ContextExtensions: contextExtensions,
 				// negation is performing to match the envoy config name (disable_request_body_buffering)
 				DisableRequestBodyBuffering: !params.passRequestPayloadToEnforcer,
 			},
@@ -1248,23 +1253,23 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
 	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 	params := &routeCreateParams{
-		organizationID:            organizationID,
-		title:                     swagger.GetTitle(),
-		apiType:                   swagger.GetAPIType(),
-		version:                   swagger.GetVersion(),
-		vHost:                     vHost,
-		xWSO2BasePath:             swagger.GetXWso2Basepath(),
-		AuthHeader:                swagger.GetXWSO2AuthHeader(),
-		prodClusterName:           prodClusterName,
-		sandClusterName:           sandClusterName,
-		endpointBasePath:          endpointBasePath,
-		corsPolicy:                swagger.GetCorsConfig(),
-		resourcePathParam:         "",
-		resourceMethods:           getDefaultResourceMethods(swagger.GetAPIType()),
-		requestInterceptor:        requestInterceptor,
-		responseInterceptor:       responseInterceptor,
-		rewritePath:               "",
-		rewriteMethod:             false,
+		organizationID:               organizationID,
+		title:                        swagger.GetTitle(),
+		apiType:                      swagger.GetAPIType(),
+		version:                      swagger.GetVersion(),
+		vHost:                        vHost,
+		xWSO2BasePath:                swagger.GetXWso2Basepath(),
+		AuthHeader:                   swagger.GetXWSO2AuthHeader(),
+		prodClusterName:              prodClusterName,
+		sandClusterName:              sandClusterName,
+		endpointBasePath:             endpointBasePath,
+		corsPolicy:                   swagger.GetCorsConfig(),
+		resourcePathParam:            "",
+		resourceMethods:              getDefaultResourceMethods(swagger.GetAPIType()),
+		requestInterceptor:           requestInterceptor,
+		responseInterceptor:          responseInterceptor,
+		rewritePath:                  "",
+		rewriteMethod:                false,
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 	}
 
