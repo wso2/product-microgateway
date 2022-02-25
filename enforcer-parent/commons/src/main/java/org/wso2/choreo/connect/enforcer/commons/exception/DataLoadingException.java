@@ -16,34 +16,25 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.exception;
+package org.wso2.choreo.connect.enforcer.commons.exception;
 
 /**
- * Represents an API security violation or a system error that may have occurred
- * while validating security requirements.
+ * Exception thrown when loading Subscriptions.
  */
-public class APISecurityException extends Exception {
+public class DataLoadingException extends EnforcerException {
 
-    private int errorCode;
-    private int statusCode;
+    public DataLoadingException(String message) {
 
-    public APISecurityException(int statusCode, int errorCode, String message) {
         super(message);
-        this.statusCode = statusCode;
-        this.errorCode = errorCode;
     }
 
-    public APISecurityException(int statusCode, int errorCode, String message, Throwable cause) {
+    public DataLoadingException(String message, Throwable cause) {
+
         super(message, cause);
-        this.statusCode = statusCode;
-        this.errorCode = errorCode;
     }
 
-    public int getErrorCode() {
-        return errorCode;
-    }
+    public DataLoadingException(Throwable cause) {
 
-    public int getStatusCode() {
-        return statusCode;
+        super(cause);
     }
 }

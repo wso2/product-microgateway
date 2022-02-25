@@ -27,4 +27,7 @@ public class GeneralErrorCodeConstants {
     public static final String API_BLOCKED_DESCRIPTION = "This API has been blocked temporarily. "
             + "Please try again later or contact the system administrators.";
 
+    // TODO: (renuka) check error codes with APIM
+    public static final int MEDIATION_POLICY_ERROR_CODE = 901100;
+
 }

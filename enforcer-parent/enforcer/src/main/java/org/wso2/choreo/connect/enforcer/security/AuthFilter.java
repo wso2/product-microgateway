@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
@@ -35,7 +36,6 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
-import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
@@ -288,8 +288,10 @@ public class AuthFilter implements Filter {
     private void setInterceptorAuthContextMetadata(Authenticator authenticator, RequestContext requestContext) {
         // add auth context to metadata, lua script will add it to the auth context of the interceptor
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        String tokenType = authenticator.getName();
+        authContext.setTokenType(tokenType);
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN_TYPE,
-                Objects.toString(authenticator.getName(), ""));
+                Objects.toString(tokenType, ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN,
                 Objects.toString(authContext.getRawToken(), ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,
