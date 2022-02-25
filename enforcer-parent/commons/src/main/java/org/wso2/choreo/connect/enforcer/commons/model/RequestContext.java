@@ -174,7 +174,7 @@ public class RequestContext {
     }
 
     /**
-     * Returns HTTP Protocol of the HTTP request
+     * Returns HTTP Protocol of the HTTP request.
      *
      * @return HTTP Protocol
      */
