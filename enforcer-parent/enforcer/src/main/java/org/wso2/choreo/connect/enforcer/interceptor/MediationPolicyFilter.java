@@ -29,6 +29,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.interceptor.opa.OPAClient;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
@@ -98,16 +99,16 @@ public class MediationPolicyFilter implements Filter {
             // to be fixed with https://github.com/wso2/product-microgateway/issues/2692
             log.error("Operation policy action \"{}\" contains invalid policy argument",
                     policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6107), e);
-            FilterUtils.setErrorToContext(requestContext, MediationConstants.GENERAL_ERROR,
-                    APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), MediationConstants.GENERAL_ERROR_MESSAGE);
+            FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
+                    APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), APIConstants.SERVER_ERROR, null);
             return false;
         }
 
         // should not reach here, if reached, it is due to a validation error in Adapter
         log.error("Operation policy action \"{}\" is not supported. Adapter has failed to validate the policy action",
                 policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6100));
-        FilterUtils.setErrorToContext(requestContext, MediationConstants.GENERAL_ERROR,
-                APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), MediationConstants.GENERAL_ERROR_MESSAGE);
+        FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
+                APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), APIConstants.SERVER_ERROR, null);
         return false;
     }
 
@@ -169,10 +170,9 @@ public class MediationPolicyFilter implements Filter {
             if (!isValid) {
                 log.error("OPA validation failed for the request: " + requestContext.getRequestPath(),
                         ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101));
-                FilterUtils.setErrorToContext(requestContext,
-                        APISecurityConstants.REMOTE_AUTHORIZATION_AUTH_FORBIDDEN,
+                FilterUtils.setErrorToContext(requestContext, APISecurityConstants.OPA_AUTH_FORBIDDEN,
                         APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
-                        "Request authorization failure at the remote authorization server");
+                        APISecurityConstants.OPA_AUTH_FORBIDDEN_MESSAGE, null);
             }
             return isValid;
         } catch (OPASecurityException e) {

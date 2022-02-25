@@ -460,7 +460,21 @@ public class FilterUtils {
      * @param e - APISecurityException thrown when validation failure happens at filter level.
      */
     public static void setErrorToContext(RequestContext requestContext, APISecurityException e) {
-        setErrorToContext(requestContext, e.getErrorCode(), e.getStatusCode(), e.getMessage());
+        Map<String, Object> requestContextProperties = requestContext.getProperties();
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE, e.getStatusCode());
+        }
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, e.getErrorCode());
+        }
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_MESSAGE)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                    APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+        }
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_DESCRIPTION)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
+        }
     }
 
     /**
@@ -469,24 +483,17 @@ public class FilterUtils {
      * @param context request context object to set the details.
      * @param errorCode internal wso2 throttle error code.
      * @param statusCode HTTP status code.
+     * @param message message of error.
      * @param desc description of error.
      */
-    public static void setErrorToContext(RequestContext context, int errorCode, int statusCode, String desc) {
+    public static void setErrorToContext(RequestContext context, int errorCode, int statusCode, String message,
+                                         String desc) {
         Map<String, Object> properties = context.getProperties();
-        if (!properties.containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
-            properties.put(APIConstants.MessageFormat.STATUS_CODE, statusCode);
-        }
-        if (!properties.containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
-            properties.put(APIConstants.MessageFormat.ERROR_CODE, errorCode);
-        }
-        if (!properties.containsKey(APIConstants.MessageFormat.ERROR_MESSAGE)) {
-            properties.put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                    APISecurityConstants.getAuthenticationFailureMessage(errorCode));
-        }
-        if (!properties.containsKey(APIConstants.MessageFormat.ERROR_DESCRIPTION)) {
-            properties.put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
-                    APISecurityConstants.getFailureMessageDetailDescription(errorCode, desc));
-        }
+        properties.putIfAbsent(APIConstants.MessageFormat.STATUS_CODE, statusCode);
+        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_CODE, errorCode);
+        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_MESSAGE, message);
+        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                APISecurityConstants.getFailureMessageDetailDescription(errorCode, desc));
     }
 
     /**

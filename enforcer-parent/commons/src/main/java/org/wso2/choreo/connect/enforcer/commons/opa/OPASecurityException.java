@@ -26,8 +26,16 @@ import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
  */
 public class OPASecurityException extends APISecurityException {
 
+    public OPASecurityException(int statusCode, int errorCode) {
+        super(statusCode, errorCode, null);
+    }
+
     public OPASecurityException(int statusCode, int errorCode, String message) {
         super(statusCode, errorCode, message);
+    }
+
+    public OPASecurityException(int statusCode, int errorCode, Throwable cause) {
+        super(statusCode, errorCode, null, cause);
     }
 
     public OPASecurityException(int statusCode, int errorCode, String message, Throwable cause) {

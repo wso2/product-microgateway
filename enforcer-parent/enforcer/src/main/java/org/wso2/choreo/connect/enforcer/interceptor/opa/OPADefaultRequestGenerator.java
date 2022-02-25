@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.choreo.connect.enforcer.interceptor.opa;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,7 +31,6 @@ import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,11 +61,10 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         inputPayload.put("pathTemplate", requestContext.getRequestPathTemplate());
         inputPayload.put("prodClusterName", requestContext.getProdClusterHeader());
         inputPayload.put("sandClusterName", requestContext.getSandClusterHeader());
-        inputPayload.put("requestBody", requestContext.getRequestPayload());
 
         // Authentication Context
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        Map<String, String> authContextPayload = new HashMap<>();
+        JSONObject authContextPayload = new JSONObject();
         authContextPayload.put("token", authContext.getRawToken());
         authContextPayload.put("tokenType", authContext.getTokenType());
         authContextPayload.put("keyType", authContext.getKeyType());
@@ -63,11 +79,10 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
             JSONObject response = new JSONObject(opaResponse);
             return response.getBoolean("result");
         } catch (JSONException e) {
-            log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean",
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
+            log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean" +
+                    ", response: {}", opaResponse, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                    APISecurityConstants.REMOTE_AUTHORIZATION_RESPONSE_FAILURE,
-                    "Error while evaluating remote authorization response", e);
+                    APISecurityConstants.OPA_RESPONSE_FAILURE, e);
         }
     }
 }

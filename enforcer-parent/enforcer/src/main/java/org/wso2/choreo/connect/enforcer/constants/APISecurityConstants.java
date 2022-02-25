@@ -70,14 +70,14 @@ public class APISecurityConstants {
     public static final String API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE = "Internal Server Error";
 
     // TODO: (renuka) check error codes with APIM: https://github.com/wso2/wso2-synapse/pull/1899/files#r809710868
-    public static final int REMOTE_AUTHORIZATION_AUTH_FORBIDDEN = 901101;
-    public static final String REMOTE_AUTHORIZATION_AUTH_FORBIDDEN_MESSAGE = "Request authorization failure";
+    public static final int OPA_AUTH_FORBIDDEN = 901101;
+    public static final String OPA_AUTH_FORBIDDEN_MESSAGE = "Forbidden";
 
-    public static final int REMOTE_AUTHORIZATION_REQUEST_FAILURE = 901102;
-    public static final String REMOTE_AUTHORIZATION_REQUEST_FAILURE_MESSAGE = "Internal Server Error";
+    public static final int OPA_REQUEST_FAILURE = 901102;
+    public static final String OPA_REQUEST_FAILURE_MESSAGE = "Internal Server Error";
 
-    public static final int REMOTE_AUTHORIZATION_RESPONSE_FAILURE = 901103;
-    public static final String REMOTE_AUTHORIZATION_RESPONSE_FAILURE_MESSAGE = "Internal Server Error";
+    public static final int OPA_RESPONSE_FAILURE = 901103;
+    public static final String OPA_RESPONSE_FAILURE_MESSAGE = "Internal Server Error";
 
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
@@ -128,14 +128,14 @@ public class APISecurityConstants {
         case INVALID_SCOPE:
             errorMessage = INVALID_SCOPE_MESSAGE;
             break;
-        case REMOTE_AUTHORIZATION_AUTH_FORBIDDEN:
-            errorMessage = REMOTE_AUTHORIZATION_AUTH_FORBIDDEN_MESSAGE;
+        case OPA_AUTH_FORBIDDEN:
+            errorMessage = OPA_AUTH_FORBIDDEN_MESSAGE;
             break;
-        case REMOTE_AUTHORIZATION_REQUEST_FAILURE:
-            errorMessage = REMOTE_AUTHORIZATION_REQUEST_FAILURE_MESSAGE;
+        case OPA_REQUEST_FAILURE:
+            errorMessage = OPA_REQUEST_FAILURE_MESSAGE;
             break;
-        case REMOTE_AUTHORIZATION_RESPONSE_FAILURE:
-            errorMessage = REMOTE_AUTHORIZATION_RESPONSE_FAILURE_MESSAGE;
+        case OPA_RESPONSE_FAILURE:
+            errorMessage = OPA_RESPONSE_FAILURE_MESSAGE;
             break;
         default:
             errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;

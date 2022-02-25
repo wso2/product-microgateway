@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.choreo.connect.enforcer.interceptor.opa;
 
 import org.apache.commons.io.IOUtils;
@@ -60,8 +78,7 @@ public class OPAClient {
             log.error("OPA Request Generator Implementation is not found in the classPath under the provided name: {}",
                     requestGeneratorClassName, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6103));
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                    APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
-                    "Error creating request to remote authorization service");
+                    APISecurityConstants.OPA_REQUEST_FAILURE);
         }
 
         String serverUrl = policyAttrib.get("serverUrl");
@@ -97,7 +114,8 @@ public class OPAClient {
                 httpPost.setEntity(reqEntity);
                 httpPost.setHeader(APIConstants.CONTENT_TYPE_HEADER, APIConstants.APPLICATION_JSON);
                 if (StringUtils.isNotEmpty(token)) {
-                    httpPost.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, token);
+                    httpPost.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                            APIConstants.AUTHORIZATION_BEARER + token);
                 }
                 try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                     int statusCode = response.getStatusLine().getStatusCode();
@@ -110,8 +128,7 @@ public class OPAClient {
                         log.error("Unexpected HTTP response code responded by the OPA server, HTTP code: {}",
                                 statusCode, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6106));
                         throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                                APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
-                                "Error while calling remote authorization server");
+                                APISecurityConstants.OPA_REQUEST_FAILURE);
                     }
                 }
             }
@@ -119,8 +136,7 @@ public class OPAClient {
             log.error("Error calling the OPA server with server endpoint: {}", serverEp,
                     ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104));
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                    APISecurityConstants.REMOTE_AUTHORIZATION_REQUEST_FAILURE,
-                    "Error while calling remote authorization server", e);
+                    APISecurityConstants.OPA_REQUEST_FAILURE, e);
         }
     }
 }
