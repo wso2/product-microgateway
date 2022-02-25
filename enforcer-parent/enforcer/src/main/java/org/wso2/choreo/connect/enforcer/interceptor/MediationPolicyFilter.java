@@ -104,12 +104,9 @@ public class MediationPolicyFilter implements Filter {
             return false;
         }
 
-        // should not reach here, if reached, it is due to a validation error in Adapter
-        log.error("Operation policy action \"{}\" is not supported. Adapter has failed to validate the policy action",
-                policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6100));
-        FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
-                APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), APIConstants.SERVER_ERROR, null);
-        return false;
+        // policy action that enforcer not supports. for eg: "CALL_INTERCEPTOR_SERVICE"
+        // TODO: (renuka) check that we can filter policies by enforcer and pass to enforcer
+        return true;
     }
 
     private void addOrModifyHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
