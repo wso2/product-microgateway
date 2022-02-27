@@ -89,25 +89,41 @@ void MgwWebSocketContext::onCreate() {
 FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
   LOG_TRACE(std::string("onRequestHeaders called mgw_WASM_websocket") + std::to_string(id()));
 
-  // Create a new gRPC bidirectional stream.
-  establishNewStream();
-
+  auto requestHeaderResult = getRequestHeaderPairs();
+  auto headerPairs = requestHeaderResult->pairs();
+  for (auto& p : headerPairs) {
+    if (std::string(p.first) == X_REQUEST_ID) {
+      this->x_request_id_ = std::string(p.second);
+    }
+  }
   // Extract ext_authz dynamic metadata and assign it to a member variable 
   auto buffer = getProperty<std::string>({"metadata", "filter_metadata", "envoy.filters.http.ext_authz"});
   if (buffer.has_value() && buffer.value()->size() != 0) {
     auto pairs = buffer.value()->pairs();
     for (auto &p : pairs) {
-      (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
+      if (std::string(p.first) == "isThrottled" && std::string(p.second) == "true") {
+        LOG_TRACE(std::string("Initial throttle state is overlimit for the request : ") + this->x_request_id_);
+        this->throttle_state_ = ThrottleState::OverLimit;
+      } else if (std::string(p.first) == INITIAL_APIM_ERROR_CODE) {
+        int errorCode;
+        sscanf(std::string(p.second).c_str(), "%d", &errorCode);
+        this->apim_error_code_ = errorCode;
+        LOG_TRACE(std::string("Initial APIM Error code is ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
+      } else if (std::string(p.first) == THROTTLE_CONDITION_EXPIRE_TIMESTAMP) {
+        int timestamp;
+        sscanf(std::string(p.second).c_str(), "%d", &timestamp);
+        this->throttle_period_ = timestamp;
+        LOG_TRACE(std::string("Throttle Period is till ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
+      } else {
+        // The above metadata is only required for determining throttling state in the start. Hence they are not
+        // required to stored in metadata separately. Everything else will be stored under metadata.
+        (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
+      }
     }
   }
-  auto requestHeaderResult = getRequestHeaderPairs();
-  auto headerPairs = requestHeaderResult->pairs();
-  for (auto& p : headerPairs) {
-    if (std::string(p.first) == "x-request-id") {
-      this->x_request_id_ = std::string(p.second);
-    }
-  }
-  LOG_TRACE(std::string("onRequestHeaders is complete for  mgw_WASM_websocke ") + std::to_string(id()) + std::string(" : ") + this->x_request_id_);                    
+  // Create a new gRPC bidirectional stream.
+  establishNewStream();
+  LOG_TRACE(std::string("onRequestHeaders is complete for  mgw_WASM_websocket ") + std::to_string(id()) + std::string(" : ") + this->x_request_id_);                    
   return FilterHeadersStatus::Continue;
 }
 
@@ -116,8 +132,7 @@ FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
   auto result = getResponseHeaderPairs();
   auto pairs = result->pairs();
   for (auto& p : pairs) {
-    // TODO: (VirajSalaka) Check if wasm API provides an interfact to check if it is an upgrade request.
-    if (std::string(p.first) == ":status" && std::string(p.second) == "101") {
+    if (std::string(p.first) == STATUS_HEADER && std::string(p.second) == STATUS_101) {
       std::string upstream_address;
       auto buffer = getValue({"upstream", "address"}, &upstream_address);
       WebSocketFrameRequest request;
@@ -183,7 +198,7 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
     // stop interation. This state switch happens when the filter-enforcer connection fails.
     }else if(this->throttle_state_ == ThrottleState::FailureModeBlocked){
       establishNewStream();
-      request.set_apim_error_code(102500);
+      request.set_apim_error_code(ENFORCER_NOT_REACHABLE_ERROR_CODE);
       auto ack = this->stream_handler_->send(request, false);
       if (ack != WasmResult::Ok) {
         LOG_WARN(std::string("error sending frame data ")+ toString(ack) + std::string(" : ") + this->x_request_id_);
@@ -270,7 +285,7 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
     // stop interation.
     }else if(this->throttle_state_ == ThrottleState::FailureModeBlocked){
       establishNewStream();
-      request.set_apim_error_code(102500);
+      request.set_apim_error_code(ENFORCER_NOT_REACHABLE_ERROR_CODE);
       auto ack = this->stream_handler_->send(request, false);
       if (ack != WasmResult::Ok) {
         LOG_WARN(std::string("error sending frame data ")+ toString(ack) + std::string(" : ") + this->x_request_id_);
@@ -408,5 +423,4 @@ void MgwWebSocketContext::sendEnforcerRequest(MgwWebSocketContext* websocContext
         }
         LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)) + std::string(" : ") + this->x_request_id_);
       }
-
 }

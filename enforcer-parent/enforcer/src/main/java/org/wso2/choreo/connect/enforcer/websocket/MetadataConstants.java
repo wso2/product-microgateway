@@ -45,5 +45,8 @@ public class MetadataConstants {
     public static final String REQUEST_ID = "requestId";
     public static final String MESSAGE_SIZE = "messageSize";
     public static final String GRPC_STREAM_ID = "streamId";
+    public static final String INITIAL_APIM_ERROR_CODE = "initialAPIMErrorCode";
+    public static final String IS_THROTTLED = "isThrottled";
+    public static final String THROTTLE_CONDITION_EXPIRE_TIMESTAMP = "ThrottleConditionExpireTimestamp";
     public static final String DEFAULT_SUBSCRIBER_TENANT = "carbon.super";
 }

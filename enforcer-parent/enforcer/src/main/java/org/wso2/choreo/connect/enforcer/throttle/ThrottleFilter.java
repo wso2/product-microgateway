@@ -39,6 +39,7 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -70,13 +71,28 @@ public class ThrottleFilter implements Filter {
             return true;
         }
 
+        log.debug("Throttle filter received the request");
+        Decision decision = doThrottle(requestContext);
+
         if (APIConstants.WEBSOCKET.equals(requestContext.getHeaders().get(APIConstants.UPGRADE_HEADER))) {
+            if (decision.isThrottled() && decision.isDueToBlockedCondition()) {
+                log.debug("Throttle filter does not allow the upgrade request, if any relevant blocking"
+                        + "conditions are present.");
+                return false;
+            }
+            requestContext.getMetadataMap().put(MetadataConstants.IS_THROTTLED,
+                    String.valueOf(decision.isThrottled()));
+            if (decision.isThrottled()) {
+                requestContext.getMetadataMap().put(MetadataConstants.INITIAL_APIM_ERROR_CODE,
+                        requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE).toString());
+                requestContext.getMetadataMap().put(MetadataConstants.THROTTLE_CONDITION_EXPIRE_TIMESTAMP,
+                        String.valueOf(decision.getResetAt() / 1000));
+            }
             log.debug("Throttle filter discarded the request as it is a websocket upgrade request");
             return true;
         }
 
-        log.debug("Throttle filter received the request");
-        if (doThrottle(requestContext)) {
+        if (decision.isThrottled()) {
             // breaking filter chain since request is throttled
             return false;
         }
@@ -107,9 +123,10 @@ public class ThrottleFilter implements Filter {
      *
      * @param reqContext request context with all request related details,
      *                   including the authentication details
-     * @return {@code true} if the request is throttled, otherwise {@code false}
+     * @return {@code Decision} with true for isThorttled property if the request is throttled, otherwise
+     * false for isThorttled property with the reset timestamp.
      */
-    private boolean doThrottle(RequestContext reqContext) {
+    private Decision doThrottle(RequestContext reqContext) {
         TracingSpan doThrottleSpan = null;
         Scope doThrottleSpanScope = null;
         try {
@@ -167,7 +184,10 @@ public class ThrottleFilter implements Filter {
                                 ThrottleConstants.THROTTLE_OUT_REASON_REQUEST_BLOCKED);
                         log.debug("Request blocked as it violates blocking conditions, for API: {}," +
                                 " application: {}, user: {}", apiContext, appBlockingKey, authorizedUser);
-                        return true;
+                        Decision decision = new Decision();
+                        decision.setThrottled(true);
+                        decision.setDueToBlockedCondition(true);
+                        return decision;
                     }
                 }
 
@@ -188,7 +208,7 @@ public class ThrottleFilter implements Filter {
                             ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
                     ThrottleUtils.setRetryAfterHeader(reqContext, apiDecision.getResetAt());
-                    return true;
+                    return apiDecision;
                 }
 
                 // Checking subscription level throttling
@@ -204,7 +224,7 @@ public class ThrottleFilter implements Filter {
                         reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                                 ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
                         ThrottleUtils.setRetryAfterHeader(reqContext, subDecision.getResetAt());
-                        return true;
+                        return subDecision;
                     }
                     log.debug("Proceeding since stopOnQuotaReach is false");
                 }
@@ -221,7 +241,7 @@ public class ThrottleFilter implements Filter {
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                             ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
                     ThrottleUtils.setRetryAfterHeader(reqContext, appDecision.getResetAt());
-                    return true;
+                    return appDecision;
                 }
 
                 // Checking Custom policy throttling
@@ -237,10 +257,10 @@ public class ThrottleFilter implements Filter {
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                             ThrottleConstants.THROTTLE_OUT_REASON_CUSTOM_LIMIT_EXCEED);
                     ThrottleUtils.setRetryAfterHeader(reqContext, customDecision.getResetAt());
-                    return true;
+                    return customDecision;
                 }
             }
-            return false;
+            return new Decision();
         } finally {
             if (Utils.tracingEnabled()) {
                 doThrottleSpanScope.close();
