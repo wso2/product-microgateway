@@ -205,6 +205,16 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 	go retrieveAPIListFromChannel(APIListChannel, nil)
 }
 
+// UpdatAPIMetadataFromCP Invokes `ApisEndpoint` and updates APIList synchronously.
+func UpdatAPIMetadataFromCP(params map[string]string) {
+	var apiList *types.APIList
+	var responseChannel = make(chan response)
+	go InvokeService(ApisEndpoint, apiList, params, responseChannel, 0)
+	// TODO: (Praminda) - discuss why we wait in a loop in other places?
+	response := <-responseChannel
+	retrieveAPIList(response, nil)
+}
+
 // InvokeService invokes the internal data resource
 func InvokeService(endpoint string, responseType interface{}, queryParamMap map[string]string, c chan response,
 	retryAttempt int) {

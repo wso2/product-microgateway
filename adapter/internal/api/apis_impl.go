@@ -260,7 +260,7 @@ func ApplyAPIProjectFromAPIM(
 	if err != nil {
 		return nil, err
 	}
-	apiYaml := apiProject.APIYaml.Data
+	apiYaml := &apiProject.APIYaml.Data
 	if apiEnvProps, found := apiEnvs[apiProject.APIYaml.Data.ID]; found {
 		loggers.LoggerAPI.Infof("Environment specific values found for the API %v ", apiProject.APIYaml.Data.ID)
 		apiProject.APIEnvProps = apiEnvProps
@@ -298,6 +298,9 @@ func ApplyAPIProjectFromAPIM(
 		allEnvironments := xds.GetAllEnvironments(apiYaml.ID, vhost, environments)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			allEnvironments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
+		// We don't need to be environment specific when checking default version. It's applied at API level
+		// hence picking 0th index here.
+		apiYaml.IsDefaultVersion = xds.APIListMap[allEnvironments[0]][apiYaml.ID].IsDefaultVersion
 		// first update the API for vhost
 		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, allEnvironments)
 		if err != nil {

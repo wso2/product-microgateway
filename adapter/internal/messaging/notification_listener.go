@@ -56,6 +56,7 @@ const (
 	policyUpdate                = "POLICY_UPDATE"
 	policyDelete                = "POLICY_DELETE"
 	blockedStatus               = "BLOCKED"
+	apiUpdate                   = "API_UPDATE"
 )
 
 // var variables
@@ -131,11 +132,36 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	return nil
 }
 
+func handleDefaultVersionUpdate(event msg.APIEvent) {
+	deployedEnvs := xds.GetDeployedEnvironmets(event.UUID)
+	conf, _ := config.ReadConfigs()
+	configuredEnvs := conf.ControlPlane.EnvironmentLabels
+
+	if len(configuredEnvs) == 0 {
+		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
+	}
+	for _, env := range deployedEnvs {
+		// TODO: (Praminda) - This loop is not required here since we are anyway looping the API's already deployed envs
+		for _, configuredEnv := range configuredEnvs {
+			if configuredEnv == env {
+				query := make(map[string]string, 3)
+				query[eh.GatewayLabelParam] = configuredEnv
+				query[eh.ContextParam] = event.APIContext
+				query[eh.VersionParam] = event.APIVersion
+				eh.UpdatAPIMetadataFromCP(query)
+			}
+		}
+	}
+
+	synchronizer.FetchAPIsFromControlPlane(event.UUID, deployedEnvs)
+}
+
 // handleAPIEvents to process api related data
 func handleAPIEvents(data []byte, eventType string) {
 	var (
-		apiEvent         msg.APIEvent
-		currentTimeStamp int64 = apiEvent.Event.TimeStamp
+		apiEvent              msg.APIEvent
+		currentTimeStamp      int64 = apiEvent.Event.TimeStamp
+		isDefaultVersionEvent bool
 	)
 
 	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
@@ -159,6 +185,13 @@ func handleAPIEvents(data []byte, eventType string) {
 		}
 		logger.LoggerInternalMsg.Debugf("API event for the API %s:%s is dropped due to having non related tenantDomain : %s",
 			apiName, apiVersion, apiEvent.TenantDomain)
+		return
+	}
+
+	isDefaultVersionEvent = isDefaultVersionUpdate(apiEvent)
+
+	if isDefaultVersionEvent {
+		handleDefaultVersionUpdate(apiEvent)
 		return
 	}
 
@@ -200,8 +233,7 @@ func handleAPIEvents(data []byte, eventType string) {
 					queryParamMap[eh.ContextParam] = apiEvent.Context
 					queryParamMap[eh.VersionParam] = apiEvent.Version
 					var apiList *types.APIList
-					go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
-						eh.APIListChannel, 0)
+					go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap, eh.APIListChannel, 0)
 				}
 			}
 		}
@@ -421,6 +453,10 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 	}
 	timeStampMap[mapKey] = currentTimeStamp
 	return false
+}
+
+func isDefaultVersionUpdate(event msg.APIEvent) bool {
+	return strings.EqualFold(apiUpdate, event.Event.Type) && strings.EqualFold("DEFAULT_VERSION", event.Action)
 }
 
 func belongsToTenant(tenantDomain string) bool {
