@@ -164,7 +164,7 @@ public class MockApiTestCase {
         if (response.getHeaders().containsKey("content-type")) {
             Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "application/json", "Response header value mismatched");
         }
-        Assert.assertEquals(response.getData(), "{\"error_message\":\"Not Implemented\",\"code\":\"501\",\"error_description\":\"Example preference example4 is not supported for this resource\"}", "Error response message mismatch");
+        Assert.assertEquals(response.getData(), "{\"error_message\":\"Not Implemented\",\"code\":\"900871\",\"error_description\":\"Example preference example4 is not supported for this resource\"}", "Error response message mismatch");
     }
 
     @Test(description = "Test not implemented preferred code")
@@ -179,6 +179,6 @@ public class MockApiTestCase {
         if (response.getHeaders().containsKey("content-type")) {
             Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "application/json", "Response header value mismatched");
         }
-        Assert.assertEquals(response.getData(), "{\"error_message\":\"Not Implemented\",\"code\":\"501\",\"error_description\":\"Preferred code 400 is not supported for this resource.\"}", "Error response message mismatch");
+        Assert.assertEquals(response.getData(), "{\"error_message\":\"Not Implemented\",\"code\":\"900871\",\"error_description\":\"Preferred code 400 is not supported for this resource.\"}", "Error response message mismatch");
     }
 }
