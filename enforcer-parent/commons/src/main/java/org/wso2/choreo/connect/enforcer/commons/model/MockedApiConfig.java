@@ -17,38 +17,19 @@
  */
 
 package org.wso2.choreo.connect.enforcer.commons.model;
-
-import java.util.List;
+import java.util.Map;
 
 /**
  * Defines JSON script structure used in the mock API implementations.
  */
 public class MockedApiConfig {
-    private String in;                             // position of mock API response determining value (query/header)
-    private String name;                           // value name expected to use when invoking mock API
-    private List<MockedResponseConfig> responses;  // mock responses defined in the JSON script
+    private Map<String, MockedResponseConfig> responses;  // status code => responseconfig
 
-    public String getIn() {
-        return in;
-    }
-
-    public void setIn(String in) {
-        this.in = in;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<MockedResponseConfig> getResponses() {
+    public Map<String, MockedResponseConfig> getResponses() {
         return responses;
     }
 
-    public void setResponses(List<MockedResponseConfig> responses) {
+    public void setResponses(Map<String, MockedResponseConfig> responses) {
         this.responses = responses;
     }
 }

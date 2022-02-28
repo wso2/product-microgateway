@@ -20,12 +20,19 @@
 package model
 
 import (
+	"encoding/json"
+	"errors"
+	"regexp"
+	"strconv"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/api"
 )
 
 // Operation type object holds data about each http method in the REST API.
@@ -37,34 +44,135 @@ type Operation struct {
 	disableSecurity  bool
 	vendorExtensions map[string]interface{}
 	policies         OperationPolicies
-	mockedAPIConfig  MockedAPIConfig
+	mockedAPIConfig  *api.MockedApiConfig
 }
 
-// MockedAPIConfig holds configurations defined for a mocked API operation result
-type MockedAPIConfig struct {
-	In        string                 `json:"in,omitempty"`
-	Name      string                 `json:"name,omitempty"`
-	Responses []MockedResponseConfig `json:"responses,omitempty"`
+// SetMockedAPIConfigOAS3 generate mock impl endpoint configurations
+func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Operation) {
+	if len(openAPIOperation.Responses) > 0 {
+		mockedAPIConfig := &api.MockedApiConfig{
+			Responses: make([]*api.MockedResponseConfig, 0),
+		}
+		for responseCode, responseRef := range openAPIOperation.Responses {
+			code := strings.ToLower(responseCode)
+			if matched, _ := regexp.MatchString("^[0-9x]*", code); (matched && len(code) == 3) || code == "default" {
+				mockedResponse := &api.MockedResponseConfig{
+					Code:    code,
+					Content: make([]*api.MockedContentConfig, 0),
+				}
+				if responseRef != nil && responseRef.Value != nil {
+					for mediaType, content := range responseRef.Value.Content {
+						example, err := convertToJSON(content.Example)
+						if err == nil {
+							mockedResponse.Content = append(mockedResponse.Content, &api.MockedContentConfig{
+								ContentType: mediaType,
+								Examples:    []*api.MockedContentExample{{Ref: "", Body: example}},
+							})
+						} else if len(content.Examples) > 0 {
+							mockedContentExamples := make([]*api.MockedContentExample, 0)
+							for ref, exampleVal := range content.Examples {
+								if exampleVal != nil && exampleVal.Value != nil {
+									example, err = convertToJSON(exampleVal.Value.Value)
+									if err == nil {
+										mockedContentExamples = append(mockedContentExamples, &api.MockedContentExample{
+											Ref:  ref,
+											Body: example,
+										})
+									}
+								}
+
+							}
+							mockedResponse.Content = append(mockedResponse.Content,
+								&api.MockedContentConfig{
+									ContentType: mediaType,
+									Examples:    mockedContentExamples,
+								})
+						}
+					}
+					for headerName, headerValues := range responseRef.Value.Headers {
+						example, err := convertToJSON(headerValues.Value.Example)
+						if err == nil {
+							mockedResponse.Headers = append(mockedResponse.Headers, &api.MockedHeaderConfig{
+								Name:  headerName,
+								Value: example,
+							})
+						}
+					}
+				}
+				if len(mockedResponse.Content) > 0 {
+					mockedAPIConfig.Responses = append(mockedAPIConfig.Responses, mockedResponse)
+				}
+			}
+		}
+		if len(mockedAPIConfig.Responses) > 0 {
+			operation.mockedAPIConfig = mockedAPIConfig
+		}
+	}
 }
 
-// MockedResponseConfig holds response configurations in the mocked API operation
-type MockedResponseConfig struct {
-	Value   string                `json:"value,omitempty"`
-	Headers []MockedHeaderConfig  `json:"headers,omitempty"`
-	Code    int                   `json:"code,omitempty"`
-	Content []MockedContentConfig `json:"content,omitempty"`
+// SetMockedAPIConfigOAS2 generate mock impl endpoint configurations
+func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operation) {
+	if openAPIOperation.Responses != nil && len(openAPIOperation.Responses.StatusCodeResponses) > 0 {
+		mockedAPIConfig := &api.MockedApiConfig{
+			Responses: make([]*api.MockedResponseConfig, 0),
+		}
+		// get response codes
+		for responseCode, responseRef := range openAPIOperation.Responses.StatusCodeResponses {
+			mockedResponse := &api.MockedResponseConfig{
+				Code:    strconv.Itoa(responseCode),
+				Content: make([]*api.MockedContentConfig, 0),
+			}
+			for mediaType, content := range responseRef.ResponseProps.Examples {
+				//todo(amali) xml payload gen
+				example, err := convertToJSON(content)
+				if err == nil {
+					mockedResponse.Content = append(mockedResponse.Content, &api.MockedContentConfig{
+						ContentType: mediaType,
+						Examples:    []*api.MockedContentExample{{Ref: "", Body: example}},
+					})
+				}
+			}
+			// swagger does not support header example/examples
+			if len(mockedResponse.Content) > 0 {
+				mockedAPIConfig.Responses = append(mockedAPIConfig.Responses, mockedResponse)
+			}
+		}
+		// get default response examples
+		if openAPIOperation.Responses.Default != nil && len(openAPIOperation.Responses.Default.Examples) > 0 {
+			mockedResponse := &api.MockedResponseConfig{
+				Code:    "default",
+				Content: make([]*api.MockedContentConfig, 0),
+			}
+			for mediaType, content := range openAPIOperation.Responses.Default.Examples {
+				example, err := convertToJSON(content)
+				if err == nil {
+					mockedResponse.Content = append(mockedResponse.Content, &api.MockedContentConfig{
+						ContentType: mediaType,
+						Examples:    []*api.MockedContentExample{{Ref: "", Body: example}},
+					})
+				}
+			}
+			// swagger does not support header example/examples
+			if len(mockedResponse.Content) > 0 {
+				mockedAPIConfig.Responses = append(mockedAPIConfig.Responses, mockedResponse)
+			}
+		}
+		if len(mockedAPIConfig.Responses) > 0 {
+			operation.mockedAPIConfig = mockedAPIConfig
+		}
+	}
 }
 
-// MockedHeaderConfig holds header configurations in the mocked API operation
-type MockedHeaderConfig struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
-// MockedContentConfig holds mocked content configurations in the mocked API operation
-type MockedContentConfig struct {
-	ContentType string `json:"contentType,omitempty"`
-	Body        string `json:"body,omitempty"`
+// convertToJSON parse interface to JSON string. returns error if a null value has passed
+func convertToJSON(data interface{}) (string, error) {
+	if data != nil {
+		b, err := json.Marshal(data)
+		if err != nil {
+			return "", err
+		}
+		return string(b), nil
+	}
+	return "", errors.New("null object passed")
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -98,7 +206,7 @@ func (operation *Operation) GetTier() string {
 }
 
 // GetMockedAPIConfig returns the operation level mocked API implementation configs
-func (operation *Operation) GetMockedAPIConfig() MockedAPIConfig {
+func (operation *Operation) GetMockedAPIConfig() *api.MockedApiConfig {
 	return operation.mockedAPIConfig
 }
 
@@ -164,10 +272,9 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 }
 
 // NewOperation Creates and returns operation type object
-func NewOperation(method string, security []map[string][]string, extensions map[string]interface{},
-	mockedAPIConfig MockedAPIConfig) *Operation {
+func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	return &Operation{id, method, security, tier, disableSecurity, extensions, OperationPolicies{}, mockedAPIConfig}
+	return &Operation{id, method, security, tier, disableSecurity, extensions, OperationPolicies{}, &api.MockedApiConfig{}}
 }

@@ -23,15 +23,15 @@ import java.util.Map;
 /**
  * Defines mock API content structure.
  */
-public class MockedContentConfig {
+public class MockedContentExamples {
 
-    private Map<String, String> contentMap;    // holds content configurations defined in the mocked API payload
+    private Map<String, String> exampleMap;    // example reference => example map
 
-    public Map<String, String> getContentMap() {
-        return contentMap;
+    public Map<String, String> getExampleMap() {
+        return exampleMap;
     }
 
-    public void setContentMap(Map<String, String> contentMap) {
-        this.contentMap = contentMap;
+    public void setExampleMap(Map<String, String> exampleMap) {
+        this.exampleMap = exampleMap;
     }
 }

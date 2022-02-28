@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,7 +31,7 @@ public class ResponseObject {
     private String errorCode;
     private String errorMessage;
     private String errorDescription;
-    private Map<String, String> headerMap;
+    private Map<String, String> headerMap = new HashMap<>();
     private ArrayList<String> removeHeaderMap = new ArrayList<>();
     private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
@@ -39,7 +40,7 @@ public class ResponseObject {
     private Map<String, String> queryParamsToAdd;
     private Map<String, String> queryParams;
     private String requestPath;
-    private String mockApiResponseContent;
+    private String responseContent;
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -156,11 +157,11 @@ public class ResponseObject {
         this.requestPath = requestPath;
     }
 
-    public String getMockApiResponsePayload() {
-        return mockApiResponseContent;
+    public String getResponsePayload() {
+        return responseContent;
     }
 
-    public void setMockApiResponseContent(String mockApiResponseContent) {
-        this.mockApiResponseContent = mockApiResponseContent;
+    public void setResponseContent(String responseContent) {
+        this.responseContent = responseContent;
     }
 }

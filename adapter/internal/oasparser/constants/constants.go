@@ -42,7 +42,6 @@ const (
 	XWso2DisableSecurity              string = "x-wso2-disable-security"
 	None                              string = "None"
 	DefaultSecurity                   string = "default"
-	XMediationScript                  string = "x-mediation-script"
 	XWso2PassRequestPayloadToEnforcer string = "x-wso2-pass-request-payload-to-enforcer"
 )
 
@@ -96,10 +95,10 @@ const (
 
 // Constants that occur as values in api.yaml
 const (
-	HTTP                 string = "HTTP"
-	WS                   string = "WS"
-	WEBHOOK              string = "WEBHOOK"
-	Prototyped           string = "prototyped"
-	TemplateEndpointType string = "TEMPLATE"
-	InlineEndpointType   string = "INLINE"
+	HTTP                  string = "HTTP"
+	WS                    string = "WS"
+	WEBHOOK               string = "WEBHOOK"
+	Prototyped            string = "prototyped"
+	MockedOASEndpointType string = "MOCKED_OAS"
+	InlineEndpointType    string = "INLINE"
 )

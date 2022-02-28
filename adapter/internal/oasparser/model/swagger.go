@@ -45,7 +45,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.securityScheme = setSecurityDefinitions(swagger2)
 	swagger.security = swagger2.Security
 	swagger.apiType = constants.HTTP
-	swagger.resources = getResourcesSwagger(swagger2, swagger.IsMockedAPI)
+	swagger.resources = getResourcesSwagger(swagger2)
 
 	swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
 
@@ -83,7 +83,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 }
 
 // getResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
+func getResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 	var resources []*Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
@@ -102,19 +102,15 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 			}
 			var methodsArray []*Operation
 			methodFound := false
-			var mockedAPIConfig MockedAPIConfig = MockedAPIConfig{}
 			var methodName string
 			if pathItem.Get != nil {
 				methodName = "GET"
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
 				}
-				if isMockedAPI {
-					xMediationScriptValue, _ := pathItem.Get.VendorExtensible.Extensions.GetString(constants.XMediationScript)
-					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
-				}
-				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Get.Security,
-					pathItem.Get.Extensions, mockedAPIConfig))
+				op := NewOperation(methodName, pathItem.Get.Security, pathItem.Get.Extensions)
+				op.SetMockedAPIConfigOAS2(pathItem.Get)
+				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
 			if pathItem.Post != nil {
@@ -122,12 +118,9 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
 				}
-				if isMockedAPI {
-					xMediationScriptValue, _ := pathItem.Post.VendorExtensible.Extensions.GetString(constants.XMediationScript)
-					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
-				}
-				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Post.Security,
-					pathItem.Post.Extensions, mockedAPIConfig))
+				op := NewOperation(methodName, pathItem.Post.Security, pathItem.Post.Extensions)
+				op.SetMockedAPIConfigOAS2(pathItem.Post)
+				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
 			if pathItem.Put != nil {
@@ -135,12 +128,9 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
 				}
-				if isMockedAPI {
-					xMediationScriptValue, _ := pathItem.Put.VendorExtensible.Extensions.GetString(constants.XMediationScript)
-					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
-				}
-				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Put.Security,
-					pathItem.Put.Extensions, mockedAPIConfig))
+				op := NewOperation(methodName, pathItem.Put.Security, pathItem.Put.Extensions)
+				op.SetMockedAPIConfigOAS2(pathItem.Put)
+				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
 			if pathItem.Delete != nil {
@@ -148,12 +138,9 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
 				}
-				if isMockedAPI {
-					xMediationScriptValue, _ := pathItem.Delete.VendorExtensible.Extensions.GetString(constants.XMediationScript)
-					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
-				}
-				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Delete.Security,
-					pathItem.Delete.Extensions, mockedAPIConfig))
+				op := NewOperation(methodName, pathItem.Delete.Security, pathItem.Delete.Extensions)
+				op.SetMockedAPIConfigOAS2(pathItem.Delete)
+				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
 			if pathItem.Head != nil {
@@ -161,12 +148,9 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
 				}
-				if isMockedAPI {
-					xMediationScriptValue, _ := pathItem.Head.VendorExtensible.Extensions.GetString(constants.XMediationScript)
-					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
-				}
-				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Head.Security,
-					pathItem.Head.Extensions, mockedAPIConfig))
+				op := NewOperation(methodName, pathItem.Head.Security, pathItem.Head.Extensions)
+				op.SetMockedAPIConfigOAS2(pathItem.Head)
+				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
 			if pathItem.Patch != nil {
@@ -174,12 +158,9 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
 				}
-				if isMockedAPI {
-					xMediationScriptValue, _ := pathItem.Patch.VendorExtensible.Extensions.GetString(constants.XMediationScript)
-					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
-				}
-				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Patch.Security,
-					pathItem.Patch.Extensions, mockedAPIConfig))
+				op := NewOperation(methodName, pathItem.Patch.Security, pathItem.Patch.Extensions)
+				op.SetMockedAPIConfigOAS2(pathItem.Patch)
+				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
 			if pathItem.Options != nil {
@@ -187,12 +168,9 @@ func getResourcesSwagger(swagger2 spec.Swagger, isMockedAPI bool) []*Resource {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
-				if isMockedAPI {
-					xMediationScriptValue, _ := pathItem.Options.VendorExtensible.Extensions.GetString(constants.XMediationScript)
-					getMockedAPIConfig(xMediationScriptValue, &mockedAPIConfig, methodName)
-				}
-				methodsArray = append(methodsArray, NewOperation(methodName, pathItem.Options.Security,
-					pathItem.Options.Extensions, mockedAPIConfig))
+				op := NewOperation(methodName, pathItem.Options.Security, pathItem.Options.Extensions)
+				op.SetMockedAPIConfigOAS2(pathItem.Options)
+				methodsArray = append(methodsArray, op)
 				methodFound = true
 			}
 			if methodFound {

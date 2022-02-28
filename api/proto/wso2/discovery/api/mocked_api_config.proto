@@ -27,17 +27,14 @@ option java_multiple_files = true;
 
 // MockedApiConfig holds configurations defined for a mocked API operation result
 message MockedApiConfig {
-	string in = 1;
-	string name = 2;
 	repeated MockedResponseConfig responses = 3;
 }
 
 // MockedResponseConfig hold response configurations for the mocked API implementations
 message MockedResponseConfig {
-	string value = 1;
+	string code = 1;
 	repeated MockedHeaderConfig headers = 2;
-	int32 code = 3;
-	repeated MockedContentConfig content = 4;
+	repeated MockedContentConfig content = 3;
 }
 
 // MockedHeaderConfig holds header configs in mocked API implementations
@@ -49,5 +46,11 @@ message MockedHeaderConfig {
 // MockedContentConfig holds content configs in mocked API implementations
 message MockedContentConfig {
 	string contentType = 1;
+	repeated MockedContentExample examples = 2;
+}
+
+// MockedContentConfig holds content configs in mocked API implementations
+message MockedContentExample {
+	string Ref = 1;
 	string body = 2;
 }

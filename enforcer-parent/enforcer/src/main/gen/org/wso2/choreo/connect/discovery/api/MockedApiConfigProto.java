@@ -34,6 +34,11 @@ public final class MockedApiConfigProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_api_MockedContentConfig_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_wso2_discovery_api_MockedContentExample_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_wso2_discovery_api_MockedContentExample_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -44,20 +49,21 @@ public final class MockedApiConfigProto {
   static {
     java.lang.String[] descriptorData = {
       "\n*wso2/discovery/api/mocked_api_config.p" +
-      "roto\022\022wso2.discovery.api\"h\n\017MockedApiCon" +
-      "fig\022\n\n\002in\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022;\n\trespons" +
-      "es\030\003 \003(\0132(.wso2.discovery.api.MockedResp" +
-      "onseConfig\"\246\001\n\024MockedResponseConfig\022\r\n\005v" +
-      "alue\030\001 \001(\t\0227\n\007headers\030\002 \003(\0132&.wso2.disco" +
-      "very.api.MockedHeaderConfig\022\014\n\004code\030\003 \001(" +
-      "\005\0228\n\007content\030\004 \003(\0132\'.wso2.discovery.api." +
-      "MockedContentConfig\"1\n\022MockedHeaderConfi" +
-      "g\022\014\n\004name\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"8\n\023Mocked" +
-      "ContentConfig\022\023\n\013contentType\030\001 \001(\t\022\014\n\004bo" +
-      "dy\030\002 \001(\tB~\n%org.wso2.choreo.connect.disc" +
-      "overy.apiB\024MockedApiConfigProtoP\001Z=githu" +
-      "b.com/envoyproxy/go-control-plane/wso2/d" +
-      "iscovery/api;apib\006proto3"
+      "roto\022\022wso2.discovery.api\"N\n\017MockedApiCon" +
+      "fig\022;\n\tresponses\030\003 \003(\0132(.wso2.discovery." +
+      "api.MockedResponseConfig\"\227\001\n\024MockedRespo" +
+      "nseConfig\022\014\n\004code\030\001 \001(\t\0227\n\007headers\030\002 \003(\013" +
+      "2&.wso2.discovery.api.MockedHeaderConfig" +
+      "\0228\n\007content\030\003 \003(\0132\'.wso2.discovery.api.M" +
+      "ockedContentConfig\"1\n\022MockedHeaderConfig" +
+      "\022\014\n\004name\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"f\n\023MockedC" +
+      "ontentConfig\022\023\n\013contentType\030\001 \001(\t\022:\n\010exa" +
+      "mples\030\002 \003(\0132(.wso2.discovery.api.MockedC" +
+      "ontentExample\"1\n\024MockedContentExample\022\013\n" +
+      "\003Ref\030\001 \001(\t\022\014\n\004body\030\002 \001(\tB~\n%org.wso2.cho" +
+      "reo.connect.discovery.apiB\024MockedApiConf" +
+      "igProtoP\001Z=github.com/envoyproxy/go-cont" +
+      "rol-plane/wso2/discovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -68,13 +74,13 @@ public final class MockedApiConfigProto {
     internal_static_wso2_discovery_api_MockedApiConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_MockedApiConfig_descriptor,
-        new java.lang.String[] { "In", "Name", "Responses", });
+        new java.lang.String[] { "Responses", });
     internal_static_wso2_discovery_api_MockedResponseConfig_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_wso2_discovery_api_MockedResponseConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_MockedResponseConfig_descriptor,
-        new java.lang.String[] { "Value", "Headers", "Code", "Content", });
+        new java.lang.String[] { "Code", "Headers", "Content", });
     internal_static_wso2_discovery_api_MockedHeaderConfig_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_wso2_discovery_api_MockedHeaderConfig_fieldAccessorTable = new
@@ -86,7 +92,13 @@ public final class MockedApiConfigProto {
     internal_static_wso2_discovery_api_MockedContentConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_MockedContentConfig_descriptor,
-        new java.lang.String[] { "ContentType", "Body", });
+        new java.lang.String[] { "ContentType", "Examples", });
+    internal_static_wso2_discovery_api_MockedContentExample_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_wso2_discovery_api_MockedContentExample_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_wso2_discovery_api_MockedContentExample_descriptor,
+        new java.lang.String[] { "Ref", "Body", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

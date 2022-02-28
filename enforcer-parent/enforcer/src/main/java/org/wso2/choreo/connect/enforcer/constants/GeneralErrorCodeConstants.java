@@ -30,4 +30,11 @@ public class GeneralErrorCodeConstants {
     // TODO: (renuka) check error codes with APIM
     public static final int MEDIATION_POLICY_ERROR_CODE = 901100;
 
+    /**
+     * Contains mock impl endpoint apis related errors
+     */
+    public static class MockImpl {
+        public static final String BAD_REQUEST_CODE = "900870";
+        public static final String NOT_IMPLEMENTED_CODE = "900871";
+    }
 }

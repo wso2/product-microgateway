@@ -100,7 +100,8 @@ public class MediationPolicyFilter implements Filter {
             log.error("Operation policy action \"{}\" contains invalid policy argument",
                     policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6107), e);
             FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
-                    APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(), APIConstants.SERVER_ERROR, null);
+                    APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    APIConstants.INTERNAL_SERVER_ERROR_MESSAGE, null);
             return false;
         }
 
@@ -116,7 +117,7 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private void renameHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String currentHeaderName = policyAttrib.get("currentHeaderName");
+        String currentHeaderName = policyAttrib.get("currentHeaderName").toLowerCase();
         String updatedHeaderValue = policyAttrib.get("updatedHeaderName");
         if (requestContext.getHeaders().containsKey(currentHeaderName)) {
             String headerValue = requestContext.getHeaders().get(currentHeaderName);

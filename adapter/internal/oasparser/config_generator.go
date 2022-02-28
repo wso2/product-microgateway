@@ -27,6 +27,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	envoy "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -122,6 +123,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 	resources := []*api.Resource{}
 	securitySchemes := []*api.SecurityScheme{}
 	securityList := []*api.SecurityList{}
+	isMockedAPI := mgwSwagger.EndpointImplementationType == constants.MockedOASEndpointType
 
 	logger.LoggerOasparser.Debugf("Security schemes in GetEnforcerAPI method %v:", mgwSwagger.GetSecurityScheme())
 	for _, securityScheme := range mgwSwagger.GetSecurityScheme() {
@@ -151,7 +153,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 	for _, res := range mgwSwagger.GetResources() {
 		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
-			operations[i] = GetEnforcerAPIOperation(*op, mgwSwagger.IsMockedAPI)
+			operations[i] = GetEnforcerAPIOperation(*op, isMockedAPI)
 		}
 		resource := &api.Resource{
 			Id:      res.GetID(),
@@ -207,7 +209,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 		OrganizationId:      mgwSwagger.OrganizationID,
 		Vhost:               vhost,
-		IsMockedApi:         mgwSwagger.IsMockedAPI,
+		IsMockedApi:         isMockedAPI,
 	}
 }
 
@@ -228,10 +230,9 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Ope
 		secSchemas[i] = secSchema
 	}
 
-	var mockedAPIConfig api.MockedApiConfig
+	var mockedAPIConfig *api.MockedApiConfig
 	if isMockedAPI {
-		mockedScriptValue := operation.GetMockedAPIConfig()
-		generateMockedAPIConfig(&mockedAPIConfig, mockedScriptValue)
+		mockedAPIConfig = operation.GetMockedAPIConfig()
 	}
 
 	policies := &api.OperationPolicies{
@@ -245,7 +246,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Ope
 		Tier:            operation.GetTier(),
 		DisableSecurity: operation.GetDisableSecurity(),
 		Policies:        policies,
-		MockedApiConfig: &mockedAPIConfig,
+		MockedApiConfig: mockedAPIConfig,
 	}
 	return &apiOperation
 }
@@ -318,38 +319,4 @@ func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.
 		}
 	}
 	return endpoints
-}
-
-// Generates mocked API configuration to pass for the enforcer considering xMediationScript value
-func generateMockedAPIConfig(mockedAPIConfig *api.MockedApiConfig, mgwMockedAPIConfig model.MockedAPIConfig) {
-	mockedAPIConfig.In = mgwMockedAPIConfig.In
-	mockedAPIConfig.Name = mgwMockedAPIConfig.Name
-	responseConfigList := make([]*api.MockedResponseConfig, 0)
-
-	for _, val := range mgwMockedAPIConfig.Responses {
-		var responseConfig api.MockedResponseConfig
-		contentConfigList := make([]*api.MockedContentConfig, 0)
-		responseConfig.Value = val.Value
-		responseConfig.Code = int32(val.Code)
-
-		for _, content := range val.Content {
-			var contentConfig api.MockedContentConfig
-			contentConfig.ContentType = content.ContentType
-			contentConfig.Body = content.Body
-			contentConfigList = append(contentConfigList, &contentConfig)
-		}
-		responseConfig.Content = contentConfigList
-
-		headerConfigList := responseConfig.Headers
-		for _, header := range val.Headers {
-			var mockedAPIHeader api.MockedHeaderConfig
-			mockedAPIHeader.Name = header.Name
-			mockedAPIHeader.Value = header.Value
-			headerConfigList = append(headerConfigList, &mockedAPIHeader)
-		}
-		responseConfig.Headers = headerConfigList
-		responseConfigList = append(responseConfigList, &responseConfig)
-	}
-	mockedAPIConfig.Responses = responseConfigList
-	logger.LoggerOasparser.Debugf("Mocked API configuration generated successfully.")
 }
