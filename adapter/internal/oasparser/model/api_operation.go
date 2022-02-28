@@ -55,14 +55,14 @@ func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Op
 		}
 		for responseCode, responseRef := range openAPIOperation.Responses {
 			code := strings.ToLower(responseCode)
-			if matched, _ := regexp.MatchString("^[0-9xX]*", code); (matched && len(code) == 3) || code == "default" {
+			if matched, _ := regexp.MatchString("^[0-9x]*", code); (matched && len(code) == 3) || code == "default" {
 				mockedResponse := &api.MockedResponseConfig{
 					Code:    code,
 					Content: make([]*api.MockedContentConfig, 0),
 				}
 				if responseRef != nil && responseRef.Value != nil {
 					for mediaType, content := range responseRef.Value.Content {
-						example, err := asJSON(content.Example)
+						example, err := convertToJSON(content.Example)
 						if err == nil {
 							mockedResponse.Content = append(mockedResponse.Content, &api.MockedContentConfig{
 								ContentType: mediaType,
@@ -72,7 +72,7 @@ func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Op
 							mockedContentExamples := make([]*api.MockedContentExample, 0)
 							for ref, exampleVal := range content.Examples {
 								if exampleVal != nil && exampleVal.Value != nil {
-									example, err = asJSON(exampleVal.Value.Value)
+									example, err = convertToJSON(exampleVal.Value.Value)
 									if err == nil {
 										mockedContentExamples = append(mockedContentExamples, &api.MockedContentExample{
 											Ref:  ref,
@@ -90,7 +90,7 @@ func (operation *Operation) SetMockedAPIConfigOAS3(openAPIOperation *openapi3.Op
 						}
 					}
 					for headerName, headerValues := range responseRef.Value.Headers {
-						example, err := asJSON(headerValues.Value.Example)
+						example, err := convertToJSON(headerValues.Value.Example)
 						if err == nil {
 							mockedResponse.Headers = append(mockedResponse.Headers, &api.MockedHeaderConfig{
 								Name:  headerName,
@@ -124,7 +124,7 @@ func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operat
 			}
 			for mediaType, content := range responseRef.ResponseProps.Examples {
 				//todo(amali) xml payload gen
-				example, err := asJSON(content)
+				example, err := convertToJSON(content)
 				if err == nil {
 					mockedResponse.Content = append(mockedResponse.Content, &api.MockedContentConfig{
 						ContentType: mediaType,
@@ -144,7 +144,7 @@ func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operat
 				Content: make([]*api.MockedContentConfig, 0),
 			}
 			for mediaType, content := range openAPIOperation.Responses.Default.Examples {
-				example, err := asJSON(content)
+				example, err := convertToJSON(content)
 				if err == nil {
 					mockedResponse.Content = append(mockedResponse.Content, &api.MockedContentConfig{
 						ContentType: mediaType,
@@ -163,8 +163,8 @@ func (operation *Operation) SetMockedAPIConfigOAS2(openAPIOperation *spec.Operat
 	}
 }
 
-// asJSON parse interface to son string. returns error if a null value has passed
-func asJSON(data interface{}) (string, error) {
+// convertToJSON parse interface to JSON string. returns error if a null value has passed
+func convertToJSON(data interface{}) (string, error) {
 	if data != nil {
 		b, err := json.Marshal(data)
 		if err != nil {

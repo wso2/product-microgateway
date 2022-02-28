@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,10 +93,19 @@ public class MockImplUtils {
         String mediaType = "application/json";
         if (preferences.containsKey(APIConstants.PREFER_CODE)) {
             preferCode = preferences.get(APIConstants.PREFER_CODE);
+            boolean isInvalidCode = false;
             try {
-                statusCode = Integer.parseInt(preferCode);
+                if (preferCode.length() == 3) {
+                    statusCode = Integer.parseInt(preferCode);
+                } else {
+                    isInvalidCode = true;
+                }
             } catch (NumberFormatException e) {
+                isInvalidCode = true;
+            }
+            if (isInvalidCode) {
                 log.error("Mock API request contains invalid value for code preference.");
+                responseObject.setErrorCode(GeneralErrorCodeConstants.MockImpl.BAD_REQUEST_CODE);
                 responseObject.setStatusCode(APIConstants.StatusCodes.BAD_REQUEST_ERROR.getCode());
                 responseObject.setErrorMessage(APIConstants.BAD_REQUEST_MESSAGE);
                 responseObject.setErrorDescription("Invalid format for code preference");
@@ -109,7 +119,8 @@ public class MockImplUtils {
         Map<String, MockedResponseConfig> responseConfigList = mockedApiConfig.getResponses();
         MockedResponseConfig responseConfig;
         if (responseConfigList.isEmpty()) {
-            setMockApiErrorResponse(responseObject, "Internal Server Error. Response config is empty.");
+            log.debug("API operation does not have mock examples configured.");
+            setMockApiErrorResponse(responseObject, "");
             return;
         } else if (!preferCode.isEmpty()) {
             if (responseConfigList.containsKey(preferCode)) {
@@ -166,21 +177,18 @@ public class MockImplUtils {
                     return;
                 }
             }
-        } // if content is empty for the response, example headers with empty body will be sent
+        }
 
+        // even if content is empty for the response, example headers with empty body will be sent
         String content = "";
         if (!preferExample.isEmpty()) {
-            if (contentExamples == null) {
-                setMockApiErrorResponse(responseObject, "Examples are not supported for this resource");
-                return;
-            }
-            if (contentExamples.getExampleMap().containsKey(preferExample)) {
-                content = contentExamples.getExampleMap().get(preferExample);
-            } else {
+            if (contentExamples == null || !contentExamples.getExampleMap().containsKey(preferExample)) {
                 setMockApiErrorResponse(responseObject, "Example preference " + preferExample +
                         " is not supported for this resource");
                 return;
             }
+            content = contentExamples.getExampleMap().get(preferExample);
+
         } else if (contentExamples != null && contentExamples.getExampleMap().size() > 0) {
             content = contentExamples.getExampleMap().entrySet().stream().findFirst().get().getValue();
         }
@@ -201,7 +209,7 @@ public class MockImplUtils {
     private static void setMockApiErrorResponse(ResponseObject responseObject, String message) {
         log.error("Cannot process the mock API request. " + message);
         responseObject.setStatusCode(APIConstants.StatusCodes.NOT_IMPLEMENTED_ERROR.getCode());
-        responseObject.setErrorCode(APIConstants.StatusCodes.NOT_IMPLEMENTED_ERROR.getValue());
+        responseObject.setErrorCode(GeneralErrorCodeConstants.MockImpl.NOT_IMPLEMENTED_CODE);
         responseObject.setErrorMessage(APIConstants.NOT_IMPLEMENTED_MESSAGE);
         responseObject.setErrorDescription(message);
     }

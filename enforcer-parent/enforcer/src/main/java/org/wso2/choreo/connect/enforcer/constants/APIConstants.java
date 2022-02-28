@@ -84,14 +84,15 @@ public class APIConstants {
     public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";
     public static final String NOT_IMPLEMENTED_MESSAGE = "Not Implemented";
     public static final String BAD_REQUEST_MESSAGE = "Bad Request";
+    public static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal Server Error";
 
     //headers and values
     public static final String CONTENT_TYPE_HEADER = "Content-type";
     public static final String ACCEPT_HEADER = "accept";
     public static final String PREFER_HEADER = "prefer";
-    public static final List<String> PREFER_KEYS = List.of("code", "example");
     public static final String PREFER_CODE = "code";
     public static final String PREFER_EXAMPLE = "example";
+    public static final List<String> PREFER_KEYS = List.of(PREFER_CODE, PREFER_EXAMPLE);
     public static final String APPLICATION_JSON = "application/json";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";

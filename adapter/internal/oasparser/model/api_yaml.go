@@ -144,7 +144,7 @@ func NewAPIYaml(fileContent []byte) (apiYaml APIYaml, err error) {
 	}
 
 	if apiYaml.Data.EndpointImplementationType == constants.InlineEndpointType {
-		errmsg := "inline endpointImplementationType is not supported with Choreo Connect"
+		errmsg := "INLINE endpointImplementationType is not supported with Choreo Connect"
 		loggers.LoggerAPI.Warnf(errmsg)
 		err = errors.New(errmsg)
 		return apiYaml, err
