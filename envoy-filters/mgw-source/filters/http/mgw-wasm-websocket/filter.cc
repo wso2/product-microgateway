@@ -118,6 +118,8 @@ FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
         // The above metadata is only required for determining throttling state in the start. Hence they are not
         // required to stored in metadata separately. Everything else will be stored under metadata.
         (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
+        LOG_TRACE(std::string(p.first) + std::string(" -> ") + std::string(p.second) +
+            std::string(" dynamic metadata for the request : ") + this->x_request_id_);
       }
     }
   }
