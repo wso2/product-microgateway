@@ -80,27 +80,14 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                     && provider.getFaultType() == FaultCategory.OTHER) {
                 continue;
             }
-            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-            try {
-                dataCollector.collectData();
-                logger.debug("Event is published.");
-            } catch (AnalyticsException e) {
-                logger.error("Error while publishing the event to the analytics portal.", e);
-            }
+            collectDataToPublish(provider);
         }
     }
 
     @Override
     public void handleWebsocketFrameRequest(WebSocketFrameRequest webSocketFrameRequest) {
         AnalyticsDataProvider  provider = new ChoreoAnalyticsForWSProvider(webSocketFrameRequest);
-        // TODO: (VirajSalaka) Common code
-        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        try {
-            dataCollector.collectData();
-            logger.debug("Event is published.");
-        } catch (AnalyticsException e) {
-            logger.error("Error while publishing the event to the analytics portal.", e);
-        }
+        collectDataToPublish(provider);
     }
 
     @Override
@@ -166,5 +153,19 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                     logEntry.getResponse().getResponseCode().getValue() == 101;
         }
         return false;
+    }
+
+    private void collectDataToPublish(AnalyticsDataProvider provider) {
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        String correlationID = "";
+        if (provider.getMetaInfo() != null) {
+            correlationID = provider.getMetaInfo().getCorrelationId();
+        }
+        try {
+            dataCollector.collectData();
+            logger.debug("Event is published. : " + correlationID);
+        } catch (AnalyticsException e) {
+            logger.error("Error while publishing the event to the analytics portal. : " + correlationID, e);
+        }
     }
 }

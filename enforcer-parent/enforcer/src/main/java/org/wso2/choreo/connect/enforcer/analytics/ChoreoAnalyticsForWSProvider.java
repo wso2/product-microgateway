@@ -46,6 +46,8 @@ import java.util.Map;
 public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
 
     private static final Logger logger = LogManager.getLogger(ChoreoAnalyticsForWSProvider.class);
+    public static final int THROTTLE_CODE_UPPER_BOUND = 900900;
+    public static final int THROTTLE_CODE_LOWER_BOUND = 900800;
 
     private WebSocketFrameRequest webSocketFrameRequest;
     private Map<String, String> extAuthMetadata;
@@ -88,8 +90,8 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
 
     @Override
     public FaultCategory getFaultType() {
-        if (webSocketFrameRequest.getApimErrorCode() >= 900800
-                && webSocketFrameRequest.getApimErrorCode() < 900900) {
+        if (webSocketFrameRequest.getApimErrorCode() >= THROTTLE_CODE_LOWER_BOUND
+                && webSocketFrameRequest.getApimErrorCode() < THROTTLE_CODE_UPPER_BOUND) {
             return FaultCategory.THROTTLED;
         }
         // When the Websocket Messages are blocked due to enforcer connections would result in
@@ -105,7 +107,7 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
         String apiVersion = extAuthMetadata.get(MetadataConstants.API_VERSION_KEY);
         String apiName = extAuthMetadata.get(MetadataConstants.API_NAME_KEY);
         String apiId = extAuthMetadata.get(MetadataConstants.API_ID_KEY);
-        String apiCreator = extAuthMetadata.get(MetadataConstants.API_CREATOR_KEY);;
+        String apiCreator = extAuthMetadata.get(MetadataConstants.API_CREATOR_KEY);
         String apiCreatorTenantDomain = extAuthMetadata.get(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY);
         api.setApiType(APIConstants.ApiType.WEB_SOCKET);
         api.setApiId(apiId);
@@ -172,14 +174,11 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
         if (isSuccessRequest()) {
             return 200;
         }
-        // TODO: (VirajSalaka) bring in constants
+
         // This is required by the analytics endpoint in order to display the errors properly.
-        if (webSocketFrameRequest.getApimErrorCode() >= 900800
-                && webSocketFrameRequest.getApimErrorCode() < 900900) {
+        if (webSocketFrameRequest.getApimErrorCode() >= THROTTLE_CODE_LOWER_BOUND
+                && webSocketFrameRequest.getApimErrorCode() < THROTTLE_CODE_UPPER_BOUND) {
             return 429;
-        }
-        if (webSocketFrameRequest.getApimErrorCode() == 101503) {
-            return 503;
         }
         return Constants.UNKNOWN_INT_VALUE;
     }

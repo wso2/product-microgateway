@@ -59,7 +59,6 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
                 logEntry.getResponse().getResponseCodeDetails())) {
             logger.debug("Is success event");
             return EventCategory.SUCCESS;
-            // TODO: (VirajSalaka) How to handle 200 response for the websocket request. (it is a fault)
         } else if (logEntry.getResponse() != null
                 && logEntry.getResponse().getResponseCode() != null
                 && logEntry.getResponse().getResponseCode().getValue() != 200
@@ -110,7 +109,6 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiType(getValueAsString(fieldsMap, MetadataConstants.API_TYPE_KEY));
         api.setApiId(getValueAsString(fieldsMap, MetadataConstants.API_ID_KEY));
         api.setApiCreator(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_KEY));
-        api.setApiType(getValueAsString(fieldsMap, MetadataConstants.API_TYPE_KEY));
         api.setApiName(getValueAsString(fieldsMap, MetadataConstants.API_NAME_KEY));
         api.setApiVersion(getValueAsString(fieldsMap, MetadataConstants.API_VERSION_KEY));
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));

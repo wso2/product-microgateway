@@ -51,11 +51,8 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     public ChoreoFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
-        if (APIConstants.WEBSOCKET.equals(requestContext.getHeaders().get(APIConstants.UPGRADE_HEADER))) {
-            isWebsocketUpgradeRequest = true;
-        } else {
-            isWebsocketUpgradeRequest = false;
-        }
+        isWebsocketUpgradeRequest =
+                APIConstants.WEBSOCKET.equals(requestContext.getHeaders().get(APIConstants.UPGRADE_HEADER));
     }
 
     @Override
