@@ -226,9 +226,9 @@ func (operation *Operation) GetID() string {
 func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoint {
 	var policies []Policy
 	if isIn {
-		policies = operation.policies.In
+		policies = operation.policies.Request
 	} else {
-		policies = operation.policies.Out
+		policies = operation.policies.Response
 	}
 	if len(policies) > 0 {
 		for _, policy := range policies {

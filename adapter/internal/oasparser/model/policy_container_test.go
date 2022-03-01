@@ -119,7 +119,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 			Target: "/pets",
 			Verb:   "POST",
 			OperationPolicies: OperationPolicies{
-				In: PolicyList{
+				Request: PolicyList{
 					{
 						PolicyName: "fooAddRequestHeader",
 						Parameters: map[string]interface{}{
@@ -146,7 +146,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 	}
 
 	expFormattedP := OperationPolicies{
-		In: PolicyList{
+		Request: PolicyList{
 			{
 				PolicyName: "fooAddRequestHeader",
 				Action:     "SET_HEADER",
@@ -165,7 +165,7 @@ func getSampleTestPolicySpec() PolicySpecification {
 	spec := PolicySpecification{}
 	spec.Data.Name = "fooAddRequestHeader"
 	spec.Data.ApplicableFlows = []string{"request"}
-	spec.Data.SupportedGateways = []string{"CC"}
+	spec.Data.SupportedGateways = []string{"ChoreoConnect"}
 	spec.Data.MultipleAllowed = false
 	spec.Data.PolicyAttributes = []struct { // redefine struct here, since it is not named, update here if the src changed
 		Name            string `yaml:"name"`

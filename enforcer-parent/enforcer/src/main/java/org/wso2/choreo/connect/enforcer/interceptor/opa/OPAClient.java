@@ -82,7 +82,7 @@ public class OPAClient {
         }
 
         String serverUrl = policyAttrib.get("serverUrl");
-        String token = policyAttrib.get("accessToken");
+        String token = policyAttrib.get("accessKey");
         String policyName = policyAttrib.get("policy");
         String ruleName = policyAttrib.get("rule");
         // TODO: (renuka) handle additionalProperties, check with APIM

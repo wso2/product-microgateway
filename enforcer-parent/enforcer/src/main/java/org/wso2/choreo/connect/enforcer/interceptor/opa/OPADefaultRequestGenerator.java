@@ -51,7 +51,7 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         inputPayload.put("requestOrigin", requestContext.getClientIp());
         inputPayload.put("method", requestContext.getRequestMethod());
         inputPayload.put("path", requestContext.getRequestPath());
-        inputPayload.put("httpVersion", requestContext.getHttpProtocol());
+        inputPayload.put("httpVersion", requestContext.getHttpProtocol()); // TODO (renuka): remove httpVersion
 
         // additional fields from choreo connect
         inputPayload.put("apiName", requestContext.getMatchedAPI().getName());

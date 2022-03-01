@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	policyCCGateway string = "CC"
+	policyCCGateway string = "ChoreoConnect"
 )
 
 // policy value validation types
@@ -94,17 +94,17 @@ type PolicyDefinition struct {
 func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPolicies, swagger *MgwSwagger) OperationPolicies {
 	fmtPolicies := OperationPolicies{}
 
-	inFlowStats := policies.In.getStats()
-	for i, policy := range policies.In {
+	inFlowStats := policies.Request.getStats()
+	for i, policy := range policies.Request {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyInFlow, inFlowStats, i, swagger); err == nil {
-			fmtPolicies.In = append(fmtPolicies.In, fmtPolicy)
+			fmtPolicies.Request = append(fmtPolicies.Request, fmtPolicy)
 		}
 	}
 
-	outFlowStats := policies.Out.getStats()
-	for i, policy := range policies.Out {
+	outFlowStats := policies.Response.getStats()
+	for i, policy := range policies.Response {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i, swagger); err == nil {
-			fmtPolicies.Out = append(fmtPolicies.Out, fmtPolicy)
+			fmtPolicies.Response = append(fmtPolicies.Response, fmtPolicy)
 		}
 	}
 
@@ -213,9 +213,6 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 				}
 				regexStr := attrib.ValidationRegex
 				if regexStr != "" {
-					if !strings.HasPrefix(regexStr, "/") || !strings.HasSuffix(regexStr, "/") {
-						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\", regex expression should starts and end with '/'", spec.Data.Name, attrib.ValidationRegex)
-					}
 					regexStr = regexStr[1 : len(regexStr)-1]
 					reg, err := regexp.Compile(regexStr)
 					if err != nil {

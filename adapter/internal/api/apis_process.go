@@ -42,7 +42,6 @@ const (
 	endpointCertDir            string = "Endpoint-certificates"
 	interceptorCertDir         string = "Endpoint-certificates/interceptors"
 	policiesDir                string = "Policies"
-	policySpecFileExtension    string = ".yaml"
 	policyDefFileExtension     string = ".gotmpl"
 	crtExtension               string = ".crt"
 	pemExtension               string = ".pem"
@@ -55,6 +54,8 @@ const (
 	production                 string = "production"
 	sandbox                    string = "sandbox"
 	zipExt                     string = ".zip"
+	yamlExt                    string = ".yaml"
+	jsonExt                    string = ".json"
 )
 
 // processFileInsideProject method process one file at a time and
@@ -162,7 +163,7 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		apiProject.APIYaml = apiYaml
 	} else if strings.Contains(fileName, policiesDir+string(os.PathSeparator)) { // handle "./Policy" dir
 		// handle policy spec and def
-		isSpec := strings.HasSuffix(fileName, policySpecFileExtension)
+		isSpec := strings.HasSuffix(fileName, jsonExt) || strings.HasSuffix(fileName, yamlExt)
 		isDef := strings.HasSuffix(fileName, policyDefFileExtension)
 		if !isSpec && !isDef {
 			return nil
@@ -177,9 +178,9 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		if isSpec {
 			// process policy specificationn
 			spec := model.PolicySpecification{}
-			if err := yaml.Unmarshal(fileContent, &spec); err != nil { // only yaml files are supported
+			if err := yaml.Unmarshal(fileContent, &spec); err != nil { // JSON is also a YAML, handled with gopkg.in/yaml.v2
 				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
-					Message:   fmt.Sprintf("Error parsing content of policy specification %v: %v", fileName, err.Error()),
+					Message:   fmt.Sprintf("Error parsing content of policy specification %s: %s", fileName, err.Error()),
 					Severity:  logging.MINOR,
 					ErrorCode: 1221,
 				})
