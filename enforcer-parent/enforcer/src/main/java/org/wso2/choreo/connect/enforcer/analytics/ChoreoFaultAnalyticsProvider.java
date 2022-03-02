@@ -133,7 +133,6 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         // This could be null if  OPTIONS request comes
         if (requestContext.getMatchedResourcePath() != null) {
             Operation operation = new Operation();
-            // TODO: (VirajSalaka) decide on the action we need to do when the Stream Idle Timeout happens.
             if (isWebsocketUpgradeRequest) {
                 operation.setApiMethod(WebSocketFrameRequest.MessageDirection.HANDSHAKE.name());
                 operation.setApiResourceTemplate(AnalyticsConstants.WEBSOCKET_HANDSHAKE_RESOURCE_PREFIX +
