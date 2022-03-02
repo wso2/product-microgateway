@@ -85,14 +85,31 @@ public class OPAClient {
         String token = policyAttrib.get("accessKey");
         String policyName = policyAttrib.get("policy");
         String ruleName = policyAttrib.get("rule");
+        String additionalPropertiesStr = policyAttrib.get("additionalProperties");
         // TODO: (renuka) handle additionalProperties, check with APIM
-
-        String requestBody = requestGenerator.generateRequest(policyName, ruleName, null, requestContext);
-        String evaluatingPolicyUrl = serverUrl + '/' + policyName;
-        if (StringUtils.isNotEmpty(ruleName)) {
-            evaluatingPolicyUrl += ('/' + ruleName);
+        String[] additionalProperties;
+        if (additionalPropertiesStr != null) {
+            additionalProperties = additionalPropertiesStr.split(",");
         }
-        String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token);
+
+        // following client related configs impl are same as the synapse impl
+        Map<String, Object> clientOptions = new HashMap<>();
+        clientOptions.put(FilterUtils.HTTPClientOptions.MAX_OPEN_CONNECTIONS, policyAttrib.get("maxOpenConnections"));
+        clientOptions.put(FilterUtils.HTTPClientOptions.MAX_PER_ROUTE, policyAttrib.get("maxPerRoute"));
+        clientOptions.put(FilterUtils.HTTPClientOptions.CONNECT_TIMEOUT, policyAttrib.get("connectionTimeout"));
+
+        // evaluating server policy URL
+        serverUrl = StringUtils.removeEnd(serverUrl, "/");
+        String evaluatingPolicyUrl;
+        if (StringUtils.isNotEmpty(ruleName)) {
+            evaluatingPolicyUrl = String.format("%s/%s/%s", serverUrl, policyName, ruleName);
+        } else {
+            evaluatingPolicyUrl = String.format("%s/%s", serverUrl, policyName);
+        }
+
+        // calling OPA server and validate response
+        String requestBody = requestGenerator.generateRequest(policyName, ruleName, null, requestContext);
+        String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token, clientOptions);
         return requestGenerator.handleResponse(policyName, ruleName, opaResponse, requestContext);
     }
 
@@ -106,12 +123,13 @@ public class OPAClient {
         requestGeneratorMap.put(DEFAULT_REQUEST_GENERATOR_CLASS, defaultRequestGenerator);
     }
 
-    private static String callOPAServer(String serverEp, String payload, String token) throws OPASecurityException {
+    private static String callOPAServer(String serverEp, String payload, String token,
+                                        Map<String, Object> clientOptions) throws OPASecurityException {
         try {
             URL url = new URL(serverEp);
             KeyStore opaKeyStore = ConfigHolder.getInstance().getOpaKeyStore();
             try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol(),
-                    opaKeyStore)) {
+                    opaKeyStore, clientOptions)) {
                 HttpPost httpPost = new HttpPost(serverEp);
                 HttpEntity reqEntity = new ByteArrayEntity(payload.getBytes(Charset.defaultCharset()));
                 httpPost.setEntity(reqEntity);
