@@ -162,7 +162,11 @@ public final class WsClient {
                     retryCount++;
                     respondedNotFound = true;
                 } else {
-                    log.error("Error during websocket handshake");
+                    if (e.getMessage() != null) {
+                        log.error("Error during websocket handshake." + e.getMessage());
+                    } else {
+                        log.error("Error during websocket handshake.");
+                    }
                 }
             }
         } while (respondedNotFound && shouldRetry(retryCount));

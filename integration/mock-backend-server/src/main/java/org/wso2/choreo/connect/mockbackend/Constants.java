@@ -28,5 +28,5 @@ public class Constants {
     public static final int MOCK_ANALYTICS_SERVER_PORT = 2399;
     public static final int INTERCEPTOR_STATUS_SERVER_PORT = 2370;
     public static final int MTLS_INTERCEPTOR_HANDLER_SERVER_PORT = 2371;
-    public static final int WEBSOCKET_SERVER_PORT = 2385;
+    public static final int WEBSOCKET_SERVER_PORT = 2360;
 }

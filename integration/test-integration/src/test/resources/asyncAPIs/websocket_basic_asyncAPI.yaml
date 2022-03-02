@@ -4,7 +4,7 @@ info:
   version: '1.0.0'
 servers:
   production:
-    url: 'ws://mockBackend:2385/v2'
+    url: 'ws://mockBackend:2360/v2'
     protocol: ws
 channels:
   /*:

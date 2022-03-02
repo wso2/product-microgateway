@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "context": "websocket-basic",
   "type": "WS",
+  "description": "This WS API later gets updated with an AsyncAPI definition which includes the actual topics/resources.",
   "tiersCollection": "AsyncUnlimited",
   "operationsDTOS": [],
   "endpoint": {
     "endpoint_type": "ws",
     "production_endpoints": {
-      "url": "ws://mockBackend:2385/v2"
+      "url": "ws://mockBackend:2360/v2"
     },
     "sandbox_endpoints": {
-      "url": "ws://mockBackend:2385/v2"
+      "url": "ws://mockBackend:2360/v2"
     }
   }
 }
