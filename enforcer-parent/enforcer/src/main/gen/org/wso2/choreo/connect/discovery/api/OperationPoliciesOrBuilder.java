@@ -8,51 +8,51 @@ public interface OperationPoliciesOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
   java.util.List<org.wso2.choreo.connect.discovery.api.Policy> 
-      getInList();
+      getRequestList();
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
-  org.wso2.choreo.connect.discovery.api.Policy getIn(int index);
+  org.wso2.choreo.connect.discovery.api.Policy getRequest(int index);
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
-  int getInCount();
+  int getRequestCount();
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
   java.util.List<? extends org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-      getInOrBuilderList();
+      getRequestOrBuilderList();
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
-  org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getInOrBuilder(
+  org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getRequestOrBuilder(
       int index);
 
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
   java.util.List<org.wso2.choreo.connect.discovery.api.Policy> 
-      getOutList();
+      getResponseList();
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
-  org.wso2.choreo.connect.discovery.api.Policy getOut(int index);
+  org.wso2.choreo.connect.discovery.api.Policy getResponse(int index);
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
-  int getOutCount();
+  int getResponseCount();
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
   java.util.List<? extends org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-      getOutOrBuilderList();
+      getResponseOrBuilderList();
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
-  org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getOutOrBuilder(
+  org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getResponseOrBuilder(
       int index);
 
   /**

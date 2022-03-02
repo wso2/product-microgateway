@@ -50,8 +50,8 @@ public class MediationPolicyFilter implements Filter {
         // get operation policies
         PolicyConfig policyConfig = requestContext.getMatchedResourcePath().getPolicyConfig();
         // apply in policies
-        if (policyConfig.getIn() != null && policyConfig.getIn().size() > 0) {
-            for (Policy policy : policyConfig.getIn()) {
+        if (policyConfig.getRequest() != null && policyConfig.getRequest().size() > 0) {
+            for (Policy policy : policyConfig.getRequest()) {
                 if (!applyPolicy(requestContext, policy)) {
                     return false;
                 }
