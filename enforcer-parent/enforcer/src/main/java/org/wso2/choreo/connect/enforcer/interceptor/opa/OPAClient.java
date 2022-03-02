@@ -81,14 +81,17 @@ public class OPAClient {
                     APISecurityConstants.OPA_REQUEST_FAILURE);
         }
 
-        String serverUrl = policyAttrib.get("serverUrl");
+        String serverUrl = policyAttrib.get("serverURL");
         String token = policyAttrib.get("accessKey");
         String policyName = policyAttrib.get("policy");
         String ruleName = policyAttrib.get("rule");
         // TODO: (renuka) handle additionalProperties, check with APIM
 
         String requestBody = requestGenerator.generateRequest(policyName, ruleName, null, requestContext);
-        String evaluatingPolicyUrl = serverUrl + '/' + policyName + '/' + ruleName; // including multiple "/" is fine.
+        String evaluatingPolicyUrl = serverUrl + '/' + policyName;
+        if (StringUtils.isNotEmpty(ruleName)) {
+            evaluatingPolicyUrl += ('/' + ruleName);
+        }
         String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token);
         return requestGenerator.handleResponse(policyName, ruleName, opaResponse, requestContext);
     }

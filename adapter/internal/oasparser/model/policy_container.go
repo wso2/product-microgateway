@@ -188,7 +188,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 			if index != pStat.firstIndex {
 				return errors.New("multiple policies not allowed")
 			}
-			loggers.LoggerOasparser.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
+			loggers.LoggerOasparser.Warnf("Operation policy \"%s\" not allowed in multiple times, appling the first policy", policy.PolicyName)
 		}
 	}
 
@@ -196,7 +196,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
 			if _, found := policyPrams[attrib.Name]; attrib.Required && !found {
-				return fmt.Errorf("required paramater %s not found", attrib.Name)
+				return fmt.Errorf("required paramater \"%s\" not found", attrib.Name)
 			}
 		}
 	}

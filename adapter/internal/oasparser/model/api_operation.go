@@ -246,8 +246,9 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 								requestTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
 								includesV := &interceptor.RequestInclusions{}
 								if includesFound {
-									includes, isList := includesValue.([]interface{})
-									if isList && len(includes) > 0 {
+									includesStr, isStr := includesValue.(string)
+									if isStr {
+										includes := strings.Split(includesStr, ",")
 										includesV = GenerateInterceptorIncludes(includes)
 									}
 								}
