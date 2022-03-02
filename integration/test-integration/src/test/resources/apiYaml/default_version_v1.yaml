@@ -1,0 +1,24 @@
+type: api
+version: v4.0.0
+data:
+  name: DefaultVersion
+  context: /defaultVersion/1.0.0
+  version: 1.0.0
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  isDefaultVersion: false
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+    - http
+    - https
+  policies:
+    - Unlimited
+  visibility: PUBLIC
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: http://mockBackend:2383/v2
+  endpointImplementationType: ENDPOINT
+  websubSubscriptionConfiguration: null
