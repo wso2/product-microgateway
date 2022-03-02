@@ -81,17 +81,6 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 		{
 			policy: Policy{
 				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooName": 2, "fooValue": "admin"},
-			},
-			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
-			isExpError: true,
-			message:    "Invalid value type in fooName",
-		},
-		{
-			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
 				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,

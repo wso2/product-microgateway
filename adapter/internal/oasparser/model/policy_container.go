@@ -21,8 +21,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"regexp"
-	"strings"
 	"text/template"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -197,49 +195,8 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 	policyPrams, ok := policy.Parameters.(map[string]interface{})
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
-			val, found := policyPrams[attrib.Name]
-			if !found {
-				if attrib.Required {
-					return fmt.Errorf("required paramater %s not found", attrib.Name)
-				}
-				continue
-			}
-
-			// TODO: (renuka) check this Value and Regex validation is needed
-			switch v := val.(type) {
-			case string:
-				if !strings.EqualFold(attrib.Type, policyValTypeString) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-				regexStr := attrib.ValidationRegex
-				if regexStr != "" {
-					regexStr = regexStr[1 : len(regexStr)-1]
-					reg, err := regexp.Compile(regexStr)
-					if err != nil {
-						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\"", spec.Data.Name, attrib.ValidationRegex)
-					}
-					if !reg.MatchString(v) {
-						return fmt.Errorf("invalid parameter value of attribute \"%s\", regex match failed", attrib.Name)
-					}
-				}
-			case int:
-				if !strings.EqualFold(attrib.Type, policyValTypeInt) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			case bool:
-				if !strings.EqualFold(attrib.Type, policyValTypeBool) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			case []interface{}:
-				if !strings.EqualFold(attrib.Type, policyValTypeArray) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			case map[interface{}]interface{}:
-				if !strings.EqualFold(attrib.Type, policyValTypeMap) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			default:
-				return fmt.Errorf("invalid value type of paramater %s, unsupported type %s", attrib.Name, attrib.Type)
+			if _, found := policyPrams[attrib.Name]; attrib.Required && !found {
+				return fmt.Errorf("required paramater %s not found", attrib.Name)
 			}
 		}
 	}
