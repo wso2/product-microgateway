@@ -22,11 +22,13 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.wso2.choreo.connect.mockbackend.Constants;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +38,8 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -367,6 +371,12 @@ public class Utils {
         }
     }
 
+    public static String convertYamlToJson(String yamlString) {
+        Yaml yaml= new Yaml();
+        Object obj = yaml.load(yamlString);
+        return JSONValue.toJSONString(obj);
+    }
+
     public static String getTargetDirPath() {
         File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
@@ -386,6 +396,10 @@ public class Utils {
     public static String getServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT), servicePath)
                 .toString();
+    }
+
+    public static String getServiceURLWebSocket(String servicePath) throws URISyntaxException {
+        return new URI("ws://localhost:" + TestConstant.GATEWAY_LISTENER_HTTP_PORT + "/" + servicePath).toString();
     }
 
     public static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
