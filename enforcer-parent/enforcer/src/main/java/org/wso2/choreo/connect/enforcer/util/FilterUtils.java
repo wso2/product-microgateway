@@ -116,7 +116,7 @@ public class FilterUtils {
      * @param options - HTTP client options
      * @return HTTP client
      */
-    public static HttpClient getHttpClient(String protocol, KeyStore clientKeyStore, Map<String, Object> options) {
+    public static HttpClient getHttpClient(String protocol, KeyStore clientKeyStore, Map<String, String> options) {
 
         //        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
         //                getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -131,20 +131,20 @@ public class FilterUtils {
         PoolingHttpClientConnectionManager pool = null;
         try {
             pool = getPoolingHttpClientConnectionManager(protocol, clientKeyStore);
-            pool.setMaxTotal((int) options.getOrDefault(HTTPClientOptions.MAX_OPEN_CONNECTIONS,
-                    Integer.valueOf(maxTotal)));
-            pool.setDefaultMaxPerRoute((int) options.getOrDefault(HTTPClientOptions.MAX_PER_ROUTE,
-                    Integer.valueOf(defaultMaxPerRoute)));
+            pool.setMaxTotal(Integer.parseInt(options.getOrDefault(HTTPClientOptions.MAX_OPEN_CONNECTIONS,
+                    maxTotal)));
+            pool.setDefaultMaxPerRoute(Integer.parseInt(options.getOrDefault(HTTPClientOptions.MAX_PER_ROUTE,
+                    defaultMaxPerRoute)));
         } catch (EnforcerException e) {
             log.error("Error while getting http client connection manager", e);
         }
 
         RequestConfig.Builder pramsBuilder = RequestConfig.custom();
         if (options.containsKey(HTTPClientOptions.CONNECT_TIMEOUT)) {
-            pramsBuilder.setConnectTimeout((int) options.get(HTTPClientOptions.CONNECT_TIMEOUT));
+            pramsBuilder.setConnectTimeout(Integer.parseInt(options.get(HTTPClientOptions.CONNECT_TIMEOUT)));
         }
         if (options.containsKey(HTTPClientOptions.SOCKET_TIMEOUT)) {
-            pramsBuilder.setSocketTimeout((int) options.get(HTTPClientOptions.SOCKET_TIMEOUT));
+            pramsBuilder.setSocketTimeout(Integer.parseInt(options.get(HTTPClientOptions.SOCKET_TIMEOUT)));
         }
         RequestConfig params = pramsBuilder.build();
         return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
@@ -644,6 +644,12 @@ public class FilterUtils {
     public static long getTimeStampSkewInSeconds() {
         //TODO : Read from config
         return 5;
+    }
+
+    public static <K, V> void putToMapIfNotNull(Map<K, V> map, K key, V value) {
+        if (value != null) {
+            map.put(key, value);
+        }
     }
 
     /**

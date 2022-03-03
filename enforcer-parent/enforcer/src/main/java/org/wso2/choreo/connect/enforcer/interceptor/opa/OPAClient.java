@@ -82,7 +82,7 @@ public class OPAClient {
                     APISecurityConstants.OPA_REQUEST_FAILURE);
         }
 
-        String serverUrl = policyAttrib.get("serverURL");
+        String serverURL = policyAttrib.get("serverURL");
         String token = policyAttrib.get("accessKey");
         String policyName = policyAttrib.get("policy");
         String ruleName = policyAttrib.get("rule");
@@ -98,18 +98,21 @@ public class OPAClient {
                 policyAttrib.get("sendAccessToken"));
 
         // client related configs
-        Map<String, Object> clientOptions = new HashMap<>();
-        clientOptions.put(FilterUtils.HTTPClientOptions.MAX_OPEN_CONNECTIONS, policyAttrib.get("maxOpenConnections"));
-        clientOptions.put(FilterUtils.HTTPClientOptions.MAX_PER_ROUTE, policyAttrib.get("maxPerRoute"));
-        clientOptions.put(FilterUtils.HTTPClientOptions.CONNECT_TIMEOUT, policyAttrib.get("connectionTimeout"));
+        Map<String, String> clientOptions = new HashMap<>();
+        FilterUtils.putToMapIfNotNull(clientOptions, FilterUtils.HTTPClientOptions.MAX_OPEN_CONNECTIONS,
+                policyAttrib.get("maxOpenConnections"));
+        FilterUtils.putToMapIfNotNull(clientOptions, FilterUtils.HTTPClientOptions.MAX_PER_ROUTE,
+                policyAttrib.get("maxPerRoute"));
+        FilterUtils.putToMapIfNotNull(clientOptions, FilterUtils.HTTPClientOptions.CONNECT_TIMEOUT,
+                policyAttrib.get("connectionTimeout"));
 
         // evaluating server policy URL
-        serverUrl = StringUtils.removeEnd(serverUrl, "/");
+        serverURL = StringUtils.removeEnd(serverURL, "/");
         String evaluatingPolicyUrl;
         if (StringUtils.isNotEmpty(ruleName)) {
-            evaluatingPolicyUrl = String.format("%s/%s/%s", serverUrl, policyName, ruleName);
+            evaluatingPolicyUrl = String.format("%s/%s/%s", serverURL, policyName, ruleName);
         } else {
-            evaluatingPolicyUrl = String.format("%s/%s", serverUrl, policyName);
+            evaluatingPolicyUrl = String.format("%s/%s", serverURL, policyName);
         }
 
         // calling OPA server and validate response
@@ -131,7 +134,7 @@ public class OPAClient {
     }
 
     private static String callOPAServer(String serverEp, String payload, String token,
-                                        Map<String, Object> clientOptions) throws OPASecurityException {
+                                        Map<String, String> clientOptions) throws OPASecurityException {
         try {
             URL url = new URL(serverEp);
             KeyStore opaKeyStore = ConfigHolder.getInstance().getOpaKeyStore();

@@ -180,7 +180,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 	if !arrayContains(spec.Data.SupportedGateways, policyCCGateway) {
 		return errors.New("choreo connect gateway not supported")
 	}
-	if !spec.Data.MultipleAllowed {
+	if !spec.Data.MultipleAllowed { // TODO (renuka): remove this multiple allowed validation and compute stats
 		// TODO (renuka): check the behaviour with APIM
 		// in here allow first instance of policy to be applied if multiple is found
 		pStat := stats[policy.PolicyName]
