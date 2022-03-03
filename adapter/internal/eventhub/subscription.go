@@ -210,7 +210,6 @@ func UpdatAPIMetadataFromCP(params map[string]string) {
 	var apiList *types.APIList
 	var responseChannel = make(chan response)
 	go InvokeService(ApisEndpoint, apiList, params, responseChannel, 0)
-	// TODO: (Praminda) - discuss why we wait in a loop in other places?
 	response := <-responseChannel
 	retrieveAPIList(response, nil)
 }

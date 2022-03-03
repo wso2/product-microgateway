@@ -132,25 +132,23 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	return nil
 }
 
+// handleDefaultVersionUpdate will redeploy default versioned API.
+// API runtime artifact doesn't get updated in CP side when default version is updated
+// (isDefaultVersion prop in apiYaml is not updated). API deployment or should happen
+// for it to get updated. However we need to redeploy the API when there is a default
+// version change. For that we call `/apis` endpoint to get updated API metadata (this
+// contains the updated `isDefaultVersion` field). Now we proceed with fetching runtime
+// artifact from the CP. When creating CC deployment objects we refer to updated `APIList`
+// map and update runtime artifact's `isDefaultVersion` field to correctly deploy default
+// versioned API.
 func handleDefaultVersionUpdate(event msg.APIEvent) {
 	deployedEnvs := xds.GetDeployedEnvironmets(event.UUID)
-	conf, _ := config.ReadConfigs()
-	configuredEnvs := conf.ControlPlane.EnvironmentLabels
-
-	if len(configuredEnvs) == 0 {
-		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
-	}
 	for _, env := range deployedEnvs {
-		// TODO: (Praminda) - This loop is not required here since we are anyway looping the API's already deployed envs
-		for _, configuredEnv := range configuredEnvs {
-			if configuredEnv == env {
-				query := make(map[string]string, 3)
-				query[eh.GatewayLabelParam] = configuredEnv
-				query[eh.ContextParam] = event.APIContext
-				query[eh.VersionParam] = event.APIVersion
-				eh.UpdatAPIMetadataFromCP(query)
-			}
-		}
+		query := make(map[string]string, 3)
+		query[eh.GatewayLabelParam] = env
+		query[eh.ContextParam] = event.APIContext
+		query[eh.VersionParam] = event.APIVersion
+		eh.UpdatAPIMetadataFromCP(query)
 	}
 
 	synchronizer.FetchAPIsFromControlPlane(event.UUID, deployedEnvs)
