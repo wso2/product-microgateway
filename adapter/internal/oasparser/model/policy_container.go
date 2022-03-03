@@ -73,6 +73,7 @@ type PolicySpecification struct {
 			Name            string `yaml:"name"`
 			ValidationRegex string `yaml:"validationRegex,omitempty"`
 			Type            string `yaml:"type"`
+			DefaultValue    string `yaml:"defaultValue"`
 			Required        bool   `yaml:"required,omitempty"`
 		} `yaml:"policyAttributes"`
 	}
@@ -166,6 +167,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	policy.Parameters = def.Definition.Parameters
 	policy.Action = def.Definition.Action
 
+	spec.fillDefaultsInPolicy(&policy)
 	return policy, nil
 }
 
@@ -188,7 +190,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 			if index != pStat.firstIndex {
 				return errors.New("multiple policies not allowed")
 			}
-			loggers.LoggerOasparser.Warnf("Operation policy \"%s\" not allowed in multiple times, appling the first policy", policy.PolicyName)
+			loggers.LoggerOasparser.Warnf("Operation policy %q not allowed in multiple times, appling the first policy", policy.PolicyName)
 		}
 	}
 
@@ -196,10 +198,22 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
 			if _, found := policyPrams[attrib.Name]; attrib.Required && !found {
-				return fmt.Errorf("required paramater \"%s\" not found", attrib.Name)
+				return fmt.Errorf("required paramater %q not found", attrib.Name)
 			}
 		}
 	}
 
 	return nil
+}
+
+// fillDefaultsInPolicy updates the policy with default values defined in the spec if the key is not found in the policy
+func (spec *PolicySpecification) fillDefaultsInPolicy(policy *Policy) {
+	if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+		for _, attrib := range spec.Data.PolicyAttributes {
+			if _, ok := paramMap[attrib.Name]; !ok && attrib.DefaultValue != "" {
+				paramMap[attrib.Name] = attrib.DefaultValue
+			}
+		}
+		policy.Parameters = paramMap
+	}
 }

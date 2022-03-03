@@ -180,7 +180,7 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			spec := model.PolicySpecification{}
 			if err := yaml.Unmarshal(fileContent, &spec); err != nil { // JSON is also a YAML, handled with gopkg.in/yaml.v2
 				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
-					Message:   fmt.Sprintf("Error parsing content of policy specification %s: %s", fileName, err.Error()),
+					Message:   fmt.Sprintf("Error parsing content of policy specification %q: %s", fileName, err.Error()),
 					Severity:  logging.MINOR,
 					ErrorCode: 1221,
 				})

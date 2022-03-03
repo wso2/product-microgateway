@@ -160,6 +160,7 @@ func getSampleTestPolicySpec() PolicySpecification {
 		Name            string `yaml:"name"`
 		ValidationRegex string `yaml:"validationRegex,omitempty"`
 		Type            string `yaml:"type"`
+		DefaultValue    string `yaml:"defaultValue"`
 		Required        bool   `yaml:"required,omitempty"`
 	}{
 		{
