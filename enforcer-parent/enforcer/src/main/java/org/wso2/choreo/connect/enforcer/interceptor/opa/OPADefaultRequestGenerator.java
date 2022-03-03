@@ -26,6 +26,7 @@ import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.opa.OPAConstants;
 import org.wso2.choreo.connect.enforcer.commons.opa.OPARequestGenerator;
 import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -40,7 +41,7 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
     private static final Logger log = LogManager.getLogger(OPADefaultRequestGenerator.class);
 
     @Override
-    public String generateRequest(String policyName, String rule, Map<String, Object> advancedProperties,
+    public String generateRequest(String policyName, String rule, Map<String, String> additionalParameters,
                                   RequestContext requestContext) throws OPASecurityException {
         JSONObject requestPayload = new JSONObject();
         JSONObject inputPayload = new JSONObject();
@@ -53,27 +54,32 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         inputPayload.put("path", requestContext.getRequestPath());
         inputPayload.put("httpVersion", requestContext.getHttpProtocol()); // TODO (renuka): remove httpVersion
 
-        // additional fields from choreo connect
-        inputPayload.put("apiName", requestContext.getMatchedAPI().getName());
-        inputPayload.put("apiVersion", requestContext.getMatchedAPI().getVersion());
-        inputPayload.put("orgId", requestContext.getMatchedAPI().getOrganizationId());
-        inputPayload.put("vhost", requestContext.getMatchedAPI().getVhost());
-        inputPayload.put("pathTemplate", requestContext.getRequestPathTemplate());
-        inputPayload.put("prodClusterName", requestContext.getProdClusterHeader());
-        inputPayload.put("sandClusterName", requestContext.getSandClusterHeader());
+        // API context
+        JSONObject apiContext = new JSONObject();
+        inputPayload.put("apiContext", apiContext);
+        apiContext.put("apiName", requestContext.getMatchedAPI().getName());
+        apiContext.put("apiVersion", requestContext.getMatchedAPI().getVersion());
+        apiContext.put("orgId", requestContext.getMatchedAPI().getOrganizationId());
+        apiContext.put("vhost", requestContext.getMatchedAPI().getVhost());
+        apiContext.put("pathTemplate", requestContext.getRequestPathTemplate());
+        apiContext.put("prodClusterName", requestContext.getProdClusterHeader());
+        apiContext.put("sandClusterName", requestContext.getSandClusterHeader());
 
         // Authentication Context
-        AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        JSONObject authContextPayload = new JSONObject();
-        authContextPayload.put("token", authContext.getRawToken());
-        authContextPayload.put("tokenType", authContext.getTokenType());
-        authContextPayload.put("keyType", authContext.getKeyType());
-        inputPayload.put("authenticationContext", authContextPayload);
+        if ("TRUE".equalsIgnoreCase(additionalParameters.get(OPAConstants.AdditionalParameters.SEND_ACCESS_TOKEN))) {
+            AuthenticationContext authContext = requestContext.getAuthenticationContext();
+            JSONObject authContextPayload = new JSONObject();
+            authContextPayload.put("token", authContext.getRawToken());
+            authContextPayload.put("tokenType", authContext.getTokenType());
+            authContextPayload.put("keyType", authContext.getKeyType());
+            inputPayload.put("authenticationContext", authContextPayload);
+        }
         return requestPayload.toString();
     }
 
     @Override
-    public boolean handleResponse(String policyName, String rule, String opaResponse, RequestContext requestContext)
+    public boolean handleResponse(String policyName, String rule, String opaResponse,
+                                  Map<String, String> additionalParameters, RequestContext requestContext)
             throws OPASecurityException {
         try {
             JSONObject response = new JSONObject(opaResponse);

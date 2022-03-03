@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.opa.OPAConstants;
 import org.wso2.choreo.connect.enforcer.commons.opa.OPARequestGenerator;
 import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -85,14 +86,18 @@ public class OPAClient {
         String token = policyAttrib.get("accessKey");
         String policyName = policyAttrib.get("policy");
         String ruleName = policyAttrib.get("rule");
-        String additionalPropertiesStr = policyAttrib.get("additionalProperties");
-        // TODO: (renuka) handle additionalProperties, check with APIM
-        String[] additionalProperties;
-        if (additionalPropertiesStr != null) {
-            additionalProperties = additionalPropertiesStr.split(",");
-        }
 
-        // following client related configs impl are same as the synapse impl
+        // additionalParameters - we provide this as a Map<String, String> in the interface
+        // TODO: (renuka) policyAttrib should support Map<String, MAP<String, String>>
+        //  and the additionalParameters should come inside this. Since APIM 4.1.0 not supports
+        //  Map<String, MAP<String, String>> in the UI, this is fine for now.
+        Map<String, String> additionalParameters = new HashMap<>();
+        additionalParameters.put(OPAConstants.AdditionalParameters.ADDITIONAL_PROPERTIES,
+                policyAttrib.get("additionalProperties"));
+        additionalParameters.put(OPAConstants.AdditionalParameters.SEND_ACCESS_TOKEN,
+                policyAttrib.get("sendAccessToken"));
+
+        // client related configs
         Map<String, Object> clientOptions = new HashMap<>();
         clientOptions.put(FilterUtils.HTTPClientOptions.MAX_OPEN_CONNECTIONS, policyAttrib.get("maxOpenConnections"));
         clientOptions.put(FilterUtils.HTTPClientOptions.MAX_PER_ROUTE, policyAttrib.get("maxPerRoute"));
@@ -108,9 +113,11 @@ public class OPAClient {
         }
 
         // calling OPA server and validate response
-        String requestBody = requestGenerator.generateRequest(policyName, ruleName, null, requestContext);
+        String requestBody = requestGenerator.generateRequest(policyName, ruleName, additionalParameters,
+                requestContext);
         String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token, clientOptions);
-        return requestGenerator.handleResponse(policyName, ruleName, opaResponse, requestContext);
+        return requestGenerator.handleResponse(policyName, ruleName, opaResponse, additionalParameters,
+                requestContext);
     }
 
     private void loadRequestGenerators() {

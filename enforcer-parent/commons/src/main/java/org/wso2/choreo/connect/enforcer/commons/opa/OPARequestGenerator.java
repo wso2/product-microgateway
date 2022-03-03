@@ -30,25 +30,27 @@ public interface OPARequestGenerator {
     /**
      * Generate the OPA request payload from the provided request context and the additional Properties Map.
      *
-     * @param policyName         Name of the policy validated.
-     * @param rule               Rule of the policy.
-     * @param advancedProperties Advanced properties that can be used to construct the opa payload.
-     * @param requestContext     Request context details to be validated.
+     * @param policyName           Name of the policy validated.
+     * @param rule                 Rule of the policy.
+     * @param additionalParameters Advanced properties that can be used to construct the opa payload.
+     * @param requestContext       Request context details to be validated.
      * @return json payload as a string be sent to the OPA server for validation.
      * @throws OPASecurityException If an authentication failure or system error occurs.
      */
-    String generateRequest(String policyName, String rule, Map<String, Object> advancedProperties,
+    String generateRequest(String policyName, String rule, Map<String, String> additionalParameters,
                            RequestContext requestContext) throws OPASecurityException;
+
     /**
      * Validate the OPA response and handle request context based on the response.
      *
-     * @param policyName     Name of the policy validated.
-     * @param rule           Rule of the policy.
-     * @param opaResponse    OPA response to be validated.
-     * @param requestContext Request context details to be validated.
+     * @param policyName           Name of the policy validated.
+     * @param rule                 Rule of the policy.
+     * @param opaResponse          OPA response to be validated.
+     * @param additionalParameters Advanced properties that can be used to construct the opa payload.
+     * @param requestContext       Request context details to be validated.
      * @return <code>true</code> if valid, <code>false</code> otherwise.
      * @throws OPASecurityException If an authentication failure or system error occurs.
      */
-    boolean handleResponse(String policyName, String rule, String opaResponse, RequestContext requestContext)
-            throws OPASecurityException;
+    boolean handleResponse(String policyName, String rule, String opaResponse, Map<String, String> additionalParameters,
+                           RequestContext requestContext) throws OPASecurityException;
 }
