@@ -44,5 +44,7 @@ public class LoggingConstants {
         public static final String LEVEL = "level";
         public static final String LOGGER = "logger";
         public static final String MESSAGE = "message";
+        public static final String TRACE_ID = "traceId";
+        public static final String CONTEXT = "context";
     }
 }

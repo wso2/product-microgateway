@@ -1,0 +1,31 @@
+{
+  "name": "RetryAPI",
+  "version": "1.0.0",
+  "context": "retry",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/retry-four",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2383/v2",
+      "config": {
+        "retryTimeOut": "3",
+        "actionDuration": "30000",
+        "actionSelect": "discard",
+        "factor": "",
+        "retryDelay": "",
+        "retryErroCode": [],
+        "suspendDuration": "",
+        "suspendErrorCode": [],
+        "suspendMaxDuration": ""
+      }
+    }
+  }
+}

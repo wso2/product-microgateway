@@ -1,0 +1,202 @@
+basePath: /v2
+definitions:
+  ApiResponse:
+    properties:
+      code:
+        format: int32
+        type: integer
+      message:
+        type: string
+      type:
+        type: string
+    type: object
+  Category:
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+    type: object
+    xml:
+      name: Category
+  Order:
+    properties:
+      complete:
+        type: boolean
+      id:
+        format: int64
+        type: integer
+      petId:
+        format: int64
+        type: integer
+      quantity:
+        format: int32
+        type: integer
+      shipDate:
+        format: date-time
+        type: string
+      status:
+        description: Order Status
+        enum:
+        - placed
+        - approved
+        - delivered
+        type: string
+    type: object
+    xml:
+      name: Order
+  Pet:
+    properties:
+      category:
+        $ref: '#/definitions/Category'
+      id:
+        format: int64
+        type: integer
+      name:
+        example: doggie
+        type: string
+      photoUrls:
+        items:
+          type: string
+          xml:
+            name: photoUrl
+        type: array
+        xml:
+          wrapped: true
+      status:
+        description: pet status in the store
+        enum:
+        - available
+        - pending
+        - sold
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/Tag'
+          xml:
+            name: tag
+        type: array
+        xml:
+          wrapped: true
+    required:
+    - name
+    - photoUrls
+    type: object
+    xml:
+      name: Pet
+  Tag:
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+    type: object
+    xml:
+      name: Tag
+  User:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        format: int64
+        type: integer
+      lastName:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      userStatus:
+        description: User Status
+        format: int32
+        type: integer
+      username:
+        type: string
+    type: object
+    xml:
+      name: User
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+host: petstore.swagger.io
+info:
+  contact:
+    email: apiteam@swagger.io
+  description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Petstore
+  version: 1.0.6
+paths:
+  /pet/findByStatus:
+    get:
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      parameters:
+      - collectionFormat: multi
+        description: Status values that need to be considered for filter
+        in: query
+        items:
+          default: available
+          enum:
+          - available
+          - pending
+          - sold
+          type: string
+        name: status
+        required: true
+        type: array
+      produces:
+      - application/json
+      - application/xml
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            items:
+              $ref: '#/definitions/Pet'
+            type: array
+        "400":
+          description: Invalid status value
+      security:
+      - petstore_auth:
+        - write:pets
+        - read:pets
+      summary: Finds Pets by status
+      tags:
+      - pet
+schemes:
+- https
+- http
+securityDefinitions:
+  api_key:
+    in: header
+    name: api_key
+    type: apiKey
+  petstore_auth:
+    authorizationUrl: https://petstore.swagger.io/oauth/authorize
+    flow: implicit
+    scopes:
+      read:pets: read your pets
+      write:pets: modify pets in your account
+    type: oauth2
+swagger: "2.0"
+tags:
+- description: Everything about your Pets
+  externalDocs:
+    description: Find out more
+    url: http://swagger.io
+  name: pet
+- description: Access to Petstore orders
+  name: store
+- description: Operations about user
+  externalDocs:
+    description: Find out more about our store
+    url: http://swagger.io
+  name: user

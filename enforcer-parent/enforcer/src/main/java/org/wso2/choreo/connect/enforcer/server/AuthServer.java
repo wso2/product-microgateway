@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.choreo.connect.enforcer.analytics.AccessLoggingService;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
@@ -79,7 +81,8 @@ public class AuthServer {
             try {
                 latch.await();
             } catch (InterruptedException e) {
-                logger.error("Error while waiting for configurations from adapter", e);
+                logger.error("Error while waiting for configurations from adapter",
+                        ErrorDetails.errorLog(LoggingConstants.Severity.BLOCKER, 6700), e);
                 System.exit(1);
             }
 
@@ -93,7 +96,8 @@ public class AuthServer {
                     Utils.setTracingEnabled(true);
                     logger.info("Tracing is enabled.");
                 } catch (TracingException e) {
-                    logger.error("Error enabling tracing", e);
+                    logger.error("Error enabling tracing",
+                            ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 6901), e);
                     // prevent further tracing activation by disabling the config
                     Utils.setTracingEnabled(false);
                 }
@@ -146,10 +150,12 @@ public class AuthServer {
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();
         } catch (IOException e) {
-            logger.error("Error while starting the enforcer gRPC server or http server.", e);
+            logger.error("Error while starting the enforcer gRPC server or http server.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.BLOCKER, 6702), e);
             System.exit(1);
         } catch (InterruptedException e) {
-            logger.error("Enforcer server main thread interrupted.", e);
+            logger.error("Enforcer server main thread interrupted.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.BLOCKER, 6703), e);
             System.exit(1);
         } catch (Exception ex) {
             // Printing the stack trace in case logger might not have been initialized

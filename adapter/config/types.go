@@ -93,6 +93,8 @@ type adapter struct {
 	Truststore truststore
 	// ArtifactsDirectory is the FilePath where the api artifacts are mounted
 	ArtifactsDirectory string
+	// SourceControl represents the configuration related to the repository where the api artifacts are stored
+	SourceControl sourceControl
 }
 
 // Envoy Listener Component related configurations.
@@ -108,6 +110,7 @@ type envoy struct {
 	Cors                             globalCors
 	Upstream                         envoyUpstream
 	Connection                       connection
+	PayloadPassingToEnforcer         payloadPassingToEnforcer
 }
 
 type connectionTimeouts struct {
@@ -179,6 +182,21 @@ type consul struct {
 	KeyFile string
 }
 
+type sourceControl struct {
+	// Enabled whether source control should be enabled
+	Enabled bool
+	// PollInterval how frequently the source watcher should be polled to get updates from the remote repository (in seconds)
+	PollInterval int
+	// RetryInterval how frequently the source watcher should retry to fetching artifacts from the remote repository (in seconds)
+	RetryInterval int
+	// MaxRetryCount is the maximum number of times the source watcher should retry to fetching artifacts from the remote repository
+	MaxRetryCount int
+	// ArtifactsDirectory is the FilePath where the api artifacts are created when fetched from the remote repository
+	ArtifactsDirectory string
+	// Repository configurations
+	Repository repository
+}
+
 // Global CORS configurations
 type globalCors struct {
 	Enabled          bool
@@ -189,12 +207,21 @@ type globalCors struct {
 	ExposeHeaders    []string
 }
 
+// Router to enforcer request body passing configurations
+type payloadPassingToEnforcer struct {
+	PassRequestPayload  bool
+	MaxRequestBytes     uint32
+	AllowPartialMessage bool
+	PackAsBytes         bool
+}
+
 // Envoy Upstream Related Configurations
 type envoyUpstream struct {
 	// UpstreamTLS related Configuration
 	TLS      upstreamTLS
 	Timeouts upstreamTimeout
 	Health   upstreamHealth
+	DNS      upstreamDNS
 	Retry    upstreamRetry
 }
 
@@ -218,6 +245,11 @@ type upstreamHealth struct {
 	Interval           int32
 	UnhealthyThreshold int32
 	HealthyThreshold   int32
+}
+
+type upstreamDNS struct {
+	DNSRefreshRate int32
+	RespectDNSTtl  bool
 }
 
 type upstreamRetry struct {
@@ -406,6 +438,14 @@ type JwtUser struct {
 type APICtlUser struct {
 	Username string
 	Password string
+}
+
+type repository struct {
+	URL         string
+	Branch      string
+	Username    string
+	AccessToken string
+	SSHKeyFile  string // SSHKeyFile path to the private key file
 }
 
 // ControlPlane struct contains configurations related to the API Manager

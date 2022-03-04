@@ -17,9 +17,11 @@
  */
 package org.wso2.choreo.connect.enforcer.server;
 
+import com.google.protobuf.ByteString;
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
@@ -49,18 +51,28 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
             responseObject.setErrorMessage(APIConstants.NOT_FOUND_MESSAGE);
             responseObject.setErrorDescription(APIConstants.NOT_FOUND_DESCRIPTION);
             return responseObject;
-        } else if (logger.isDebugEnabled()) {
-            APIConfig api = matchedAPI.getAPIConfig();
-            logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
         }
+        APIConfig api = matchedAPI.getAPIConfig();
+        logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
+
+        // putting API details into ThreadContext for logging purposes
+        ThreadContext.push(api.getName());
+        ThreadContext.push(api.getOrganizationId());
+        ThreadContext.push(api.getBasePath());
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
-        return matchedAPI.process(requestContext);
+        ResponseObject responseObject = matchedAPI.process(requestContext);
+
+        // to clear the ThreadContext's stack used for logging
+        ThreadContext.removeStack();
+        return responseObject;
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
+        String requestPayload = null;
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
+        String httpProtocol = request.getAttributes().getRequest().getHttp().getProtocol();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
         String pathTemplate = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
         String prodCluster = request.getAttributes().getContextExtensionsMap()
@@ -77,12 +89,24 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 request.getAttributes().getSource().getAddress().hasSocketAddress()) {
             address = request.getAttributes().getSource().getAddress().getSocketAddress().getAddress();
         }
+        if (!request.getAttributes().getRequest().getHttp().getRawBody().isEmpty()) {
+            ByteString byteString = request.getAttributes().getRequest().getHttp().getRawBody();
+            if (byteString.isValidUtf8()) {
+                requestPayload = byteString.toStringUtf8();
+            }
+        }
+        if (!request.getAttributes().getRequest().getHttp().getBody().isEmpty()) {
+            ByteString byteString = request.getAttributes().getRequest().getHttp().getBodyBytes();
+            if (byteString.isValidUtf8()) {
+                requestPayload = byteString.toStringUtf8();
+            }
+        }
         address = FilterUtils.getClientIp(headers, address);
         ResourceConfig resourceConfig = null;
         resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).build();
+                .pathTemplate(pathTemplate).requestPayload(requestPayload).httpProtocol(httpProtocol).build();
     }
 }

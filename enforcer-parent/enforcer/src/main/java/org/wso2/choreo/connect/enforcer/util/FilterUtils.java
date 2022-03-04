@@ -27,6 +27,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -37,6 +38,10 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -46,18 +51,21 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
-import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
 /**
@@ -92,9 +101,20 @@ public class FilterUtils {
      * Return a http client instance.
      *
      * @param protocol - service endpoint protocol http/https
-     * @return
+     * @return HTTP client
      */
     public static HttpClient getHttpClient(String protocol) {
+        return getHttpClient(protocol, null);
+    }
+
+    /**
+     * Return a http client instance.
+     *
+     * @param protocol - service endpoint protocol http/https
+     * @param clientKeyStore - keystore with key and cert for client
+     * @return HTTP client
+     */
+    public static HttpClient getHttpClient(String protocol, KeyStore clientKeyStore) {
 
         //        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
         //                getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -104,7 +124,7 @@ public class FilterUtils {
 
         PoolingHttpClientConnectionManager pool = null;
         try {
-            pool = getPoolingHttpClientConnectionManager(protocol);
+            pool = getPoolingHttpClientConnectionManager(protocol, clientKeyStore);
         } catch (EnforcerException e) {
             log.error("Error while getting http client connection manager", e);
         }
@@ -115,21 +135,39 @@ public class FilterUtils {
         return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
     }
 
+    public static KeyStore createClientKeyStore(String certPath, String keyPath) {
+        try {
+            Certificate cert = TLSUtils.getCertificateFromFile(certPath);
+            Key key = JWTUtils.getPrivateKey(keyPath);
+            KeyStore opaKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            opaKeyStore.load(null, null);
+            opaKeyStore.setKeyEntry("client-keys", key, null, new Certificate[]{cert});
+            KeyManagerFactory keyMgrFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyMgrFactory.init(opaKeyStore, null);
+            return opaKeyStore;
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | EnforcerException
+                | UnrecoverableKeyException e) {
+            log.error("Error creating client KeyStore by loading cert and key from file",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 7100), e);
+            return null;
+        }
+    }
+
     /**
      * Return a PoolingHttpClientConnectionManager instance.
      *
      * @param protocol- service endpoint protocol. It can be http/https
      * @return PoolManager
      */
-    private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(String protocol)
-            throws EnforcerException {
+    private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(
+            String protocol, KeyStore clientKeyStore) throws EnforcerException {
 
         PoolingHttpClientConnectionManager poolManager;
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
-            SSLConnectionSocketFactory socketFactory = createSocketFactory();
+            SSLConnectionSocketFactory socketFactory = createSocketFactory(clientKeyStore);
             org.apache.http.config.Registry<ConnectionSocketFactory> socketFactoryRegistry =
                     RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register(APIConstants.HTTPS_PROTOCOL, socketFactory).build();
+                            .register(APIConstants.HTTPS_PROTOCOL, socketFactory).build();
             poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         } else {
             poolManager = new PoolingHttpClientConnectionManager();
@@ -137,11 +175,15 @@ public class FilterUtils {
         return poolManager;
     }
 
-    private static SSLConnectionSocketFactory createSocketFactory() throws EnforcerException {
+    private static SSLConnectionSocketFactory createSocketFactory(KeyStore clientKeyStore) throws EnforcerException {
         SSLContext sslContext;
         try {
             KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+            SSLContextBuilder sslContextBuilder = SSLContexts.custom().loadTrustMaterial(trustStore);
+            if (clientKeyStore != null) {
+                sslContextBuilder.loadKeyMaterial(clientKeyStore, null);
+            }
+            sslContext = sslContextBuilder.build();
 
             X509HostnameVerifier hostnameVerifier;
             String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
@@ -157,9 +199,7 @@ public class FilterUtils {
             return new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         } catch (KeyStoreException e) {
             handleException("Failed to read from Key Store", e);
-        } catch (NoSuchAlgorithmException e) {
-            handleException("Failed to initialize sslContext. ", e);
-        } catch (KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException e) {
             handleException("Failed to initialize sslContext ", e);
         }
 
@@ -435,6 +475,25 @@ public class FilterUtils {
             requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
         }
+    }
+
+    /**
+     * Set error related details to the {@link RequestContext}.
+     *
+     * @param context request context object to set the details.
+     * @param errorCode internal wso2 throttle error code.
+     * @param statusCode HTTP status code.
+     * @param message message of error.
+     * @param desc description of error.
+     */
+    public static void setErrorToContext(RequestContext context, int errorCode, int statusCode, String message,
+                                         String desc) {
+        Map<String, Object> properties = context.getProperties();
+        properties.putIfAbsent(APIConstants.MessageFormat.STATUS_CODE, statusCode);
+        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_CODE, errorCode);
+        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_MESSAGE, message);
+        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                APISecurityConstants.getFailureMessageDetailDescription(errorCode, desc));
     }
 
     /**

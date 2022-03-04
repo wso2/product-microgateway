@@ -44,28 +44,30 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id                  string
-	UUID                string
-	apiType             string
-	description         string
-	title               string
-	version             string
-	vendorExtensions    map[string]interface{}
-	productionEndpoints *EndpointCluster
-	sandboxEndpoints    *EndpointCluster
-	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []*Resource
-	xWso2Basepath       string
-	xWso2Cors           *CorsConfig
-	securityScheme      []SecurityScheme
-	security            []map[string][]string
-	xWso2ThrottlingTier string
-	xWso2AuthHeader     string
-	disableSecurity     bool
-	OrganizationID      string
-	IsPrototyped        bool
-	IsMockedAPI         bool
-	LifecycleStatus     string
+	id                         string
+	UUID                       string
+	apiType                    string
+	description                string
+	title                      string
+	version                    string
+	vendorExtensions           map[string]interface{}
+	productionEndpoints        *EndpointCluster
+	sandboxEndpoints           *EndpointCluster
+	xWso2Endpoints             map[string]*EndpointCluster
+	resources                  []*Resource
+	xWso2Basepath              string
+	xWso2Cors                  *CorsConfig
+	securityScheme             []SecurityScheme
+	security                   []map[string][]string
+	xWso2ThrottlingTier        string
+	xWso2AuthHeader            string
+	disableSecurity            bool
+	OrganizationID             string
+	IsPrototyped               bool
+	EndpointType               string
+	EndpointImplementationType string
+	LifecycleStatus            string
+	xWso2RequestBodyPass       bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -227,6 +229,12 @@ func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
 }
 
+// GetXWso2RequestBodyPass returns boolean value to indicate
+// whether it is allowed to pass request body to the enforcer or not.
+func (swagger *MgwSwagger) GetXWso2RequestBodyPass() bool {
+	return swagger.xWso2RequestBodyPass
+}
+
 // SetID set the Id of the API
 func (swagger *MgwSwagger) SetID(id string) {
 	swagger.id = id
@@ -283,14 +291,14 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 }
 
 // SetOperationPolicies this will merge operation level policies provided in api yaml
-func (swagger *MgwSwagger) SetOperationPolicies(yamlOperations []OperationYaml) {
+func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 	for _, resource := range swagger.resources {
 		path := strings.TrimSuffix(resource.path, "/")
 		for _, operation := range resource.methods {
 			method := operation.method
-			for _, yamlOperation := range yamlOperations {
+			for _, yamlOperation := range apiProject.APIYaml.Data.Operations {
 				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
-					operation.policies = yamlOperation.OperationPolicies
+					operation.policies = apiProject.Policies.GetFormattedOperationalPolicies(yamlOperation.OperationPolicies, swagger)
 					break
 				}
 			}
@@ -631,41 +639,43 @@ func (swagger *MgwSwagger) setDisableSecurity() {
 // Validate method confirms that the mgwSwagger has all required fields in the required format.
 // This needs to be checked prior to generate router/enforcer related resources.
 func (swagger *MgwSwagger) Validate() error {
-	if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
-		(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
+	if swagger.EndpointImplementationType != constants.MockedOASEndpointType {
+		if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
+			(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
 
-		logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
-			swagger.title, swagger.version)
-		return errors.New("no endpoints are provided for the API")
-	}
-	err := swagger.productionEndpoints.validateEndpointCluster("API level production")
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
-			swagger.title, swagger.version, err)
-		return err
-	}
-	err = swagger.sandboxEndpoints.validateEndpointCluster("API level sandbox")
-	if err != nil {
-		logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
-			swagger.title, swagger.version, err)
-		return err
-	}
-	for _, res := range swagger.resources {
-		err := res.productionEndpoints.validateEndpointCluster("Resource level production")
+			logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
+				swagger.title, swagger.version)
+			return errors.New("no endpoints are provided for the API")
+		}
+		err := swagger.productionEndpoints.validateEndpointCluster("API level production")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
 			return err
 		}
-		err = res.sandboxEndpoints.validateEndpointCluster("Resource level sandbox")
+		err = swagger.sandboxEndpoints.validateEndpointCluster("API level sandbox")
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
 				swagger.title, swagger.version, err)
 			return err
 		}
-	}
 
-	err = swagger.validateBasePath()
+		for _, res := range swagger.resources {
+			err := res.productionEndpoints.validateEndpointCluster("Resource level production")
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
+					swagger.title, swagger.version, err)
+				return err
+			}
+			err = res.sandboxEndpoints.validateEndpointCluster("Resource level sandbox")
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
+					swagger.title, swagger.version, err)
+				return err
+			}
+		}
+	}
+	err := swagger.validateBasePath()
 	if err != nil {
 		logger.LoggerOasparser.Errorf("Error while parsing the API %s:%s - %v", swagger.title, swagger.version, err)
 		return err
@@ -1134,10 +1144,13 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 		swagger.IsPrototyped = true
 	}
 
-	// below condition will evaluate as true for mocked API implementations
-	if endpointConfig.ImplementationStatus == constants.Prototyped &&
-		data.EndpointImplementationType == constants.TemplateEndpointType {
-		swagger.IsMockedAPI = true
+	swagger.EndpointType = endpointConfig.EndpointType
+	swagger.EndpointImplementationType = data.EndpointImplementationType
+
+	// from here onwards it will process endpoint info
+	// So discontinue if the implementation type is mocked_oas
+	if data.EndpointImplementationType == constants.MockedOASEndpointType {
+		return nil
 	}
 
 	if len(endpointConfig.ProductionEndpoints) > 0 {

@@ -35,11 +35,11 @@ public class ErrorDetails {
     }
 
     /**
-     * Static method to initiate a ErrorLog
+     * static method to initiate a errorLog with details, without 'new' operator
      *
      * @param severity severity level of the error
      * @param code     unique code to troubleshoot the error
-     * @return ErrorLog object
+     * @return ErrorDetails object with given parameters
      */
     public static ErrorDetails errorLog(String severity, int code) {
         return new ErrorDetails(severity, code);

@@ -18,20 +18,17 @@
 
 package org.wso2.choreo.connect.enforcer.throttle.databridge.agent.endpoint.binary;
 
-import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.AgentHolder;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.client.AbstractSecureClientPoolFactory;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.DataEndpointConfiguration;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.exception.DataEndpointException;
+import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.EndpointUtils;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -48,7 +45,7 @@ public class BinarySecureClientPoolFactory extends AbstractSecureClientPoolFacto
         super(trustStore);
         SSLContext ctx;
         try {
-            ctx = createSSLContext();
+            ctx = EndpointUtils.createSSLContext(trustStore);
             sslSocketFactory = ctx.getSocketFactory();
         } catch (DataEndpointException e) {
             log.error("Error while initializing the SSL Context with provided parameters" +
@@ -108,17 +105,6 @@ public class BinarySecureClientPoolFactory extends AbstractSecureClientPoolFacto
         } catch (IOException e) {
             log.warn("Cannot close the socket successfully from " + socket.getLocalAddress().getHostAddress()
                     + ":" + socket.getPort());
-        }
-    }
-
-    private SSLContext createSSLContext() throws DataEndpointException {
-        SSLContext ctx;
-        try {
-            KeyStore trustStore = getTrustStore();
-            ctx = SSLContexts.custom().loadTrustMaterial(trustStore).build();
-            return ctx;
-        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-            throw new DataEndpointException("Error while creating the SSLContext with instance type : TLS.", e);
         }
     }
 }

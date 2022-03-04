@@ -21,6 +21,7 @@ package utills
 import (
 	"bytes"
 	"encoding/json"
+	"path/filepath"
 	"strings"
 
 	// TODO: (VirajSalaka) remove outdated dependency
@@ -75,4 +76,10 @@ func FindAPIDefinitionVersion(jsn []byte) string {
 	}
 	logger.LoggerOasparser.Error("API definition version is not defined.")
 	return constants.NotDefined
+}
+
+// FileNameWithoutExtension returns the file name without the extension
+// ex: when provided the path "/foo/hello.world" it returns "hello"
+func FileNameWithoutExtension(path string) string {
+	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }

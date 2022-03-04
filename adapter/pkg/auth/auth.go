@@ -17,7 +17,19 @@
 
 package auth
 
-import "encoding/base64"
+import (
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"io/ioutil"
+
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/pkg/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
+)
 
 // GetBasicAuth function returns the basicAuth header for the
 // given usename and password.
@@ -25,4 +37,52 @@ import "encoding/base64"
 func GetBasicAuth(username, password string) string {
 	auth := username + ":" + password
 	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
+// GetGitAuth returns the authentication for the repository
+func GetGitAuth() (transport.AuthMethod, error) {
+	conf, err := config.ReadConfigs()
+	if err != nil {
+		loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+			Message: fmt.Sprintf("Error while reading configs: %s", err.Error()),
+			Severity: logging.BLOCKER,
+			ErrorCode: 3000,
+		})
+		return nil, err
+	}
+
+	username := conf.Adapter.SourceControl.Repository.Username
+	sshKeyFile := conf.Adapter.SourceControl.Repository.SSHKeyFile
+	if username == "" && sshKeyFile == "" {
+		return &http.BasicAuth{}, nil
+	} else if username != "" {
+		accessToken := conf.Adapter.SourceControl.Repository.AccessToken
+		return &http.BasicAuth{
+			Username: username,
+			Password: accessToken,
+		}, nil
+	} else if sshKeyFile != "" {
+		sshKey, err := ioutil.ReadFile(sshKeyFile)
+		if err != nil {
+			loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error reading ssh key file: %s", err.Error()),
+				Severity: logging.CRITICAL,
+				ErrorCode: 3001,
+			})
+			return nil, err
+		}
+
+		publicKey, err := ssh.NewPublicKeys(ssh.DefaultUsername, sshKey, "")
+		if err != nil {
+			loggers.LoggerAuth.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error creating ssh public key: %s", err.Error()),
+				Severity: logging.CRITICAL,
+				ErrorCode: 3002,
+			})
+			return nil, err
+		}
+
+		return publicKey, nil
+	}
+	return nil, errors.New("No username or ssh key file provided")
 }

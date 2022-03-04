@@ -96,70 +96,62 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     }
 
     private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {
-        DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
-        HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+        DeniedHttpResponse.Builder deniedResponseBuilder = DeniedHttpResponse.newBuilder();
+        CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
         if (responseObject.isDirectResponse()) {
+            // set headers
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();
-                            responseBuilder.addHeaders(headerValueOption);
+                            deniedResponseBuilder.addHeaders(headerValueOption);
                         }
                 );
             }
-            // To handle pre flight options request
-            if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
-                return CheckResponse.newBuilder()
-                        .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
-                        .setDeniedResponse(responseBuilder.setStatus(status).build())
-                        .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
-                                        Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
-                                .build())
-                        .build();
-            }
-            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder().setHeader(
-                            HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
-                                    .setValue(APIConstants.APPLICATION_JSON).build())
-                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
-                    .build();
-            responseBuilder.addHeaders(headerValueOption);
+            deniedResponseBuilder.addHeaders(HeaderValueOption.newBuilder().setHeader(HeaderValue.newBuilder()
+                    .setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build()));
 
-            Struct.Builder structBuilder = Struct.newBuilder();
-            if (responseObject.getMetaDataMap() != null) {
-                responseObject.getMetaDataMap().forEach((key, value) ->
-                        structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+            // set status code
+            HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+            deniedResponseBuilder.setStatus(status);
+
+            // set body content
+            if (responseObject.getResponsePayload() != null) {
+                deniedResponseBuilder.setBody(responseObject.getResponsePayload());
             }
 
-            CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder()
-                    .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
-                    .setDynamicMetadata(structBuilder.build());
-
+            // set error response body content and headers
             if (responseObject.getErrorCode() != null) {
-                // Error handling
+                // Error handling create an application/json error payload
                 JSONObject responseJson = new JSONObject();
                 responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
                 responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
                 responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
+                deniedResponseBuilder.setBody(responseJson.toString());
 
-                return checkResponseBuilder
-                        .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
+                HeaderValueOption headerValueOption = HeaderValueOption.newBuilder().setHeader(
+                                HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
+                                        .setValue(APIConstants.APPLICATION_JSON).build())
                         .build();
-            } else {
-                if (responseObject.getMockApiResponsePayload() != null) {
-                    responseBuilder.setBody(responseObject.getMockApiResponsePayload());
-                }
-
-                // Below condition is evaluated to stop re-directing successful mock API responses to upstream.
-                // Here only the checkResponse object's status code is changed. This provides API call's response status
-                // code as specified in the mock API's JSON script (expected status code).
-                if (responseObject.getStatusCode() >= 200 || responseObject.getStatusCode() <= 299) {
-                    checkResponseBuilder.setStatus(Status.newBuilder().setCode(421));
-                }
-                status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
-                return  checkResponseBuilder.setDeniedResponse(responseBuilder.setStatus(status).build()).build();
+                deniedResponseBuilder.addHeaders(headerValueOption);
             }
+
+            // set meta data
+            Struct.Builder metadataStructBuilder = Struct.newBuilder();
+            if (responseObject.getMetaDataMap() != null) {
+                responseObject.getMetaDataMap().forEach((key, value) ->
+                        metadataStructBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+            }
+            metadataStructBuilder.putFields("correlationID",
+                    Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build());
+
+            return checkResponseBuilder
+                    .setDynamicMetadata(metadataStructBuilder.build())
+                    .setDeniedResponse(deniedResponseBuilder.build())
+                    .setStatus(Status.newBuilder().setCode(getDirectResponseCode(responseObject.getStatusCode())))
+                    .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
 
@@ -205,10 +197,12 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         }
     }
 
-    private int getCode(int statusCode) {
+    private int getDirectResponseCode(int statusCode) {
         switch (statusCode) {
-            case 200:
-                return Code.OK_VALUE;
+            // removed ok value from here since this method is used strictly for direct response,
+            // which should not sent a request to the upstream.
+            // case 200:
+            // return Code.OK_VALUE;
             case 401:
                 return Code.UNAUTHENTICATED_VALUE;
             case 403:

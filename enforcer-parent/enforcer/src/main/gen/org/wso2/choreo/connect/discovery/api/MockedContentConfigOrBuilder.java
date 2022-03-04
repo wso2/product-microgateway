@@ -20,14 +20,26 @@ public interface MockedContentConfigOrBuilder extends
       getContentTypeBytes();
 
   /**
-   * <code>string body = 2;</code>
-   * @return The body.
+   * <code>repeated .wso2.discovery.api.MockedContentExample examples = 2;</code>
    */
-  java.lang.String getBody();
+  java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentExample> 
+      getExamplesList();
   /**
-   * <code>string body = 2;</code>
-   * @return The bytes for body.
+   * <code>repeated .wso2.discovery.api.MockedContentExample examples = 2;</code>
    */
-  com.google.protobuf.ByteString
-      getBodyBytes();
+  org.wso2.choreo.connect.discovery.api.MockedContentExample getExamples(int index);
+  /**
+   * <code>repeated .wso2.discovery.api.MockedContentExample examples = 2;</code>
+   */
+  int getExamplesCount();
+  /**
+   * <code>repeated .wso2.discovery.api.MockedContentExample examples = 2;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.api.MockedContentExampleOrBuilder> 
+      getExamplesOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.api.MockedContentExample examples = 2;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.MockedContentExampleOrBuilder getExamplesOrBuilder(
+      int index);
 }

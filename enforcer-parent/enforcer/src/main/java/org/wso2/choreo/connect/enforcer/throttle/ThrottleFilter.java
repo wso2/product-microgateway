@@ -24,6 +24,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
@@ -417,7 +419,8 @@ public class ThrottleFilter implements Filter {
                 }
             } catch (UnknownHostException e) {
                 //send empty value as ip
-                log.error("Error while parsing host IP {}", remoteIP, e);
+                log.error("Error while parsing host IP {}", remoteIP,
+                        ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6901), e);
                 jsonObMap.put(ThrottleConstants.IPV6, 0);
                 jsonObMap.put(ThrottleConstants.IP, 0);
             }

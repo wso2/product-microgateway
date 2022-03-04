@@ -19,15 +19,13 @@
 package org.wso2.choreo.connect.tests.testcases.withapim.apikey;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
 import org.wso2.am.integration.test.utils.bean.APILifeCycleAction;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
-import org.wso2.choreo.connect.tests.apim.dto.Application;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -38,10 +36,9 @@ import java.util.Map;
 
 public class APIKeyBlockedAPITestCase extends ApimBaseTest {
 
-    private static final String SAMPLE_API_NAME = "APIKeyTestAPI";
-    private static final String SAMPLE_API_CONTEXT = "apiKey";
-    private static final String SAMPLE_API_VERSION = "1.0.0";
-    private static final String APP_NAME = "APIKeyTestApp";
+    private static final String API_NAME = "APIKeyBlockedAPI";
+    private static final String API_CONTEXT = "apiKey_blocked_api";
+    private static final String APP_NAME = "APIKeyBlockedAPIApp";
     private String applicationId;
     private String apiId;
     private String endpointURL;
@@ -50,46 +47,21 @@ public class APIKeyBlockedAPITestCase extends ApimBaseTest {
     @BeforeClass(description = "Initialise the setup for API key App level test case")
     void start() throws Exception {
         super.initWithSuperTenant();
-
-        String targetDir = Utils.getTargetDirPath();
-        String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "api_key_openAPI.yaml";
-
-        JSONArray securityScheme = new JSONArray();
-        securityScheme.put("oauth_basic_auth_api_key_mandatory");
-        securityScheme.put("api_key");
-
-        JSONObject apiProperties = new JSONObject();
-        apiProperties.put("name", SAMPLE_API_NAME);
-        apiProperties.put("context", "/" + SAMPLE_API_CONTEXT);
-        apiProperties.put("version", SAMPLE_API_VERSION);
-        apiProperties.put("provider", user.getUserName());
-        apiProperties.put("securityScheme", securityScheme);
-        apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
-
-        publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
-
-        // creating the application
-        Application app = new Application(APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        applicationId = StoreUtils.createApplication(app, storeRestClient);
-
-        PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
-
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-
-        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/1");
+        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
+        applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
+        endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/1");
 
         // Obtain API keys
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
                 storeRestClient);
         String apiKey = apiKeyDTO.getApikey();
         headers.put("apikey", apiKey);
-
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
     @Test(description = "Invoke API which has API Key as the Application Level Security")
     public void testAPIKeyForAppLevel() throws Exception {
-        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endpointURL), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(
+                Utils.getServiceURLHttps(endpointURL), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(),
                 com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,

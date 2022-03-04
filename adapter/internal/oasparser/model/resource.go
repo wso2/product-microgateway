@@ -99,7 +99,7 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 	for _, method := range resource.methods {
 		if len(method.policies.In) > 0 {
 			for _, policy := range method.policies.In {
-				if strings.EqualFold(constants.RewritePathTemplate, policy.TemplateName) {
+				if strings.EqualFold(constants.RewritePathTemplate, policy.Action) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
 							if v, orderExists := paramMap[constants.Order]; orderExists {
@@ -118,7 +118,7 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 							}
 						}
 					}
-				} else if strings.EqualFold(constants.RewriteMethodTemplate, policy.TemplateName) {
+				} else if strings.EqualFold(constants.RewriteMethodTemplate, policy.Action) {
 					rewriteMethod = true
 				}
 			}

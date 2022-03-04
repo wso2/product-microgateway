@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.exception;
+package org.wso2.choreo.connect.enforcer.commons.exception;
 
 /**
  * Represents an API security violation or a system error that may have occurred

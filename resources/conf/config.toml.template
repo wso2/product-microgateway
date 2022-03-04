@@ -63,6 +63,32 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Optional path to the private key for Consul communication. If this is set, then you need to also set certFile
   keyFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
+# Configuration related to the repository where the API artifacts are stored
+[adapter.sourceControl]
+  # Enable/Disable Source Control for API Artifacts
+  enabled = false
+  # Time interval (in seconds) in which the Adapter should fetch updates from the remote repository
+  pollInterval = 30
+  # Time interval (in seconds) in which the adapter should retry fetching artifacts from the remote repository at startup
+  retryInterval = 5
+  # Maximum number of retries for fetching artifacts from the remote repository at startup
+  maxRetryCount = 20
+  # The directory path where the git artifacts are stored
+  artifactsDirectory = "/home/wso2/git-artifacts"
+  # Configurations of the repository
+  [adapter.sourceControl.repository]
+    # Repository URL where artifacts are stored
+    URL = "https://github.com/username/repository-name.git"
+    # Branch of the repository where the artifacts are stored (Use "" for default branch)
+    branch = "main"
+    # Use either username and accessToken, or ssh key for authentication
+    # Git username (Use "" in the case of a public repository (only for GitHub))
+    username = "username"
+    # Git personal access token or password
+    accessToken = $env{git_access_token}
+    # Path to the private key used for authentication (Use "" in the case of a public repository (only for GitHub))
+    sshKeyFile = "/home/wso2/ssh-keys/id_ed25519"
+
 # Configurations required for router to route the traffic from different clients to services
 [router] # --------------------------------------------------------
   # Host for listener of Router
@@ -120,6 +146,12 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Disable SSL verification
   disableSslVerification = false
 
+[router.upstream.dns]
+  #  DNS refresh rate in miliseconds
+  dNSRefreshRate = 5000
+  # set cluster’s DNS refresh rate to resource record’s TTL which comes from DNS resolution
+  respectDNSTtl = false
+
 # health configs for upstream clusters 
 [router.upstream.health]
   #  time in seconds to wait for a health check response
@@ -161,6 +193,17 @@ artifactsDirectory = "/home/wso2/artifacts"
   # The idle timeout for connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. 
   # If the connection is an HTTP/2 downstream connection a drain sequence will occur prior to closing the connection
   idleTimeoutInSeconds = 3600
+
+# Configs for request body passing from router to enforcer.
+[router.payloadPassingToEnforcer]
+  # Enable/Disable request body passing feature.
+  PassRequestPayload = false
+  # Sets the allowed maximum size of a request body in bytes.
+  maxRequestBytes = 10240
+  # If enabled, request body will buffer the message until maxRequestBytes is reached.
+  allowPartialMessage = false
+  # If enabled, request body will send as raw bytes, otherwise it will be a UTF-8 string request body.
+  packAsBytes = false
 
 [enforcer] # --------------------------------------------------------
 

@@ -1,0 +1,11 @@
+
+  gitlab:
+    image: "gitlab/gitlab-ce:14.7.3-ce.0"
+    restart: always
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails["initial_root_password"] = "svcAdmin"
+        gitlab_rails['monitoring_whitelist'] = ['0.0.0.0/0']
+    ports:
+      - "8285:80"
+

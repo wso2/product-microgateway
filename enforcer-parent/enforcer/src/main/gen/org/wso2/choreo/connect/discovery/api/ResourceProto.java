@@ -77,15 +77,15 @@ public final class ResourceProto {
       "\001\n\021OperationPolicies\022&\n\002in\030\001 \003(\0132\032.wso2." +
       "discovery.api.Policy\022\'\n\003out\030\002 \003(\0132\032.wso2" +
       ".discovery.api.Policy\022)\n\005fault\030\003 \003(\0132\032.w" +
-      "so2.discovery.api.Policy\"\264\001\n\006Policy\022\022\n\np" +
-      "olicyName\030\001 \001(\t\022\024\n\014templateName\030\002 \001(\t\022\r\n" +
-      "\005order\030\003 \001(\r\022>\n\nparameters\030\004 \003(\0132*.wso2." +
-      "discovery.api.Policy.ParametersEntry\0321\n\017" +
-      "ParametersEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 " +
-      "\001(\t:\0028\001Bw\n%org.wso2.choreo.connect.disco" +
-      "very.apiB\rResourceProtoP\001Z=github.com/en" +
-      "voyproxy/go-control-plane/wso2/discovery" +
-      "/api;apib\006proto3"
+      "so2.discovery.api.Policy\"\256\001\n\006Policy\022\022\n\np" +
+      "olicyName\030\001 \001(\t\022\016\n\006action\030\002 \001(\t\022\r\n\005order" +
+      "\030\003 \001(\r\022>\n\nparameters\030\004 \003(\0132*.wso2.discov" +
+      "ery.api.Policy.ParametersEntry\0321\n\017Parame" +
+      "tersEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028" +
+      "\001Bw\n%org.wso2.choreo.connect.discovery.a" +
+      "piB\rResourceProtoP\001Z=github.com/envoypro" +
+      "xy/go-control-plane/wso2/discovery/api;a" +
+      "pib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -123,7 +123,7 @@ public final class ResourceProto {
     internal_static_wso2_discovery_api_Policy_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Policy_descriptor,
-        new java.lang.String[] { "PolicyName", "TemplateName", "Order", "Parameters", });
+        new java.lang.String[] { "PolicyName", "Action", "Order", "Parameters", });
     internal_static_wso2_discovery_api_Policy_ParametersEntry_descriptor =
       internal_static_wso2_discovery_api_Policy_descriptor.getNestedTypes().get(0);
     internal_static_wso2_discovery_api_Policy_ParametersEntry_fieldAccessorTable = new

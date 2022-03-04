@@ -22,14 +22,17 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONObject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -38,7 +41,6 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
-import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -53,7 +55,7 @@ import java.text.ParseException;
  */
 public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
-    private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
+    private static final Logger log = LogManager.getLogger(InternalAPIKeyAuthenticator.class);
     private String securityParam;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
@@ -228,7 +230,8 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
                             requestContext.getMatchedAPI().getUuid(), internalKey);
                 } else {
-                    log.error("Internal Key authentication failed. " + FilterUtils.getMaskedToken(splitToken[0]));
+                    log.error("Internal Key authentication failed. " + FilterUtils.getMaskedToken(splitToken[0]),
+                            ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6602));
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                     CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), internalKey);
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),

@@ -29,21 +29,22 @@ const (
 
 // Constants for OpenAPI vendor extension keys and values
 const (
-	XWso2ProdEndpoints   string = "x-wso2-production-endpoints"
-	XWso2SandbxEndpoints string = "x-wso2-sandbox-endpoints"
-	XWso2endpoints       string = "x-wso2-endpoints"
-	XWso2BasePath        string = "x-wso2-basePath"
-	XWso2Label           string = "x-wso2-label"
-	XWso2Cors            string = "x-wso2-cors"
-	XThrottlingTier      string = "x-throttling-tier"
-	XWso2ThrottlingTier  string = "x-wso2-throttling-tier"
-	XAuthHeader          string = "x-wso2-auth-header"
-	XAuthType            string = "x-auth-type"
-	XWso2DisableSecurity string = "x-wso2-disable-security"
-	None                 string = "None"
-	DefaultSecurity      string = "default"
-	XMediationScript     string = "x-mediation-script"
-	XScopes              string = "x-scopes"
+	XWso2ProdEndpoints                string = "x-wso2-production-endpoints"
+	XWso2SandbxEndpoints              string = "x-wso2-sandbox-endpoints"
+	XWso2endpoints                    string = "x-wso2-endpoints"
+	XWso2BasePath                     string = "x-wso2-basePath"
+	XWso2Label                        string = "x-wso2-label"
+	XWso2Cors                         string = "x-wso2-cors"
+	XThrottlingTier                   string = "x-throttling-tier"
+	XWso2ThrottlingTier               string = "x-wso2-throttling-tier"
+	XAuthHeader                       string = "x-wso2-auth-header"
+	XAuthType                         string = "x-auth-type"
+	XWso2DisableSecurity              string = "x-wso2-disable-security"
+	None                              string = "None"
+	DefaultSecurity                   string = "default"
+	XMediationScript                  string = "x-mediation-script"
+	XScopes                           string = "x-scopes"
+	XWso2PassRequestPayloadToEnforcer string = "x-wso2-pass-request-payload-to-enforcer"
 )
 
 // cluster name prefixes
@@ -96,13 +97,14 @@ const (
 
 // Constants that occur as values in api.yaml
 const (
-	HTTP                 string = "HTTP"
-	WS                   string = "WS"
-	WEBHOOK              string = "WEBHOOK"
-	SSE                  string = "SSE"
-	Prototyped           string = "prototyped"
-	TemplateEndpointType string = "TEMPLATE"
-	InlineEndpointType   string = "INLINE"
+	HTTP                  string = "HTTP"
+	WS                    string = "WS"
+	WEBHOOK               string = "WEBHOOK"
+	SSE                   string = "SSE"
+	Prototyped            string = "prototyped"
+	MockedOASEndpointType string = "MOCKED_OAS"
+	TemplateEndpointType  string = "TEMPLATE"
+	InlineEndpointType    string = "INLINE"
 )
 
 // Constants used for version identification of API definitions

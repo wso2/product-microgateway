@@ -29,6 +29,8 @@ public class EnvVarConfig {
     private static final String ADAPTER_HOST_NAME = "ADAPTER_HOST_NAME";
     private static final String ENFORCER_PRIVATE_KEY_PATH = "ENFORCER_PRIVATE_KEY_PATH";
     private static final String ENFORCER_PUBLIC_CERT_PATH = "ENFORCER_PUBLIC_CERT_PATH";
+    private static final String OPA_CLIENT_PRIVATE_KEY_PATH = "OPA_CLIENT_PRIVATE_KEY_PATH";
+    private static final String OPA_CLIENT_PUBLIC_CERT_PATH = "OPA_CLIENT_PUBLIC_CERT_PATH";
     private static final String ADAPTER_HOST = "ADAPTER_HOST";
     private static final String ADAPTER_XDS_PORT = "ADAPTER_XDS_PORT";
     private static final String ENFORCER_LABEL = "ENFORCER_LABEL";
@@ -54,6 +56,8 @@ public class EnvVarConfig {
     private final String trustedAdapterCertsPath;
     private final String enforcerPrivateKeyPath;
     private final String enforcerPublicKeyPath;
+    private final String opaClientPrivateKeyPath;
+    private final String opaClientPublicKeyPath;
     private final String adapterHost;
     private final String enforcerLabel;
     private final String adapterXdsPort;
@@ -71,6 +75,10 @@ public class EnvVarConfig {
         enforcerPrivateKeyPath = retrieveEnvVarOrDefault(ENFORCER_PRIVATE_KEY_PATH,
                 DEFAULT_ENFORCER_PRIVATE_KEY_PATH);
         enforcerPublicKeyPath = retrieveEnvVarOrDefault(ENFORCER_PUBLIC_CERT_PATH,
+                DEFAULT_ENFORCER_PUBLIC_CERT_PATH);
+        opaClientPrivateKeyPath = retrieveEnvVarOrDefault(OPA_CLIENT_PRIVATE_KEY_PATH,
+                DEFAULT_ENFORCER_PRIVATE_KEY_PATH);
+        opaClientPublicKeyPath = retrieveEnvVarOrDefault(OPA_CLIENT_PUBLIC_CERT_PATH,
                 DEFAULT_ENFORCER_PUBLIC_CERT_PATH);
         enforcerLabel = retrieveEnvVarOrDefault(ENFORCER_LABEL, DEFAULT_ENFORCER_LABEL);
         adapterHost = retrieveEnvVarOrDefault(ADAPTER_HOST, DEFAULT_ADAPTER_HOST);
@@ -111,6 +119,14 @@ public class EnvVarConfig {
 
     public String getEnforcerPublicKeyPath() {
         return enforcerPublicKeyPath;
+    }
+
+    public String getOpaClientPrivateKeyPath() {
+        return opaClientPrivateKeyPath;
+    }
+
+    public String getOpaClientPublicKeyPath() {
+        return opaClientPublicKeyPath;
     }
 
     public String getAdapterHost() {

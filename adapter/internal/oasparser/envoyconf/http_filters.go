@@ -102,7 +102,7 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 	return upgradeFilters
 }
 
-// getExtAuthzHTTPFilter gets ExtAauthz http filter.
+// getExtAuthzHTTPFilter gets ExtAuthz http filter.
 func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	conf, _ := config.ReadConfigs()
 	extAuthzConfig := &ext_authv3.ExtAuthz{
@@ -122,6 +122,15 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 				Timeout: ptypes.DurationProto(conf.Envoy.EnforcerResponseTimeoutInSeconds * time.Second),
 			},
 		},
+	}
+
+	// configures envoy to handle request body
+	if conf.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
+		extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
+			MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
+			AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
+			PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
+		}
 	}
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
 	if err2 != nil {

@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
+import org.wso2.choreo.connect.tests.util.SourceControlUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,6 +99,29 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         try {
             HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
                     "/health"), headers);
+            return response != null && response.getResponseCode() == HttpStatus.SC_OK;
+        } catch (ConnectException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if the Gitlab instance is healthy
+     *
+     * @return a Callable that checks if the Gitlab instance is healthy
+     */
+    public Callable<Boolean> isGitHealthy() throws IOException {
+        return new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                return checkGitInstanceHealth();
+            }
+        };
+    }
+
+    public static Boolean checkGitInstanceHealth() throws IOException {
+        Map<String, String> headers = new HashMap<>(0);
+        try {
+            HttpResponse response = HttpClientRequest.doGet(SourceControlUtils.GIT_HEALTH_URL, headers);
             return response != null && response.getResponseCode() == HttpStatus.SC_OK;
         } catch (ConnectException e) {
             return false;

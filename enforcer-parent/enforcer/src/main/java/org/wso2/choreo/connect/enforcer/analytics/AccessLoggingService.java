@@ -29,6 +29,8 @@ import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsUtils;
@@ -76,7 +78,8 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
 
             @Override
             public void onError(Throwable throwable) {
-                logger.error("Error while receiving access log entries from router. " + throwable.getMessage());
+                logger.error("Error while receiving access log entries from router. " + throwable.getMessage(),
+                        ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5101));
                 responseObserver.onCompleted();
             }
 

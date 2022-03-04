@@ -642,6 +642,14 @@ paths:
           description: Resource not found
       security:
         - petstore_auth: [ ]
+  /echo:
+    post:
+      summary: Provides echo response
+      responses:
+        '200':
+          description: successful operation
+      security:
+        - petstore_auth: [ ]
 securityDefinitions:
   api_key:
     type: apiKey

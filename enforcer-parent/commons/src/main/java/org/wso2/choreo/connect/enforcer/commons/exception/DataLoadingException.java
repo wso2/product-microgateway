@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,22 +16,25 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.commons.model;
-
-import java.util.Map;
+package org.wso2.choreo.connect.enforcer.commons.exception;
 
 /**
- * Defines mock API content structure.
+ * Exception thrown when loading Subscriptions.
  */
-public class MockedContentConfig {
+public class DataLoadingException extends EnforcerException {
 
-    private Map<String, String> contentMap;    // holds content configurations defined in the mocked API payload
+    public DataLoadingException(String message) {
 
-    public Map<String, String> getContentMap() {
-        return contentMap;
+        super(message);
     }
 
-    public void setContentMap(Map<String, String> contentMap) {
-        this.contentMap = contentMap;
+    public DataLoadingException(String message, Throwable cause) {
+
+        super(message, cause);
+    }
+
+    public DataLoadingException(Throwable cause) {
+
+        super(cause);
     }
 }

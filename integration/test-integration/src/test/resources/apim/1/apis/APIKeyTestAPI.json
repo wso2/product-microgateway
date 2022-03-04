@@ -1,0 +1,21 @@
+{
+  "name": "APIKeyTestAPI",
+  "version": "1.0.0",
+  "context": "apiKey",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "securityScheme": ["oauth_basic_auth_api_key_mandatory", "api_key"],
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/dummy",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2383/v2"
+    }
+  }
+}

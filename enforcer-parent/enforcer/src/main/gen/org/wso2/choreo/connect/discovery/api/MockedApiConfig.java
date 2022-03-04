@@ -20,8 +20,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private MockedApiConfig() {
-    in_ = "";
-    name_ = "";
     responses_ = java.util.Collections.emptyList();
   }
 
@@ -56,18 +54,6 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 10: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            in_ = s;
-            break;
-          }
-          case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            name_ = s;
-            break;
-          }
           case 26: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
               responses_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.MockedResponseConfig>();
@@ -110,82 +96,6 @@ private static final long serialVersionUID = 0L;
     return org.wso2.choreo.connect.discovery.api.MockedApiConfigProto.internal_static_wso2_discovery_api_MockedApiConfig_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.choreo.connect.discovery.api.MockedApiConfig.class, org.wso2.choreo.connect.discovery.api.MockedApiConfig.Builder.class);
-  }
-
-  public static final int IN_FIELD_NUMBER = 1;
-  private volatile java.lang.Object in_;
-  /**
-   * <code>string in = 1;</code>
-   * @return The in.
-   */
-  @java.lang.Override
-  public java.lang.String getIn() {
-    java.lang.Object ref = in_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      in_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string in = 1;</code>
-   * @return The bytes for in.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getInBytes() {
-    java.lang.Object ref = in_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      in_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int NAME_FIELD_NUMBER = 2;
-  private volatile java.lang.Object name_;
-  /**
-   * <code>string name = 2;</code>
-   * @return The name.
-   */
-  @java.lang.Override
-  public java.lang.String getName() {
-    java.lang.Object ref = name_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      name_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string name = 2;</code>
-   * @return The bytes for name.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getNameBytes() {
-    java.lang.Object ref = name_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      name_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
   }
 
   public static final int RESPONSES_FIELD_NUMBER = 3;
@@ -242,12 +152,6 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getInBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, in_);
-    }
-    if (!getNameBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
-    }
     for (int i = 0; i < responses_.size(); i++) {
       output.writeMessage(3, responses_.get(i));
     }
@@ -260,12 +164,6 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!getInBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, in_);
-    }
-    if (!getNameBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
-    }
     for (int i = 0; i < responses_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(3, responses_.get(i));
@@ -285,10 +183,6 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.api.MockedApiConfig other = (org.wso2.choreo.connect.discovery.api.MockedApiConfig) obj;
 
-    if (!getIn()
-        .equals(other.getIn())) return false;
-    if (!getName()
-        .equals(other.getName())) return false;
     if (!getResponsesList()
         .equals(other.getResponsesList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -302,10 +196,6 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + IN_FIELD_NUMBER;
-    hash = (53 * hash) + getIn().hashCode();
-    hash = (37 * hash) + NAME_FIELD_NUMBER;
-    hash = (53 * hash) + getName().hashCode();
     if (getResponsesCount() > 0) {
       hash = (37 * hash) + RESPONSES_FIELD_NUMBER;
       hash = (53 * hash) + getResponsesList().hashCode();
@@ -448,10 +338,6 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      in_ = "";
-
-      name_ = "";
-
       if (responsesBuilder_ == null) {
         responses_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -485,8 +371,6 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.api.MockedApiConfig buildPartial() {
       org.wso2.choreo.connect.discovery.api.MockedApiConfig result = new org.wso2.choreo.connect.discovery.api.MockedApiConfig(this);
       int from_bitField0_ = bitField0_;
-      result.in_ = in_;
-      result.name_ = name_;
       if (responsesBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
           responses_ = java.util.Collections.unmodifiableList(responses_);
@@ -544,14 +428,6 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.api.MockedApiConfig other) {
       if (other == org.wso2.choreo.connect.discovery.api.MockedApiConfig.getDefaultInstance()) return this;
-      if (!other.getIn().isEmpty()) {
-        in_ = other.in_;
-        onChanged();
-      }
-      if (!other.getName().isEmpty()) {
-        name_ = other.name_;
-        onChanged();
-      }
       if (responsesBuilder_ == null) {
         if (!other.responses_.isEmpty()) {
           if (responses_.isEmpty()) {
@@ -607,158 +483,6 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     private int bitField0_;
-
-    private java.lang.Object in_ = "";
-    /**
-     * <code>string in = 1;</code>
-     * @return The in.
-     */
-    public java.lang.String getIn() {
-      java.lang.Object ref = in_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        in_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string in = 1;</code>
-     * @return The bytes for in.
-     */
-    public com.google.protobuf.ByteString
-        getInBytes() {
-      java.lang.Object ref = in_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        in_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string in = 1;</code>
-     * @param value The in to set.
-     * @return This builder for chaining.
-     */
-    public Builder setIn(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      in_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string in = 1;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearIn() {
-      
-      in_ = getDefaultInstance().getIn();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string in = 1;</code>
-     * @param value The bytes for in to set.
-     * @return This builder for chaining.
-     */
-    public Builder setInBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      in_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object name_ = "";
-    /**
-     * <code>string name = 2;</code>
-     * @return The name.
-     */
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        name_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @return The bytes for name.
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @param value The name to set.
-     * @return This builder for chaining.
-     */
-    public Builder setName(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      name_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearName() {
-      
-      name_ = getDefaultInstance().getName();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @param value The bytes for name to set.
-     * @return This builder for chaining.
-     */
-    public Builder setNameBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      name_ = value;
-      onChanged();
-      return this;
-    }
 
     private java.util.List<org.wso2.choreo.connect.discovery.api.MockedResponseConfig> responses_ =
       java.util.Collections.emptyList();

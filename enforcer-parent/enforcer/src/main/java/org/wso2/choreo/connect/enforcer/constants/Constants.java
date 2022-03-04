@@ -49,7 +49,9 @@ public class Constants {
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";
 
-    public static final String BEGINING_OF_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n";
+    /* "-----BEGIN PRIVATE KEY-----\n" changed to "-----BEGIN PRIVATE KEY-----"
+    since new lines in different OSs differ (Linux: \n, Windows: \r\n) */
+    public static final String BEGINING_OF_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----";
     public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
     public static final String RSA = "RSA";
 
