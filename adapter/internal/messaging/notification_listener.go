@@ -226,6 +226,7 @@ func handleAPIEvents(data []byte, eventType string) {
 						logger.LoggerInternalMsg.Debugf("API Metadata for api Id: %s is not updated as it already exists", apiEvent.UUID)
 						continue
 					}
+					logger.LoggerInternalMsg.Debugf("Fetching Metadata for api Id: %s ", apiEvent.UUID)
 					queryParamMap := make(map[string]string, 3)
 					queryParamMap[eh.GatewayLabelParam] = configuredEnv
 					queryParamMap[eh.ContextParam] = apiEvent.Context

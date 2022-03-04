@@ -300,7 +300,14 @@ func ApplyAPIProjectFromAPIM(
 			allEnvironments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		// We don't need to be environment specific when checking default version. It's applied at API level
 		// hence picking 0th index here.
-		apiYaml.IsDefaultVersion = xds.APIListMap[allEnvironments[0]][apiYaml.ID].IsDefaultVersion
+		if api, ok := xds.APIListMap[allEnvironments[0]][apiYaml.ID]; ok {
+			apiYaml.IsDefaultVersion = api.IsDefaultVersion
+		} else {
+			// APIListMap is synchronously updated only for default version changes. In other API deployment
+			// events, this may not be updated. We can safely ignore this case since runtime artifact's
+			// `isDefaultVersion` prop is anyway updated for deployment events.
+			loggers.LoggerAPI.Debugf("API %s is not found in API Metadata map.", apiYaml.ID)
+		}
 		// first update the API for vhost
 		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, allEnvironments)
 		if err != nil {
