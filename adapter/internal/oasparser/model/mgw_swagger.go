@@ -68,6 +68,7 @@ type MgwSwagger struct {
 	EndpointImplementationType string
 	LifecycleStatus            string
 	xWso2RequestBodyPass       bool
+	IsDefaultVersion           bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1139,6 +1140,7 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
 	swagger.LifecycleStatus = data.LifeCycleStatus
+	swagger.IsDefaultVersion = data.IsDefaultVersion
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig

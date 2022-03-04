@@ -482,6 +482,18 @@ func GetAllEnvironments(apiUUID, vhost string, newEnvironments []string) []strin
 	return allEnvironments
 }
 
+// GetDeployedEnvironments returns all the environments the API with `apiUUID` is deployed to
+func GetDeployedEnvironments(apiUUID string) []string {
+	var envs []string
+	if envMap, ok := apiUUIDToGatewayToVhosts[apiUUID]; ok {
+		envs = make([]string, 0, len(envMap))
+		for k := range envMap {
+			envs = append(envs, k)
+		}
+	}
+	return envs
+}
+
 // GetVhostOfAPI returns the vhost of API deployed in the given gateway environment
 func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 	if envToVhost, ok := apiUUIDToGatewayToVhosts[apiUUID]; ok {

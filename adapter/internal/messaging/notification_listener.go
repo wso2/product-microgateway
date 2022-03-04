@@ -56,6 +56,7 @@ const (
 	policyUpdate                = "POLICY_UPDATE"
 	policyDelete                = "POLICY_DELETE"
 	blockedStatus               = "BLOCKED"
+	apiUpdate                   = "API_UPDATE"
 )
 
 // var variables
@@ -131,11 +132,34 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	return nil
 }
 
+// handleDefaultVersionUpdate will redeploy default versioned API.
+// API runtime artifact doesn't get updated in CP side when default version is updated
+// (isDefaultVersion prop in apiYaml is not updated). API deployment or should happen
+// for it to get updated. However we need to redeploy the API when there is a default
+// version change. For that we call `/apis` endpoint to get updated API metadata (this
+// contains the updated `isDefaultVersion` field). Now we proceed with fetching runtime
+// artifact from the CP. When creating CC deployment objects we refer to updated `APIList`
+// map and update runtime artifact's `isDefaultVersion` field to correctly deploy default
+// versioned API.
+func handleDefaultVersionUpdate(event msg.APIEvent) {
+	deployedEnvs := xds.GetDeployedEnvironments(event.UUID)
+	for _, env := range deployedEnvs {
+		query := make(map[string]string, 3)
+		query[eh.GatewayLabelParam] = env
+		query[eh.ContextParam] = event.APIContext
+		query[eh.VersionParam] = event.APIVersion
+		eh.UpdateAPIMetadataFromCP(query)
+	}
+
+	synchronizer.FetchAPIsFromControlPlane(event.UUID, deployedEnvs)
+}
+
 // handleAPIEvents to process api related data
 func handleAPIEvents(data []byte, eventType string) {
 	var (
-		apiEvent         msg.APIEvent
-		currentTimeStamp int64 = apiEvent.Event.TimeStamp
+		apiEvent              msg.APIEvent
+		currentTimeStamp      int64 = apiEvent.Event.TimeStamp
+		isDefaultVersionEvent bool
 	)
 
 	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
@@ -162,6 +186,13 @@ func handleAPIEvents(data []byte, eventType string) {
 		return
 	}
 
+	isDefaultVersionEvent = isDefaultVersionUpdate(apiEvent)
+
+	if isDefaultVersionEvent {
+		handleDefaultVersionUpdate(apiEvent)
+		return
+	}
+
 	// Per each revision, synchronization should happen.
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
@@ -169,7 +200,7 @@ func handleAPIEvents(data []byte, eventType string) {
 
 	for _, env := range apiEvent.GatewayLabels {
 		if isLaterEvent(apiListTimeStampMap, apiEvent.UUID+":"+env, currentTimeStamp) {
-			return
+			break
 		}
 		// removeFromGateway event with multiple labels could only appear when the API is subjected
 		// to delete. Hence we could simply delete after checking against just one iteration.
@@ -181,7 +212,7 @@ func handleAPIEvents(data []byte, eventType string) {
 					xds.UpdateEnforcerAPIList(env, xdsAPIList)
 				}
 			}
-			return
+			break
 		}
 		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 			conf, _ := config.ReadConfigs()
@@ -195,13 +226,13 @@ func handleAPIEvents(data []byte, eventType string) {
 						logger.LoggerInternalMsg.Debugf("API Metadata for api Id: %s is not updated as it already exists", apiEvent.UUID)
 						continue
 					}
+					logger.LoggerInternalMsg.Debugf("Fetching Metadata for api Id: %s ", apiEvent.UUID)
 					queryParamMap := make(map[string]string, 3)
 					queryParamMap[eh.GatewayLabelParam] = configuredEnv
 					queryParamMap[eh.ContextParam] = apiEvent.Context
 					queryParamMap[eh.VersionParam] = apiEvent.Version
 					var apiList *types.APIList
-					go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap,
-						eh.APIListChannel, 0)
+					go eh.InvokeService(eh.ApisEndpoint, apiList, queryParamMap, eh.APIListChannel, 0)
 				}
 			}
 		}
@@ -421,6 +452,10 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 	}
 	timeStampMap[mapKey] = currentTimeStamp
 	return false
+}
+
+func isDefaultVersionUpdate(event msg.APIEvent) bool {
+	return strings.EqualFold(apiUpdate, event.Event.Type) && strings.EqualFold("DEFAULT_VERSION", event.Action)
 }
 
 func belongsToTenant(tenantDomain string) bool {
