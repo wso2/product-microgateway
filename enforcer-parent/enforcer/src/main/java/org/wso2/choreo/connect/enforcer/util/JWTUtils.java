@@ -33,10 +33,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
-import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
 
 import java.io.IOException;
@@ -153,9 +153,14 @@ public class JWTUtils {
             String strKeyPEM;
             Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
+            String lineSeparator = System.lineSeparator();
+            // Change the lineSeparator to \r\n if it runs on WSL
+            if (System.getProperty("os.version").toLowerCase().contains("wsl")) {
+                lineSeparator = "\r\n";
+            }
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")
-                    .replaceAll(System.lineSeparator(), "")
+                    .replaceAll(lineSeparator, "")
                     .replace(Constants.END_OF_PRIVATE_KEY, "");
 
             byte[] encoded = Base64.getDecoder().decode(strKeyPEM);

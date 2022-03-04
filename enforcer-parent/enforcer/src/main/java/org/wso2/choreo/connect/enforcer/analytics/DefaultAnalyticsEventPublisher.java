@@ -31,6 +31,8 @@ import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
@@ -165,7 +167,9 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
             dataCollector.collectData();
             logger.debug("Event is published. : " + correlationID);
         } catch (AnalyticsException e) {
-            logger.error("Error while publishing the event to the analytics portal. : " + correlationID, e);
+            logger.error("Error while publishing the event to the analytics portal. : "
+                    + correlationID,
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5100), e);
         }
     }
 }

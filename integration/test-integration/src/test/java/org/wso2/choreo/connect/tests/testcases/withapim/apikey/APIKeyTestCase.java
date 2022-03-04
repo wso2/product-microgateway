@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
@@ -41,51 +42,21 @@ import java.util.*;
 
 public class APIKeyTestCase extends ApimBaseTest {
 
-    private static final String SAMPLE_API_NAME = "APIKeyTestAPI";
     private static final String SAMPLE_API_CONTEXT = "apiKey";
-    private static final String SAMPLE_API_VERSION = "1.0.0";
     private static final String APP_NAME = "APIKeyTestApp";
     private String apiKey;
     private String apiKeyForIPTest;
     private String apiKeyForRefererTest;
     private String tamperedAPIKey;
-    private String applicationId;
-    private String apiId;
     private String endPoint;
-    private String jwtEndpoint;
 
     @BeforeClass(description = "Initialise the setup for API key tests")
     void start() throws Exception {
         super.initWithSuperTenant();
 
-        String targetDir = Utils.getTargetDirPath();
-        String filePath = targetDir + ApictlUtils.OPENAPIS_PATH + "api_key_openAPI.yaml";
-
-        // enable apikey in apim
-        JSONArray securityScheme = new JSONArray();
-        securityScheme.put("oauth_basic_auth_api_key_mandatory");
-        securityScheme.put("api_key");
-
-        JSONObject apiProperties = new JSONObject();
-        apiProperties.put("name", SAMPLE_API_NAME);
-        apiProperties.put("context", "/" + SAMPLE_API_CONTEXT);
-        apiProperties.put("version", SAMPLE_API_VERSION);
-        apiProperties.put("provider", user.getUserName());
-        apiProperties.put("securityScheme", securityScheme);
-        apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
-
-        publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
-
-        // creating the application
-        Application app = new Application(APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        applicationId = StoreUtils.createApplication(app, storeRestClient);
-
-        PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
-
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
 
         endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/1");
-        jwtEndpoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/jwtheader");
 
         // Obtain API keys
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
@@ -100,8 +71,6 @@ public class APIKeyTestCase extends ApimBaseTest {
         APIKeyDTO refererTestAPIKeyDTO = storeRestClient.generateAPIKeys(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
                 -1, null, "http://www.abc.com");
         apiKeyForRefererTest = refererTestAPIKeyDTO.getApikey();
-
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
     //    Invokes with tampered API key and this will fail.
@@ -109,7 +78,8 @@ public class APIKeyTestCase extends ApimBaseTest {
     public void invokeWithTamperedAPIKey() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("apikey", tamperedAPIKey);
-        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(
+                Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
@@ -230,12 +200,5 @@ public class APIKeyTestCase extends ApimBaseTest {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.VALID_JWT_RESPONSE, "Response body mismatched");
-    }
-
-    @AfterClass
-    public void clean() throws Exception {
-        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
-        storeRestClient.removeApplicationById(applicationId);
-        publisherRestClient.deleteAPI(apiId);
     }
 }

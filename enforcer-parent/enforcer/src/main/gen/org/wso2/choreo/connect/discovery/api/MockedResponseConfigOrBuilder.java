@@ -8,16 +8,16 @@ public interface MockedResponseConfigOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string value = 1;</code>
-   * @return The value.
+   * <code>string code = 1;</code>
+   * @return The code.
    */
-  java.lang.String getValue();
+  java.lang.String getCode();
   /**
-   * <code>string value = 1;</code>
-   * @return The bytes for value.
+   * <code>string code = 1;</code>
+   * @return The bytes for code.
    */
   com.google.protobuf.ByteString
-      getValueBytes();
+      getCodeBytes();
 
   /**
    * <code>repeated .wso2.discovery.api.MockedHeaderConfig headers = 2;</code>
@@ -44,31 +44,25 @@ public interface MockedResponseConfigOrBuilder extends
       int index);
 
   /**
-   * <code>int32 code = 3;</code>
-   * @return The code.
-   */
-  int getCode();
-
-  /**
-   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 3;</code>
    */
   java.util.List<org.wso2.choreo.connect.discovery.api.MockedContentConfig> 
       getContentList();
   /**
-   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 3;</code>
    */
   org.wso2.choreo.connect.discovery.api.MockedContentConfig getContent(int index);
   /**
-   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 3;</code>
    */
   int getContentCount();
   /**
-   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 3;</code>
    */
   java.util.List<? extends org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder> 
       getContentOrBuilderList();
   /**
-   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 4;</code>
+   * <code>repeated .wso2.discovery.api.MockedContentConfig content = 3;</code>
    */
   org.wso2.choreo.connect.discovery.api.MockedContentConfigOrBuilder getContentOrBuilder(
       int index);

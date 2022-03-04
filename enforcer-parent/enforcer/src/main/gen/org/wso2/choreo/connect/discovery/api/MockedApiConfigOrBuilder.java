@@ -8,30 +8,6 @@ public interface MockedApiConfigOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string in = 1;</code>
-   * @return The in.
-   */
-  java.lang.String getIn();
-  /**
-   * <code>string in = 1;</code>
-   * @return The bytes for in.
-   */
-  com.google.protobuf.ByteString
-      getInBytes();
-
-  /**
-   * <code>string name = 2;</code>
-   * @return The name.
-   */
-  java.lang.String getName();
-  /**
-   * <code>string name = 2;</code>
-   * @return The bytes for name.
-   */
-  com.google.protobuf.ByteString
-      getNameBytes();
-
-  /**
    * <code>repeated .wso2.discovery.api.MockedResponseConfig responses = 3;</code>
    */
   java.util.List<org.wso2.choreo.connect.discovery.api.MockedResponseConfig> 

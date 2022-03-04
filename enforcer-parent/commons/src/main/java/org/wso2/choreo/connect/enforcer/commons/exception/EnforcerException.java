@@ -16,25 +16,23 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.exception;
+package org.wso2.choreo.connect.enforcer.commons.exception;
 
 /**
- * Exception thrown when loading Subscriptions.
+ * This is the custom exception class for API management.
  */
-public class DataLoadingException extends EnforcerException {
+public class EnforcerException extends Exception {
 
-    public DataLoadingException(String message) {
-
-        super(message);
+    public EnforcerException(String msg) {
+        super(msg);
     }
 
-    public DataLoadingException(String message, Throwable cause) {
-
-        super(message, cause);
+    public EnforcerException(String msg, Throwable e) {
+        super(msg, e);
     }
 
-    public DataLoadingException(Throwable cause) {
-
-        super(cause);
+    public EnforcerException(Throwable throwable) {
+        super(throwable);
     }
+
 }

@@ -156,7 +156,6 @@ public class HttpsClientRequest {
         }
     }
 
-
     private static HttpsURLConnection getURLConnection(String requestUrl)
             throws IOException {
         setSSlSystemProperties();

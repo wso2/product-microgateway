@@ -58,6 +58,13 @@ var defaultConfig = &Config{
 			Location: "/home/wso2/security/truststore",
 		},
 		ArtifactsDirectory: "/home/wso2/artifacts",
+		SourceControl: sourceControl{
+			Enabled:            false,
+			PollInterval:       30,
+			RetryInterval:      5,
+			MaxRetryCount:      20,
+			ArtifactsDirectory: "/home/wso2/git-artifacts",
+		},
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
@@ -107,6 +114,10 @@ var defaultConfig = &Config{
 				BaseIntervalInMillis: 25,
 				StatusCodes:          []uint32{504},
 			},
+			DNS: upstreamDNS{
+				DNSRefreshRate: 5000,
+				RespectDNSTtl:  false,
+			},
 		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{
@@ -115,6 +126,12 @@ var defaultConfig = &Config{
 				StreamIdleTimeoutInSeconds:     300,
 				IdleTimeoutInSeconds:           3600,
 			},
+		},
+		PayloadPassingToEnforcer: payloadPassingToEnforcer{
+			PassRequestPayload:  false,
+			MaxRequestBytes:     10240,
+			AllowPartialMessage: false,
+			PackAsBytes:         false,
 		},
 	},
 	Enforcer: enforcer{

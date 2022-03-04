@@ -136,7 +136,7 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 		}
 
 		security := getSecurityArray(vendorExtensions)
-		methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions, MockedAPIConfig{}))
+		methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions))
 		resource := unmarshalSwaggerResources(channel, methodsArray, channelItem.VendorExtensions)
 		resources = append(resources, &resource)
 	}

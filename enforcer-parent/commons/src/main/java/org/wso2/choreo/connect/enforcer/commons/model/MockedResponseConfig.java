@@ -19,39 +19,21 @@
 package org.wso2.choreo.connect.enforcer.commons.model;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Defines mock API response structure.
  */
 public class MockedResponseConfig {
-    private String value;
-    private int code;
     private List<MockedHeaderConfig> headers;
+    private Map<String, MockedContentExamples> contentMap;
 
-    private MockedContentConfig content;
-
-    public String getValue() {
-        return value;
+    public Map<String, MockedContentExamples> getContentMap() {
+        return contentMap;
     }
 
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public MockedContentConfig getContent() {
-        return content;
-    }
-
-    public void setContent(MockedContentConfig content) {
-        this.content = content;
+    public void setContentMap(Map<String, MockedContentExamples> contentMap) {
+        this.contentMap = contentMap;
     }
 
     public List<MockedHeaderConfig> getHeaders() {

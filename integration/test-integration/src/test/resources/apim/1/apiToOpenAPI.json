@@ -1,3 +1,5 @@
 {
-  "JwtScopeAPI": "scopes_openAPI.yaml"
+  "JwtScopeAPI": "scopes_openAPI.yaml",
+  "APIKeyTestAPI": "api_key_openAPI.yaml",
+  "APIKeyBlockedAPI": "api_key_blocked_openAPI.yaml"
 }

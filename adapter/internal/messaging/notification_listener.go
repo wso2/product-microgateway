@@ -31,6 +31,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
@@ -139,7 +140,11 @@ func handleAPIEvents(data []byte, eventType string) {
 
 	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
 	if apiEventErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling API event data %v", apiEventErr)
+		logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while unmarshalling API event data %v", apiEventErr),
+			Severity:  logging.MAJOR,
+			ErrorCode: 2004,
+		})
 		return
 	}
 

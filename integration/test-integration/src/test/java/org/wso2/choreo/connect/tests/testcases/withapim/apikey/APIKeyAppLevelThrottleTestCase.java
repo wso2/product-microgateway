@@ -31,6 +31,7 @@ import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
@@ -46,9 +47,8 @@ import java.util.Map;
 
 public class APIKeyAppLevelThrottleTestCase extends ApimBaseTest {
 
-    private static final String API_NAME = "APIKeyAppLevelThrottleApi";
+    private static final String API_NAME = "APIKeyAppLevelThrottleAPI";
     private static final String API_CONTEXT = "apikey_app_level_throttling";
-    private static final String API_VERSION = "1.0.0";
     private static final String APP_NAME = "apiKeyAppThrottleApp";
 
     private static final String POLICY_NAME = "app5PerMin";
@@ -78,22 +78,12 @@ public class APIKeyAppLevelThrottleTestCase extends ApimBaseTest {
                     appThrottlePolicyDTO);
         appThrottlePolicyDTO = addedPolicy.getData();
 
-        // Create API
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(API_NAME, API_CONTEXT, API_VERSION, user.getUserName());
-
-        List<String> securityScheme = new ArrayList<>();
-        securityScheme.add("oauth_basic_auth_api_key_mandatory");
-        securityScheme.add("api_key");
-        apiRequest.setSecurityScheme(securityScheme);
-
-        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
-
         // Create the app and subscribe
         Application app = new Application(APP_NAME, POLICY_NAME);
         applicationId = StoreUtils.createApplication(app, storeRestClient);
+        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED,
                 storeRestClient);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
     @Test(description = "Test application level throttling for API Key")
@@ -113,7 +103,6 @@ public class APIKeyAppLevelThrottleTestCase extends ApimBaseTest {
     public void destroy() throws Exception {
         StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
         storeRestClient.removeApplicationById(applicationId);
-        publisherRestClient.deleteAPI(apiId);
         adminRestClient.deleteApplicationThrottlingPolicy(appThrottlePolicyDTO.getPolicyId());
     }
 }

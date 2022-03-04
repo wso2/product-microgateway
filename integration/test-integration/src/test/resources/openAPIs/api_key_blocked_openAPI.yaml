@@ -1,0 +1,31 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.5
+  title: API key Blocked API
+servers:
+  - url: http://mockBackend:2383/v2
+paths:
+  '/pet/{petId}':
+    get:
+      summary: Find pet by ID
+      parameters:
+        - name: petId
+          in: path
+          description: ID of pet to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+        '404':
+          description: Pet not found
+      security:
+        - APIKeyAuth: []
+components:
+  securitySchemes:
+    APIKeyAuth:
+      type: apiKey
+      name: x-api-key
+      in: header

@@ -21,6 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
@@ -33,7 +36,6 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
-import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
@@ -147,7 +149,8 @@ public class AuthFilter implements Filter {
             FilterUtils.setUnauthenticatedErrorToContext(requestContext);
         }
         log.error(
-                "None of the authenticators were able to authenticate the request: " + requestContext.getRequestPath());
+                "None of the authenticators were able to authenticate the request: " + requestContext.getRequestPath(),
+                ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6600));
         //set WWW_AUTHENTICATE header to error response
         requestContext.addOrModifyHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                 ", error=\"invalid_token\"" +
@@ -160,9 +163,11 @@ public class AuthFilter implements Filter {
             AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
             requestContext.setAuthenticationContext(authenticate);
             if (authenticate.isAuthenticated()) {
-                updateClusterHeaderAndCheckEnv(requestContext, authenticate);
-                // set backend security
-                EndpointSecurityUtils.addEndpointSecurity(requestContext);
+                if (!requestContext.getMatchedAPI().isMockedApi()) {
+                    updateClusterHeaderAndCheckEnv(requestContext, authenticate);
+                    // set backend security
+                    EndpointSecurityUtils.addEndpointSecurity(requestContext);
+                }
                 return new AuthenticationResponse(true, false,
                         false);
             }
@@ -285,8 +290,10 @@ public class AuthFilter implements Filter {
     private void setInterceptorAuthContextMetadata(Authenticator authenticator, RequestContext requestContext) {
         // add auth context to metadata, lua script will add it to the auth context of the interceptor
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        String tokenType = authenticator.getName();
+        authContext.setTokenType(tokenType);
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN_TYPE,
-                Objects.toString(authenticator.getName(), ""));
+                Objects.toString(tokenType, ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.TOKEN,
                 Objects.toString(authContext.getRawToken(), ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,

@@ -20,6 +20,7 @@ package ga
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	stub "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"google.golang.org/genproto/googleapis/rpc/status"
@@ -88,7 +90,11 @@ func initConnection() (*grpc.ClientConn, error) {
 	// TODO: (VirajSalaka) Bring in connection level configurations
 	conn, err := getGRPCConnection()
 	if err != nil {
-		logger.LoggerGA.Error("Error while connecting to the Global Adapter.", err)
+		logger.LoggerGA.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while connecting to the Global Adapter. %v", err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1700,
+		})
 		return nil, err
 	}
 
@@ -98,7 +104,11 @@ func initConnection() (*grpc.ClientConn, error) {
 
 	if err != nil {
 		// TODO: (VirajSalaka) handle error.
-		logger.LoggerGA.Error("Error while starting client. ", err)
+		logger.LoggerGA.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while starting client. %v", err.Error()),
+			Severity:  logging.CRITICAL,
+			ErrorCode: 1701,
+		})
 		return nil, err
 	}
 	logger.LoggerGA.Info("Connection to the global adapter is successful.")
@@ -112,7 +122,11 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 	certificate, err := tlsutils.GetServerCertificate(conf.Adapter.Keystore.CertPath,
 		conf.Adapter.Keystore.KeyPath)
 	if err != nil {
-		logger.LoggerGA.Fatal("Error while processing the private-public key pair", err)
+		logger.LoggerGA.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error while processing the private-public key pair : %v", err.Error()),
+			Severity:  logging.BLOCKER,
+			ErrorCode: 1702,
+		})
 	}
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{certificate},

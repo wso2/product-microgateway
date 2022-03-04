@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,23 +16,22 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.exception;
+package org.wso2.choreo.connect.enforcer.commons.model;
+
+import java.util.Map;
 
 /**
- * This is the custom exception class for API management.
+ * Defines mock API content structure.
  */
-public class EnforcerException extends Exception {
+public class MockedContentExamples {
 
-    public EnforcerException(String msg) {
-        super(msg);
+    private Map<String, String> exampleMap;    // example reference => example map
+
+    public Map<String, String> getExampleMap() {
+        return exampleMap;
     }
 
-    public EnforcerException(String msg, Throwable e) {
-        super(msg, e);
+    public void setExampleMap(Map<String, String> exampleMap) {
+        this.exampleMap = exampleMap;
     }
-
-    public EnforcerException(Throwable throwable) {
-        super(throwable);
-    }
-
 }

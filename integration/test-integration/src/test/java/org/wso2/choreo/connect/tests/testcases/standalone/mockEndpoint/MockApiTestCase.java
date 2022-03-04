@@ -43,14 +43,14 @@ public class MockApiTestCase {
 
     @BeforeClass
     public void createApiProject() throws IOException, CCTestException {
-        ApictlUtils.createProject("mock_endpoint_openAPI.yaml", "apictl_mock_api_test",
-                null, null, null, "apictl_prototype_test.yaml");
+        ApictlUtils.createProject("mock_endpoint_openAPI.yaml", "mock_api_test",
+                null, null, null, "mock_impl_test.yaml");
     }
 
     @Test
     public void deployMockAPI() throws Exception {
         ApictlUtils.login("test");
-        ApictlUtils.deployAPI("apictl_mock_api_test", "test");
+        ApictlUtils.deployAPI("mock_api_test", "test");
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
 
         API api = new API();
@@ -68,54 +68,117 @@ public class MockApiTestCase {
                 3600, null, true);
     }
 
-    // Invokes mocked API implementation using header value
-    @Test(description = "Test to detect wrong API keys")
-    public void invokeMockedApiImplementationWithHeader() throws Exception {
+    @Test(description = "Test auth token")
+    public void invokeWithoutToken() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("mockApiValue", "success");
-        headers.put("Internal-Key", testKey);
-        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockApiWithHeader", headers);
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockApi", headers);
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertTrue(response.getHeaders().containsKey("x-wso2-header1"), "Response header not available");
-        if (response.getHeaders().containsKey("x-wso2-header1")) {
-            Assert.assertTrue(response.getHeaders().get("x-wso2-header1").equalsIgnoreCase("Sample header value"), "Response header value mismatched");
-        }
-        Assert.assertTrue(response.getData().contains("{\"name\" : \"choreo connect\""), "Error response message mismatch");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
     }
 
-    // Invokes with mocked API implementation using query param
-    @Test(description = "Test to detect wrong API keys")
-    public void invokeMockedApiImplementationWithQueryParam() throws Exception {
-        String headerName = "x-wso2-q-header";
+    @Test(description = "Test default example")
+    public void getDefaultContent() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("accept", "application/xml");
         headers.put("Internal-Key", testKey);
-        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockWithQueryParam?mockApiQueryVal=success", headers);
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockApi", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("x-wso2-header"), "Response header not available");
+        if (response.getHeaders().containsKey("x-wso2-header")) {
+            Assert.assertEquals(response.getHeaders().get("x-wso2-header"), "\"Sample header value\"", "Response header value mismatched");
+        }
+        Assert.assertTrue(response.getHeaders().containsKey("content-type"), "Response header not available");
+        if (response.getHeaders().containsKey("content-type")) {
+            Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "application/json", "Response header value mismatched");
+        }
+        Assert.assertEquals(response.getData(), "{\"description\":\"default content\"}", "Error response body mismatch");
+    }
+
+    @Test(description = "Test no default example but only one example")
+    public void getNoDefaultContent() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testOneExample", headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
-        Assert.assertTrue(response.getHeaders().containsKey(headerName), "Response header not available");
-        if (response.getHeaders().containsKey(headerName)) {
-            Assert.assertTrue(response.getHeaders().get(headerName).equalsIgnoreCase("Header value for query param"),
-                    "Response header value mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("x-wso2-header"), "Response header not available");
+        if (response.getHeaders().containsKey("x-wso2-header")) {
+            Assert.assertEquals(response.getHeaders().get("x-wso2-header"), "\"Sample header value\"", "Response header value mismatched");
         }
-        Assert.assertTrue(response.getData().contains("<name>choreo connect</name>"), "Error response message mismatch");
+        Assert.assertTrue(response.getHeaders().containsKey("content-type"), "Response header not available");
+        if (response.getHeaders().containsKey("content-type")) {
+            Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "application/json", "Response header value mismatched");
+        }
+        Assert.assertEquals(response.getData(), "{\"description\":\"json mediatype example1\"}", "Error response message mismatch");
     }
 
-    // Invokes with mocked default API implementation
-    @Test(description = "Test to detect wrong API keys")
-    public void invokeMockedDefaultApiImplementation() throws Exception {
-        String headerName = "x-wso2-default-header";
+    @Test(description = "Test prefer and code with X")
+    public void preferExample() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", testKey);
-        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockDefault", headers);
+        headers.put("Accept", "text/*");
+        headers.put("Prefer", "code=508, example=example1");
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockApi", headers);
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertTrue(response.getHeaders().containsKey(headerName), "Response header not available");
-        if (response.getHeaders().containsKey(headerName)) {
-            Assert.assertTrue(response.getHeaders().get(headerName).equalsIgnoreCase("Default header value"),
-                    "Response header value mismatched");
+        Assert.assertEquals(response.getResponseCode(), 508, "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("x-wso2-header"), "Response header not available");
+        if (response.getHeaders().containsKey("x-wso2-header")) {
+            Assert.assertEquals(response.getHeaders().get("x-wso2-header"), "\"Sample header value\"", "Response header value mismatched");
         }
-        Assert.assertTrue(response.getData().contains("{\"name\" : \"choreo connect\"}"), "Error response message mismatch");
+        Assert.assertTrue(response.getHeaders().containsKey("content-type"), "Response header not available");
+        if (response.getHeaders().containsKey("content-type")) {
+            Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "text/html", "Response header value mismatched");
+        }
+        Assert.assertEquals(response.getData(), "{\"description\":\"content for example 1\"}", "Error response message mismatch");
+    }
+
+    @Test(description = "Test when multiple examples but preferred example is not given")
+    public void preferNoExample() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", testKey);
+        headers.put("Accept", "text/*");
+        headers.put("Prefer", "code=508");
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockApi", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 508, "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("x-wso2-header"), "Response header not available");
+        if (response.getHeaders().containsKey("x-wso2-header")) {
+            Assert.assertEquals(response.getHeaders().get("x-wso2-header"), "\"Sample header value\"", "Response header value mismatched");
+        }
+        Assert.assertTrue(response.getHeaders().containsKey("content-type"), "Response header not available");
+        if (response.getHeaders().containsKey("content-type")) {
+            Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "text/html", "Response header value mismatched");
+        }
+        Assert.assertTrue(response.getData().contains("content for example"), "Error response body mismatch");
+    }
+
+    @Test(description = "Test not implemented preferred code")
+    public void getNotImplementedExample() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", testKey);
+        headers.put("Accept", "text/*");
+        headers.put("Prefer", "code=508, example=example4");
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockApi", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_IMPLEMENTED, "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("content-type"), "Response header not available");
+        if (response.getHeaders().containsKey("content-type")) {
+            Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "application/json", "Response header value mismatched");
+        }
+        Assert.assertEquals(response.getData(), "{\"error_message\":\"Not Implemented\",\"code\":\"900871\",\"error_description\":\"Example preference example4 is not supported for this resource\"}", "Error response message mismatch");
+    }
+
+    @Test(description = "Test not implemented preferred code")
+    public void getNotImplementedCode() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", testKey);
+        headers.put("Prefer", "code=400");
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095/mockApiTest/1.0.0/testMockApi", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_IMPLEMENTED, "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("content-type"), "Response header not available");
+        if (response.getHeaders().containsKey("content-type")) {
+            Assert.assertEquals(response.getHeaders().get("content-type").toLowerCase(), "application/json", "Response header value mismatched");
+        }
+        Assert.assertEquals(response.getData(), "{\"error_message\":\"Not Implemented\",\"code\":\"900871\",\"error_description\":\"Preferred code 400 is not supported for this resource.\"}", "Error response message mismatch");
     }
 }

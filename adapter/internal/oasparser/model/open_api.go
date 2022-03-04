@@ -23,6 +23,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
+	conf "github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
@@ -52,8 +53,8 @@ const (
 // The title, version, description, vendor extension map, endpoints based on servers property,
 // and pathItem level information are populated here.
 //
-// for each pathItem; vendor extensions, endpoints (based on servers object), available http Methods,
-// are populated. Each resource corresponding to a pathItem, has the property called iD, which is a
+// For each pathItem; vendor extensions, endpoints (based on servers object), available http Methods,
+// are populated. Each resource corresponding to a pathItem, has the property called ID, which is a
 // UUID.
 //
 // No operation specific information is extracted.
@@ -74,6 +75,8 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	if err != nil {
 		return err
 	}
+
+	swagger.xWso2RequestBodyPass = getRequestBodyBufferConfig(swagger.vendorExtensions)
 
 	swagger.apiType = constants.HTTP
 	var productionUrls []Endpoint
@@ -160,7 +163,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 					}
 
 				}
-				if productionUrls != nil && len(productionUrls) > 0 {
+				if len(productionUrls) > 0 {
 					resource.productionEndpoints = generateEndpointCluster(constants.ProdClustersConfigNamePrefix, productionUrls, constants.LoadBalance)
 				}
 			}
@@ -181,18 +184,27 @@ func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
 	return securitySchemes
 }
 
+// getRequestBodyBufferConfig method returns a boolean value indicating whether a given API is configured to
+// pass request body to the enforcer or not.
+func getRequestBodyBufferConfig(vendorExtensions map[string]interface{}) bool {
+	configs, _ := conf.ReadConfigs()
+	if !configs.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
+		return false
+	}
+	if val, found := vendorExtensions[constants.XWso2PassRequestPayloadToEnforcer]; found {
+		if passerValue, ok := val.(bool); ok {
+			return passerValue
+		}
+	}
+	return true
+}
+
 func getOperationLevelDetails(operation *openapi3.Operation, method string) *Operation {
 	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
-	var mockedAPIConfig MockedAPIConfig
-
-	// x-mediation-script extension is only available for the mocked APIs. Below condition will execute only for the
-	// mocked APIs.
-	if scriptValue, isScriptAvailable := extensions[constants.XMediationScript]; isScriptAvailable {
-		getMockedAPIConfig(scriptValue, &mockedAPIConfig, method)
-	}
-
+	mgwOperation := NewOperation(method, nil, extensions)
+	mgwOperation.SetMockedAPIConfigOAS3(operation)
 	if operation.Security == nil {
-		return NewOperation(method, nil, extensions, mockedAPIConfig)
+		return mgwOperation
 	}
 
 	var securityData []openapi3.SecurityRequirement = *(operation.Security)
@@ -201,26 +213,8 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) *Ope
 		securityArray[i] = security
 	}
 	logger.LoggerOasparser.Debugf("Security array %v", securityArray)
-	return NewOperation(method, securityArray, extensions, mockedAPIConfig)
-
-}
-
-// getMockedApiConfig recieves xMediationScriptValue, mockedApiConfig pointer value and method name. It unmrashalls the xMediationScript string
-// to mockedApiConfig struct type.
-func getMockedAPIConfig(xMediationScriptValue interface{}, mockedAPIConfig *MockedAPIConfig, method string) {
-	if str, ok := xMediationScriptValue.(string); ok {
-		isValidJSONString := json.Valid([]byte(str))
-		if isValidJSONString {
-			unmarshalError := json.Unmarshal([]byte(str), &mockedAPIConfig)
-			if unmarshalError != nil {
-				logger.LoggerOasparser.Errorf("Error while unmarshalling JSON for method %v. Error: %v", method, unmarshalError)
-				return
-			}
-			logger.LoggerOasparser.Debugf("x-mediation-script value processed successfully for the %v operation.", method)
-		} else {
-			logger.LoggerOasparser.Errorf("Invalid JSON value received for mocked API implementation's %v operation.", method)
-		}
-	}
+	mgwOperation.SetSecurity(securityArray)
+	return mgwOperation
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3

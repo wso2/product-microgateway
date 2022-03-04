@@ -5,6 +5,16 @@
     "tier": "Unlimited"
   },
   {
+    "apiName": "APIKeyBlockedAPI",
+    "appName": "APIKeyBlockedAPIApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "APIKeyTestAPI",
+    "appName": "APIKeyTestApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "BackendSecurityAPI",
     "appName": "BackendSecurityApp",
     "tier": "Unlimited"
@@ -22,6 +32,16 @@
   {
     "apiName": "JwtScopeAPI",
     "appName": "JwtScopeApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "RetryAPI",
+    "appName": "RetryApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "TimeoutAPI",
+    "appName": "TimeoutApp",
     "tier": "Unlimited"
   },
   {
