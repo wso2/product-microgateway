@@ -27,6 +27,8 @@ import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
@@ -272,7 +274,8 @@ public class WebSocketAPI implements API {
         } else {
             webSocketThrottleResponse.setApimErrorCode(ThrottleConstants.THROTTLE_CONDITION_UNKNOWN);
             logger.error("Error code is not assigned for the websocket throttle response. : " + requestContext
-                    .getMatchedAPI().getBasePath());
+                    .getMatchedAPI().getBasePath(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5200));
         }
         webSocketThrottleResponse.setThrottlePeriod(
                 (Long) requestContext.getProperties().get(ThrottleConstants.HEADER_RETRY_AFTER));

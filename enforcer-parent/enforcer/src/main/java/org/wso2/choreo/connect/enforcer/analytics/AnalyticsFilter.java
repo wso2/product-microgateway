@@ -104,7 +104,8 @@ public class AnalyticsFilter {
         if (publisher != null) {
             publisher.handleWebsocketFrameRequest(frameRequest);
         } else {
-            logger.error("Cannot publish the analytics event as analytics publisher is null.");
+            logger.error("Cannot publish the analytics event as analytics publisher is null.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5102));
         }
     }
 

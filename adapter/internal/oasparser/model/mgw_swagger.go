@@ -36,6 +36,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
@@ -1107,7 +1108,11 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 	}
 
 	if err != nil {
-		logger.LoggerOasparser.Error("Error occurred while extracting the API definition to MgwSwagger ", err)
+		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("Error occurred while extracting the API definition to MgwSwagger. %s", err.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 2208,
+		})
 		return err
 	}
 	err = swagger.SetXWso2Extensions()
