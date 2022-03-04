@@ -73,19 +73,19 @@ public final class ResourceProto {
       "\022\014\n\004tier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010\022" +
       "7\n\010policies\030\005 \001(\0132%.wso2.discovery.api.O" +
       "perationPolicies\022<\n\017mockedApiConfig\030\006 \001(" +
-      "\0132#.wso2.discovery.api.MockedApiConfig\"\217" +
-      "\001\n\021OperationPolicies\022&\n\002in\030\001 \003(\0132\032.wso2." +
-      "discovery.api.Policy\022\'\n\003out\030\002 \003(\0132\032.wso2" +
-      ".discovery.api.Policy\022)\n\005fault\030\003 \003(\0132\032.w" +
-      "so2.discovery.api.Policy\"\256\001\n\006Policy\022\022\n\np" +
-      "olicyName\030\001 \001(\t\022\016\n\006action\030\002 \001(\t\022\r\n\005order" +
-      "\030\003 \001(\r\022>\n\nparameters\030\004 \003(\0132*.wso2.discov" +
-      "ery.api.Policy.ParametersEntry\0321\n\017Parame" +
-      "tersEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028" +
-      "\001Bw\n%org.wso2.choreo.connect.discovery.a" +
-      "piB\rResourceProtoP\001Z=github.com/envoypro" +
-      "xy/go-control-plane/wso2/discovery/api;a" +
-      "pib\006proto3"
+      "\0132#.wso2.discovery.api.MockedApiConfig\"\231" +
+      "\001\n\021OperationPolicies\022+\n\007request\030\001 \003(\0132\032." +
+      "wso2.discovery.api.Policy\022,\n\010response\030\002 " +
+      "\003(\0132\032.wso2.discovery.api.Policy\022)\n\005fault" +
+      "\030\003 \003(\0132\032.wso2.discovery.api.Policy\"\256\001\n\006P" +
+      "olicy\022\022\n\npolicyName\030\001 \001(\t\022\016\n\006action\030\002 \001(" +
+      "\t\022\r\n\005order\030\003 \001(\r\022>\n\nparameters\030\004 \003(\0132*.w" +
+      "so2.discovery.api.Policy.ParametersEntry" +
+      "\0321\n\017ParametersEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005valu" +
+      "e\030\002 \001(\t:\0028\001Bw\n%org.wso2.choreo.connect.d" +
+      "iscovery.apiB\rResourceProtoP\001Z=github.co" +
+      "m/envoyproxy/go-control-plane/wso2/disco" +
+      "very/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -117,7 +117,7 @@ public final class ResourceProto {
     internal_static_wso2_discovery_api_OperationPolicies_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_OperationPolicies_descriptor,
-        new java.lang.String[] { "In", "Out", "Fault", });
+        new java.lang.String[] { "Request", "Response", "Fault", });
     internal_static_wso2_discovery_api_Policy_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_wso2_discovery_api_Policy_fieldAccessorTable = new

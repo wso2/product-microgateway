@@ -56,8 +56,8 @@ message Operation {
 
 // OperationPolicies holds policies of the APIM operations
 message OperationPolicies {
-	repeated Policy in = 1;
-	repeated Policy out = 2;
+	repeated Policy request = 1;
+	repeated Policy response = 2;
 	repeated Policy fault = 3;
 }
 

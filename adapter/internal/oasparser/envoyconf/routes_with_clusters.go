@@ -671,9 +671,6 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
 func createRoute(params *routeCreateParams) *routev3.Route {
-	// func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
-	// 	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string,
-	// 	corsPolicy *routev3.CorsPolicy) *routev3.Route {
 	title := params.title
 	version := params.version
 	vHost := params.vHost
@@ -689,6 +686,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	endpointBasepath := params.endpointBasePath
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
+	isDefaultVersion := params.isDefaultVersion
 	config, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
@@ -700,7 +698,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		responseHeadersToRemove []string
 	)
 
-	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
+	basePath := getFilteredBasePath(xWso2Basepath, endpointBasepath)
+	if isDefaultVersion {
+		basePath = getDefaultVersionBasepath(basePath, version)
+	}
+	routePath := generateRoutePath(basePath, resourcePath)
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
@@ -717,7 +719,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	// if any of the operations on the route path has a method rewrite policy,
 	// we remove the :method header matching,
-	// because envoy does not allow method rewrting later if the following method regex doesnot have the new method.
+	// because envoy does not allow method rewrting later if the following method regex does not have the new method.
 	// hence when method rewriting is enabled for the resource, the method validation will be handled by the enforcer instead of the router.
 	if !params.rewriteMethod {
 		// OPTIONS is always added even if it is not listed under resources
@@ -836,7 +838,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Value:   luaMarshelled.Bytes(),
 	}
 
-	pathRegex := xWso2Basepath
+	pathRegex := basePath
 	substitutionString := endpointBasepath
 	if params.rewritePath != "" {
 		pathRegex = routePath
@@ -1147,28 +1149,28 @@ func CreateReadyEndpoint() *routev3.Route {
 	return &router
 }
 
-// generateRoutePaths generates route paths for the api resources.
-func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
-	prefix := ""
+// generateRoutePath generates route paths for the api resources.
+func generateRoutePath(basePath, resourcePath string) string {
 	newPath := ""
-	if strings.TrimSpace(xWso2Basepath) != "" {
-		prefix = basepathConsistent(xWso2Basepath)
-
-	} else {
-		prefix = basepathConsistent(basePath)
-		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
-	}
 	if strings.Contains(resourcePath, "?") {
 		resourcePath = strings.Split(resourcePath, "?")[0]
 	}
-	fullpath := prefix + resourcePath
+	fullpath := basePath + resourcePath
 	newPath = generateRegex(fullpath)
 	return newPath
 }
 
-func basepathConsistent(basePath string) string {
-	modifiedBasePath := basePath
-	if !strings.HasPrefix(basePath, "/") {
+func getFilteredBasePath(xWso2Basepath string, basePath string) string {
+	var modifiedBasePath string
+
+	if strings.TrimSpace(xWso2Basepath) != "" {
+		modifiedBasePath = xWso2Basepath
+	} else {
+		modifiedBasePath = basePath
+		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
+	}
+
+	if !strings.HasPrefix(modifiedBasePath, "/") {
 		modifiedBasePath = "/" + modifiedBasePath
 	}
 	modifiedBasePath = strings.TrimSuffix(modifiedBasePath, "/")
@@ -1280,6 +1282,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		rewritePath:                  "",
 		rewriteMethod:                false,
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
+		isDefaultVersion:             swagger.IsDefaultVersion,
 	}
 
 	if resource != nil {
@@ -1330,4 +1333,9 @@ func getDefaultResourceMethods(apiType string) []string {
 		defaultResourceMethods = []string{"GET"}
 	}
 	return defaultResourceMethods
+}
+
+func getDefaultVersionBasepath(basePath string, version string) string {
+	context := strings.ReplaceAll(basePath, "/"+version, "")
+	return fmt.Sprintf("(%s|%s)", basePath, context)
 }

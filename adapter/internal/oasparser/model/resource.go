@@ -97,8 +97,8 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 	rewriteMethod := false
 	pathOrder := 0
 	for _, method := range resource.methods {
-		if len(method.policies.In) > 0 {
-			for _, policy := range method.policies.In {
+		if len(method.policies.Request) > 0 {
+			for _, policy := range method.policies.Request {
 				if strings.EqualFold(constants.RewritePathTemplate, policy.Action) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {

@@ -118,6 +118,7 @@ type APIEvent struct {
 	Version string `json:"version"`
 	Context string `json:"context"`
 	Name    string `json:"name"`
+	Action  string `json:"action"`
 }
 
 // ApplicationRegistrationEvent for struct application registration events

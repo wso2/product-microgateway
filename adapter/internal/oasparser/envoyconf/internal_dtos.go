@@ -43,4 +43,5 @@ type routeCreateParams struct {
 	rewritePath                  string
 	rewriteMethod                bool
 	passRequestPayloadToEnforcer bool
+	isDefaultVersion             bool
 }

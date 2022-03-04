@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.opa.OPAConstants;
 import org.wso2.choreo.connect.enforcer.commons.opa.OPARequestGenerator;
 import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -81,16 +82,45 @@ public class OPAClient {
                     APISecurityConstants.OPA_REQUEST_FAILURE);
         }
 
-        String serverUrl = policyAttrib.get("serverUrl");
-        String token = policyAttrib.get("accessToken");
+        String serverURL = policyAttrib.get("serverURL");
+        String token = policyAttrib.get("accessKey");
         String policyName = policyAttrib.get("policy");
         String ruleName = policyAttrib.get("rule");
-        // TODO: (renuka) handle additionalProperties, check with APIM
 
-        String requestBody = requestGenerator.generateRequest(policyName, ruleName, null, requestContext);
-        String evaluatingPolicyUrl = serverUrl + '/' + policyName + '/' + ruleName; // including multiple "/" is fine.
-        String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token);
-        return requestGenerator.handleResponse(policyName, ruleName, opaResponse, requestContext);
+        // additionalParameters - we provide this as a Map<String, String> in the interface
+        // TODO: (renuka) policyAttrib should support Map<String, MAP<String, String>>
+        //  and the additionalParameters should come inside this. Since APIM 4.1.0 not supports
+        //  Map<String, MAP<String, String>> in the UI, this is fine for now.
+        Map<String, String> additionalParameters = new HashMap<>();
+        additionalParameters.put(OPAConstants.AdditionalParameters.ADDITIONAL_PROPERTIES,
+                policyAttrib.get("additionalProperties"));
+        additionalParameters.put(OPAConstants.AdditionalParameters.SEND_ACCESS_TOKEN,
+                policyAttrib.get("sendAccessToken"));
+
+        // client related configs
+        Map<String, String> clientOptions = new HashMap<>();
+        FilterUtils.putToMapIfNotNull(clientOptions, FilterUtils.HTTPClientOptions.MAX_OPEN_CONNECTIONS,
+                policyAttrib.get("maxOpenConnections"));
+        FilterUtils.putToMapIfNotNull(clientOptions, FilterUtils.HTTPClientOptions.MAX_PER_ROUTE,
+                policyAttrib.get("maxPerRoute"));
+        FilterUtils.putToMapIfNotNull(clientOptions, FilterUtils.HTTPClientOptions.CONNECT_TIMEOUT,
+                policyAttrib.get("connectionTimeout"));
+
+        // evaluating server policy URL
+        serverURL = StringUtils.removeEnd(serverURL, "/");
+        String evaluatingPolicyUrl;
+        if (StringUtils.isNotEmpty(ruleName)) {
+            evaluatingPolicyUrl = String.format("%s/%s/%s", serverURL, policyName, ruleName);
+        } else {
+            evaluatingPolicyUrl = String.format("%s/%s", serverURL, policyName);
+        }
+
+        // calling OPA server and validate response
+        String requestBody = requestGenerator.generateRequest(policyName, ruleName, additionalParameters,
+                requestContext);
+        String opaResponse = callOPAServer(evaluatingPolicyUrl, requestBody, token, clientOptions);
+        return requestGenerator.handleResponse(policyName, ruleName, opaResponse, additionalParameters,
+                requestContext);
     }
 
     private void loadRequestGenerators() {
@@ -103,12 +133,13 @@ public class OPAClient {
         requestGeneratorMap.put(DEFAULT_REQUEST_GENERATOR_CLASS, defaultRequestGenerator);
     }
 
-    private static String callOPAServer(String serverEp, String payload, String token) throws OPASecurityException {
+    private static String callOPAServer(String serverEp, String payload, String token,
+                                        Map<String, String> clientOptions) throws OPASecurityException {
         try {
             URL url = new URL(serverEp);
             KeyStore opaKeyStore = ConfigHolder.getInstance().getOpaKeyStore();
             try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol(),
-                    opaKeyStore)) {
+                    opaKeyStore, clientOptions)) {
                 HttpPost httpPost = new HttpPost(serverEp);
                 HttpEntity reqEntity = new ByteArrayEntity(payload.getBytes(Charset.defaultCharset()));
                 httpPost.setEntity(reqEntity);

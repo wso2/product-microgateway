@@ -275,11 +275,11 @@ public class RestAPI implements API {
 
     private static PolicyConfig genPolicyConfig(OperationPolicies operationPolicies) {
         PolicyConfig policyConfig = new PolicyConfig();
-        if (operationPolicies.getInCount() > 0) {
-            policyConfig.setIn(genPolicyList(operationPolicies.getInList()));
+        if (operationPolicies.getRequestCount() > 0) {
+            policyConfig.setRequest(genPolicyList(operationPolicies.getRequestList()));
         }
-        if (operationPolicies.getOutCount() > 0) {
-            policyConfig.setOut(genPolicyList(operationPolicies.getOutList()));
+        if (operationPolicies.getResponseCount() > 0) {
+            policyConfig.setResponse(genPolicyList(operationPolicies.getResponseList()));
         }
         if (operationPolicies.getFaultCount() > 0) {
             policyConfig.setFault(genPolicyList(operationPolicies.getFaultList()));

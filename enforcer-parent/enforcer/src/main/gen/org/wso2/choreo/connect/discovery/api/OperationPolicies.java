@@ -20,8 +20,8 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private OperationPolicies() {
-    in_ = java.util.Collections.emptyList();
-    out_ = java.util.Collections.emptyList();
+    request_ = java.util.Collections.emptyList();
+    response_ = java.util.Collections.emptyList();
     fault_ = java.util.Collections.emptyList();
   }
 
@@ -58,19 +58,19 @@ private static final long serialVersionUID = 0L;
             break;
           case 10: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              in_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>();
+              request_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>();
               mutable_bitField0_ |= 0x00000001;
             }
-            in_.add(
+            request_.add(
                 input.readMessage(org.wso2.choreo.connect.discovery.api.Policy.parser(), extensionRegistry));
             break;
           }
           case 18: {
             if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-              out_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>();
+              response_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>();
               mutable_bitField0_ |= 0x00000002;
             }
-            out_.add(
+            response_.add(
                 input.readMessage(org.wso2.choreo.connect.discovery.api.Policy.parser(), extensionRegistry));
             break;
           }
@@ -99,10 +99,10 @@ private static final long serialVersionUID = 0L;
           e).setUnfinishedMessage(this);
     } finally {
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        in_ = java.util.Collections.unmodifiableList(in_);
+        request_ = java.util.Collections.unmodifiableList(request_);
       }
       if (((mutable_bitField0_ & 0x00000002) != 0)) {
-        out_ = java.util.Collections.unmodifiableList(out_);
+        response_ = java.util.Collections.unmodifiableList(response_);
       }
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         fault_ = java.util.Collections.unmodifiableList(fault_);
@@ -124,84 +124,84 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.api.OperationPolicies.class, org.wso2.choreo.connect.discovery.api.OperationPolicies.Builder.class);
   }
 
-  public static final int IN_FIELD_NUMBER = 1;
-  private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> in_;
+  public static final int REQUEST_FIELD_NUMBER = 1;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> request_;
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
   @java.lang.Override
-  public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getInList() {
-    return in_;
+  public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getRequestList() {
+    return request_;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-      getInOrBuilderList() {
-    return in_;
+      getRequestOrBuilderList() {
+    return request_;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
   @java.lang.Override
-  public int getInCount() {
-    return in_.size();
+  public int getRequestCount() {
+    return request_.size();
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.Policy getIn(int index) {
-    return in_.get(index);
+  public org.wso2.choreo.connect.discovery.api.Policy getRequest(int index) {
+    return request_.get(index);
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+   * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getInOrBuilder(
+  public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getRequestOrBuilder(
       int index) {
-    return in_.get(index);
+    return request_.get(index);
   }
 
-  public static final int OUT_FIELD_NUMBER = 2;
-  private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> out_;
+  public static final int RESPONSE_FIELD_NUMBER = 2;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> response_;
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
   @java.lang.Override
-  public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getOutList() {
-    return out_;
+  public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getResponseList() {
+    return response_;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-      getOutOrBuilderList() {
-    return out_;
+      getResponseOrBuilderList() {
+    return response_;
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
   @java.lang.Override
-  public int getOutCount() {
-    return out_.size();
+  public int getResponseCount() {
+    return response_.size();
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.Policy getOut(int index) {
-    return out_.get(index);
+  public org.wso2.choreo.connect.discovery.api.Policy getResponse(int index) {
+    return response_.get(index);
   }
   /**
-   * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+   * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getOutOrBuilder(
+  public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getResponseOrBuilder(
       int index) {
-    return out_.get(index);
+    return response_.get(index);
   }
 
   public static final int FAULT_FIELD_NUMBER = 3;
@@ -258,11 +258,11 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    for (int i = 0; i < in_.size(); i++) {
-      output.writeMessage(1, in_.get(i));
+    for (int i = 0; i < request_.size(); i++) {
+      output.writeMessage(1, request_.get(i));
     }
-    for (int i = 0; i < out_.size(); i++) {
-      output.writeMessage(2, out_.get(i));
+    for (int i = 0; i < response_.size(); i++) {
+      output.writeMessage(2, response_.get(i));
     }
     for (int i = 0; i < fault_.size(); i++) {
       output.writeMessage(3, fault_.get(i));
@@ -276,13 +276,13 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    for (int i = 0; i < in_.size(); i++) {
+    for (int i = 0; i < request_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(1, in_.get(i));
+        .computeMessageSize(1, request_.get(i));
     }
-    for (int i = 0; i < out_.size(); i++) {
+    for (int i = 0; i < response_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(2, out_.get(i));
+        .computeMessageSize(2, response_.get(i));
     }
     for (int i = 0; i < fault_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
@@ -303,10 +303,10 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.api.OperationPolicies other = (org.wso2.choreo.connect.discovery.api.OperationPolicies) obj;
 
-    if (!getInList()
-        .equals(other.getInList())) return false;
-    if (!getOutList()
-        .equals(other.getOutList())) return false;
+    if (!getRequestList()
+        .equals(other.getRequestList())) return false;
+    if (!getResponseList()
+        .equals(other.getResponseList())) return false;
     if (!getFaultList()
         .equals(other.getFaultList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -320,13 +320,13 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    if (getInCount() > 0) {
-      hash = (37 * hash) + IN_FIELD_NUMBER;
-      hash = (53 * hash) + getInList().hashCode();
+    if (getRequestCount() > 0) {
+      hash = (37 * hash) + REQUEST_FIELD_NUMBER;
+      hash = (53 * hash) + getRequestList().hashCode();
     }
-    if (getOutCount() > 0) {
-      hash = (37 * hash) + OUT_FIELD_NUMBER;
-      hash = (53 * hash) + getOutList().hashCode();
+    if (getResponseCount() > 0) {
+      hash = (37 * hash) + RESPONSE_FIELD_NUMBER;
+      hash = (53 * hash) + getResponseList().hashCode();
     }
     if (getFaultCount() > 0) {
       hash = (37 * hash) + FAULT_FIELD_NUMBER;
@@ -464,25 +464,25 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
-        getInFieldBuilder();
-        getOutFieldBuilder();
+        getRequestFieldBuilder();
+        getResponseFieldBuilder();
         getFaultFieldBuilder();
       }
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (inBuilder_ == null) {
-        in_ = java.util.Collections.emptyList();
+      if (requestBuilder_ == null) {
+        request_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
       } else {
-        inBuilder_.clear();
+        requestBuilder_.clear();
       }
-      if (outBuilder_ == null) {
-        out_ = java.util.Collections.emptyList();
+      if (responseBuilder_ == null) {
+        response_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
       } else {
-        outBuilder_.clear();
+        responseBuilder_.clear();
       }
       if (faultBuilder_ == null) {
         fault_ = java.util.Collections.emptyList();
@@ -517,23 +517,23 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.api.OperationPolicies buildPartial() {
       org.wso2.choreo.connect.discovery.api.OperationPolicies result = new org.wso2.choreo.connect.discovery.api.OperationPolicies(this);
       int from_bitField0_ = bitField0_;
-      if (inBuilder_ == null) {
+      if (requestBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
-          in_ = java.util.Collections.unmodifiableList(in_);
+          request_ = java.util.Collections.unmodifiableList(request_);
           bitField0_ = (bitField0_ & ~0x00000001);
         }
-        result.in_ = in_;
+        result.request_ = request_;
       } else {
-        result.in_ = inBuilder_.build();
+        result.request_ = requestBuilder_.build();
       }
-      if (outBuilder_ == null) {
+      if (responseBuilder_ == null) {
         if (((bitField0_ & 0x00000002) != 0)) {
-          out_ = java.util.Collections.unmodifiableList(out_);
+          response_ = java.util.Collections.unmodifiableList(response_);
           bitField0_ = (bitField0_ & ~0x00000002);
         }
-        result.out_ = out_;
+        result.response_ = response_;
       } else {
-        result.out_ = outBuilder_.build();
+        result.response_ = responseBuilder_.build();
       }
       if (faultBuilder_ == null) {
         if (((bitField0_ & 0x00000004) != 0)) {
@@ -592,55 +592,55 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.api.OperationPolicies other) {
       if (other == org.wso2.choreo.connect.discovery.api.OperationPolicies.getDefaultInstance()) return this;
-      if (inBuilder_ == null) {
-        if (!other.in_.isEmpty()) {
-          if (in_.isEmpty()) {
-            in_ = other.in_;
+      if (requestBuilder_ == null) {
+        if (!other.request_.isEmpty()) {
+          if (request_.isEmpty()) {
+            request_ = other.request_;
             bitField0_ = (bitField0_ & ~0x00000001);
           } else {
-            ensureInIsMutable();
-            in_.addAll(other.in_);
+            ensureRequestIsMutable();
+            request_.addAll(other.request_);
           }
           onChanged();
         }
       } else {
-        if (!other.in_.isEmpty()) {
-          if (inBuilder_.isEmpty()) {
-            inBuilder_.dispose();
-            inBuilder_ = null;
-            in_ = other.in_;
+        if (!other.request_.isEmpty()) {
+          if (requestBuilder_.isEmpty()) {
+            requestBuilder_.dispose();
+            requestBuilder_ = null;
+            request_ = other.request_;
             bitField0_ = (bitField0_ & ~0x00000001);
-            inBuilder_ = 
+            requestBuilder_ = 
               com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                 getInFieldBuilder() : null;
+                 getRequestFieldBuilder() : null;
           } else {
-            inBuilder_.addAllMessages(other.in_);
+            requestBuilder_.addAllMessages(other.request_);
           }
         }
       }
-      if (outBuilder_ == null) {
-        if (!other.out_.isEmpty()) {
-          if (out_.isEmpty()) {
-            out_ = other.out_;
+      if (responseBuilder_ == null) {
+        if (!other.response_.isEmpty()) {
+          if (response_.isEmpty()) {
+            response_ = other.response_;
             bitField0_ = (bitField0_ & ~0x00000002);
           } else {
-            ensureOutIsMutable();
-            out_.addAll(other.out_);
+            ensureResponseIsMutable();
+            response_.addAll(other.response_);
           }
           onChanged();
         }
       } else {
-        if (!other.out_.isEmpty()) {
-          if (outBuilder_.isEmpty()) {
-            outBuilder_.dispose();
-            outBuilder_ = null;
-            out_ = other.out_;
+        if (!other.response_.isEmpty()) {
+          if (responseBuilder_.isEmpty()) {
+            responseBuilder_.dispose();
+            responseBuilder_ = null;
+            response_ = other.response_;
             bitField0_ = (bitField0_ & ~0x00000002);
-            outBuilder_ = 
+            responseBuilder_ = 
               com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                 getOutFieldBuilder() : null;
+                 getResponseFieldBuilder() : null;
           } else {
-            outBuilder_.addAllMessages(other.out_);
+            responseBuilder_.addAllMessages(other.response_);
           }
         }
       }
@@ -700,484 +700,484 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> in_ =
+    private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> request_ =
       java.util.Collections.emptyList();
-    private void ensureInIsMutable() {
+    private void ensureRequestIsMutable() {
       if (!((bitField0_ & 0x00000001) != 0)) {
-        in_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>(in_);
+        request_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>(request_);
         bitField0_ |= 0x00000001;
        }
     }
 
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> inBuilder_;
+        org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> requestBuilder_;
 
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getInList() {
-      if (inBuilder_ == null) {
-        return java.util.Collections.unmodifiableList(in_);
+    public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getRequestList() {
+      if (requestBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(request_);
       } else {
-        return inBuilder_.getMessageList();
+        return requestBuilder_.getMessageList();
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public int getInCount() {
-      if (inBuilder_ == null) {
-        return in_.size();
+    public int getRequestCount() {
+      if (requestBuilder_ == null) {
+        return request_.size();
       } else {
-        return inBuilder_.getCount();
+        return requestBuilder_.getCount();
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy getIn(int index) {
-      if (inBuilder_ == null) {
-        return in_.get(index);
+    public org.wso2.choreo.connect.discovery.api.Policy getRequest(int index) {
+      if (requestBuilder_ == null) {
+        return request_.get(index);
       } else {
-        return inBuilder_.getMessage(index);
+        return requestBuilder_.getMessage(index);
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder setIn(
+    public Builder setRequest(
         int index, org.wso2.choreo.connect.discovery.api.Policy value) {
-      if (inBuilder_ == null) {
+      if (requestBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureInIsMutable();
-        in_.set(index, value);
+        ensureRequestIsMutable();
+        request_.set(index, value);
         onChanged();
       } else {
-        inBuilder_.setMessage(index, value);
+        requestBuilder_.setMessage(index, value);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder setIn(
+    public Builder setRequest(
         int index, org.wso2.choreo.connect.discovery.api.Policy.Builder builderForValue) {
-      if (inBuilder_ == null) {
-        ensureInIsMutable();
-        in_.set(index, builderForValue.build());
+      if (requestBuilder_ == null) {
+        ensureRequestIsMutable();
+        request_.set(index, builderForValue.build());
         onChanged();
       } else {
-        inBuilder_.setMessage(index, builderForValue.build());
+        requestBuilder_.setMessage(index, builderForValue.build());
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder addIn(org.wso2.choreo.connect.discovery.api.Policy value) {
-      if (inBuilder_ == null) {
+    public Builder addRequest(org.wso2.choreo.connect.discovery.api.Policy value) {
+      if (requestBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureInIsMutable();
-        in_.add(value);
+        ensureRequestIsMutable();
+        request_.add(value);
         onChanged();
       } else {
-        inBuilder_.addMessage(value);
+        requestBuilder_.addMessage(value);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder addIn(
+    public Builder addRequest(
         int index, org.wso2.choreo.connect.discovery.api.Policy value) {
-      if (inBuilder_ == null) {
+      if (requestBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureInIsMutable();
-        in_.add(index, value);
+        ensureRequestIsMutable();
+        request_.add(index, value);
         onChanged();
       } else {
-        inBuilder_.addMessage(index, value);
+        requestBuilder_.addMessage(index, value);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder addIn(
+    public Builder addRequest(
         org.wso2.choreo.connect.discovery.api.Policy.Builder builderForValue) {
-      if (inBuilder_ == null) {
-        ensureInIsMutable();
-        in_.add(builderForValue.build());
+      if (requestBuilder_ == null) {
+        ensureRequestIsMutable();
+        request_.add(builderForValue.build());
         onChanged();
       } else {
-        inBuilder_.addMessage(builderForValue.build());
+        requestBuilder_.addMessage(builderForValue.build());
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder addIn(
+    public Builder addRequest(
         int index, org.wso2.choreo.connect.discovery.api.Policy.Builder builderForValue) {
-      if (inBuilder_ == null) {
-        ensureInIsMutable();
-        in_.add(index, builderForValue.build());
+      if (requestBuilder_ == null) {
+        ensureRequestIsMutable();
+        request_.add(index, builderForValue.build());
         onChanged();
       } else {
-        inBuilder_.addMessage(index, builderForValue.build());
+        requestBuilder_.addMessage(index, builderForValue.build());
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder addAllIn(
+    public Builder addAllRequest(
         java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.Policy> values) {
-      if (inBuilder_ == null) {
-        ensureInIsMutable();
+      if (requestBuilder_ == null) {
+        ensureRequestIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, in_);
+            values, request_);
         onChanged();
       } else {
-        inBuilder_.addAllMessages(values);
+        requestBuilder_.addAllMessages(values);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder clearIn() {
-      if (inBuilder_ == null) {
-        in_ = java.util.Collections.emptyList();
+    public Builder clearRequest() {
+      if (requestBuilder_ == null) {
+        request_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
       } else {
-        inBuilder_.clear();
+        requestBuilder_.clear();
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public Builder removeIn(int index) {
-      if (inBuilder_ == null) {
-        ensureInIsMutable();
-        in_.remove(index);
+    public Builder removeRequest(int index) {
+      if (requestBuilder_ == null) {
+        ensureRequestIsMutable();
+        request_.remove(index);
         onChanged();
       } else {
-        inBuilder_.remove(index);
+        requestBuilder_.remove(index);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy.Builder getInBuilder(
+    public org.wso2.choreo.connect.discovery.api.Policy.Builder getRequestBuilder(
         int index) {
-      return getInFieldBuilder().getBuilder(index);
+      return getRequestFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getInOrBuilder(
+    public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getRequestOrBuilder(
         int index) {
-      if (inBuilder_ == null) {
-        return in_.get(index);  } else {
-        return inBuilder_.getMessageOrBuilder(index);
+      if (requestBuilder_ == null) {
+        return request_.get(index);  } else {
+        return requestBuilder_.getMessageOrBuilder(index);
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
     public java.util.List<? extends org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-         getInOrBuilderList() {
-      if (inBuilder_ != null) {
-        return inBuilder_.getMessageOrBuilderList();
+         getRequestOrBuilderList() {
+      if (requestBuilder_ != null) {
+        return requestBuilder_.getMessageOrBuilderList();
       } else {
-        return java.util.Collections.unmodifiableList(in_);
+        return java.util.Collections.unmodifiableList(request_);
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy.Builder addInBuilder() {
-      return getInFieldBuilder().addBuilder(
+    public org.wso2.choreo.connect.discovery.api.Policy.Builder addRequestBuilder() {
+      return getRequestFieldBuilder().addBuilder(
           org.wso2.choreo.connect.discovery.api.Policy.getDefaultInstance());
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy.Builder addInBuilder(
+    public org.wso2.choreo.connect.discovery.api.Policy.Builder addRequestBuilder(
         int index) {
-      return getInFieldBuilder().addBuilder(
+      return getRequestFieldBuilder().addBuilder(
           index, org.wso2.choreo.connect.discovery.api.Policy.getDefaultInstance());
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy in = 1;</code>
+     * <code>repeated .wso2.discovery.api.Policy request = 1;</code>
      */
     public java.util.List<org.wso2.choreo.connect.discovery.api.Policy.Builder> 
-         getInBuilderList() {
-      return getInFieldBuilder().getBuilderList();
+         getRequestBuilderList() {
+      return getRequestFieldBuilder().getBuilderList();
     }
     private com.google.protobuf.RepeatedFieldBuilderV3<
         org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-        getInFieldBuilder() {
-      if (inBuilder_ == null) {
-        inBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+        getRequestFieldBuilder() {
+      if (requestBuilder_ == null) {
+        requestBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
             org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder>(
-                in_,
+                request_,
                 ((bitField0_ & 0x00000001) != 0),
                 getParentForChildren(),
                 isClean());
-        in_ = null;
+        request_ = null;
       }
-      return inBuilder_;
+      return requestBuilder_;
     }
 
-    private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> out_ =
+    private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> response_ =
       java.util.Collections.emptyList();
-    private void ensureOutIsMutable() {
+    private void ensureResponseIsMutable() {
       if (!((bitField0_ & 0x00000002) != 0)) {
-        out_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>(out_);
+        response_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Policy>(response_);
         bitField0_ |= 0x00000002;
        }
     }
 
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> outBuilder_;
+        org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> responseBuilder_;
 
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getOutList() {
-      if (outBuilder_ == null) {
-        return java.util.Collections.unmodifiableList(out_);
+    public java.util.List<org.wso2.choreo.connect.discovery.api.Policy> getResponseList() {
+      if (responseBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(response_);
       } else {
-        return outBuilder_.getMessageList();
+        return responseBuilder_.getMessageList();
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public int getOutCount() {
-      if (outBuilder_ == null) {
-        return out_.size();
+    public int getResponseCount() {
+      if (responseBuilder_ == null) {
+        return response_.size();
       } else {
-        return outBuilder_.getCount();
+        return responseBuilder_.getCount();
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy getOut(int index) {
-      if (outBuilder_ == null) {
-        return out_.get(index);
+    public org.wso2.choreo.connect.discovery.api.Policy getResponse(int index) {
+      if (responseBuilder_ == null) {
+        return response_.get(index);
       } else {
-        return outBuilder_.getMessage(index);
+        return responseBuilder_.getMessage(index);
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder setOut(
+    public Builder setResponse(
         int index, org.wso2.choreo.connect.discovery.api.Policy value) {
-      if (outBuilder_ == null) {
+      if (responseBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureOutIsMutable();
-        out_.set(index, value);
+        ensureResponseIsMutable();
+        response_.set(index, value);
         onChanged();
       } else {
-        outBuilder_.setMessage(index, value);
+        responseBuilder_.setMessage(index, value);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder setOut(
+    public Builder setResponse(
         int index, org.wso2.choreo.connect.discovery.api.Policy.Builder builderForValue) {
-      if (outBuilder_ == null) {
-        ensureOutIsMutable();
-        out_.set(index, builderForValue.build());
+      if (responseBuilder_ == null) {
+        ensureResponseIsMutable();
+        response_.set(index, builderForValue.build());
         onChanged();
       } else {
-        outBuilder_.setMessage(index, builderForValue.build());
+        responseBuilder_.setMessage(index, builderForValue.build());
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder addOut(org.wso2.choreo.connect.discovery.api.Policy value) {
-      if (outBuilder_ == null) {
+    public Builder addResponse(org.wso2.choreo.connect.discovery.api.Policy value) {
+      if (responseBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureOutIsMutable();
-        out_.add(value);
+        ensureResponseIsMutable();
+        response_.add(value);
         onChanged();
       } else {
-        outBuilder_.addMessage(value);
+        responseBuilder_.addMessage(value);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder addOut(
+    public Builder addResponse(
         int index, org.wso2.choreo.connect.discovery.api.Policy value) {
-      if (outBuilder_ == null) {
+      if (responseBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureOutIsMutable();
-        out_.add(index, value);
+        ensureResponseIsMutable();
+        response_.add(index, value);
         onChanged();
       } else {
-        outBuilder_.addMessage(index, value);
+        responseBuilder_.addMessage(index, value);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder addOut(
+    public Builder addResponse(
         org.wso2.choreo.connect.discovery.api.Policy.Builder builderForValue) {
-      if (outBuilder_ == null) {
-        ensureOutIsMutable();
-        out_.add(builderForValue.build());
+      if (responseBuilder_ == null) {
+        ensureResponseIsMutable();
+        response_.add(builderForValue.build());
         onChanged();
       } else {
-        outBuilder_.addMessage(builderForValue.build());
+        responseBuilder_.addMessage(builderForValue.build());
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder addOut(
+    public Builder addResponse(
         int index, org.wso2.choreo.connect.discovery.api.Policy.Builder builderForValue) {
-      if (outBuilder_ == null) {
-        ensureOutIsMutable();
-        out_.add(index, builderForValue.build());
+      if (responseBuilder_ == null) {
+        ensureResponseIsMutable();
+        response_.add(index, builderForValue.build());
         onChanged();
       } else {
-        outBuilder_.addMessage(index, builderForValue.build());
+        responseBuilder_.addMessage(index, builderForValue.build());
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder addAllOut(
+    public Builder addAllResponse(
         java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.Policy> values) {
-      if (outBuilder_ == null) {
-        ensureOutIsMutable();
+      if (responseBuilder_ == null) {
+        ensureResponseIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, out_);
+            values, response_);
         onChanged();
       } else {
-        outBuilder_.addAllMessages(values);
+        responseBuilder_.addAllMessages(values);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder clearOut() {
-      if (outBuilder_ == null) {
-        out_ = java.util.Collections.emptyList();
+    public Builder clearResponse() {
+      if (responseBuilder_ == null) {
+        response_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
       } else {
-        outBuilder_.clear();
+        responseBuilder_.clear();
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public Builder removeOut(int index) {
-      if (outBuilder_ == null) {
-        ensureOutIsMutable();
-        out_.remove(index);
+    public Builder removeResponse(int index) {
+      if (responseBuilder_ == null) {
+        ensureResponseIsMutable();
+        response_.remove(index);
         onChanged();
       } else {
-        outBuilder_.remove(index);
+        responseBuilder_.remove(index);
       }
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy.Builder getOutBuilder(
+    public org.wso2.choreo.connect.discovery.api.Policy.Builder getResponseBuilder(
         int index) {
-      return getOutFieldBuilder().getBuilder(index);
+      return getResponseFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getOutOrBuilder(
+    public org.wso2.choreo.connect.discovery.api.PolicyOrBuilder getResponseOrBuilder(
         int index) {
-      if (outBuilder_ == null) {
-        return out_.get(index);  } else {
-        return outBuilder_.getMessageOrBuilder(index);
+      if (responseBuilder_ == null) {
+        return response_.get(index);  } else {
+        return responseBuilder_.getMessageOrBuilder(index);
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
     public java.util.List<? extends org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-         getOutOrBuilderList() {
-      if (outBuilder_ != null) {
-        return outBuilder_.getMessageOrBuilderList();
+         getResponseOrBuilderList() {
+      if (responseBuilder_ != null) {
+        return responseBuilder_.getMessageOrBuilderList();
       } else {
-        return java.util.Collections.unmodifiableList(out_);
+        return java.util.Collections.unmodifiableList(response_);
       }
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy.Builder addOutBuilder() {
-      return getOutFieldBuilder().addBuilder(
+    public org.wso2.choreo.connect.discovery.api.Policy.Builder addResponseBuilder() {
+      return getResponseFieldBuilder().addBuilder(
           org.wso2.choreo.connect.discovery.api.Policy.getDefaultInstance());
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
-    public org.wso2.choreo.connect.discovery.api.Policy.Builder addOutBuilder(
+    public org.wso2.choreo.connect.discovery.api.Policy.Builder addResponseBuilder(
         int index) {
-      return getOutFieldBuilder().addBuilder(
+      return getResponseFieldBuilder().addBuilder(
           index, org.wso2.choreo.connect.discovery.api.Policy.getDefaultInstance());
     }
     /**
-     * <code>repeated .wso2.discovery.api.Policy out = 2;</code>
+     * <code>repeated .wso2.discovery.api.Policy response = 2;</code>
      */
     public java.util.List<org.wso2.choreo.connect.discovery.api.Policy.Builder> 
-         getOutBuilderList() {
-      return getOutFieldBuilder().getBuilderList();
+         getResponseBuilderList() {
+      return getResponseFieldBuilder().getBuilderList();
     }
     private com.google.protobuf.RepeatedFieldBuilderV3<
         org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder> 
-        getOutFieldBuilder() {
-      if (outBuilder_ == null) {
-        outBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+        getResponseFieldBuilder() {
+      if (responseBuilder_ == null) {
+        responseBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
             org.wso2.choreo.connect.discovery.api.Policy, org.wso2.choreo.connect.discovery.api.Policy.Builder, org.wso2.choreo.connect.discovery.api.PolicyOrBuilder>(
-                out_,
+                response_,
                 ((bitField0_ & 0x00000002) != 0),
                 getParentForChildren(),
                 isClean());
-        out_ = null;
+        response_ = null;
       }
-      return outBuilder_;
+      return responseBuilder_;
     }
 
     private java.util.List<org.wso2.choreo.connect.discovery.api.Policy> fault_ =

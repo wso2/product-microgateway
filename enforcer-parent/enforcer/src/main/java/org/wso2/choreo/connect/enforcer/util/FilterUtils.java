@@ -69,6 +69,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,7 @@ public class FilterUtils {
      * @return HTTP client
      */
     public static HttpClient getHttpClient(String protocol) {
-        return getHttpClient(protocol, null);
+        return getHttpClient(protocol, null, null);
     }
 
     /**
@@ -112,9 +113,10 @@ public class FilterUtils {
      *
      * @param protocol - service endpoint protocol http/https
      * @param clientKeyStore - keystore with key and cert for client
+     * @param options - HTTP client options
      * @return HTTP client
      */
-    public static HttpClient getHttpClient(String protocol, KeyStore clientKeyStore) {
+    public static HttpClient getHttpClient(String protocol, KeyStore clientKeyStore, Map<String, String> options) {
 
         //        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
         //                getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -122,16 +124,29 @@ public class FilterUtils {
         String maxTotal = "100"; //TODO : Read from config
         String defaultMaxPerRoute = "10"; //TODO : Read from config
 
+        if (options == null) {
+            options = Collections.emptyMap();
+        }
+
         PoolingHttpClientConnectionManager pool = null;
         try {
             pool = getPoolingHttpClientConnectionManager(protocol, clientKeyStore);
+            pool.setMaxTotal(Integer.parseInt(options.getOrDefault(HTTPClientOptions.MAX_OPEN_CONNECTIONS,
+                    maxTotal)));
+            pool.setDefaultMaxPerRoute(Integer.parseInt(options.getOrDefault(HTTPClientOptions.MAX_PER_ROUTE,
+                    defaultMaxPerRoute)));
         } catch (EnforcerException e) {
             log.error("Error while getting http client connection manager", e);
         }
-        pool.setMaxTotal(Integer.parseInt(maxTotal));
-        pool.setDefaultMaxPerRoute(Integer.parseInt(defaultMaxPerRoute));
 
-        RequestConfig params = RequestConfig.custom().build();
+        RequestConfig.Builder pramsBuilder = RequestConfig.custom();
+        if (options.containsKey(HTTPClientOptions.CONNECT_TIMEOUT)) {
+            pramsBuilder.setConnectTimeout(Integer.parseInt(options.get(HTTPClientOptions.CONNECT_TIMEOUT)));
+        }
+        if (options.containsKey(HTTPClientOptions.SOCKET_TIMEOUT)) {
+            pramsBuilder.setSocketTimeout(Integer.parseInt(options.get(HTTPClientOptions.SOCKET_TIMEOUT)));
+        }
+        RequestConfig params = pramsBuilder.build();
         return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
     }
 
@@ -629,5 +644,22 @@ public class FilterUtils {
     public static long getTimeStampSkewInSeconds() {
         //TODO : Read from config
         return 5;
+    }
+
+    public static <K, V> void putToMapIfNotNull(Map<K, V> map, K key, V value) {
+        if (value != null) {
+            map.put(key, value);
+        }
+    }
+
+    /**
+     * HTTP client option constants that is used with the util function {@link #getHttpClient(String, KeyStore, Map)
+     * getHttpClient}
+     */
+    public static class HTTPClientOptions {
+        public static final String CONNECT_TIMEOUT = "CONNECT_TIMEOUT";
+        public static final String SOCKET_TIMEOUT = "SOCKET_TIMEOUT";
+        public static final String MAX_OPEN_CONNECTIONS = "MAX_OPEN_CONNECTIONS";
+        public static final String MAX_PER_ROUTE = "MAX_PER_ROUTE";
     }
 }

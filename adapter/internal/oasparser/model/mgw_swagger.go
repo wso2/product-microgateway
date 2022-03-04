@@ -69,6 +69,7 @@ type MgwSwagger struct {
 	EndpointImplementationType string
 	LifecycleStatus            string
 	xWso2RequestBodyPass       bool
+	IsDefaultVersion           bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1032,7 +1033,12 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			if v, found := val[constants.Includes]; found {
 				includes := v.([]interface{})
 				if len(includes) > 0 {
-					includesV = GenerateInterceptorIncludes(includes)
+					// convert type of includes from "[]interface{}" to "[]string"
+					includesStr := make([]string, len(includes))
+					for i, v := range includes {
+						includesStr[i] = v.(string)
+					}
+					includesV = GenerateInterceptorIncludes(includesStr)
 				}
 			}
 
@@ -1051,10 +1057,10 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 }
 
 //GenerateInterceptorIncludes generate includes
-func GenerateInterceptorIncludes(includes []interface{}) *interceptor.RequestInclusions {
+func GenerateInterceptorIncludes(includes []string) *interceptor.RequestInclusions {
 	includesV := &interceptor.RequestInclusions{}
 	for _, include := range includes {
-		switch include.(string) {
+		switch strings.TrimSpace(include) {
 		case "request_headers":
 			includesV.RequestHeaders = true
 		case "request_body":
@@ -1138,6 +1144,7 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
 	swagger.LifecycleStatus = data.LifeCycleStatus
+	swagger.IsDefaultVersion = data.IsDefaultVersion
 
 	// Added with both HTTP and WS APIs. x-throttling-tier is not used with WS.
 	swagger.xWso2ThrottlingTier = data.APIThrottlingPolicy

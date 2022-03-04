@@ -47,6 +47,7 @@ type APIYaml struct {
 		SecurityScheme             []string `json:"securityScheme,omitempty"`
 		OrganizationID             string   `json:"organizationId,omitempty"`
 		APIThrottlingPolicy        string   `json:"apiThrottlingPolicy,omitempty"`
+		IsDefaultVersion           bool     `json:"isDefaultVersion,omitempty"`
 		EndpointConfig             struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
@@ -98,9 +99,9 @@ type OperationYaml struct {
 
 // OperationPolicies holds policies of the APIM operations
 type OperationPolicies struct {
-	In    PolicyList `json:"in,omitempty"`
-	Out   PolicyList `json:"out,omitempty"`
-	Fault PolicyList `json:"fault,omitempty"`
+	Request  PolicyList `json:"request,omitempty"`
+	Response PolicyList `json:"response,omitempty"`
+	Fault    PolicyList `json:"fault,omitempty"`
 }
 
 // policyStats used to optimize and reduce loops by storing stats by calculating only once
