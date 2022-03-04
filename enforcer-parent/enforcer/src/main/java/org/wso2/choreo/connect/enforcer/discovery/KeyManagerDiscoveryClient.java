@@ -149,7 +149,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
 
             @Override
             public void onCompleted() {
-                logger.info("Completed receiving APIs");
+                logger.info("Completed receiving Key Managers");
             }
         });
 
