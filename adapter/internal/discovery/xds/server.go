@@ -482,8 +482,8 @@ func GetAllEnvironments(apiUUID, vhost string, newEnvironments []string) []strin
 	return allEnvironments
 }
 
-// GetDeployedEnvironmets returns all the environments the API with `apiUUID` is deployed to
-func GetDeployedEnvironmets(apiUUID string) []string {
+// GetDeployedEnvironments returns all the environments the API with `apiUUID` is deployed to
+func GetDeployedEnvironments(apiUUID string) []string {
 	var envs []string
 	if envMap, ok := apiUUIDToGatewayToVhosts[apiUUID]; ok {
 		envs = make([]string, 0, len(envMap))

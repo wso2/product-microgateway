@@ -205,8 +205,8 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 	go retrieveAPIListFromChannel(APIListChannel, nil)
 }
 
-// UpdatAPIMetadataFromCP Invokes `ApisEndpoint` and updates APIList synchronously.
-func UpdatAPIMetadataFromCP(params map[string]string) {
+// UpdateAPIMetadataFromCP Invokes `ApisEndpoint` and updates APIList synchronously.
+func UpdateAPIMetadataFromCP(params map[string]string) {
 	var apiList *types.APIList
 	var responseChannel = make(chan response)
 	go InvokeService(ApisEndpoint, apiList, params, responseChannel, 0)

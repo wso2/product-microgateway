@@ -142,13 +142,13 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 // map and update runtime artifact's `isDefaultVersion` field to correctly deploy default
 // versioned API.
 func handleDefaultVersionUpdate(event msg.APIEvent) {
-	deployedEnvs := xds.GetDeployedEnvironmets(event.UUID)
+	deployedEnvs := xds.GetDeployedEnvironments(event.UUID)
 	for _, env := range deployedEnvs {
 		query := make(map[string]string, 3)
 		query[eh.GatewayLabelParam] = env
 		query[eh.ContextParam] = event.APIContext
 		query[eh.VersionParam] = event.APIVersion
-		eh.UpdatAPIMetadataFromCP(query)
+		eh.UpdateAPIMetadataFromCP(query)
 	}
 
 	synchronizer.FetchAPIsFromControlPlane(event.UUID, deployedEnvs)
