@@ -71,8 +71,7 @@ public class APIKeySubLevelThrottleTestCase extends ApimBaseTest {
 
         // Add the subscription throttling policy
         subThrottlePolicyDTO = DtoFactory.createSubscriptionThrottlePolicyDTO(POLICY_NAME, POLICY_NAME, POLICY_DESC,
-                false, defaultLimit,-1, -1, 100,
-                "min", new ArrayList<>(), true, "", 0);
+                false, defaultLimit, 100, "min",  true, null);
         ApiResponse<SubscriptionThrottlePolicyDTO> addedSubPolicy = adminRestClient.addSubscriptionThrottlingPolicy(
                         subThrottlePolicyDTO);
         subThrottlePolicyDTO = addedSubPolicy.getData();

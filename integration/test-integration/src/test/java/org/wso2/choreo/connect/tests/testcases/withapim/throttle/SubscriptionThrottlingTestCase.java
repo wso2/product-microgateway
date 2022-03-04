@@ -68,9 +68,8 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         ThrottleLimitDTO defaultLimit =
                 DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, reqCountLimit, null);
         requestCountPolicyDTO = DtoFactory
-                .createSubscriptionThrottlePolicyDTO(policyName, policyDispName, policyDesc, false, defaultLimit,-1,
-                        -1, 100, "min", new ArrayList<>(),
-                        true, "", 0);
+                .createSubscriptionThrottlePolicyDTO(policyName, policyDispName, policyDesc, false, defaultLimit,
+                        100, "min", true, null);
 
         // Add the subscription throttling policy
         ApiResponse<SubscriptionThrottlePolicyDTO> addedPolicy =
