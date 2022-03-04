@@ -97,9 +97,9 @@ type OperationYaml struct {
 
 // OperationPolicies holds policies of the APIM operations
 type OperationPolicies struct {
-	In    PolicyList `json:"in,omitempty"`
-	Out   PolicyList `json:"out,omitempty"`
-	Fault PolicyList `json:"fault,omitempty"`
+	Request  PolicyList `json:"request,omitempty"`
+	Response PolicyList `json:"response,omitempty"`
+	Fault    PolicyList `json:"fault,omitempty"`
 }
 
 // policyStats used to optimize and reduce loops by storing stats by calculating only once

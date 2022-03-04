@@ -236,9 +236,9 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Ope
 	}
 
 	policies := &api.OperationPolicies{
-		In:    castPoliciesToEnforcerPolicies(operation.GetPolicies().In),
-		Out:   castPoliciesToEnforcerPolicies(operation.GetPolicies().Out),
-		Fault: castPoliciesToEnforcerPolicies(operation.GetPolicies().Fault),
+		Request:  castPoliciesToEnforcerPolicies(operation.GetPolicies().Request),
+		Response: castPoliciesToEnforcerPolicies(operation.GetPolicies().Response),
+		Fault:    castPoliciesToEnforcerPolicies(operation.GetPolicies().Fault),
 	}
 	apiOperation := api.Operation{
 		Method:          operation.GetMethod(),

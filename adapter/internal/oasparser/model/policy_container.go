@@ -21,8 +21,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"regexp"
-	"strings"
 	"text/template"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -31,7 +29,7 @@ import (
 )
 
 const (
-	policyCCGateway string = "CC"
+	policyCCGateway string = "ChoreoConnect"
 )
 
 // policy value validation types
@@ -75,6 +73,7 @@ type PolicySpecification struct {
 			Name            string `yaml:"name"`
 			ValidationRegex string `yaml:"validationRegex,omitempty"`
 			Type            string `yaml:"type"`
+			DefaultValue    string `yaml:"defaultValue"`
 			Required        bool   `yaml:"required,omitempty"`
 		} `yaml:"policyAttributes"`
 	}
@@ -94,17 +93,17 @@ type PolicyDefinition struct {
 func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPolicies, swagger *MgwSwagger) OperationPolicies {
 	fmtPolicies := OperationPolicies{}
 
-	inFlowStats := policies.In.getStats()
-	for i, policy := range policies.In {
+	inFlowStats := policies.Request.getStats()
+	for i, policy := range policies.Request {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyInFlow, inFlowStats, i, swagger); err == nil {
-			fmtPolicies.In = append(fmtPolicies.In, fmtPolicy)
+			fmtPolicies.Request = append(fmtPolicies.Request, fmtPolicy)
 		}
 	}
 
-	outFlowStats := policies.Out.getStats()
-	for i, policy := range policies.Out {
+	outFlowStats := policies.Response.getStats()
+	for i, policy := range policies.Response {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i, swagger); err == nil {
-			fmtPolicies.Out = append(fmtPolicies.Out, fmtPolicy)
+			fmtPolicies.Response = append(fmtPolicies.Response, fmtPolicy)
 		}
 	}
 
@@ -168,6 +167,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	policy.Parameters = def.Definition.Parameters
 	policy.Action = def.Definition.Action
 
+	spec.fillDefaultsInPolicy(&policy)
 	return policy, nil
 }
 
@@ -182,7 +182,7 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 	if !arrayContains(spec.Data.SupportedGateways, policyCCGateway) {
 		return errors.New("choreo connect gateway not supported")
 	}
-	if !spec.Data.MultipleAllowed {
+	if !spec.Data.MultipleAllowed { // TODO (renuka): remove this multiple allowed validation and compute stats
 		// TODO (renuka): check the behaviour with APIM
 		// in here allow first instance of policy to be applied if multiple is found
 		pStat := stats[policy.PolicyName]
@@ -190,62 +190,30 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 			if index != pStat.firstIndex {
 				return errors.New("multiple policies not allowed")
 			}
-			loggers.LoggerOasparser.Warnf("Operation policy \"%v\" not allowed in multiple times, appling the first policy", policy.PolicyName)
+			loggers.LoggerOasparser.Warnf("Operation policy %q not allowed in multiple times, appling the first policy", policy.PolicyName)
 		}
 	}
 
 	policyPrams, ok := policy.Parameters.(map[string]interface{})
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
-			val, found := policyPrams[attrib.Name]
-			if !found {
-				if attrib.Required {
-					return fmt.Errorf("required paramater %s not found", attrib.Name)
-				}
-				continue
-			}
-
-			// TODO: (renuka) check this Value and Regex validation is needed
-			switch v := val.(type) {
-			case string:
-				if !strings.EqualFold(attrib.Type, policyValTypeString) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-				regexStr := attrib.ValidationRegex
-				if regexStr != "" {
-					if !strings.HasPrefix(regexStr, "/") || !strings.HasSuffix(regexStr, "/") {
-						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\", regex expression should starts and end with '/'", spec.Data.Name, attrib.ValidationRegex)
-					}
-					regexStr = regexStr[1 : len(regexStr)-1]
-					reg, err := regexp.Compile(regexStr)
-					if err != nil {
-						return fmt.Errorf("invalid regex expression in policy spec %s, regex: \"%s\"", spec.Data.Name, attrib.ValidationRegex)
-					}
-					if !reg.MatchString(v) {
-						return fmt.Errorf("invalid parameter value of attribute \"%s\", regex match failed", attrib.Name)
-					}
-				}
-			case int:
-				if !strings.EqualFold(attrib.Type, policyValTypeInt) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			case bool:
-				if !strings.EqualFold(attrib.Type, policyValTypeBool) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			case []interface{}:
-				if !strings.EqualFold(attrib.Type, policyValTypeArray) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			case map[interface{}]interface{}:
-				if !strings.EqualFold(attrib.Type, policyValTypeMap) {
-					return fmt.Errorf("invalid value type of paramater %s, required %s", attrib.Name, attrib.Type)
-				}
-			default:
-				return fmt.Errorf("invalid value type of paramater %s, unsupported type %s", attrib.Name, attrib.Type)
+			if _, found := policyPrams[attrib.Name]; attrib.Required && !found {
+				return fmt.Errorf("required paramater %q not found", attrib.Name)
 			}
 		}
 	}
 
 	return nil
+}
+
+// fillDefaultsInPolicy updates the policy with default values defined in the spec if the key is not found in the policy
+func (spec *PolicySpecification) fillDefaultsInPolicy(policy *Policy) {
+	if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+		for _, attrib := range spec.Data.PolicyAttributes {
+			if _, ok := paramMap[attrib.Name]; !ok && attrib.DefaultValue != "" {
+				paramMap[attrib.Name] = attrib.DefaultValue
+			}
+		}
+		policy.Parameters = paramMap
+	}
 }

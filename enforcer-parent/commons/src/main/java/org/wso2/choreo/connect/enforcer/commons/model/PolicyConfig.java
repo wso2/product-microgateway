@@ -24,24 +24,24 @@ import java.util.ArrayList;
  */
 public class PolicyConfig {
 
-    private ArrayList<Policy> in;
-    private ArrayList<Policy> out;
+    private ArrayList<Policy> request;
+    private ArrayList<Policy> response;
     private ArrayList<Policy> fault;
 
-    public ArrayList<Policy> getIn() {
-        return in;
+    public ArrayList<Policy> getRequest() {
+        return request;
     }
 
-    public void setIn(ArrayList<Policy> in) {
-        this.in = in;
+    public void setRequest(ArrayList<Policy> request) {
+        this.request = request;
     }
 
-    public ArrayList<Policy> getOut() {
-        return out;
+    public ArrayList<Policy> getResponse() {
+        return response;
     }
 
-    public void setOut(ArrayList<Policy> out) {
-        this.out = out;
+    public void setResponse(ArrayList<Policy> response) {
+        this.response = response;
     }
 
     public ArrayList<Policy> getFault() {
