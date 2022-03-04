@@ -29,6 +29,8 @@ public:
     virtual void updateHandlerState(HandlerState state);
 
     virtual void updateThrottlePeriod(const int throttle_period);
+
+    virtual void updateAPIMErrorCode(int apim_error_code);
 };
 
 class StreamHanlderClient{

@@ -26,6 +26,8 @@ import org.java_websocket.exceptions.InvalidDataException;
 import org.java_websocket.framing.Framedata;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
+import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.server.WebSocketHandler;
@@ -51,6 +53,9 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
     private Draft_6455 decoder;
 
     public WebSocketResponseObserver(StreamObserver<WebSocketFrameResponse> responseStreamObserver) {
+        if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
+            AnalyticsFilter.getInstance();
+        }
         this.responseStreamObserver = responseStreamObserver;
         this.decoder = new Draft_6455();
     }
@@ -65,6 +70,7 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
             // batches and aggregate the frames. In that case if we directly send the frames to traffic manager, the
             // frame count will be wrong. Instead we can decode the buffer into frames and then process them
             // individually for throttling.
+            AnalyticsFilter.getInstance().handleWebsocketFrameRequest(webSocketFrameRequest);
             List<Framedata> frames = decoder.translateFrame(
                     ByteBuffer.wrap(webSocketFrameRequest.getPayload().toByteArray()));
             frames.forEach((framedata -> {
@@ -77,14 +83,16 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
                             .process(webSocketFrameRequestClone);
                     if (WebSocketThrottleState.OK == webSocketThrottleResponse.getWebSocketThrottleState()) {
                         WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
-                                WebSocketFrameResponse.Code.OK).build();
+                                WebSocketFrameResponse.Code.OK).setApimErrorCode(0).build();
                         responseStreamObserver.onNext(response);
                     } else if (WebSocketThrottleState.OVER_LIMIT == webSocketThrottleResponse
                             .getWebSocketThrottleState()) {
                         logger.debug("throttle out period" + webSocketThrottleResponse.getThrottlePeriod());
-                        WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
-                                WebSocketFrameResponse.Code.OVER_LIMIT).setThrottlePeriod(
-                                webSocketThrottleResponse.getThrottlePeriod()).build();
+                        WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder()
+                                .setThrottleState(WebSocketFrameResponse.Code.OVER_LIMIT)
+                                .setThrottlePeriod(webSocketThrottleResponse.getThrottlePeriod())
+                                .setApimErrorCode(webSocketThrottleResponse.getApimErrorCode())
+                                .build();
                         responseStreamObserver.onNext(response);
                     } else {
                         logger.debug("throttle state of the connection is not available in enforcer");

@@ -19,7 +19,7 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 /**
- * ConfigurationConstants holds the pre determined configuration keys provided.
+ * AnalyticsConstants holds the pre determined configuration keys provided.
  */
 public class AnalyticsConstants {
 

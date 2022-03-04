@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -46,9 +47,12 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
     private static final Logger logger = LogManager.getLogger(ChoreoFaultAnalyticsProvider.class);
+    private final boolean isWebsocketUpgradeRequest;
 
     public ChoreoFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
+        isWebsocketUpgradeRequest =
+                APIConstants.WEBSOCKET.equals(requestContext.getHeaders().get(APIConstants.UPGRADE_HEADER));
     }
 
     @Override
@@ -129,6 +133,12 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         // This could be null if  OPTIONS request comes
         if (requestContext.getMatchedResourcePath() != null) {
             Operation operation = new Operation();
+            if (isWebsocketUpgradeRequest) {
+                operation.setApiMethod(WebSocketFrameRequest.MessageDirection.HANDSHAKE.name());
+                operation.setApiResourceTemplate(AnalyticsConstants.WEBSOCKET_HANDSHAKE_RESOURCE_PREFIX +
+                        requestContext.getMatchedResourcePath().getPath());
+                return operation;
+            }
             operation.setApiMethod(requestContext.getMatchedResourcePath().getMethod().name());
             operation.setApiResourceTemplate(requestContext.getMatchedResourcePath().getPath());
             return operation;
@@ -149,7 +159,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Latencies getLatencies() {
         // Latencies information are not required.
-        return null;
+        return new Latencies();
     }
 
     @Override
@@ -196,15 +206,13 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public String getUserAgentHeader() {
-        // User agent is not required for fault scenario
-        logger.error("Internal Error: User agent header is not required for fault events");
+        // UserAgent header is not validated for fault events.
         return null;
     }
 
     @Override
     public String getEndUserIP() {
-        logger.error("Internal Error: End User IPAddress is not required for fault events");
-        // EndUserIP is not required for fault event type
+        // EndUserIP is not validated for fault events.
         return null;
     }
 }

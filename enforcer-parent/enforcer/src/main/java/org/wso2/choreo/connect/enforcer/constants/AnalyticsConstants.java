@@ -51,4 +51,6 @@ public class AnalyticsConstants {
     public static final int NHTTP_CONNECTION_CLOSED = 101505;
     public static final int NHTTP_PROTOCOL_VIOLATION = 101506;
     public static final int NHTTP_CONNECT_TIMEOUT = 101508;
+
+    public static final String WEBSOCKET_HANDSHAKE_RESOURCE_PREFIX = "init-request:";
 }

@@ -46,5 +46,8 @@ public class MetadataConstants {
 
     public static final String DESTINATION = WSO2_METADATA_PREFIX + "destination";
 
+    public static final String USER_AGENT_KEY = WSO2_METADATA_PREFIX + "user-agent";
+    public static final String CLIENT_IP_KEY = WSO2_METADATA_PREFIX + "client-ip";
+
     public static final String ERROR_CODE_KEY = "ErrorCode";
 }
