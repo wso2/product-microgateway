@@ -28,6 +28,8 @@ public class ThrottleConstants {
     public static final int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
     public static final int BLOCKED_ERROR_CODE = 900805;
     public static final int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
+    // This value is used to assign when the actual throttle policy is not properly assigned. If this
+    public static final int THROTTLE_CONDITION_UNKNOWN = 900807;
 
     public static final String THROTTLE_OUT_MESSAGE = "Message throttled out";
     public static final String THROTTLE_OUT_DESCRIPTION = "You have exceeded your quota";

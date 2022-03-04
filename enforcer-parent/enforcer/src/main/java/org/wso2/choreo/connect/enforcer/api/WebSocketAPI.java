@@ -266,8 +266,14 @@ public class WebSocketAPI implements API {
         }
         WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
         webSocketThrottleResponse.setOverLimitState();
-        webSocketThrottleResponse.setApimErrorCode(Integer.parseInt(requestContext.getProperties()
-                .get(APIConstants.MessageFormat.ERROR_CODE).toString()));
+        if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+            webSocketThrottleResponse.setApimErrorCode(Integer.parseInt(requestContext.getProperties()
+                    .get(APIConstants.MessageFormat.ERROR_CODE).toString()));
+        } else {
+            webSocketThrottleResponse.setApimErrorCode(ThrottleConstants.THROTTLE_CONDITION_UNKNOWN);
+            logger.error("Error code is not assigned for the websocket throttle response. : " + requestContext
+                    .getMatchedAPI().getBasePath());
+        }
         webSocketThrottleResponse.setThrottlePeriod(
                 (Long) requestContext.getProperties().get(ThrottleConstants.HEADER_RETRY_AFTER));
         return webSocketThrottleResponse;
