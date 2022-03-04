@@ -18,11 +18,11 @@
 package org.wso2.choreo.connect.enforcer.commons.opa;
 
 /**
- * This class represents the constants that are used for OPA mediator
+ * This class represents the constants that are used for OPA mediator.
  */
 public class OPAConstants {
     /**
-     * Constants of the AdditionalParameters map
+     * Constants of the AdditionalParameters map.
      */
     public static class AdditionalParameters {
         public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
