@@ -28,6 +28,11 @@ public class Decision {
     boolean isThrottled;
 
     /**
+     * Is the request throttled due to blocking condition.
+     */
+    boolean isDueToBlockedCondition;
+
+    /**
      * When will this decision reset. This is a timestamp in {@link Long} format,
      * deciding when the user can access the blocked resource again.
      */
@@ -36,6 +41,7 @@ public class Decision {
     public Decision() {
         this.isThrottled = false;
         this.resetAt = 0;
+        this.setDueToBlockedCondition(false);
     }
 
     public boolean isThrottled() {
@@ -52,5 +58,16 @@ public class Decision {
 
     public void setResetAt(long resetAt) {
         this.resetAt = resetAt;
+    }
+
+    /**
+     * Is the request throttled due to blocking condition.
+     */
+    public boolean isDueToBlockedCondition() {
+        return isDueToBlockedCondition;
+    }
+
+    public void setDueToBlockedCondition(boolean dueToBlockedCondition) {
+        isDueToBlockedCondition = dueToBlockedCondition;
     }
 }

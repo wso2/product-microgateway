@@ -43,6 +43,7 @@ void MgwGrpcStreamHandler::onReceive(size_t body_size){
   } else {
     this->callbacks_->updateFilterState(ResponseStatus::OK);
   }
+  this->callbacks_->updateAPIMErrorCode(frame_response.apim_error_code());
 };
 
 void MgwGrpcStreamHandler::onRemoteClose(GrpcStatus status){

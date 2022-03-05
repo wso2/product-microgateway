@@ -273,21 +273,28 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		apiEnvProps = apiEnvPropsV
 	}
 
+	err = apiProject.APIYaml.ValidateAPIType()
+	if err != nil {
+		return nil, err
+	}
+
 	err = mgwSwagger.PopulateFromAPIYaml(apiProject.APIYaml)
 	if err != nil {
 		return nil, err
 	}
 
-	if apiYaml.APIType == constants.HTTP || apiYaml.APIType == constants.WEBHOOK {
-		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
+	err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
+	if err != nil {
+		return nil, err
+	}
 
-		// Set the following in case they were overridden by the above line
-		mgwSwagger.SetID(apiYaml.ID)
-		mgwSwagger.SetName(apiYaml.Name)
-		mgwSwagger.SetVersion(apiYaml.Version)
-		if err != nil {
-			return nil, err
-		}
+	// Set the following in case they were overridden by the above line
+	mgwSwagger.SetID(apiYaml.ID)
+	mgwSwagger.SetName(apiYaml.Name)
+	mgwSwagger.SetVersion(apiYaml.Version)
+
+	if apiYaml.APIType == constants.HTTP {
+		// avoid the following for AsyncAPI types
 		// the following will be used for APIM specific security config.
 		// it will enable folowing securities globally for the API, overriding swagger securities.
 		isYamlAPIKey := false
@@ -303,15 +310,8 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetOperationPolicies(apiProject)
-		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-	} else if apiYaml.APIType != constants.WS {
-		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.ErrorC(logging.ErrorDetails{
-			Message:   "API type not currently supported by Choreo Connect",
-			Severity:  logging.MINOR,
-			ErrorCode: 1404,
-		})
 	}
+	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
 	mgwSwagger.OrganizationID = apiYaml.OrganizationID
 	organizationID := apiYaml.OrganizationID

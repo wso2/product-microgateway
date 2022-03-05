@@ -20,14 +20,20 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Operation;
+import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
+import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -35,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
@@ -71,6 +78,7 @@ public class WebSocketAPI implements API {
         Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
         Map<String, List<String>> apiSecurity = new HashMap<>();
         Map<String, EndpointCluster> endpoints = new HashMap<>();
+        List<ResourceConfig> resources = new ArrayList<>();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -119,13 +127,21 @@ public class WebSocketAPI implements API {
                     APIProcessUtils.convertProtoEndpointSecurity(
                             api.getEndpointSecurity().getSandBoxSecurityInfo()));
         }
+        for (Resource res : api.getResourcesList()) {
+            for (Operation operation : res.getMethodsList()) {
+                ResourceConfig resConfig = RestAPI.buildResource(operation, res.getPath(), apiSecurity);
+                resConfig.setTier(api.getTier());
+                resources.add(resConfig);
+            }
+        }
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .apiSecurity(apiSecurity).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).endpoints(endpoints).build();
+                .organizationId(api.getOrganizationId()).endpoints(endpoints).resources(resources)
+                .securitySchemeDefinitions(securitySchemes).build();
         initFilters();
         initUpgradeFilters();
         return basePath;
@@ -134,8 +150,13 @@ public class WebSocketAPI implements API {
     @Override
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
+        boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
         if (executeFilterChain(requestContext)) {
+            if (analyticsEnabled) {
+                AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
+            }
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
+            responseObject.setQueryParamsToAdd(requestContext.getQueryParamsToAdd());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
             }
@@ -160,6 +181,10 @@ public class WebSocketAPI implements API {
             }
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
+            }
+            if (analyticsEnabled && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
+                AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
+                responseObject.setMetaDataMap(new HashMap<>(0));
             }
         }
         return responseObject;
@@ -243,6 +268,15 @@ public class WebSocketAPI implements API {
         }
         WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
         webSocketThrottleResponse.setOverLimitState();
+        if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+            webSocketThrottleResponse.setApimErrorCode(Integer.parseInt(requestContext.getProperties()
+                    .get(APIConstants.MessageFormat.ERROR_CODE).toString()));
+        } else {
+            webSocketThrottleResponse.setApimErrorCode(ThrottleConstants.THROTTLE_CONDITION_UNKNOWN);
+            logger.error("Error code is not assigned for the websocket throttle response. : " + requestContext
+                    .getMatchedAPI().getBasePath(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5200));
+        }
         webSocketThrottleResponse.setThrottlePeriod(
                 (Long) requestContext.getProperties().get(ThrottleConstants.HEADER_RETRY_AFTER));
         return webSocketThrottleResponse;

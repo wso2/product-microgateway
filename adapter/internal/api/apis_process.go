@@ -35,6 +35,7 @@ import (
 const (
 	openAPIDir                 string = "Definitions"
 	openAPIFilename            string = "swagger."
+	asyncAPIFilename           string = "asyncapi."
 	apiYAMLFile                string = "api.yaml"
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	endpointCertFile           string = "endpoint_certificates."
@@ -79,8 +80,10 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 	}
 
 	// API definition file
-	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
-		loggers.LoggerAPI.Debugf("openAPI file : %v", fileName)
+	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) ||
+		strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+asyncAPIFilename) {
+
+		loggers.LoggerAPI.Debugf("API definition file : %v", fileName)
 		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
 		if conversionErr != nil {
 			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
@@ -90,7 +93,7 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			})
 			return conversionErr
 		}
-		apiProject.OpenAPIJsn = swaggerJsn
+		apiProject.APIDefinition = swaggerJsn
 
 		// Interceptor certs
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&

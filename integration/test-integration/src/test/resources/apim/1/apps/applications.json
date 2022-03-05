@@ -50,5 +50,9 @@
   {
     "appName": "VHostApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "WebSocketBasicApp",
+    "throttleTier": "Unlimited"
   }
 ]

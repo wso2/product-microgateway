@@ -11,6 +11,7 @@ data:
   cacheTimeout: 300
   isDefaultVersion: false
   enableSchemaValidation: false
+  apiThrottlingPolicy: 5PerMin
   enableStore: true
   type: WS
   transport: []

@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
@@ -99,6 +100,15 @@ public class AnalyticsFilter {
         }
     }
 
+    public void handleWebsocketFrameRequest(WebSocketFrameRequest frameRequest) {
+        if (publisher != null) {
+            publisher.handleWebsocketFrameRequest(frameRequest);
+        } else {
+            logger.error("Cannot publish the analytics event as analytics publisher is null.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5102));
+        }
+    }
+
     public void handleSuccessRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
         Scope analyticsSpanScope = null;
@@ -149,6 +159,9 @@ public class AnalyticsFilter {
 
             requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
                     requestContext.getMatchedAPI().getOrganizationId());
+            requestContext.addMetadataToMap(MetadataConstants.CLIENT_IP_KEY, requestContext.getClientIp());
+            requestContext.addMetadataToMap(MetadataConstants.USER_AGENT_KEY,
+                    AnalyticsUtils.setDefaultIfNull(requestContext.getHeaders().get("user-agent")));
         } finally {
             if (Utils.tracingEnabled()) {
                 analyticsSpanScope.close();
@@ -157,7 +170,7 @@ public class AnalyticsFilter {
         }
     }
 
-    private String resolveEndpoint(RequestContext requestContext) {
+    public String resolveEndpoint(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         // KeyType could be sandbox only if the keytype is set fetched from the Eventhub
         if (authContext != null && authContext.getKeyType() != null

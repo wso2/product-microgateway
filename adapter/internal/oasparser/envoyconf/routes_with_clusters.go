@@ -192,6 +192,19 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 	}
 
+	// Websocket APIs are processed in a different manner compared to REST APIs.
+	// No interceptors engaged.
+	// There is a single method, which is a GET.
+	// No topic level endpoints.
+	if mgwSwagger.GetAPIType() == constants.WS {
+		for _, resource := range mgwSwagger.GetResources() {
+			routesP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelbasePath, apiLevelClusterNameProd,
+				apiLevelClusterNameSand, nil, nil, organizationID))
+			routes = append(routes, routesP)
+		}
+		return routes, clusters, endpoints
+	}
+
 	for _, resource := range mgwSwagger.GetResources() {
 		resourceRequestInterceptor := apiRequestInterceptor
 		resourceResponseInterceptor := apiResponseInterceptor
@@ -358,11 +371,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID))
 		routes = append(routes, routeP)
 	}
-	if mgwSwagger.GetAPIType() == constants.WS {
-		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelbasePath, apiLevelClusterNameProd,
-			apiLevelClusterNameSand, nil, nil, organizationID))
-		routes = append(routes, routesP)
-	}
+
 	return routes, clusters, endpoints
 }
 

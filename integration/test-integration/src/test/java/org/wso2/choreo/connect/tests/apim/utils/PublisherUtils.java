@@ -115,30 +115,54 @@ public class PublisherUtils {
     }
 
     /**
-     * Updates the OpenAPI definition of an already created API
+     * Updates the OpenAPI definition of an already created REST API
      * 
      * @param apiId ID of the API to update the OpenAPI definition
      * @param openAPIFileName Name of the OpenAPI file. ex. scopes_openAPI.yaml
      * @param publisherRestClient An instance of RestAPIPublisherImpl
-     * @return ID of the API that was updated
-     * @throws CCTestException if the OpenAPI file specified was not present, or an error occurs when updating the API
+     * @throws CCTestException if the OpenAPI file specified was not present, or an error occurs while updating the API
      */
-    public static String updateOpenAPIDefinition(String apiId, String openAPIFileName,
+    public static void updateOpenAPIDefinition(String apiId, String openAPIFileName,
                                                RestAPIPublisherImpl publisherRestClient) throws CCTestException {
         String targetDir = Utils.getTargetDirPath();
         Path definitionPath = Paths.get(targetDir + ApictlUtils.OPENAPIS_PATH + openAPIFileName);
-        String responseApiId;
         try {
             String openAPIContent = Files.readString(definitionPath);
-            responseApiId = publisherRestClient.updateSwagger(apiId, openAPIContent);
+            publisherRestClient.updateSwagger(apiId, openAPIContent);
         } catch (ApiException e) {
-            log.error("Error occurred while creating API with an OpenAPI definition. Response: {}", e.getResponseBody());
-            throw new CCTestException("Error while creating an API with an OpenAPI", e);
+            log.error("Error occurred while updating OpenAPI definition. Response: {}", e.getResponseBody());
+            throw new CCTestException("Error while updating OpenAPI", e);
         } catch (IOException e) {
             log.error("Error occurred while reading OpenAPI definition for: {}", openAPIFileName);
             throw new CCTestException("Error while reading OpenAPI definition", e);
         }
-        return responseApiId;
+    }
+
+    /**
+     * Updates the AsyncAPI definition of an already created AsyncAPI
+     *
+     * @param apiId ID of the API to update the AsyncAPI definition
+     * @param asyncAPIFileName Name of the AsyncAPI file. ex. websocket_basic_asyncAPI.yaml
+     * @param publisherRestClient An instance of RestAPIPublisherImpl
+     * @throws CCTestException if the AsyncAPI file specified was not present, or an error occurs while updating the API
+     */
+    public static void updateAsyncAPIDefinition(String apiId, String asyncAPIFileName,
+                                                 RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        String targetDir = Utils.getTargetDirPath();
+        Path definitionPath = Paths.get(targetDir + ApictlUtils.ASYNCAPIS_PATH + asyncAPIFileName);
+
+        try {
+            String asyncAPIContentYaml = Files.readString(definitionPath);
+            String asyncAPIContentJson = Utils.convertYamlToJson(asyncAPIContentYaml);
+            publisherRestClient.apIsApi.apisApiIdAsyncapiPut(apiId, null, asyncAPIContentJson,
+                    null, null);
+        } catch (ApiException e) {
+            log.error("Error occurred while updating AsyncAPI definition. Response: {}", e.getResponseBody());
+            throw new CCTestException("Error while while updating AsyncAPI", e);
+        } catch (IOException e) {
+            log.error("Error occurred while reading AsyncAPI definition for: {}", asyncAPIFileName);
+            throw new CCTestException("Error while reading AsyncAPI definition", e);
+        }
     }
 
     /**
@@ -171,7 +195,7 @@ public class PublisherUtils {
         try {
             createAPIResponse = publisherRestClient.addAPI(apiRequest);
         } catch (ApiException e) {
-            log.error("Error while creating an API. REST response: {}", e.getMessage());
+            log.error("Error while creating an API. REST response: {}", ((ApiException) e.getCause()).getResponseBody());
             throw new CCTestException("Error while creating an API", e);
         }
         if (Objects.nonNull(createAPIResponse) && createAPIResponse.getResponseCode() == HttpStatus.SC_CREATED

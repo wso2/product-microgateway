@@ -57,6 +57,7 @@ public class ApimResourceProcessor {
     RestAPIStoreImpl storeRestClient;
     Map<String, ArrayList<String>> apiToVhosts;
     Map<String, String> apiToOpenAPI;
+    Map<String, String> apiToAsyncAPI;
 
     private static final String APIM_ARTIFACTS_FOLDER = File.separator + "apim" + File.separator;
     private static final String APIS_FOLDER = File.separator + "apis";
@@ -89,6 +90,7 @@ public class ApimResourceProcessor {
                 APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + APIS_FOLDER);
         try (Stream<Path> paths = Files.walk(apisLocation)) {
             readApiWithOpenAPIMap();
+            readApiWithAsyncAPIMap();
             readApiToVhostMap();
             for (Iterator<Path> apiFiles = paths.filter(Files::isRegularFile).iterator(); apiFiles.hasNext();) {
                 Path apiFilePath = apiFiles.next();
@@ -98,14 +100,14 @@ public class ApimResourceProcessor {
                 apiRequest.setProvider(apiProvider);
                 apiRequest.setTags("tags"); // otherwise, throws a NPE
 
-                // Create API
-                String apiId;
+                // Create REST API
+                String apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
                 if(apiToOpenAPI.containsKey(apiRequest.getName())) {
                     String openAPIFileName = apiToOpenAPI.get(apiRequest.getName());
-                    apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
                     PublisherUtils.updateOpenAPIDefinition(apiId, openAPIFileName, publisherRestClient);
-                } else {
-                    apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                } else if(apiToAsyncAPI.containsKey(apiRequest.getName())) {
+                    String asyncAPIFileName = apiToAsyncAPI.get(apiRequest.getName());
+                    PublisherUtils.updateAsyncAPIDefinition(apiId, asyncAPIFileName, publisherRestClient);
                 }
 
                 // Deploy API
@@ -175,8 +177,15 @@ public class ApimResourceProcessor {
     private void readApiWithOpenAPIMap() throws IOException {
         Path mapLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + File.separator
                 + "apim" + File.separator + apimArtifactsIndex + File.separator + "apiToOpenAPI.json");
-        String apiToVhostString = Files.readString(mapLocation);
-        apiToOpenAPI = new ObjectMapper().readValue(apiToVhostString, new TypeReference<>() {});
+        String apiToOpenAPIString = Files.readString(mapLocation);
+        apiToOpenAPI = new ObjectMapper().readValue(apiToOpenAPIString, new TypeReference<>() {});
+    }
+
+    private void readApiWithAsyncAPIMap() throws IOException {
+        Path mapLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + File.separator
+                + "apim" + File.separator + apimArtifactsIndex + File.separator + "apiToAsyncAPI.json");
+        String apiToAsyncAPIString = Files.readString(mapLocation);
+        apiToAsyncAPI = new ObjectMapper().readValue(apiToAsyncAPIString, new TypeReference<>() {});
     }
 
     private void readApiToVhostMap() throws IOException {

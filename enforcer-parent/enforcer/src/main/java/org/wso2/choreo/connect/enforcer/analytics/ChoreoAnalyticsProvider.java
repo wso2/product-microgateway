@@ -106,9 +106,9 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     public API getApi() {
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         ExtendedAPI api = new ExtendedAPI();
+        api.setApiType(getValueAsString(fieldsMap, MetadataConstants.API_TYPE_KEY));
         api.setApiId(getValueAsString(fieldsMap, MetadataConstants.API_ID_KEY));
         api.setApiCreator(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_KEY));
-        api.setApiType(getValueAsString(fieldsMap, MetadataConstants.API_TYPE_KEY));
         api.setApiName(getValueAsString(fieldsMap, MetadataConstants.API_NAME_KEY));
         api.setApiVersion(getValueAsString(fieldsMap, MetadataConstants.API_VERSION_KEY));
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));

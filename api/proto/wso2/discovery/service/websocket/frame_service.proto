@@ -42,6 +42,16 @@ message WebSocketFrameRequest {
   string remote_ip = 4;
 
   bytes payload = 5;
+
+  // direction of the message
+  enum MessageDirection {
+        PUBLISH = 0;
+        SUBSCRIBE = 1;
+        HANDSHAKE = 2;
+  }
+  MessageDirection direction = 6;
+
+  int32 apim_error_code = 7;
 }
 
 message WebSocketFrameResponse {
@@ -56,6 +66,8 @@ message WebSocketFrameResponse {
   Code throttle_state = 1;
 
   int64 throttle_period = 2;
+
+  int32 apim_error_code = 3;
 }
 
 message Metadata {

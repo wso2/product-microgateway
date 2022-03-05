@@ -18,7 +18,10 @@
 
 package org.wso2.choreo.connect.mockbackend;
 
+import org.wso2.choreo.connect.mockbackend.async.MockAsyncServer;
+
 import java.util.Arrays;
+import java.util.List;
 
 public class MockServices {
 
@@ -30,7 +33,8 @@ public class MockServices {
         mockBackendProd.start();
         mockBackendSandbox.start();
         mockAnalyticsServer.start();
-        if (args.length > 0 && args[0].equals("-tls-enabled")) {
+        List<String> argList = Arrays.asList(args);
+        if (argList.contains("-tls-enabled")) {
             MockBackendProd securedMockBackendProd = new MockBackendProd(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
                     true, false);
             MockBackendProd mtlsMockBackendProd = new MockBackendProd(Constants.MTLS_MOCK_BACKEND_SERVER_PORT,
@@ -38,12 +42,16 @@ public class MockServices {
             securedMockBackendProd.start();
             mtlsMockBackendProd.start();
         }
-        if (Arrays.asList(args).contains("-interceptor-svc-enabled")) {
+        if (argList.contains("-interceptor-svc-enabled")) {
             MockInterceptorServer mockInterceptorServer = new MockInterceptorServer(
                     Constants.INTERCEPTOR_STATUS_SERVER_PORT,
                     Constants.MTLS_INTERCEPTOR_HANDLER_SERVER_PORT
             );
             mockInterceptorServer.start();
+        }
+        if (argList.contains("-async-enabled")) {
+            MockAsyncServer mockAsyncServer = new MockAsyncServer(Constants.WEBSOCKET_SERVER_PORT);
+            mockAsyncServer.start();
         }
     }
 }

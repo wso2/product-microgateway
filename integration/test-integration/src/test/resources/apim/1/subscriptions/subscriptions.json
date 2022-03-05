@@ -58,5 +58,10 @@
     "apiName": "EndpointWithTrailingSlashAPI",
     "appName": "EndpointWithTrailingSlashApiApp",
     "tier": "Unlimited"
+  },
+  {
+    "apiName": "WebSocketBasicAPI",
+    "appName": "WebSocketBasicApp",
+    "tier": "AsyncUnlimited"
   }
 ]
