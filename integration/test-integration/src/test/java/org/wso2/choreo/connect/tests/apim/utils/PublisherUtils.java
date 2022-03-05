@@ -29,8 +29,7 @@ import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIProductInfoDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIProductListDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
@@ -38,7 +37,6 @@ import org.wso2.am.integration.test.utils.bean.APILifeCycleAction;
 import org.wso2.am.integration.test.utils.bean.APILifeCycleState;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.am.integration.test.utils.bean.APIRevisionRequest;
-import org.wso2.am.integration.test.utils.bean.APIRevisionDeployUndeployRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
@@ -221,18 +219,10 @@ public class PublisherUtils {
      * @throws CCTestException if an error occurs while deploying or publishing an API
      */
     public static String deployAndPublishAPI(String apiId, String apiName, String vhost,
-                                             RestAPIPublisherImpl publisherRestClient)
-            throws CCTestException {
+                                             RestAPIPublisherImpl publisherRestClient) throws CCTestException {
         String revisionUUID;
-        // Create Revision and Deploy to Gateway
-        try {
-            revisionUUID = createAPIRevisionAndDeploy(apiId, vhost, publisherRestClient);
-        } catch (JSONException | ApiException e) {
-            log.error("Error while deploying the API. REST response: {}", e.getMessage());
-            throw new CCTestException("Error while creating and deploying API Revision", e);
-        }
+        revisionUUID = createAPIRevisionAndDeploy(apiId, vhost, publisherRestClient);
         log.info("API Deployed. Name:" + apiName + " VHost:" + vhost);
-
         publishAPI(apiId, apiName, publisherRestClient);
         return revisionUUID;
     }
@@ -278,7 +268,7 @@ public class PublisherUtils {
      * @return revisionUUID
      */
     public static String createAPIRevisionAndDeploy(String apiId, RestAPIPublisherImpl publisherRestClient)
-            throws ApiException, JSONException {
+            throws CCTestException {
         return createAPIRevisionAndDeploy(apiId, "localhost", publisherRestClient);
     }
 
@@ -290,15 +280,18 @@ public class PublisherUtils {
      * @param publisherRestClient -  Instance of APIPublisherRestClient
      * @return revisionUUID
      */
-    public static String createAPIRevisionAndDeploy(String apiId, String vhost, RestAPIPublisherImpl publisherRestClient)
-            throws ApiException, JSONException {
-
-        String revisionUUID = createAPIRevision(apiId, publisherRestClient);
-
-        // Deploy API revision
-        List<APIRevisionDeployUndeployRequest> deployRequestList = getDeployRequestList("Default", vhost);
-        publisherRestClient.deployAPIRevision(apiId, revisionUUID, deployRequestList);
-        return revisionUUID;
+    public static String createAPIRevisionAndDeploy(String apiId, String vhost,
+                                                    RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        try {
+            String revisionUUID = createAPIRevision(apiId, publisherRestClient);
+            deployRevision(apiId, revisionUUID, vhost, publisherRestClient);
+            return revisionUUID;
+        } catch ( JSONException e) {
+            throw new CCTestException("Error while creating API revision and deploying.", e);
+        } catch (ApiException e) {
+            log.error("Error msg from APIM: {}", e.getResponseBody());
+            throw new CCTestException("Error while creating API revision and deploying.", e);
+        }
     }
 
     public static String createAPIRevision(String apiId, RestAPIPublisherImpl publisherRestClient)
@@ -319,78 +312,20 @@ public class PublisherUtils {
         return revisionUUID;
     }
 
-    /**
-     * Create API Product Revision and Deploy to gateway using REST API.
-     *
-     * @param apiId            - API UUID
-     * @param publisherRestClient - Instance of APIPublisherRestClient
-     */
-    public static String createAPIProductRevisionAndDeploy(String apiId, String vhost,
-           RestAPIPublisherImpl publisherRestClient) throws ApiException, JSONException {
-
-        //Add the API Revision using the API publisher.
-        APIRevisionRequest apiRevisionRequest = new APIRevisionRequest();
-        apiRevisionRequest.setApiUUID(apiId);
-        apiRevisionRequest.setDescription("Test Revision 1");
-
-        HttpResponse apiRevisionResponse = publisherRestClient.addAPIProductRevision(apiRevisionRequest);
-        assertEquals(apiRevisionResponse.getResponseCode(), Response.Status.CREATED.getStatusCode(),
-                "Create API Response Code is invalid." + apiRevisionResponse.getData());
-
-        // Read revision ID from response
-        JSONObject apiRevisionJsonObject = new JSONObject(apiRevisionResponse.getData());
-        String revisionUUID = apiRevisionJsonObject.getString("id");
-
-        // Deploy API Product revision
-        List<APIRevisionDeployUndeployRequest> deployRequestList = getDeployRequestList("Default", vhost);
-        HttpResponse deployResponse = publisherRestClient.deployAPIProductRevision(apiId, revisionUUID,
-                deployRequestList);
-        assertEquals(deployResponse.getResponseCode(), Response.Status.CREATED.getStatusCode(),
-                "Unable to deploy API Product Revisions:" + deployResponse.getData());
-        return revisionUUID;
-    }
-
-    private static List<APIRevisionDeployUndeployRequest> getDeployRequestList(String envName, String vhost) {
-        // Deploy Revision to gateway
-        List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
-        APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionDeployRequest.setName(envName);
-        apiRevisionDeployRequest.setVhost(vhost);
-        apiRevisionDeployRequest.setDisplayOnDevportal(true);
-        apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
-        return apiRevisionDeployRequestList;
-    }
-
-    /**
-     * Copy and publish the copied API.
-     *
-     * @param newAPIVersion           - New API version need to create
-     * @param publisherRestClient     - Instance of APIPublisherRestClient
-     * @param isRequireReSubscription - If publish with re-subscription required option true else false.
-     * @throws CCTestException -Exception throws by copyAPI() and publishAPI() method calls
-     */
-    public static void copyAndPublishCopiedAPI(String apiID, String newAPIVersion, RestAPIPublisherImpl publisherRestClient,
-                                           boolean isRequireReSubscription) throws CCTestException, ApiException {
-        APIDTO apidto = copyAPI(apiID, newAPIVersion, publisherRestClient);
-        changeLCStateAPI(apidto.getId(), APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, isRequireReSubscription);
-    }
-
-    /**
-     * @param apiID               - API id.
-     * @param newAPIVersion       - New API version need to create
-     * @param publisherRestClient - Instance of RestAPIPublisherImpl
-     * @throws ApiException Exception throws by the method call of copyAPIWithReturnDTO() in RestAPIPublisherImpl.java
-     */
-    public static APIDTO copyAPI(String apiID, String newAPIVersion, RestAPIPublisherImpl publisherRestClient)
-            throws ApiException {
-        //Copy API to version  to newVersion
-        return publisherRestClient.copyAPIWithReturnDTO(newAPIVersion, apiID, false);
-    }
-
     public static void deployRevision(String apiId, String revisionUUID, String vhost,
-                                      RestAPIPublisherImpl publisherRestClient) throws ApiException {
-        List<APIRevisionDeployUndeployRequest> deployRequestList = getDeployRequestList("Default", vhost);
-        publisherRestClient.deployAPIRevision(apiId, revisionUUID, deployRequestList);
+                                      RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOList = new ArrayList();
+        APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
+        apiRevisionDeploymentDTO.setName("Default");
+        apiRevisionDeploymentDTO.setVhost(vhost);
+        apiRevisionDeploymentDTO.setDisplayOnDevportal(true);
+        apiRevisionDeploymentDTOList.add(apiRevisionDeploymentDTO);
+        try {
+            publisherRestClient.apiRevisionsApi.deployAPIRevision(apiId, revisionUUID, apiRevisionDeploymentDTOList);
+        } catch (ApiException e) {
+            log.error("Error msg from APIM: {}", e.getResponseBody());
+            throw new CCTestException("Error while deploying API revision.", e);
+        }
     }
 
     public static void publishAPI(String apiId, String apiName,
@@ -416,13 +351,14 @@ public class PublisherUtils {
 
     public static void undeployAPI(String apiId, String revisionUUID, RestAPIPublisherImpl publisherRestClient)
             throws ApiException {
-        List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
-        APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
+        List<APIRevisionDeploymentDTO> apiRevisionUndeployRequestList = new ArrayList<>();
+        APIRevisionDeploymentDTO apiRevisionUnDeployRequest = new APIRevisionDeploymentDTO();
         apiRevisionUnDeployRequest.setName("Default");
         apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
         apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
-        publisherRestClient.undeployAPIRevision(apiId, revisionUUID,
-                apiRevisionUndeployRequestList);
+        publisherRestClient.apiRevisionsApi.undeployAPIRevisionWithHttpInfo(apiId, revisionUUID, (String) null,
+                    false, apiRevisionUndeployRequestList);
+
     }
 
     /**
@@ -446,43 +382,6 @@ public class PublisherUtils {
         undeployAPI(apiId, revisionUUID, publisherRestClient);
 
         publisherRestClient.deleteAPIRevision(apiId, revisionUUID);
-        return revisionUUID;
-    }
-
-    /**
-     * Undeploy and Delete API Product Revisions using REST API.
-     *
-     * @param apiId            - API UUID
-     * @param publisherRestClient - Instance of APIPublisherRestClient
-     */
-    public static String undeployAndDeleteAPIProductRevisions(String apiId, RestAPIPublisherImpl publisherRestClient)
-            throws ApiException, JSONException {
-        int HTTP_RESPONSE_CODE_OK = Response.Status.OK.getStatusCode();
-        int HTTP_RESPONSE_CODE_CREATED = Response.Status.CREATED.getStatusCode();
-
-        // Get Deployed Revisions
-        HttpResponse apiRevisionsGetResponse = publisherRestClient.getAPIProductRevisions(apiId, "deployed:true");
-        assertEquals(apiRevisionsGetResponse.getResponseCode(), HTTP_RESPONSE_CODE_OK,
-                "Unable to retrieve revisions" + apiRevisionsGetResponse.getData());
-        JSONObject jsonObject = new JSONObject(apiRevisionsGetResponse.getData());
-
-        JSONArray arrayList = jsonObject.getJSONArray("list");
-        JSONObject firstInTheList = arrayList.getJSONObject(0);
-        String revisionUUID = firstInTheList.getString("id");
-
-        // Un deploy Revisions
-        List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
-        APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionUnDeployRequest.setName("Default");
-        apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
-        apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
-        HttpResponse apiRevisionsUnDeployResponse = publisherRestClient.undeployAPIProductRevision(apiId, revisionUUID,
-                apiRevisionUndeployRequestList);
-        assertEquals(apiRevisionsUnDeployResponse.getResponseCode(), HTTP_RESPONSE_CODE_CREATED,
-                "Unable to Undeploy API Product Revisions:" + apiRevisionsUnDeployResponse.getData());
-
-        // Get Revisions
-        publisherRestClient.deleteAPIProductRevision(apiId, revisionUUID);
         return revisionUUID;
     }
 
@@ -535,24 +434,6 @@ public class PublisherUtils {
         } catch (APIManagerIntegrationTestException | ApiException e) {
             log.error("Error while removing all APIs. REST response: {}", e.getMessage());
             throw new CCTestException("Error while removing APIs from Publisher", e);
-        }
-    }
-
-    public static void removeAllApiProductsFromPublisher(RestAPIPublisherImpl publisherRestClient) throws CCTestException {
-        if (Objects.isNull(publisherRestClient)) {
-            return;
-        }
-        try {
-            APIProductListDTO allApiProducts = publisherRestClient.getAllApiProducts();
-            List<APIProductInfoDTO> apiProductListDTO = allApiProducts.getList();
-
-            if (apiProductListDTO != null) {
-                for (APIProductInfoDTO apiProductInfoDTO : apiProductListDTO) {
-                    publisherRestClient.deleteApiProduct(apiProductInfoDTO.getId());
-                }
-            }
-        } catch (ApiException e) {
-            throw new CCTestException("Error while removing API Products from Publisher", e);
         }
     }
 

@@ -50,14 +50,15 @@ key_password =  "wso2carbon"
 [[apim.gateway.environment]]
 name = "Default"
 type = "hybrid"
+provider = "wso2"
 display_in_api_console = true
 description = "This is a hybrid gateway that handles both production and sandbox token traffic."
 show_as_token_endpoint_url = true
-service_url = "https://localhost:${mgt.transport.https.port}/services/"
+service_url = "https://apim:${mgt.transport.https.port}/services/"
 username= "${admin.username}"
 password= "${admin.password}"
-ws_endpoint = "ws://localhost:9099"
-wss_endpoint = "wss://localhost:8099"
+ws_endpoint = "ws://localhost:9090"
+wss_endpoint = "wss://localhost:9095"
 http_endpoint = "http://localhost:9090"
 https_endpoint = "https://localhost:9095"
 websub_event_receiver_http_endpoint = "http://localhost:9021"
@@ -65,16 +66,16 @@ websub_event_receiver_https_endpoint = "https://localhost:8021"
 
 ######################## THIS IS THE ONLY CHANGE DONE TO DEFAULT DEPLOYMENT.TOML FILE ########################
 [[apim.gateway.environment.virtual_host]]
-ws_endpoint = "ws://us.wso2.com:9099"
-wss_endpoint = "wss://us.wso2.com:8099"
+ws_endpoint = "ws://us.wso2.com:9090"
+wss_endpoint = "wss://us.wso2.com:9095"
 http_endpoint = "http://us.wso2.com:9090"
 https_endpoint = "https://us.wso2.com:9095"
 websub_event_receiver_http_endpoint = "http://us.wso2.com:9021"
 websub_event_receiver_https_endpoint = "https://us.wso2.com:8021"
 
 [[apim.gateway.environment.virtual_host]]
-ws_endpoint = "ws://foods.com:9099"
-wss_endpoint = "wss://foods.com:8099"
+ws_endpoint = "ws://foods.com:9090"
+wss_endpoint = "wss://foods.com:9095"
 http_endpoint = "http://foods.com:9090"
 https_endpoint = "https://foods.com:9095"
 websub_event_receiver_http_endpoint = "http://foods.com:9021"
@@ -84,7 +85,7 @@ websub_event_receiver_https_endpoint = "https://foods.com:8021"
 [apim.sync_runtime_artifacts.gateway]
 gateway_labels =["Default"]
 #[apim.cache.gateway_token]
-#enable = true
+enable = true
 #expiry_time = "900s"
 
 #[apim.cache.resource]

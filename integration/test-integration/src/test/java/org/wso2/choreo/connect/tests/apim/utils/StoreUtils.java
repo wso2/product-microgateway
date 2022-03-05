@@ -17,18 +17,24 @@
  */
 package org.wso2.choreo.connect.tests.apim.utils;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.store.api.ApiException;
-import org.wso2.am.integration.clients.store.api.v1.dto.*;
+import org.wso2.am.integration.clients.store.api.ApiResponse;
+import org.wso2.am.integration.clients.store.api.v1.dto.APIKeyDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.SubscriptionDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.SubscriptionListDTO;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.carbon.automation.engine.context.beans.User;
-import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -143,20 +149,26 @@ public class StoreUtils {
      */
     public static String subscribeToAPI(String apiId, String applicationId, String tier,
                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
-        HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
-        if (Objects.isNull(response)) {
-            log.error("Error while subscribing to the API. API may not have been published.");
-            throw new CCTestException(
-                    "Error while subscribing to the API. API Id : " + apiId + ", Application Id: " + applicationId);
+        SubscriptionDTO subscription = new SubscriptionDTO();
+        subscription.setApplicationId(applicationId);
+        subscription.setApiId(apiId);
+        subscription.setThrottlingPolicy(tier);
+        subscription.setRequestedThrottlingPolicy(tier);
+        try {
+            SubscriptionDTO subscriptionResponse = storeRestClient.subscriptionIndividualApi.
+                    subscriptionsPost(subscription, storeRestClient.tenantDomain);
+            if (StringUtils.isEmpty(subscriptionResponse.getSubscriptionId())) {
+                log.error("Error while subscribing to the API. API may not have been published.");
+                throw new CCTestException(
+                        "Error while subscribing to the API. API Id : " + apiId + ", Application Id: " + applicationId);
+            }
+            log.info("API Subscribed. " + getSubscriptionInfoString(apiId, applicationId, tier));
+            return subscriptionResponse.getSubscriptionId();
+        } catch (ApiException e) {
+            log.error("Error msg from APIM: {}", e.getResponseBody());
+            throw new CCTestException("Error while subscribing to API.", e);
         }
-        if (!(response.getResponseCode() == HttpStatus.SC_OK &&
-                !StringUtils.isEmpty(response.getData()))) {
-            throw new CCTestException("Error in API Subscribe." +
-                    getSubscriptionInfoString(apiId, applicationId, tier) +
-                    "Response Code:" + response.getResponseCode());
-        }
-        log.info("API Subscribed. " + getSubscriptionInfoString(apiId, applicationId, tier));
-        return response.getData();
+
     }
 
     /**
@@ -186,13 +198,22 @@ public class StoreUtils {
      * @throws CCTestException if an error occurs while creating the application
      */
     public static String createApplication(Application app, RestAPIStoreImpl storeRestClient) throws CCTestException {
-        HttpResponse applicationResponse = storeRestClient.createApplication(app.getName(), app.getDescription(),
-                app.getThrottleTier(), app.getTokenType());
-        if (Objects.isNull(applicationResponse)) {
-            throw new CCTestException("Could not create the application: " + app.getName());
+        ApplicationDTO application = new ApplicationDTO();
+        application.setName(app.getName());
+        application.setDescription(app.getDescription());
+        application.setThrottlingPolicy(app.getThrottleTier());
+        application.setTokenType(app.getTokenType());
+        try {
+            ApplicationDTO createdApp = storeRestClient.applicationsApi.applicationsPost(application);
+            if (StringUtils.isEmpty(createdApp.getApplicationId())) {
+                throw new CCTestException("Could not create the application: " + app.getName());
+            }
+            log.info("Application Created. Name:" + app.getName() + " ThrottleTier:" + app.getThrottleTier());
+            return createdApp.getApplicationId();
+        } catch (ApiException e) {
+            log.error("Error msg from APIM: {}", e.getResponseBody());
+            throw new CCTestException("Error while subscribing to API.", e);
         }
-        log.info("Application Created. Name:" + app.getName() + " ThrottleTier:" + app.getThrottleTier());
-        return applicationResponse.getData();
     }
 
     /**
@@ -209,14 +230,20 @@ public class StoreUtils {
         ArrayList<String> grantTypes = new ArrayList<>();
         grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.PASSWORD);
         grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.CLIENT_CREDENTIAL);
-        ApplicationKeyDTO applicationKeyDTO;
+        ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequest = new ApplicationKeyGenerateRequestDTO();
+        applicationKeyGenerateRequest.setValidityTime(TestConstant.DEFAULT_TOKEN_VALIDITY_TIME);
+        applicationKeyGenerateRequest.setCallbackUrl("");
+        applicationKeyGenerateRequest.setKeyType(keyType);
+        applicationKeyGenerateRequest.setScopes(null);
+        applicationKeyGenerateRequest.setGrantTypesToBeSupported(grantTypes);
         try {
-            applicationKeyDTO = storeRestClient.generateKeys(appId,
-                    TestConstant.DEFAULT_TOKEN_VALIDITY_TIME, "", keyType, null, grantTypes);
+        ApiResponse<ApplicationKeyDTO> response = storeRestClient.applicationKeysApi.
+                applicationsApplicationIdGenerateKeysPostWithHttpInfo(appId, applicationKeyGenerateRequest,
+                        storeRestClient.tenantDomain);
+            return response.getData();
         } catch (ApiException e) {
             throw new CCTestException("Error while generating consumer keys from APIM Store", e);
         }
-        return applicationKeyDTO;
     }
 
 
@@ -242,7 +269,8 @@ public class StoreUtils {
                             .getAllSubscriptionsOfApplication(applicationInfoDTO.getApplicationId());
                     if (subsDTO != null && subsDTO.getList() != null) {
                         for (SubscriptionDTO subscriptionDTO : subsDTO.getList()) {
-                            storeRestClient.removeSubscription(subscriptionDTO.getSubscriptionId());
+                            storeRestClient.subscriptionIndividualApi.
+                                    subscriptionsSubscriptionIdDeleteWithHttpInfo(subscriptionDTO.getSubscriptionId(), null);
                         }
                     }
                     if (!APIMIntegrationConstants.OAUTH_DEFAULT_APPLICATION_NAME.equals(applicationInfoDTO.getName())) {
@@ -264,7 +292,8 @@ public class StoreUtils {
                     .getAllSubscriptionsOfApplication(appId);
             if (subsDTO != null && subsDTO.getList() != null) {
                 for (SubscriptionDTO subscriptionDTO : subsDTO.getList()) {
-                    storeRestClient.removeSubscription(subscriptionDTO.getSubscriptionId());
+                    storeRestClient.subscriptionIndividualApi.
+                            subscriptionsSubscriptionIdDeleteWithHttpInfo(subscriptionDTO.getSubscriptionId(), null);
                 }
             }
         } catch (org.wso2.am.integration.clients.store.api.ApiException e) {

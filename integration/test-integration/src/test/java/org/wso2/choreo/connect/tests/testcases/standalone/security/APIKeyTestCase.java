@@ -32,22 +32,22 @@ import java.util.Map;
 
 public class APIKeyTestCase extends ApimBaseTest {
     private String testAPIKey =
-            "eyJ4NXQiOiJOVGRtWmpNNFpEazNOalkwWXpjNU1tWm1PRGd3TVRFM01XWXdOREU1TVdSbFpEZzROemM0WkE9PSIsImtpZCI6Imdhd" +
-                    "GV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib" +
-                    "24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6Il" +
-                    "VubGltaXRlZCIsIm5hbWUiOiJBUElLZXlUZXN0QXBwIiwiaWQiOjg4LCJ1dWlkIjoiYzcwZmVmZjEtYWZhOS00YTA3LTk" +
-                    "0OWEtNjIwNDExZjFjZmVhIn0sImlzcyI6Imh0dHBzOlwvXC9hcGltOjk0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5m" +
-                    "byI6eyJVbmxpbWl0ZWQiOnsidGllclF1b3RhVHlwZSI6InJlcXVlc3RDb3VudCIsImdyYXBoUUxNYXhDb21wbGV4aXR5I" +
-                    "jowLCJncmFwaFFMTWF4RGVwdGgiOjAsInN0b3BPblF1b3RhUmVhY2giOnRydWUsInNwaWtlQXJyZXN0TGltaXQiOjAsIn" +
-                    "NwaWtlQXJyZXN0VW5pdCI6bnVsbH19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJ" +
-                    "zY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkFQSUtleVRlc3RBUEkiLCJjb250ZXh0Ijoi" +
-                    "XC9hcGlLZXlcLzEuMC4wIiwicHVibGlzaGVyIjoiYWRtaW4iLCJ2ZXJzaW9uIjoiMS4wLjAiLCJzdWJzY3JpcHRpb25Ua" +
-                    "WVyIjoiVW5saW1pdGVkIn1dLCJ0b2tlbl90eXBlIjoiYXBpS2V5IiwiaWF0IjoxNjM4MzUzOTA1LCJqdGkiOiJkNjlmND" +
-                    "JlNy1mNWExLTRiZDktOTFjZC0zZmZjYjg5NGQ1OTgifQ==.T_V3sqMPSP3sD4a91HM4dbucac-J9PazE0xkv85D2i5V8p" +
-                    "oj1H9jBaAWLH1PRdDdPpGuV69px3cRKJugyZ43z8DrAwYsMO4DzC_VYAJjAFCHWwg82vjeLC3gQrv0A85cx1p4jyjWAbx" +
-                    "ByLO4351G96ds-yMfKaUF1ZYWzDtnsI1SIzgczXY3OLANdjkNwE0wvlu-UOWSdEEFSdNFDYc4Nn33g2EeL4I9llYltW81" +
-                    "weXA0WnOMK4nvKZtrSQmWTIH-RlfJGR07FZRfFeQi3OfQuOR6puYHBx946PqAbIGj5t2IhmaQl_Bun66AJwkd2nalO2bx" +
-                    "pNEHoTWCtuHN2zVpQ==";
+            "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4Tm1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6Im" +
+                    "dhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkB" +
+                    "jYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidGllclF1b3RhVHlwZSI6bnVsbCwid" +
+                    "GllciI6IlVubGltaXRlZCIsIm5hbWUiOiJBUElLZXlUZXN0QXBwIiwiaWQiOjQsInV1aWQiOiIzMjgxNTk0Ni02N2Y" +
+                    "yLTRjZmYtYmQxYS0zMjJjZTRmY2U4YTAifSwiaXNzIjoiaHR0cHM6XC9cL2FwaW06OTQ0M1wvb2F1dGgyXC90b2tlb" +
+                    "iIsInRpZXJJbmZvIjp7IlVubGltaXRlZCI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1" +
+                    "heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBc" +
+                    "nJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0IjpudWxsfX0sImtleXR5cGUiOiJQUk9EVUNUSU9OIiwic3Vic2Ny" +
+                    "aWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIiLCJuYW1lIjoiQVBJS2V5VGV" +
+                    "zdEFQSSIsImNvbnRleHQiOiJcL2FwaUtleVwvMS4wLjAiLCJwdWJsaXNoZXIiOiJhZG1pbiIsInZlcnNpb24iOiIxLjA" +
+                    "uMCIsInN1YnNjcmlwdGlvblRpZXIiOiJVbmxpbWl0ZWQifV0sInRva2VuX3R5cGUiOiJhcGlLZXkiLCJpYXQiOjE2NDY" +
+                    "0MDg3MjEsImp0aSI6IjY0ODI1OWVjLWY5ZmEtNGY5OC1iYWYzLWUyZmYwYzhjZmRhMyJ9.eGrG8v_BUusNTbrIvN0N3m" +
+                    "OEHLw8zXU8rbAag1U4JUmSLd2hySoiCqMnXXYLI_U01qfGupET3HD3ZVcNOWqgjMa_c_ABGPrVTLNxKmCTpzRNbNbfex" +
+                    "ouvo0b9FcM_5Z_bSgw9kDGqAzdYb8Hi5Ibe2LNDPQf7Kxwc6dd0iKMUvtM9kMdt-IBgRNIDqnx1auSuuuC2SEEQmeDWk" +
+                    "uOAvKifyu075Gv7GyiX6vELfH7xxMMZuq0EAKIYXFRmbO6SLQ1JcqFvUW6Une7NAg7Y4TSfx7v6WzL1dTe8pRaGK7CUR" +
+                    "f76gJQ9PteAgdzpCkIv2XNKYnoOm6BL0ezv8LUiwJPeA==";
 
     @Test(description = "Test to check the API Key in query param is working")
     public void invokeAPIKeyInQueryParamSuccessTest() throws Exception {
