@@ -97,6 +97,8 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 	for i, policy := range policies.Request {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyInFlow, inFlowStats, i, swagger); err == nil {
 			fmtPolicies.Request = append(fmtPolicies.Request, fmtPolicy)
+			loggers.LoggerOasparser.Debugf("Applying operation policy %q in request flow, for API %q in org %q, formatted policy %v",
+				policy.PolicyName, swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
@@ -104,6 +106,8 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 	for i, policy := range policies.Response {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i, swagger); err == nil {
 			fmtPolicies.Response = append(fmtPolicies.Response, fmtPolicy)
+			loggers.LoggerOasparser.Debugf("Applying operation policy %q in response flow, for API %q in org %q, formatted policy %v",
+				policy.PolicyName, swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
@@ -111,6 +115,8 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 	for i, policy := range policies.Fault {
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyFaultFlow, faultFlowStats, i, swagger); err == nil {
 			fmtPolicies.Fault = append(fmtPolicies.Fault, fmtPolicy)
+			loggers.LoggerOasparser.Debugf("Applying operation policy %q in fault flow, for API %q in org %q, formatted policy %v",
+				policy.PolicyName, swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
@@ -212,6 +218,8 @@ func (spec *PolicySpecification) fillDefaultsInPolicy(policy *Policy) {
 		for _, attrib := range spec.Data.PolicyAttributes {
 			if _, ok := paramMap[attrib.Name]; !ok && attrib.DefaultValue != "" {
 				paramMap[attrib.Name] = attrib.DefaultValue
+				loggers.LoggerOasparser.Debugf("Update with policy attribute %q of policy %q with default value from spec",
+					attrib.Name, policy.PolicyName)
 			}
 		}
 		policy.Parameters = paramMap

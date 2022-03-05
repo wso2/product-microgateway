@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.interceptor.opa;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -32,6 +33,7 @@ import org.wso2.choreo.connect.enforcer.commons.opa.OPASecurityException;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -39,6 +41,7 @@ import java.util.Map;
  */
 public class OPADefaultRequestGenerator implements OPARequestGenerator {
     private static final Logger log = LogManager.getLogger(OPADefaultRequestGenerator.class);
+    private static final String TRUE = "TRUE";
 
     @Override
     public String generateRequest(String policyName, String rule, Map<String, String> additionalParameters,
@@ -48,7 +51,9 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         requestPayload.put("input", inputPayload);
 
         // following fields are the same fields sent from the synapse request generator
-        inputPayload.put("transportHeaders", requestContext.getHeaders());
+        JSONObject transportHeaders = new JSONObject(requestContext.getHeaders());
+        transportHeaders.remove(StringUtils.lowerCase(requestContext.getMatchedAPI().getAuthHeader()));
+        inputPayload.put("transportHeaders", transportHeaders);
         inputPayload.put("requestOrigin", requestContext.getClientIp());
         inputPayload.put("method", requestContext.getRequestMethod());
         inputPayload.put("path", requestContext.getRequestPath());
@@ -66,7 +71,7 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         apiContext.put("sandClusterName", requestContext.getSandClusterHeader());
 
         // Authentication Context
-        if ("TRUE".equalsIgnoreCase(additionalParameters.get(OPAConstants.AdditionalParameters.SEND_ACCESS_TOKEN))) {
+        if (TRUE.equalsIgnoreCase(additionalParameters.get(OPAConstants.AdditionalParameters.SEND_ACCESS_TOKEN))) {
             AuthenticationContext authContext = requestContext.getAuthenticationContext();
             JSONObject authContextPayload = new JSONObject();
             authContextPayload.put("token", authContext.getRawToken());
@@ -74,6 +79,15 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
             authContextPayload.put("keyType", authContext.getKeyType());
             inputPayload.put("authenticationContext", authContextPayload);
         }
+
+        // Additional Properties
+        // In APIM additional parameter are appended to the main input payload, handle the same in Choreo Connect
+        String addProps = additionalParameters.get(OPAConstants.AdditionalParameters.ADDITIONAL_PROPERTIES);
+        if (StringUtils.isNotEmpty(addProps)) {
+            Arrays.stream(addProps.split(OPAConstants.AdditionalParameters.PARAM_SEPARATOR))
+                    .forEach(key -> inputPayload.put(key, requestContext.getProperties().get(key)));
+        }
+
         return requestPayload.toString();
     }
 

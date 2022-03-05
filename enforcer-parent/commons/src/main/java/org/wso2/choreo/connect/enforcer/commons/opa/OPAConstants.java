@@ -25,6 +25,7 @@ public class OPAConstants {
      * Constants of the AdditionalParameters map.
      */
     public static class AdditionalParameters {
+        public static final String PARAM_SEPARATOR = ",";
         public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
         public static final String SEND_ACCESS_TOKEN = "sendAccessToken";
     }
