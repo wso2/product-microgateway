@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
@@ -184,6 +185,7 @@ public class OpenAPICodegenUtils {
      * @return openAPI definition as a JSON String
      */
     public static String getOpenAPIAsJson(OpenAPI openAPI, String openAPIContent, Path openAPIPath) {
+        Json.mapper().registerModule(new JavaTimeModule());
         String jsonOpenAPI = Json.pretty(openAPI);
         String openAPIVersion;
         Path fileName = openAPIPath.getFileName();
