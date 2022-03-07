@@ -47,6 +47,8 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
+            - mountPath: /home/wso2/artifacts/apis
+              name: api-artifacts-vol
           image: wso2/choreo-connect-adapter:1.1.0-alpha2
           imagePullPolicy: IfNotPresent
           env:
@@ -97,4 +99,6 @@ spec:
         - name: logconfig-toml-vol
           configMap:
             name: logconfig-toml
+        - name: api-artifacts-vol
+          emptyDir: {}
       restartPolicy: Always

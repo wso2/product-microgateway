@@ -52,6 +52,9 @@ data:
     alias =  "wso2carbon"
     key_password =  "wso2carbon"
 
+    #[keystore.listener_profile]
+    #bind_address = "0.0.0.0"
+
     #[keystore.primary]
     #file_name =  "wso2carbon.jks"
     #type =  "JKS"
@@ -69,6 +72,7 @@ data:
     [[apim.gateway.environment]]
     name = "Default"
     type = "hybrid"
+    provider = "wso2"
     display_in_api_console = true
     description = "This is a hybrid gateway that handles both production and sandbox token traffic."
     show_as_token_endpoint_url = true
@@ -115,7 +119,6 @@ data:
 
     [apim.analytics]
     enable = false
-    config_endpoint = "https://localhost:8080/auth/v1"
     auth_token = ""
 
     [apim.key_manager]
@@ -274,3 +277,8 @@ data:
     proxyPort = 443
     [transport.http.properties]
     proxyPort = 80
+
+    [oauth.grant_type.token_exchange]
+    enable = true
+    allow_refresh_tokens = true
+    iat_validity_period = "1h"

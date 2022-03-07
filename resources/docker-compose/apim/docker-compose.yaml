@@ -12,7 +12,7 @@ services:
       - "5672:5672"
       - "8243:8243"
     volumes:
-      - ./conf/deployment.toml:/home/wso2carbon/wso2am-4.0.0/repository/conf/deployment.toml
+      - ./conf/deployment.toml:/home/wso2carbon/wso2-config-volume/repository/conf/deployment.toml
   router:
     image: wso2/choreo-connect-router:1.1.0-alpha2
     logging:
