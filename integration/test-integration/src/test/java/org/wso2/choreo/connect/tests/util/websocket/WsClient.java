@@ -89,7 +89,7 @@ public final class WsClient {
             }
             WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(
                     uri, WebSocketVersion.V13, null, true, httpHeaders,
-                    65536, true, false, 10000L);
+                    65536, true, false, 15000L);
             final WsClientHandler handler = new WsClientHandler(handshaker, receivedMessages);
 
             Bootstrap b = new Bootstrap();
@@ -107,7 +107,8 @@ public final class WsClient {
                             p.addLast(
                                     new HttpClientCodec(),
                                     new HttpObjectAggregator(8192),
-                                    WebSocketClientCompressionHandler.INSTANCE,
+                                    // TODO: (suksw) Uncomment the following once this is fixed https://github.com/wso2/product-microgateway/issues/2693
+                                    // WebSocketClientCompressionHandler.INSTANCE,
                                     handler);
                         }
                     });
@@ -124,7 +125,7 @@ public final class WsClient {
         } catch (InterruptedException e) {
             log.error("Interrupted while syncing channel connect, close or handshake", e);
         } finally {
-            group.shutdownGracefully();
+            group.shutdownGracefully().syncUninterruptibly();
         }
         return receivedMessages;
     }
