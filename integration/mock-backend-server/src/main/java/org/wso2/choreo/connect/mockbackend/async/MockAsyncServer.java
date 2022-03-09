@@ -89,7 +89,8 @@ public class MockAsyncServer extends Thread {
 
             // handle websocket handshake and the control frames (Close, Ping, Pong)
             pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH,
-                    true // checkStartsWith
+                    true, // checkStartsWith,
+                    15000L // handshakeTimeoutMillis
             ));
 
             // handle custom websocket implementation

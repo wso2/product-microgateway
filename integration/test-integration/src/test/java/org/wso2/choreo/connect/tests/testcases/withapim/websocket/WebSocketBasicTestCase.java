@@ -85,14 +85,20 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
         List<String> messagesToSend = List.of(new String[]{"ping", "close"});
         boolean respondedNotFound = false;
         int serverResponse = 0;
-        try {
-            wsClient.connectAndSendMessages(messagesToSend);
-        } catch (WebSocketClientHandshakeException e) {
-            serverResponse = e.response().status().code();
-            if (404 == e.response().status().code()) {
-                respondedNotFound = true;
+        int maxRetryCount = 10;
+        int retryCount = 0;
+        do {
+            retryCount ++;
+            try {
+                wsClient.connectAndSendMessages(messagesToSend);
+            } catch (WebSocketClientHandshakeException e) {
+                serverResponse = e.response().status().code();
+                if (404 == e.response().status().code()) {
+                    respondedNotFound = true;
+                }
             }
-        }
+        } while (maxRetryCount > retryCount && serverResponse == 503);
+
         Assert.assertTrue(respondedNotFound, "Server responded with " + serverResponse);
     }
 }

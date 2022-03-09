@@ -70,7 +70,7 @@ public final class WsClient {
 
     public ArrayList<String> connectAndSendMessages(List<String> messages) throws CCTestException {
         log.info("Starting websocket client");
-        EventLoopGroup group = new NioEventLoopGroup();
+        EventLoopGroup group = new NioEventLoopGroup(1);
         ArrayList<String> receivedMessages = new ArrayList<>();
         try {
             URI uri = new URI(url);
@@ -159,7 +159,8 @@ public final class WsClient {
                 responses = connectAndSendMessages(messages);
                 respondedNotFound = false;
             } catch (WebSocketClientHandshakeException | CCTestException e) {
-                if("Invalid handshake response getStatus: 404 Not Found".equals(e.getMessage())) {
+                if("Invalid handshake response getStatus: 404 Not Found".equals(e.getMessage()) ||
+                "Invalid handshake response getStatus: 503 Service Unavailable".equals(e.getMessage())) {
                     retryCount++;
                     respondedNotFound = true;
                 } else {
