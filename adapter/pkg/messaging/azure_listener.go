@@ -90,7 +90,7 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 						logger.LoggerMsg.Warnf("Failed to complete the ASB message. %v", err)
 					}
 				}
-				logger.LoggerMsg.Debugf("Processed %v messages from ASB for subscription: %q, topic: %q", len(messages), subName, topic)
+				logger.LoggerMsg.Debugf("Processed %d messages from ASB for subscription: %q, topic: %q", len(messages), subName, topic)
 			}
 		}()
 	}
