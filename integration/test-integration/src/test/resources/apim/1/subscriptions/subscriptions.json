@@ -63,5 +63,15 @@
     "apiName": "WebSocketBasicAPI",
     "appName": "WebSocketBasicApp",
     "tier": "AsyncUnlimited"
+  },
+  {
+    "apiName": "WebsocketApiLevelBandwidthThrottleAPI",
+    "appName": "WebsocketApiLevelThrottleApp",
+    "tier": "AsyncUnlimited"
+  },
+  {
+    "apiName": "WebsocketApiLevelEventCountThrottleAPI",
+    "appName": "WebsocketApiLevelThrottleApp",
+    "tier": "AsyncUnlimited"
   }
 ]

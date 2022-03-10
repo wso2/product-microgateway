@@ -1,0 +1,15 @@
+{
+  "policyName": "5ReqPerMin",
+  "displayName": "5ReqPerMin",
+  "description": "Allows 5 requests (if http or else events if ws) per minute",
+  "isDeployed": false,
+  "type": "AdvancedThrottlePolicy",
+  "defaultLimit": {
+    "type": "REQUESTCOUNTLIMIT",
+    "requestCount": {
+      "timeUnit": "min",
+      "unitTime": 2,
+      "requestCount": 5
+    }
+  }
+}

@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.mockbackend.async.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.slf4j.Logger;
@@ -30,12 +31,37 @@ public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(WsServerFrameHandler.class);
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (msg instanceof WebSocketFrame) {
-            if (msg instanceof TextWebSocketFrame) {
-                log.info("TextWebSocketFrame received. Message: {}", ((TextWebSocketFrame) msg).text());
+    public void channelRead(ChannelHandlerContext ctx, Object frame) {
+
+        if (frame instanceof WebSocketFrame) {
+            if (frame instanceof TextWebSocketFrame) {
+                String msg = ((TextWebSocketFrame) frame).text();
+                if (msg.length() > 50) {
+                    log.info("TextWebSocketFrame with a large payload received.");
+                    ctx.channel().writeAndFlush(
+                            new TextWebSocketFrame("Message received: " + msg));
+                    return;
+                }
+                if (msg.startsWith("send me")) { // This is to ask the server to send the specified number of frames
+                    String[] s = msg.split(" ");
+                    int numberOfTimes = Integer.parseInt(s[2]);
+                    for (int i = 0; i < numberOfTimes; i++) {
+                        log.info("Sending message {}", i);
+                        ctx.channel().writeAndFlush(
+                                new TextWebSocketFrame("Message " + i));
+                        try {
+                            // Remove the following once https://github.com/wso2/product-microgateway/issues/2706 is fixed
+                            Thread.sleep(800);
+                        } catch (InterruptedException ex) {
+                            log.info("Interrupted while waiting before sending the next message");
+                        }
+                    }
+                    ctx.channel().writeAndFlush(new CloseWebSocketFrame());
+                }
+
+                log.info("TextWebSocketFrame received. Message: {}", msg);
                 ctx.channel().writeAndFlush(
-                        new TextWebSocketFrame("Message received: " + ((TextWebSocketFrame) msg).text()));
+                        new TextWebSocketFrame("Message received: " + msg));
             } else {
                 log.info("Unsupported WebSocketFrame");
             }
