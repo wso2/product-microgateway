@@ -271,12 +271,17 @@ public class StoreUtils {
                         for (SubscriptionDTO subscriptionDTO : subsDTO.getList()) {
                             storeRestClient.subscriptionIndividualApi.
                                     subscriptionsSubscriptionIdDeleteWithHttpInfo(subscriptionDTO.getSubscriptionId(), null);
+                            log.info("Deleted Subscription. API: {} App: {}",
+                                    subscriptionDTO.getApiInfo().getName(), subscriptionDTO.getApplicationInfo().getName());
                         }
                     }
                     if (!APIMIntegrationConstants.OAUTH_DEFAULT_APPLICATION_NAME.equals(applicationInfoDTO.getName())) {
                         storeRestClient.deleteApplication(applicationInfoDTO.getApplicationId());
+                        log.info("Deleted App {}", applicationInfoDTO.getName());
                     }
                 }
+            } else {
+                throw new CCTestException("Error while removing Apps from Store. Empty ApplicationListDTO");
             }
         } catch (org.wso2.am.integration.clients.store.api.ApiException e) {
             throw new CCTestException("Error while removing Subscriptions and Apps from Store", e);
@@ -295,6 +300,9 @@ public class StoreUtils {
                     storeRestClient.subscriptionIndividualApi.
                             subscriptionsSubscriptionIdDeleteWithHttpInfo(subscriptionDTO.getSubscriptionId(), null);
                 }
+            } else {
+                throw new CCTestException(
+                        "Error while removing Subscriptions and Apps from Store. Empty SubscriptionListDTO.");
             }
         } catch (org.wso2.am.integration.clients.store.api.ApiException e) {
             throw new CCTestException("Error while removing Subscriptions and Apps from Store", e);

@@ -47,7 +47,7 @@ public class ApimPreparer extends ApimBaseTest {
         PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
 
         ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor(apimArtifactsIndex, user.getUserName(),
-                publisherRestClient, storeRestClient);
+                adminRestClient, publisherRestClient, storeRestClient);
         apimResourceProcessor.createApisAppsSubs();
 
         if(ChoreoConnectImpl.checkCCInstanceHealth()) {
