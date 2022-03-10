@@ -4,8 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.AdvancedPolicyCollectionApi;
+import org.wso2.am.integration.clients.admin.api.ApplicationPolicyCollectionApi;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyInfoDTO;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyListDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyListDTO;
 import org.wso2.am.integration.test.Constants;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -22,7 +25,8 @@ public class AdminUtils {
         advancedPolicyCollectionApi.setApiClient(adminRestClient.apiAdminClient);
         ApiResponse<AdvancedThrottlePolicyListDTO> advancedThrottlePolicyListDTOApiResponse;
         try {
-            advancedThrottlePolicyListDTOApiResponse = advancedPolicyCollectionApi.throttlingPoliciesAdvancedGetWithHttpInfo(Constants.APPLICATION_JSON, null, null);
+            advancedThrottlePolicyListDTOApiResponse = advancedPolicyCollectionApi
+                    .throttlingPoliciesAdvancedGetWithHttpInfo(Constants.APPLICATION_JSON, null, null);
         } catch (org.wso2.am.integration.clients.admin.ApiException e) {
             throw new CCTestException("Error while getting all advanced throttling policies", e);
         }
@@ -34,6 +38,32 @@ public class AdminUtils {
         AdvancedThrottlePolicyListDTO advancedThrottlePolicyListDTO = advancedThrottlePolicyListDTOApiResponse.getData();
         if (advancedThrottlePolicyListDTO.getList() != null) {
             return advancedThrottlePolicyListDTO.getList();
+        } else {
+            throw new CCTestException("Received null as advanced throttling policy list");
+        }
+    }
+
+    public static List<ApplicationThrottlePolicyDTO> getAllApplicationThrottlingPolicies(RestAPIAdminImpl adminRestClient)
+            throws CCTestException {
+        // Currently, RestAPIAdminImpl does not have a method to get all ApplicationThrottlingPolicies.
+        // This is a workaround to use a method that is used internally by RestAPIAdminImpl.
+        ApplicationPolicyCollectionApi applicationPolicyCollectionApi = new ApplicationPolicyCollectionApi();
+        applicationPolicyCollectionApi.setApiClient(adminRestClient.apiAdminClient);
+        ApiResponse<ApplicationThrottlePolicyListDTO> applicationThrottlePolicyListDTOApiResponse;
+        try {
+            applicationThrottlePolicyListDTOApiResponse = applicationPolicyCollectionApi
+                    .throttlingPoliciesApplicationGetWithHttpInfo(Constants.APPLICATION_JSON, null, null);
+        } catch (org.wso2.am.integration.clients.admin.ApiException e) {
+            throw new CCTestException("Error while getting all advanced throttling policies", e);
+        }
+
+        if (applicationThrottlePolicyListDTOApiResponse == null || applicationThrottlePolicyListDTOApiResponse.getData() == null) {
+            throw new CCTestException("Received null response when getting all advanced throttling policies");
+        }
+
+        ApplicationThrottlePolicyListDTO applicationThrottlePolicyListDTO = applicationThrottlePolicyListDTOApiResponse.getData();
+        if (applicationThrottlePolicyListDTO.getList() != null) {
+            return applicationThrottlePolicyListDTO.getList();
         } else {
             throw new CCTestException("Received null as advanced throttling policy list");
         }

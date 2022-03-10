@@ -5,6 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ThrottlePolicyDTO;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.dto.Subscription;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -24,7 +26,6 @@ public class JsonReader {
     private static final String APIM_ARTIFACTS_FOLDER = File.separator + "apim" + File.separator;
     private static final String ADMIN_FOLDER = File.separator + "admin";
     private static final String THROTTLE_FOLDER = File.separator + "throttle";
-    private static final String ADVANCED_FOLDER = File.separator + "advanced";
     private static final String APPLICATIONS_FILE = File.separator + "apps" + File.separator + "applications.json";
     private static final String SUBSCRIPTION_FILE = File.separator + "subscriptions" + File.separator + "subscriptions.json";
 
@@ -32,6 +33,7 @@ public class JsonReader {
     private static final Type TYPE_APPLICATION = new TypeToken<List<Application>>() {}.getType();
     private static final Type TYPE_SUBSCRIPTION = new TypeToken<List<Subscription>>() {}.getType();
     private static final Type TYPE_ADVANCED_THROTTLE_POLICY_DTO = new TypeToken<AdvancedThrottlePolicyDTO>() {}.getType();
+    private static final Type TYPE_APPLICATION_THROTTLE_POLICY_DTO = new TypeToken<ApplicationThrottlePolicyDTO>() {}.getType();
 
     public static Map<String, String> readApiToOpenAPIMap(String apimArtifactsIndex) throws CCTestException {
         Path mapLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + File.separator
@@ -99,29 +101,37 @@ public class JsonReader {
         }
     }
 
-    public static Map<String, AdvancedThrottlePolicyDTO> readAdvancedThrottlePoliciesFromJsonFiles(String apimArtifactsIndex)
-            throws CCTestException {
-        Map<String, AdvancedThrottlePolicyDTO> advancedThrottlePoliciesList = new HashMap<>();
+    public static Map<String, ThrottlePolicyDTO> readThrottlePoliciesFromJsonFiles(
+            String throttleType, String apimArtifactsIndex) throws CCTestException {
+        Map<String, ThrottlePolicyDTO> throttlePoliciesList = new HashMap<>();
         Path apiThrottlePolicyLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
-                APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + ADMIN_FOLDER + THROTTLE_FOLDER + ADVANCED_FOLDER);
+                APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + ADMIN_FOLDER + THROTTLE_FOLDER +
+                File.separator + throttleType);
         try (Stream<Path> paths = Files.walk(apiThrottlePolicyLocation)) {
             for (Iterator<Path> apiFiles = paths.filter(Files::isRegularFile).iterator(); apiFiles.hasNext();) {
                 Path apiFilePath = apiFiles.next();
                 String apiFileContent = Files.readString(apiFilePath);
 
-                AdvancedThrottlePolicyDTO apiPolicyDto = new Gson().fromJson(apiFileContent,
-                        TYPE_ADVANCED_THROTTLE_POLICY_DTO);
-                advancedThrottlePoliciesList.put(apiPolicyDto.getPolicyName(), apiPolicyDto);
+                if (TestConstant.THROTTLING.ADVANCED.equals(throttleType)) {
+                    AdvancedThrottlePolicyDTO apiPolicyDto = new Gson().fromJson(apiFileContent,
+                            TYPE_ADVANCED_THROTTLE_POLICY_DTO);
+                    throttlePoliciesList.put(apiPolicyDto.getPolicyName(), apiPolicyDto);
+                } else if (TestConstant.THROTTLING.APPLICATION.equals(throttleType)) {
+                    ApplicationThrottlePolicyDTO apiPolicyDto = new Gson().fromJson(apiFileContent,
+                            TYPE_APPLICATION_THROTTLE_POLICY_DTO);
+                    throttlePoliciesList.put(apiPolicyDto.getPolicyName(), apiPolicyDto);
+                }
             }
         } catch (IOException e) {
-            throw new CCTestException("Error while reading json for API throttling policies", e);
+            throw new CCTestException("Error while reading json for throttling policies of type " +
+                    throttleType, e);
         }
-        return advancedThrottlePoliciesList;
+        return throttlePoliciesList;
     }
 
-    public static boolean isAdvancedThrottlePolicyFolderExists(String apimArtifactsIndex) {
+    public static boolean isThrottlePolicyFolderExists(String throttleType, String apimArtifactsIndex) {
         Path apiThrottlePolicyLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
-                APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + ADMIN_FOLDER + THROTTLE_FOLDER + ADVANCED_FOLDER);
+                APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + ADMIN_FOLDER + THROTTLE_FOLDER + File.separator + throttleType);
         return Files.exists(apiThrottlePolicyLocation);
     }
 
