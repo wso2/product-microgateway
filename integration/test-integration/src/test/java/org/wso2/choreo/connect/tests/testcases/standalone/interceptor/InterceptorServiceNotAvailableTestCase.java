@@ -37,7 +37,7 @@ public class InterceptorServiceNotAvailableTestCase extends InterceptorBaseTestC
     }
 
     @Override
-    void clearInterceptorStatus() {
+    public void clearInterceptorStatus() {
         // do not clear interceptor service, since the server is not available here.
     }
 

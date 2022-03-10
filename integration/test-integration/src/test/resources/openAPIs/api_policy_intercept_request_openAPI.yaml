@@ -1,12 +1,12 @@
-# NOTE: changes done to this Swagger Definition may require changes in the API "API Policy Interceptor Request"
-# with the OAS: "api_policy_intercept_request_openAPI.yaml" and API YAML file: "api_policy_intercept_request.yaml".
-# This is because, same integration test case classes are shared with that API.
+# This is the same spec used for interceptor test case.
+# The only difference is that, the vendor extension "x-wso2-request-interceptor" and "x-wso2-response-interceptor"
+# is removed.
 
 swagger: '2.0'
 info:
   description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
   version: 1.0.5
-  title: Swagger Petstore Request Intercept
+  title: API Policy Request Interceptor API
   termsOfService: 'http://swagger.io/terms/'
   contact:
     email: apiteam@swagger.io
@@ -32,12 +32,6 @@ x-wso2-endpoints:
       urls:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
-x-wso2-request-interceptor: # API level interceptor definition
-  serviceURL: https://mockBackend:2371
-  includes:
-    - request_headers
-    - request_body
-    - invocation_context
 paths:
   /echo/{id}:
     get:
@@ -61,10 +55,6 @@ paths:
         '200':
           description: successful operation
   /echo/resp-intercept:
-    x-wso2-response-interceptor: # Resource level interceptor definition
-      serviceURL: https://mockBackend:2371
-      includes:
-        - request_headers
     post:
       summary: Echo Request
       description: Echo request back to the client
@@ -76,15 +66,7 @@ paths:
         '200':
           description: successful operation
   /pet/findByStatus/resp-intercept-enabled:
-    x-wso2-response-interceptor: # Resource level interceptor definition
-      serviceURL: https://invalid-service-url:2371
-      includes:
-        - request_headers
     post:
-      x-wso2-response-interceptor: # Operational level interceptor definition
-        serviceURL: https://mockBackend:2371
-        includes:
-          - request_headers
       tags:
         - pet
       summary: Finds Pets by status
@@ -117,10 +99,6 @@ paths:
         '400':
           description: Invalid status value
   /pet/findByStatus/headers-only:
-    x-wso2-request-interceptor:
-      serviceURL: https://mockBackend:2371
-      includes: # "request_body" not included
-        - request_headers
     post:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
