@@ -58,5 +58,13 @@
   {
     "appName": "WebsocketApiLevelThrottleApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "WebSocketAppBandwidthThrottleApp",
+    "throttleTier": "3KbPerMin"
+  },
+  {
+    "appName": "WebSocketAppEventCountThrottleApp",
+    "throttleTier": "5ReqPerMin"
   }
 ]

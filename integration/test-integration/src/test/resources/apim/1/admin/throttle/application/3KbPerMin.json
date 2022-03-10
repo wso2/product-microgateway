@@ -1,0 +1,26 @@
+{
+  "policyName": "3KbPerMin",
+  "displayName": "3KbPerMin",
+  "description": "Allows 3Kb per minute",
+  "isDeployed": false,
+  "type": "ApplicationThrottlePolicy",
+  "defaultLimit": {
+    "type": "BANDWIDTHLIMIT",
+    "requestCount": {
+      "timeUnit": "min",
+      "unitTime": 1,
+      "requestCount": 1000
+    },
+    "bandwidth": {
+      "timeUnit": "min",
+      "unitTime": 2,
+      "dataAmount": 3,
+      "dataUnit": "KB"
+    },
+    "eventCount": {
+      "timeUnit": "min",
+      "unitTime": 1,
+      "eventCount": 1000
+    }
+  }
+}
