@@ -64,6 +64,8 @@ public class ApictlUtils {
             "deploymentEnvironments" + File.separator;
     public static final String API_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator + "apiYaml" +
             File.separator;
+    public static final String PROJECT_SUB_DIRS = TestConstant.TEST_RESOURCES_PATH + File.separator + "projectSubDirs" +
+            File.separator;
     public static final String MGW_ADAPTER_CERTS_PATH = TestConstant.CC_TEMP_PATH + TestConstant.DOCKER_COMPOSE_DIR
             + File.separator + "resources" + File.separator + "adapter" + File.separator + "security"
             + File.separator + "truststore" + File.separator;
@@ -140,6 +142,27 @@ public class ApictlUtils {
     public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
                                      String interceptorCert, String apiYamlFile)
             throws IOException, CCTestException {
+        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, apiYamlFile, null);
+    }
+
+    /**
+     * Create an API project - To be used before deploying an API via the apictl deploy command
+     *
+     * @param openApiFile       openAPI file to create the API project from
+     * @param apiProjectName    expected name of the project that gets created
+     * @param backendCert       name of the backend cert file that should be included in the
+     *                          Endpoint-certificates folder of the API project
+     * @param deployEnvYamlFile deployment_environments.yaml file of API project
+     * @param interceptorCert   name of the interceptor cert file that should be included in the
+     *                          Endpoint-certificates/interceptor folder of the API project
+     * @param apiYamlFile       api.yaml file of the API project
+     * @param projectSubDir     any projectSubDir that need to copy or replace in API project
+     * @throws IOException     if the runtime fails to execute the apictl command
+     * @throws CCTestException if apictl was unable to create the project
+     */
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
+                                     String interceptorCert, String apiYamlFile, String projectSubDir)
+            throws IOException, CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
         if(openApiFile.startsWith("https://") || openApiFile.startsWith("http://")) {
@@ -183,6 +206,11 @@ public class ApictlUtils {
             Utils.copyFile(
                     targetDir + API_YAML_PATH + apiYamlFile,
                     projectPathToCreate + File.separator + "api.yaml");
+        }
+        if (projectSubDir != null) {
+            Utils.copyDirectory(
+                    targetDir + PROJECT_SUB_DIRS + projectSubDir,
+                    projectPathToCreate);
         }
         log.info("Created API project " + apiProjectName);
     }
