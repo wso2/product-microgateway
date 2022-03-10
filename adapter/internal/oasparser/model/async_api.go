@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
@@ -136,12 +137,38 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 		}
 
 		security := getSecurityArray(vendorExtensions)
-		methodsArray = append(methodsArray, NewOperation("GET", security, vendorExtensions))
+		operation := NewOperation("GET", security, vendorExtensions)
+		// The path rewrite operation is applied from async-api definition.
+		// (Where in REST API scenario, it is populated from api.yaml)
+		populatePoliciesFromVendorExtensions(operation, vendorExtensions)
+		methodsArray = append(methodsArray, operation)
 		resource := unmarshalSwaggerResources(channel, methodsArray, channelItem.VendorExtensions)
 		resources = append(resources, &resource)
 	}
 
 	return SortResources(resources)
+}
+
+func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions map[string]interface{}) {
+	if uriMapping, found := vendorExtensions[constants.XUriMapping]; found {
+		// TODO: (VirajSalaka) preprocess to process path param query param conversion.
+		newResourcePath := uriMapping.(string)
+		if strings.Contains(newResourcePath, "?") {
+			newResourcePath = newResourcePath[:strings.Index(newResourcePath, "?")]
+		}
+		policyParameters := make(map[string]interface{})
+		policyParameters[constants.RewritePathResourcePath] = newResourcePath
+		policyParameters[constants.IncludeQueryParams] = true
+		policy := Policy{
+			PolicyName: constants.RewritePathResourcePath,
+			Action:     constants.RewritePathTemplate,
+			Order:      1,
+			Parameters: policyParameters,
+		}
+		operation.policies = OperationPolicies{
+			Request: []Policy{policy},
+		}
+	}
 }
 
 func getSecurityArray(vendorExtensions map[string]interface{}) (security []map[string][]string) {
