@@ -122,14 +122,16 @@ func (asyncAPI AsyncAPI) getSecuritySchemes() []SecurityScheme {
 
 func (asyncAPI AsyncAPI) getResources() []*Resource {
 	resources := []*Resource{}
-	for channel, channelItem := range asyncAPI.Channels { // ex: channel = /notify, channelParam = map[publish:map, subscribe:map]
+	for channel, channelItem := range asyncAPI.Channels {
+		// ex: channel = /notify, channelItem = { Publish:map, Subscribe:map }
 		var pubOrSubVendorExtensions map[string]interface{}
 
 		if channelItem.Publish != nil {
 			pubOrSubVendorExtensions = channelItem.Publish.(map[string]interface{})
 			if channelItem.Subscribe != nil {
 				loggers.LoggerOasparser.Warnf(
-					"Both Publish and Subscribe types exists for the same topic. Prioritizing the extensions under type Publish for the topic %v.", channel)
+					"Both Publish and Subscribe types exists for the same topic. "+
+						"Prioritizing the extensions under type Publish for the topic %v.", channel)
 			}
 		} else if channelItem.Subscribe != nil {
 			pubOrSubVendorExtensions = channelItem.Subscribe.(map[string]interface{})
