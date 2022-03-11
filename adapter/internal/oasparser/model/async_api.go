@@ -159,6 +159,7 @@ func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions
 		policyParameters := make(map[string]interface{})
 		policyParameters[constants.RewritePathResourcePath] = newResourcePath
 		policyParameters[constants.IncludeQueryParams] = true
+		policyParameters[constants.XUriMapping] = uriMapping.(string)
 		policy := Policy{
 			PolicyName: constants.RewritePathResourcePath,
 			Action:     constants.RewritePathTemplate,

@@ -38,6 +38,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
+import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
@@ -150,6 +151,7 @@ public class WebSocketAPI implements API {
     @Override
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
+        responseObject.setRequestPath(requestContext.getRequestPath());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
         if (executeFilterChain(requestContext)) {
             if (analyticsEnabled) {
@@ -231,6 +233,9 @@ public class WebSocketAPI implements API {
         // Cors Filter
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
+        // PathRewriteFilter
+        MediationPolicyFilter mediationPolicyFilter = new MediationPolicyFilter();
+        this.filters.add(mediationPolicyFilter);
         // Auth Filter
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig, null);
