@@ -31,7 +31,6 @@ public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-
         if (msg instanceof WebSocketFrame) {
             if (msg instanceof TextWebSocketFrame) {
                 log.info("TextWebSocketFrame received. Message: {}", ((TextWebSocketFrame) msg).text());

@@ -1107,7 +1107,10 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 		var asyncAPISpec AsyncAPI
 		err = json.Unmarshal(definitionJsn, &asyncAPISpec)
 		if err == nil {
-			err = swagger.SetInfoAsyncAPI(asyncAPISpec)
+			err = asyncAPISpec.unmarshallAPILevelVendorExtensions(definitionJsn)
+			if err == nil {
+				err = swagger.SetInfoAsyncAPI(asyncAPISpec)
+			}
 		}
 	} else {
 		return errors.New("API version not specified or not supported")
