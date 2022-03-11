@@ -25,6 +25,8 @@ import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import java.util.concurrent.TimeUnit;
 
 public class InterceptorRequestFlowAPIPolicyTestcase extends InterceptorRequestFlowTestcase {
+    // TestNG runs same test cases twice when we have test classes that extends the first test class.
+
     @BeforeClass(description = "Init APIs")
     void start() throws Exception {
         // Undeploy APIs tested for Interceptors with the same base path
@@ -34,9 +36,10 @@ public class InterceptorRequestFlowAPIPolicyTestcase extends InterceptorRequestF
         // Create APIs with same base path, that used same interceptor configurations but instead of define them in
         // x-wso2 vendor extensions define them using API Policies.
         ApictlUtils.createProject("api_policy_intercept_request_openAPI.yaml", "api_policy_intercept_request_petstore", "backend_tls.crt", null, "interceptor.crt", "api_policy_intercept_request.yaml", "apiPolicyInterceptRequestAPI");
+        ApictlUtils.createProject("api_policy_intercept_response_openAPI.yaml", "api_policy_intercept_response_petstore", "backend_tls.crt", null, "interceptor.crt", "api_policy_intercept_response.yaml", "apiPolicyInterceptResponseAPI");
 
         ApictlUtils.deployAPI("api_policy_intercept_request_petstore", "test");
-        TimeUnit.SECONDS.sleep(3);
+        ApictlUtils.deployAPI("api_policy_intercept_response_petstore", "test");
+        TimeUnit.SECONDS.sleep(5);
     }
-
 }

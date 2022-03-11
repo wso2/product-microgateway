@@ -1,8 +1,8 @@
 type: api
 version: v4.1.0
 data:
-  name: APIPolicyRequestInterceptorAPI
-  context: /intercept-request
+  name: APIPolicyResponseInterceptorAPI
+  context: /intercept-response
   version: 1.0.5
   provider: admin
   lifeCycleStatus: PUBLISHED
@@ -26,45 +26,28 @@ data:
       target: /echo/{id}
       verb: GET
       operationPolicies:
-        request:
-          -
-            policyName: ccCallInterceptorService
-            parameters:
-              interceptorServiceURL: https://mockBackend:2371
-              includes: request_headers,request_body,invocation_context
-        response: []
-        fault: []
-    -
-      target: /echo/{id}
-      verb: POST
-      operationPolicies:
-        request:
-          -
-            policyName: ccCallInterceptorService
-            parameters:
-              interceptorServiceURL: https://mockBackend:2371
-              includes: request_headers,request_body,invocation_context
-        response: []
-        fault: []
-    -
-      target: /echo/resp-intercept
-      verb: POST
-      operationPolicies:
-        request:
-          -
-            policyName: ccCallInterceptorService
-            parameters:
-              interceptorServiceURL: https://mockBackend:2371
-              includes: request_headers,request_body,invocation_context
+        request: []
         response:
           -
             policyName: ccCallInterceptorService
             parameters:
               interceptorServiceURL: https://mockBackend:2371
-              includes: request_headers
+              includes: request_headers,request_body,response_headers,response_body,invocation_context
         fault: []
     -
-      target: /pet/findByStatus/resp-intercept-enabled
+      target: /echo/{id}
+      verb: POST
+      operationPolicies:
+        request: []
+        response:
+          -
+            policyName: ccCallInterceptorService
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,request_body,response_headers,response_body,invocation_context
+        fault: []
+    -
+      target: /echo/both-intercept/resp-body-not-included
       verb: POST
       operationPolicies:
         request:
@@ -72,7 +55,41 @@ data:
             policyName: ccCallInterceptorService
             parameters:
               interceptorServiceURL: https://mockBackend:2371
-              includes: request_headers,request_body,invocation_context
+              includes: request_headers
+        response:
+          -
+            policyName: ccCallInterceptorService
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,request_body
+        fault: []
+    -
+      target: /pet/findByStatus/req-intercept-enabled
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccCallInterceptorService
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers
+        response:
+          -
+            policyName: ccCallInterceptorService
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,request_body,response_headers,response_body,invocation_context
+        fault: []
+    -
+      target: /pet/findByStatus/interceptor-context
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccCallInterceptorService
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers
         response:
           -
             policyName: ccCallInterceptorService
@@ -84,23 +101,35 @@ data:
       target: /pet/findByStatus/headers-only
       verb: POST
       operationPolicies:
-        request:
+        request: []
+        response:
           -
             policyName: ccCallInterceptorService
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
-        response: []
         fault: []
     -
-      target: /pet/findByStatus/dynamic-ep-echo
+      target: /pet/findByStatus/body-included
       verb: POST
       operationPolicies:
-        request:
+        request: []
+        response:
           -
             policyName: ccCallInterceptorService
             parameters:
               interceptorServiceURL: https://mockBackend:2371
-              includes: request_headers,request_body,invocation_context
-        response: []
+              includes: request_headers,response_body
+        fault: []
+    -
+      target: /pet/findByStatus/update-status-code
+      verb: POST
+      operationPolicies:
+        request: []
+        response:
+          -
+            policyName: ccCallInterceptorService
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,response_body
         fault: []

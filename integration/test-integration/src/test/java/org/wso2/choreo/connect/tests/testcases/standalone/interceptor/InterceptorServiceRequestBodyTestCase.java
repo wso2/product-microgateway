@@ -39,7 +39,7 @@ import java.util.Map;
 
 public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCase {
     @DataProvider(name = "interceptFlowProvider")
-    Object[][] interceptFlowProvider() {
+    public Object[][] interceptFlowProvider() {
         //  {basePath, expectedHandler, isRequestFlow}
         return new Object[][]{
                 {"SwaggerPetstoreRequestIntercept", "/intercept-request", InterceptorConstants.Handler.REQUEST_ONLY, true},

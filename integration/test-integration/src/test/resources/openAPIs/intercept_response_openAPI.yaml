@@ -1,3 +1,7 @@
+# NOTE: changes done to this Swagger Definition may require changes in the API "API Policy Interceptor Response"
+# with the OAS: "api_policy_intercept_response_openAPI.yaml" and API YAML file: "api_policy_intercept_response.yaml".
+# This is because, same integration test case classes are shared with that API.
+
 swagger: '2.0'
 info:
   description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'

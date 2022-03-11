@@ -1,4 +1,4 @@
-# This is the same spec used for interceptor test case "intercept_request_openAPI.yaml".
+# This is the same spec used for interceptor test case "intercept_response_openAPI.yaml".
 # The only difference is that, the vendor extension "x-wso2-request-interceptor" and "x-wso2-response-interceptor"
 # is removed.
 
@@ -6,7 +6,7 @@ swagger: '2.0'
 info:
   description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
   version: 1.0.5
-  title: API Policy Request Interceptor API
+  title: API Policy Response Interceptor API
   termsOfService: 'http://swagger.io/terms/'
   contact:
     email: apiteam@swagger.io
@@ -15,7 +15,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 host: 'mockBackend:2383'
 basePath: /v2
-x-wso2-basePath: /intercept-request
+x-wso2-basePath: /intercept-response
 tags:
   - name: pet
     description: Everything about your Pets
@@ -27,11 +27,6 @@ schemes:
 x-wso2-production-endpoints:
   urls:
     - https://mockBackend:2382/v2
-x-wso2-endpoints:
-  - myDynamicEndpoint:
-      urls:
-        - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
-      type: loadbalance
 paths:
   /echo/{id}:
     get:
@@ -54,7 +49,7 @@ paths:
       responses:
         '200':
           description: successful operation
-  /echo/resp-intercept:
+  /echo/both-intercept/resp-body-not-included:
     post:
       summary: Echo Request
       description: Echo request back to the client
@@ -65,7 +60,7 @@ paths:
       responses:
         '200':
           description: successful operation
-  /pet/findByStatus/resp-intercept-enabled:
+  /pet/findByStatus/req-intercept-enabled:
     post:
       tags:
         - pet
@@ -98,6 +93,17 @@ paths:
               $ref: '#/definitions/Pet'
         '400':
           description: Invalid status value
+  /pet/findByStatus/interceptor-context:
+    post:
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: successful operation
   /pet/findByStatus/headers-only:
     post:
       summary: Finds Pets by status
@@ -109,7 +115,18 @@ paths:
       responses:
         '200':
           description: successful operation
-  /pet/findByStatus/dynamic-ep-echo: # for dynamic endpoint echo test
+  /pet/findByStatus/body-included:
+    post:
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: successful operation
+  /pet/findByStatus/update-status-code:
     post:
       summary: Finds Pets by status
       description: Multiple status values can be provided with comma separated strings
