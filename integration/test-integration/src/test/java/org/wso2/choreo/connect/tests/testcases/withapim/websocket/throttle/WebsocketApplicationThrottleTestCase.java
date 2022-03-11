@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testcases.withapim.websocket;
+package org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -37,8 +37,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Websocket Throttling for Applications in APIM 4.1.0-alpha
+ *
+ * Supported
+ * - Event count throttling via Type REQUESTCOUNTLIMIT
+ * - Bandwidth throttling via Type BANDWIDTHLIMIT
+ *
+ * Not supported
+ * - Request count throttling
+ */
 public class WebsocketApplicationThrottleTestCase extends ApimBaseTest {
-    private static final String API_CONTEXT = "websocket-basic";
+    private static final String API_CONTEXT = "websocket-basic"; // Reusing the WebSocketBasicAPI
     private static final String API_VERSION = "1.0.0";
     private static final String BANDWIDTH_THROTTLE_APPLICATION_NAME = "WebSocketAppBandwidthThrottleApp";
     private static final String EVENT_COUNT_THROTTLE_APPLICATION_NAME = "WebSocketAppEventCountThrottleApp";

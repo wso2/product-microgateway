@@ -82,8 +82,10 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RetryAndTimeoutTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketBasicTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketSecurityDisabledTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebsocketApiLevelThrottleTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebsocketApplicationThrottleTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApiLevelThrottleTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApplicationThrottleTestCase"/>
+           <!-- TODO: (suksw) Eneble this once https://github.com/wso2/product-microgateway/issues/2733 is fixed -->
+<!--           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketSubscriptionThrottleTestCase"/>-->
        </classes>
    </test>
 

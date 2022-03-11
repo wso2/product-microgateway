@@ -196,7 +196,7 @@ public final class WsClient {
         boolean isThrottled = false;
         List<String> messagesToSend = new ArrayList<>();
         messagesToSend.add("send me " + throttleBuffer);
-        List<String> responses = retryConnectUntilDeployed(messagesToSend, 5000);
+        List<String> responses = retryConnectUntilDeployed(messagesToSend, throttleBuffer * 1000);
         if (responses.size() < throttleBuffer) {
             isThrottled = true;
         }

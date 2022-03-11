@@ -66,5 +66,9 @@
   {
     "appName": "WebSocketAppEventCountThrottleApp",
     "throttleTier": "5ReqPerMin"
+  },
+  {
+    "appName": "WebSocketSubscriptionEventCountThrottleApp",
+    "throttleTier": "Unlimited"
   }
 ]

@@ -83,5 +83,10 @@
     "apiName": "WebSocketBasicAPI",
     "appName": "WebSocketAppEventCountThrottleApp",
     "tier": "AsyncUnlimited"
+  },
+  {
+    "apiName": "WebsocketSubscriptionThrottleAPI",
+    "appName": "WebSocketSubscriptionEventCountThrottleApp",
+    "tier": "5EventsPerMin"
   }
 ]
