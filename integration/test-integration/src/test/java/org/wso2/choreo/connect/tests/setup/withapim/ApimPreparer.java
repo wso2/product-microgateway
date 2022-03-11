@@ -48,7 +48,7 @@ public class ApimPreparer extends ApimBaseTest {
 
         ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor(apimArtifactsIndex, user.getUserName(),
                 adminRestClient, publisherRestClient, storeRestClient);
-        apimResourceProcessor.createApisAppsSubs();
+        apimResourceProcessor.populateApiManager();
 
         if(ChoreoConnectImpl.checkCCInstanceHealth()) {
             //wait till all resources deleted and are redeployed

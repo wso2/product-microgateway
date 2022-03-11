@@ -21,10 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyInfoDTO;
-import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
-import org.wso2.am.integration.clients.admin.api.dto.ThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.*;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
@@ -68,6 +65,7 @@ public class ApimResourceProcessor {
 
     Map<String, ThrottlePolicyDTO> advancedThrottlePoliciesList; // API policy name -> API policy DTO
     Map<String, ThrottlePolicyDTO> applicationThrottlePoliciesList; // Application policy name -> Application policy DTO
+    Map<String, ThrottlePolicyDTO> subscriptionThrottlePoliciesList; // Subscription policy name -> Subscription policy DTO
 
     private static final String APIM_ARTIFACTS_FOLDER = File.separator + "apim" + File.separator;
     private static final String APIS_FOLDER = File.separator + "apis";
@@ -87,14 +85,14 @@ public class ApimResourceProcessor {
         this.storeRestClient = storeRestClient;
     }
 
-    public void createApisAppsSubs() throws CCTestException {
-        createAdminPolicies();
+    public void populateApiManager() throws CCTestException {
+        createAdminThrottlePolicies();
         createApisAndUpdateMap();
         createAppsAndUpdateMap();
         createSubscriptions();
     }
 
-    private void createAdminPolicies() throws CCTestException {
+    private void createAdminThrottlePolicies() throws CCTestException {
         // Recreate advanced throttle policies
         if (JsonReader.isThrottlePolicyFolderExists(TestConstant.THROTTLING.ADVANCED, apimArtifactsIndex)) {
             advancedThrottlePoliciesList = JsonReader.readThrottlePoliciesFromJsonFiles(
@@ -113,6 +111,16 @@ public class ApimResourceProcessor {
             createApplicationThrottlingPolicies();
         } else {
             log.info("No application throttle policies for the apimArtifactsIndex {}", apimArtifactsIndex);
+        }
+
+        // Recreate subscription throttle policies
+        if (JsonReader.isThrottlePolicyFolderExists(TestConstant.THROTTLING.SUBSCRIPTION, apimArtifactsIndex)) {
+            subscriptionThrottlePoliciesList = JsonReader.readThrottlePoliciesFromJsonFiles(
+                    TestConstant.THROTTLING.SUBSCRIPTION, apimArtifactsIndex);
+            removeNewlyAddedSubscriptionThrottlingPolicies();
+            createSubscriptionThrottlingPolicies();
+        } else {
+            log.info("No subscription throttle policies for the apimArtifactsIndex {}", apimArtifactsIndex);
         }
     }
 
@@ -184,6 +192,8 @@ public class ApimResourceProcessor {
         }
     }
 
+    // --- Sub Methods for Throttle Policy Creation and Deletion
+
     private void createAdvancedThrottlingPolicies() {
         advancedThrottlePoliciesList.forEach((key, value) -> {
             try {
@@ -192,7 +202,7 @@ public class ApimResourceProcessor {
                 log.error("Error while creating AdvancedThrottlingPolicy. Name: {}, Response: {}",
                         key, e.getResponseBody());
             }
-            log.info("Created advanced throttling policy {}", key);
+            log.info("Created Advanced Throttling policy {}", key);
         });
     }
 
@@ -204,11 +214,23 @@ public class ApimResourceProcessor {
                 log.error("Error while creating ApplicationThrottlingPolicy. Name: {}, Response: {}",
                         key, e.getResponseBody());
             }
-            log.info("Created ApplicationThrottlingPolicy {}", key);
+            log.info("Created Application Throttling Policy {}", key);
         });
     }
 
-    public void removeNewlyAddedAdvancedThrottlingPolicies() throws CCTestException {
+    private void createSubscriptionThrottlingPolicies() {
+        subscriptionThrottlePoliciesList.forEach((key, value) -> {
+            try {
+                adminRestClient.addSubscriptionThrottlingPolicy((SubscriptionThrottlePolicyDTO) value);
+            } catch (org.wso2.am.integration.clients.admin.ApiException e) {
+                log.error("Error while creating SubscriptionThrottlingPolicy. Name: {}, Response: {}",
+                        key, e.getResponseBody());
+            }
+            log.info("Created Subscription Throttling Policy {}", key);
+        });
+    }
+
+    private void removeNewlyAddedAdvancedThrottlingPolicies() throws CCTestException {
         List<AdvancedThrottlePolicyInfoDTO> advancedThrottlingPolicies =
                 AdminUtils.getAllAdvancedThrottlingPolicies(adminRestClient);
         for (AdvancedThrottlePolicyInfoDTO existingPolicy: advancedThrottlingPolicies) {
@@ -216,16 +238,16 @@ public class ApimResourceProcessor {
             if (advancedThrottlePoliciesList.containsKey(existingPolicy.getPolicyName())) {
                 try {
                     adminRestClient.deleteAdvancedThrottlingPolicy(existingPolicy.getPolicyId());
-                    log.info("Deleted AdvancedThrottlingPolicy: {}", existingPolicy.getPolicyName());
+                    log.info("Deleted Advanced Throttling Policy: {}", existingPolicy.getPolicyName());
                 } catch (org.wso2.am.integration.clients.admin.ApiException e) {
-                    log.error("Error while deleting AdvancedThrottlingPolicy. Name: {}", existingPolicy.getPolicyName());
-                    throw new CCTestException("Error while deleting AdvancedThrottlingPolicy", e);
+                    throw new CCTestException(
+                            "Error while deleting AdvancedThrottlingPolicy. Name: " + existingPolicy.getPolicyName(), e);
                 }
             }
         }
     }
 
-    public void removeNewlyAddedApplicationThrottlingPolicies() throws CCTestException {
+    private void removeNewlyAddedApplicationThrottlingPolicies() throws CCTestException {
         List<ApplicationThrottlePolicyDTO> applicationThrottlingPolicies =
                 AdminUtils.getAllApplicationThrottlingPolicies(adminRestClient);
         for (ApplicationThrottlePolicyDTO existingPolicy: applicationThrottlingPolicies) {
@@ -233,10 +255,27 @@ public class ApimResourceProcessor {
             if (applicationThrottlePoliciesList.containsKey(existingPolicy.getPolicyName())) {
                 try {
                     adminRestClient.deleteApplicationThrottlingPolicy(existingPolicy.getPolicyId());
-                    log.info("Deleted ApplicationThrottlingPolicy: {}", existingPolicy.getPolicyName());
+                    log.info("Deleted Application Throttling Policy: {}", existingPolicy.getPolicyName());
                 } catch (org.wso2.am.integration.clients.admin.ApiException e) {
-                    log.error("Error while deleting ApplicationThrottlingPolicy. Name: {}", existingPolicy.getPolicyName());
-                    throw new CCTestException("Error while deleting ApplicationThrottlingPolicy", e);
+                    throw new CCTestException(
+                            "Error while deleting ApplicationThrottlingPolicy. Name: " + existingPolicy.getPolicyName(), e);
+                }
+            }
+        }
+    }
+
+    private void removeNewlyAddedSubscriptionThrottlingPolicies() throws CCTestException {
+        List<SubscriptionThrottlePolicyDTO> subscriptionThrottlingPolicies =
+                AdminUtils.getAllSubscriptionThrottlingPolicies(adminRestClient);
+        for (SubscriptionThrottlePolicyDTO existingPolicy: subscriptionThrottlingPolicies) {
+            // Check if the policy is not a policy that comes with the pack by default (i.e. a new policy)
+            if (subscriptionThrottlePoliciesList.containsKey(existingPolicy.getPolicyName())) {
+                try {
+                    adminRestClient.deleteSubscriptionThrottlingPolicy(existingPolicy.getPolicyId());
+                    log.info("Deleted Subscription Throttling Policy: {}", existingPolicy.getPolicyName());
+                } catch (org.wso2.am.integration.clients.admin.ApiException e) {
+                    throw new CCTestException(
+                            "Error while deleting SubscriptionThrottlingPolicy. Name: " + existingPolicy.getPolicyName(), e);
                 }
             }
         }

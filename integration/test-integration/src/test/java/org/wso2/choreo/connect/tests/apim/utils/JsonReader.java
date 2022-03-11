@@ -24,6 +24,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottlePolicyDTO;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.dto.Subscription;
@@ -52,6 +53,7 @@ public class JsonReader {
     private static final Type TYPE_SUBSCRIPTION = new TypeToken<List<Subscription>>() {}.getType();
     private static final Type TYPE_ADVANCED_THROTTLE_POLICY_DTO = new TypeToken<AdvancedThrottlePolicyDTO>() {}.getType();
     private static final Type TYPE_APPLICATION_THROTTLE_POLICY_DTO = new TypeToken<ApplicationThrottlePolicyDTO>() {}.getType();
+    private static final Type TYPE_SUBSCRIPTION_THROTTLE_POLICY_DTO = new TypeToken<SubscriptionThrottlePolicyDTO>() {}.getType();
 
     public static Map<String, String> readApiToOpenAPIMap(String apimArtifactsIndex) throws CCTestException {
         Path mapLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH + File.separator
@@ -122,10 +124,10 @@ public class JsonReader {
     public static Map<String, ThrottlePolicyDTO> readThrottlePoliciesFromJsonFiles(
             String throttleType, String apimArtifactsIndex) throws CCTestException {
         Map<String, ThrottlePolicyDTO> throttlePoliciesList = new HashMap<>();
-        Path apiThrottlePolicyLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
+        Path throttlePolicyLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
                 APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + ADMIN_FOLDER + THROTTLE_FOLDER +
                 File.separator + throttleType);
-        try (Stream<Path> paths = Files.walk(apiThrottlePolicyLocation)) {
+        try (Stream<Path> paths = Files.walk(throttlePolicyLocation)) {
             for (Iterator<Path> apiFiles = paths.filter(Files::isRegularFile).iterator(); apiFiles.hasNext();) {
                 Path apiFilePath = apiFiles.next();
                 String apiFileContent = Files.readString(apiFilePath);
@@ -138,6 +140,13 @@ public class JsonReader {
                     ApplicationThrottlePolicyDTO apiPolicyDto = new Gson().fromJson(apiFileContent,
                             TYPE_APPLICATION_THROTTLE_POLICY_DTO);
                     throttlePoliciesList.put(apiPolicyDto.getPolicyName(), apiPolicyDto);
+                } else if (TestConstant.THROTTLING.SUBSCRIPTION.equals(throttleType)) {
+                    SubscriptionThrottlePolicyDTO apiPolicyDto = new Gson().fromJson(apiFileContent,
+                            TYPE_SUBSCRIPTION_THROTTLE_POLICY_DTO);
+                    throttlePoliciesList.put(apiPolicyDto.getPolicyName(), apiPolicyDto);
+                } else {
+                    throw new CCTestException("Throttling policy conversion from JSON to Java Object not handled for " +
+                            throttleType);
                 }
             }
         } catch (IOException e) {
