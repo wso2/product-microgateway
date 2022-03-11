@@ -67,15 +67,10 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
-        </classes>
-    </test>
-    <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeoutTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">

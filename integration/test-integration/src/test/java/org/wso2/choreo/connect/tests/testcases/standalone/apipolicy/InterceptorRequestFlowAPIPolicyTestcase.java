@@ -35,8 +35,10 @@ public class InterceptorRequestFlowAPIPolicyTestcase extends InterceptorRequestF
 
         // Create APIs with same base path, that used same interceptor configurations but instead of define them in
         // x-wso2 vendor extensions define them using API Policies.
-        ApictlUtils.createProject("api_policy_intercept_request_openAPI.yaml", "api_policy_intercept_request_petstore", "backend_tls.crt", null, "interceptor.crt", "api_policy_intercept_request.yaml", "apiPolicyInterceptRequestAPI");
-        ApictlUtils.createProject("api_policy_intercept_response_openAPI.yaml", "api_policy_intercept_response_petstore", "backend_tls.crt", null, "interceptor.crt", "api_policy_intercept_response.yaml", "apiPolicyInterceptResponseAPI");
+        ApictlUtils.createProject("api_policy_intercept_request_openAPI.yaml", "api_policy_intercept_request_petstore",
+                "backend_tls.crt", null, "interceptor.crt", "api_policy_intercept_request.yaml", true);
+        ApictlUtils.createProject("api_policy_intercept_response_openAPI.yaml", "api_policy_intercept_response_petstore",
+                "backend_tls.crt", null, "interceptor.crt", "api_policy_intercept_response.yaml", true);
 
         ApictlUtils.deployAPI("api_policy_intercept_request_petstore", "test");
         ApictlUtils.deployAPI("api_policy_intercept_response_petstore", "test");

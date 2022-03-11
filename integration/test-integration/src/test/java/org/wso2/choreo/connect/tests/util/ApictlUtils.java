@@ -64,7 +64,7 @@ public class ApictlUtils {
             "deploymentEnvironments" + File.separator;
     public static final String API_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator + "apiYaml" +
             File.separator;
-    public static final String PROJECT_SUB_DIRS = TestConstant.TEST_RESOURCES_PATH + File.separator + "projectSubDirs" +
+    public static final String API_POLICIES_DIR = TestConstant.TEST_RESOURCES_PATH + File.separator + "policies" +
             File.separator;
     public static final String MGW_ADAPTER_CERTS_PATH = TestConstant.CC_TEMP_PATH + TestConstant.DOCKER_COMPOSE_DIR
             + File.separator + "resources" + File.separator + "adapter" + File.separator + "security"
@@ -142,7 +142,7 @@ public class ApictlUtils {
     public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
                                      String interceptorCert, String apiYamlFile)
             throws IOException, CCTestException {
-        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, apiYamlFile, null);
+        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, apiYamlFile, false);
     }
 
     /**
@@ -156,12 +156,12 @@ public class ApictlUtils {
      * @param interceptorCert   name of the interceptor cert file that should be included in the
      *                          Endpoint-certificates/interceptor folder of the API project
      * @param apiYamlFile       api.yaml file of the API project
-     * @param projectSubDir     any projectSubDir that need to copy or replace in API project
+     * @param isInsertPolicies  whether insert or not API Policies to the API project
      * @throws IOException     if the runtime fails to execute the apictl command
      * @throws CCTestException if apictl was unable to create the project
      */
     public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
-                                     String interceptorCert, String apiYamlFile, String projectSubDir)
+                                     String interceptorCert, String apiYamlFile, boolean isInsertPolicies)
             throws IOException, CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
@@ -173,11 +173,11 @@ public class ApictlUtils {
         String projectPathToCreate = targetDir + API_PROJECTS_PATH + apiProjectName;
 
         //apictl init <projectPath> --oas <openApiFilePath>
-        String[] cmdArray = { INIT };
-        String[] argsArray = { projectPathToCreate, OAS_FLAG, openApiFilePath };
+        String[] cmdArray = {INIT};
+        String[] argsArray = {projectPathToCreate, OAS_FLAG, openApiFilePath};
         String[] responseLines = runApictlCommand(cmdArray, argsArray, 2);
 
-        if (responseLines[1]!= null && !PROJECT_INITIALIZED_RESPONSE.equals(responseLines[1].trim())) {
+        if (responseLines[1] != null && !PROJECT_INITIALIZED_RESPONSE.equals(responseLines[1].trim())) {
             if ((projectPathToCreate + ALREADY_EXISTS_RESPONSE).equals(responseLines[0].trim())) {
                 throw new CCTestException("Project already exists");
             } else {
@@ -207,10 +207,10 @@ public class ApictlUtils {
                     targetDir + API_YAML_PATH + apiYamlFile,
                     projectPathToCreate + File.separator + "api.yaml");
         }
-        if (projectSubDir != null) {
+        if (isInsertPolicies) {
             Utils.copyDirectory(
-                    targetDir + PROJECT_SUB_DIRS + projectSubDir,
-                    projectPathToCreate);
+                    targetDir + API_POLICIES_DIR,
+                    projectPathToCreate+ File.separator + "Policies");
         }
         log.info("Created API project " + apiProjectName);
     }
