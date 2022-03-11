@@ -41,6 +41,7 @@ const (
 	applicationEventType        = "APPLICATION"
 	subscriptionEventType       = "SUBSCRIPTION"
 	scopeEvenType               = "SCOPE"
+	policyEventType             = "POLICY"
 	removeAPIFromGateway        = "REMOVE_API_FROM_GATEWAY"
 	deployAPIToGateway          = "DEPLOY_API_IN_GATEWAY"
 	applicationRegistration     = "APPLICATION_REGISTRATION_CREATE"
@@ -126,8 +127,10 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 		handleApplicationEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, subscriptionEventType) {
 		handleSubscriptionEvents(decodedByte, eventType)
-	} else {
+	} else if strings.Contains(eventType, policyEventType) {
 		handlePolicyEvents(decodedByte, eventType)
+	} else {
+		// filter all other events including HEALTH_CHECK event
 	}
 	return nil
 }
