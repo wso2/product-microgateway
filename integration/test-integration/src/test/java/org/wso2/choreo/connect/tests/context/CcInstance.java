@@ -48,7 +48,7 @@ public class CcInstance extends ChoreoConnectImpl {
      */
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, String gitServiceFile,
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
-                       boolean isInterceptorCertRequired)
+                       boolean isInterceptorCertRequired, boolean isOPAPoliciesMountRequired)
             throws IOException, CCTestException {
         createTmpMgwSetup();
         String targetDir = Utils.getTargetDirPath();
@@ -84,6 +84,10 @@ public class CcInstance extends ChoreoConnectImpl {
             addInterceptorCertToRouterTruststore();
         }
 
+        if (isOPAPoliciesMountRequired) {
+            addOPAPoliciesToDockerContext();
+        }
+
         String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
                         + TestConstant.DOCKER_COMPOSE_YAML_PATH;
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, backendServiceFile);
@@ -109,6 +113,7 @@ public class CcInstance extends ChoreoConnectImpl {
         boolean withCustomJwtTransformer = false;
         boolean withAnalyticsMetricImpl = false;
         boolean isInterceptorCertRequired = false;
+        boolean isOPAPoliciesMountRequired = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -144,10 +149,15 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
+        public Builder withOpaPolicyMount() {
+            this.isOPAPoliciesMountRequired = true;
+            return this;
+        }
+
         public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
-                    this.startupAPIProjectFiles, this.isInterceptorCertRequired);
+                    this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.isOPAPoliciesMountRequired);
             return instance;
         }
     }

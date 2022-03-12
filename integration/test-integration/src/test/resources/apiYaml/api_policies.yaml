@@ -112,50 +112,63 @@ data:
               includeQueryParams: false
         response: []
         fault: []
-#    -
-#      target: /echo-full/headers-policy/{id}
-#      verb: GET
-#      operationPolicies:
-#        request:
-#          -
-#            policyName: ccAddHeader
-#            parameters:
-#              headerName: fooCC
-#              headerValue: barCC
-#          -
-#            policyName: addQueryParam
-#            parameters:
-#              paramKey: helloQ
-#              paramValue: worldQ
-#          -
-#            policyName: ccChangeHTTPMethod
-#            parameters:
-#              currentMethod: GET
-#              updatedMethod: POST
-#          -
-#            policyName: ccRemoveHeader
-#            parameters:
-#              headerName: Foooo
-#          -
-#            policyName: rewriteResourcePath
-#            parameters:
-#              newResourcePath: hello-world
-#              includeQueryParams: true
-#          -
-#            policyName: opaPolicy
-#            parameters:
-#              serverUrl: http://localhost:8080
-#              policy: foo
-#              rule: allow
-#              sendAccessToken: true
-#              additionalProperties: hello,world
-#          -
-#            policyName: ccCallInterceptorService
-#            parameters:
-#              interceptorServiceURL: https://hello-interceptor:8080
-#              includes: request_headers,request_body
-#        response: []
-#        fault: []
+    -
+      target: /echo-full/opa-policy
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: opaPolicy
+            parameters:
+              serverUrl: http://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/opa-policy-no-access-token
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: opaPolicy
+            parameters:
+              serverUrl: http://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: false
+        response: []
+        fault: []
+    -
+      target: /echo-full/opa-policy-invalid-response
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: opaPolicy
+            parameters:
+              serverUrl: http://opa-server:8181/v1/data
+              policy: sample
+              rule: envoy_headers
+              sendAccessToken: true
+        response: []
+        fault: []
 #    -
 #      target: /echo-full/headers-policy/{id}
 #      verb: GET

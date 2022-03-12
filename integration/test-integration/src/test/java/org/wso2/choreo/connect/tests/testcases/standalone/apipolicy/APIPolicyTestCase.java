@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.apipolicy;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
@@ -106,18 +107,60 @@ public class APIPolicyTestCase {
 //        Assert.assertTrue(echoResponse.getQuery().isEmpty(), "Query params has not been discarded");
     }
 
+    @Test(description = "Test OPA API policy - Success Validation")
+    public void testOPAAPIPolicySuccessValidation() throws Exception {
+        headers.put("foo", "bar"); // this header is validated in OPA policy
+        EchoResponse echoResponse = invokeEchoPost("/echo-full/opa-policy" + queryParams, "Hello", headers);
+
+        Assert.assertEquals(echoResponse.getData(), "Hello");
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey1"), "newHeaderVal1");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test OPA API policy - Failed Validation")
+    public void testOPAAPIPolicyFailedValidation() throws Exception {
+        // missing the header "foo"
+        HttpResponse response = invokePost("/echo-full/opa-policy" + queryParams, "Hello", headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
+    }
+
+    @Test(description = "Test OPA API policy - No auth token - Failed Validation")
+    public void testOPAAPIPolicyNoTokenFailedValidation() throws Exception {
+        headers.put("foo", "bar"); // this header is validated in OPA policy
+        // auth key type is validated in OPA policy, since it is missing, validation failed
+        HttpResponse response = invokePost("/echo-full/opa-policy-no-access-token" + queryParams, "Hello", headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
+    }
+
+
+    @Test(description = "Test OPA API policy - Invalid Response from OPA server")
+    public void testOPAAPIPolicyInvalidResponse() throws Exception {
+        HttpResponse response = invokePost("/echo-full/opa-policy-invalid-response" + queryParams, "Hello", headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
+    }
+
     private EchoResponse invokeEchoGet(String resourcePath, Map<String, String> headers) throws Exception {
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(basePath + resourcePath), headers);
+        HttpResponse response = invokeGet(resourcePath, headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertNotNull(response);
         return new Gson().fromJson(response.getData(), EchoResponse.class);
     }
 
     private EchoResponse invokeEchoPost(String resourcePath, String payload, Map<String, String> headers) throws Exception {
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(basePath + resourcePath), payload, headers);
+        HttpResponse response = invokePost(resourcePath, payload, headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertNotNull(response);
         return new Gson().fromJson(response.getData(), EchoResponse.class);
+    }
+
+    private HttpResponse invokeGet(String resourcePath, Map<String, String> headers) throws Exception {
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        return HttpsClientRequest.doGet(Utils.getServiceURLHttps(basePath + resourcePath), headers);
+    }
+
+    private HttpResponse invokePost(String resourcePath, String payload, Map<String, String> headers) throws Exception {
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        return HttpsClientRequest.doPost(Utils.getServiceURLHttps(basePath + resourcePath), payload, headers);
     }
 
     private void assertOriginalClientRequestInfo(EchoResponse echoResponse) {

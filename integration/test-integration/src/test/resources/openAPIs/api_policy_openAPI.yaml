@@ -55,13 +55,19 @@ paths:
         '200':
           description: successful operation
   /echo-full/opa-policy:
-    get:
+    post:
       summary: rewrite based policies appied
       responses:
         '200':
           description: successful operation
-  /echo-full/call-interceptor-policy:
-    get:
+  /echo-full/opa-policy-no-access-token:
+    post:
+      summary: rewrite based policies appied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/opa-policy-invalid-response:
+    post:
       summary: rewrite based policies appied
       responses:
         '200':

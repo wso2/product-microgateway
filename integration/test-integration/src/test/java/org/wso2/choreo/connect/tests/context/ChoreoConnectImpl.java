@@ -211,4 +211,11 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
                     StandardOpenOption.APPEND);
         }
     }
+
+    public static void addOPAPoliciesToDockerContext() throws CCTestException {
+        String opaPoliciesDir = ChoreoConnectImpl.class.getClassLoader()
+                .getResource("opaPolicies").getPath();
+        Utils.copyDirectory(opaPoliciesDir, Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH
+                + TestConstant.DOCKER_COMPOSE_CC_DIR + File.separator + TestConstant.OPA_POLICY_HOST_DIR);
+    }
 }

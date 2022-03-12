@@ -111,6 +111,7 @@ public class TestConstant {
     public static final String RESOURCES_DIR = File.separator + "resources";
     public static final String SECURITY_DIR = File.separator + "security";
     public static final String CC_TEMP_PATH = File.separator + "choreo-connect-temp";
+    public static final String OPA_POLICY_HOST_DIR = "opaPolicies";
 
     public static final String CONFIG_TOML_PATH = CONF_DIR + File.separator + "config.toml";
     public static final String DEPLYMNT_TOML_PATH = CONF_DIR + File.separator + "deployment.toml";

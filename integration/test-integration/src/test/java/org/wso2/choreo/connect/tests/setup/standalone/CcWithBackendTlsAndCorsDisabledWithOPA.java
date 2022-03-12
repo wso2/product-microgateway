@@ -26,13 +26,14 @@ import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.util.concurrent.TimeUnit;
 
-public class CcWithBackendTlsAndCorsDisabled {
+public class CcWithBackendTlsAndCorsDisabledWithOPA {
     CcInstance ccInstance;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         ccInstance = new CcInstance.Builder().withNewConfig("cors-disabled-config.toml")
-                .withBackendServiceFile("backend-service-tls.yaml").build();
+                .withBackendServiceFile("backend-service-tls-with-opa-server.yaml")
+                .withOpaPolicyMount().build();
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
