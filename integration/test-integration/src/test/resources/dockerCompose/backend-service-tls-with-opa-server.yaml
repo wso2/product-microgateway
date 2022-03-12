@@ -11,6 +11,6 @@
       - router
   opa-server:
     image: openpolicyagent/opa:0.37.2-static
-    command: run --server --addr :8181 /policies/sample-policy.rego
+    command: run --server --addr :8181 --tls-private-key-file /opa-volume/certs/server-key.pem --tls-cert-file /opa-volume/certs/server-cert.pem /opa-volume/policies/sample-policy.rego
     volumes:
-      - ./opaPolicies:/policies # the host dir "opaPolicies" is equal to @link{ TestConstant.OPA_POLICY_HOST_DIR }
+      - ./opa-volume:/opa-volume

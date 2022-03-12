@@ -48,7 +48,8 @@ public class CcInstance extends ChoreoConnectImpl {
      */
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, String gitServiceFile,
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
-                       boolean isInterceptorCertRequired, boolean isOPAPoliciesMountRequired)
+                       boolean isInterceptorCertRequired, String enforcerTrustCertsDir, String volumeMountDir
+                       )
             throws IOException, CCTestException {
         createTmpMgwSetup();
         String targetDir = Utils.getTargetDirPath();
@@ -84,8 +85,12 @@ public class CcInstance extends ChoreoConnectImpl {
             addInterceptorCertToRouterTruststore();
         }
 
-        if (isOPAPoliciesMountRequired) {
-            addOPAPoliciesToDockerContext();
+        if (StringUtils.isNotEmpty(enforcerTrustCertsDir)) {
+            addCertsToEnforcerTruststore(enforcerTrustCertsDir);
+        }
+
+        if (StringUtils.isNotEmpty(volumeMountDir)) {
+            copyVolumeMountDirToDockerContext(volumeMountDir);
         }
 
         String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
@@ -108,12 +113,13 @@ public class CcInstance extends ChoreoConnectImpl {
         String dockerComposeFile;
         String confFileName;
         String backendServiceFile;
+        String enforcerTrustCertsDir;
+        String volumeMountDir;
         String gitServiceFile;
         List<String> startupAPIProjectFiles = new ArrayList<>();
         boolean withCustomJwtTransformer = false;
         boolean withAnalyticsMetricImpl = false;
         boolean isInterceptorCertRequired = false;
-        boolean isOPAPoliciesMountRequired = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -124,14 +130,27 @@ public class CcInstance extends ChoreoConnectImpl {
             this.confFileName = confFileName;
             return this;
         }
+
         public Builder withBackendServiceFile(String backendServiceFile){
             this.backendServiceFile = backendServiceFile;
             return this;
         }
+
+        public Builder withEnforcerTrustCertsDir(String enforcerTrustCertsDir){
+            this.enforcerTrustCertsDir = enforcerTrustCertsDir;
+            return this;
+        }
+
+        public Builder withVolumeMountDir(String volumeMountDir) {
+            this.volumeMountDir = volumeMountDir;
+            return this;
+        }
+
         public Builder withGitServiceFile(String gitServiceFile){
             this.gitServiceFile = gitServiceFile;
             return this;
         }
+
         // Currently, both added via the same jar
         public Builder withAllCustomImpls() {
             this.withCustomJwtTransformer = true;
@@ -149,15 +168,12 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
-        public Builder withOpaPolicyMount() {
-            this.isOPAPoliciesMountRequired = true;
-            return this;
-        }
-
         public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
-                    this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.isOPAPoliciesMountRequired);
+                    this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.enforcerTrustCertsDir,
+                    this.volumeMountDir
+            );
             return instance;
         }
     }

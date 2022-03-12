@@ -212,10 +212,17 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         }
     }
 
-    public static void addOPAPoliciesToDockerContext() throws CCTestException {
-        String opaPoliciesDir = ChoreoConnectImpl.class.getClassLoader()
-                .getResource("opaPolicies").getPath();
-        Utils.copyDirectory(opaPoliciesDir, Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH
-                + TestConstant.DOCKER_COMPOSE_CC_DIR + File.separator + TestConstant.OPA_POLICY_HOST_DIR);
+    public static void addCertsToEnforcerTruststore(String certsDir) throws CCTestException {
+        String certsDirPath = ChoreoConnectImpl.class.getClassLoader()
+                .getResource("certs/" + certsDir).getPath();
+        Utils.copyDirectory(certsDirPath, Utils.getTargetDirPath() + File.separator + TestConstant.CC_TEMP_PATH
+                + TestConstant.DOCKER_COMPOSE_DIR + TestConstant.ENFORCER_TRUSTSTORE_DIR);
+    }
+
+    public static void copyVolumeMountDirToDockerContext(String mountDir) throws CCTestException {
+        String volumeMountSrcDir = ChoreoConnectImpl.class.getClassLoader()
+                .getResource("dockerVolumeMounts/" + mountDir).getPath();
+        Utils.copyDirectory(volumeMountSrcDir, Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH
+                + TestConstant.DOCKER_COMPOSE_CC_DIR + File.separator + mountDir);
     }
 }

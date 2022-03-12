@@ -125,7 +125,7 @@ data:
           -
             policyName: opaPolicy
             parameters:
-              serverUrl: http://opa-server:8181/v1/data
+              serverUrl: https://opa-server:8181/v1/data
               policy: sample
               rule: allow
               sendAccessToken: true
@@ -144,7 +144,7 @@ data:
           -
             policyName: opaPolicy
             parameters:
-              serverUrl: http://opa-server:8181/v1/data
+              serverUrl: https://opa-server:8181/v1/data
               policy: sample
               rule: allow
               sendAccessToken: false
@@ -163,7 +163,7 @@ data:
           -
             policyName: opaPolicy
             parameters:
-              serverUrl: http://opa-server:8181/v1/data
+              serverUrl: https://opa-server:8181/v1/data
               policy: sample
               rule: envoy_headers
               sendAccessToken: true
