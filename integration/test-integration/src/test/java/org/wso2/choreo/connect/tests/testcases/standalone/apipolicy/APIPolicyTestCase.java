@@ -103,7 +103,7 @@ public class APIPolicyTestCase {
 
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.DELETE.name());
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path2");
-        // TODO: (renuka) following is failing, fix the bug and uncomment this
+        // TODO: (renuka) following is failing, fix https://github.com/wso2/product-microgateway/issues/2741 and uncomment this
 //        Assert.assertTrue(echoResponse.getQuery().isEmpty(), "Query params has not been discarded");
     }
 
@@ -137,6 +137,24 @@ public class APIPolicyTestCase {
     public void testOPAAPIPolicyInvalidResponse() throws Exception {
         HttpResponse response = invokePost("/echo-full/opa-policy-invalid-response" + queryParams, "Hello", headers);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
+    }
+
+    @Test(description = "Test all API Policies together")
+    public void testAllPoliciesTogether() throws Exception {
+        headers.put("RemoveThisHeader", "Unnecessary Header");
+        headers.put("foo", "bar"); // this header is validated in OPA policy
+        EchoResponse echoResponse = invokeEchoPost("/echo-full/all-policies/123-abc" + queryParams, "Hello World!", headers);
+
+        Assert.assertFalse(echoResponse.getHeaders().containsKey("RemoveThisHeader"),
+                getPolicyFailAssertMessage("Remove Header"));
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("newH1"), "newH1Value",
+                getPolicyFailAssertMessage("Add Header"));
+        Assert.assertEquals(echoResponse.getQuery().get("newQ1"), "newQ1Value",
+                getPolicyFailAssertMessage("Add Query"));
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies"); // TODO: (renuka) check rewrite replace path templates
+        Assert.assertEquals(echoResponse.getData(), "Hello World!");
+        assertOriginalClientRequestInfo(echoResponse);
     }
 
     private EchoResponse invokeEchoGet(String resourcePath, Map<String, String> headers) throws Exception {

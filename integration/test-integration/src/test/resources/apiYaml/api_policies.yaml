@@ -169,135 +169,41 @@ data:
               sendAccessToken: true
         response: []
         fault: []
-#    -
-#      target: /echo-full/headers-policy/{id}
-#      verb: GET
-#      operationPolicies:
-#        request:
-#          -
-#            policyName: ccAddHeader
-#            parameters:
-#              headerName: fooCC
-#              headerValue: barCC
-#          -
-#            policyName: addQueryParam
-#            parameters:
-#              paramKey: helloQ
-#              paramValue: worldQ
-#          -
-#            policyName: ccChangeHTTPMethod
-#            parameters:
-#              currentMethod: GET
-#              updatedMethod: POST
-#          -
-#            policyName: ccRemoveHeader
-#            parameters:
-#              headerName: Foooo
-#          -
-#            policyName: rewriteResourcePath
-#            parameters:
-#              newResourcePath: hello-world
-#              includeQueryParams: true
-#          -
-#            policyName: opaPolicy
-#            parameters:
-#              serverUrl: http://localhost:8080
-#              policy: foo
-#              rule: allow
-#              sendAccessToken: true
-#              additionalProperties: hello,world
-#          -
-#            policyName: ccCallInterceptorService
-#            parameters:
-#              interceptorServiceURL: https://hello-interceptor:8080
-#              includes: request_headers,request_body
-#        response: []
-#        fault: []
-#    -
-#      target: /echo-full/headers-policy/{id}
-#      verb: GET
-#      operationPolicies:
-#        request:
-#          -
-#            policyName: ccAddHeader
-#            parameters:
-#              headerName: fooCC
-#              headerValue: barCC
-#          -
-#            policyName: addQueryParam
-#            parameters:
-#              paramKey: helloQ
-#              paramValue: worldQ
-#          -
-#            policyName: ccChangeHTTPMethod
-#            parameters:
-#              currentMethod: GET
-#              updatedMethod: POST
-#          -
-#            policyName: ccRemoveHeader
-#            parameters:
-#              headerName: Foooo
-#          -
-#            policyName: rewriteResourcePath
-#            parameters:
-#              newResourcePath: hello-world
-#              includeQueryParams: true
-#          -
-#            policyName: opaPolicy
-#            parameters:
-#              serverUrl: http://localhost:8080
-#              policy: foo
-#              rule: allow
-#              sendAccessToken: true
-#              additionalProperties: hello,world
-#          -
-#            policyName: ccCallInterceptorService
-#            parameters:
-#              interceptorServiceURL: https://hello-interceptor:8080
-#              includes: request_headers,request_body
-#        response: []
-#        fault: []
-#    -
-#      target: /echo-full/headers-policy/{id}
-#      verb: GET
-#      operationPolicies:
-#        request:
-#          -
-#            policyName: ccAddHeader
-#            parameters:
-#              headerName: fooCC
-#              headerValue: barCC
-#          -
-#            policyName: addQueryParam
-#            parameters:
-#              paramKey: helloQ
-#              paramValue: worldQ
-#          -
-#            policyName: ccChangeHTTPMethod
-#            parameters:
-#              currentMethod: GET
-#              updatedMethod: POST
-#          -
-#            policyName: ccRemoveHeader
-#            parameters:
-#              headerName: Foooo
-#          -
-#            policyName: rewriteResourcePath
-#            parameters:
-#              newResourcePath: hello-world
-#              includeQueryParams: true
-#          -
-#            policyName: opaPolicy
-#            parameters:
-#              serverUrl: http://localhost:8080
-#              policy: foo
-#              rule: allow
-#              sendAccessToken: true
-#              additionalProperties: hello,world
-#          -
-#            policyName: ccCallInterceptorService
-#            parameters:
-#              interceptorServiceURL: https://hello-interceptor:8080
-#              includes: request_headers,request_body
-#        response: []
-#        fault: []
+    -
+      target: /echo-full/all-policies/{id}
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            parameters:
+              headerName: newH1
+              headerValue: newH1Value
+          -
+            policyName: addQueryParam
+            parameters:
+              paramKey: newQ1
+              paramValue: newQ1Value
+          -
+            policyName: ccChangeHTTPMethod
+            parameters:
+              currentMethod: POST
+              updatedMethod: PUT
+          -
+            policyName: ccRemoveHeader
+            parameters:
+              headerName: RemoveThisHeader
+          -
+            policyName: rewriteResourcePath
+            parameters:
+              newResourcePath: /echo-full/new-path-all-policies
+              includeQueryParams: true
+          -
+            policyName: opaPolicy
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: true
+        response: []
+        fault: []

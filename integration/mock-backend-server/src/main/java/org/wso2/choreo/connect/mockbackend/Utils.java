@@ -19,9 +19,7 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import com.google.gson.Gson;
-import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import org.json.JSONObject;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 
 import javax.net.ssl.KeyManager;

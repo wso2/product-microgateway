@@ -8,10 +8,6 @@ info:
 servers:
   - url: http://mockBackend:2383/v2
 x-wso2-basePath: /api-policy
-#    x-wso2-request-interceptor:
-#      serviceURL: https://mockBackend:2371
-#      includes:
-#        - request_headers
 paths:
   /echo-full/no-policies:
     get:
@@ -56,19 +52,25 @@ paths:
           description: successful operation
   /echo-full/opa-policy:
     post:
-      summary: rewrite based policies appied
+      summary: opa policy applied
       responses:
         '200':
           description: successful operation
   /echo-full/opa-policy-no-access-token:
     post:
-      summary: rewrite based policies appied
+      summary: opa policy applied
       responses:
         '200':
           description: successful operation
   /echo-full/opa-policy-invalid-response:
     post:
-      summary: rewrite based policies appied
+      summary: opa policy applied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/all-policies/{id}:
+    post:
+      summary: all policies together
       responses:
         '200':
           description: successful operation
