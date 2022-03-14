@@ -315,6 +315,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					opI.ClusterName)
 				opID := opI.ClusterName
 				opI.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opID)
+				operationalReqInterceptors[method] = opI // since cluster name is updated
 				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
 				if err != nil {
 					logger.LoggerOasparser.Errorf("Error while adding operational level request intercept external cluster for %v:%v-%v-%v. %v",
@@ -354,6 +355,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					opI.ClusterName)
 				opID := opI.ClusterName
 				opI.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opID)
+				operationalRespInterceptorVal[method] = opI // since cluster name is updated
 				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
 				if err != nil {
 					logger.LoggerOasparser.Errorf("Error while adding operational level response intercept external cluster for %v:%v-%v-%v. %v",
