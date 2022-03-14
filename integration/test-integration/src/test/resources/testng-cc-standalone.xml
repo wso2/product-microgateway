@@ -73,6 +73,15 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
         </classes>
     </test>
+    <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeoutTestCase"/>
+        </classes>
+    </test>
     <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>
