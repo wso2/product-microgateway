@@ -126,9 +126,8 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 		handleSubscriptionEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, policyEventType) {
 		handlePolicyEvents(decodedByte, eventType)
-	} else {
-		// filter all other events including HEALTH_CHECK event
 	}
+	// other events will ignore including HEALTH_CHECK event
 	return nil
 }
 
