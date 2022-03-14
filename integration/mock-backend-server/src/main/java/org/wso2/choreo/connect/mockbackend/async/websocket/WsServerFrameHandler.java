@@ -20,6 +20,10 @@ package org.wso2.choreo.connect.mockbackend.async.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.slf4j.Logger;
@@ -28,6 +32,15 @@ import org.slf4j.LoggerFactory;
 
 public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(WsServerFrameHandler.class);
+    private final String customContext;
+
+    public WsServerFrameHandler() {
+        customContext = "";
+    }
+
+    public WsServerFrameHandler(String backendIdentifier) {
+        customContext = backendIdentifier;
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -36,7 +49,17 @@ public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
             if (msg instanceof TextWebSocketFrame) {
                 log.info("TextWebSocketFrame received. Message: {}", ((TextWebSocketFrame) msg).text());
                 ctx.channel().writeAndFlush(
-                        new TextWebSocketFrame("Message received: " + ((TextWebSocketFrame) msg).text()));
+                        new TextWebSocketFrame("Message received: " + ((TextWebSocketFrame) msg).text() +
+                                customContext));
+            } else if (msg instanceof BinaryWebSocketFrame) {
+                log.info("BinaryWebSocketFrame received. Message: {}", msg);
+                ctx.channel().writeAndFlush(
+                        new BinaryWebSocketFrame(((BinaryWebSocketFrame) msg).content()));
+            } else if (msg instanceof PingWebSocketFrame) {
+                ctx.channel().writeAndFlush(new PongWebSocketFrame());
+            } else if (msg instanceof CloseWebSocketFrame) {
+                ctx.channel().unsafe().closeForcibly();
+            } else if (msg instanceof PongWebSocketFrame) {
             } else {
                 log.info("Unsupported WebSocketFrame");
             }

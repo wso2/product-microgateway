@@ -28,14 +28,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.choreo.connect.mockbackend.async.websocket.WsServerFrameHandler;
+import org.wso2.choreo.connect.mockbackend.async.websocket.WsHttpRequestHandler;
 
 public class MockAsyncServer extends Thread {
     private static final Logger log = LoggerFactory.getLogger(MockAsyncServer.class);
@@ -69,8 +68,6 @@ public class MockAsyncServer extends Thread {
 
     static class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
-        private static final String WEBSOCKET_PATH = "/v2";
-
         private final SslContext sslCtx;
 
         public WebSocketServerInitializer(SslContext sslCtx) {
@@ -86,13 +83,14 @@ public class MockAsyncServer extends Thread {
             pipeline.addLast(new HttpServerCodec());
             pipeline.addLast(new HttpObjectAggregator(65536));
             pipeline.addLast(new WebSocketServerCompressionHandler());
-
-            // handle websocket handshake and the control frames (Close, Ping, Pong)
-            pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
-
-            // handle custom websocket implementation
-            pipeline.addLast(new WsServerFrameHandler());
-            log.info("Initialized pipeline to support WS at path {}", WEBSOCKET_PATH);
+            pipeline.addLast(new WsHttpRequestHandler());
+//
+//            // handle websocket handshake and the control frames (Close, Ping, Pong)
+//            pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
+//
+//            // handle custom websocket implementation
+//            pipeline.addLast(new WsServerFrameHandler());
+//            log.info("Initialized pipeline to support WS at path {}", WEBSOCKET_PATH);
         }
     }
 }

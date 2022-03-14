@@ -36,6 +36,7 @@ import java.util.Map;
 
 public class WebSocketBasicTestCase extends ApimBaseTest {
     private static final String API_CONTEXT = "websocket-basic";
+    private static final String TOPIC_API_CONTEXT = "websocket-topic";
     private static final String API_VERSION = "1.0.0";
     private static final String APPLICATION_NAME = "WebSocketBasicApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
@@ -92,5 +93,44 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
             }
         }
         Assert.assertTrue(respondedNotFound);
+    }
+
+    @Test(description = "Test topics for API with no uri mapping", dependsOnMethods = "testConnectionWithPing")
+    public void testBasicTopicWithNoURIMapping() throws Exception {
+        String topic = "/noMapping";
+        String endpointURL = Utils.getServiceURLWebSocket(TOPIC_API_CONTEXT + "/" + API_VERSION + topic);
+        WsClient wsClient = new WsClient(endpointURL, requestHeaders);
+        String msg = "a text msg that is sent via a web socket connection";
+        List<String> messagesToSend = new ArrayList<>();
+        messagesToSend.add(msg);
+        messagesToSend.add("close");
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        Assert.assertEquals(responses.size(), 1);
+        Assert.assertEquals("Message received: " + msg, responses.get(0));
+    }
+
+    @Test(description = "Test topics for API with uri mapping", dependsOnMethods = "testConnectionWithPing")
+    public void testBasicTopicWithURIMapping() throws Exception {
+        String topic = "/notifications";
+        testTopic(topic, topic);
+    }
+
+    @Test(description = "Test topics for API with uri mapping, including conversion to query params",
+            dependsOnMethods = "testConnectionWithPing")
+    public void testQueryParamConvertedTopicWithURIMapping() throws Exception {
+        String topic = "/rooms/room1";
+        testTopic(topic, "/rooms?room=room1");
+    }
+
+    private void testTopic(String topic, String assertSuffix) throws Exception {
+        String endpointURL = Utils.getServiceURLWebSocket(TOPIC_API_CONTEXT + "/" + API_VERSION + topic);
+        WsClient wsClient = new WsClient(endpointURL, requestHeaders);
+        String msg = "a text msg that is sent via a web socket connection";
+        List<String> messagesToSend = new ArrayList<>();
+        messagesToSend.add(msg);
+        messagesToSend.add("close");
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        Assert.assertEquals(responses.size(), 1);
+        Assert.assertEquals("Message received: " + msg + ":" + assertSuffix, responses.get(0));
     }
 }

@@ -63,5 +63,10 @@
     "apiName": "WebSocketBasicAPI",
     "appName": "WebSocketBasicApp",
     "tier": "AsyncUnlimited"
+  },
+  {
+    "apiName": "WebSocketTopicAPI",
+    "appName": "WebSocketBasicApp",
+    "tier": "AsyncUnlimited"
   }
 ]
