@@ -293,7 +293,7 @@ public class MockBackendProd extends Thread {
             httpServer.createContext(context + "/echo2", Utils::echo);
 
             // echo request body, request headers in echo response payload
-            httpServer.createContext(context + "/echo-full", Utils::echoInsidePayload);
+            httpServer.createContext(context + "/echo-full", Utils::echoFullRequest);
 
             httpServer.start();
         } catch (Exception ex) {

@@ -215,7 +215,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
     public static void addCertsToEnforcerTruststore(String certsDir) throws CCTestException {
         String certsDirPath = ChoreoConnectImpl.class.getClassLoader()
                 .getResource("certs/" + certsDir).getPath();
-        Utils.copyDirectory(certsDirPath, Utils.getTargetDirPath() + File.separator + TestConstant.CC_TEMP_PATH
+        Utils.copyDirectory(certsDirPath, Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH
                 + TestConstant.DOCKER_COMPOSE_DIR + TestConstant.ENFORCER_TRUSTSTORE_DIR);
     }
 

@@ -103,8 +103,7 @@ public class APIPolicyTestCase {
 
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.DELETE.name());
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path2");
-        // TODO: (renuka) following is failing, fix https://github.com/wso2/product-microgateway/issues/2741 and uncomment this
-//        Assert.assertTrue(echoResponse.getQuery().isEmpty(), "Query params has not been discarded");
+        Assert.assertTrue(echoResponse.getQuery().isEmpty(), "Query params has not been discarded");
     }
 
     @Test(description = "Test OPA API policy - Success Validation")
