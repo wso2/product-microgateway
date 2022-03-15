@@ -84,13 +84,6 @@ public class MockAsyncServer extends Thread {
             pipeline.addLast(new HttpObjectAggregator(65536));
             pipeline.addLast(new WebSocketServerCompressionHandler());
             pipeline.addLast(new WsHttpRequestHandler());
-//
-//            // handle websocket handshake and the control frames (Close, Ping, Pong)
-//            pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
-//
-//            // handle custom websocket implementation
-//            pipeline.addLast(new WsServerFrameHandler());
-//            log.info("Initialized pipeline to support WS at path {}", WEBSOCKET_PATH);
         }
     }
 }

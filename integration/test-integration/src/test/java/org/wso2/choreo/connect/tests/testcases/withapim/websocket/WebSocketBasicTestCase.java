@@ -85,14 +85,22 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
         WsClient wsClient = new WsClient(endpointURL, requestHeaders);
         List<String> messagesToSend = List.of(new String[]{"ping", "close"});
         boolean respondedNotFound = false;
-        try {
-            wsClient.connectAndSendMessages(messagesToSend);
-        } catch (WebSocketClientHandshakeException e) {
-            if (404 == e.response().status().code()) {
-                respondedNotFound = true;
+        int serverResponse = 0;
+        int maxRetryCount = 10;
+        int retryCount = 0;
+        do {
+            retryCount ++;
+            try {
+                wsClient.connectAndSendMessages(messagesToSend);
+            } catch (WebSocketClientHandshakeException e) {
+                serverResponse = e.response().status().code();
+                if (404 == e.response().status().code()) {
+                    respondedNotFound = true;
+                }
             }
-        }
-        Assert.assertTrue(respondedNotFound);
+        } while (maxRetryCount > retryCount && serverResponse == 503);
+
+        Assert.assertTrue(respondedNotFound, "Server responded with " + serverResponse);
     }
 
     @Test(description = "Test topics for API with no uri mapping", dependsOnMethods = "testConnectionWithPing")

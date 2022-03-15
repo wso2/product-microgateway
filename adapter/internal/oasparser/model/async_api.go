@@ -17,6 +17,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -57,12 +58,13 @@ type Server struct {
 
 // ChannelItem in AsyncAPI channels
 type ChannelItem struct {
-	Ref              string                 `json:"$ref,omitempty"`
-	Subscribe        interface{}            `json:"subscribe,omitempty"` // TODO: (suksw) OperationAsync or $ref
-	Publish          interface{}            `json:"publish,omitempty"`   // TODO: (suksw) OperationAsync or $ref
-	Parameters       map[string]interface{} `json:"parameters,omitempty"`
-	Bindings         map[string]interface{} `json:"bindings,omitempty"`
-	VendorExtensions map[string]interface{} `json:"-"`
+	Ref                  string                 `json:"$ref,omitempty"`
+	Subscribe            interface{}            `json:"subscribe,omitempty"` // TODO: (suksw) OperationAsync or $ref
+	Publish              interface{}            `json:"publish,omitempty"`   // TODO: (suksw) OperationAsync or $ref
+	Parameters           map[string]interface{} `json:"parameters,omitempty"`
+	Bindings             map[string]interface{} `json:"bindings,omitempty"`
+	XAuthType            string                 `json:"x-auth-type,omitempty"`
+	XWso2DisableSecurity bool                   `json:"x-wso2-disable-security,omitempty"`
 }
 
 // OperationAsync is the Operation object that includes the message object
@@ -82,6 +84,7 @@ type OperationAsync struct {
 // SetInfoAsyncAPI populates the MgwSwagger object with information in asyncapi.yaml.
 func (swagger *MgwSwagger) SetInfoAsyncAPI(asyncAPI AsyncAPI) error {
 	swagger.vendorExtensions = asyncAPI.VendorExtensions
+	swagger.disableSecurity = ResolveDisableSecurity(asyncAPI.VendorExtensions)
 	swagger.securityScheme = asyncAPI.getSecuritySchemes()
 	swagger.resources = asyncAPI.getResources()
 
@@ -120,29 +123,39 @@ func (asyncAPI AsyncAPI) getSecuritySchemes() []SecurityScheme {
 func (asyncAPI AsyncAPI) getResources() []*Resource {
 	resources := []*Resource{}
 	for channel, channelItem := range asyncAPI.Channels {
-		var methodsArray []*Operation
-		var vendorExtensions map[string]interface{}
-		if channelItem.Publish == nil && channelItem.Subscribe == nil {
+		// ex: channel = /notify, channelItem = { Publish:map, Subscribe:map }
+		var pubOrSubVendorExtensions map[string]interface{}
+
+		if channelItem.Publish != nil {
+			pubOrSubVendorExtensions = channelItem.Publish.(map[string]interface{})
+			if channelItem.Subscribe != nil {
+				loggers.LoggerOasparser.Warnf(
+					"Both Publish and Subscribe types exists for the same topic. "+
+						"Prioritizing the extensions under type Publish for the topic %v.", channel)
+			}
+		} else if channelItem.Subscribe != nil {
+			pubOrSubVendorExtensions = channelItem.Subscribe.(map[string]interface{})
+		} else {
 			loggers.LoggerOasparser.Warnf(
 				"The topic does not include a Publish or a Subscribe definition. Discarding the topic %v.", channel)
 			continue
-		} else if channelItem.Publish != nil && channelItem.Subscribe != nil {
-			loggers.LoggerOasparser.Warnf(
-				"Both Publish and Subscribe types exists for the same topic. Prioritizing the extensions under type Publish for the topic %v.", channel)
-			vendorExtensions = channelItem.Publish.(map[string]interface{})
-		} else if channelItem.Publish != nil { // only Publish has been defined
-			vendorExtensions = channelItem.Publish.(map[string]interface{})
-		} else { // only Subscribe has been defined
-			vendorExtensions = channelItem.Subscribe.(map[string]interface{})
 		}
 
-		security := getSecurityArray(vendorExtensions)
-		operation := NewOperation("GET", security, vendorExtensions)
+		if channelItem.XAuthType == "None" || channelItem.XWso2DisableSecurity {
+			pubOrSubVendorExtensions[constants.XWso2DisableSecurity] = true
+		}
+
+		security := getSecurityArray(pubOrSubVendorExtensions)
+		operation := NewOperation("GET", security, pubOrSubVendorExtensions)
 		// The path rewrite operation is applied from async-api definition.
 		// (Where in REST API scenario, it is populated from api.yaml)
-		populatePoliciesFromVendorExtensions(operation, vendorExtensions)
+		populatePoliciesFromVendorExtensions(operation, pubOrSubVendorExtensions)
+		var methodsArray []*Operation
 		methodsArray = append(methodsArray, operation)
-		resource := unmarshalSwaggerResources(channel, methodsArray, channelItem.VendorExtensions)
+
+		// we ignore other topic vendor extensions except x-auth-type and x-wso2-disable-security
+		channelVendorExtensions := map[string]interface{}{}
+		resource := unmarshalSwaggerResources(channel, methodsArray, channelVendorExtensions)
 		resources = append(resources, &resource)
 	}
 
@@ -185,4 +198,21 @@ func getSecurityArray(vendorExtensions map[string]interface{}) (security []map[s
 		security = append(security, securityItem)
 	}
 	return security
+}
+
+func (asyncAPI AsyncAPI) unmarshallAPILevelVendorExtensions(b []byte) error {
+	var apiDef map[string]interface{}
+	if err := json.Unmarshal(b, &apiDef); err != nil {
+		return errors.New("Error while unmarshalling API level vendor extensions." + err.Error())
+	}
+	for key, value := range apiDef {
+		keyl := strings.ToLower(key)
+		if strings.HasPrefix(keyl, "x-") {
+			if asyncAPI.VendorExtensions == nil {
+				asyncAPI.VendorExtensions = map[string]interface{}{}
+			}
+			asyncAPI.VendorExtensions[key] = value
+		}
+	}
+	return nil
 }
