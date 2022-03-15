@@ -176,6 +176,17 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 			result:  nil,
 			message: "when malformed endpoint is provided",
 		},
+		{
+			input: "  https://petstore.io:8001/api/v2 ",
+			result: &Endpoint{
+				Host:     "petstore.io",
+				Basepath: "/api/v2",
+				Port:     8001,
+				URLType:  "https",
+				RawURL:   "https://petstore.io:8001/api/v2",
+			},
+			message: "When leading and trailing spaces present",
+		},
 	}
 	for _, item := range dataItems {
 		resultResources, err := getHTTPEndpoint(item.input)
