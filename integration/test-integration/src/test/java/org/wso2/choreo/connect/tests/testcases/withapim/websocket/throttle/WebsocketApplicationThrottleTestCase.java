@@ -80,7 +80,8 @@ public class WebsocketApplicationThrottleTestCase extends ApimBaseTest {
         }
         messages.add("close");
         List<String> responses = wsClient.retryConnectUntilDeployed(messages, 0);
-        Assert.assertTrue(responses.size() < 10, "Websocket connection was not throttled on bandwidth.");
+        Assert.assertTrue(responses.size() >= 3 && responses.size() < 10,
+                "Websocket connection was not throttled on bandwidth.");
     }
 
     @Test(description = "Test API level throttling with default limits")
