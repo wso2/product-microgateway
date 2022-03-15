@@ -12,6 +12,7 @@
       "eventCount": 5
     }
   },
+  "stopOnQuotaReach":true,
   "rateLimitCount": 1000,
   "subscriberCount": 50,
   "billingPlan": "FREE"
