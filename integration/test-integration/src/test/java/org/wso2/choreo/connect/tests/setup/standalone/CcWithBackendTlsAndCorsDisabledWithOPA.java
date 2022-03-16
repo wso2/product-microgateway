@@ -26,13 +26,15 @@ import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.util.concurrent.TimeUnit;
 
-public class CcWithBackendTlsAndCorsDisabled {
+public class CcWithBackendTlsAndCorsDisabledWithOPA {
     CcInstance ccInstance;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         ccInstance = new CcInstance.Builder().withNewConfig("cors-disabled-config.toml")
-                .withBackendServiceFile("backend-service-tls.yaml").build();
+                .withBackendServiceFile("backend-service-tls-with-opa-server.yaml")
+                .withEnforcerTrustCertsDir("enforcer-truststore-opa-certs")
+                .withVolumeMountDir("opa-volume").build();
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
@@ -42,6 +44,7 @@ public class CcWithBackendTlsAndCorsDisabled {
         ApictlUtils.createProject("intercept_response_openAPI.yaml", "intercept_response_petstore", "backend_tls.crt", null, "interceptor.crt", null);
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore");
         ApictlUtils.createProject( "api_key_swagger_security_openAPI.yaml", "apikey");
+        ApictlUtils.createProject( "api_policy_openAPI.yaml", "api_policy", null, null, null, "api_policies.yaml", true);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -51,6 +54,7 @@ public class CcWithBackendTlsAndCorsDisabled {
         ApictlUtils.deployAPI("intercept_response_petstore", "test");
         ApictlUtils.deployAPI("cors_petstore", "test");
         ApictlUtils.deployAPI("apikey", "test");
+        ApictlUtils.deployAPI("api_policy", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

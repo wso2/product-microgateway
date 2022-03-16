@@ -119,6 +119,8 @@ public class TestConstant {
 
     public static final String ROUTER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "router"
             + SECURITY_DIR + File.separator + "truststore";
+    public static final String ENFORCER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "enforcer"
+            + SECURITY_DIR + File.separator + "truststore";
     public static final String DOCKER_COMPOSE_CC_DIR = DOCKER_COMPOSE_DIR + File.separator + "choreo-connect";
     public static final String DROPINS_FOLDER_PATH = DOCKER_COMPOSE_DIR + RESOURCES_DIR
             + File.separator + "enforcer" + File.separator + "dropins";

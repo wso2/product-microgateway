@@ -46,12 +46,12 @@ public class InterceptorBaseTestCase {
     String statusBodyType;
 
     @BeforeClass(description = "initialise the setup")
-    void setup() throws Exception {
+    public void setup() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
 
     @BeforeMethod(description = "clear the status of interceptor management service")
-    void clearInterceptorStatus() throws Exception {
+    public void clearInterceptorStatus() throws Exception {
         HttpClientRequest.doGet(Utils.getMockInterceptorManagerHttp("/interceptor/clear-status"));
     }
 

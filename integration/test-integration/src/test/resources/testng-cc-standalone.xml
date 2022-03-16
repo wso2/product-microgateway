@@ -60,13 +60,17 @@
     </test>
     <test name="cc-with-backend-tls" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabled"/>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabledWithOPA"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
