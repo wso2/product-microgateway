@@ -20,6 +20,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -115,10 +116,17 @@ type PolicyList []Policy
 
 // Policy holds APIM policies
 type Policy struct {
-	PolicyName string      `json:"policyName,omitempty"`
-	Action     string      `json:"-"`
-	Order      int         `json:"order,omitempty"`
-	Parameters interface{} `json:"parameters,omitempty"`
+	PolicyName    string      `json:"policyName,omitempty"`
+	PolicyVersion string      `json:"policyVersion,omitempty"`
+	Action        string      `json:"-"`
+	Order         int         `json:"order,omitempty"`
+	Parameters    interface{} `json:"parameters,omitempty"`
+}
+
+// GetFullName returns the fully qualified name of the policy
+// This should be equal to the policy spec/def file name
+func (p *Policy) GetFullName() string {
+	return fmt.Sprintf("%s_%s", p.PolicyName, p.PolicyVersion)
 }
 
 // NewAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json

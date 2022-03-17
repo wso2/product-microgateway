@@ -5,7 +5,7 @@ data:
   name: rewriteResourcePath
   version: v1
   displayName: Rewrite Resource Path
-  description: Rewrite the resource path of a request
+  description: This policy allows you to rewrite the resource path of a request
   applicableFlows:
    - request
   supportedGateways:
@@ -18,7 +18,7 @@ data:
     name: newResourcePath
     displayName: New Resource Path
     description: Name of the new resource path
-    validationRegex: ^([a-zA-Z_][a-zA-Z\d_\-\ ]*)$
+    validationRegex: "^/?([a-zA-Z0-9!@#\\$%\\^\\&*\\)\\(+=._\\-~:,\\?{}/]*)$"
     type: String
     allowedValues: []
     required: true
@@ -29,5 +29,5 @@ data:
     validationRegex: ^(true|false)$
     type: Boolean
     allowedValues: []
+    defaultValue: "true"
     required: false
-  multipleAllowed: false

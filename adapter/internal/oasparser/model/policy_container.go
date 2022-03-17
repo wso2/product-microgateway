@@ -65,6 +65,7 @@ type PolicySpecification struct {
 	Version string `yaml:"version" json:"version"`
 	Data    struct {
 		Name              string   `yaml:"name"`
+		Version           string   `yaml:"version"`
 		ApplicableFlows   []string `yaml:"applicableFlows"`
 		SupportedGateways []string `yaml:"supportedGateways"`
 		SupportedAPITypes []string `yaml:"supportedApiTypes"`
@@ -98,7 +99,7 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyInFlow, inFlowStats, i, swagger); err == nil {
 			fmtPolicies.Request = append(fmtPolicies.Request, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in request flow, for API %q in org %q, formatted policy %v",
-				policy.PolicyName, swagger.GetID(), swagger.OrganizationID, fmtPolicy)
+				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
@@ -107,7 +108,7 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i, swagger); err == nil {
 			fmtPolicies.Response = append(fmtPolicies.Response, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in response flow, for API %q in org %q, formatted policy %v",
-				policy.PolicyName, swagger.GetID(), swagger.OrganizationID, fmtPolicy)
+				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
@@ -116,7 +117,7 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyFaultFlow, faultFlowStats, i, swagger); err == nil {
 			fmtPolicies.Fault = append(fmtPolicies.Fault, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in fault flow, for API %q in org %q, formatted policy %v",
-				policy.PolicyName, swagger.GetID(), swagger.OrganizationID, fmtPolicy)
+				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
@@ -125,23 +126,23 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 
 // getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
 func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int, swagger *MgwSwagger) (Policy, error) {
-	// using index i instead of struct to validate policy against multiple allowed and apply only first if multiple exists
-	spec := p[policy.PolicyName].Specification
+	plcFullName := policy.GetFullName()
+	spec := p[plcFullName].Specification
 	if err := spec.validatePolicy(policy, flow, stats, index); err != nil {
 		swagger.GetID()
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Operation policy validation failed for API \"%s\" in org \"%s\":, ignoring the policy \"%s\": %v", swagger.GetID(), swagger.OrganizationID, policy.PolicyName, err),
+			Message:   fmt.Sprintf("Operation policy validation failed for API %q in org %q:, ignoring the policy %q: %v", swagger.GetID(), swagger.OrganizationID, plcFullName, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2204,
 		})
 		return policy, err
 	}
 
-	defRaw := p[policy.PolicyName].Definition.RawData
+	defRaw := p[plcFullName].Definition.RawData
 	t, err := template.New("policy-def").Parse(string(defRaw))
 	if err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing the operation policy definition \"%s\" into go template of the API \"%s\" in org \"%s\": %v", policy.PolicyName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing the operation policy definition %q into go template of the API %q in org %q: %v", plcFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2205,
 		})
@@ -152,7 +153,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	err = t.Execute(&out, policy.Parameters)
 	if err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing operation policy definition \"%s\" of the API \"%s\" in org \"%s\": %v", policy.PolicyName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing operation policy definition \"%s\" of the API \"%s\" in org \"%s\": %v", plcFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2206,
 		})
@@ -162,7 +163,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	def := PolicyDefinition{}
 	if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing formalized operation policy definition \"%s\" into yaml of the API \"%s\" in org \"%s\": %v", policy.PolicyName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing formalized operation policy definition \"%s\" into yaml of the API \"%s\" in org \"%s\": %v", plcFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2207,
 		})
@@ -179,11 +180,12 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 
 // validatePolicy validates the given policy against the spec
 func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int) error {
-	if spec.Data.Name != policy.PolicyName {
-		return fmt.Errorf("invalid policy specification, spec name \"%s\" and policy name \"%s\" mismatch", spec.Data.Name, policy.PolicyName)
+	if spec.Data.Name != policy.PolicyName || spec.Data.Version != policy.PolicyVersion {
+		return fmt.Errorf("invalid policy specification, spec name %q:%q and policy name %q:%q mismatch",
+			spec.Data.Name, spec.Data.Version, policy.PolicyName, policy.PolicyVersion)
 	}
 	if !arrayContains(spec.Data.ApplicableFlows, string(flow)) {
-		return fmt.Errorf("policy flow \"%s\" not supported", flow)
+		return fmt.Errorf("policy flow %q not supported", flow)
 	}
 	if !arrayContains(spec.Data.SupportedGateways, policyCCGateway) {
 		return errors.New("choreo connect gateway not supported")

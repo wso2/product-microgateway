@@ -36,8 +36,9 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 	}{
 		{
 			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,
 			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
@@ -47,8 +48,9 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 		},
 		{
 			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyOutFlow,
 			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
@@ -58,8 +60,9 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 		},
 		{
 			policy: Policy{
-				PolicyName: "invalidName",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
+				PolicyName:    "invalidName",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,
 			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
@@ -69,8 +72,9 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 		},
 		{
 			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooValue": "admin"},
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooValue": "admin"},
 			},
 			flow:       policyInFlow,
 			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
@@ -80,8 +84,9 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 		},
 		{
 			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,
 			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
@@ -110,7 +115,8 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 			OperationPolicies: OperationPolicies{
 				Request: PolicyList{
 					{
-						PolicyName: "fooAddRequestHeader",
+						PolicyName:    "fooAddRequestHeader",
+						PolicyVersion: "v1",
 						Parameters: map[string]interface{}{
 							"fooName":  "fooHeaderName",
 							"fooValue": "fooHeaderValue",
@@ -125,7 +131,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 	proj := ProjectAPI{
 		APIYaml: apiYaml,
 		Policies: map[string]PolicyContainer{
-			"fooAddRequestHeader": {
+			"fooAddRequestHeader_v1": {
 				Specification: spec,
 				Definition: PolicyDefinition{
 					RawData: getSampleTestPolicyDef(),
@@ -137,8 +143,9 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 	expFormattedP := OperationPolicies{
 		Request: PolicyList{
 			{
-				PolicyName: "fooAddRequestHeader",
-				Action:     "SET_HEADER",
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Action:        "SET_HEADER",
 				Parameters: map[string]interface{}{
 					"headerName":  "fooHeaderName",
 					"headerValue": "fooHeaderValue",
@@ -153,6 +160,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 func getSampleTestPolicySpec() PolicySpecification {
 	spec := PolicySpecification{}
 	spec.Data.Name = "fooAddRequestHeader"
+	spec.Data.Version = "v1"
 	spec.Data.ApplicableFlows = []string{"request"}
 	spec.Data.SupportedGateways = []string{"ChoreoConnect"}
 	spec.Data.MultipleAllowed = false

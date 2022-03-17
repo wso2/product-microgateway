@@ -1,14 +1,10 @@
-<!-- NOTE: J2 files should be ignored in choreo connect, this is a definition file for synapse gateway -->
-
 <opa>
    <serverUrl>{{serverUrl}}</serverUrl>
    {% if accessToken %}
    <accessKey>{{accessKey}}</accessKey>
    {% endif %}
    <policy>{{policy}}</policy>
-   {% if rule %}
    <rule>{{rule}}</rule>
-   {% endif %}
    <requestGenerator>org.wso2.carbon.apimgt.gateway.opa.APIMOPARequestGenerator</requestGenerator>
    <additionalParameters>
       {% if sendAccessToken %}

@@ -30,6 +30,7 @@ data:
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,response_headers,response_body,invocation_context
@@ -42,6 +43,7 @@ data:
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,response_headers,response_body,invocation_context
@@ -53,12 +55,14 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body
@@ -70,12 +74,14 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,response_headers,response_body,invocation_context
@@ -87,12 +93,14 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
@@ -105,6 +113,7 @@ data:
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
@@ -117,6 +126,7 @@ data:
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,response_body
@@ -129,6 +139,7 @@ data:
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,response_body

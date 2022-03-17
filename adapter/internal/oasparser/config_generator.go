@@ -268,7 +268,7 @@ func castPoliciesToEnforcerPolicies(policies []model.Policy) []*api.Policy {
 			}
 		}
 		enforcerPolicies[i] = &api.Policy{
-			PolicyName: policy.PolicyName,
+			PolicyName: policy.PolicyName, //TODO (renuka): remove this. not requited add version
 			Action:     policy.Action,
 			Order:      uint32(policy.Order),
 			Parameters: parameterMap,
