@@ -29,8 +29,6 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 	tests := []struct {
 		policy     Policy
 		flow       PolicyFlow
-		stats      map[string]policyStats
-		pIndex     int
 		isExpError bool
 		message    string
 	}{
@@ -41,8 +39,6 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: false,
 			message:    "Valid policy should not return error",
 		},
@@ -53,8 +49,6 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyOutFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: true,
 			message:    "Invalid policy flow should return error",
 		},
@@ -65,8 +59,6 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: true,
 			message:    "Invalid policy name should return error",
 		},
@@ -77,27 +69,13 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 				Parameters:    map[string]interface{}{"fooValue": "admin"},
 			},
 			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: true,
 			message:    "Required parameter not found, should return error",
-		},
-		{
-			policy: Policy{
-				PolicyName:    "fooAddRequestHeader",
-				PolicyVersion: "v1",
-				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
-			},
-			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     5,
-			isExpError: true,
-			message:    "Multiple not allowed and not the first policy in the list, should return error",
 		},
 	}
 
 	for _, test := range tests {
-		err := spec.validatePolicy(test.policy, test.flow, test.stats, test.pIndex)
+		err := spec.validatePolicy(test.policy, test.flow)
 		if test.isExpError {
 			assert.Error(t, err, test.message)
 		} else {
@@ -163,7 +141,6 @@ func getSampleTestPolicySpec() PolicySpecification {
 	spec.Data.Version = "v1"
 	spec.Data.ApplicableFlows = []string{"request"}
 	spec.Data.SupportedGateways = []string{"ChoreoConnect"}
-	spec.Data.MultipleAllowed = false
 	spec.Data.PolicyAttributes = []struct { // redefine struct here, since it is not named, update here if the src changed
 		Name            string `yaml:"name"`
 		ValidationRegex string `yaml:"validationRegex,omitempty"`

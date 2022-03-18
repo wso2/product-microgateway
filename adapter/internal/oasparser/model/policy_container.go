@@ -94,27 +94,24 @@ type PolicyDefinition struct {
 func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPolicies, swagger *MgwSwagger) OperationPolicies {
 	fmtPolicies := OperationPolicies{}
 
-	inFlowStats := policies.Request.getStats()
-	for i, policy := range policies.Request {
-		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyInFlow, inFlowStats, i, swagger); err == nil {
+	for _, policy := range policies.Request {
+		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyInFlow, swagger); err == nil {
 			fmtPolicies.Request = append(fmtPolicies.Request, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in request flow, for API %q in org %q, formatted policy %v",
 				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
-	outFlowStats := policies.Response.getStats()
-	for i, policy := range policies.Response {
-		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, outFlowStats, i, swagger); err == nil {
+	for _, policy := range policies.Response {
+		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyOutFlow, swagger); err == nil {
 			fmtPolicies.Response = append(fmtPolicies.Response, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in response flow, for API %q in org %q, formatted policy %v",
 				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
 		}
 	}
 
-	faultFlowStats := policies.Fault.getStats()
-	for i, policy := range policies.Fault {
-		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyFaultFlow, faultFlowStats, i, swagger); err == nil {
+	for _, policy := range policies.Fault {
+		if fmtPolicy, err := p.getFormattedPolicyFromTemplated(policy, policyFaultFlow, swagger); err == nil {
 			fmtPolicies.Fault = append(fmtPolicies.Fault, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in fault flow, for API %q in org %q, formatted policy %v",
 				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
@@ -125,10 +122,10 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 }
 
 // getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
-func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int, swagger *MgwSwagger) (Policy, error) {
+func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow, swagger *MgwSwagger) (Policy, error) {
 	plcFullName := policy.GetFullName()
 	spec := p[plcFullName].Specification
-	if err := spec.validatePolicy(policy, flow, stats, index); err != nil {
+	if err := spec.validatePolicy(policy, flow); err != nil {
 		swagger.GetID()
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Operation policy validation failed for API %q in org %q:, ignoring the policy %q: %v", swagger.GetID(), swagger.OrganizationID, plcFullName, err),
@@ -179,7 +176,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 }
 
 // validatePolicy validates the given policy against the spec
-func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, stats map[string]policyStats, index int) error {
+func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) error {
 	if spec.Data.Name != policy.PolicyName || spec.Data.Version != policy.PolicyVersion {
 		return fmt.Errorf("invalid policy specification, spec name %q:%q and policy name %q:%q mismatch",
 			spec.Data.Name, spec.Data.Version, policy.PolicyName, policy.PolicyVersion)
@@ -189,17 +186,6 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow, 
 	}
 	if !arrayContains(spec.Data.SupportedGateways, policyCCGateway) {
 		return errors.New("choreo connect gateway not supported")
-	}
-	if !spec.Data.MultipleAllowed { // TODO (renuka): remove this multiple allowed validation and compute stats
-		// TODO (renuka): check the behaviour with APIM
-		// in here allow first instance of policy to be applied if multiple is found
-		pStat := stats[policy.PolicyName]
-		if pStat.count > 1 {
-			if index != pStat.firstIndex {
-				return errors.New("multiple policies not allowed")
-			}
-			loggers.LoggerOasparser.Warnf("Operation policy %q not allowed in multiple times, appling the first policy", policy.PolicyName)
-		}
 	}
 
 	policyPrams, ok := policy.Parameters.(map[string]interface{})
