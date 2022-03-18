@@ -41,6 +41,18 @@ const (
 	policyValTypeMap    string = "Map"
 )
 
+var (
+	// policyDefFuncMap is a map of functions used in policy definitions
+	policyDefFuncMap = template.FuncMap{
+		// isParamExists checks the key is exists in the params map, this will not consider the value of the param
+		// if the go templated "{{ if .param }}" is used, that will consider the value of the param (if value is a zero value, it consider as not exists)
+		"isParamExists": func(m map[string]interface{}, key string) (ok bool) {
+			_, ok = m[key]
+			return
+		},
+	}
+)
+
 // PolicyFlow holds list of Policies in a operation (in one flow: In, Out or Fault)
 type PolicyFlow string
 
@@ -136,7 +148,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	}
 
 	defRaw := p[plcFullName].Definition.RawData
-	t, err := template.New("policy-def").Parse(string(defRaw))
+	t, err := template.New("policy-def").Funcs(policyDefFuncMap).Parse(string(defRaw))
 	if err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Error parsing the operation policy definition %q into go template of the API %q in org %q: %v", plcFullName, swagger.GetID(), swagger.OrganizationID, err),
