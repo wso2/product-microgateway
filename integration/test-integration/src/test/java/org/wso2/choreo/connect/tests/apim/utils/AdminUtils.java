@@ -18,12 +18,16 @@
 
 package org.wso2.choreo.connect.tests.apim.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.admin.api.AdvancedPolicyCollectionApi;
 import org.wso2.am.integration.clients.admin.api.ApplicationPolicyCollectionApi;
 import org.wso2.am.integration.clients.admin.api.SubscriptionPolicyCollectionApi;
-import org.wso2.am.integration.clients.admin.api.dto.*;
+import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyInfoDTO;
+import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyListDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.am.integration.clients.admin.ApiException;
 import org.wso2.am.integration.test.Constants;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -49,7 +53,7 @@ public class AdminUtils {
         try {
             advancedThrottlePolicyListDTO = advancedPolicyCollectionApi
                     .throttlingPoliciesAdvancedGet(Constants.APPLICATION_JSON, null, null);
-        } catch (org.wso2.am.integration.clients.admin.ApiException e) {
+        } catch (ApiException e) {
             throw new CCTestException("Error while getting all advanced throttling policies", e);
         }
 
