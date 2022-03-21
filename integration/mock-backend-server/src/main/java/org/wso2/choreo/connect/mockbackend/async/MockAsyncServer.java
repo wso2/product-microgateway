@@ -61,13 +61,13 @@ public class MockAsyncServer extends Thread {
         } catch (InterruptedException e) {
             log.error("Interrupted while syncing channel bind or channel close", e);
         } finally {
-            workerGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully().syncUninterruptibly();;
             bossGroup.shutdownGracefully();
         }
     }
 
     static class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
-
+        private static final String WEBSOCKET_PATH = "/v2";
         private final SslContext sslCtx;
 
         public WebSocketServerInitializer(SslContext sslCtx) {
@@ -83,7 +83,7 @@ public class MockAsyncServer extends Thread {
             pipeline.addLast(new HttpServerCodec());
             pipeline.addLast(new HttpObjectAggregator(65536));
             pipeline.addLast(new WebSocketServerCompressionHandler());
-            pipeline.addLast(new WsHttpRequestHandler());
+            pipeline.addLast(new WsHttpRequestHandler(WEBSOCKET_PATH));
         }
     }
 }
