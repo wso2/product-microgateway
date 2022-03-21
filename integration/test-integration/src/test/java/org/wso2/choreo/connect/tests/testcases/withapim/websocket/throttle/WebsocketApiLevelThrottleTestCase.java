@@ -101,9 +101,7 @@ public class WebsocketApiLevelThrottleTestCase extends ApimBaseTest {
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME*2, "Couldn't wait until the API was deployed in Choreo Connect");
 
         WsClient wsClient = new WsClient(bandwidthThrottleEndpoint, headers);
-        Path largePayloadFile = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
-                        File.separator + "1KbPayload");
-        String largePayload = Files.readString(largePayloadFile);
+        String largePayload = "a".repeat(1024);
         List<String> messages = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             messages.add(largePayload);
@@ -129,5 +127,6 @@ public class WebsocketApiLevelThrottleTestCase extends ApimBaseTest {
 
         WsClient wsClient = new WsClient(eventCountThrottleEndpoint, headers);
         Assert.assertTrue(wsClient.isThrottledWebSocket(throttleCount), "Request not throttled by event count");
+        // TODO: (suksw) Add testcase for client sent event count throttling
     }
 }

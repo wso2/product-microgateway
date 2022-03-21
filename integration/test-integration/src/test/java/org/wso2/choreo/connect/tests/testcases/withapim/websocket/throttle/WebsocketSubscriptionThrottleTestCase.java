@@ -66,5 +66,6 @@ public class WebsocketSubscriptionThrottleTestCase extends ApimBaseTest {
         WsClient wsClient = new WsClient(endpoint, headers);
         Assert.assertTrue(wsClient.isThrottledWebSocket(throttleCount),
                 "Request not throttled by event count condition");
+        // TODO: (suksw) Add testcase for client sent event count throttling
     }
 }

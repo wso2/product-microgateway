@@ -71,9 +71,7 @@ public class WebsocketApplicationThrottleTestCase extends ApimBaseTest {
         headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         WsClient wsClient = new WsClient(endpoint, headers);
-        Path largePayloadFile = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
-                File.separator + "1KbPayload");
-        String largePayload = Files.readString(largePayloadFile);
+        String largePayload = "a".repeat(1024);
         List<String> messages = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             messages.add(largePayload);
@@ -95,5 +93,6 @@ public class WebsocketApplicationThrottleTestCase extends ApimBaseTest {
         WsClient wsClient = new WsClient(endpoint, headers);
         Assert.assertTrue(wsClient.isThrottledWebSocket(throttleCount),
                 "Request not throttled by request count condition in api tier");
+        // TODO: (suksw) Add testcase for client sent event count throttling
     }
 }

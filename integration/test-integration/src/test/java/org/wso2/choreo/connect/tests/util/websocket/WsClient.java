@@ -144,7 +144,11 @@ public final class WsClient {
                 WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[] { 8, 1, 8, 1 }));
                 ch.writeAndFlush(frame);
             } else {
-                log.info("Sending text frame.");
+                if (messageToSend.length() < 100) {
+                    log.info("Sending text frame. Msg: {}", messageToSend);
+                } else {
+                    log.info("Sending text frame.");
+                }
                 WebSocketFrame frame = new TextWebSocketFrame(messageToSend);
                 ch.writeAndFlush(frame);
             }
@@ -195,8 +199,8 @@ public final class WsClient {
         int throttleBuffer = expectedCount + 10;
         boolean isThrottled = false;
         List<String> messagesToSend = new ArrayList<>();
-        messagesToSend.add("send me " + throttleBuffer);
-        List<String> responses = retryConnectUntilDeployed(messagesToSend, throttleBuffer * 1000);
+        messagesToSend.add("send me. small frames. " + throttleBuffer);
+        List<String> responses = retryConnectUntilDeployed(messagesToSend, throttleBuffer * 1100);
         if (responses.size() >= expectedCount && responses.size() < throttleBuffer) {
             isThrottled = true;
         }

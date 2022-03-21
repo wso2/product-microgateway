@@ -26,39 +26,36 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(WsServerFrameHandler.class);
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object frame) {
-
         if (frame instanceof WebSocketFrame) {
             if (frame instanceof TextWebSocketFrame) {
                 String msg = ((TextWebSocketFrame) frame).text();
-                if (msg.length() > 50) {
+                if (msg.length() > 100) {
                     log.info("TextWebSocketFrame with a large payload received.");
                     ctx.channel().writeAndFlush(
-                            new TextWebSocketFrame("Message received: " + msg));
+                            new TextWebSocketFrame("Message large payload received."));
                     return;
                 }
-                if (msg.startsWith("send me")) { // This is to ask the server to send the specified number of frames
-                    String[] s = msg.split(" ");
-                    int numberOfTimes = Integer.parseInt(s[2]);
-                    for (int i = 0; i < numberOfTimes; i++) {
-                        log.info("Sending message {}", i);
-                        ctx.channel().writeAndFlush(
-                                new TextWebSocketFrame("Message " + i));
-                        try {
-                            // Remove the following once https://github.com/wso2/product-microgateway/issues/2706 is fixed
-                            Thread.sleep(800);
-                        } catch (InterruptedException ex) {
-                            log.info("Interrupted while waiting before sending the next message");
-                        }
+                if (msg.startsWith("send me.")) {
+                    // This is to ask the server to send the specified number of frames
+                    // The msg is expected to be one in the following formats
+                    // - "send me. small frames. 5"
+                    // - "send me. large frames. 5"
+                    String[] s = msg.split("\\.");
+                    int numberOfTimes = Integer.parseInt(s[2].trim());
+                    String msgType = s[1];
+                    if ("large frames".equals(msgType.trim())) {
+                        String largePayload = "a".repeat(1024);
+                        sendMultipleFrames(ctx, largePayload, numberOfTimes);
+                    } else {
+                        sendMultipleFrames(ctx, "", numberOfTimes);
                     }
-                    ctx.channel().writeAndFlush(new CloseWebSocketFrame());
                 }
-
+                // Echo the received message for verification
                 log.info("TextWebSocketFrame received. Message: {}", msg);
                 ctx.channel().writeAndFlush(
                         new TextWebSocketFrame("Message received: " + msg));
@@ -66,5 +63,20 @@ public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
                 log.info("Unsupported WebSocketFrame");
             }
         }
+    }
+
+    public void sendMultipleFrames(ChannelHandlerContext ctx, String msgToSend, int numberOfTimes) {
+        for (int i = 0; i < numberOfTimes; i++) {
+            log.info("Sending message {}", i);
+            ctx.channel().writeAndFlush(
+                    new TextWebSocketFrame("Message " + i + msgToSend));
+            try {
+                // Remove the following once https://github.com/wso2/product-microgateway/issues/2706 is fixed
+                Thread.sleep(800);
+            } catch (InterruptedException ex) {
+                log.info("Interrupted while waiting before sending the next message");
+            }
+        }
+        ctx.channel().writeAndFlush(new CloseWebSocketFrame());
     }
 }
