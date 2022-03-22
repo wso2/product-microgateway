@@ -136,23 +136,23 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 
 // getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
 func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow PolicyFlow, swagger *MgwSwagger) (Policy, error) {
-	plcFullName := policy.GetFullName()
-	spec := p[plcFullName].Specification
+	policyFullName := policy.GetFullName()
+	spec := p[policyFullName].Specification
 	if err := spec.validatePolicy(policy, flow); err != nil {
 		swagger.GetID()
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Operation policy validation failed for API %q in org %q:, ignoring the policy %q: %v", swagger.GetID(), swagger.OrganizationID, plcFullName, err),
+			Message:   fmt.Sprintf("Operation policy validation failed for API %q in org %q:, ignoring the policy %q: %v", swagger.GetID(), swagger.OrganizationID, policyFullName, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2204,
 		})
 		return policy, err
 	}
 
-	defRaw := p[plcFullName].Definition.RawData
+	defRaw := p[policyFullName].Definition.RawData
 	t, err := template.New("policy-def").Funcs(policyDefFuncMap).Parse(string(defRaw))
 	if err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing the operation policy definition %q into go template of the API %q in org %q: %v", plcFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing the operation policy definition %q into go template of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2205,
 		})
@@ -163,7 +163,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	err = t.Execute(&out, policy.Parameters)
 	if err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing operation policy definition \"%s\" of the API \"%s\" in org \"%s\": %v", plcFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing operation policy definition \"%s\" of the API \"%s\" in org \"%s\": %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2206,
 		})
@@ -173,7 +173,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	def := PolicyDefinition{}
 	if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing formalized operation policy definition \"%s\" into yaml of the API \"%s\" in org \"%s\": %v", plcFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing formalized operation policy definition \"%s\" into yaml of the API \"%s\" in org \"%s\": %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2207,
 		})
