@@ -71,7 +71,7 @@ public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().writeAndFlush(
                     new TextWebSocketFrame("Message " + i + msgToSend));
             try {
-                // Remove the following once https://github.com/wso2/product-microgateway/issues/2706 is fixed
+                // TODO: (suksw) Remove the following once https://github.com/wso2/product-microgateway/issues/2706 is fixed
                 Thread.sleep(800);
             } catch (InterruptedException ex) {
                 log.info("Interrupted while waiting before sending the next message");
