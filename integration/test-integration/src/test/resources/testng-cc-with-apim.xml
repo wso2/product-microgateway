@@ -66,6 +66,7 @@
     <test name="Restart API-M" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimClientsPreparer"/>
         </classes>
     </test>
 
