@@ -45,7 +45,8 @@ var (
 	// policyDefFuncMap is a map of functions used in policy definitions
 	policyDefFuncMap = template.FuncMap{
 		// isParamExists checks the key is exists in the params map, this will not consider the value of the param
-		// if the go templated "{{ if .param }}" is used, that will consider the value of the param (if value is a zero value, it consider as not exists)
+		// if the go templated "{{ if .param }}" is used, that will consider the
+		// value of the param (if value is a zero value, it consider as not exists)
 		"isParamExists": func(m map[string]interface{}, key string) (ok bool) {
 			_, ok = m[key]
 			return
