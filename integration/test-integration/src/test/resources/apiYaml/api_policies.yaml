@@ -29,18 +29,39 @@ data:
         request:
           -
             policyName: ccAddHeader
+            policyVersion: v1
             parameters:
               headerName: newHeaderKey1
               headerValue: newHeaderVal1
           -
             policyName: ccRemoveHeader
+            policyVersion: v1
             parameters:
               headerName: RemOveThisHeaDer # this should be case-insensitive
           -
             policyName: ccAddHeader
+            policyVersion: v1
             parameters:
               headerName: newHeaderKey2
               headerValue: newHeaderVal2
+        response: []
+        fault: []
+    -
+      target: /echo-full/custom-policy/{id}
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: customAddHeader
+            policyVersion: v1
+            parameters:
+              customHeaderName: customV1NewHeaderKey
+              customHeaderValue: customV1NewHeaderVal
+          -
+            policyName: customAddHeader
+            policyVersion: v2
+            parameters:
+              customHeaderValue: customV2NewHeaderVal
         response: []
         fault: []
     -
@@ -50,11 +71,13 @@ data:
         request:
           -
             policyName: addQueryParam
+            policyVersion: v1
             parameters:
               paramKey: helloQ1
               paramValue: worldQ1
           -
             policyName: addQueryParam
+            policyVersion: v1
             parameters:
               paramKey: helloQ2
               paramValue: worldQ2
@@ -67,11 +90,13 @@ data:
         request:
           -
             policyName: ccChangeHTTPMethod
+            policyVersion: v1
             parameters:
               currentMethod: GET
               updatedMethod: PUT
           -
             policyName: rewriteResourcePath
+            policyVersion: v1
             parameters:
               newResourcePath: /echo-full/new-path
               includeQueryParams: true
@@ -85,11 +110,13 @@ data:
         request:
           -
             policyName: ccChangeHTTPMethod
+            policyVersion: v1
             parameters:
               currentMethod: GET
               updatedMethod: PUT
           -
             policyName: rewriteResourcePath
+            policyVersion: v1
             parameters:
               newResourcePath: /echo-full/new-path
               includeQueryParams: true
@@ -102,11 +129,13 @@ data:
         request:
           -
             policyName: ccChangeHTTPMethod
+            policyVersion: v1
             parameters:
               currentMethod: GET
               updatedMethod: DELETE
           -
             policyName: rewriteResourcePath
+            policyVersion: v1
             parameters:
               newResourcePath: /echo-full/new-path2
               includeQueryParams: false
@@ -119,11 +148,13 @@ data:
         request:
           -
             policyName: ccAddHeader
+            policyVersion: v1
             parameters:
               headerName: newHeaderKey1
               headerValue: newHeaderVal1
           -
             policyName: opaPolicy
+            policyVersion: v1
             parameters:
               serverUrl: https://opa-server:8181/v1/data
               policy: sample
@@ -138,11 +169,13 @@ data:
         request:
           -
             policyName: ccAddHeader
+            policyVersion: v1
             parameters:
               headerName: newHeaderKey1
               headerValue: newHeaderVal1
           -
             policyName: opaPolicy
+            policyVersion: v1
             parameters:
               serverUrl: https://opa-server:8181/v1/data
               policy: sample
@@ -157,11 +190,13 @@ data:
         request:
           -
             policyName: ccAddHeader
+            policyVersion: v1
             parameters:
               headerName: newHeaderKey1
               headerValue: newHeaderVal1
           -
             policyName: opaPolicy
+            policyVersion: v1
             parameters:
               serverUrl: https://opa-server:8181/v1/data
               policy: sample
@@ -176,30 +211,36 @@ data:
         request:
           -
             policyName: ccAddHeader
+            policyVersion: v1
             parameters:
               headerName: newH1
               headerValue: newH1Value
           -
             policyName: addQueryParam
+            policyVersion: v1
             parameters:
               paramKey: newQ1
               paramValue: newQ1Value
           -
             policyName: ccChangeHTTPMethod
+            policyVersion: v1
             parameters:
               currentMethod: POST
               updatedMethod: PUT
           -
             policyName: ccRemoveHeader
+            policyVersion: v1
             parameters:
               headerName: RemoveThisHeader
           -
             policyName: rewriteResourcePath
+            policyVersion: v1
             parameters:
               newResourcePath: /echo-full/new-path-all-policies
               includeQueryParams: true
           -
             policyName: opaPolicy
+            policyVersion: v1
             parameters:
               serverUrl: https://opa-server:8181/v1/data
               policy: sample

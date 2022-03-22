@@ -29,6 +29,7 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,invocation_context
@@ -41,6 +42,7 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,invocation_context
@@ -53,12 +55,14 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,invocation_context
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
@@ -70,12 +74,14 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,invocation_context
         response:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
@@ -87,6 +93,7 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers
@@ -99,6 +106,7 @@ data:
         request:
           -
             policyName: ccCallInterceptorService
+            policyVersion: v1
             parameters:
               interceptorServiceURL: https://mockBackend:2371
               includes: request_headers,request_body,invocation_context

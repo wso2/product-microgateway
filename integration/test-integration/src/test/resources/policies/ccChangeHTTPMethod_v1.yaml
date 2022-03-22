@@ -5,7 +5,7 @@ data:
   name: ccChangeHTTPMethod
   version: v1
   displayName: Change HTTP Method
-  description: With this policy, user can change the HTTP Method
+  description: This policy allows you to change the HTTP Method
   applicableFlows:
    - request
   supportedGateways:
@@ -31,7 +31,7 @@ data:
    -
     name: updatedMethod
     displayName: Updated HTTP Method
-    description: New, updated method of the HTTP request
+    description: New updated method of the HTTP request
     validationRegex: ^(GET|PUT|POST|PATCH|DELETE|HEAD|OPTIONS)$
     type: Enum
     allowedValues:
@@ -43,4 +43,3 @@ data:
      - HEAD
      - OPTIONS
     required: true
-  multipleAllowed: false

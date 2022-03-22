@@ -1,5 +1,3 @@
-<!-- NOTE: J2 files should be ignored in choreo connect, this is a definition file for synapse gateway -->
-
 <property name="rest_postfix" expression="get-property('axis2', 'REST_URL_POSTFIX')"/>
 <filter regex=".*\?.*" source="get-property('rest_postfix')">
 		<!-- if there are query params already defined -->

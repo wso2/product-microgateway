@@ -29,70 +29,53 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 	tests := []struct {
 		policy     Policy
 		flow       PolicyFlow
-		stats      map[string]policyStats
-		pIndex     int
 		isExpError bool
 		message    string
 	}{
 		{
 			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: false,
 			message:    "Valid policy should not return error",
 		},
 		{
 			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyOutFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: true,
 			message:    "Invalid policy flow should return error",
 		},
 		{
 			policy: Policy{
-				PolicyName: "invalidName",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
+				PolicyName:    "invalidName",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: true,
 			message:    "Invalid policy name should return error",
 		},
 		{
 			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooValue": "admin"},
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooValue": "admin"},
 			},
 			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     3,
 			isExpError: true,
 			message:    "Required parameter not found, should return error",
-		},
-		{
-			policy: Policy{
-				PolicyName: "fooAddRequestHeader",
-				Parameters: map[string]interface{}{"fooName": "user", "fooValue": "admin"},
-			},
-			flow:       policyInFlow,
-			stats:      map[string]policyStats{"fooAddRequestHeader": {firstIndex: 3, count: 2}},
-			pIndex:     5,
-			isExpError: true,
-			message:    "Multiple not allowed and not the first policy in the list, should return error",
 		},
 	}
 
 	for _, test := range tests {
-		err := spec.validatePolicy(test.policy, test.flow, test.stats, test.pIndex)
+		err := spec.validatePolicy(test.policy, test.flow)
 		if test.isExpError {
 			assert.Error(t, err, test.message)
 		} else {
@@ -110,7 +93,8 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 			OperationPolicies: OperationPolicies{
 				Request: PolicyList{
 					{
-						PolicyName: "fooAddRequestHeader",
+						PolicyName:    "fooAddRequestHeader",
+						PolicyVersion: "v1",
 						Parameters: map[string]interface{}{
 							"fooName":  "fooHeaderName",
 							"fooValue": "fooHeaderValue",
@@ -125,7 +109,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 	proj := ProjectAPI{
 		APIYaml: apiYaml,
 		Policies: map[string]PolicyContainer{
-			"fooAddRequestHeader": {
+			"fooAddRequestHeader_v1": {
 				Specification: spec,
 				Definition: PolicyDefinition{
 					RawData: getSampleTestPolicyDef(),
@@ -137,8 +121,9 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 	expFormattedP := OperationPolicies{
 		Request: PolicyList{
 			{
-				PolicyName: "fooAddRequestHeader",
-				Action:     "SET_HEADER",
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
+				Action:        "SET_HEADER",
 				Parameters: map[string]interface{}{
 					"headerName":  "fooHeaderName",
 					"headerValue": "fooHeaderValue",
@@ -153,9 +138,9 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 func getSampleTestPolicySpec() PolicySpecification {
 	spec := PolicySpecification{}
 	spec.Data.Name = "fooAddRequestHeader"
+	spec.Data.Version = "v1"
 	spec.Data.ApplicableFlows = []string{"request"}
 	spec.Data.SupportedGateways = []string{"ChoreoConnect"}
-	spec.Data.MultipleAllowed = false
 	spec.Data.PolicyAttributes = []struct { // redefine struct here, since it is not named, update here if the src changed
 		Name            string `yaml:"name"`
 		ValidationRegex string `yaml:"validationRegex,omitempty"`

@@ -68,6 +68,17 @@ public class APIPolicyTestCase {
         assertOriginalClientRequestInfo(echoResponse);
     }
 
+    @Test(description = "Test custom API Policies and Policy Versions")
+    public void testCustomAPIPoliciesAndPolicyVersions() throws Exception {
+        EchoResponse echoResponse = invokeEchoPost("/echo-full/custom-policy/123" + queryParams, "Hello World!", headers);
+
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("customV1NewHeaderKey"), "customV1NewHeaderVal",
+                getPolicyFailAssertMessage("Custom Add Header V1"));
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("customV2NewHeaderKey"), "customV2NewHeaderVal",
+                getPolicyFailAssertMessage("Custom Add Header V2"));
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
     @Test(description = "Test query based API Policies")
     public void testQueryAPIPolicy() throws Exception {
         EchoResponse echoResponse = invokeEchoGet("/echo-full/query-policy" + queryParams, headers);
