@@ -62,11 +62,13 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 
 		logger.LoggerMsg.Infof("Starting the ASB consumer for subscription: %s, topic: %s", subName, topic)
 		func() {
+			defer logger.LoggerMsg.Errorf("ASB consumer has stopped for subscription: %q, topic: %q", subName, topic)
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
 
 			// keep receiving messages from asb
 			for {
+				logger.LoggerMsg.Debugf("Continue processing messages from ASB for subscription: %q, topic: %q", subName, topic)
 				messages, err := receiver.ReceiveMessages(ctx, 10, nil)
 				if err != nil {
 					logger.LoggerMsg.Errorf("Failed to receive messages from ASB. %v", err)
@@ -88,6 +90,7 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 						logger.LoggerMsg.Warnf("Failed to complete the ASB message. %v", err)
 					}
 				}
+				logger.LoggerMsg.Debugf("Processed %d messages from ASB for subscription: %q, topic: %q", len(messages), subName, topic)
 			}
 		}()
 	}
