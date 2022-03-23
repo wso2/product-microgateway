@@ -1,0 +1,24 @@
+{
+  "name": "WebsocketApiLevelEventCountThrottleAPI",
+  "version": "1.0.0",
+  "context": "websocket-api-level-event-count-throttle",
+  "description": "This API will later get updated to include the API throttling policy.",
+  "type": "WS",
+  "tiersCollection": "AsyncUnlimited",
+  "operationsDTOS": [
+    {
+      "verb": "SUBSCRIBE",
+      "target": "/*",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "ws",
+    "production_endpoints": {
+      "url": "ws://mockBackend:2360/v2"
+    },
+    "sandbox_endpoints": {
+      "url": "ws://mockBackend:2360/v2"
+    }
+  }
+}

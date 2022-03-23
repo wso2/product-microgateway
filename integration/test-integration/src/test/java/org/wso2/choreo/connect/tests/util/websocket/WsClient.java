@@ -39,13 +39,13 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import javax.net.ssl.SSLException;
 import java.net.URI;
@@ -68,7 +68,8 @@ public final class WsClient {
         this.headers = headers;
     }
 
-    public ArrayList<String> connectAndSendMessages(List<String> messages) throws CCTestException {
+    public ArrayList<String> connectAndSendMessages(List<String> messages, int delayAfterSending)
+            throws CCTestException {
         log.info("Starting websocket client");
         EventLoopGroup group = new NioEventLoopGroup(1);
         ArrayList<String> receivedMessages = new ArrayList<>();
@@ -120,6 +121,7 @@ public final class WsClient {
             log.info("Websocket client handshake complete");
 
             sendMessages(ch, messages);
+            Utils.delay(delayAfterSending, "interrupted while waiting for response frames");
         } catch (URISyntaxException e) {
             log.error("Error while parsing websocket URI", e);
         } catch (InterruptedException e) {
@@ -142,21 +144,27 @@ public final class WsClient {
                 WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[] { 8, 1, 8, 1 }));
                 ch.writeAndFlush(frame);
             } else {
-                log.info("Sending text frame.");
+                if (messageToSend.length() < 100) {
+                    log.info("Sending text frame. Msg: {}", messageToSend);
+                } else {
+                    log.info("Sending text frame.");
+                }
                 WebSocketFrame frame = new TextWebSocketFrame(messageToSend);
                 ch.writeAndFlush(frame);
             }
+            // Remove the following once https://github.com/wso2/product-microgateway/issues/2706 is fixed
+            Utils.delay(1000, "Interrupted while waiting after sending one frame");
         }
     }
 
-    public ArrayList<String> retryConnectUntilDeployed(List<String> messages) throws InterruptedException {
+    public ArrayList<String> retryConnectUntilDeployed(List<String> messages, int delayAfterSending) throws InterruptedException {
         int retryCount = 0;
         boolean respondedNotFound = false;
         ArrayList<String> responses = null;
         do {
             try {
                 log.info("Trying websocket connect with url : " + url);
-                responses = connectAndSendMessages(messages);
+                responses = connectAndSendMessages(messages, delayAfterSending);
                 respondedNotFound = false;
             } catch (WebSocketClientHandshakeException | CCTestException e) {
                 if("Invalid handshake response getStatus: 404 Not Found".equals(e.getMessage()) ||
@@ -182,6 +190,25 @@ public final class WsClient {
         }
         Thread.sleep(RETRY_INTERVAL_MILLIS);
         return true;
+    }
+
+    public boolean isThrottledWebSocket(int expectedCount) throws InterruptedException {
+        // Similar to HTTP throttling, this buffer is to avoid failures due to delays in evaluating throttle
+        // conditions at TM here it sets the final throttle request count twice as the limit set in the policy.
+        // it will make sure throttle will happen even if the throttle window passed.
+        int throttleBuffer = expectedCount + 10;
+        boolean isThrottled = false;
+        List<String> messagesToSend = new ArrayList<>();
+        messagesToSend.add("send me. small frames. " + throttleBuffer);
+        List<String> responses = retryConnectUntilDeployed(messagesToSend, throttleBuffer * 1100);
+        if (responses.size() >= expectedCount && responses.size() < throttleBuffer) {
+            isThrottled = true;
+        }
+        for (String response: responses) {
+            log.info("============== Response {}", response);
+        }
+
+        return isThrottled;
     }
 }
 

@@ -1,0 +1,33 @@
+type: operation_policy_specification
+version: v4.1.0
+data:
+  category: Mediation
+  name: rewriteResourcePath
+  version: v1
+  displayName: Rewrite Resource Path
+  description: This policy allows you to rewrite the resource path of a request
+  applicableFlows:
+   - request
+  supportedGateways:
+   - Synapse
+   - ChoreoConnect
+  supportedApiTypes:
+   - HTTP
+  policyAttributes:
+   -
+    name: newResourcePath
+    displayName: New Resource Path
+    description: Name of the new resource path
+    validationRegex: "^/?([a-zA-Z0-9!@#\\$%\\^\\&*\\)\\(+=._\\-~:,\\?{}/]*)$"
+    type: String
+    allowedValues: []
+    required: true
+   -
+    name: includeQueryParams
+    displayName: Include Query Parameters?
+    description: Select whether to include exiting query params to the new resource path
+    validationRegex: ^(true|false)$
+    type: Boolean
+    allowedValues: []
+    defaultValue: "true"
+    required: false

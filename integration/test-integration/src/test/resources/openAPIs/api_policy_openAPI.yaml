@@ -1,0 +1,82 @@
+openapi: "3.0.0"
+info:
+  version: v1.0
+  title: API-Policy API
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: http://mockBackend:2383/v2
+x-wso2-basePath: /api-policy
+paths:
+  /echo-full/no-policies:
+    get:
+      summary: No policies appied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/headers-policy/{id}:
+    post:
+      summary: Set, remove header policies appied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/custom-policy/{id}:
+    post:
+      summary: Custom policies
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/query-policy:
+    get:
+      summary: query based policies appied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/rewrite-policy/{id}:
+    get:
+      summary: rewrite based policies appied
+      responses:
+        '200':
+          description: successful operation
+    post:
+      summary: rewrite based policies appied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/rewrite-policy/discard-query-params:
+    get:
+      summary: rewrite path with discard queries
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/mixed-policies:
+    get:
+      summary: rewrite based policies appied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/opa-policy:
+    post:
+      summary: opa policy applied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/opa-policy-no-access-token:
+    post:
+      summary: opa policy applied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/opa-policy-invalid-response:
+    post:
+      summary: opa policy applied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/all-policies/{id}:
+    post:
+      summary: all policies together
+      responses:
+        '200':
+          description: successful operation

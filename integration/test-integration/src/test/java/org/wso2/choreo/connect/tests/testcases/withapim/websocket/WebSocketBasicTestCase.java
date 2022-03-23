@@ -60,7 +60,7 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
     public void testConnectionWithPing() throws Exception {
         WsClient wsClient = new WsClient(endpointURL, requestHeaders);
         List<String> messagesToSend = List.of(new String[]{"ping", "close"});
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 0);
         Assert.assertEquals(responses.size(), 1);
         Assert.assertEquals(responses.get(0), "pong");
     }
@@ -73,7 +73,7 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
         messagesToSend.add(msg);
         messagesToSend.add(msg);
         messagesToSend.add("close");
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 0);
         Assert.assertEquals(responses.size(), 2);
         Assert.assertEquals(responses.get(0), "Message received: " + msg);
     }
@@ -90,7 +90,7 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
         do {
             retryCount ++;
             try {
-                wsClient.connectAndSendMessages(messagesToSend);
+                wsClient.connectAndSendMessages(messagesToSend, 0);
             } catch (WebSocketClientHandshakeException e) {
                 serverResponse = e.response().status().code();
                 if (404 == e.response().status().code()) {

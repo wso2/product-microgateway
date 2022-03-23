@@ -1,0 +1,16 @@
+      - "5006:5006"
+  mockBackend:
+    image: wso2/choreo-connect-mock-backend:1.1.0-alpha3-SNAPSHOT
+    command: java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockServices -tls-enabled -interceptor-svc-enabled
+    ports:
+      - "2370:2370"
+      - "2371:2371" #Added this port for test debug purposes
+      - "2383:2383"
+      - "2399:2399"
+    links:
+      - router
+  opa-server:
+    image: openpolicyagent/opa:0.37.2-static
+    command: run --server --addr :8181 --tls-private-key-file /opa-volume/certs/server-key.pem --tls-cert-file /opa-volume/certs/server-cert.pem /opa-volume/policies/sample-policy.rego
+    volumes:
+      - ./opa-volume:/opa-volume

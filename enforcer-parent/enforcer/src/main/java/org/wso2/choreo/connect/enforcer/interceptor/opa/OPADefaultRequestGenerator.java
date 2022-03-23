@@ -41,7 +41,6 @@ import java.util.Map;
  */
 public class OPADefaultRequestGenerator implements OPARequestGenerator {
     private static final Logger log = LogManager.getLogger(OPADefaultRequestGenerator.class);
-    private static final String TRUE = "TRUE";
 
     @Override
     public String generateRequest(String policyName, String rule, Map<String, String> additionalParameters,
@@ -71,7 +70,7 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         apiContext.put("sandClusterName", requestContext.getSandClusterHeader());
 
         // Authentication Context
-        if (TRUE.equalsIgnoreCase(additionalParameters.get(OPAConstants.AdditionalParameters.SEND_ACCESS_TOKEN))) {
+        if (Boolean.parseBoolean(additionalParameters.get(OPAConstants.AdditionalParameters.SEND_ACCESS_TOKEN))) {
             AuthenticationContext authContext = requestContext.getAuthenticationContext();
             JSONObject authContextPayload = new JSONObject();
             authContextPayload.put("token", authContext.getRawToken());

@@ -18,7 +18,11 @@
 
 package org.wso2.choreo.connect.mockbackend;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
+
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManager;
@@ -31,6 +35,10 @@ import java.net.HttpURLConnection;
 import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Utils {
     // echo sends request headers in response headers and request body in response body
@@ -43,6 +51,32 @@ public class Utils {
         exchange.sendResponseHeaders(respCode, response.length);
         exchange.getResponseBody().write(response);
         exchange.close();
+    }
+
+    // echo request body, request headers in echo response payload
+    public static void echoFullRequest(HttpExchange exchange) throws IOException {
+        EchoResponse echoResponse = new EchoResponse();
+        echoResponse.setData(Utils.requestBodyToString(exchange));
+        echoResponse.setHeaders(exchange.getRequestHeaders());
+        echoResponse.setPath(exchange.getRequestURI().getPath());
+        echoResponse.setMethod(exchange.getRequestMethod());
+
+        // queries
+        String queries = exchange.getRequestURI().getQuery();
+        Map<String, String> queryMap;
+        if (StringUtils.isNotEmpty(queries)) {
+            queryMap = Arrays.stream(queries.split(Constants.HTTP_QUERY_SEPARATOR))
+                    .map(q -> q.split(Constants.HTTP_QUERY_KEY_VAL_SEPARATOR))
+                    .collect(Collectors.toMap(q -> q[0], q -> q[1]));
+        } else {
+            queryMap = Collections.emptyMap();
+        }
+        echoResponse.setQuery(queryMap);
+
+        Gson gson = new Gson();
+        byte[] response = gson.toJson(echoResponse).getBytes();
+        int respCode = response.length == 0 ? HttpURLConnection.HTTP_NO_CONTENT : HttpURLConnection.HTTP_OK;
+        respondWithBodyAndClose(respCode, response, exchange);
     }
 
     public static String requestBodyToString(HttpExchange exchange) throws IOException {

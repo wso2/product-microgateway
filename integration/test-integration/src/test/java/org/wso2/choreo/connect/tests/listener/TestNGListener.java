@@ -45,7 +45,6 @@ public class TestNGListener extends TestListenerAdapter {
 
     public TestNGListener() {
         super();
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
         Logger.getLogger("").setLevel(Level.WARNING);
     }

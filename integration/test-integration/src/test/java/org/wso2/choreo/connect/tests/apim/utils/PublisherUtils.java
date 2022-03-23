@@ -429,6 +429,7 @@ public class PublisherUtils {
             if (apiListDTO != null && apiListDTO.getList() != null) {
                 for (APIInfoDTO apiInfoDTO : apiListDTO.getList()) {
                     publisherRestClient.deleteAPI(apiInfoDTO.getId());
+                    log.info("Deleted API {}", apiInfoDTO.getName());
                 }
             }
         } catch (APIManagerIntegrationTestException | ApiException e) {

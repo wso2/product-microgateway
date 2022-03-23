@@ -1,0 +1,250 @@
+type: api
+version: v4.1.0
+data:
+  name: API-Policy API
+  context: /api-policy
+  version: v1.0
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+    - http
+    - https
+  policies:
+    - Unlimited
+  visibility: PUBLIC
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: http://mockBackend:2383/v2
+  endpointImplementationType: ENDPOINT
+  organizationId: carbon.super
+  operations:
+    -
+      target: /echo-full/headers-policy/{id}
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: RemOveThisHeaDer # this should be case-insensitive
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey2
+              headerValue: newHeaderVal2
+        response: []
+        fault: []
+    -
+      target: /echo-full/custom-policy/{id}
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: customAddHeader
+            policyVersion: v1
+            parameters:
+              customHeaderName: customV1NewHeaderKey
+              customHeaderValue: customV1NewHeaderVal
+          -
+            policyName: customAddHeader
+            policyVersion: v2
+            parameters:
+              customHeaderValue: customV2NewHeaderVal
+        response: []
+        fault: []
+    -
+      target: /echo-full/query-policy
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: addQueryParam
+            policyVersion: v1
+            parameters:
+              paramKey: helloQ1
+              paramValue: worldQ1
+          -
+            policyName: addQueryParam
+            policyVersion: v1
+            parameters:
+              paramKey: helloQ2
+              paramValue: worldQ2
+        response: []
+        fault: []
+    -
+      target: /echo-full/rewrite-policy/{id}
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: GET
+              updatedMethod: PUT
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/new-path
+              includeQueryParams: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/rewrite-policy/{id}
+      verb: POST
+      operationPolicies:
+        # applying same policies as in GET, since CC only supports API policies at resource level
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: GET
+              updatedMethod: PUT
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/new-path
+              includeQueryParams: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/rewrite-policy/discard-query-params
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: GET
+              updatedMethod: DELETE
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/new-path2
+              includeQueryParams: false
+        response: []
+        fault: []
+    -
+      target: /echo-full/opa-policy
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: opaPolicy
+            policyVersion: v1
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/opa-policy-no-access-token
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: opaPolicy
+            policyVersion: v1
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: false
+        response: []
+        fault: []
+    -
+      target: /echo-full/opa-policy-invalid-response
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: opaPolicy
+            policyVersion: v1
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: sample
+              rule: envoy_headers
+              sendAccessToken: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/all-policies/{id}
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newH1
+              headerValue: newH1Value
+          -
+            policyName: addQueryParam
+            policyVersion: v1
+            parameters:
+              paramKey: newQ1
+              paramValue: newQ1Value
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: POST
+              updatedMethod: PUT
+          -
+            policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: RemoveThisHeader
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/new-path-all-policies
+              includeQueryParams: true
+          -
+            policyName: opaPolicy
+            policyVersion: v1
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: true
+        response: []
+        fault: []
