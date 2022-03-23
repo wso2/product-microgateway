@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
  */
 public class MediationPolicyFilter implements Filter {
     private static final Logger log = LogManager.getLogger(MediationPolicyFilter.class);
+    private static final String X_URI_MAPPING_PROPERTY = "x-uri-mapping";
 
     public MediationPolicyFilter() {
         OPAClient.init();
@@ -151,8 +152,9 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private void pathParamToQueryParamTransform(RequestContext requestContext, Map<String, String> policyAttrib) {
-        if (policyAttrib.containsKey("x-uri-mapping")) {
-            String uriMappingValue = policyAttrib.get("x-uri-mapping");
+        // "x-uri-mapping" property is explicitly added when processing x-uri-mapping extension in async api definition
+        if (policyAttrib.containsKey(X_URI_MAPPING_PROPERTY)) {
+            String uriMappingValue = policyAttrib.get(X_URI_MAPPING_PROPERTY);
             String[] queryParts = uriMappingValue.split("\\?");
             String queryParamString = queryParts.length > 1 ? queryParts[1] : "";
             List<NameValuePair> queryParams = URLEncodedUtils.parse(queryParamString, StandardCharsets.UTF_8);

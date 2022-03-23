@@ -164,7 +164,6 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 
 func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions map[string]interface{}) {
 	if uriMapping, found := vendorExtensions[constants.XUriMapping]; found {
-		// TODO: (VirajSalaka) preprocess to process path param query param conversion.
 		newResourcePath := uriMapping.(string)
 		if strings.Contains(newResourcePath, "?") {
 			newResourcePath = newResourcePath[:strings.Index(newResourcePath, "?")]
