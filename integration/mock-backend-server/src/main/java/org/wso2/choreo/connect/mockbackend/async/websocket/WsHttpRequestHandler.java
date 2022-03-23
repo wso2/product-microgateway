@@ -20,11 +20,8 @@ package org.wso2.choreo.connect.mockbackend.async.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.mockbackend.async.MockAsyncServer;
@@ -33,70 +30,52 @@ public class WsHttpRequestHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(MockAsyncServer.class);
     private static final String[] topics = new String[2];
-    private static final String WEBSOCKET_BASEPATH = "/v2";
+    private static String websocketBasepath;
     private static final String WS_PATH_NOTIFICATIONS = "/notifications";
     private static final String WS_PATH_ROOM_ID = "/rooms?room=room1";
 
-    public WsHttpRequestHandler() {
+    public WsHttpRequestHandler(String websocketBasepath) {
+        WsHttpRequestHandler.websocketBasepath = websocketBasepath;
         topics[0] = WS_PATH_NOTIFICATIONS;
         topics[1] = WS_PATH_ROOM_ID;
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-
         if (msg instanceof HttpRequest) {
-
-            HttpRequest httpRequest = (HttpRequest) msg;
+            String uri = ((HttpRequest) msg).uri();
             log.info("Http Request Received");
 
-            HttpHeaders headers = httpRequest.headers();
-            System.out.println("Connection : " +headers.get("Connection"));
-            System.out.println("Upgrade : " + headers.get("Upgrade"));
+            ctx.pipeline().remove(this);
 
-            if ("Upgrade".equalsIgnoreCase(headers.get(HttpHeaderNames.CONNECTION)) &&
-                    "WebSocket".equalsIgnoreCase(headers.get(HttpHeaderNames.UPGRADE))) {
-                if (!((HttpRequest) msg).uri().startsWith(WEBSOCKET_BASEPATH)) {
-                    ctx.channel().unsafe().closeForcibly();
-                }
-                WsServerFrameHandler frameHandler = new WsServerFrameHandler();
-                for (String topic: topics) {
-                    if (((HttpRequest) msg).uri().equals(WEBSOCKET_BASEPATH + topic)) {
-                        frameHandler = new WsServerFrameHandler(":" + topic);
-                        break;
-                    }
-                }
-                //Adding new handler to the existing pipeline to handle WebSocket Messages
-                ctx.pipeline().replace(this, "websocketHandler", frameHandler);
+            // handle websocket handshake and the control frames (Close, Ping, Pong)
+            ctx.pipeline().addLast(new WebSocketServerProtocolHandler(websocketBasepath,
+                null, // subprotocols
+                true, // allowExtensions
+                65536, // maxFrameSize
+                false, // allowMaskMismatch
+                true, // checkStartsWith,
+                15000L // handshakeTimeoutMillis
+            ));
 
-                log.info("WebSocketHandler added to the pipeline");
-                log.info("Opened Channel : " + ctx.channel());
-                log.info("Handshaking....");
-                //Do the Handshake to upgrade connection from HTTP to WebSocket protocol
-                handleHandshake(ctx, httpRequest);
-                log.info("Handshake is done");
+            String knownTopic = isKnownTopic(uri);
+            if (knownTopic == null) {
+                log.info("Adding WsBasicFrameHandler to the pipeline");
+                ctx.pipeline().addLast(new WsBasicFrameHandler());
+            } else {
+                log.info("Adding WsTopicFrameHandler to the pipeline. Topic: {}", knownTopic);
+                ctx.pipeline().addLast(new WsTopicFrameHandler(":" + knownTopic));
             }
-        } else {
-            log.info("Incoming request is unknown");
+            ctx.pipeline().fireChannelRead(msg);
         }
     }
 
-    /* Do the handshaking for WebSocket request */
-    protected void handleHandshake(ChannelHandlerContext ctx, HttpRequest req) {
-        WebSocketServerHandshakerFactory wsFactory =
-                new WebSocketServerHandshakerFactory(getWebSocketURL(req), null, true);
-        WebSocketServerHandshaker handshaker = wsFactory.newHandshaker(req);
-        if (handshaker == null) {
-            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
-        } else {
-            handshaker.handshake(ctx.channel(), req);
+    public String isKnownTopic(String uri) {
+        for (String topic: topics) {
+            if (uri.equals(websocketBasepath + topic)) {
+                return topic;
+            }
         }
-    }
-
-    protected String getWebSocketURL(HttpRequest req) {
-        System.out.println("Req URI : " + req.uri());
-        String url =  "ws://" + req.headers().get("Host") + req.uri();
-        System.out.println("Constructed URL : " + url);
-        return url;
+        return null;
     }
 }

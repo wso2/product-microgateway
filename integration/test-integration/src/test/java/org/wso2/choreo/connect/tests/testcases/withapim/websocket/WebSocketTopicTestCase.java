@@ -18,7 +18,6 @@
 
 package org.wso2.choreo.connect.tests.testcases.withapim.websocket;
 
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakeException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -34,13 +33,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WebSocketBasicTestCase extends ApimBaseTest {
-    private static final String API_CONTEXT = "websocket-basic";
+public class WebSocketTopicTestCase extends ApimBaseTest {
+    private static final String API_CONTEXT = "websocket-topic";
     private static final String API_VERSION = "1.0.0";
-    private static final String APPLICATION_NAME = "WebSocketBasicApp";
+    private static final String APPLICATION_NAME = "WebSocketTopicApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
-
-    private String endpointURL;
 
     @BeforeClass(alwaysRun = true, description = "Create access token and define endpoint URL")
     void setEnvironment() throws Exception {
@@ -52,53 +49,43 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
-
-        endpointURL = Utils.getServiceURLWebSocket(API_CONTEXT + "/" + API_VERSION);
     }
 
-    @Test(description = "Test websocket connection and a ping via Choreo Connect")
-    public void testConnectionWithPing() throws Exception {
-        WsClient wsClient = new WsClient(endpointURL, requestHeaders);
-        List<String> messagesToSend = List.of(new String[]{"ping", "close"});
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
-        Assert.assertEquals(responses.size(), 1);
-        Assert.assertEquals(responses.get(0), "pong");
-    }
-
-    @Test(description = "Test sending a websocket plain text msg via Choreo Connect")
-    public void testConnectionWithTextMessage() throws Exception {
+    @Test(description = "Test topics for API with no uri mapping")
+    public void testBasicTopicWithNoURIMapping() throws Exception {
+        String topic = "/noMapping";
+        String endpointURL = Utils.getServiceURLWebSocket(API_CONTEXT + "/" + API_VERSION + topic);
         WsClient wsClient = new WsClient(endpointURL, requestHeaders);
         String msg = "a text msg that is sent via a web socket connection";
         List<String> messagesToSend = new ArrayList<>();
         messagesToSend.add(msg);
+        messagesToSend.add("close");
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        Assert.assertEquals(responses.size(), 1);
+        Assert.assertEquals("Message received: " + msg, responses.get(0));
+    }
+
+    @Test(description = "Test topics for API with uri mapping")
+    public void testBasicTopicWithURIMapping() throws Exception {
+        String topic = "/notifications";
+        testTopic(topic, topic);
+    }
+
+    @Test(description = "Test topics for API with uri mapping, including conversion to query params")
+    public void testQueryParamConvertedTopicWithURIMapping() throws Exception {
+        String topic = "/rooms/room1";
+        testTopic(topic, "/rooms?room=room1");
+    }
+
+    private void testTopic(String topic, String assertSuffix) throws Exception {
+        String endpointURL = Utils.getServiceURLWebSocket(API_CONTEXT + "/" + API_VERSION + topic);
+        WsClient wsClient = new WsClient(endpointURL, requestHeaders);
+        String msg = "a text msg that is sent via a web socket connection";
+        List<String> messagesToSend = new ArrayList<>();
         messagesToSend.add(msg);
         messagesToSend.add("close");
         List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
-        Assert.assertEquals(responses.size(), 2);
-        Assert.assertEquals(responses.get(0), "Message received: " + msg);
-    }
-
-    @Test(description = "Test non existent version of an API", dependsOnMethods = "testConnectionWithPing")
-    public void testNonExistentVersion() throws Exception {
-        endpointURL = Utils.getServiceURLWebSocket(API_CONTEXT + "/2.0.0");
-        WsClient wsClient = new WsClient(endpointURL, requestHeaders);
-        List<String> messagesToSend = List.of(new String[]{"ping", "close"});
-        boolean respondedNotFound = false;
-        int serverResponse = 0;
-        int maxRetryCount = 10;
-        int retryCount = 0;
-        do {
-            retryCount ++;
-            try {
-                wsClient.connectAndSendMessages(messagesToSend);
-            } catch (WebSocketClientHandshakeException e) {
-                serverResponse = e.response().status().code();
-                if (404 == e.response().status().code()) {
-                    respondedNotFound = true;
-                }
-            }
-        } while (maxRetryCount > retryCount && serverResponse == 503);
-
-        Assert.assertTrue(respondedNotFound, "Server responded with " + serverResponse);
+        Assert.assertEquals(responses.size(), 1);
+        Assert.assertEquals("Message received: " + msg + ":" + assertSuffix, responses.get(0));
     }
 }
