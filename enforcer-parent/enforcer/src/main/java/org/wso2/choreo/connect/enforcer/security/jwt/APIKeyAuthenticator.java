@@ -193,6 +193,15 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
                                 .getCode(), validationInfoDto.getValidationStatus(),
                                 GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                    } else if (APISecurityConstants.API_SUBSCRIPTION_BLOCKED == validationInfoDto
+                            .getValidationStatus()) {
+                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                                APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE);
+                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                APISecurityConstants.API_SUBSCRIPTION_BLOCKED_DESCRIPTION);
+                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
+                                .getCode(), validationInfoDto.getValidationStatus(),
+                                APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE);
                     }
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                             validationInfoDto.getValidationStatus(),
