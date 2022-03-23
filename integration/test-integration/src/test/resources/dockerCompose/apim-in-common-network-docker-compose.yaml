@@ -13,7 +13,7 @@ services:
       - "8243:8243"
     volumes:
       - ./conf/deployment.toml:/home/wso2carbon/wso2-config-volume/repository/conf/deployment.toml
-      - ./database:/home/wso2carbon/wso2-config-volume/repository/database:rw
+      - ./database:/home/wso2carbon/wso2am-4.1.0-beta/repository/database:rw
     networks:
       - apim_and_cc
   
