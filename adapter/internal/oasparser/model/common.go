@@ -129,6 +129,9 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 		urlType  string
 	)
 
+	// Remove leading and trailing spaces of rawURL
+	rawURL = strings.Trim(rawURL, " ")
+
 	if !strings.Contains(rawURL, "://") {
 		if apiType == constants.HTTP {
 			rawURL = "http://" + rawURL

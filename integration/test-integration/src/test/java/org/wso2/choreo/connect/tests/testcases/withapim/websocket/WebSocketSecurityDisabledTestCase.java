@@ -50,7 +50,7 @@ public class WebSocketSecurityDisabledTestCase extends ApimBaseTest {
     public void testTopicSecurityDisabledViaPublisher() throws Exception {
         WsClient wsClient = new WsClient(endpointURL + "/security-disabled-via-apim-publisher", new HashMap<>());
         List<String> messagesToSend = List.of(new String[]{"ping", "close"});
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 0);
         Assert.assertEquals(responses.size(), 1);
         Assert.assertEquals(responses.get(0), "pong");
     }
@@ -59,7 +59,7 @@ public class WebSocketSecurityDisabledTestCase extends ApimBaseTest {
     public void testTopicSecurityDisabledViaExtension() throws Exception {
         WsClient wsClient = new WsClient(endpointURL + "/security-disabled-via-extension", new HashMap<>());
         List<String> messagesToSend = List.of(new String[]{"ping", "close"});
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 0);
         Assert.assertEquals(responses.size(), 1);
         Assert.assertEquals(responses.get(0), "pong");
     }

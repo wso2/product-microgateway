@@ -48,7 +48,7 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
     }
 
     @DataProvider(name = "requestBodyProvider")
-    Object[][] requestBodyProvider() {
+    public Object[][] requestBodyProvider() {
         String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
         String interceptorRespBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
 

@@ -145,10 +145,10 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private void removeAllQueries(RequestContext requestContext, Map<String, String> policyAttrib) {
-        if (policyAttrib.containsKey("includeQueryParams")) {
-            boolean removeQuery = !Boolean.parseBoolean(policyAttrib.get("includeQueryParams"));
-            requestContext.setRemoveAllQueryParams(removeQuery);
-        }
+        // adapter may not pass, booleans with false in the map, hence empty, null or any other strings
+        // excepts "true" is considered as false.
+        boolean removeQuery = !Boolean.parseBoolean(policyAttrib.get("includeQueryParams"));
+        requestContext.setRemoveAllQueryParams(removeQuery);
     }
 
     private void pathParamToQueryParamTransform(RequestContext requestContext, Map<String, String> policyAttrib) {

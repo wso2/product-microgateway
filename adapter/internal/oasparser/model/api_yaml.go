@@ -20,6 +20,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -104,21 +105,22 @@ type OperationPolicies struct {
 	Fault    PolicyList `json:"fault,omitempty"`
 }
 
-// policyStats used to optimize and reduce loops by storing stats by calculating only once
-type policyStats struct {
-	firstIndex int
-	count      int
-}
-
 // PolicyList holds list of Polices in a flow of operation
 type PolicyList []Policy
 
 // Policy holds APIM policies
 type Policy struct {
-	PolicyName string      `json:"policyName,omitempty"`
-	Action     string      `json:"-"`
-	Order      int         `json:"order,omitempty"`
-	Parameters interface{} `json:"parameters,omitempty"`
+	PolicyName    string      `json:"policyName,omitempty"`
+	PolicyVersion string      `json:"policyVersion,omitempty"`
+	Action        string      `json:"-"`
+	Order         int         `json:"order,omitempty"`
+	Parameters    interface{} `json:"parameters,omitempty"`
+}
+
+// GetFullName returns the fully qualified name of the policy
+// This should be equal to the policy spec/def file name
+func (p *Policy) GetFullName() string {
+	return fmt.Sprintf("%s_%s", p.PolicyName, p.PolicyVersion)
 }
 
 // NewAPIYaml returns an APIYaml struct after reading and validating api.yaml or api.json
@@ -261,17 +263,4 @@ func (apiYaml APIYaml) ValidateAPIType() (err error) {
 		return err
 	}
 	return nil
-}
-
-func (pl PolicyList) getStats() map[string]policyStats {
-	stats := map[string]policyStats{}
-	for i, policy := range pl {
-		stat, ok := stats[policy.PolicyName]
-		if ok {
-			stats[policy.PolicyName] = policyStats{firstIndex: stat.firstIndex, count: stat.count + 1}
-		} else {
-			stats[policy.PolicyName] = policyStats{firstIndex: i, count: 1}
-		}
-	}
-	return stats
 }

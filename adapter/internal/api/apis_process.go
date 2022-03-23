@@ -172,10 +172,10 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			return nil
 		}
 
-		policyName := utills.FileNameWithoutExtension(fileName)
+		policyFullName := utills.FileNameWithoutExtension(fileName)
 		policy := model.PolicyContainer{}
-		if _, ok := apiProject.Policies[policyName]; ok {
-			policy = apiProject.Policies[policyName]
+		if _, ok := apiProject.Policies[policyFullName]; ok {
+			policy = apiProject.Policies[policyFullName]
 		}
 
 		if isSpec {
@@ -190,12 +190,12 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 				return err
 			}
 			policy.Specification = spec
-			apiProject.Policies[policyName] = policy
+			apiProject.Policies[policyFullName] = policy
 		}
 		if isDef {
 			// process policy definition
 			policy.Definition = model.PolicyDefinition{RawData: fileContent}
-			apiProject.Policies[policyName] = policy
+			apiProject.Policies[policyFullName] = policy
 		}
 	}
 	return nil

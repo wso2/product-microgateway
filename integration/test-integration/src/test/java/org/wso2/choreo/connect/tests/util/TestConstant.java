@@ -119,6 +119,8 @@ public class TestConstant {
 
     public static final String ROUTER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "router"
             + SECURITY_DIR + File.separator + "truststore";
+    public static final String ENFORCER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "enforcer"
+            + SECURITY_DIR + File.separator + "truststore";
     public static final String DOCKER_COMPOSE_CC_DIR = DOCKER_COMPOSE_DIR + File.separator + "choreo-connect";
     public static final String DROPINS_FOLDER_PATH = DOCKER_COMPOSE_DIR + RESOURCES_DIR
             + File.separator + "enforcer" + File.separator + "dropins";
@@ -139,6 +141,12 @@ public class TestConstant {
     //apim instances names
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
     public static final String AM_ALL_IN_ONE_INSTANCE = "all-in-one";
+
+    public static final class THROTTLING {
+        public static final String ADVANCED = "advanced";
+        public static final String APPLICATION = "application";
+        public static final String SUBSCRIPTION = "subscription";
+    }
 
     public static final class APIM_INTERNAL_ROLE {
         public static final String SUBSCRIBER = "Internal/subscriber";

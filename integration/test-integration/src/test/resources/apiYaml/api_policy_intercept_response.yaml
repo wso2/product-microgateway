@@ -1,0 +1,146 @@
+type: api
+version: v4.1.0
+data:
+  name: APIPolicyResponseInterceptorAPI
+  context: /intercept-response
+  version: 1.0.5
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+    - http
+    - https
+  policies:
+    - Unlimited
+  visibility: PUBLIC
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: https://mockBackend:2383/v2
+  endpointImplementationType: ENDPOINT
+  organizationId: carbon.super
+  operations:
+    -
+      target: /echo/{id}
+      verb: GET
+      operationPolicies:
+        request: []
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,request_body,response_headers,response_body,invocation_context
+        fault: []
+    -
+      target: /echo/{id}
+      verb: POST
+      operationPolicies:
+        request: []
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,request_body,response_headers,response_body,invocation_context
+        fault: []
+    -
+      target: /echo/both-intercept/resp-body-not-included
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,request_body
+        fault: []
+    -
+      target: /pet/findByStatus/req-intercept-enabled
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,request_body,response_headers,response_body,invocation_context
+        fault: []
+    -
+      target: /pet/findByStatus/interceptor-context
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers
+        fault: []
+    -
+      target: /pet/findByStatus/headers-only
+      verb: POST
+      operationPolicies:
+        request: []
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers
+        fault: []
+    -
+      target: /pet/findByStatus/body-included
+      verb: POST
+      operationPolicies:
+        request: []
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,response_body
+        fault: []
+    -
+      target: /pet/findByStatus/update-status-code
+      verb: POST
+      operationPolicies:
+        request: []
+        response:
+          -
+            policyName: ccCallInterceptorService
+            policyVersion: v1
+            parameters:
+              interceptorServiceURL: https://mockBackend:2371
+              includes: request_headers,response_body
+        fault: []

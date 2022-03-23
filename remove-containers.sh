@@ -16,7 +16,7 @@
 # -----------------------------------------------------------------------
 
 # Just to assist developers by removing all the containers.
-cc_version=1.1.0-alpha2
+cc_version=1.1.0-beta
 
 docker kill "$(docker ps -a | grep wso2/choreo-connect-enforcer:$cc_version | awk '{print $1}')"
 docker rm "$(docker ps -a | grep wso2/choreo-connect-enforcer:$cc_version | awk '{print $1}')"

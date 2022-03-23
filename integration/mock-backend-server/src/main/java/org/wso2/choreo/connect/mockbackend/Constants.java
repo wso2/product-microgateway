@@ -21,6 +21,9 @@ package org.wso2.choreo.connect.mockbackend;
 public class Constants {
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE = "content-type";
+    public static final String HTTP_QUERY_SEPARATOR = "&";
+    public static final String HTTP_QUERY_KEY_VAL_SEPARATOR = "=";
+
     public static final int MOCK_BACKEND_SERVER_PORT = 2383;
     public static final int SECURED_MOCK_BACKEND_SERVER_PORT = 2381;
     public static final int MTLS_MOCK_BACKEND_SERVER_PORT = 2382;

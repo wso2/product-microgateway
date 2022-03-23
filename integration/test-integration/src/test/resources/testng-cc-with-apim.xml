@@ -83,6 +83,9 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketBasicTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketSecurityDisabledTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketTopicTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApiLevelThrottleTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApplicationThrottleTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketSubscriptionThrottleTestCase"/>
        </classes>
    </test>
 

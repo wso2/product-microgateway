@@ -46,7 +46,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
     }
 
     @DataProvider(name = "requestBodyProvider")
-    Object[][] requestBodyProvider() {
+    public Object[][] requestBodyProvider() {
         String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
         String interceptorRespBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
 
@@ -64,7 +64,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
     }
 
     @DataProvider(name = "directRespondRequestBodyProvider")
-    Object[][] directRespondRequestBodyProvider() {
+    public Object[][] directRespondRequestBodyProvider() {
         String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
         String interceptorRespBody = "{\"message\": \"This is direct responded\"}";
 
@@ -204,7 +204,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
     }
 
     @DataProvider(name = "directRespondProvider")
-    Object[][] directRespondProvider() {
+    public Object[][] directRespondProvider() {
         // {interceptorRespBody}
         return new Object[][]{
                 {"UPDATED BODY"},

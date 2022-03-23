@@ -1,0 +1,19 @@
+{
+  "policyName": "5EventsPerMin",
+  "displayName": "5EventsPerMin",
+  "description": "Allows 5 events per minute",
+  "isDeployed": false,
+  "type": "SubscriptionThrottlePolicy",
+  "defaultLimit": {
+    "type": "EVENTCOUNTLIMIT",
+    "eventCount": {
+      "timeUnit": "min",
+      "unitTime": 1,
+      "eventCount": 5
+    }
+  },
+  "stopOnQuotaReach":true,
+  "rateLimitCount": 1000,
+  "subscriberCount": 50,
+  "billingPlan": "FREE"
+}

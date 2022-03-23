@@ -60,7 +60,7 @@ public class WebSocketTopicTestCase extends ApimBaseTest {
         List<String> messagesToSend = new ArrayList<>();
         messagesToSend.add(msg);
         messagesToSend.add("close");
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 800);
         Assert.assertEquals(responses.size(), 1);
         Assert.assertEquals("Message received: " + msg, responses.get(0));
     }
@@ -84,7 +84,7 @@ public class WebSocketTopicTestCase extends ApimBaseTest {
         List<String> messagesToSend = new ArrayList<>();
         messagesToSend.add(msg);
         messagesToSend.add("close");
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 800);
         Assert.assertEquals(responses.size(), 1);
         Assert.assertEquals("Message received: " + msg + ":" + assertSuffix, responses.get(0));
     }

@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   router:
-    image: wso2/choreo-connect-router:1.1.0-alpha2
+    image: wso2/choreo-connect-router:1.1.0-beta
     logging:
       options:
         max-size: "20m"
@@ -31,7 +31,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/choreo-connect-adapter:1.1.0-alpha2
+    image: wso2/choreo-connect-adapter:1.1.0-beta
     logging:
       options:
         max-size: "20m"
@@ -50,7 +50,7 @@ services:
       - "18000:18000"
       - "9843:9843"
   enforcer:
-    image: wso2/choreo-connect-enforcer:1.1.0-alpha2
+    image: wso2/choreo-connect-enforcer:1.1.0-beta
     logging:
       options:
         max-size: "20m"

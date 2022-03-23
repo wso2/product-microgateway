@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.websocket;
 
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,38 +81,47 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
                 if (framedata.getOpcode() == Opcode.TEXT || framedata.getOpcode() == Opcode.BINARY
                     || framedata.getOpcode() == Opcode.CONTINUOUS) {
                     WebSocketFrameRequest webSocketFrameRequestClone = webSocketFrameRequest.toBuilder()
-                            .setFrameLength(framedata.getPayloadData().remaining()).build();
-                    WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler
-                            .process(webSocketFrameRequestClone);
-                    if (WebSocketThrottleState.OK == webSocketThrottleResponse.getWebSocketThrottleState()) {
-                        WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
-                                WebSocketFrameResponse.Code.OK).setApimErrorCode(0).build();
-                        responseStreamObserver.onNext(response);
-                    } else if (WebSocketThrottleState.OVER_LIMIT == webSocketThrottleResponse
-                            .getWebSocketThrottleState()) {
-                        logger.debug("throttle out period" + webSocketThrottleResponse.getThrottlePeriod());
-                        WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder()
-                                .setThrottleState(WebSocketFrameResponse.Code.OVER_LIMIT)
-                                .setThrottlePeriod(webSocketThrottleResponse.getThrottlePeriod())
-                                .setApimErrorCode(webSocketThrottleResponse.getApimErrorCode())
-                                .build();
-                        responseStreamObserver.onNext(response);
-                    } else {
-                        logger.debug("throttle state of the connection is not available in enforcer");
-                        WebSocketFrameResponse webSocketFrameResponse = WebSocketFrameResponse.newBuilder()
-                                .setThrottleState(WebSocketFrameResponse.Code.UNKNOWN).build();
-                        responseStreamObserver.onNext(webSocketFrameResponse);
-                    }
+                            .setFrameLength(framedata.getPayloadData().remaining())
+                            .setPayload(ByteString.copyFrom(framedata.getPayloadData()))
+                            .build();
+                    sendWebSocketFrameResponse(webSocketFrameRequestClone);
                 } else {
                     logger.debug("Websocket frame type not related to throttling: {}", framedata.getOpcode());
                 }
             }));
         } catch (InvalidDataException e) {
-            logger.error(e);
+            // temp fix for https://github.com/wso2/product-microgateway/issues/2693
+            logger.error("Error {} when decoding websocket frame. Could be a batched set of " +
+                    "multiple compressed frames. Processing the frame in raw form.", e.getMessage());
+            sendWebSocketFrameResponse(webSocketFrameRequest);
         }
 
         if (!this.throttleKeysInitiated) {
             initializeThrottleKeys(webSocketFrameRequest);
+        }
+    }
+
+    private void sendWebSocketFrameResponse(WebSocketFrameRequest webSocketFrameRequest) {
+        WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler
+                .process(webSocketFrameRequest);
+        if (WebSocketThrottleState.OK == webSocketThrottleResponse.getWebSocketThrottleState()) {
+            WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
+                    WebSocketFrameResponse.Code.OK).setApimErrorCode(0).build();
+            responseStreamObserver.onNext(response);
+        } else if (WebSocketThrottleState.OVER_LIMIT == webSocketThrottleResponse
+                .getWebSocketThrottleState()) {
+            logger.debug("throttle out period" + webSocketThrottleResponse.getThrottlePeriod());
+            WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder()
+                    .setThrottleState(WebSocketFrameResponse.Code.OVER_LIMIT)
+                    .setThrottlePeriod(webSocketThrottleResponse.getThrottlePeriod())
+                    .setApimErrorCode(webSocketThrottleResponse.getApimErrorCode())
+                    .build();
+            responseStreamObserver.onNext(response);
+        } else {
+            logger.debug("throttle state of the connection is not available in enforcer");
+            WebSocketFrameResponse webSocketFrameResponse = WebSocketFrameResponse.newBuilder()
+                    .setThrottleState(WebSocketFrameResponse.Code.UNKNOWN).build();
+            responseStreamObserver.onNext(webSocketFrameResponse);
         }
     }
 
