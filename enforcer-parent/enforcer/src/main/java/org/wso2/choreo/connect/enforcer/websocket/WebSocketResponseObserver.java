@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.websocket;
 
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,7 +79,9 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
                 if (framedata.getOpcode() == Opcode.TEXT || framedata.getOpcode() == Opcode.BINARY
                     || framedata.getOpcode() == Opcode.CONTINUOUS) {
                     WebSocketFrameRequest webSocketFrameRequestClone = webSocketFrameRequest.toBuilder()
-                            .setFrameLength(framedata.getPayloadData().remaining()).build();
+                            .setFrameLength(framedata.getPayloadData().remaining())
+                            .setPayload(ByteString.copyFrom(framedata.getPayloadData()))
+                            .build();
                     sendWebSocketFrameResponse(webSocketFrameRequestClone);
                 } else {
                     logger.debug("Websocket frame type not related to throttling: {}", framedata.getOpcode());
