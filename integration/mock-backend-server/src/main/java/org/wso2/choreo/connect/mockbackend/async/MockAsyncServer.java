@@ -57,12 +57,10 @@ public class MockAsyncServer extends Thread {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new WebSocketServerInitializer(null));
 
-            Channel ch = b.bind(serverPort).sync().channel();
-            ch.closeFuture().sync();
-        } catch (InterruptedException e) {
-            log.error("Interrupted while syncing channel bind or channel close", e);
+            Channel ch = b.bind(serverPort).syncUninterruptibly().channel();
+            ch.closeFuture().syncUninterruptibly();
         } finally {
-            workerGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully().syncUninterruptibly();
             bossGroup.shutdownGracefully();
         }
     }
@@ -89,6 +87,10 @@ public class MockAsyncServer extends Thread {
 
             // handle websocket handshake and the control frames (Close, Ping, Pong)
             pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH,
+                    null, // subprotocols
+                    true, // allowExtensions
+                    65536, // maxFrameSize
+                    false, // allowMaskMismatch
                     true, // checkStartsWith,
                     15000L // handshakeTimeoutMillis
             ));

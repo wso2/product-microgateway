@@ -142,6 +142,12 @@ public class TestConstant {
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
     public static final String AM_ALL_IN_ONE_INSTANCE = "all-in-one";
 
+    public static final class THROTTLING {
+        public static final String ADVANCED = "advanced";
+        public static final String APPLICATION = "application";
+        public static final String SUBSCRIPTION = "subscription";
+    }
+
     public static final class APIM_INTERNAL_ROLE {
         public static final String SUBSCRIBER = "Internal/subscriber";
         public static final String PUBLISHER = "Internal/publisher";
