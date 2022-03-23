@@ -231,7 +231,7 @@ public class JWTAuthenticator implements Authenticator {
                                                 APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE);
                                         requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                                                 APISecurityConstants.API_SUBSCRIPTION_BLOCKED_DESCRIPTION);
-                                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
+                                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED
                                                 .getCode(), apiKeyValidationInfoDTO.getValidationStatus(),
                                                 APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE);
                                     }

@@ -199,7 +199,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                                 APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE);
                         requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                                 APISecurityConstants.API_SUBSCRIPTION_BLOCKED_DESCRIPTION);
-                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED
                                 .getCode(), validationInfoDto.getValidationStatus(),
                                 APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE);
                     }
