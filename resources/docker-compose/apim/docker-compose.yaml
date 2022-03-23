@@ -11,6 +11,8 @@ services:
       - "9443:9443"
       - "5672:5672"
       - "8243:8243"
+    environment:
+      - PROFILE_NAME=control-plane
     volumes:
       - ./conf/deployment.toml:/home/wso2carbon/wso2-config-volume/repository/conf/deployment.toml
   router:
