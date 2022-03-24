@@ -107,7 +107,6 @@ public class RequestContextTest {
                 "petId", "12");
     }
 
-
     private void testPathParamValues(String rawPath, String basePath, String pathTemplate, String pathParamName,
                                      String expectedValue) {
         RequestContext.Builder builder = new RequestContext.Builder(rawPath);
