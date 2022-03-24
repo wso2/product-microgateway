@@ -544,10 +544,18 @@ public class RequestContext {
                     formattedBasePath.substring(0, formattedBasePath.length() - 1) : formattedBasePath;
             String formattedResourcePathTemplate = resourceTemplate.startsWith("/") ?
                     resourceTemplate : "/" + resourceTemplate;
-
             String formattedRawPath = rawPath.split("\\?")[0];
-            final ParameterResolver parameterResolver = new ParameterResolver
-                    (formattedBasePath + formattedResourcePathTemplate);
+
+            String completeResourcePathTemplate = formattedBasePath + formattedResourcePathTemplate;
+            // rawPath would not have the prefix <formattedBasePath> only when it is a default api
+            // request.
+            if (!formattedRawPath.startsWith(formattedBasePath)) {
+                // formatted basePath does not have a trailing slash. Hence the last slash appears right
+                // before the version.
+                String apiContext = formattedBasePath.substring(0, formattedBasePath.lastIndexOf("/"));
+                completeResourcePathTemplate = apiContext + formattedResourcePathTemplate;
+            }
+            final ParameterResolver parameterResolver = new ParameterResolver(completeResourcePathTemplate);
             return parameterResolver.parametersByName(formattedRawPath);
         }
     }

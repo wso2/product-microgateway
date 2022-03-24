@@ -101,6 +101,11 @@ public class RequestContextTest {
                 "petId", "12");
     }
 
+    @Test
+    public void testPathParameterWithDefaultAPIRequests() {
+        testPathParamValues("/testapi/pet/12", "/testapi/v1", "/pet/{petId}",
+                "petId", "12");
+    }
 
     private void testPathParamValues(String rawPath, String basePath, String pathTemplate, String pathParamName,
                                      String expectedValue) {

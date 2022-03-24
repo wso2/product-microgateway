@@ -71,7 +71,9 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
             // batches and aggregate the frames. In that case if we directly send the frames to traffic manager, the
             // frame count will be wrong. Instead we can decode the buffer into frames and then process them
             // individually for throttling.
-            AnalyticsFilter.getInstance().handleWebsocketFrameRequest(webSocketFrameRequest);
+            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
+                AnalyticsFilter.getInstance().handleWebsocketFrameRequest(webSocketFrameRequest);
+            }
             List<Framedata> frames = decoder.translateFrame(
                     ByteBuffer.wrap(webSocketFrameRequest.getPayload().toByteArray()));
             frames.forEach((framedata -> {
