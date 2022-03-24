@@ -29,15 +29,17 @@ import org.wso2.choreo.connect.mockbackend.async.MockAsyncServer;
 public class WsHttpRequestHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(MockAsyncServer.class);
-    private static final String[] topics = new String[2];
+    private static final String[] topics = new String[3];
     private static String websocketBasepath;
     private static final String WS_PATH_NOTIFICATIONS = "/notifications";
     private static final String WS_PATH_ROOM_ID = "/rooms?room=room1";
+    private static final String WS_PATH_NO_MAPPING = "/noMapping";
 
     public WsHttpRequestHandler(String websocketBasepath) {
         WsHttpRequestHandler.websocketBasepath = websocketBasepath;
         topics[0] = WS_PATH_NOTIFICATIONS;
         topics[1] = WS_PATH_ROOM_ID;
+        topics[2] = WS_PATH_NO_MAPPING;
     }
 
     @Override
