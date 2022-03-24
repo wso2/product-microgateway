@@ -163,24 +163,28 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 }
 
 func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions map[string]interface{}) {
+	var newResourcePath string
+	policyParameters := make(map[string]interface{})
 	if uriMapping, found := vendorExtensions[constants.XUriMapping]; found {
-		newResourcePath := uriMapping.(string)
+		newResourcePath = uriMapping.(string)
 		if strings.Contains(newResourcePath, "?") {
 			newResourcePath = newResourcePath[:strings.Index(newResourcePath, "?")]
 		}
-		policyParameters := make(map[string]interface{})
-		policyParameters[constants.RewritePathResourcePath] = newResourcePath
-		policyParameters[constants.IncludeQueryParams] = true
+		// URI Mapping parameter is only used when enforcer needs to map path parameters to query parameters.
 		policyParameters[constants.XUriMapping] = uriMapping.(string)
-		policy := Policy{
-			PolicyName: constants.RewritePathResourcePath,
-			Action:     constants.RewritePathTemplate,
-			Order:      1,
-			Parameters: policyParameters,
-		}
-		operation.policies = OperationPolicies{
-			Request: []Policy{policy},
-		}
+	} else {
+		newResourcePath = "/"
+	}
+	policyParameters[constants.RewritePathResourcePath] = newResourcePath
+	policyParameters[constants.IncludeQueryParams] = true
+	policy := Policy{
+		PolicyName: constants.RewritePathResourcePath,
+		Action:     constants.RewritePathTemplate,
+		Order:      1,
+		Parameters: policyParameters,
+	}
+	operation.policies = OperationPolicies{
+		Request: []Policy{policy},
 	}
 }
 
