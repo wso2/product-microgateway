@@ -53,8 +53,9 @@ public class APISecurityConstants {
     public static final String API_AUTH_INCORRECT_API_RESOURCE_DESCRIPTION = "Check the API documentation and add a "
             + "proper REST resource path to the invocation URL";
 
-    public static final int API_BLOCKED = 900907;
-    public static final String API_BLOCKED_MESSAGE = "The requested API is temporarily blocked";
+    public static final int API_SUBSCRIPTION_BLOCKED = 900907;
+    public static final String API_SUBSCRIPTION_BLOCKED_MESSAGE = "The requested API is temporarily blocked";
+    public static final String API_SUBSCRIPTION_BLOCKED_DESCRIPTION = "API Subscription is blocked";
 
     public static final int API_AUTH_FORBIDDEN = 900908;
     public static final String API_AUTH_FORBIDDEN_MESSAGE = "Resource forbidden ";
@@ -116,8 +117,8 @@ public class APISecurityConstants {
         case API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
             errorMessage = API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE_MESSAGE;
             break;
-        case API_BLOCKED:
-            errorMessage = API_BLOCKED_MESSAGE;
+        case API_SUBSCRIPTION_BLOCKED:
+            errorMessage = API_SUBSCRIPTION_BLOCKED_MESSAGE;
             break;
         case API_AUTH_FORBIDDEN:
             errorMessage = API_AUTH_FORBIDDEN_MESSAGE;
