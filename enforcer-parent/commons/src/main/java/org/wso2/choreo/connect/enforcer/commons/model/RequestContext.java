@@ -555,8 +555,7 @@ public class RequestContext {
                 String apiContext = formattedBasePath.substring(0, formattedBasePath.lastIndexOf("/"));
                 completeResourcePathTemplate = apiContext + formattedResourcePathTemplate;
             }
-            final ParameterResolver parameterResolver = new ParameterResolver
-                    (completeResourcePathTemplate);
+            final ParameterResolver parameterResolver = new ParameterResolver(completeResourcePathTemplate);
             return parameterResolver.parametersByName(formattedRawPath);
         }
     }
