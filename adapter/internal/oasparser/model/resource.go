@@ -110,8 +110,8 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 							}
 							rewritePath, found = paramValue.(string)
 							if found {
-								rewritePath = "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePath, "/"), "/")
-								if matched, _ := regexp.MatchString("^[a-zA-Z0-9~/_.-]*$", rewritePath); !matched {
+								rewritePath = getRewriteRegexFromPathTemplate(resource.path, rewritePath)
+								if matched, _ := regexp.MatchString(`^[a-zA-Z0-9~/_.\-\\]*$`, rewritePath); !matched {
 									logger.LoggerOasparser.Error("Rewrite path includes invalid characters")
 									rewritePath = ""
 								}

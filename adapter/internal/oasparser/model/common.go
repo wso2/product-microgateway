@@ -22,6 +22,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -196,4 +197,33 @@ func unmarshalSwaggerResources(path string, methods []*Operation, vendorExtensio
 		//security:         operation.Security,
 		vendorExtensions: vendorExtensions,
 	}
+}
+
+// getRewriteRegexFromPathTemplate returns a regex with capture groups for given rewritePathTemplate
+func getRewriteRegexFromPathTemplate(pathTemplate, rewritePathTemplate string) string {
+	rewriteRegex := "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePathTemplate, "/"), "/")
+	pathParamToIndexMap := getPathParamToIndexMap(pathTemplate)
+	r := regexp.MustCompile(`{uri.var.([^{}]+)}`)
+	matches := r.FindAllStringSubmatch(rewritePathTemplate, -1)
+	for _, match := range matches {
+		if len(match) > 1 {
+			templatedParam := match[0]
+			param := match[1]
+			rewriteRegex = strings.ReplaceAll(rewriteRegex, templatedParam, fmt.Sprintf(`\%d`, pathParamToIndexMap[param]))
+		}
+	}
+	return rewriteRegex
+}
+
+// getPathParamToIndexMap returns a map of path params to its index (map of path param -> index)
+func getPathParamToIndexMap(pathTemplate string) map[string]int {
+	indexMap := make(map[string]int)
+	r := regexp.MustCompile(`{([^{}]+)}`)
+	matches := r.FindAllStringSubmatch(pathTemplate, -1)
+	for i, paramMatches := range matches {
+		if len(paramMatches) > 1 {
+			indexMap[paramMatches[1]] = i + 1
+		}
+	}
+	return indexMap
 }
