@@ -36,5 +36,5 @@ func MaskString(str string, visibleLength int, maskCharacter string, maskRight b
 		return mask + str[maskLength:]
 	}
 
-	return str
+	return strings.Repeat(maskCharacter, stringLength)
 }

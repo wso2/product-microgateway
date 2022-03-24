@@ -74,8 +74,8 @@ func TestMaskString(t *testing.T) {
 				maskCharacter: "*",
 				maskRight:     false,
 			},
-			output:  "pqrwxyz",
-			message: "return unmasked string when visible length is more than the string length",
+			output:  "*******",
+			message: "if the visible length is greater than str length mask the whole string",
 		},
 		{
 			input: TestMaskStringArguments{
