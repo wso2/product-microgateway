@@ -36,7 +36,6 @@ void MgwGrpcStreamHandler::onReceive(size_t body_size){
   const WebSocketFrameResponse& frame_response = message->proto<WebSocketFrameResponse>();
   LOG_TRACE(WebSocketFrameResponse_Code_Name(frame_response.throttle_state()));
   if(frame_response.throttle_state() == WebSocketFrameResponse_Code_OK){
-    LOG_TRACE("gRPC streaming onReceive");
     this->callbacks_->updateFilterState(ResponseStatus::OK);
   } else if (frame_response.throttle_state() == WebSocketFrameResponse_Code_OVER_LIMIT){
     this->callbacks_->updateThrottlePeriod(frame_response.throttle_period());
