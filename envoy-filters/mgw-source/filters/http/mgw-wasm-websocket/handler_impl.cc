@@ -27,7 +27,7 @@ MgwGrpcStreamHandler::MgwGrpcStreamHandler(HandlerCallbacks *callbacks){
 }
 
 MgwGrpcStreamHandler::~MgwGrpcStreamHandler(){
-  LOG_TRACE("Handler destructed");
+  LOG_TRACE("Handler destructed.");
 }
 
 void MgwGrpcStreamHandler::onReceive(size_t body_size){

@@ -16,7 +16,7 @@ SOURCE_DIR_MOUNT_API=/source/mgw-api/extensions/filters/http/mgw-wasm-websocket/
 BUILD_DIR="${PWD}"/../../../../../router/target/mgw-wasm/
 BUILD_DIR_MOUNT_DEST=/build
 
-ENVOY_BUILD_IMAGE=envoyproxy/envoy-build-ubuntu:e33c93e6d79804bf95ff80426d10bdcc9096c785
+ENVOY_BUILD_IMAGE=envoyproxy/envoy-build-ubuntu:3f6b1b096f2c0652ed270c5564b292bdd9a520f6
 
 # websocket.wasm
 

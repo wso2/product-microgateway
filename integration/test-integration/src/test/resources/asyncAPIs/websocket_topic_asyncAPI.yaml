@@ -1,0 +1,33 @@
+asyncapi: 2.0.0
+info:
+  title: WebSocketTopicAPI
+  version: 1.0.0
+servers:
+  production:
+    url: 'ws://mockBackend:2360/v2'
+    protocol: ws
+channels:
+  /notifications:
+    publish:
+      x-uri-mapping: /notifications
+    x-auth-type: Any
+  /noMapping:
+    publish: {}
+    x-auth-type: Any
+  '/rooms/{roomID}':
+    publish:
+      x-uri-mapping: '/rooms?room={uri.var.roomID}'
+    parameters:
+      roomID:
+        description: ''
+        schema:
+          type: string
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'http://localhost:9999'
+          scopes: {}
+          x-scopes-bindings: {}

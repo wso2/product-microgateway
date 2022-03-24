@@ -7,7 +7,7 @@ networks:
       name: apim_and_cc
 services:
   router:
-    image: wso2/choreo-connect-router:1.1.0-alpha2
+    image: wso2/choreo-connect-router:1.1.0-beta
     logging:
       options:
         max-size: "20m"
@@ -35,7 +35,7 @@ services:
     networks:
       - cc_internal
   adapter:
-    image: wso2/choreo-connect-adapter:1.1.0-alpha2
+    image: wso2/choreo-connect-adapter:1.1.0-beta
     logging:
       options:
         max-size: "20m"
@@ -58,7 +58,7 @@ services:
       - cc_internal
       - apim_and_cc
   enforcer:
-    image: wso2/choreo-connect-enforcer:1.1.0-alpha2
+    image: wso2/choreo-connect-enforcer:1.1.0-beta
     logging:
       options:
         max-size: "20m"

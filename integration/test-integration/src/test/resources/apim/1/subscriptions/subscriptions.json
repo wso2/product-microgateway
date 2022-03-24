@@ -65,6 +65,11 @@
     "tier": "AsyncUnlimited"
   },
   {
+    "apiName": "WebSocketTopicAPI",
+    "appName": "WebSocketTopicApp",
+    "tier": "AsyncUnlimited"
+  },
+  {
     "apiName": "WebsocketApiLevelBandwidthThrottleAPI",
     "appName": "WebsocketApiLevelThrottleApp",
     "tier": "AsyncUnlimited"
