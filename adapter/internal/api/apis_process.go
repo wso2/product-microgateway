@@ -164,6 +164,8 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			return errors.New("Error while reading api.yaml or api.json")
 		}
 		apiProject.APIYaml = apiYaml
+
+		// API policies
 	} else if strings.Contains(fileName, policiesDir+string(os.PathSeparator)) { // handle "./Policy" dir
 		// handle policy spec and def
 		isSpec := strings.HasSuffix(fileName, jsonExt) || strings.HasSuffix(fileName, yamlExt)

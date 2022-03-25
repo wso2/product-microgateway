@@ -52,6 +52,7 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         // following fields are the same fields sent from the synapse request generator
         JSONObject transportHeaders = new JSONObject(requestContext.getHeaders());
         transportHeaders.remove(StringUtils.lowerCase(requestContext.getMatchedAPI().getAuthHeader()));
+        // changes this
         inputPayload.put("transportHeaders", transportHeaders);
         inputPayload.put("requestOrigin", requestContext.getClientIp());
         inputPayload.put("method", requestContext.getRequestMethod());

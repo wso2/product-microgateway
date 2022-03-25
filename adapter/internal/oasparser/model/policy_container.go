@@ -163,7 +163,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	err = t.Execute(&out, policy.Parameters)
 	if err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing operation policy definition \"%s\" of the API \"%s\" in org \"%s\": %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing operation policy definition %q of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2206,
 		})
@@ -173,18 +173,31 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	def := PolicyDefinition{}
 	if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing formalized operation policy definition \"%s\" into yaml of the API \"%s\" in org \"%s\": %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing formalized operation policy definition %q into yaml of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2207,
 		})
 		return Policy{}, err
 	}
 
-	// update templated policy itself and return, not updating a pointer to keep the original template values as it is.
+	// Update templated policy itself and return, not updating a pointer to keep the original template values as it is.
 	policy.Parameters = def.Definition.Parameters
 	policy.Action = def.Definition.Action
 
+	// Fill default values
 	spec.fillDefaultsInPolicy(&policy)
+
+	// Check the API Policy supported by Choreo Connect
+	// Required params may be comming from default values as defined in the policy specification
+	// Hence do the validation after filling default values
+	if err := supportedPoliciesMap.validate(&policy); err != nil {
+		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("API policy validation failed, policy: %q of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Severity:  logging.MINOR,
+			ErrorCode: 0,
+		})
+		return Policy{}, err
+	}
 	return policy, nil
 }
 

@@ -110,11 +110,11 @@ type PolicyList []Policy
 
 // Policy holds APIM policies
 type Policy struct {
-	PolicyName    string      `json:"policyName,omitempty"`
-	PolicyVersion string      `json:"policyVersion,omitempty"`
-	Action        string      `json:"-"`
-	Order         int         `json:"order,omitempty"`
-	Parameters    interface{} `json:"parameters,omitempty"`
+	PolicyName       string      `json:"policyName,omitempty"`
+	PolicyVersion    string      `json:"policyVersion,omitempty"`
+	Action           string      `json:"-"` // This is a meta value used in CC, not included in API YAML
+	IsPassToEnforcer bool        `json:"-"` // This is a meta value used in CC, not included in API YAML
+	Parameters       interface{} `json:"parameters,omitempty"`
 }
 
 // GetFullName returns the fully qualified name of the policy
