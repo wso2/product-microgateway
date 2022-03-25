@@ -52,8 +52,10 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
 
         // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, expectedBody}
         return new Object[][]{
-                // non empty body from interceptor - means update request to backend
+                // non-empty body from interceptor - means update request to backend
                 {clientReqBody, interceptorRespBody, false, interceptorRespBody},
+                // empty request from client and non-empty body from interceptor - means update request to backend
+                {"", interceptorRespBody, false, interceptorRespBody},
                 // empty response body from interceptor - means update request to backend as empty
                 {clientReqBody, "", false, ""},
                 // null response body from interceptor (i.e. {"body": null}) - means do not update request to backend
@@ -70,13 +72,15 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
 
         // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, clientRespBody}
         return new Object[][]{
-                // non empty body from interceptor - means update request to backend
+                // non-empty body from interceptor - means update request to client
                 {clientReqBody, interceptorRespBody, false, interceptorRespBody},
-                // empty response body from interceptor - means update request to backend as empty
+                // empty request from client and non-empty body from interceptor - means update request to client
+                {"", interceptorRespBody, false, interceptorRespBody},
+                // empty response body from interceptor - means update request to client as empty
                 {clientReqBody, "", false, ""},
-                // null response body from interceptor (i.e. {"body": null}) - means do not update request to backend
+                // null response body from interceptor (i.e. {"body": null}) - means do not update request to client
                 {clientReqBody, null, false, ""},
-                // no response from interceptor (i.e. {}) - means do not update request to backend
+                // no response from interceptor (i.e. {}) - means do not update request to client
                 {clientReqBody, null, true, ""}
         };
     }
