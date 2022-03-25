@@ -39,6 +39,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 /**
@@ -91,6 +92,16 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
                     return FaultCategory.AUTH;
                 case 429:
                     return FaultCategory.THROTTLED;
+                case 503:
+                    // for API Blocked Scenario, it is considered as an Auth Failure although the status code
+                    // is 503
+                    if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.ERROR_CODE) &&
+                            GeneralErrorCodeConstants.API_BLOCKED_CODE ==
+                                    Integer.parseInt(requestContext.getProperties()
+                                            .get(APIConstants.MessageFormat.ERROR_CODE).toString())) {
+                        return FaultCategory.AUTH;
+                    }
+                    return FaultCategory.OTHER;
                 default:
                     return FaultCategory.OTHER;
             }

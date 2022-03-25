@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCate
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 
 /**
  * FaultCodeClassifier classifies the fault and returns error code.
@@ -70,6 +71,7 @@ public class FaultCodeClassifier {
             case APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
             case APISecurityConstants.INVALID_SCOPE:
                 return FaultSubCategories.Authentication.AUTHORIZATION_FAILURE;
+            case GeneralErrorCodeConstants.API_BLOCKED_CODE:
             case APISecurityConstants.API_SUBSCRIPTION_BLOCKED:
             case APISecurityConstants.API_AUTH_FORBIDDEN:
             case APISecurityConstants.SUBSCRIPTION_INACTIVE:
