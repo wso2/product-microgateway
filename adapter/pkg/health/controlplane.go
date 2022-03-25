@@ -51,6 +51,7 @@ func WaitForControlPlane() {
 	restAPIStarted := false
 	// if wait for both jmsStarted and restAPIStarted becomes true
 	for !brokerStarted || !restAPIStarted {
+		logger.LoggerHealth.Debugf("Waiting for connecting to control plane.. brokerStarted:%v restAPIStarted:%v", brokerStarted, restAPIStarted)
 		select {
 		case brokerStarted = <-controlPlaneBrokerStatusChan:
 			logger.LoggerHealth.Debugf("Connection to Control Plane Broker %v", brokerStarted)

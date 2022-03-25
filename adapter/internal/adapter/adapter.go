@@ -342,15 +342,26 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 func FetchAPIUUIDsFromGlobalAdapter() {
 	logger.LoggerMgw.Info("Fetching APIs at Local Adapter startup...")
 	apiEventsAtStartup := ga.FetchAPIsFromGA()
+	logger.LoggerMgw.Debugf("apiEventsAtStartup : %v", apiEventsAtStartup)
 	conf, _ := config.ReadConfigs()
+	envs := conf.ControlPlane.EnvironmentLabels
 	initialAPIUUIDListMap := make(map[string]int)
 	var apiUUIDList []string
 	for i, apiEventAtStartup := range apiEventsAtStartup {
+		logger.LoggerMgw.Debugf("Looping on apiEventsAtStartup iteration : %d", i)
 		apiUUIDList = append(apiUUIDList, apiEventAtStartup.APIUUID)
 		initialAPIUUIDListMap[apiEventAtStartup.APIUUID] = i
 	}
 	// Load subscription data with the received API UUID list map when GA is enabled.
+	logger.LoggerMgw.Debugf("initialAPIUUIDListMap: %v", initialAPIUUIDListMap)
 	eventhub.LoadSubscriptionData(conf, initialAPIUUIDListMap)
 	// Fetch APIs at LA startup with the received API UUID list when GA is enabled.
-	fetchAPIsOnStartUp(conf, apiUUIDList)
+	// When apiUUIDList is null, we don't need to fetch APIs.
+	if apiUUIDList == nil {
+		logger.LoggerMgw.Infof("No api artifacts received from the GA at the startup, hense deploying readiness health API..")
+		health.SetControlPlaneRestAPIStatus(true)
+		xds.DeployReadinessAPI(envs)
+	} else {
+		fetchAPIsOnStartUp(conf, apiUUIDList)
+	}
 }
