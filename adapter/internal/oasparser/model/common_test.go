@@ -39,6 +39,13 @@ func TestGetRewriteRegexFromPathTemplate(t *testing.T) {
 			message:             `Two params with same order`,
 		},
 		{
+			pathTemplate:        `/abc/shop/{shopId}.xyz/pets/{petId}`,
+			rewritePathTemplate: `/abc-shops/shops/{uri.var.shopId}/pets/{uri.var.petId}.pet`,
+			regexRewritePath:    `/abc-shops/shops/\1/pets/\2.pet`,
+			isExpError:          false,
+			message:             `Two params with same order`,
+		},
+		{
 			pathTemplate:        `/abc/shop/{shopId}/pets/{petId}`,
 			rewritePathTemplate: `/abc-shops/pets/{uri.var.petId}/shops/{uri.var.shopId}`,
 			regexRewritePath:    `/abc-shops/pets/\2/shops/\1`,

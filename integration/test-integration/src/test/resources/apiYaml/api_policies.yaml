@@ -123,7 +123,7 @@ data:
         response: []
         fault: []
     -
-      target: /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}/pets/{petId}/orders
+      target: /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}.xyz/pets/{petId}/orders
       verb: GET
       operationPolicies:
         request:
@@ -137,7 +137,7 @@ data:
             policyName: rewriteResourcePath
             policyVersion: v1
             parameters:
-              newResourcePath: /echo-full/pets/{uri.var.petId}/hello-shops/abcd-shops/{uri.var.shopId}
+              newResourcePath: /echo-full/pets/{uri.var.petId}.pets/hello-shops/abcd-shops/{uri.var.shopId}
               includeQueryParams: true
         response: []
         fault: []

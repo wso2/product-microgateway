@@ -111,10 +111,10 @@ public class APIPolicyTestCase {
     public void testRewritePathAPIPolicyWithCaptureGroups() throws Exception {
         // HTTP method: GET
         EchoResponse echoResponse = invokeEchoGet(
-                "/echo-full/rewrite-policy-with-capture-groups/shops/shop1234/pets/pet890/orders" + queryParams, headers);
+                "/echo-full/rewrite-policy-with-capture-groups/shops/shop1234.xyz/pets/pet890/orders" + queryParams, headers);
 
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/pets/pet890/hello-shops/abcd-shops/shop1234");
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/pets/pet890.pets/hello-shops/abcd-shops/shop1234");
         assertOriginalClientRequestInfo(echoResponse);
     }
 
