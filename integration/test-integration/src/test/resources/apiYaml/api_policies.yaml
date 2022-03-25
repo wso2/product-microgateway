@@ -123,6 +123,25 @@ data:
         response: []
         fault: []
     -
+      target: /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}/pets/{petId}/orders
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: GET
+              updatedMethod: PUT
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/pets/{uri.var.petId}/hello-shops/abcd-shops/{uri.var.shopId}
+              includeQueryParams: true
+        response: []
+        fault: []
+    -
       target: /echo-full/rewrite-policy/discard-query-params
       verb: GET
       operationPolicies:

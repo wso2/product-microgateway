@@ -44,6 +44,12 @@ paths:
       responses:
         '200':
           description: successful operation
+  /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}/pets/{petId}/orders:
+    get:
+      summary: rewrite based policies appied with capture groups
+      responses:
+        '200':
+          description: successful operation
   /echo-full/rewrite-policy/discard-query-params:
     get:
       summary: rewrite path with discard queries
