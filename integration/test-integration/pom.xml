@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.choreo.connect</groupId>
         <artifactId>integration</artifactId>
-        <version>1.1.0-alpha3-SNAPSHOT</version>
+        <version>1.1.0-beta2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -76,6 +76,7 @@
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-with-tls-and-network.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls-with-opa-server.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                             </target>
                         </configuration>
                         <goals>

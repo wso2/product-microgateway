@@ -14,7 +14,18 @@ paths:
       includes:
         - request_headers
     post:
-      summary: Interceptor echo backend
+      summary: Request headers updated by interceptor before reaching backend
+      responses:
+        '200':
+          description: successful operation
+  /echo/456:
+    x-wso2-request-interceptor:
+      serviceURL: https://mockBackend:2371
+      includes:
+        - request_headers
+        - request_body
+    post:
+      summary: Request headers and body updated by interceptor before reaching backend
       responses:
         '200':
           description: successful operation
