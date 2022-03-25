@@ -200,7 +200,7 @@ func unmarshalSwaggerResources(path string, methods []*Operation, vendorExtensio
 }
 
 // getRewriteRegexFromPathTemplate returns a regex with capture groups for given rewritePathTemplate
-func getRewriteRegexFromPathTemplate(pathTemplate, rewritePathTemplate string) string {
+func getRewriteRegexFromPathTemplate(pathTemplate, rewritePathTemplate string) (string, error) {
 	rewriteRegex := "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePathTemplate, "/"), "/")
 	pathParamToIndexMap := getPathParamToIndexMap(pathTemplate)
 	r := regexp.MustCompile(`{uri.var.([^{}]+)}`)
@@ -209,10 +209,21 @@ func getRewriteRegexFromPathTemplate(pathTemplate, rewritePathTemplate string) s
 		if len(match) > 1 {
 			templatedParam := match[0]
 			param := match[1]
-			rewriteRegex = strings.ReplaceAll(rewriteRegex, templatedParam, fmt.Sprintf(`\%d`, pathParamToIndexMap[param]))
+			if index, ok := pathParamToIndexMap[param]; ok {
+				rewriteRegex = strings.ReplaceAll(rewriteRegex, templatedParam, fmt.Sprintf(`\%d`, index))
+			} else {
+				return "", fmt.Errorf("invalid path param %q in rewrite path", param)
+			}
 		}
 	}
-	return rewriteRegex
+
+	// validate rewriteRegex
+	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9~/_.\-\\]*$`, rewriteRegex); !matched {
+		logger.LoggerOasparser.Error("Rewrite path includes invalid characters")
+		return "", fmt.Errorf("rewrite path regex includes invalid characters, regex %q", rewriteRegex)
+	}
+
+	return rewriteRegex, nil
 }
 
 // getPathParamToIndexMap returns a map of path params to its index (map of path param -> index)

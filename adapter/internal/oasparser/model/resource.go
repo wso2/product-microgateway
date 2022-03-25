@@ -20,6 +20,7 @@
 package model
 
 import (
+	"fmt"
 	"regexp"
 	"sort"
 
@@ -27,6 +28,7 @@ import (
 
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // Resource represents the object structure holding the information related to the
@@ -110,10 +112,17 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 							}
 							rewritePath, found = paramValue.(string)
 							if found {
-								rewritePath = getRewriteRegexFromPathTemplate(resource.path, rewritePath)
-								if matched, _ := regexp.MatchString(`^[a-zA-Z0-9~/_.\-\\]*$`, rewritePath); !matched {
-									logger.LoggerOasparser.Error("Rewrite path includes invalid characters")
+								if regexPath, err := getRewriteRegexFromPathTemplate(resource.path, rewritePath); err != nil {
+									logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+										Message:   fmt.Sprintf("Invalid rewrite path %q: %v", rewritePath, err),
+										Severity:  logging.MINOR,
+										ErrorCode: 2212,
+									})
 									rewritePath = ""
+								} else {
+									rewritePath = regexPath
+									// get the first success rewrite path and ignore other rewrite methods in the same resource path
+									break
 								}
 							}
 						}

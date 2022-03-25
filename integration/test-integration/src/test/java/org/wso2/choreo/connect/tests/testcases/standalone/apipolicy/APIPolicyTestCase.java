@@ -118,6 +118,28 @@ public class APIPolicyTestCase {
         assertOriginalClientRequestInfo(echoResponse);
     }
 
+    @Test(description = "Test rewrite path API Policy with capture groups with invalid param")
+    public void testRewritePathAPIPolicyWithCaptureGroupsInvalidParam() throws Exception {
+        // HTTP method: GET
+        EchoResponse echoResponse = invokeEchoGet(
+                "/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders" + queryParams, headers);
+
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test rewrite path API Policy with capture groups with invalid chars")
+    public void testRewritePathAPIPolicyWithCaptureGroupsInvalidChars() throws Exception {
+        // HTTP method: GET
+        EchoResponse echoResponse = invokeEchoGet(
+                "/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders" + queryParams, headers);
+
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
     @Test(description = "Test rewrite path and discard queries in rewrite path API Policies")
     public void testRewritePathAndDiscardQueriesAPIPolicy() throws Exception {
         // HTTP method: GET

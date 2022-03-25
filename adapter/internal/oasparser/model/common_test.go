@@ -28,37 +28,60 @@ func TestGetRewriteRegexFromPathTemplate(t *testing.T) {
 		pathTemplate        string
 		rewritePathTemplate string
 		regexRewritePath    string
+		isExpError          bool
 		message             string
 	}{
 		{
 			pathTemplate:        `/abc/shop/{shopId}/pets/{petId}`,
 			rewritePathTemplate: `/abc-shops/shops/{uri.var.shopId}/pets/{uri.var.petId}`,
 			regexRewritePath:    `/abc-shops/shops/\1/pets/\2`,
+			isExpError:          false,
 			message:             `Two params with same order`,
 		},
 		{
 			pathTemplate:        `/abc/shop/{shopId}/pets/{petId}`,
 			rewritePathTemplate: `/abc-shops/pets/{uri.var.petId}/shops/{uri.var.shopId}`,
 			regexRewritePath:    `/abc-shops/pets/\2/shops/\1`,
+			isExpError:          false,
 			message:             `Two params with different order`,
 		},
 		{
 			pathTemplate:        `/abc/shop/{shopId}/pets/{petId}`,
 			rewritePathTemplate: `/abc-shops/pets/{uri.var.petId}/shops/{uri.var.shopId}/{uri.var.petId}`,
 			regexRewritePath:    `/abc-shops/pets/\2/shops/\1/\2`,
+			isExpError:          false,
 			message:             `Two params with multiple times`,
 		},
 		{
 			pathTemplate:        `/abc/shop/pets`,
 			rewritePathTemplate: `/abc-shops/pets/`,
 			regexRewritePath:    `/abc-shops/pets`,
+			isExpError:          false,
 			message:             `No params`,
+		},
+		{
+			pathTemplate:        `/abc/shop/{shopId}/pets/{petId}`,
+			rewritePathTemplate: `/abc-shops/pets/{uri.var.nonExistingId}`,
+			regexRewritePath:    `/abc-shops/pets/`,
+			isExpError:          true,
+			message:             `Non existing path param`,
+		},
+		{
+			pathTemplate:        `/abc/shop/{shopId}/pets/{petId}`,
+			rewritePathTemplate: `/abc-shops/pets/{invalidParam}`,
+			regexRewritePath:    `/abc-shops/pets/`,
+			isExpError:          true,
+			message:             `Invalid characters`,
 		},
 	}
 
 	for _, test := range tests {
-		regexRewritePath := getRewriteRegexFromPathTemplate(test.pathTemplate, test.rewritePathTemplate)
-		assert.Equal(t, test.regexRewritePath, regexRewritePath)
+		regexRewritePath, err := getRewriteRegexFromPathTemplate(test.pathTemplate, test.rewritePathTemplate)
+		if test.isExpError {
+			assert.Error(t, err, test.message)
+		} else {
+			assert.Equal(t, test.regexRewritePath, regexRewritePath)
+		}
 	}
 }
 
