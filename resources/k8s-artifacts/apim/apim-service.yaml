@@ -44,3 +44,6 @@ spec:
     - name: binary-auth
       port: 9711
       targetPort: 9711
+    - name: servlet-proxy-https
+      port: 443
+      targetPort: 9443
