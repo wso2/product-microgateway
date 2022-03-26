@@ -48,7 +48,7 @@ public class WebSocketFrameService extends WebSocketFrameServiceGrpc.WebSocketFr
     }
 
     public static void removeObserver(String streamId) {
-        if (responseObservers.contains(streamId)) {
+        if (responseObservers.containsKey(streamId)) {
             responseObservers.remove(streamId);
         }
     }
