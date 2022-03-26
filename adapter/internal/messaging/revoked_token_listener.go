@@ -24,6 +24,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	stringutils "github.com/wso2/product-microgateway/adapter/internal/utils"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
@@ -36,7 +37,7 @@ func handleTokenRevocation() {
 			continue
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
-		logger.LoggerInternalMsg.Infof("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
+		logger.LoggerInternalMsg.Debugf("RevokedToken: %s, Token Type: %s", stringutils.MaskToken(notification.Event.PayloadData.RevokedToken),
 			notification.Event.PayloadData.Type)
 		processTokenRevocationEvent(&notification)
 		d.Ack(false)
@@ -52,7 +53,7 @@ func handleAzureTokenRevocation() {
 			continue
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
-		logger.LoggerInternalMsg.Infof("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
+		logger.LoggerInternalMsg.Debugf("RevokedToken: %s, Token Type: %s", stringutils.MaskToken(notification.Event.PayloadData.RevokedToken),
 			notification.Event.PayloadData.Type)
 		processTokenRevocationEvent(&notification)
 	}
