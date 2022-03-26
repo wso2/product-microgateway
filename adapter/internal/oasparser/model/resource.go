@@ -100,7 +100,7 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 	for _, method := range resource.methods {
 		if len(method.policies.Request) > 0 {
 			for _, policy := range method.policies.Request {
-				if strings.EqualFold(constants.RewritePathTemplate, policy.Action) {
+				if strings.EqualFold(constants.RewritePathAction, policy.Action) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
 							rewritePath, found = paramValue.(string)
@@ -120,7 +120,7 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 							}
 						}
 					}
-				} else if strings.EqualFold(constants.RewriteMethodTemplate, policy.Action) {
+				} else if strings.EqualFold(constants.RewriteMethodAction, policy.Action) {
 					rewriteMethod = true
 				}
 			}

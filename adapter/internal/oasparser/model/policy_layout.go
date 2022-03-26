@@ -20,6 +20,8 @@ package model
 import (
 	"errors"
 	"fmt"
+
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 )
 
 // supportedPoliciesMap maps (policy action name) -> (policy layout)
@@ -36,20 +38,23 @@ var supportedPoliciesMap = map[string]policyLayout{
 		RequiredParams:   []string{"queryParamName", "queryParamValue"},
 		IsPassToEnforcer: true,
 	},
-	"CALL_INTERCEPTOR_SERVICE": {
-		RequiredParams:   []string{"interceptorServiceURL", "includes"},
+	constants.InterceptorServiceAction: {
+		RequiredParams:   []string{constants.InterceptorServiceURL, constants.InterceptorServiceIncludes},
 		IsPassToEnforcer: false,
 	},
-	"REWRITE_RESOURCE_METHOD": {
+	constants.RewriteMethodAction: {
 		RequiredParams:   []string{"currentMethod", "updatedMethod"},
 		IsPassToEnforcer: true,
 	},
-	"REWRITE_RESOURCE_PATH": {
-		RequiredParams:   []string{"resourcePath", "includeQueryParams"},
+	constants.RewritePathAction: {
+		RequiredParams:   []string{constants.RewritePathResourcePath, constants.IncludeQueryParams},
 		IsPassToEnforcer: true,
 	},
 	"OPA": {
-		RequiredParams:   []string{"requestGenerator", "serverURL", "policy", "rule"},
+		// Following parameters are not required (optional)
+		// "rule", token", "additionalProperties", "sendAccessToken", "maxOpenConnections", "maxPerRoute"
+		// "connectionTimeout", "requestGenerator"
+		RequiredParams:   []string{"serverURL", "policy"},
 		IsPassToEnforcer: true,
 	},
 }
