@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ func TestMaskString(t *testing.T) {
 				maskCharacter: "*",
 				maskRight:     true,
 			},
-			output:  "abcd*********",
+			output:  "abcd**********",
 			message: "mask from right hand side. keep left four charaters unmasked",
 		},
 		{
@@ -54,7 +54,7 @@ func TestMaskString(t *testing.T) {
 				maskCharacter: "*",
 				maskRight:     false,
 			},
-			output:  "********ijklm",
+			output:  "**********ijklm",
 			message: "mask from left hand side. keep last five characters unmasked",
 		},
 		{
@@ -64,7 +64,7 @@ func TestMaskString(t *testing.T) {
 				maskCharacter: "x",
 				maskRight:     false,
 			},
-			output:  "xxxxxxxxijklm",
+			output:  "xxxxxxxxxxijklm",
 			message: "use 'x' as the mask charactor",
 		},
 		{
@@ -84,7 +84,7 @@ func TestMaskString(t *testing.T) {
 				maskCharacter: "x",
 				maskRight:     false,
 			},
-			output:  "xxxxxxxxxxxxxxxxxxxx",
+			output:  "xxxxxxxxxx",
 			message: "mask the whole string",
 		},
 	}

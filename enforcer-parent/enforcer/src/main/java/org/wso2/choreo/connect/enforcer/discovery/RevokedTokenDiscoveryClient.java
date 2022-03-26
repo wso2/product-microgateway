@@ -129,7 +129,6 @@ public class RevokedTokenDiscoveryClient implements Runnable {
                     @Override
                     public void onNext(DiscoveryResponse response) {
                         logger.info("Revoked  token event received with version : " + response.getVersionInfo());
-                        logger.debug("Received revoked tokens response " + response);
                         XdsSchedulerManager.getInstance().stopRevokedTokenDiscoveryScheduling();
                         latestReceived = response;
                         try {

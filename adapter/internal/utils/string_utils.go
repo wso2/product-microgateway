@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,20 +21,29 @@ import (
 	"strings"
 )
 
-// MaskString takes string as argument and keep a visibleLength number of charators and mask rest of the string with maskCharacter
+// DefaultMaskLength is the mask length of masked string
+const DefaultMaskLength = 10
+
+// MaskString takes string as argument and keep a visibleLength number of charators and mask
+// maskCharacter is used to generate the masked part of the string
 // It can mask the charators from either left or right hand side of the string depending on maskRight boolean
 // It returns the masked string
 func MaskString(str string, visibleLength int, maskCharacter string, maskRight bool) string {
 	stringLength := len(str)
 
 	if 0 <= visibleLength && visibleLength < stringLength {
-		maskLength := stringLength - visibleLength
+		maskLength := DefaultMaskLength
 		mask := strings.Repeat(maskCharacter, maskLength)
 		if maskRight {
 			return str[:visibleLength] + mask
 		}
-		return mask + str[maskLength:]
+		return mask + str[stringLength-visibleLength:]
 	}
 
 	return strings.Repeat(maskCharacter, stringLength)
+}
+
+// MaskToken masks the token with "*" character and keeps last four charaters visible
+func MaskToken(token string) string {
+	return MaskString(token, 4, "*", false)
 }
