@@ -119,7 +119,7 @@ public final class WsClient {
             Channel ch = b.connect(uri.getHost(), uri.getPort()).sync().channel();
             handler.handshakeFuture().sync();
 
-            log.info("Websocket client handshake complete");
+            log.info("Websocket client handshake is complete");
 
             sendMessages(ch, messages);
             Utils.delay(delayAfterSending, "interrupted while waiting for response frames");
