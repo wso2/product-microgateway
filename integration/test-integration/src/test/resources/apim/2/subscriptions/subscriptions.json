@@ -1,0 +1,7 @@
+[
+  {
+    "apiName": "WebSocketScopeAPI",
+    "appName": "WebSocketScopeApp",
+    "tier": "AsyncUnlimited"
+  }
+]

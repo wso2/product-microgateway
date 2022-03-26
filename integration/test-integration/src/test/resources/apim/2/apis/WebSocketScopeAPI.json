@@ -1,0 +1,24 @@
+{
+  "name": "WebSocketScopeAPI",
+  "version": "1.0.0",
+  "context": "websocket-scope",
+  "type": "WS",
+  "tiersCollection": "AsyncUnlimited",
+  "description": "The scope here for 'subscribe' will not be added until updated again with the AsyncAPI",
+  "operationsDTOS": [
+    {
+      "verb": "SUBSCRIBE",
+      "target": "/*",
+      "scopes": ["reader"]
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "ws",
+    "production_endpoints": {
+      "url": "ws://mockBackend:2360/v2"
+    },
+    "sandbox_endpoints": {
+      "url": "ws://mockBackend:2360/v2"
+    }
+  }
+}

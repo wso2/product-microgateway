@@ -162,6 +162,7 @@ public final class WsClient {
         int retryCount = 0;
         boolean respondedNotFound = false;
         ArrayList<String> responses = null;
+        String error = null;
         do {
             try {
                 log.info("Trying websocket connect with url : " + url);
@@ -174,13 +175,18 @@ public final class WsClient {
                     respondedNotFound = true;
                 } else {
                     if (e.getMessage() != null) {
-                        log.error("Error during websocket handshake." + e.getMessage());
+                        log.error("Error during websocket handshake. " + e.getMessage());
+                        error = e.getMessage();
                     } else {
                         log.error("Error during websocket handshake.");
                     }
                 }
             }
         } while (respondedNotFound && shouldRetry(retryCount));
+        if (error != null) {
+            responses = new ArrayList<>();
+            responses.add(error);
+        }
         return responses;
     }
 

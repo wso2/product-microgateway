@@ -36,7 +36,7 @@
         </classes>
     </test>
 
-    <test name="Deploy APIs apps subscriptions Before starting Choreo Connect" parallel="false">
+    <test name="Clean and Deploy APIs apps subscriptions Before starting Choreo Connect" parallel="false">
         <parameter name = "apimArtifactsIndex" value="1"/>
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
@@ -109,12 +109,25 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EndpointsWithTrailingSlashTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EnforcerAPITestCase"/>
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
+        </classes>
+    </test>
+
+    <test name="Clean the 1st set and deploy a 2nd set of APIs apps subscriptions" parallel="false">
+        <parameter name = "apimArtifactsIndex" value="2"/>
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
+        </classes>
+    </test>
+
+    <test name="Test the 2nd set of APIs apps subscriptions" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketScopeTestCase"/>
         </classes>
     </test>
 
     <test name="Test against a new Choreo Connect instance with special Choreo Connect configs" parallel="false">
         <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutorTwo"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.InternalKeyHeaderTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrototypedAPITestCase"/>

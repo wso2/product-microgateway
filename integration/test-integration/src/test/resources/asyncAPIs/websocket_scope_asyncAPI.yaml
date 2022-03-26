@@ -1,0 +1,25 @@
+asyncapi: 2.0.0
+info:
+  title: WebSocketScopeAPI
+  version: 1.0.0
+servers:
+  production:
+    url: 'ws://mockBackend:2360/v2'
+    protocol: ws
+channels:
+  /*:
+    subscribe:
+      x-scopes:
+        - reader
+    x-auth-type: Any
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'http://localhost:9999'
+          scopes:
+            reader: ''
+          x-scopes-bindings:
+            reader: ''
