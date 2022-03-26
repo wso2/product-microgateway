@@ -18,6 +18,8 @@
 package org.wso2.choreo.connect.enforcer.interceptor;
 
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
@@ -33,13 +35,18 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.interceptor.opa.OPAClient;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Apply mediation policies.
  */
 public class MediationPolicyFilter implements Filter {
     private static final Logger log = LogManager.getLogger(MediationPolicyFilter.class);
+    private static final String X_URI_MAPPING_PROPERTY = "x-uri-mapping";
 
     public MediationPolicyFilter() {
         OPAClient.init();
@@ -85,6 +92,7 @@ public class MediationPolicyFilter implements Filter {
                 }
                 case "REWRITE_RESOURCE_PATH": {
                     removeAllQueries(requestContext, policy.getParameters());
+                    pathParamToQueryParamTransform(requestContext, policy.getParameters());
                     return true;
                 }
                 case "REWRITE_RESOURCE_METHOD": {
@@ -141,6 +149,35 @@ public class MediationPolicyFilter implements Filter {
         // excepts "true" is considered as false.
         boolean removeQuery = !Boolean.parseBoolean(policyAttrib.get("includeQueryParams"));
         requestContext.setRemoveAllQueryParams(removeQuery);
+    }
+
+    private void pathParamToQueryParamTransform(RequestContext requestContext, Map<String, String> policyAttrib) {
+        // "x-uri-mapping" property is explicitly added when processing x-uri-mapping extension in async api definition
+        if (policyAttrib.containsKey(X_URI_MAPPING_PROPERTY)) {
+            String uriMappingValue = policyAttrib.get(X_URI_MAPPING_PROPERTY);
+            String[] queryParts = uriMappingValue.split("\\?");
+            String queryParamString = queryParts.length > 1 ? queryParts[1] : "";
+            List<NameValuePair> queryParams = URLEncodedUtils.parse(queryParamString, StandardCharsets.UTF_8);
+            for (NameValuePair param : queryParams) {
+                String singleQueryParamvalue = param.getValue();
+                if (singleQueryParamvalue.contains("{uri.var.")) {
+                    Matcher substituteParamMatcher = Pattern.compile("\\{uri\\.var\\.(.*?)\\}")
+                            .matcher(singleQueryParamvalue);
+                    while (substituteParamMatcher.find()) {
+                        String pathParamId = singleQueryParamvalue
+                                .substring(substituteParamMatcher.start() + 9, substituteParamMatcher.end() - 1)
+                                .trim();
+                        if (requestContext.getPathParameters() != null
+                                && requestContext.getPathParameters().containsKey(pathParamId)) {
+                            requestContext.getQueryParamsToAdd().put(param.getName(),
+                                    requestContext.getPathParameters().get(pathParamId));
+                        }
+                    }
+                } else {
+                    requestContext.getQueryParamsToAdd().put(param.getName(), param.getValue());
+                }
+            }
+        }
     }
 
     private void addOrModifyQuery(RequestContext requestContext, Map<String, String> policyAttrib) {

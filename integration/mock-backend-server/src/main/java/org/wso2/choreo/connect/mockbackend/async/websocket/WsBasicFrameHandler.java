@@ -20,14 +20,15 @@ package org.wso2.choreo.connect.mockbackend.async.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger log = LoggerFactory.getLogger(WsServerFrameHandler.class);
+public class WsBasicFrameHandler extends ChannelInboundHandlerAdapter {
+    private static final Logger log = LoggerFactory.getLogger(WsBasicFrameHandler.class);
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object frame) {
@@ -58,7 +59,11 @@ public class WsServerFrameHandler extends ChannelInboundHandlerAdapter {
                 // Echo the received message for verification
                 log.info("TextWebSocketFrame received. Message: {}", msg);
                 ctx.channel().writeAndFlush(
-                        new TextWebSocketFrame("Message received: " + msg));
+                        new TextWebSocketFrame("Message received: " + ((TextWebSocketFrame) frame).text()));
+            } else if (frame instanceof BinaryWebSocketFrame) {
+                log.info("BinaryWebSocketFrame received.");
+                ctx.channel().writeAndFlush(
+                        new BinaryWebSocketFrame(((BinaryWebSocketFrame) frame).content()));
             } else {
                 log.info("Unsupported WebSocketFrame");
             }

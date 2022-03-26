@@ -45,6 +45,7 @@ const (
 	XMediationScript                  string = "x-mediation-script"
 	XScopes                           string = "x-scopes"
 	XWso2PassRequestPayloadToEnforcer string = "x-wso2-pass-request-payload-to-enforcer"
+	XUriMapping                       string = "x-uri-mapping"
 )
 
 // cluster name prefixes
@@ -93,6 +94,7 @@ const (
 	InterceptorServiceURL      string = "interceptorServiceURL"
 	InterceptorServiceIncludes string = "includes"
 	Order                      string = "order"
+	IncludeQueryParams         string = "includeQueryParams"
 )
 
 // Constants that occur as values in api.yaml
