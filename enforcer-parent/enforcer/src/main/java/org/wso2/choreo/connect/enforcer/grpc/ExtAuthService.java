@@ -222,7 +222,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         }
 
         Map<String, String> queryParamMap = new HashMap<>();
-        queryParamMap.putAll(currentQueryParamMap);
+        if (currentQueryParamMap != null) {
+            queryParamMap.putAll(currentQueryParamMap);
+        }
         queryParamMap.putAll(queryParamsToAdd);
 
         String pathWithoutQueryParams = requestPath.split("\\?")[0];

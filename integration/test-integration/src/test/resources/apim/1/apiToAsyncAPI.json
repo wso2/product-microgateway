@@ -1,4 +1,5 @@
 {
   "WebSocketBasicAPI": "websocket_basic_asyncAPI.yaml",
+  "WebSocketTopicAPI": "websocket_topic_asyncAPI.yaml",
   "WebSocketSecurityDisabledAPI": "websocket_security_disabled_asyncAPI.yaml"
 }

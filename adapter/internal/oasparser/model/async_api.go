@@ -146,8 +146,12 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 		}
 
 		security := getSecurityArray(pubOrSubVendorExtensions)
+		operation := NewOperation("GET", security, pubOrSubVendorExtensions)
+		// The path rewrite operation is applied from async-api definition.
+		// (Where in REST API scenario, it is populated from api.yaml)
+		populatePoliciesFromVendorExtensions(operation, pubOrSubVendorExtensions)
 		var methodsArray []*Operation
-		methodsArray = append(methodsArray, NewOperation("GET", security, pubOrSubVendorExtensions))
+		methodsArray = append(methodsArray, operation)
 
 		// we ignore other topic vendor extensions except x-auth-type and x-wso2-disable-security
 		channelVendorExtensions := map[string]interface{}{}
@@ -156,6 +160,32 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 	}
 
 	return SortResources(resources)
+}
+
+func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions map[string]interface{}) {
+	var newResourcePath string
+	policyParameters := make(map[string]interface{})
+	if uriMapping, found := vendorExtensions[constants.XUriMapping]; found {
+		newResourcePath = uriMapping.(string)
+		if strings.Contains(newResourcePath, "?") {
+			newResourcePath = newResourcePath[:strings.Index(newResourcePath, "?")]
+		}
+		// URI Mapping parameter is only used when enforcer needs to map path parameters to query parameters.
+		policyParameters[constants.XUriMapping] = uriMapping.(string)
+	} else {
+		newResourcePath = "/"
+	}
+	policyParameters[constants.RewritePathResourcePath] = newResourcePath
+	policyParameters[constants.IncludeQueryParams] = true
+	policy := Policy{
+		PolicyName: constants.RewritePathResourcePath,
+		Action:     constants.RewritePathTemplate,
+		Order:      1,
+		Parameters: policyParameters,
+	}
+	operation.policies = OperationPolicies{
+		Request: []Policy{policy},
+	}
 }
 
 func getSecurityArray(vendorExtensions map[string]interface{}) (security []map[string][]string) {

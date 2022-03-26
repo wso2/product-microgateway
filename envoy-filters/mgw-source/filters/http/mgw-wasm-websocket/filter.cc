@@ -64,6 +64,10 @@ bool MgwWebSocketRootContext::onConfigure(size_t config_size) {
   return true;
 }
 
+MgwWebSocketContext::~MgwWebSocketContext(){
+  LOG_TRACE(std::string("MgwContext destructed") + this->x_request_id_);
+}
+
 // Called when a new HTTP filter is created.
 void MgwWebSocketContext::onCreate() { 
   LOG_TRACE(std::string("onCreate " + std::to_string(id())));
@@ -71,6 +75,7 @@ void MgwWebSocketContext::onCreate() {
   // Read config provided by xDS and initialize member varibales.
   this->node_id_ = r->config_.node_id();
   this->failure_mode_deny_ = r->config_.failure_mode_deny();
+  this->stream_handler_ = new MgwGrpcStreamHandler(this);
   // Initialize throttle period to now or 0
   struct timeval now;
   // NULL value is provided since we want UTC. Otherwise we should provide a param for the relevant timezone.
@@ -310,8 +315,9 @@ void MgwWebSocketContext::onDone() { LOG_TRACE(std::string("onDone " + std::to_s
 
 void MgwWebSocketContext::onLog() { LOG_TRACE(std::string("onLog " + std::to_string(id())) + std::string(" : ") + this->x_request_id_); }
 
-void MgwWebSocketContext::onDelete() { 
+void MgwWebSocketContext::onDelete() {
   LOG_TRACE(std::string("onDelete " + std::to_string(id())));
+  this->stream_handler_->reset();
  }
 
 // Callback used by the handler to pass the throttle response received by the gRPC stream.
@@ -357,7 +363,6 @@ bool MgwWebSocketContext::isDataFrame(const std::string_view data){
 // Establish a new gRPC stream.
 void MgwWebSocketContext::establishNewStream() {
   LOG_TRACE(std::string("establish new stream called. : ") + this->x_request_id_);
-  this->stream_handler_ = new MgwGrpcStreamHandler(this);
   GrpcService grpc_service;
   MgwWebSocketRootContext *r = dynamic_cast<MgwWebSocketRootContext*>(root());
   grpc_service.mutable_envoy_grpc()->set_cluster_name(r->config_.rate_limit_service());  
