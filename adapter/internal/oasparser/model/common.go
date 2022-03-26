@@ -203,17 +203,17 @@ func unmarshalSwaggerResources(path string, methods []*Operation, vendorExtensio
 func getRewriteRegexFromPathTemplate(pathTemplate, rewritePathTemplate string) (string, error) {
 	rewriteRegex := "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePathTemplate, "/"), "/")
 	pathParamToIndexMap := getPathParamToIndexMap(pathTemplate)
-	r := regexp.MustCompile(`{uri.var.([^{}]+)}`)
+	r := regexp.MustCompile(`{uri.var.([^{}]+)}`) // define a capture group to catch the path param
 	matches := r.FindAllStringSubmatch(rewritePathTemplate, -1)
 	for _, match := range matches {
-		if len(match) > 1 {
-			templatedParam := match[0]
-			param := match[1]
-			if index, ok := pathParamToIndexMap[param]; ok {
-				rewriteRegex = strings.ReplaceAll(rewriteRegex, templatedParam, fmt.Sprintf(`\%d`, index))
-			} else {
-				return "", fmt.Errorf("invalid path param %q in rewrite path", param)
-			}
+		// match is slice always with length two (since one capture group is defined in the regex)
+		// hence we do not want to explicitly validate the slice length
+		templatedParam := match[0]
+		param := match[1]
+		if index, ok := pathParamToIndexMap[param]; ok {
+			rewriteRegex = strings.ReplaceAll(rewriteRegex, templatedParam, fmt.Sprintf(`\%d`, index))
+		} else {
+			return "", fmt.Errorf("invalid path param %q in rewrite path", param)
 		}
 	}
 
@@ -229,12 +229,12 @@ func getRewriteRegexFromPathTemplate(pathTemplate, rewritePathTemplate string) (
 // getPathParamToIndexMap returns a map of path params to its index (map of path param -> index)
 func getPathParamToIndexMap(pathTemplate string) map[string]int {
 	indexMap := make(map[string]int)
-	r := regexp.MustCompile(`{([^{}]+)}`)
+	r := regexp.MustCompile(`{([^{}]+)}`) // define a capture group to catch the path param
 	matches := r.FindAllStringSubmatch(pathTemplate, -1)
 	for i, paramMatches := range matches {
-		if len(paramMatches) > 1 {
-			indexMap[paramMatches[1]] = i + 1
-		}
+		// paramMatches is slice always with length two (since one capture group is defined in the regex)
+		// hence we do not want to explicitly validate the slice length
+		indexMap[paramMatches[1]] = i + 1
 	}
 	return indexMap
 }
