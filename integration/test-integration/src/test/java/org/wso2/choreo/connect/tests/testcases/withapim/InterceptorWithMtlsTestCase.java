@@ -38,6 +38,7 @@ import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -144,6 +145,54 @@ public class InterceptorWithMtlsTestCase extends ApimBaseTest {
 
         // test body
         Assert.assertEquals(response.getData(), clientReqBody);
+    }
+
+    @Test
+    public void testUpdateHeadersAndRequestBodyInRequestFlowInterception() throws Exception {
+        JSONObject interceptorRespBodyJSON = new JSONObject();
+
+        // set body to be updated to
+        String interceptorRespBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
+        interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString(interceptorRespBody.getBytes()));
+
+        // set header updates related info
+        interceptorRespBodyJSON.put("headersToAdd", Collections.singletonMap("foo-add", "Header_newly_added"));
+        Map<String, String> headersToReplace = new HashMap<>();
+        headersToReplace.put("foo-update", "Header_Updated");
+        headersToReplace.put("content-type", "application/xml");
+        interceptorRespBodyJSON.put("headersToReplace", headersToReplace);
+        interceptorRespBodyJSON.put("headersToRemove", Collections.singletonList("foo-remove"));
+        setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
+
+        // setting client
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + accessToken);
+        headers.put("foo-remove", "Header_to_be_deleted");
+        headers.put("foo-update", "Header_to_be_updated");
+        headers.put("foo-keep", "Header_to_be_kept");
+        headers.put("content-type", "application/json");
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                API_CONTEXT + "/1.0.0/echo/456"), clientReqBody, headers);
+
+        Assert.assertNotNull(response);
+        int expectedRespCode = StringUtils.isEmpty(clientReqBody) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
+        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
+
+        // check which flows are invoked in interceptor service
+        JSONObject status = getInterceptorStatus();
+        String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
+        Assert.assertEquals(handler, InterceptorConstants.Handler.REQUEST_ONLY.toString(), "Invalid interceptor handler");
+
+        // test headers
+        Map<String, String> respHeaders = response.getHeaders();
+        Assert.assertFalse(respHeaders.containsKey("foo-remove"), "Failed to remove header");
+        Assert.assertEquals(respHeaders.get("foo-add"), "Header_newly_added", "Failed to add new header");
+        Assert.assertEquals(respHeaders.get("foo-update"), "Header_Updated", "Failed to replace header");
+        Assert.assertEquals(respHeaders.get("content-type"), "application/xml", "Failed to replace header");
+        Assert.assertEquals(respHeaders.get("foo-keep"), "Header_to_be_kept", "Failed to keep original header");
+
+        // test body
+        Assert.assertEquals(response.getData(), interceptorRespBody);
     }
 
     void setResponseOfInterceptor(String responseBody, boolean isRequestFlow) throws Exception {
