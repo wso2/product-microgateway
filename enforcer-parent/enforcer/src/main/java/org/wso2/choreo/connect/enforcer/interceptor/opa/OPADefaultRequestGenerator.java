@@ -57,7 +57,6 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         inputPayload.put("requestOrigin", requestContext.getClientIp());
         inputPayload.put("method", requestContext.getRequestMethod());
         inputPayload.put("path", requestContext.getRequestPath());
-        inputPayload.put("httpVersion", requestContext.getHttpProtocol()); // TODO (renuka): remove httpVersion
 
         // API context
         JSONObject apiContext = new JSONObject();

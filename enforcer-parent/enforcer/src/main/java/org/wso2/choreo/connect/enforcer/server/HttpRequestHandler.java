@@ -72,7 +72,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         String requestPayload = null;
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
-        String httpProtocol = request.getAttributes().getRequest().getHttp().getProtocol();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
         String pathTemplate = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
         String prodCluster = request.getAttributes().getContextExtensionsMap()
@@ -107,6 +106,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).requestPayload(requestPayload).httpProtocol(httpProtocol).build();
+                .pathTemplate(pathTemplate).requestPayload(requestPayload).build();
     }
 }
