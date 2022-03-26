@@ -65,7 +65,7 @@ public class BlockedApiTestCase extends ApimBaseTest {
                 user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         API api = new API();
-        api.setContext(API_CONTEXT);
+        api.setContext(API_CONTEXT + "/1.0.0");
         api.setName(API_NAME);
         api.setVersion("1.0.0");
         api.setProvider("admin");
