@@ -93,7 +93,6 @@ const (
 	RewritePathResourcePath    string = "resourcePath"
 	InterceptorServiceURL      string = "interceptorServiceURL"
 	InterceptorServiceIncludes string = "includes"
-	Order                      string = "order"
 	IncludeQueryParams         string = "includeQueryParams"
 )
 

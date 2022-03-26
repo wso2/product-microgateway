@@ -23,7 +23,7 @@ import (
 )
 
 // supportedPoliciesMap maps (policy action name) -> (policy layout)
-var supportedPoliciesMap = policyLayouts{
+var supportedPoliciesMap = map[string]policyLayout{
 	"SET_HEADER": {
 		RequiredParams:   []string{"headerName", "headerValue"},
 		IsPassToEnforcer: true,
@@ -60,10 +60,8 @@ type policyLayout struct {
 	IsPassToEnforcer bool
 }
 
-type policyLayouts map[string]policyLayout
-
-func (pl policyLayouts) validate(policy *Policy) error {
-	if layout, ok := pl[policy.Action]; ok {
+func validatePolicyAction(policy *Policy) error {
+	if layout, ok := supportedPoliciesMap[policy.Action]; ok {
 		for _, requiredParam := range layout.RequiredParams {
 			if params, isMap := policy.Parameters.(map[string]interface{}); isMap { // todo: make this map[string]interface{}
 				if _, ok := params[requiredParam]; !ok {

@@ -8,41 +8,23 @@ public interface PolicyOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string policyName = 1;</code>
-   * @return The policyName.
-   */
-  java.lang.String getPolicyName();
-  /**
-   * <code>string policyName = 1;</code>
-   * @return The bytes for policyName.
-   */
-  com.google.protobuf.ByteString
-      getPolicyNameBytes();
-
-  /**
-   * <code>string action = 2;</code>
+   * <code>string action = 1;</code>
    * @return The action.
    */
   java.lang.String getAction();
   /**
-   * <code>string action = 2;</code>
+   * <code>string action = 1;</code>
    * @return The bytes for action.
    */
   com.google.protobuf.ByteString
       getActionBytes();
 
   /**
-   * <code>uint32 order = 3;</code>
-   * @return The order.
-   */
-  int getOrder();
-
-  /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
   int getParametersCount();
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
   boolean containsParameters(
       java.lang.String key);
@@ -53,19 +35,19 @@ public interface PolicyOrBuilder extends
   java.util.Map<java.lang.String, java.lang.String>
   getParameters();
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
   java.util.Map<java.lang.String, java.lang.String>
   getParametersMap();
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
 
   java.lang.String getParametersOrDefault(
       java.lang.String key,
       java.lang.String defaultValue);
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
 
   java.lang.String getParametersOrThrow(

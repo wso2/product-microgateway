@@ -178,9 +178,7 @@ func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions
 	policyParameters[constants.RewritePathResourcePath] = newResourcePath
 	policyParameters[constants.IncludeQueryParams] = true
 	policy := Policy{
-		PolicyName: constants.RewritePathResourcePath,
 		Action:     constants.RewritePathTemplate,
-		Order:      1,
 		Parameters: policyParameters,
 	}
 	operation.policies = OperationPolicies{

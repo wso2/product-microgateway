@@ -190,7 +190,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	// Check the API Policy supported by Choreo Connect
 	// Required params may be comming from default values as defined in the policy specification
 	// Hence do the validation after filling default values
-	if err := supportedPoliciesMap.validate(&policy); err != nil {
+	if err := validatePolicyAction(&policy); err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("API policy validation failed, policy: %q of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,

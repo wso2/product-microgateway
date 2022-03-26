@@ -20,7 +20,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Policy() {
-    policyName_ = "";
     action_ = "";
   }
 
@@ -58,21 +57,10 @@ private static final long serialVersionUID = 0L;
           case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            policyName_ = s;
-            break;
-          }
-          case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-
             action_ = s;
             break;
           }
-          case 24: {
-
-            order_ = input.readUInt32();
-            break;
-          }
-          case 34: {
+          case 18: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
               parameters_ = com.google.protobuf.MapField.newMapField(
                   ParametersDefaultEntryHolder.defaultEntry);
@@ -114,7 +102,7 @@ private static final long serialVersionUID = 0L;
   protected com.google.protobuf.MapField internalGetMapField(
       int number) {
     switch (number) {
-      case 4:
+      case 2:
         return internalGetParameters();
       default:
         throw new RuntimeException(
@@ -129,48 +117,10 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.api.Policy.class, org.wso2.choreo.connect.discovery.api.Policy.Builder.class);
   }
 
-  public static final int POLICYNAME_FIELD_NUMBER = 1;
-  private volatile java.lang.Object policyName_;
-  /**
-   * <code>string policyName = 1;</code>
-   * @return The policyName.
-   */
-  @java.lang.Override
-  public java.lang.String getPolicyName() {
-    java.lang.Object ref = policyName_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      policyName_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string policyName = 1;</code>
-   * @return The bytes for policyName.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getPolicyNameBytes() {
-    java.lang.Object ref = policyName_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      policyName_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int ACTION_FIELD_NUMBER = 2;
+  public static final int ACTION_FIELD_NUMBER = 1;
   private volatile java.lang.Object action_;
   /**
-   * <code>string action = 2;</code>
+   * <code>string action = 1;</code>
    * @return The action.
    */
   @java.lang.Override
@@ -187,7 +137,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string action = 2;</code>
+   * <code>string action = 1;</code>
    * @return The bytes for action.
    */
   @java.lang.Override
@@ -205,18 +155,7 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int ORDER_FIELD_NUMBER = 3;
-  private int order_;
-  /**
-   * <code>uint32 order = 3;</code>
-   * @return The order.
-   */
-  @java.lang.Override
-  public int getOrder() {
-    return order_;
-  }
-
-  public static final int PARAMETERS_FIELD_NUMBER = 4;
+  public static final int PARAMETERS_FIELD_NUMBER = 2;
   private static final class ParametersDefaultEntryHolder {
     static final com.google.protobuf.MapEntry<
         java.lang.String, java.lang.String> defaultEntry =
@@ -243,7 +182,7 @@ private static final long serialVersionUID = 0L;
     return internalGetParameters().getMap().size();
   }
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
 
   @java.lang.Override
@@ -261,7 +200,7 @@ private static final long serialVersionUID = 0L;
     return getParametersMap();
   }
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
   @java.lang.Override
 
@@ -269,7 +208,7 @@ private static final long serialVersionUID = 0L;
     return internalGetParameters().getMap();
   }
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
   @java.lang.Override
 
@@ -282,7 +221,7 @@ private static final long serialVersionUID = 0L;
     return map.containsKey(key) ? map.get(key) : defaultValue;
   }
   /**
-   * <code>map&lt;string, string&gt; parameters = 4;</code>
+   * <code>map&lt;string, string&gt; parameters = 2;</code>
    */
   @java.lang.Override
 
@@ -311,21 +250,15 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getPolicyNameBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, policyName_);
-    }
     if (!getActionBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, action_);
-    }
-    if (order_ != 0) {
-      output.writeUInt32(3, order_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, action_);
     }
     com.google.protobuf.GeneratedMessageV3
       .serializeStringMapTo(
         output,
         internalGetParameters(),
         ParametersDefaultEntryHolder.defaultEntry,
-        4);
+        2);
     unknownFields.writeTo(output);
   }
 
@@ -335,15 +268,8 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!getPolicyNameBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, policyName_);
-    }
     if (!getActionBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, action_);
-    }
-    if (order_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeUInt32Size(3, order_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, action_);
     }
     for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
          : internalGetParameters().getMap().entrySet()) {
@@ -353,7 +279,7 @@ private static final long serialVersionUID = 0L;
           .setValue(entry.getValue())
           .build();
       size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, parameters__);
+          .computeMessageSize(2, parameters__);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -370,12 +296,8 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.api.Policy other = (org.wso2.choreo.connect.discovery.api.Policy) obj;
 
-    if (!getPolicyName()
-        .equals(other.getPolicyName())) return false;
     if (!getAction()
         .equals(other.getAction())) return false;
-    if (getOrder()
-        != other.getOrder()) return false;
     if (!internalGetParameters().equals(
         other.internalGetParameters())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -389,12 +311,8 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + POLICYNAME_FIELD_NUMBER;
-    hash = (53 * hash) + getPolicyName().hashCode();
     hash = (37 * hash) + ACTION_FIELD_NUMBER;
     hash = (53 * hash) + getAction().hashCode();
-    hash = (37 * hash) + ORDER_FIELD_NUMBER;
-    hash = (53 * hash) + getOrder();
     if (!internalGetParameters().getMap().isEmpty()) {
       hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
       hash = (53 * hash) + internalGetParameters().hashCode();
@@ -514,7 +432,7 @@ private static final long serialVersionUID = 0L;
     protected com.google.protobuf.MapField internalGetMapField(
         int number) {
       switch (number) {
-        case 4:
+        case 2:
           return internalGetParameters();
         default:
           throw new RuntimeException(
@@ -525,7 +443,7 @@ private static final long serialVersionUID = 0L;
     protected com.google.protobuf.MapField internalGetMutableMapField(
         int number) {
       switch (number) {
-        case 4:
+        case 2:
           return internalGetMutableParameters();
         default:
           throw new RuntimeException(
@@ -558,11 +476,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      policyName_ = "";
-
       action_ = "";
-
-      order_ = 0;
 
       internalGetMutableParameters().clear();
       return this;
@@ -592,9 +506,7 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.api.Policy buildPartial() {
       org.wso2.choreo.connect.discovery.api.Policy result = new org.wso2.choreo.connect.discovery.api.Policy(this);
       int from_bitField0_ = bitField0_;
-      result.policyName_ = policyName_;
       result.action_ = action_;
-      result.order_ = order_;
       result.parameters_ = internalGetParameters();
       result.parameters_.makeImmutable();
       onBuilt();
@@ -645,16 +557,9 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.api.Policy other) {
       if (other == org.wso2.choreo.connect.discovery.api.Policy.getDefaultInstance()) return this;
-      if (!other.getPolicyName().isEmpty()) {
-        policyName_ = other.policyName_;
-        onChanged();
-      }
       if (!other.getAction().isEmpty()) {
         action_ = other.action_;
         onChanged();
-      }
-      if (other.getOrder() != 0) {
-        setOrder(other.getOrder());
       }
       internalGetMutableParameters().mergeFrom(
           other.internalGetParameters());
@@ -688,85 +593,9 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private java.lang.Object policyName_ = "";
-    /**
-     * <code>string policyName = 1;</code>
-     * @return The policyName.
-     */
-    public java.lang.String getPolicyName() {
-      java.lang.Object ref = policyName_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        policyName_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string policyName = 1;</code>
-     * @return The bytes for policyName.
-     */
-    public com.google.protobuf.ByteString
-        getPolicyNameBytes() {
-      java.lang.Object ref = policyName_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        policyName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string policyName = 1;</code>
-     * @param value The policyName to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPolicyName(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      policyName_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string policyName = 1;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearPolicyName() {
-      
-      policyName_ = getDefaultInstance().getPolicyName();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string policyName = 1;</code>
-     * @param value The bytes for policyName to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPolicyNameBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      policyName_ = value;
-      onChanged();
-      return this;
-    }
-
     private java.lang.Object action_ = "";
     /**
-     * <code>string action = 2;</code>
+     * <code>string action = 1;</code>
      * @return The action.
      */
     public java.lang.String getAction() {
@@ -782,7 +611,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string action = 2;</code>
+     * <code>string action = 1;</code>
      * @return The bytes for action.
      */
     public com.google.protobuf.ByteString
@@ -799,7 +628,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string action = 2;</code>
+     * <code>string action = 1;</code>
      * @param value The action to set.
      * @return This builder for chaining.
      */
@@ -814,7 +643,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string action = 2;</code>
+     * <code>string action = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearAction() {
@@ -824,7 +653,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string action = 2;</code>
+     * <code>string action = 1;</code>
      * @param value The bytes for action to set.
      * @return This builder for chaining.
      */
@@ -836,37 +665,6 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       action_ = value;
-      onChanged();
-      return this;
-    }
-
-    private int order_ ;
-    /**
-     * <code>uint32 order = 3;</code>
-     * @return The order.
-     */
-    @java.lang.Override
-    public int getOrder() {
-      return order_;
-    }
-    /**
-     * <code>uint32 order = 3;</code>
-     * @param value The order to set.
-     * @return This builder for chaining.
-     */
-    public Builder setOrder(int value) {
-      
-      order_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>uint32 order = 3;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearOrder() {
-      
-      order_ = 0;
       onChanged();
       return this;
     }
@@ -898,7 +696,7 @@ private static final long serialVersionUID = 0L;
       return internalGetParameters().getMap().size();
     }
     /**
-     * <code>map&lt;string, string&gt; parameters = 4;</code>
+     * <code>map&lt;string, string&gt; parameters = 2;</code>
      */
 
     @java.lang.Override
@@ -916,7 +714,7 @@ private static final long serialVersionUID = 0L;
       return getParametersMap();
     }
     /**
-     * <code>map&lt;string, string&gt; parameters = 4;</code>
+     * <code>map&lt;string, string&gt; parameters = 2;</code>
      */
     @java.lang.Override
 
@@ -924,7 +722,7 @@ private static final long serialVersionUID = 0L;
       return internalGetParameters().getMap();
     }
     /**
-     * <code>map&lt;string, string&gt; parameters = 4;</code>
+     * <code>map&lt;string, string&gt; parameters = 2;</code>
      */
     @java.lang.Override
 
@@ -937,7 +735,7 @@ private static final long serialVersionUID = 0L;
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
-     * <code>map&lt;string, string&gt; parameters = 4;</code>
+     * <code>map&lt;string, string&gt; parameters = 2;</code>
      */
     @java.lang.Override
 
@@ -958,7 +756,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>map&lt;string, string&gt; parameters = 4;</code>
+     * <code>map&lt;string, string&gt; parameters = 2;</code>
      */
 
     public Builder removeParameters(
@@ -977,7 +775,7 @@ private static final long serialVersionUID = 0L;
       return internalGetMutableParameters().getMutableMap();
     }
     /**
-     * <code>map&lt;string, string&gt; parameters = 4;</code>
+     * <code>map&lt;string, string&gt; parameters = 2;</code>
      */
     public Builder putParameters(
         java.lang.String key,
@@ -989,7 +787,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>map&lt;string, string&gt; parameters = 4;</code>
+     * <code>map&lt;string, string&gt; parameters = 2;</code>
      */
 
     public Builder putAllParameters(
