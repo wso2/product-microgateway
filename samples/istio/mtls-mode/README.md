@@ -126,12 +126,12 @@ kubectl label namespace default istio-injection=enabled
 - Add an `/etc/host` entry for Choreo Connect and WSO2 API Manager
 
     ```
-    127.0.0.1  apim.wso2.com gw.wso2.com
+    127.0.0.1  wso2apim gw.wso2.com
     ```
 
 ### 5. Apply API Management for the microservice
 
-- Access the Publisher portal - https://apim.wso2.com/publisher/
+- Access the Publisher portal - https://wso2apim/publisher/
 
   Use admin:admin as the credentials.
 
