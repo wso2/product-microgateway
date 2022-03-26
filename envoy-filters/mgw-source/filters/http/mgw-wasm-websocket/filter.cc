@@ -317,7 +317,7 @@ void MgwWebSocketContext::onLog() { LOG_TRACE(std::string("onLog " + std::to_str
 
 void MgwWebSocketContext::onDelete() {
   LOG_TRACE(std::string("onDelete " + std::to_string(id())));
-  this->stream_handler_->reset();
+  this->stream_handler_->close();
  }
 
 // Callback used by the handler to pass the throttle response received by the gRPC stream.
