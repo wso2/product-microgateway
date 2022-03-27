@@ -46,7 +46,7 @@ var (
 const DefaultGatewayName = "Default"
 
 // DefaultGatewayVHost represents the default vhost of default gateway environment if it is not configured
-const DefaultGatewayVHost = "localhost" // TODO (renuka): check this with pubuduG and raji: do we want this?
+const DefaultGatewayVHost = "localhost"
 // for /testtoken and /health check, if user not configured default env, we have no vhost
 
 const (

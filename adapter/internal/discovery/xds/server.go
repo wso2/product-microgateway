@@ -558,7 +558,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
 			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, apiNameVersionHashedID)
-			// TODO: (renuka) optimize to update cache only once after updating all maps
+			// Updating cache one API by one API, if one API failed to update cache continue with others.
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
 				logger.LoggerXds.ErrorC(logging.ErrorDetails{
@@ -626,7 +626,7 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
 			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, uuid)
-			// TODO: (renuka) optimize to update cache only once after updating all maps
+			// Updating cache one API by one API, if one API failed to update cache continue with others.
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
 				logger.LoggerXds.ErrorC(logging.ErrorDetails{

@@ -195,7 +195,7 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getQuery().get("newQ1"), "newQ1Value",
                 getPolicyFailAssertMessage("Add Query"));
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies"); // TODO: (renuka) check rewrite replace path templates
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies");
         Assert.assertEquals(echoResponse.getData(), "Hello World!");
         assertOriginalClientRequestInfo(echoResponse);
     }
