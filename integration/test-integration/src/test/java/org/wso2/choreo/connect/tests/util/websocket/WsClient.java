@@ -52,6 +52,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
@@ -63,6 +64,7 @@ public final class WsClient {
 
     private final String url;
     private final Map<String, String> headers;
+    private boolean isMeasureDuration = false;
 
     public WsClient(String url, Map<String, String> headers) {
         this.url = url;
@@ -121,7 +123,16 @@ public final class WsClient {
 
             log.info("Websocket client handshake complete");
 
-            sendMessages(ch, messages);
+            if (isMeasureDuration) {
+                long startTime = System.nanoTime();
+                ch.closeFuture().sync();
+                long connectionDuration = System.nanoTime() - startTime;
+                long durationInSeconds = TimeUnit.NANOSECONDS.toSeconds(connectionDuration);
+                log.info("Idle connection duration = {}", durationInSeconds);
+                receivedMessages.add("duration:" + durationInSeconds);
+            } else {
+                sendMessages(ch, messages);
+            }
             Utils.delay(delayAfterSending, "interrupted while waiting for response frames");
         } catch (URISyntaxException e) {
             log.error("Error while parsing websocket URI", e);
@@ -162,6 +173,7 @@ public final class WsClient {
         int retryCount = 0;
         boolean respondedNotFound = false;
         ArrayList<String> responses = null;
+        String error = null;
         do {
             try {
                 log.info("Trying websocket connect with url : " + url);
@@ -174,13 +186,18 @@ public final class WsClient {
                     respondedNotFound = true;
                 } else {
                     if (e.getMessage() != null) {
-                        log.error("Error during websocket handshake." + e.getMessage());
+                        log.error("Error during websocket handshake. " + e.getMessage());
+                        error = e.getMessage();
                     } else {
                         log.error("Error during websocket handshake.");
                     }
                 }
             }
         } while (respondedNotFound && shouldRetry(retryCount));
+        if (error != null) {
+            responses = new ArrayList<>();
+            responses.add(error);
+        }
         return responses;
     }
 
@@ -210,6 +227,10 @@ public final class WsClient {
         }
 
         return isThrottled;
+    }
+
+    public void setMeasureDuration() {
+        isMeasureDuration = true;
     }
 }
 

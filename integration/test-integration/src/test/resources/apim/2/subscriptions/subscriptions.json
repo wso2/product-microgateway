@@ -1,0 +1,12 @@
+[
+  {
+    "apiName": "WebSocketScopeAPI",
+    "appName": "WebSocketScopeApp",
+    "tier": "AsyncUnlimited"
+  },
+  {
+    "apiName": "WebSocketTimeoutAPI",
+    "appName": "WebSocketTimeoutApp",
+    "tier": "AsyncUnlimited"
+  }
+]

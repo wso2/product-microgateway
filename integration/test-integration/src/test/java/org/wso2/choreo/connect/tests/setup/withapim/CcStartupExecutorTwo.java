@@ -29,8 +29,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This class is prepared to invoke CC for test cases that cover specific scenarios.
- * Supporting test cases
- * Using for same header name for API keys and Internal Keys
+ * Supporting test cases and scenarios:
+ *
+ * - Using for same header name for API keys and Internal Keys
+ * - Updated routeIdleTimeout (this overrides streamIdleTimeout). This is to test an idle websocket connection.
  */
 public class CcStartupExecutorTwo extends ApimBaseTest {
     CcInstance ccInstance;
