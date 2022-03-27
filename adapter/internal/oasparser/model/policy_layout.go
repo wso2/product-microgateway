@@ -65,10 +65,11 @@ type policyLayout struct {
 	IsPassToEnforcer bool
 }
 
+// validatePolicyAction validates policy against the policy definition that supported by Choreo Connect
 func validatePolicyAction(policy *Policy) error {
 	if layout, ok := supportedPoliciesMap[policy.Action]; ok {
 		for _, requiredParam := range layout.RequiredParams {
-			if params, isMap := policy.Parameters.(map[string]interface{}); isMap { // todo: make this map[string]interface{}
+			if params, isMap := policy.Parameters.(map[string]interface{}); isMap {
 				if _, ok := params[requiredParam]; !ok {
 					return fmt.Errorf("required parameter %q not found for the policy action %q", requiredParam, policy.Action)
 				}
