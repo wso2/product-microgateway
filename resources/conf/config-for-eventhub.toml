@@ -28,18 +28,18 @@
 
 [enforcer.throttling]
   enableGlobalEventPublishing = true
-  jmsConnectionProviderURL = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
+  jmsConnectionProviderURL = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5673'"
   [enforcer.throttling.publisher]
     username = "admin"
     password = "$env{tm_admin_pwd}"
     [[enforcer.throttling.publisher.URLGroup]]
-      receiverURLs = ["tcp://apim:9611"]
-      authURLs = ["ssl://apim:9711"]
+      receiverURLs = ["tcp://apim:9612"]
+      authURLs = ["ssl://apim:9712"]
 
 [enforcer.security]
 [[enforcer.security.tokenService]]
   name = "Resident Key Manager"
-  issuer = "https://localhost:9443/oauth2/token"
+  issuer = "https://localhost:9444/oauth2/token"
   certificateAlias = "wso2carbon"
   jwksURL = ""
   validateSubscription = false
@@ -57,19 +57,19 @@
 
 [[enforcer.security.tokenService]]
   name = "APIM Publisher"
-  issuer = "https://localhost:9443/publisher"
+  issuer = "https://localhost:9444/publisher"
   validateSubscription = true
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [controlPlane]
   enabled = true
-  serviceURL = "https://apim:9443/"
+  serviceURL = "https://apim:9444/"
   username = "admin"
   password = "$env{cp_admin_pwd}"
   environmentLabels = ["Default"]
   skipSSLVerification = true
   [controlPlane.brokerConnectionParameters]
-    eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
+    eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5673?retries='10'&connectdelay='30'"]
 
 [analytics]
   enabled = false
