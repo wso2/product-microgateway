@@ -3,6 +3,10 @@
     enabled = false
 [router.upstream.tls]
     trustedCertPath = "/home/wso2/security/truststore/ca-certificates.crt"
+[router.upstream.timeouts]
+    routeTimeoutInSeconds = 300
+    maxRouteTimeoutInSeconds = 300
+    routeIdleTimeoutInSeconds = 15
 
 [enforcer]
 [enforcer.security]

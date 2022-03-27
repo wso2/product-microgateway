@@ -2,5 +2,9 @@
   {
     "appName": "WebSocketScopeApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "WebSocketTimeoutApp",
+    "throttleTier": "Unlimited"
   }
 ]
