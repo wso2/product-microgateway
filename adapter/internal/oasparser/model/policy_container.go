@@ -33,15 +33,6 @@ const (
 	policyCCGateway string = "ChoreoConnect"
 )
 
-// policy value validation types
-const (
-	policyValTypeString string = "String"
-	policyValTypeInt    string = "Integer"
-	policyValTypeBool   string = "Boolean" // TODO: (renuka) check type names with APIM
-	policyValTypeArray  string = "Array"
-	policyValTypeMap    string = "Map"
-)
-
 var (
 	// policyDefFuncMap is a map of functions used in policy definitions
 	policyDefFuncMap = template.FuncMap{
