@@ -82,8 +82,6 @@ websub_event_receiver_http_endpoint = "http://foods.com:9021"
 websub_event_receiver_https_endpoint = "https://foods.com:8021"
 ######################## END ########################
 
-[apim.sync_runtime_artifacts.gateway]
-gateway_labels =["Default"]
 #[apim.cache.gateway_token]
 enable = true
 #expiry_time = "900s"
