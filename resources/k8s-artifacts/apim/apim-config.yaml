@@ -23,7 +23,7 @@ data:
     #offset=0
     base_path = "${carbon.protocol}://${carbon.host}:${carbon.management.port}"
     #discard_empty_caches = false
-    server_role = "default"
+    server_role = "control-plane"
 
     [super_admin]
     username = "admin"
@@ -86,9 +86,6 @@ data:
     websub_event_receiver_http_endpoint = "http://localhost:9021"
     websub_event_receiver_https_endpoint = "https://localhost:8021"
 
-    [apim.sync_runtime_artifacts.gateway]
-    gateway_labels =["Default"]
-    enable = false
     #[apim.cache.gateway_token]
     #enable = true
     #expiry_time = "900s"

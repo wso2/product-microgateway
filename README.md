@@ -31,7 +31,7 @@ Let's host our first API on Choreo Connect. We will be exposing the publicly ava
 1. First download the latest CLI tool(APICTL) and the Choreo Connect distributions
 and extract them to a folder of your choice.
    
-    * [CLI (APICTL - v4.0.x)](https://github.com/wso2/product-apim-tooling/releases/)
+    * [CLI (APICTL - v4.1.x)](https://github.com/wso2/product-apim-tooling/releases/)
     * [Choreo Connect Distribution](https://github.com/wso2/product-microgateway/releases/)
     
       CLI tool extracted location will be referred as `CLI_HOME` and Choreo Connect distribution extracted location would be referred as `CC_HOME`.
@@ -53,7 +53,7 @@ and extract them to a folder of your choice.
 where you executed the command. 
 
  
-5. Now lets start the Choreo Connect on docker by executing the docker compose script inside the `CC_HOME/docker-compose/choreo-connect/`. Navigate to `CC_HOME/docker-compose/choreo-connect/` and execute the following command
+5. Now let's start the Choreo Connect on docker by executing the docker compose script inside the `CC_HOME/docker-compose/choreo-connect/`. Navigate to `CC_HOME/docker-compose/choreo-connect/` and execute the following command
     ```
     docker-compose up -d
     ```
@@ -110,7 +110,7 @@ Let's get a test token from the Choreo Connect using its `/testkey` endpoint.
 
     ```
     List APIs          - apictl mg get apis -e dev -k
-    Undeploy API       - apictl mg undeploy api -n SwaggerPetstore -v 1.0.5 -e dev -k
+    Undeploy API       - apictl mg undeploy api -n SwaggerPetstore -v 1.0.6 -e dev -k
     Logout             - apictl mg logout dev   
     Remove Environment - apictl mg remove env dev
     ```
