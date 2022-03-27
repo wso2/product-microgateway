@@ -32,8 +32,22 @@ x-wso2-endpoints:
       urls:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
+
+# Call Interceptor Service API Policies is applied for all operations, hence this should override from all
+# API Policies in all operations
+x-wso2-request-interceptor:
+  serviceURL: https://invalid-host-this-should-be-overriden-from-api-policy:8080
+  includes:
+    - invocation_context
+
 paths:
   /echo/{id}:
+    # Call Interceptor Service API Policies is applied for all operations of this resource
+    # Hence, this should be replaced with API Policy
+    x-wso2-request-interceptor:
+      serviceURL: https://invalid-host-this-should-be-overriden-from-api-policy:8080
+      includes:
+        - invocation_context
     get:
       summary: Echo Request
       description: Echo request back to the client
@@ -45,6 +59,12 @@ paths:
         '200':
           description: successful operation
     post:
+      # Call Interceptor Service API Policies is applied for this operation
+      # Hence, this should be replaced with API Policy
+      x-wso2-request-interceptor:
+        serviceURL: https://invalid-host-this-should-be-overriden-from-api-policy:8080
+        includes:
+          - invocation_context
       summary: Echo Request
       description: Echo request back to the client
       operationId: echo
