@@ -46,6 +46,16 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 			policy: Policy{
 				PolicyName:    "fooAddRequestHeader",
 				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "$%invalid name%$", "fooValue": "admin"},
+			},
+			flow:       policyInFlow,
+			isExpError: true,
+			message:    "Invalid value for policy parameter should return error",
+		},
+		{
+			policy: Policy{
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
 				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyOutFlow,
@@ -168,19 +178,19 @@ func getSampleTestPolicySpec() PolicySpecification {
 	}{
 		{
 			Name:            "fooName",
-			ValidationRegex: `/^\S+$/`,
+			ValidationRegex: `^([a-zA-Z_][a-zA-Z\\d_\\-\\ ]*)$`,
 			Type:            "String",
 			Required:        true,
 		},
 		{
 			Name:            "fooValue",
-			ValidationRegex: `/^\S+$/`,
+			ValidationRegex: `.*`,
 			Type:            "String",
 			Required:        true,
 		},
 		{
 			Name:            "fooNotRequired",
-			ValidationRegex: `/^\S+$/`,
+			ValidationRegex: `^\S+$`,
 			Type:            "String",
 			Required:        false,
 		},

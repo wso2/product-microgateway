@@ -23,7 +23,7 @@ paths:
           description: successful operation
   /echo-full/unsupported-policy/{id}:
     post:
-      summary: Set, remove header policies appied
+      summary: Unsupported policies should be ignored
       responses:
         '200':
           description: successful operation

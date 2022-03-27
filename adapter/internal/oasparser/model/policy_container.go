@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"regexp"
 	"text/template"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -217,8 +218,23 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) 
 	policyPrams, ok := policy.Parameters.(map[string]interface{})
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
-			if _, found := policyPrams[attrib.Name]; attrib.Required && !found {
+			val, found := policyPrams[attrib.Name]
+			if attrib.Required && !found {
 				return fmt.Errorf("required paramater %q not found", attrib.Name)
+			}
+
+			switch v := val.(type) {
+			case string:
+				regexStr := attrib.ValidationRegex
+				if regexStr != "" {
+					reg, err := regexp.Compile(regexStr)
+					if err != nil {
+						return fmt.Errorf("invalid regex expression in policy spec %s, regex: %q", spec.Data.Name, attrib.ValidationRegex)
+					}
+					if !reg.MatchString(v) {
+						return fmt.Errorf("invalid parameter value of attribute %q, regex match failed", attrib.Name)
+					}
+				}
 			}
 		}
 	}
