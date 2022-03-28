@@ -39,8 +39,12 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
+import org.wso2.choreo.connect.enforcer.models.API;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -203,8 +207,31 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     try {
                         api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
                                 false);
+                        if (api != null) {
+                            String context = requestContext.getMatchedAPI().getBasePath();
+                            String uuid = requestContext.getMatchedAPI().getUuid();
+                            String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
+                            SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
+                                    .getTenantSubscriptionStore(apiTenantDomain);
+                            API subscriptionDataStoreAPI = datastore.getApiByContextAndVersion(uuid);
+                            if (subscriptionDataStoreAPI != null &&
+                                    APIConstants.LifecycleStatus.BLOCKED
+                                            .equals(subscriptionDataStoreAPI.getLcState())) {
+                                FilterUtils.setErrorToContext(requestContext,
+                                        GeneralErrorCodeConstants.API_BLOCKED_CODE,
+                                        APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE,
+                                        GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+                                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                                        GeneralErrorCodeConstants.API_BLOCKED_CODE,
+                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                            }
+                            log.debug("Internal Key Authentication is successful.");
+                        }
+                    } catch (APISecurityException e) {
+                        throw e;
                     } finally {
-                        log.debug("Internal Key authentication successful.");
+                        log.debug("Internal Key authentication is completed.");
                         if (Utils.tracingEnabled()) {
                             apiKeyValidateSubscriptionSpanScope.close();
                             Utils.finishSpan(apiKeyValidateSubscriptionSpan);

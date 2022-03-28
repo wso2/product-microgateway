@@ -72,9 +72,10 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
                     .getTenantSubscriptionStore(apiTenantDomain);
             API api = datastore.getApiByContextAndVersion(uuid);
             if (api != null && APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
-                requestContext.getProperties()
-                        .put(APIConstants.MessageFormat.ERROR_MESSAGE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
-                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                FilterUtils.setErrorToContext(requestContext,
+                        GeneralErrorCodeConstants.API_BLOCKED_CODE,
+                        APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE,
                         GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
                 throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
                         GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);

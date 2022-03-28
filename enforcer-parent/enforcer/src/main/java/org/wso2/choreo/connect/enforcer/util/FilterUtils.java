@@ -67,7 +67,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,7 +86,7 @@ public class FilterUtils {
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
     public static final String STRICT = "Strict";
     public static final String ALLOW_ALL = "AllowAll";
-    public static final List<String> SKIPPED_FAULT_CODES = new ArrayList<>(Arrays.asList("700700"));
+    public static final List<String> SKIPPED_FAULT_CODES = new ArrayList<>();
 
     public static String getMaskedToken(String token) {
 
@@ -505,7 +504,7 @@ public class FilterUtils {
                                          String desc) {
         Map<String, Object> properties = context.getProperties();
         properties.putIfAbsent(APIConstants.MessageFormat.STATUS_CODE, statusCode);
-        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_CODE, errorCode);
+        properties.putIfAbsent(APIConstants.MessageFormat.ERROR_CODE, String.valueOf(errorCode));
         properties.putIfAbsent(APIConstants.MessageFormat.ERROR_MESSAGE, message);
         properties.putIfAbsent(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                 APISecurityConstants.getFailureMessageDetailDescription(errorCode, desc));
