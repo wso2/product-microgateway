@@ -231,7 +231,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     } catch (APISecurityException e) {
                         throw e;
                     } finally {
-                        log.debug("Internal Key authentication complete.");
+                        log.debug("Internal Key authentication is completed.");
                         if (Utils.tracingEnabled()) {
                             apiKeyValidateSubscriptionSpanScope.close();
                             Utils.finishSpan(apiKeyValidateSubscriptionSpan);
