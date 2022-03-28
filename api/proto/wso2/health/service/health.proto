@@ -23,6 +23,7 @@ message HealthCheckResponse {
 }
 
 // [#protodoc-title: Health]
+service Health {
   rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
 
   rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
