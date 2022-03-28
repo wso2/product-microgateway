@@ -407,9 +407,20 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 		},
 	}}
 
+	hostNameAddressWithIP := &corev3.Address{Address: &corev3.Address_SocketAddress{
+		SocketAddress: &corev3.SocketAddress{
+			Address:  "10.10.10.10",
+			Protocol: corev3.SocketAddress_TCP,
+			PortSpecifier: &corev3.SocketAddress_PortValue{
+				PortValue: uint32(2384),
+			},
+		},
+	}}
+
 	tlsCert := generateTLSCert(defaultMgwKeyPath, defaultMgwCertPath)
 	upstreamTLSContextWithCerts := createUpstreamTLSContext(certByteArr, hostNameAddress)
 	upstreamTLSContextWithoutCerts := createUpstreamTLSContext(nil, hostNameAddress)
+	upstreamTLSContextWithIP := createUpstreamTLSContext(certByteArr, hostNameAddressWithIP)
 
 	assert.NotEmpty(t, upstreamTLSContextWithCerts, "Upstream TLS Context should not be null when certs provided")
 	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext, "CommonTLSContext should not be "+
@@ -430,10 +441,19 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 		"validation context certificate mismatch")
 	assert.Equal(t, defaultCACertPath, upstreamTLSContextWithoutCerts.CommonTlsContext.GetValidationContext().GetTrustedCa().GetFilename(),
 		"validation context certificate filepath mismatch")
-	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchSubjectAltNames(),
+	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames(),
 		"Subject Alternative Names Should not be empty.")
-	assert.Equal(t, "abc.com", upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchSubjectAltNames()[0].GetExact(),
+	assert.Equal(t, "abc.com", upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames()[0].GetMatcher().GetExact(),
 		"Upstream SAN mismatch.")
+	assert.Equal(t, tlsv3.SubjectAltNameMatcher_DNS, upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames()[0].SanType,
+		"Upstream SAN type mismatch.")
+
+	assert.NotEmpty(t, upstreamTLSContextWithIP.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames(),
+		"Subject Alternative Names Should not be empty.")
+	assert.Equal(t, "10.10.10.10", upstreamTLSContextWithIP.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames()[0].GetMatcher().GetExact(),
+		"Upstream SAN mismatch.")
+	assert.Equal(t, tlsv3.SubjectAltNameMatcher_IP_ADDRESS, upstreamTLSContextWithIP.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames()[0].SanType,
+		"Upstream SAN type mismatch.")
 }
 
 func TestGetCorsPolicy(t *testing.T) {
