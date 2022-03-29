@@ -49,6 +49,10 @@ function searchFilesToUpload() returns (error?) {
                 if (response.statusCode == 201) {
                     printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
                     var result = file:remove(fileLocation + filepath:getPathSeparator() + fileName);
+                } if (response.statusCode == 500 && stringutils:contains(response.getTextPayload().toString(),"Connection refused")) {
+                    printError(KEY_UPLOAD_TASK, "Connection Refused Error occurred while uploading the file. Upload request returned" +
+                    "with status code : " + response.statusCode.toString());
+                    return ();
                 } else {
                     printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file. Upload request returned" +
                     "with status code : " + response.statusCode.toString());
