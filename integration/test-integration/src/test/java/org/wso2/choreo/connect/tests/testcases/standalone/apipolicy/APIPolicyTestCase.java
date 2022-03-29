@@ -68,6 +68,27 @@ public class APIPolicyTestCase {
         assertOriginalClientRequestInfo(echoResponse);
     }
 
+    @Test(description = "Test header based unsupported API Policies")
+    public void testUnsupportedAPIPolicies() throws Exception {
+        headers.put("RemoveThisHeader", "Unnecessary Header");
+        EchoResponse echoResponse = invokeEchoPost("/echo-full/unsupported-policy/123" + queryParams, "Hello World!", headers);
+
+        // check supported policies
+        Assert.assertFalse(echoResponse.getHeaders().containsKey("RemoveThisHeader"),
+                getPolicyFailAssertMessage("Remove Header"));
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey1"), "newHeaderVal1",
+                getPolicyFailAssertMessage("Add Header"));
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey2"), "newHeaderVal2",
+                getPolicyFailAssertMessage("Add Header"));
+        assertOriginalClientRequestInfo(echoResponse);
+
+        // check unsupported policies
+        Assert.assertFalse(echoResponse.getHeaders().containsKey("newHeaderKeyFromUnsupportedAction"),
+                "Unsupported policy has applied");
+        Assert.assertFalse(echoResponse.getHeaders().containsKey("newHeaderKeyFromUnsupportedParam"),
+                "Unsupported policy has applied");
+    }
+
     @Test(description = "Test custom API Policies and Policy Versions")
     public void testCustomAPIPoliciesAndPolicyVersions() throws Exception {
         EchoResponse echoResponse = invokeEchoPost("/echo-full/custom-policy/123" + queryParams, "Hello World!", headers);
@@ -195,7 +216,7 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getQuery().get("newQ1"), "newQ1Value",
                 getPolicyFailAssertMessage("Add Query"));
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies"); // TODO: (renuka) check rewrite replace path templates
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies");
         Assert.assertEquals(echoResponse.getData(), "Hello World!");
         assertOriginalClientRequestInfo(echoResponse);
     }

@@ -68,54 +68,48 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private boolean applyPolicy(RequestContext requestContext, Policy policy) {
-        try {
-            switch (policy.getAction()) {
-                case "SET_HEADER": {
-                    addOrModifyHeader(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "RENAME_HEADER": {
-                    renameHeader(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REMOVE_HEADER": {
-                    removeHeader(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "ADD_QUERY": {
-                    addOrModifyQuery(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REMOVE_QUERY": {
-                    removeQuery(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REWRITE_RESOURCE_PATH": {
-                    removeAllQueries(requestContext, policy.getParameters());
-                    pathParamToQueryParamTransform(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REWRITE_RESOURCE_METHOD": {
-                    modifyMethod(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "OPA": {
-                    return opaAuthValidation(requestContext, policy.getParameters());
-                }
+        switch (policy.getAction()) {
+            case "SET_HEADER": {
+                addOrModifyHeader(requestContext, policy.getParameters());
+                return true;
             }
-        } catch (NullPointerException e) { // TODO: (renuka) policy args should be validated from adapter
-            // to be fixed with https://github.com/wso2/product-microgateway/issues/2692
-            log.error("Operation policy action \"{}\" contains invalid policy argument",
-                    policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6107), e);
-            FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
-                    APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                    APIConstants.INTERNAL_SERVER_ERROR_MESSAGE, null);
-            return false;
+            case "RENAME_HEADER": {
+                renameHeader(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REMOVE_HEADER": {
+                removeHeader(requestContext, policy.getParameters());
+                return true;
+            }
+            case "ADD_QUERY": {
+                addOrModifyQuery(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REMOVE_QUERY": {
+                removeQuery(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REWRITE_RESOURCE_PATH": {
+                removeAllQueries(requestContext, policy.getParameters());
+                pathParamToQueryParamTransform(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REWRITE_RESOURCE_METHOD": {
+                modifyMethod(requestContext, policy.getParameters());
+                return true;
+            }
+            case "OPA": {
+                return opaAuthValidation(requestContext, policy.getParameters());
+            }
         }
 
-        // policy action that enforcer not supports. for eg: "CALL_INTERCEPTOR_SERVICE"
-        // TODO: (renuka) check that we can filter policies by enforcer and pass to enforcer
-        return true;
+        // should not reach here, if reached, it is due to a validation error in Adapter
+        log.error("Operation policy action \"{}\" is not supported. Adapter has failed to validate the policy action",
+                policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6100));
+        FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
+                APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
+                APIConstants.INTERNAL_SERVER_ERROR_MESSAGE, null);
+        return false;
     }
 
     private void addOrModifyHeader(RequestContext requestContext, Map<String, String> policyAttrib) {

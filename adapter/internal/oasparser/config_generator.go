@@ -252,8 +252,12 @@ func GetEnforcerAPIOperation(operation mgw.Operation, isMockedAPI bool) *api.Ope
 }
 
 func castPoliciesToEnforcerPolicies(policies []model.Policy) []*api.Policy {
-	enforcerPolicies := make([]*api.Policy, len(policies))
-	for i, policy := range policies {
+	enforcerPolicies := make([]*api.Policy, 0, len(policies))
+	for _, policy := range policies {
+		if !policy.IsPassToEnforcer {
+			// The API Policy do not want support from enforcer to handle the request
+			continue
+		}
 		parameterMap := make(map[string]string)
 		if policy.Parameters != nil {
 			if params, ok := policy.Parameters.(map[string]interface{}); ok {
@@ -267,12 +271,10 @@ func castPoliciesToEnforcerPolicies(policies []model.Policy) []*api.Policy {
 
 			}
 		}
-		enforcerPolicies[i] = &api.Policy{
-			PolicyName: policy.PolicyName, //TODO (renuka): remove, this not required (policy name and version)
+		enforcerPolicies = append(enforcerPolicies, &api.Policy{
 			Action:     policy.Action,
-			Order:      uint32(policy.Order),
 			Parameters: parameterMap,
-		}
+		})
 	}
 	return enforcerPolicies
 }

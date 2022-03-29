@@ -63,8 +63,6 @@ message OperationPolicies {
 
 // Policy holds APIM policies
 message Policy {
-	string policyName = 1;
-	string action = 2;
-	uint32 order = 3;
-	map<string, string> parameters = 4;
+	string action = 1;
+	map<string, string> parameters = 2;
 }

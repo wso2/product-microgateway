@@ -291,8 +291,7 @@ public class RestAPI implements API {
             (List<org.wso2.choreo.connect.discovery.api.Policy> operationPoliciesList) {
         ArrayList<Policy> policyList = new ArrayList<>();
         for (org.wso2.choreo.connect.discovery.api.Policy policy : operationPoliciesList) {
-            policyList.add(new Policy(policy.getPolicyName(), policy.getAction(), policy.getOrder(),
-                    policy.getParametersMap()));
+            policyList.add(new Policy(policy.getAction(), policy.getParametersMap()));
         }
         return policyList;
     }

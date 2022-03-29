@@ -46,6 +46,16 @@ func TestPolicySpecificationValidatePolicy(t *testing.T) {
 			policy: Policy{
 				PolicyName:    "fooAddRequestHeader",
 				PolicyVersion: "v1",
+				Parameters:    map[string]interface{}{"fooName": "$%invalid name%$", "fooValue": "admin"},
+			},
+			flow:       policyInFlow,
+			isExpError: true,
+			message:    "Invalid value for policy parameter should return error",
+		},
+		{
+			policy: Policy{
+				PolicyName:    "fooAddRequestHeader",
+				PolicyVersion: "v1",
 				Parameters:    map[string]interface{}{"fooName": "user", "fooValue": "admin"},
 			},
 			flow:       policyOutFlow,
@@ -106,6 +116,11 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 	}
 
 	spec := getSampleTestPolicySpec()
+	specInvalid1 := getSampleTestPolicySpec()
+	specInvalid1.Data.Name = "fooAddRequestHeaderInvalid1"
+	specInvalid2 := getSampleTestPolicySpec()
+	specInvalid2.Data.Name = "fooAddRequestHeaderInvalid2"
+
 	proj := ProjectAPI{
 		APIYaml: apiYaml,
 		Policies: map[string]PolicyContainer{
@@ -115,15 +130,28 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 					RawData: getSampleTestPolicyDef(),
 				},
 			},
+			"fooAddRequestHeaderInvalid1_v1": {
+				Specification: specInvalid1,
+				Definition: PolicyDefinition{
+					RawData: getSampleInvalidTestPolicyDef1(),
+				},
+			},
+			"fooAddRequestHeaderInvalid2_v1": {
+				Specification: specInvalid2,
+				Definition: PolicyDefinition{
+					RawData: getSampleInvalidTestPolicyDef2(),
+				},
+			},
 		},
 	}
 
 	expFormattedP := OperationPolicies{
 		Request: PolicyList{
 			{
-				PolicyName:    "fooAddRequestHeader",
-				PolicyVersion: "v1",
-				Action:        "SET_HEADER",
+				PolicyName:       "fooAddRequestHeader",
+				PolicyVersion:    "v1",
+				Action:           "SET_HEADER",
+				IsPassToEnforcer: true,
 				Parameters: map[string]interface{}{
 					"headerName":  "fooHeaderName",
 					"headerValue": "fooHeaderValue",
@@ -150,19 +178,19 @@ func getSampleTestPolicySpec() PolicySpecification {
 	}{
 		{
 			Name:            "fooName",
-			ValidationRegex: `/^\S+$/`,
+			ValidationRegex: `^([a-zA-Z_][a-zA-Z\\d_\\-\\ ]*)$`,
 			Type:            "String",
 			Required:        true,
 		},
 		{
 			Name:            "fooValue",
-			ValidationRegex: `/^\S+$/`,
+			ValidationRegex: `.*`,
 			Type:            "String",
 			Required:        true,
 		},
 		{
 			Name:            "fooNotRequired",
-			ValidationRegex: `/^\S+$/`,
+			ValidationRegex: `^\S+$`,
 			Type:            "String",
 			Required:        false,
 		},
@@ -176,6 +204,26 @@ definition:
   action: SET_HEADER
   parameters:
     headerName: {{ .fooName }}
+    headerValue: {{ .fooValue }}
+`)
+}
+
+func getSampleInvalidTestPolicyDef1() []byte {
+	return []byte(`
+definition:
+  action: SET_HEADER_INVALID_ACTION
+  parameters:
+    headerName: {{ .fooName }}
+    headerValue: {{ .fooValue }}
+`)
+}
+
+func getSampleInvalidTestPolicyDef2() []byte {
+	return []byte(`
+definition:
+  action: SET_HEADER
+  parameters:
+    headerNameInvalidParam: {{ .fooName }}
     headerValue: {{ .fooValue }}
 `)
 }

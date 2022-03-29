@@ -50,13 +50,17 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
         requestPayload.put("input", inputPayload);
 
         // following fields are the same fields sent from the synapse request generator
-        JSONObject transportHeaders = new JSONObject(requestContext.getHeaders());
-        transportHeaders.remove(StringUtils.lowerCase(requestContext.getMatchedAPI().getAuthHeader()));
+        JSONObject transportHeaders = new JSONObject();
+        // To avoid publishing user token to OPA. If "SEND_ACCESS_TOKEN" is enabled
+        // it is sent in auth context
+        requestContext.getHeaders().keySet().stream()
+                .filter(header -> !requestContext.getProtectedHeaders().contains(header))
+                .forEach(header -> transportHeaders.put(header, requestContext.getHeaders().get(header)));
+        // changes this
         inputPayload.put("transportHeaders", transportHeaders);
         inputPayload.put("requestOrigin", requestContext.getClientIp());
         inputPayload.put("method", requestContext.getRequestMethod());
         inputPayload.put("path", requestContext.getRequestPath());
-        inputPayload.put("httpVersion", requestContext.getHttpProtocol()); // TODO (renuka): remove httpVersion
 
         // API context
         JSONObject apiContext = new JSONObject();

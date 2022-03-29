@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package grpc.health.v1;
 
-// TODO: (renuka) what should be the go_package? keep in below package? so we can gen all at once
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/health/service";
 option java_package = "org.wso2.choreo.connect.discovery.service.health";
 option java_outer_classname = "HealthProto";
@@ -24,7 +23,7 @@ message HealthCheckResponse {
 }
 
 // [#protodoc-title: Health]
-service Health { //TODO: (renuka) rename to HealthService ?
+service Health {
   rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
 
   rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);

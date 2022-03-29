@@ -47,6 +47,42 @@ data:
         response: []
         fault: []
     -
+      target: /echo-full/unsupported-policy/{id}
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: ccAddHeaderNotSupportedAction
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKeyFromUnsupportedAction
+              headerValue: newHeaderValueFromUnsupportedAction
+          -
+            policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: RemOveThisHeaDer # this should be case-insensitive
+          -
+            policyName: ccAddHeaderNotSupportedParam
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKeyFromUnsupportedParam
+              headerValue: newHeaderValueFromUnsupportedParam
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey2
+              headerValue: newHeaderVal2
+        response: []
+        fault: []
+    -
       target: /echo-full/custom-policy/{id}
       verb: POST
       operationPolicies:

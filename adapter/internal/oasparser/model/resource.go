@@ -97,19 +97,12 @@ func (resource *Resource) GetMethodList() []string {
 func (resource *Resource) GetRewriteResource() (string, bool) {
 	rewritePath := ""
 	rewriteMethod := false
-	pathOrder := 0
 	for _, method := range resource.methods {
 		if len(method.policies.Request) > 0 {
 			for _, policy := range method.policies.Request {
-				if strings.EqualFold(constants.RewritePathTemplate, policy.Action) {
+				if strings.EqualFold(constants.RewritePathAction, policy.Action) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
-							if v, orderExists := paramMap[constants.Order]; orderExists {
-								if pathOrder > v.(int) {
-									continue
-								}
-								pathOrder = v.(int)
-							}
 							rewritePath, found = paramValue.(string)
 							if found {
 								if regexPath, err := getRewriteRegexFromPathTemplate(resource.path, rewritePath); err != nil {
@@ -127,7 +120,7 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 							}
 						}
 					}
-				} else if strings.EqualFold(constants.RewriteMethodTemplate, policy.Action) {
+				} else if strings.EqualFold(constants.RewriteMethodAction, policy.Action) {
 					rewriteMethod = true
 				}
 			}

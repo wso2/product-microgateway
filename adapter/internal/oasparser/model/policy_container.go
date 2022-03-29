@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"regexp"
 	"text/template"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -30,15 +31,6 @@ import (
 
 const (
 	policyCCGateway string = "ChoreoConnect"
-)
-
-// policy value validation types
-const (
-	policyValTypeString string = "String"
-	policyValTypeInt    string = "Integer"
-	policyValTypeBool   string = "Boolean" // TODO: (renuka) check type names with APIM
-	policyValTypeArray  string = "Array"
-	policyValTypeMap    string = "Map"
 )
 
 var (
@@ -163,7 +155,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	err = t.Execute(&out, policy.Parameters)
 	if err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing operation policy definition \"%s\" of the API \"%s\" in org \"%s\": %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing operation policy definition %q of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2206,
 		})
@@ -173,18 +165,31 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	def := PolicyDefinition{}
 	if err := yaml.Unmarshal(out.Bytes(), &def); err != nil {
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error parsing formalized operation policy definition \"%s\" into yaml of the API \"%s\" in org \"%s\": %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Message:   fmt.Sprintf("Error parsing formalized operation policy definition %q into yaml of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2207,
 		})
 		return Policy{}, err
 	}
 
-	// update templated policy itself and return, not updating a pointer to keep the original template values as it is.
+	// Update templated policy itself and return, not updating a pointer to keep the original template values as it is.
 	policy.Parameters = def.Definition.Parameters
 	policy.Action = def.Definition.Action
 
+	// Fill default values
 	spec.fillDefaultsInPolicy(&policy)
+
+	// Check the API Policy supported by Choreo Connect
+	// Required params may be comming from default values as defined in the policy specification
+	// Hence do the validation after filling default values
+	if err := validatePolicyAction(&policy); err != nil {
+		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf("API policy validation failed, policy: %q of the API %q in org %q: %v", policyFullName, swagger.GetID(), swagger.OrganizationID, err),
+			Severity:  logging.MINOR,
+			ErrorCode: 0,
+		})
+		return Policy{}, err
+	}
 	return policy, nil
 }
 
@@ -204,8 +209,23 @@ func (spec *PolicySpecification) validatePolicy(policy Policy, flow PolicyFlow) 
 	policyPrams, ok := policy.Parameters.(map[string]interface{})
 	if ok {
 		for _, attrib := range spec.Data.PolicyAttributes {
-			if _, found := policyPrams[attrib.Name]; attrib.Required && !found {
+			val, found := policyPrams[attrib.Name]
+			if attrib.Required && !found {
 				return fmt.Errorf("required paramater %q not found", attrib.Name)
+			}
+
+			switch v := val.(type) {
+			case string:
+				regexStr := attrib.ValidationRegex
+				if regexStr != "" {
+					reg, err := regexp.Compile(regexStr)
+					if err != nil {
+						return fmt.Errorf("invalid regex expression in policy spec %s, regex: %q", spec.Data.Name, attrib.ValidationRegex)
+					}
+					if !reg.MatchString(v) {
+						return fmt.Errorf("invalid parameter value of attribute %q, regex match failed", attrib.Name)
+					}
+				}
 			}
 		}
 	}

@@ -24,27 +24,15 @@ import java.util.Map;
  */
 public class Policy {
 
-    private String policyName;
     private String action;
-    private int order;
     private Map<String, String> parameters;
 
     public Policy() {
     }
 
-    public Policy(String policyName, String action, int order, Map<String, String> parameters) {
-        this.policyName = policyName;
+    public Policy(String action, Map<String, String> parameters) {
         this.action = action;
-        this.order = order;
         this.parameters = parameters;
-    }
-
-    public String getPolicyName() {
-        return policyName;
-    }
-
-    public void setPolicyName(String policyName) {
-        this.policyName = policyName;
     }
 
     public String getAction() {
@@ -53,14 +41,6 @@ public class Policy {
 
     public void setAction(String action) {
         this.action = action;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     public Map<String, String> getParameters() {

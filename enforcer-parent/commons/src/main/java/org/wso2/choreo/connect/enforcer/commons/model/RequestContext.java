@@ -46,7 +46,6 @@ public class RequestContext {
     private AuthenticationContext authenticationContext;
     private String requestID;
     private String clientIp;
-    private String httpProtocol;
     private String requestPayload;
     // Denotes the cluster header name for each environment. Both properties can be null if
     // the openAPI has production endpoints alone.
@@ -174,15 +173,6 @@ public class RequestContext {
     }
 
     /**
-     * Returns HTTP Protocol of the HTTP request.
-     *
-     * @return HTTP Protocol
-     */
-    public String getHttpProtocol() {
-        return httpProtocol;
-    }
-
-    /**
      * Returns the request payload (request data submitted with the request).
      *
      * @return request payload (data).
@@ -203,7 +193,7 @@ public class RequestContext {
     /**
      * Original Request Path where path parameters are provided with parameter values.
      * ex: /pet/1?status=available
-     * @return
+     * @return request path
      */
     public String getRequestPath() {
         return requestPath;
@@ -400,7 +390,6 @@ public class RequestContext {
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
         private String clientIp;
-        private String httpProtocol;
         private String requestPayload;
         private WebSocketFrameContext webSocketFrameContext;
 
@@ -462,11 +451,6 @@ public class RequestContext {
             return this;
         }
 
-        public Builder httpProtocol(String protocol) {
-            this.httpProtocol = protocol;
-            return this;
-        }
-
         public Builder webSocketFrameContext(WebSocketFrameContext webSocketFrameContext) {
             this.webSocketFrameContext = webSocketFrameContext;
             return this;
@@ -492,7 +476,6 @@ public class RequestContext {
             requestContext.authenticationContext = this.authenticationContext;
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
-            requestContext.httpProtocol = this.httpProtocol;
             requestContext.requestPayload = this.requestPayload;
             requestContext.addHeaders = new HashMap<>();
             requestContext.removeHeaders = new ArrayList<>();

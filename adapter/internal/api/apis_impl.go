@@ -238,7 +238,7 @@ func validateAndUpdateXds(apiProject model.ProjectAPI, override *bool) (updatedA
 			append(vhostToEnvsMap[environment.DeploymentVhost], environment.DeploymentEnvironment)
 	}
 
-	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
+	// Updating cache one API by one API, if one API failed to update cache continue with others.
 	for vhost, environments := range vhostToEnvsMap {
 		_, err = xds.UpdateAPI(vhost, apiProject, environments)
 		if err != nil {
@@ -279,7 +279,7 @@ func ApplyAPIProjectFromAPIM(
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
 
-	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
+	// Updating cache one API by one API, if one API failed to update cache continue with others.
 	for vhost, environments := range vhostToEnvsMap {
 		// search for vhosts in the given environments
 		for _, env := range environments {

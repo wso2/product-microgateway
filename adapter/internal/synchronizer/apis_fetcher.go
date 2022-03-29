@@ -101,7 +101,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		apiFileData, err := ioutil.ReadAll(f)
 		_ = f.Close() // Close the file here (without defer)
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
-		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
+		// Updating cache one API by one API, if one API failed to update cache continue with others.
 		var deployedRevisionList []*notifier.DeployedAPIRevision
 		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps)
 		if err != nil {
