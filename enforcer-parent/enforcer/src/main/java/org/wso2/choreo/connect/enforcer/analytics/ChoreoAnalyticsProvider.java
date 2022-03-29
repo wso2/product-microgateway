@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
-import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 
@@ -46,8 +45,8 @@ import java.util.Map;
  * Analytics Data Provider of Microgateway
  */
 public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
-    private static final Logger logger = LogManager.getLogger(APIFactory.class);
-    private final HTTPAccessLogEntry logEntry;
+    private static final Logger logger = LogManager.getLogger(ChoreoAnalyticsProvider.class);
+    protected final HTTPAccessLogEntry logEntry;
 
     public ChoreoAnalyticsProvider(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
@@ -58,9 +57,6 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         if (logEntry.getResponse() != null && AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL.equals(
                 logEntry.getResponse().getResponseCodeDetails())) {
             logger.debug("Is success event");
-            return EventCategory.SUCCESS;
-        } else if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
-            logger.debug("Is success event.");
             return EventCategory.SUCCESS;
         } else if (logEntry.hasResponse()
                 && logEntry.getResponse().hasResponseCode()
@@ -156,25 +152,17 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         // This method is only invoked for success requests. Hence all these properties will be available.
         // The cors requests responded from the CORS filter are already filtered at this point.
         AccessLogCommon properties = logEntry.getCommonProperties();
-        Latencies latencies = new Latencies();
-        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getSeconds() * 1000 +
-                properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
-        latencies.setResponseLatency(downstreamResponseSendTimestamp);
-
-        // In this case, the enforcer responds to the request. Hence, there is no upstream.
-        if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
-            latencies.setBackendLatency(0);
-            latencies.setRequestMediationLatency(downstreamResponseSendTimestamp);
-            latencies.setResponseMediationLatency(0);
-            return latencies;
-        }
-
         long backendResponseRecvTimestamp = properties.getTimeToLastUpstreamRxByte().getSeconds() * 1000 +
                 properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000;
         long backendRequestSendTimestamp = properties.getTimeToFirstUpstreamTxByte().getSeconds() * 1000 +
                 properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000;
+        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getSeconds() * 1000 +
+                properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
+
+        Latencies latencies = new Latencies();
         latencies.setBackendLatency(backendResponseRecvTimestamp - backendRequestSendTimestamp);
         latencies.setRequestMediationLatency(backendRequestSendTimestamp);
+        latencies.setResponseLatency(downstreamResponseSendTimestamp);
         latencies.setResponseMediationLatency(downstreamResponseSendTimestamp - backendResponseRecvTimestamp);
         return latencies;
     }

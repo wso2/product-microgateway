@@ -75,7 +75,12 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 logger.debug("LogEntry is ignored as it is already published by the enforcer.");
                 continue;
             }
-            AnalyticsDataProvider provider = new ChoreoAnalyticsProvider(logEntry);
+            AnalyticsDataProvider provider;
+            if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
+                provider = new ChoreoAnalyticsProviderForMockAPISuccess(logEntry);
+            } else {
+                provider = new ChoreoAnalyticsProvider(logEntry);
+            }
             // If the APIName is not available, the event should not be published.
             // 404 errors are not logged due to this.
             if (provider.getEventCategory() == EventCategory.FAULT
