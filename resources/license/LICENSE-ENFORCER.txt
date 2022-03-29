@@ -30,7 +30,7 @@ json-schema-core-1.2.8.jar                                                      
 kotlin-stdlib-1.3.72.jar                                                                            jar            apache2
 jsr305-3.0.2.jar                                                                                    bundle         apache2
 netty-resolver-4.1.71.Final.jar                                                                     bundle         apache2
-org.wso2.carbon.apimgt.common.analytics-9.20.12.jar                                                 bundle         apache2
+org.wso2.carbon.apimgt.common.analytics-9.20.74.jar                                                 bundle         apache2
 swagger-parser-1.0.44.jar                                                                           jar            apache2
 disruptor-3.4.2.wso2v1.jar                                                                          bundle         apache2
 nimbus-jose-jwt-7.3.0.wso2v1.jar                                                                    bundle         apache2
@@ -94,7 +94,7 @@ guava-30.0-jre.jar                                                              
 commons-codec-1.11.jar                                                                              bundle         apache2
 jackson-databind-2.13.2.1.jar                                                                       bundle         apache2
 tomcat-embed-core-8.5.46.jar                                                                        jar            apache2
-org.wso2.carbon.apimgt.common.gateway-9.20.12.jar                                                   bundle         apache2
+org.wso2.carbon.apimgt.common.gateway-9.20.74.jar                                                   bundle         apache2
 grpc-context-1.32.1.jar                                                                             jar            apache2
 listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar                                      jar            apache2
 cal10n-api-0.7.4.jar                                                                                bundle         mit
@@ -162,7 +162,7 @@ geronimo-activation_1.1_spec-1.0.2.jar                                          
 animal-sniffer-annotations-1.18.jar                                                                 jar            mit
 annotations-api-6.0.53.jar                                                                          jar            apache2
 jopt-simple-5.0.3.jar                                                                               bundle         mit
-org.wso2.carbon.apimgt.common.jms-9.20.12.jar                                                       bundle         apache2
+org.wso2.carbon.apimgt.common.jms-9.20.74.jar                                                       bundle         apache2
 woden-impl-dom-1.0M9.jar                                                                            bundle         apache2
 json-20140107.jar                                                                                   jar            apache2
 httpcore-4.4.13.jar                                                                                 jar            apache2
