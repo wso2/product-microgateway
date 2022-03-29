@@ -124,6 +124,13 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
     }
 
     private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
+
+        // If the logEntry corresponds to success mock api request, it should be published using logEntry.
+        // IsMockAPI flag is only set when it corresponds to a success request.
+        if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
+            return false;
+        }
+
         // If ext_auth_denied request comes, the event is already published from the enforcer.
         // There is a chance that the analytics event is published from enforcer and then result in ext_authz_error
         // responseCodeDetail due to some error/exception within enforcer implementation. This scenario is not
@@ -172,4 +179,5 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                     ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5100), e);
         }
     }
+
 }

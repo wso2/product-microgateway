@@ -59,8 +59,11 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
                 logEntry.getResponse().getResponseCodeDetails())) {
             logger.debug("Is success event");
             return EventCategory.SUCCESS;
-        } else if (logEntry.getResponse() != null
-                && logEntry.getResponse().getResponseCode() != null
+        } else if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
+            logger.debug("Is success event.");
+            return EventCategory.SUCCESS;
+        } else if (logEntry.hasResponse()
+                && logEntry.getResponse().hasResponseCode()
                 && logEntry.getResponse().getResponseCode().getValue() != 200
                 && logEntry.getResponse().getResponseCode().getValue() != 204) {
             logger.debug("Is fault event");
@@ -153,15 +156,24 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         // This method is only invoked for success requests. Hence all these properties will be available.
         // The cors requests responded from the CORS filter are already filtered at this point.
         AccessLogCommon properties = logEntry.getCommonProperties();
+        Latencies latencies = new Latencies();
+        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getSeconds() * 1000 +
+                properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
+        latencies.setResponseLatency(downstreamResponseSendTimestamp);
+
+        // In this case, the enforcer responds to the request. Hence, there is no upstream.
+        if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
+            latencies.setBackendLatency(0);
+            latencies.setRequestMediationLatency(downstreamResponseSendTimestamp);
+            latencies.setResponseMediationLatency(0);
+            return latencies;
+        }
+
         long backendResponseRecvTimestamp = properties.getTimeToLastUpstreamRxByte().getSeconds() * 1000 +
                 properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000;
         long backendRequestSendTimestamp = properties.getTimeToFirstUpstreamTxByte().getSeconds() * 1000 +
                 properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000;
-        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getSeconds() * 1000 +
-                properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
-        Latencies latencies = new Latencies();
         latencies.setBackendLatency(backendResponseRecvTimestamp - backendRequestSendTimestamp);
-        latencies.setResponseLatency(downstreamResponseSendTimestamp);
         latencies.setRequestMediationLatency(backendRequestSendTimestamp);
         latencies.setResponseMediationLatency(downstreamResponseSendTimestamp - backendResponseRecvTimestamp);
         return latencies;
@@ -224,11 +236,8 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     private Map<String, Value> getFieldsMapFromLogEntry() {
-        if (logEntry.getCommonProperties() == null
-                || logEntry.getCommonProperties().getMetadata() == null
-                || logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() == null
-                || !logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
-                .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)) {
+        if (!logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                        .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)) {
             return new HashMap<>(0);
         }
         return logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
