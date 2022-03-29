@@ -35,6 +35,17 @@ jobs:
         id: extract-project-version
       - name: Print Maven project version
         run: echo ${{ steps.extract-project-version.outputs.version }}
+      - name: Generate proto API
+        run: sudo sh api/protogen.sh
+      - name: Check for uncommitted changes
+        run: |
+          if [[ `git status --porcelain` ]]; then
+            echo "There are uncommitted changes"
+            git status
+            exit 1
+          else
+            echo "No changes"
+          fi
       - name: Build with Maven
         run: |
           export GOFLAGS=-mod=mod
