@@ -180,7 +180,7 @@ func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions
 	policy := Policy{
 		Action:           constants.RewritePathAction,
 		Parameters:       policyParameters,
-		IsPassToEnforcer: true,
+		IsPassToEnforcer: supportedPoliciesMap[constants.RewritePathAction].IsPassToEnforcer,
 	}
 	operation.policies = OperationPolicies{
 		Request: []Policy{policy},
