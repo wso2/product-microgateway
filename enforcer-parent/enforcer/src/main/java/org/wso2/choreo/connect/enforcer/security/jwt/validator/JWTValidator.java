@@ -43,7 +43,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,7 +51,6 @@ import java.util.Map;
  */
 public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
-    private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
 
     public JWTValidator() {
@@ -66,12 +64,12 @@ public class JWTValidator {
 
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
             ExtendedTokenIssuerDto tokenIssuer = tokenIssuers.get(issuer);
-            this.jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
-            if (this.jwtTransformer == null) {
-                this.jwtTransformer = new DefaultJWTTransformer();
+            JWTTransformer jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
+            if (jwtTransformer == null) {
+                jwtTransformer = new DefaultJWTTransformer();
             }
-            this.jwtTransformer.loadConfiguration(tokenIssuer);
-            return validateToken(signedJWTInfo, tokenIssuer);
+            jwtTransformer.loadConfiguration(tokenIssuer);
+            return validateToken(signedJWTInfo, tokenIssuer, jwtTransformer);
         }
         jwtValidationInfo.setValid(false);
         jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
@@ -79,8 +77,8 @@ public class JWTValidator {
         return jwtValidationInfo;
     }
 
-    private JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo, ExtendedTokenIssuerDto tokenIssuer)
-            throws EnforcerException {
+    private JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo, ExtendedTokenIssuerDto tokenIssuer,
+                                            JWTTransformer jwtTransformer) throws EnforcerException {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         boolean state;
         try {
@@ -89,9 +87,9 @@ public class JWTValidator {
                 JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
                 state = validateTokenExpiry(jwtClaimsSet);
                 if (state) {
-                    jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
-                    jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
-                    JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
+                    jwtValidationInfo.setConsumerKey(jwtTransformer.getTransformedConsumerKey(jwtClaimsSet));
+                    jwtValidationInfo.setScopes(jwtTransformer.getTransformedScopes(jwtClaimsSet));
+                    JWTClaimsSet transformedJWTClaimSet = jwtTransformer.transform(jwtClaimsSet);
                     createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
                     jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
                     jwtValidationInfo.setKeyManager(tokenIssuer.getName());
@@ -162,21 +160,6 @@ public class JWTValidator {
         String jwksInfo = JWTUtils.retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
         jwkSet = JWKSet.parse(jwksInfo);
         return jwkSet;
-    }
-
-    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
-        return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
-    }
-
-    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
-        return jwtTransformer.getTransformedScopes(jwtClaimsSet);
-    }
-
-    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
-        return jwtTransformer.transform(jwtClaimsSet);
     }
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo, JWTClaimsSet jwtClaimsSet)
