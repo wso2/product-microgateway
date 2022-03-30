@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
@@ -156,8 +157,13 @@ public class EnforcerConfig {
         this.analyticsConfig = analyticsConfig;
     }
 
-    public Map<String, JWTTransformer> getJwtTransformerMap() {
-        return jwtTransformerMap;
+    public JWTTransformer getJwtTransformer(String issuer) {
+        if (jwtTransformerMap.containsKey(issuer)) {
+            return jwtTransformerMap.get(issuer);
+        }
+        JWTTransformer defaultJWTTransformer = new DefaultJWTTransformer();
+        jwtTransformerMap.put(issuer, defaultJWTTransformer);
+        return defaultJWTTransformer;
     }
 
     public void setJwtTransformerMap(Map<String, JWTTransformer> jwtTransformerMap) {
