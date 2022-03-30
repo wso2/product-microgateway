@@ -48,8 +48,10 @@ public class WebSocketFrameService extends WebSocketFrameServiceGrpc.WebSocketFr
     }
 
     public static void removeObserver(String streamId) {
-        if (responseObservers.contains(streamId)) {
+        if (streamId != null) {
             responseObservers.remove(streamId);
+        } else {
+            logger.warn("Not removing observer since streamId is null");
         }
     }
 
