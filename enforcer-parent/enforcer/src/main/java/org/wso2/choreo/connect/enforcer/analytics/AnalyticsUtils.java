@@ -18,10 +18,12 @@
 
 package org.wso2.choreo.connect.enforcer.analytics;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
+import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 
@@ -32,10 +34,6 @@ public class AnalyticsUtils {
 
     public static String getAPIId(RequestContext requestContext) {
         return requestContext.getMatchedAPI().getUuid();
-    }
-
-    private static String generateHash(String apiName, String apiVersion) {
-        return DigestUtils.md5Hex(apiName + ":" + apiVersion);
     }
 
     public static String setDefaultIfNull(String value) {
@@ -65,5 +63,29 @@ public class AnalyticsUtils {
             authContext.setAuthenticated(false);
         }
         return authContext;
+    }
+
+    /**
+     * Decides if the logEntry corresponds to a mock API. The "x-wso2-is-mock-api" is only set when
+     * handling mock-api-request.
+     *
+     * @param logEntry Access Log Entry
+     * @return true if the logEntry has the metadata called "x-wso2-is-mock-api" and its value is true
+     */
+    public static boolean isMockAPISuccessRequest(HTTPAccessLogEntry logEntry) {
+
+        return (!StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails())) &&
+                logEntry.getResponse().getResponseCodeDetails()
+                        .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL) &&
+                logEntry.hasCommonProperties() &&
+                logEntry.getCommonProperties().hasMetadata() &&
+                logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                        .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY) != null &&
+                logEntry.getCommonProperties().getMetadata()
+                        .getFilterMetadataMap().get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
+                        .containsKey(MetadataConstants.IS_MOCK_API) &&
+                Boolean.parseBoolean(logEntry.getCommonProperties().getMetadata()
+                        .getFilterMetadataMap().get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
+                        .get(MetadataConstants.IS_MOCK_API).getStringValue());
     }
 }

@@ -123,6 +123,7 @@ public class AnalyticsFilter {
             String apiName = requestContext.getMatchedAPI().getName();
             String apiVersion = requestContext.getMatchedAPI().getVersion();
             String apiType = requestContext.getMatchedAPI().getApiType();
+            boolean isMockAPI = requestContext.getMatchedAPI().isMockedApi();
             AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
             requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
@@ -131,6 +132,7 @@ public class AnalyticsFilter {
             requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
             requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
             requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
+            requestContext.addMetadataToMap(MetadataConstants.IS_MOCK_API, String.valueOf(isMockAPI));
 
             String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
                     requestContext.getMatchedAPI().getBasePath());
@@ -171,6 +173,12 @@ public class AnalyticsFilter {
     }
 
     public String resolveEndpoint(RequestContext requestContext) {
+
+        // For MockAPIs there is no backend, Hence "MockImplementation" is added as the destination.
+        if (requestContext.getMatchedAPI().isMockedApi()) {
+            return "MockImplementation";
+        }
+
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         // KeyType could be sandbox only if the keytype is set fetched from the Eventhub
         if (authContext != null && authContext.getKeyType() != null

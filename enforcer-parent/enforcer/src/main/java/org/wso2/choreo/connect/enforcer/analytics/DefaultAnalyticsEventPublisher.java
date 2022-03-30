@@ -75,7 +75,12 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 logger.debug("LogEntry is ignored as it is already published by the enforcer.");
                 continue;
             }
-            AnalyticsDataProvider provider = new ChoreoAnalyticsProvider(logEntry);
+            AnalyticsDataProvider provider;
+            if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
+                provider = new ChoreoAnalyticsProviderForMockAPISuccess(logEntry);
+            } else {
+                provider = new ChoreoAnalyticsProvider(logEntry);
+            }
             // If the APIName is not available, the event should not be published.
             // 404 errors are not logged due to this.
             if (provider.getEventCategory() == EventCategory.FAULT
@@ -124,6 +129,13 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
     }
 
     private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
+
+        // If the logEntry corresponds to success mock api request, it should be published using logEntry.
+        // IsMockAPI flag is only set when it corresponds to a success request.
+        if (AnalyticsUtils.isMockAPISuccessRequest(logEntry)) {
+            return false;
+        }
+
         // If ext_auth_denied request comes, the event is already published from the enforcer.
         // There is a chance that the analytics event is published from enforcer and then result in ext_authz_error
         // responseCodeDetail due to some error/exception within enforcer implementation. This scenario is not
@@ -172,4 +184,5 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                     ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5100), e);
         }
     }
+
 }

@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
-import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 
@@ -46,8 +45,8 @@ import java.util.Map;
  * Analytics Data Provider of Microgateway
  */
 public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
-    private static final Logger logger = LogManager.getLogger(APIFactory.class);
-    private final HTTPAccessLogEntry logEntry;
+    private static final Logger logger = LogManager.getLogger(ChoreoAnalyticsProvider.class);
+    protected final HTTPAccessLogEntry logEntry;
 
     public ChoreoAnalyticsProvider(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
@@ -59,8 +58,8 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
                 logEntry.getResponse().getResponseCodeDetails())) {
             logger.debug("Is success event");
             return EventCategory.SUCCESS;
-        } else if (logEntry.getResponse() != null
-                && logEntry.getResponse().getResponseCode() != null
+        } else if (logEntry.hasResponse()
+                && logEntry.getResponse().hasResponseCode()
                 && logEntry.getResponse().getResponseCode().getValue() != 200
                 && logEntry.getResponse().getResponseCode().getValue() != 204) {
             logger.debug("Is fault event");
@@ -159,10 +158,11 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
                 properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000;
         long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getSeconds() * 1000 +
                 properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
+
         Latencies latencies = new Latencies();
         latencies.setBackendLatency(backendResponseRecvTimestamp - backendRequestSendTimestamp);
-        latencies.setResponseLatency(downstreamResponseSendTimestamp);
         latencies.setRequestMediationLatency(backendRequestSendTimestamp);
+        latencies.setResponseLatency(downstreamResponseSendTimestamp);
         latencies.setResponseMediationLatency(downstreamResponseSendTimestamp - backendResponseRecvTimestamp);
         return latencies;
     }
