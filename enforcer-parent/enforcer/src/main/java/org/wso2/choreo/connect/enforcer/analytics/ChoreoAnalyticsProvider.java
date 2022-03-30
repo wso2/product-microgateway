@@ -224,8 +224,11 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     private Map<String, Value> getFieldsMapFromLogEntry() {
-        if (!logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
-                        .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)) {
+        if (logEntry.getCommonProperties() == null
+                || logEntry.getCommonProperties().getMetadata() == null
+                || logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() == null
+                || !logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)) {
             return new HashMap<>(0);
         }
         return logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()

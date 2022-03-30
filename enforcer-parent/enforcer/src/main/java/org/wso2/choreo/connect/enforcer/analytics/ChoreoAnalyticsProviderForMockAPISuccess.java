@@ -27,6 +27,8 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Analytics Data Provider for MockAPIs Successful requests.
  * <p>
@@ -57,12 +59,14 @@ public class ChoreoAnalyticsProviderForMockAPISuccess extends ChoreoAnalyticsPro
         // The cors requests responded from the CORS filter are already filtered at this point.
         AccessLogCommon properties = logEntry.getCommonProperties();
         Latencies latencies = new Latencies();
-        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getSeconds() * 1000 +
-                properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
+
+        long downstreamResponseSendTimeFromStart =
+                TimeUnit.SECONDS.toMillis(properties.getTimeToLastDownstreamTxByte().getSeconds()) +
+                        TimeUnit.NANOSECONDS.toMillis(properties.getTimeToLastDownstreamTxByte().getNanos());
         // Mock APIs does not have a backend. Hence, backend latency remains 0.
-        latencies.setResponseLatency(downstreamResponseSendTimestamp);
+        latencies.setResponseLatency(downstreamResponseSendTimeFromStart);
         latencies.setBackendLatency(0);
-        latencies.setRequestMediationLatency(downstreamResponseSendTimestamp);
+        latencies.setRequestMediationLatency(downstreamResponseSendTimeFromStart);
         latencies.setResponseMediationLatency(0);
         return latencies;
 
