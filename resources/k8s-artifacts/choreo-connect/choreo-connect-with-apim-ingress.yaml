@@ -24,10 +24,10 @@ spec:
   tls:
   - hosts:
       - gw.wso2.com
-      - wso2apim
+      - apim.wso2.com
     secretName: tls-secret
   rules:
-    - host: wso2apim
+    - host: apim.wso2.com
       http:
           paths:
             - path: /

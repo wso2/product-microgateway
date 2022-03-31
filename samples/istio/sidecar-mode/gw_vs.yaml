@@ -29,7 +29,7 @@ spec:
       tls:
         mode: PASSTHROUGH
       hosts:
-        - "wso2apim"
+        - "apim.wso2.com"
         - "gw.wso2.com"
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -38,7 +38,7 @@ metadata:
   name: apim-virtualservice
 spec:
   hosts:
-    - "wso2apim"
+    - "apim.wso2.com"
     - "gw.wso2.com"
   gateways:
     - apim-gateway
@@ -46,7 +46,7 @@ spec:
     - match:
         - port: 443
           sniHosts:
-            - wso2apim
+            - apim.wso2.com
       route:
         - destination:
             host: wso2apim

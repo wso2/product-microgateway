@@ -67,7 +67,7 @@ data:
     [enforcer.security]
     [[enforcer.security.tokenService]]
       name = "Resident Key Manager"
-      issuer = "https://wso2apim/oauth2/token"
+      issuer = "https://apim.wso2.com/oauth2/token"
       certificateAlias = "wso2carbon"
       jwksURL = ""
       validateSubscription = false
@@ -85,7 +85,7 @@ data:
 
     [[enforcer.security.tokenService]]
       name = "APIM Publisher"
-      issuer = "https://wso2apim/publisher"
+      issuer = "https://apim.wso2.com/publisher"
       validateSubscription = true
       certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
