@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v0.3.6
-	github.com/envoyproxy/go-control-plane v0.10.0
+	github.com/envoyproxy/go-control-plane v0.10.2-0.20211124143408-6141aee35516
 	github.com/envoyproxy/protoc-gen-validate v0.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getkin/kin-openapi v0.8.0

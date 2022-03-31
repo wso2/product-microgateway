@@ -1,9 +1,18 @@
 admin:
-  access_log_path: /dev/null
+  access_log: []
   address:
     socket_address:
       address: 0.0.0.0
       port_value: 9000
+layered_runtime:
+  layers:
+    - name: deprecation
+      static_layer:
+        re2.max_program_size.error_level: 1000
+    # This value is added to overcome the warning log, and it is not based on any experiment.
+    - name: globalMaxConnections
+      static_layer:
+        overload.global_downstream_max_connections: 2147483647
 node:
   cluster: default_cluster
   id: default
