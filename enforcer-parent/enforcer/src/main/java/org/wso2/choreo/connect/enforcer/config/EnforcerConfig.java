@@ -55,7 +55,7 @@ public class EnforcerConfig {
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
     private AnalyticsDTO analyticsConfig;
-    private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
+    private final Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
     private AuthHeaderDto authHeader;
     private ManagementCredentialsDto management;
     private AdminRestServerDto restServer;
@@ -161,13 +161,20 @@ public class EnforcerConfig {
         if (jwtTransformerMap.containsKey(issuer)) {
             return jwtTransformerMap.get(issuer);
         }
-        JWTTransformer defaultJWTTransformer = new DefaultJWTTransformer();
-        jwtTransformerMap.put(issuer, defaultJWTTransformer);
-        return defaultJWTTransformer;
+        synchronized (jwtTransformerMap) {
+            // check the map again, if two threads blocks and one add the default one
+            // so the next thread also check if the default added by previous one
+            if (jwtTransformerMap.containsKey(issuer)) {
+                return jwtTransformerMap.get(issuer);
+            }
+            JWTTransformer defaultJWTTransformer = new DefaultJWTTransformer();
+            jwtTransformerMap.put(issuer, defaultJWTTransformer);
+            return defaultJWTTransformer;
+        }
     }
 
-    public void setJwtTransformerMap(Map<String, JWTTransformer> jwtTransformerMap) {
-        this.jwtTransformerMap = jwtTransformerMap;
+    public void setJwtTransformers(Map<String, JWTTransformer> jwtTransformerMap) {
+        this.jwtTransformerMap.putAll(jwtTransformerMap);
     }
 
     public AuthHeaderDto getAuthHeader() {

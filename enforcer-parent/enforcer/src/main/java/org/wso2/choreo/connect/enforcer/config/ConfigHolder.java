@@ -235,7 +235,7 @@ public class ConfigHolder {
                 issuerDto.addClaimMapping(map);
             }
             // Load jwt transformers map.
-            config.setJwtTransformerMap(BackendJwtUtils.loadJWTTransformers());
+            config.setJwtTransformers(BackendJwtUtils.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias.isBlank()) {
                 if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(jwtIssuer.getName())) {
