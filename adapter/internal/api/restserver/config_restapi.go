@@ -129,6 +129,20 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualDeleteApisHandler = api_individual.DeleteApisHandlerFunc(func(
 		params api_individual.DeleteApisParams, principal *models.Principal) middleware.Responder {
 
+		conf, _ := config.ReadConfigs()
+
+		if conf.ControlPlane.Enabled {
+			errCode := int64(400)
+			errMsg := "When control plane is enabled, APIs cannot be directly undeployed from the adapter. Using apictl, still you can undeploy an API in APIM instead."
+			err := models.Error{
+				Code:        &errCode,
+				Description: "Bad request",
+				Message:     &errMsg,
+			}
+			logger.LoggerAPI.Info(errMsg)
+			return api_individual.NewDeleteApisBadRequest().WithPayload(&err)
+		}
+
 		vhost := ""
 		if params.Vhost != nil {
 			vhost = *params.Vhost
@@ -155,6 +169,21 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
+
+		conf, _ := config.ReadConfigs()
+
+		if conf.ControlPlane.Enabled {
+			errCode := int64(400)
+			errMsg := "When control plane is enabled, APIs cannot be directly deployed to the adapter. Using apictl, still you can import APIs to APIM instead."
+			err := models.Error{
+				Code:    &errCode,
+				Message: &errMsg,
+			}
+			logger.LoggerAPI.Info(errMsg)
+			// TODO: (suksw) Generate new 400 error object for POST request and update apictl to print the message
+			return api_individual.NewDeleteApisBadRequest().WithPayload(&err)
+		}
+
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		_, err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
