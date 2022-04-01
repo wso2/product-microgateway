@@ -1195,6 +1195,7 @@ func generateRegex(fullpath string) string {
 	pathParaRegex := "([^/]+)"
 	wildCardRegex := "((/(.*))*)"
 	endRegex := "(\\?([^/]+))?"
+	trailingSlashRegex := "(/{0,1})"
 	newPath := ""
 
 	// Check and replace all the path parameters
@@ -1203,6 +1204,8 @@ func generateRegex(fullpath string) string {
 
 	if strings.HasSuffix(newPath, "/*") {
 		newPath = strings.TrimSuffix(newPath, "/*") + wildCardRegex
+	} else if strings.HasSuffix(newPath, "/") {
+		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex
 	}
 	return "^" + newPath + endRegex + "$"
 }
