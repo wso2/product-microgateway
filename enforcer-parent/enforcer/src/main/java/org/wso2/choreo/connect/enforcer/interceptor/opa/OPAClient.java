@@ -165,7 +165,7 @@ public class OPAClient {
             }
         } catch (IOException e) {
             log.error("Error calling the OPA server with server endpoint: {}", serverEp,
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104));
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.OPA_REQUEST_FAILURE, e);
         }

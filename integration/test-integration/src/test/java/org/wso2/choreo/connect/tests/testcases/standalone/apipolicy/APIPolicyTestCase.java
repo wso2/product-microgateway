@@ -22,11 +22,13 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
+import org.awaitility.Awaitility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -35,6 +37,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class APIPolicyTestCase {
     private String jwtTokenProd;
@@ -45,6 +48,8 @@ public class APIPolicyTestCase {
     @BeforeClass(description = "Get Prod token")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(2, TimeUnit.MINUTES)
+                .until(APIPolicyTestCase::checkOPAServerHealth);
     }
 
     @BeforeMethod
@@ -258,5 +263,14 @@ public class APIPolicyTestCase {
 
     private String getPolicyFailAssertMessage(String policyName) {
         return String.format("Gateway has failed to apply %s API policy", policyName);
+    }
+
+    private static Boolean checkOPAServerHealth() {
+        try {
+            HttpResponse response = HttpsClientRequest.doGet("https://localhost:8181/health?bundles");
+            return response.getResponseCode() == HttpStatus.SC_OK;
+        } catch (CCTestException e) {
+            return false;
+        }
     }
 }

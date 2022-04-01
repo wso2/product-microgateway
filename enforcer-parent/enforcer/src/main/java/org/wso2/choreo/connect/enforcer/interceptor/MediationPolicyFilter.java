@@ -205,8 +205,8 @@ public class MediationPolicyFilter implements Filter {
             }
             return isValid;
         } catch (OPASecurityException e) {
-            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(), e,
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101));
+            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101), e);
             FilterUtils.setErrorToContext(requestContext, e);
             return false;
         }
