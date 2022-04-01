@@ -306,7 +306,6 @@ func ApplyAPIProjectFromAPIM(
 			// APIListMap is synchronously updated only for default version changes. In other API deployment
 			// events, this may not be updated. We can safely ignore this case since runtime artifact's
 			// `isDefaultVersion` prop is anyway updated for deployment events.
-			// TODO: (VirajSalaka) Is it better to set it to false?
 			loggers.LoggerAPI.Debugf("API %s is not found in API Metadata map.", apiYaml.ID)
 		}
 		// first update the API for vhost
