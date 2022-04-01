@@ -92,12 +92,15 @@ func ProcessMountedAPIProjects() (artifactsMap map[string]model.ProjectAPI, err 
 	files, err := ioutil.ReadDir((apisDirName))
 	if err != nil {
 		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Error while reading api artifacts during startup. %v", err.Error()),
+			Message:   fmt.Sprintf("Error while reading API artifacts during startup. %v", err.Error()),
 			Severity:  logging.MAJOR,
 			ErrorCode: 1206,
 		})
-		// If Adapter Server which accepts apictl projects is closed then the adapter should not proceed.
+		// If Adapter REST API is disabled while this error occurs, then the adapter should not proceed.
 		if !conf.Adapter.Server.Enabled {
+			errMsg := "Error while reading mounted API artifacts during startup. " + err.Error() +
+				" Will not proceed since the Adapter REST API is also disabled."
+			err = errors.New(errMsg)
 			return nil, err
 		}
 	}
