@@ -15,7 +15,7 @@ below is and where the actual text of the license can be found.
 Name                                                                                                Type           License
 _________________________________________________________________________________________________________________________________________________
 opentelemetry-extension-trace-propagators-1.6.0.jar                                                 jar            apache2
-org.wso2.choreo.connect.enforcer.commons-1.1.0-beta2.jar                                            bundle         apache2
+org.wso2.choreo.connect.enforcer.commons-1.1.0.jar                                            bundle         apache2
 jackson-dataformat-xml-2.12.1.jar                                                                   bundle         apache2
 netty-handler-4.1.71.Final.jar                                                                      bundle         apache2
 swagger-annotations-1.5.22.jar                                                                      bundle         apache2

@@ -23,42 +23,45 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta content="text/html; charset=iso-8859-1" http-equiv="content-type"/>
-    <title>Choreo Connect 1.0.0 - 5th January 2022</title>
+    <title>Choreo Connect 1.1.0 - 5th January 2022</title>
 </head>
 <body>
 <div id="main-content">
     <div>
-        <h1>Choreo Connect 1.0.0 is Released.</h1>
-        <p>Choreo Connect is a cloud-native, open-source, and developer-centric API gateway. It provides first-class
-            support for Kubernetes while facilitating an array of API management quality of services (QoS), such as
-            message security rate-limiting, observability, and message mediation.</p>
-        <p>Choreo Connect 1.0.0 is compatible with WSO2 API Manager 4.0.0.</p>
-        <h1>What's new in 1.0.0</h1>
+        <h1>Choreo Connect 1.1.0 is Released.</h1>
+        <p>Choreo Connect is a cloud-native, open-source, and developer-centric API gateway. It provides first-class support for
+            Kubernetes while facilitating an array of API management quality of services (QoS), such as message
+            security rate-limiting, observability, and message mediation. It is powered by Envoy Proxy!</p>
+        <p>Choreo Connect 1.1.0 is also compatible with WSO2 API Manager 4.1.0.</p>
+        <h1>What's new in 1.1.0</h1>
         <h2>New Features</h2>
         <ul>
-            <li>Message transformations with interceptors</li>
-            <li>API key authentication</li>
-            <li>Support circuit breaking</li>
-            <li>Custom filters</li>
-            <li>Tracing with open tracing</li>
-            <li>Immutable gateway support</li>
+            <li>Mock API implementation support considering API definition.</li>
+            <li>Operational policies support with WSO2 API-M.</li>
+            <li>Request payload passing from router to enforcer.</li>
+            <li>Git integration support.</li>
+            <li>Open Policy Agent (OPA) validation support.</li>
+            <li>Support for default versioned APIs.</li>
+            <li>Analytics publishing for WebSocket APIs.</li>
         </ul>
         <p>
-            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aclosed+project%3Awso2%2Fproduct-microgateway%2F12+label%3A%22Type%2FNew+Feature%22">More
-                in 1.0.0 New Features</a></p>
+            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue%20is%3Aclosed%20label%3A%22Type%2FNew%20Feature%22%20project%3Awso2%2Fproduct-microgateway%2F15">More
+                about 1.1.0 New Features</a></p>
         <h2>Improvements</h2>
         <ul>
-            <li>Per endpoint certificate support</li>
-            <li>Backend JWT support with internal keys</li>
-            <li>Support subscription validation with API keys</li>
-            <li>Support endpoint referencing</li>
+            <li>API policy version support.</li>
+            <li>Improved WebSocket API handling.</li>
+            <li>Configurable DNS refresh rate.</li>
+            <li>Log correlation in enforcer.</li>
+            <li>Operation level interceptor support.</li>
+            <li>Request payload passing to custom filters.</li>
         </ul>
         <p>
-            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aclosed+project%3Awso2%2Fproduct-microgateway%2F12+label%3AType%2FImprovement">More
-                in 1.0.0 Improvements</a></p>
+            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue%20is%3Aclosed%20label%3AType%2FImprovement%20project%3Awso2%2Fproduct-microgateway%2F15">More
+                about 1.1.0 Improvements</a></p>
         <h2>Bug fixes</h2>
         <p>
-            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aclosed+project%3Awso2%2Fproduct-microgateway%2F12+label%3AType%2FBug">Bug
+            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue%20is%3Aclosed%20label%3AType%2FBug%20project%3Awso2%2Fproduct-microgateway%2F15">Bug
                 fixes</a></p>
         <h2>Known Issues</h2>
         <p><a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aopen+-label%3Aballerina-mgw+">Open
