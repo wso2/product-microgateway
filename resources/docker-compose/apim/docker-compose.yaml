@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   apim:
-    image: wso2/wso2am:4.1.0-rc2-alpine
+    image: wso2/wso2am:4.1.0alpine
     healthcheck:
       test: ["CMD", "nc", "-z","localhost", "9444"]
       interval: 10s
