@@ -205,6 +205,13 @@ public class APIPolicyTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
     }
 
+    @Test(description = "Test Custom OPA API policy - Not found Impl of Request Generator")
+    public void testCustomOPAAPIPolicyNotFoundImpl() throws Exception {
+        // missing the header "custom-foo"
+        HttpResponse response = invokePost("/echo-full/custom-opa-policy-not-found" + queryParams, "Hello", headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
+    }
+
     @Test(description = "Test OPA API policy - No auth token - Failed Validation")
     public void testOPAAPIPolicyNoTokenFailedValidation() throws Exception {
         headers.put("foo", "bar"); // this header is validated in OPA policy

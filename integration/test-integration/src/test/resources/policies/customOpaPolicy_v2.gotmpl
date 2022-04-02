@@ -1,0 +1,26 @@
+definition:
+  action: OPA
+  parameters:
+    # following is the only diff with the default OPA policy - this class is not exists
+    requestGenerator: "org.wso2.choreo.connect.tests.RequestGeneratorNotFound"
+    serverURL: {{ .serverUrl }}
+    {{- if isParamExists . "accessKey" }}
+    accessKey: {{ .accessKey }}
+    {{- end }}
+    policy: {{ .policy }}
+    rule: {{ .rule }}
+    {{- if isParamExists . "sendAccessToken" }}
+    sendAccessToken: {{ .sendAccessToken }}
+    {{- end }}
+    {{- if isParamExists . "additionalProperties" }}
+    additionalProperties: {{ .additionalProperties }}
+    {{- end }}
+    {{- if isParamExists . "maxOpenConnections" }}
+    maxOpenConnections: {{ .maxOpenConnections }}
+    {{- end }}
+    {{- if isParamExists . "maxPerRoute" }}
+    maxPerRoute: {{ .maxPerRoute }}
+    {{- end }}
+    {{- if isParamExists . "connectionTimeout" }}
+    connectionTimeout: {{ .connectionTimeout }}
+    {{- end }}
