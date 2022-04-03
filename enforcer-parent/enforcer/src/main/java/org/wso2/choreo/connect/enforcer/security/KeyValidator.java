@@ -79,8 +79,6 @@ public class KeyValidator {
                     scopeList.append(",");
                 }
                 scopeList.deleteCharAt(scopeList.length() - 1);
-                log.debug("Scopes allowed for token : " + validationContext.getAccessToken() + " : " + scopeList
-                        .toString());
             }
         }
 
