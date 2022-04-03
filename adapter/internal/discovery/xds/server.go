@@ -350,8 +350,9 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	if uniqueIdentifier == "" {
 		// If API is imported from apictl generate hash as the unique ID
 		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiYaml.Name, apiYaml.Version)
-		reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiYaml.Name, apiYaml.Version)] = uniqueIdentifier
 	}
+
+	reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiYaml.Name, apiYaml.Version)] = uniqueIdentifier
 	apiIdentifier := GenerateIdentifierForAPIWithUUID(vHost, uniqueIdentifier)
 
 	mutexForInternalMapUpdate.Lock()
