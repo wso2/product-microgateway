@@ -86,6 +86,18 @@ paths:
       responses:
         '200':
           description: successful operation
+  /echo-full/custom-opa-policy:
+    post:
+      summary: custom opa policy applied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/custom-opa-policy-not-found:
+    post:
+      summary: custom opa policy applied - custom request gen impl not exists
+      responses:
+        '200':
+          description: successful operation
   /echo-full/opa-policy-no-access-token:
     post:
       summary: opa policy applied

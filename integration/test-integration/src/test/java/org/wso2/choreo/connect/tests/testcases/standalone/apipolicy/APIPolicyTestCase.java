@@ -186,11 +186,35 @@ public class APIPolicyTestCase {
         assertOriginalClientRequestInfo(echoResponse);
     }
 
+    @Test(description = "Test Custom OPA API policy - Success Validation")
+    public void testCustomOPAAPIPolicySuccessValidation() throws Exception {
+        headers.put("custom-foo", "custom-bar"); // this header is validated in OPA policy
+        EchoResponse echoResponse = invokeEchoPost("/echo-full/custom-opa-policy" + queryParams, "Hello", headers);
+
+        Assert.assertEquals(echoResponse.getData(), "Hello");
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey1"), "newHeaderVal1");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
     @Test(description = "Test OPA API policy - Failed Validation")
     public void testOPAAPIPolicyFailedValidation() throws Exception {
         // missing the header "foo"
         HttpResponse response = invokePost("/echo-full/opa-policy" + queryParams, "Hello", headers);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
+    }
+
+    @Test(description = "Test Custom OPA API policy - Failed Validation")
+    public void testCustomOPAAPIPolicyFailedValidation() throws Exception {
+        // missing the header "custom-foo"
+        HttpResponse response = invokePost("/echo-full/custom-opa-policy" + queryParams, "Hello", headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
+    }
+
+    @Test(description = "Test Custom OPA API policy - Not found Impl of Request Generator")
+    public void testCustomOPAAPIPolicyNotFoundImpl() throws Exception {
+        // missing the header "custom-foo"
+        HttpResponse response = invokePost("/echo-full/custom-opa-policy-not-found" + queryParams, "Hello", headers);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
     }
 
     @Test(description = "Test OPA API policy - No auth token - Failed Validation")

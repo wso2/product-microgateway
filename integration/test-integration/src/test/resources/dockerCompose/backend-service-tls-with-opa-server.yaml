@@ -11,7 +11,7 @@
       - router
   opa-server:
     image: openpolicyagent/opa:0.37.2-static
-    command: run --server --addr :8181 --tls-private-key-file /opa-volume/certs/server-key.pem --tls-cert-file /opa-volume/certs/server-cert.pem /opa-volume/policies/sample-policy.rego
+    command: run --server --addr :8181 --tls-private-key-file /opa-volume/certs/server-key.pem --tls-cert-file /opa-volume/certs/server-cert.pem /opa-volume/policies/sample-policy.rego /opa-volume/policies/custom-policy.rego
     volumes:
       - ./opa-volume:/opa-volume
     ports:

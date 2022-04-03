@@ -321,6 +321,26 @@ public class Utils {
     }
 
     /**
+     * Delete a file
+     *
+     * @param filePath file location.
+     */
+    public static boolean deleteFile(String filePath) {
+        File file = new File(filePath);
+        return file.delete();
+    }
+
+    /**
+     * Delete a file or directory without throwing exception
+     *
+     * @param filePath file location.
+     */
+    public static boolean deleteQuietly(String filePath) {
+        File file = new File(filePath);
+        return FileUtils.deleteQuietly(file);
+    }
+
+    /**
      * Delay the program for a given time period
      *
      * @param sourceLocation file location.

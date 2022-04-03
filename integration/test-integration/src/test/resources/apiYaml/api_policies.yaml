@@ -256,6 +256,48 @@ data:
         response: []
         fault: []
     -
+      target: /echo-full/custom-opa-policy
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: customOpaPolicy
+            policyVersion: v1
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: custom
+              rule: allow
+              sendAccessToken: false
+        response: []
+        fault: []
+    -
+      target: /echo-full/custom-opa-policy-not-found
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          -
+            policyName: customOpaPolicy
+            policyVersion: v2
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: custom
+              rule: allow
+              sendAccessToken: false
+        response: []
+        fault: []
+    -
       target: /echo-full/opa-policy-no-access-token
       verb: POST
       operationPolicies:
