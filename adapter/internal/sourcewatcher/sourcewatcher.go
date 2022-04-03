@@ -206,7 +206,9 @@ func pullRepositoryIfUpdated(localRepository *git.Repository){
 	for _, r := range remoteList {
 		if r.Name() == refName && !r.Hash().IsZero() && localRepositoryHash != r.Hash().String() {
 			loggers.LoggerSourceWatcher.Info("Fetching commit with hash: ", r.Hash().String(), " from remote repository")
-			pullChanges(localRepository)
+			if err := pullChanges(localRepository); err != nil {
+				return
+			}
 
 			err := processArtifactChanges()
 			if err != nil {
@@ -215,6 +217,7 @@ func pullRepositoryIfUpdated(localRepository *git.Repository){
 					Severity: logging.MAJOR,
 					ErrorCode: 2506,
 				})
+				return
 			}
 
 			//Redeploy changes
@@ -233,7 +236,7 @@ func pullRepositoryIfUpdated(localRepository *git.Repository){
 }
 
 // pullChanges pulls changes from the given repository
-func pullChanges(localRepository *git.Repository){
+func pullChanges(localRepository *git.Repository) error {
 	conf, _ := config.ReadConfigs()
 
 	branch := conf.Adapter.SourceControl.Repository.Branch
@@ -272,6 +275,7 @@ func pullChanges(localRepository *git.Repository){
 			ErrorCode: 2508,
 		})
 	}
+	return err
 }
 
 // processArtifactChanges undeploy the APIs whose artifacts are not present in the repository
