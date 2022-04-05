@@ -1204,7 +1204,7 @@ func generateRegex(fullpath string) string {
 
 	if strings.HasSuffix(newPath, "/*") {
 		newPath = strings.TrimSuffix(newPath, "/*") + wildCardRegex
-	} else if strings.HasSuffix(newPath, "/") {
+	} else {
 		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex
 	}
 	return "^" + newPath + endRegex + "$"

@@ -275,6 +275,24 @@ func TestGenerateRegex(t *testing.T) {
 			isMatched:     true,
 		},
 		{
+			inputpath:     "/v2/pet/{petId}",
+			userInputPath: "/v2/pet/5/",
+			message:       "when the input path does not have tailing slash and user input path has trailing slash",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/",
+			userInputPath: "/v2/pet/5",
+			message:       "when the input path has tailing slash and user input path does not have trailing slash",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/",
+			userInputPath: "/v2/pet/5/",
+			message:       "when both the input path and user input path has trailing slash",
+			isMatched:     true,
+		},
+		{
 			inputpath:     "/v2/pet/{petId}/info",
 			userInputPath: "/v2/pet/5/info",
 			message:       "when path parameter is provided in the middle of the path",
