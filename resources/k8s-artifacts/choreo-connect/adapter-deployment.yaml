@@ -49,7 +49,7 @@ spec:
               name: logconfig-toml-vol
             - mountPath: /home/wso2/artifacts/apis
               name: api-artifacts-vol
-          image: wso2/choreo-connect-adapter:1.1.0-beta2-SNAPSHOT
+          image: wso2/choreo-connect-adapter:1.1.0
           imagePullPolicy: IfNotPresent
           env:
             - name: ADAPTER_PRIVATE_KEY_PATH

@@ -156,6 +156,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      * @throws CCTestException if an error occurs while file copy operation
      */
     void createTmpMgwSetup() throws CCTestException {
+        Utils.deleteQuietly(ccTempPath);
         Utils.copyDirectory(ccExtractedPath, ccTempPath);
     }
 

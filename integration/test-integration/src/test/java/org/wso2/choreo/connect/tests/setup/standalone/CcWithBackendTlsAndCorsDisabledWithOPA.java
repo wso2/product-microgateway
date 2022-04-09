@@ -34,7 +34,9 @@ public class CcWithBackendTlsAndCorsDisabledWithOPA {
         ccInstance = new CcInstance.Builder().withNewConfig("cors-disabled-config.toml")
                 .withBackendServiceFile("backend-service-tls-with-opa-server.yaml")
                 .withEnforcerTrustCertsDir("enforcer-truststore-opa-certs")
-                .withVolumeMountDir("opa-volume").build();
+                .withVolumeMountDir("opa-volume")
+                .withAllCustomImpls() // for custom OPA request generator
+                .build();
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
