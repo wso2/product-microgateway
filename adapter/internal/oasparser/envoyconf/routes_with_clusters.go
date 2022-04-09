@@ -853,6 +853,17 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		if params.rewritePath != "/" {
 			substitutionString = endpointBasepath + params.rewritePath
 		}
+	} else {
+		if strings.Contains(resourcePath, "?") {
+			resourcePath = strings.Split(resourcePath, "?")[0]
+		}
+		resourceRegex := generatePathRegexSegment(resourcePath)
+		pathRegex = "^" + basePath + resourceRegex + "$"
+		substitutionString = generateSubstitutionString(resourceRegex, endpointBasepath)
+		if strings.HasSuffix(resourcePath, "/*") {
+			resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
+			pathRegex = "^" + basePath + resourceRegex
+		}
 	}
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
@@ -1168,6 +1179,42 @@ func generateRoutePath(basePath, resourcePath string) string {
 	return newPath
 }
 
+func generatePathRegexSegment(resourcePath string) string {
+	pathParaRegex := "([^/]+)"
+	wildCardRegex := "((/(.*))*)"
+	trailingSlashRegex := "(/{0,1})"
+	resourceRegex := ""
+	matcher := regexp.MustCompile(`{([^}]+)}`)
+	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
+	if strings.HasSuffix(resourceRegex, "/*") {
+		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + wildCardRegex
+	} else {
+		resourceRegex = strings.TrimSuffix(resourceRegex, "/") + trailingSlashRegex
+	}
+	return resourceRegex
+}
+
+func generateSubstitutionString(resourceRegex string, endpointBasepath string) string {
+	pathParaRegex := "([^/]+)"
+	trailingSlashRegex := "(/{0,1})"
+	wildCardRegex := "((/(.*))*)"
+	pathParamIndex := 0
+	for {
+		pathParaRemains := strings.Contains(resourceRegex, pathParaRegex)
+		if !pathParaRemains {
+			break
+		}
+		pathParamIndex++
+		resourceRegex = strings.Replace(resourceRegex, pathParaRegex, fmt.Sprintf("\\%d", pathParamIndex), 1)
+	}
+	if strings.HasSuffix(resourceRegex, wildCardRegex) {
+		resourceRegex = strings.TrimSuffix(resourceRegex, wildCardRegex)
+	} else if strings.HasSuffix(resourceRegex, trailingSlashRegex) {
+		resourceRegex = strings.TrimSuffix(resourceRegex, trailingSlashRegex) + "/"
+	}
+	return endpointBasepath + resourceRegex
+}
+
 func getFilteredBasePath(xWso2Basepath string, basePath string) string {
 	var modifiedBasePath string
 
@@ -1192,21 +1239,8 @@ func getFilteredBasePath(xWso2Basepath string, basePath string) string {
 // It takes the path value as an input and then returns the regex value.
 // TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
 func generateRegex(fullpath string) string {
-	pathParaRegex := "([^/]+)"
-	wildCardRegex := "((/(.*))*)"
 	endRegex := "(\\?([^/]+))?"
-	trailingSlashRegex := "(/{0,1})"
-	newPath := ""
-
-	// Check and replace all the path parameters
-	matcher := regexp.MustCompile(`{([^}]+)}`)
-	newPath = matcher.ReplaceAllString(fullpath, pathParaRegex)
-
-	if strings.HasSuffix(newPath, "/*") {
-		newPath = strings.TrimSuffix(newPath, "/*") + wildCardRegex
-	} else {
-		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex
-	}
+	newPath := generatePathRegexSegment(fullpath)
 	return "^" + newPath + endRegex + "$"
 }
 

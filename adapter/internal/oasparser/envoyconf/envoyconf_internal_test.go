@@ -101,9 +101,9 @@ func TestCreateRoute(t *testing.T) {
 					MaxProgramSize: nil,
 				},
 			},
-			Regex: "/xWso2BasePath",
+			Regex: "^/xWso2BasePath/resourcePath(/{0,1})$",
 		},
-		Substitution: "/basepath",
+		Substitution: "/basepath/resourcePath/",
 	}
 
 	UpgradeConfigsDisabled := []*routev3.RouteAction_UpgradeConfig{{
