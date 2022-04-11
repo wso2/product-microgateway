@@ -423,6 +423,12 @@ enabled = true
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
     reconnectInterval = 5000
     reconnectRetryCount = 60
+  # Worker Pool for sending requests to API Manager to reduce the load if the adapter tries to reconnect.
+  [controlPlane.requestWorkerPool]
+    # Number of workers
+    poolSize = 4
+    # Number of tasks can be submitted to the worker pool without being blocked.
+    queueSizePerPool = 1000
   # HTTP client configuration.
   [controlPlane.httpClient] 
     requestTimeOut = 30

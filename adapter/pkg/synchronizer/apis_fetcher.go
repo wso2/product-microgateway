@@ -25,7 +25,6 @@ package synchronizer
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -35,10 +34,8 @@ import (
 	"time"
 
 	parser "github.com/mitchellh/mapstructure"
-	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/pkg/auth"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
-	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
 const (
@@ -61,12 +58,15 @@ const (
 // FetchAPIs pulls the API artifact calling to the API manager
 // API Manager returns a .zip file as a response and this function
 // returns a byte slice of that ZIP file.
-func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL string,
-	userName string, password string, skipSSL bool, truststoreLocation string,
-	resourceEndpoint string, sendType bool, apiUUIDList []string, requestTimeOut time.Duration) {
-	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
-	req := ConstructControlPlaneRequest(id, gwLabel, serviceURL, userName, password, skipSSL, truststoreLocation, resourceEndpoint, sendType, apiUUIDList)
-	workerReq := WorkerRequest{
+func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, resourceEndpoint string, sendType bool, apiUUIDList []string) {
+	if id != nil {
+		logger.LoggerSync.Infof("Fetching API from Control Plane for Id %q.", *id)
+	} else {
+		logger.LoggerSync.Info("Fetching APIs from Control Plane")
+	}
+
+	req := ConstructControlPlaneRequest(id, gwLabel, workerPool.controlPlaneParams, resourceEndpoint, sendType, apiUUIDList)
+	workerReq := workerRequest{
 		Req:                *req,
 		APIUUID:            id,
 		SyncAPIRespChannel: c,
@@ -75,32 +75,17 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 		workerReq.labels = gwLabel
 	}
 
-	WorkerPool.Enqueue(workerReq)
+	if workerPool == nil {
+		logger.LoggerSync.Fatal("WorkerPool is not inititated due to an internal error.")
+	}
+	// If adding task to the pool cannot be done, the whole thread hangs here.
+	workerPool.Enqueue(workerReq)
 }
 
 // SendRequestToControlPlane is the function triggered to send the request to the control plane.
 // It returns true if a response is received from the api manager.
-func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []string, c chan SyncAPIResponse) bool {
-	var tr *http.Transport
-	conf, _ := config.ReadConfigs()
-	skipSSL := conf.ControlPlane.SkipSSLVerification
-	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
-	if !skipSSL {
-		caCertPool := tlsutils.GetTrustedCertPool(conf.Adapter.Truststore.Location)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Configuring the http client
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   requestTimeOut * time.Second,
-	}
+func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []string, c chan SyncAPIResponse,
+	client *http.Client) bool {
 	// Make the request
 	logger.LoggerSync.Debug("Sending the controle plane request")
 	resp, err := client.Do(req)
@@ -154,14 +139,16 @@ func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []stri
 }
 
 // ConstructControlPlaneRequest constructs the http Request used to send to the control plane
-func ConstructControlPlaneRequest(id *string, gwLabel []string, serviceURL string,
-	userName string, password string, skipSSL bool, truststoreLocation string,
+func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlaneParams controlPlaneParameters,
 	resourceEndpoint string, sendType bool, apiUUIDList []string) *http.Request {
 	var (
 		req      *http.Request
 		err      error
 		bodyJSON []byte
 	)
+	serviceURL := controlPlaneParams.serviceURL
+	userName := controlPlaneParams.username
+	password := controlPlaneParams.password
 	// postData contains the API UUID list in the payload of the post request.
 	type postData struct {
 		Uuids []string `json:"uuids"`
@@ -228,9 +215,8 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, serviceURL strin
 }
 
 // RetryFetchingAPIs function keeps retrying to fetch APIs from runtime-artifact endpoint.
-func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName string, password string, skipSSL bool,
-	truststoreLocation string, retryInterval time.Duration, data SyncAPIResponse, endpoint string, sendType bool,
-	requestTimeOut time.Duration) {
+func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint string, sendType bool) {
+	retryInterval := workerPool.controlPlaneParams.retryInterval
 	go func(d SyncAPIResponse) {
 		// Retry fetching from control plane after a configured time interval
 		if retryInterval == 0 {
@@ -240,8 +226,7 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName strin
 		logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
 		time.Sleep(retryInterval * time.Second)
 		logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
-		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-			endpoint, sendType, nil, requestTimeOut)
+		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, endpoint, sendType, nil)
 	}(data)
 }
 

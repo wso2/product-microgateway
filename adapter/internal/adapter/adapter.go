@@ -289,25 +289,16 @@ OUTER:
 // to the router and enforcer components.
 func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Populate data from config.
-	serviceURL := conf.ControlPlane.ServiceURL
-	userName := conf.ControlPlane.Username
-	password := conf.ControlPlane.Password
 	envs := conf.ControlPlane.EnvironmentLabels
-	skipSSL := conf.ControlPlane.SkipSSLVerification
-	retryInterval := conf.ControlPlane.RetryInterval
-	truststoreLocation := conf.Adapter.Truststore.Location
-	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)
 
 	// Get API details.
 	if apiUUIDList == nil {
-		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut)
+		adapter.GetAPIs(c, nil, envs, sync.RuntimeArtifactEndpoint, true, nil)
 	} else {
-		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.APIArtifactEndpoint, true, apiUUIDList, requestTimeOut)
+		adapter.GetAPIs(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList)
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
@@ -329,8 +320,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
-			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)
+			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.

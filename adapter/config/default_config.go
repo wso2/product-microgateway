@@ -288,6 +288,10 @@ var defaultConfig = &Config{
 		HTTPClient: httpClient{
 			RequestTimeOut: 30,
 		},
+		RequestWorkerPool: requestWorkerPool{
+			PoolSize:         4,
+			QueueSizePerPool: 1000,
+		},
 	},
 	GlobalAdapter: globalAdapter{
 		Enabled:              false,
