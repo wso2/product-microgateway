@@ -45,8 +45,6 @@ import (
 // getHTTPFilters generates httpFilter configuration
 func getHTTPFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
-	router := getRouterHTTPFilter()
-	lua := getLuaFilter()
 	cors := &hcmv3.HttpFilter{
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
@@ -55,9 +53,28 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
 		extAauth,
-		lua,
-		router,
 	}
+
+	logConf := config.ReadLogConfigs()
+
+	// debug log first filter
+	if logConf.RouterDebugLog.Enable {
+		httpFilters = append(httpFilters, getDebugLogFirstFilter())
+	}
+
+	// filter for interceptors
+	lua := getLuaFilter()
+	httpFilters = append(httpFilters, lua)
+
+	// debug log second filter
+	if logConf.RouterDebugLog.Enable {
+		httpFilters = append(httpFilters, getDebugLogSecondFilter())
+	}
+
+	// router must be the last filter
+	router := getRouterHTTPFilter()
+	httpFilters = append(httpFilters, router)
+
 	return httpFilters
 }
 
@@ -165,6 +182,84 @@ func getLuaFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &luaFilter
+}
+
+// getDebugLogFirstFilter gives the logging filter to be defined before the intercepters in the filter chain
+func getDebugLogFirstFilter() *hcmv3.HttpFilter {
+	luaConfig := &luav3.Lua{
+		InlineCode: `function envoy_on_request(request_handle)
+			local request_headers = request_handle:headers()
+			local log_output = "\n"
+			for header_name, header_value in pairs(request_headers) do
+				log_output = log_output .. ">> request before interceptors >> " .. header_name .. ": " .. header_value .. "\n"
+			end
+			if request_handle:body() then
+				log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
+			end
+			request_handle:logDebug(log_output)
+		end
+		
+		function envoy_on_response(response_handle)
+			local response_headers = response_handle:headers()
+			local log_output = "\n"
+			for header_name, header_value in pairs(response_headers) do
+				log_output = log_output .. "<< response after interceptors << " .. header_name .. ": " .. header_value .. "\n"
+			end
+			if response_handle:body() then
+				log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
+			end
+			response_handle:logDebug(log_output)
+		end`,
+	}
+	ext, error := ptypes.MarshalAny(luaConfig)
+	if error != nil {
+		logger.LoggerOasparser.Error(error)
+	}
+	return &hcmv3.HttpFilter{
+		Name: debugLogFirstFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: ext,
+		},
+	}
+}
+
+// getDebugLogFirstFilter gives the logging filter to be defined after the intercepters in the filter chain
+func getDebugLogSecondFilter() *hcmv3.HttpFilter {
+	luaConfig := &luav3.Lua{
+		InlineCode: `function envoy_on_request(request_handle)
+			local request_headers = request_handle:headers()
+			local log_output = "\n"
+			for header_name, header_value in pairs(request_headers) do
+				log_output = log_output .. ">> request after interceptors >> " .. header_name .. ": " .. header_value .. "\n"
+			end
+			if request_handle:body() then
+				log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
+			end
+			request_handle:logDebug(log_output)
+		end
+		
+		function envoy_on_response(response_handle)
+			local response_headers = response_handle:headers()
+			local log_output = "\n"
+			for header_name, header_value in pairs(response_headers) do
+				log_output = log_output .. "<< response before interceptors << " .. header_name .. ": " .. header_value .. "\n"
+			end
+			if response_handle:body() then
+				log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
+			end
+			response_handle:logDebug(log_output)
+		end`,
+	}
+	ext, error := ptypes.MarshalAny(luaConfig)
+	if error != nil {
+		logger.LoggerOasparser.Error(error)
+	}
+	return &hcmv3.HttpFilter{
+		Name: debugLogSecondFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: ext,
+		},
+	}
 }
 
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {

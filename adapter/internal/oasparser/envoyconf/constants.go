@@ -26,6 +26,8 @@ const (
 const (
 	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
 	luaFilterName              string = "envoy.filters.http.lua"
+	debugLogFirstFilterName    string = "envoy.filters.http.debug_log_first"
+	debugLogSecondFilterName   string = "envoy.filters.http.debug_log_second"
 	transportSocketName        string = "envoy.transport_sockets.tls"
 	fileAccessLogName          string = "envoy.access_loggers.file"
 	grpcAccessLogName          string = "envoy.http_grpc_access_log"

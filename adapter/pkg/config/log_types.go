@@ -28,6 +28,10 @@ type accessLog struct {
 	Format  string
 }
 
+type routerDebugLog struct {
+	Enable bool
+}
+
 // LogConfig represents the configurations related to adapter logs and envoy access logs.
 type LogConfig struct {
 	Logfile   string
@@ -43,8 +47,9 @@ type LogConfig struct {
 		Compress   bool
 	}
 
-	Pkg        []pkg
-	AccessLogs *accessLog
+	Pkg            []pkg
+	AccessLogs     *accessLog
+	RouterDebugLog *routerDebugLog
 }
 
 func getDefaultLogConfig() *LogConfig {
@@ -58,6 +63,9 @@ func getDefaultLogConfig() *LogConfig {
 			Format: "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%' %RESPONSE_CODE% " +
 				"%RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%" +
 				"'%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n",
+		},
+		RouterDebugLog: &routerDebugLog{
+			Enable: false,
 		},
 	}
 	adapterLogConfig.Rotation.MaxSize = 10
