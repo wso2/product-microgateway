@@ -405,6 +405,76 @@ func TestGenerateRegex(t *testing.T) {
 	}
 }
 
+func TestGenerateSubstitutionString(t *testing.T) {
+	type generateSubsStringTestItem struct {
+		inputPath          string
+		expectedSubsString string
+		message            string
+		shouldEqual        bool
+	}
+	dataItems := []generateSubsStringTestItem{
+		{
+			"/v2/pet",
+			"/basepath/v2/pet",
+			"when input path does not have a trailing slash",
+			true,
+		},
+		{
+			"/v2/pet/",
+			"/basepath/v2/pet/",
+			"when input path has a trailing slash",
+			true,
+		},
+		{
+			"/v2/pet/",
+			"/basepath/v2/pet",
+			"when input path has a trailing slash",
+			false,
+		},
+		{
+			"/v2/pet/{petId}",
+			"/basepath/v2/pet/\\1",
+			"when input path has a path param",
+			true,
+		},
+		{
+			"/v2/pet/{petId}/",
+			"/basepath/v2/pet/\\1/",
+			"when input path has a path param and trailing slash",
+			true,
+		},
+		{
+			"/v2/pet/{petId}/info",
+			"/basepath/v2/pet/\\1/info",
+			"when input path has a path param in the middle of the path",
+			true,
+		},
+		{
+			"/v2/pet/{petId}/test/{petId}",
+			"/basepath/v2/pet/\\1/test/\\2",
+			"when input path has a two path params",
+			true,
+		},
+		{
+			"/v2/*",
+			"/basepath/v2",
+			"when input path has a wildcard at the end",
+			true,
+		},
+		{
+			"/v2/{petId}/*",
+			"/basepath/v2/\\1",
+			"when input path has a path param and a wildcard at the end",
+			true,
+		},
+	}
+	for _, item := range dataItems {
+		generatedSubstitutionString := generateSubstitutionString(item.inputPath, "/basepath")
+		isEqual := generatedSubstitutionString == item.expectedSubsString
+		assert.Equal(t, item.shouldEqual, isEqual, item.message)
+	}
+}
+
 func TestCreateUpstreamTLSContext(t *testing.T) {
 	certFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/certs/testcrt.crt"
 	certByteArr, err := ioutil.ReadFile(certFilePath)
