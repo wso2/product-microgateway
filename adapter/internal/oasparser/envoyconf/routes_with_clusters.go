@@ -858,12 +858,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			resourcePath = strings.Split(resourcePath, "?")[0]
 		}
 		resourceRegex := generatePathRegexSegment(resourcePath)
-		pathRegex = "^" + basePath + resourceRegex + "$"
-		substitutionString = generateSubstitutionString(resourceRegex, endpointBasepath)
+		substitutionString = generateSubstitutionString(resourcePath, endpointBasepath)
 		if strings.HasSuffix(resourcePath, "/*") {
 			resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
-			pathRegex = "^" + basePath + resourceRegex
 		}
+		pathRegex = "^" + basePath + resourceRegex
 	}
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
@@ -1194,11 +1193,12 @@ func generatePathRegexSegment(resourcePath string) string {
 	return resourceRegex
 }
 
-func generateSubstitutionString(resourceRegex string, endpointBasepath string) string {
+func generateSubstitutionString(resourcePath string, endpointBasepath string) string {
 	pathParaRegex := "([^/]+)"
 	trailingSlashRegex := "(/{0,1})"
 	wildCardRegex := "((/(.*))*)"
 	pathParamIndex := 0
+	resourceRegex := generatePathRegexSegment(resourcePath)
 	for {
 		pathParaRemains := strings.Contains(resourceRegex, pathParaRegex)
 		if !pathParaRemains {
@@ -1209,8 +1209,10 @@ func generateSubstitutionString(resourceRegex string, endpointBasepath string) s
 	}
 	if strings.HasSuffix(resourceRegex, wildCardRegex) {
 		resourceRegex = strings.TrimSuffix(resourceRegex, wildCardRegex)
-	} else if strings.HasSuffix(resourceRegex, trailingSlashRegex) {
+	} else if strings.HasSuffix(resourcePath, "/") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, trailingSlashRegex) + "/"
+	} else {
+		resourceRegex = strings.TrimSuffix(resourceRegex, trailingSlashRegex)
 	}
 	return endpointBasepath + resourceRegex
 }
