@@ -19,6 +19,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,20 +39,22 @@ import java.util.Map;
 public class ExistingApiTestCase extends ApimBaseTest {
     private static final String API_CONTEXT = "existing_api";
     private static final String APP_NAME = "ExistingApiApp";
+    private String applicationId;
+    private String accessTokenProd;
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
         super.initWithSuperTenant();
+
+        applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
+        accessTokenProd = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
     }
 
     @Test
     public void testExistingApiWithProdKey() throws Exception {
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
-        String accessToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
-                user, storeRestClient);
-
         Map<String, String> headers = new HashMap<>();
-        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessTokenProd);
         headers.put(HttpHeaderNames.HOST.toString(), "localhost");
 
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
@@ -63,7 +66,6 @@ public class ExistingApiTestCase extends ApimBaseTest {
 
     @Test
     public void testExistingApiWithSandboxKey() throws Exception {
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
         String accessToken = StoreUtils.generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
 
@@ -76,5 +78,33 @@ public class ExistingApiTestCase extends ApimBaseTest {
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
+    }
+
+    @Test
+    public void checkHeadersSentToBackend() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessTokenProd);
+
+        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/headers");
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+                "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
+        JSONObject responseJSON = new JSONObject(response.getData());
+        Assert.assertEquals(responseJSON.length(), 10, "Unexpected number of headers received by the backend");
+
+        Assert.assertNotNull(responseJSON.get("X-trace-key"));
+        Assert.assertNotNull(responseJSON.get("Accept"));
+        Assert.assertNotNull(responseJSON.get("X-request-id"));
+        Assert.assertNotNull(responseJSON.get("X-jwt-assertion"));
+        Assert.assertNotNull(responseJSON.get("X-forwarded-proto"));
+        Assert.assertNotNull(responseJSON.get("Host"));
+        Assert.assertNotNull(responseJSON.get("Pragma"));
+        Assert.assertNotNull(responseJSON.get("X-envoy-original-path"));
+        Assert.assertNotNull(responseJSON.get("User-agent"));
+        Assert.assertNotNull(responseJSON.get("Cache-control"));
+
+        Assert.assertFalse(responseJSON.has("x-wso2-cluster-header"));
+        Assert.assertFalse(responseJSON.has("x-envoy-expected-rq-timeout-ms"));
     }
 }
