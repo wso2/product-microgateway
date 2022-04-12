@@ -524,7 +524,7 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
-        <apictl.version>4.1.0-rc1</apictl.version>
+        <apictl.version>4.1.0</apictl.version>
         <apim.version>4.1.0-beta</apim.version>
         <grpc.healthProbe.version>0.3.6</grpc.healthProbe.version>
         <analytics.publisher.client.version>1.0.4</analytics.publisher.client.version>
