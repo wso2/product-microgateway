@@ -475,6 +475,60 @@ func TestGenerateSubstitutionString(t *testing.T) {
 	}
 }
 
+func TestGenerateRegexSegment(t *testing.T) {
+
+	type generateRegexSegmentTestItem struct {
+		inputPath    string
+		regexSegment string
+		message      string
+		shouldEqual  bool
+	}
+	dataItems := []generateRegexSegmentTestItem{
+		{
+			inputPath:    "/v2/pet/",
+			regexSegment: "/v2/pet(/{0,1})",
+			message:      "when the input path has a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet",
+			regexSegment: "/v2/pet(/{0,1})",
+			message:      "when the input path does not have a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/{petId}",
+			regexSegment: "/v2/pet/([^/]+)(/{0,1})",
+			message:      "when the input path has a path param and does not have a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/{petId}/",
+			regexSegment: "/v2/pet/([^/]+)(/{0,1})",
+			message:      "when the input path has a path param and a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/{petId}/test/{petId}",
+			regexSegment: "/v2/pet/([^/]+)/test/([^/]+)(/{0,1})",
+			message:      "when the input path has two path params",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/*",
+			regexSegment: "/v2/pet((/(.*))*)",
+			message:      "when the input path ends with *",
+			shouldEqual:  true,
+		},
+	}
+
+	for _, item := range dataItems {
+		generatedPathRegexSegment := generatePathRegexSegment(item.inputPath)
+		isEqual := generatedPathRegexSegment == item.regexSegment
+		assert.Equal(t, item.shouldEqual, isEqual, item.message)
+	}
+}
+
 func TestCreateUpstreamTLSContext(t *testing.T) {
 	certFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/certs/testcrt.crt"
 	certByteArr, err := ioutil.ReadFile(certFilePath)
