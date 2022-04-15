@@ -357,12 +357,6 @@ data:
               paramKey: newQ1
               paramValue: newQ1Value
           -
-            policyName: ccChangeHTTPMethod
-            policyVersion: v1
-            parameters:
-              currentMethod: POST
-              updatedMethod: PUT
-          -
             policyName: ccRemoveHeader
             policyVersion: v1
             parameters:
@@ -373,6 +367,12 @@ data:
             parameters:
               newResourcePath: /echo-full/new-path-all-policies
               includeQueryParams: true
+          - # apply ccChangeHTTPMethod after rewriteResourcePath, in other places tested reversed of this
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: POST
+              updatedMethod: PUT
           -
             policyName: opaPolicy
             policyVersion: v1
