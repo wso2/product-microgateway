@@ -90,21 +90,32 @@ public class ExistingApiTestCase extends ApimBaseTest {
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
-        JSONObject responseJSON = new JSONObject(response.getData());
-        Assert.assertEquals(responseJSON.length(), 10, "Unexpected number of headers received by the backend");
 
-        Assert.assertNotNull(responseJSON.get("X-trace-key"));
-        Assert.assertNotNull(responseJSON.get("Accept"));
-        Assert.assertNotNull(responseJSON.get("X-request-id"));
-        Assert.assertNotNull(responseJSON.get("X-jwt-assertion"));
-        Assert.assertNotNull(responseJSON.get("X-forwarded-proto"));
-        Assert.assertNotNull(responseJSON.get("Host"));
-        Assert.assertNotNull(responseJSON.get("Pragma"));
-        Assert.assertNotNull(responseJSON.get("X-envoy-original-path"));
-        Assert.assertNotNull(responseJSON.get("User-agent"));
-        Assert.assertNotNull(responseJSON.get("Cache-control"));
+        // Request headers received by the backend
+        JSONObject headersToBackend = new JSONObject(response.getData());
+        Assert.assertEquals(headersToBackend.length(), 10, "Unexpected number of headers received by the backend");
 
-        Assert.assertFalse(responseJSON.has("x-wso2-cluster-header"));
-        Assert.assertFalse(responseJSON.has("x-envoy-expected-rq-timeout-ms"));
+        Assert.assertNotNull(headersToBackend.get("X-trace-key"));
+        Assert.assertNotNull(headersToBackend.get("Accept"));
+        Assert.assertNotNull(headersToBackend.get("X-request-id"));
+        Assert.assertNotNull(headersToBackend.get("X-jwt-assertion"));
+        Assert.assertNotNull(headersToBackend.get("X-forwarded-proto"));
+        Assert.assertNotNull(headersToBackend.get("Host"));
+        Assert.assertNotNull(headersToBackend.get("Pragma"));
+        Assert.assertNotNull(headersToBackend.get("X-envoy-original-path"));
+        Assert.assertNotNull(headersToBackend.get("User-agent"));
+        Assert.assertNotNull(headersToBackend.get("Cache-control"));
+
+        Assert.assertFalse(headersToBackend.has("x-wso2-cluster-header"));
+        Assert.assertFalse(headersToBackend.has("x-envoy-expected-rq-timeout-ms"));
+
+        // Response headers received by the client
+        Map<String, String> headersToClient = response.getHeaders();
+        Assert.assertEquals(headersToClient.size(), 4, "Unexpected number of headers received by the client");
+
+        Assert.assertNotNull(headersToClient.get("date"));      // = Fri, 15 Apr 2022 05:10:41 GMT
+        Assert.assertNotNull(headersToClient.get("server"));    // = envoy
+        Assert.assertNotNull(headersToClient.get("content-length"));
+        Assert.assertNotNull(headersToClient.get("content-type"));
     }
 }
