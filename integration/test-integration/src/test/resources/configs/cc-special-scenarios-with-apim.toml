@@ -55,7 +55,7 @@
         password = "$env{tm_admin_pwd}"
         # Receiver URL and the authentication URL of the Traffic manager node/nodes
         [[enforcer.throttling.publisher.URLGroup]]
-          receiverURLs = ["ssl://apim:9612"]
+          receiverURLs = ["tcp://apim:9612"]
           authURLs = ["ssl://apim:9712"]
 
 [controlPlane]
