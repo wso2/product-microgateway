@@ -10,7 +10,6 @@ services:
       - "9764:9764"
       - "9444:9444"
       - "5673:5673"
-      - "8244:8244"
     environment:
       - PROFILE_NAME=control-plane
     volumes:
