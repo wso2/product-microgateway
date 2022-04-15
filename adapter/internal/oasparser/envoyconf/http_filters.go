@@ -58,7 +58,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	logConf := config.ReadLogConfigs()
 
 	// debug log first filter
-	if logConf.RouterDebugLog.Enable {
+	if logConf.DebugLogs.Enable {
 		httpFilters = append(httpFilters, getDebugLogFirstFilter())
 	}
 
@@ -67,7 +67,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	httpFilters = append(httpFilters, lua)
 
 	// debug log second filter
-	if logConf.RouterDebugLog.Enable {
+	if logConf.DebugLogs.Enable {
 		httpFilters = append(httpFilters, getDebugLogSecondFilter())
 	}
 

@@ -28,7 +28,7 @@ type accessLog struct {
 	Format  string
 }
 
-type routerDebugLog struct {
+type debugLogs struct {
 	Enable bool
 }
 
@@ -47,9 +47,9 @@ type LogConfig struct {
 		Compress   bool
 	}
 
-	Pkg            []pkg
-	AccessLogs     *accessLog
-	RouterDebugLog *routerDebugLog
+	Pkg        []pkg
+	AccessLogs *accessLog
+	DebugLogs  *debugLogs
 }
 
 func getDefaultLogConfig() *LogConfig {
@@ -64,7 +64,7 @@ func getDefaultLogConfig() *LogConfig {
 				"%RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%" +
 				"'%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n",
 		},
-		RouterDebugLog: &routerDebugLog{
+		DebugLogs: &debugLogs{
 			Enable: false,
 		},
 	}
