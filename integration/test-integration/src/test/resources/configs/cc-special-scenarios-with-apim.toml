@@ -13,33 +13,6 @@
 [enforcer.security.authHeader]
   testConsoleHeaderName = "apikey"
 
-[[enforcer.security.tokenService]]
-  name = "Resident Key Manager"
-  issuer = "https://localhost:9444/oauth2/token"
-  certificateAlias = "wso2carbon"
-  jwksURL = ""
-  validateSubscription = true
-  consumerKeyClaim = "azp"
-  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-
-# Issuer 2
-[[enforcer.security.tokenService]]
-  name = "MGW"
-  issuer = "https://localhost:9095/testkey"
-  certificateAlias = "mgw"
-  jwksURL = ""
-  validateSubscription = false
-  consumerKeyClaim = ""
-  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
-
-# Issuer 3
-[[enforcer.security.tokenService]]
-  name = "APIM Publisher"
-  issuer = "https://localhost:9444/publisher"
-  validateSubscription = true
-  certificateAlias = ""
-  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-
 [enforcer.jwtGenerator]
     enable = true
 
