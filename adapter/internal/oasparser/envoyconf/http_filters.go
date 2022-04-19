@@ -44,38 +44,21 @@ import (
 
 // getHTTPFilters generates httpFilter configuration
 func getHTTPFilters() []*hcmv3.HttpFilter {
-	extAauth := getExtAuthzHTTPFilter()
+
 	cors := &hcmv3.HttpFilter{
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
 	}
-
-	httpFilters := []*hcmv3.HttpFilter{
-		cors,
-		extAauth,
-	}
+	extAauth := getExtAuthzHTTPFilter()
+	lua := getLuaFilter()
+	router := getRouterHTTPFilter()
 
 	logConf := config.ReadLogConfigs()
 
-	// debug log first filter
 	if logConf.DebugLogs.Enable {
-		httpFilters = append(httpFilters, getDebugLogFirstFilter())
+		return []*hcmv3.HttpFilter{cors, extAauth, getDebugLogFirstFilter(), lua, getDebugLogSecondFilter(), router}
 	}
-
-	// filter for interceptors
-	lua := getLuaFilter()
-	httpFilters = append(httpFilters, lua)
-
-	// debug log second filter
-	if logConf.DebugLogs.Enable {
-		httpFilters = append(httpFilters, getDebugLogSecondFilter())
-	}
-
-	// router must be the last filter
-	router := getRouterHTTPFilter()
-	httpFilters = append(httpFilters, router)
-
-	return httpFilters
+	return []*hcmv3.HttpFilter{cors, extAauth, lua, router}
 }
 
 // getRouterHTTPFilter gets router http filter.
