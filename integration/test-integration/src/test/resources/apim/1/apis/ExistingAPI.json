@@ -9,6 +9,11 @@
       "verb": "GET",
       "target": "/pet/findByStatus",
       "throttlingPolicy": "Unlimited"
+    },
+    {
+      "verb": "GET",
+      "target": "/headers",
+      "throttlingPolicy": "Unlimited"
     }
   ],
   "endpoint": {

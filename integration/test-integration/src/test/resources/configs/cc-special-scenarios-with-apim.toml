@@ -21,21 +21,22 @@
     enableHeaderConditions = true
     enableQueryParamConditions = true
     enableJwtClaimConditions = true
-    jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
+    jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5673'"
     [enforcer.throttling.publisher]
         # Credentials required to establish connection between Traffic Manager
         username = "admin"
         password = "$env{tm_admin_pwd}"
         # Receiver URL and the authentication URL of the Traffic manager node/nodes
         [[enforcer.throttling.publisher.URLGroup]]
-          receiverURLs = ["ssl://apim:9611"]
-          authURLs = ["ssl://apim:9711"]
+          receiverURLs = ["tcp://apim:9612"]
+          authURLs = ["ssl://apim:9712"]
 
 [controlPlane]
     enabled = true
+    serviceURL = "https://apim:9444/"
     skipSSLVerification=true
-[controlPlane.brokerConnectionParameters]
-    eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='250'&connectdelay='10'"]
+    [controlPlane.brokerConnectionParameters]
+        eventListeningEndpoints = ["amqp://admin:admin@apim:5673?retries='250'&connectdelay='10'"]
 
 [analytics]
     enabled = true

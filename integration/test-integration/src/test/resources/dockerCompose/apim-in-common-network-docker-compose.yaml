@@ -7,10 +7,9 @@ services:
     image: wso2/wso2am:4.1.0-alpine
     user: root
     ports:
-      - "9763:9763"
-      - "9443:9443"
-      - "5672:5672"
-      - "8243:8243"
+      - "9764:9764"
+      - "9444:9444"
+      - "5673:5673"
     environment:
       - PROFILE_NAME=control-plane
     volumes:
