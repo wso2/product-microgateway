@@ -21,7 +21,7 @@ read -p "Please enter Choreo Connect Version (Ex: 1.0.0): " CC_VERSION
 
 # Sets the architecture type
 ARC_VALUE="linux-amd64"
-echo "\033[0;31mPlease select below value correctly. Otherwise copying executables will be incorrect.\033[0m"
+echo "\033[0;31mPlease select below value correctly. Otherwise copied executables will be incorrect.\033[0m"
 read -p "Are you running Choreo Connect UBUNTU based images? (y or n): " IS_RUNNING_UBUNTU_IMAGES
 if [ "$IS_RUNNING_UBUNTU_IMAGES" = "y" ]; then
   ARC_VALUE="linux-arm64"

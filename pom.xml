@@ -160,7 +160,7 @@
                                     <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml" />
                                     <fileset dir="resources/k8s-artifacts" includes="**/*deployment.yaml" />
                                 </replaceregexp>
-                                <replaceregexp file="remove-containers.sh" match="micro_gw_version=.*" replace="micro_gw_version=${project.version}" byline="true" />
+                                <replaceregexp file="dev-scripts/remove-containers.sh" match="micro_gw_version=.*" replace="micro_gw_version=${project.version}" byline="true" />
                             </target>
                         </configuration>
                     </execution>

@@ -11,7 +11,7 @@ This provides the information to how to work with the current microgateway setup
 
 ## Quick Start Guide
 
-- `sh remove-containers.sh` (If it is the first time this is not required to run.
+- `sh dev-scripts/remove-containers.sh` (If it is the first time this is not required to run.
 The purpose is to remove the already created docker containers. Otherwise, the docker 
 maven plugin would fail to create the new docker images)
 
@@ -48,7 +48,7 @@ maven plugin would fail to create the new docker images)
  
  ### If the developer needs to build a separate component
  
- - In this case, first execute the `sh remove-containers.sh`. If you need to keep the
+ - In this case, first execute the `sh dev-scripts/remove-containers.sh`. If you need to keep the
  other container up and running please modify the script. If not (usually) you can simply
  execute the script as it is because this does not remove the docker image.
  

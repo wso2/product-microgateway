@@ -89,8 +89,7 @@ choreo-connect-1.1.0
 ```
 
 ## Prerequisites
-1. Before running this script you need to run Choreo Connect docker-compose file up and running in the background.
-2. You should execute the script with sudo permissions. (Otherwise there will be errors when executing `docker cp` command.)
+1. Before running this script you need to run Choreo Connect docker-compose file with relevant image versions in the background.
 
 ## Inputs for the script
 
@@ -102,4 +101,4 @@ These values are not required to start script execution.
 
 ## Script starting method
 
-You can start the script with `sudo ./directory-structure-maker.sh`.
+You can start the script with `./directory-structure-maker.sh` command.
