@@ -120,6 +120,10 @@ public class MockBackendProd extends Thread {
                 byte[] response = ResponseConstants.RESPONSE_VALID_JWT_TRANSFORMER.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+            httpServer.createContext(context + "/store/1/pet/123", exchange -> {
+                byte[] response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
             httpServer.createContext(context + "/store/order/1", exchange -> {
                 byte[] response;
                 if (exchange.getRequestHeaders().containsKey("Authorization") &&
