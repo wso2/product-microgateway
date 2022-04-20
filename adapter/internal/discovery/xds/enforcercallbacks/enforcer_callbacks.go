@@ -26,6 +26,8 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
+const instanceIdentifierKey string = "instanceIdentifier"
+
 // Callbacks is used to debug the xds server related communication.
 type Callbacks struct {
 }
@@ -46,8 +48,9 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
+	nodeIdentifier := getNodeIdentifier(request)
 	logger.LoggerEnforcerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
-		id, request.GetNode(), request.GetVersionInfo(), request.GetTypeUrl())
+		id, nodeIdentifier, request.GetVersionInfo(), request.GetTypeUrl())
 	if request.ErrorDetail != nil {
 		logger.LoggerEnforcerXdsCallbacks.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(), id, request.ErrorDetail.Message),
@@ -71,20 +74,26 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 }
 
 // OnStreamResponse prints debug logs
-func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
+func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest,
+	response *discovery.DiscoveryResponse) {
+	nodeIdentifier := getNodeIdentifier(request)
 	logger.LoggerEnforcerXdsCallbacks.Debugf("stream response on stream id: %d node: %s for type: %s version: %s",
-		id, request.GetNode(), request.GetTypeUrl(), response.GetVersionInfo())
+		id, nodeIdentifier, request.GetTypeUrl(), response.GetVersionInfo())
 }
 
 // OnFetchRequest prints debug logs
 func (cb *Callbacks) OnFetchRequest(_ context.Context, req *discovery.DiscoveryRequest) error {
-	logger.LoggerEnforcerXdsCallbacks.Debugf("fetch request from node: %s, version: %s, for type: %s", req.Node.Id, req.VersionInfo, req.TypeUrl)
+	nodeIdentifier := getNodeIdentifier(req)
+	logger.LoggerEnforcerXdsCallbacks.Debugf("fetch request from node: %s, version: %s, for type: %s", nodeIdentifier,
+		req.VersionInfo, req.TypeUrl)
 	return nil
 }
 
 // OnFetchResponse prints debug logs
 func (cb *Callbacks) OnFetchResponse(req *discovery.DiscoveryRequest, res *discovery.DiscoveryResponse) {
-	logger.LoggerEnforcerXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type: %s", req.Node.Id, req.VersionInfo, res.TypeUrl)
+	nodeIdentifier := getNodeIdentifier(req)
+	logger.LoggerEnforcerXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type: %s", nodeIdentifier,
+		req.VersionInfo, res.TypeUrl)
 }
 
 // OnDeltaStreamOpen is unused.
@@ -103,4 +112,13 @@ func (cb *Callbacks) OnStreamDeltaResponse(id int64, req *discovery.DeltaDiscove
 // OnStreamDeltaRequest is unused.
 func (cb *Callbacks) OnStreamDeltaRequest(id int64, req *discovery.DeltaDiscoveryRequest) error {
 	return nil
+}
+
+func getNodeIdentifier(request *discovery.DiscoveryRequest) string {
+	metadataMap := request.Node.Metadata.AsMap()
+	nodeIdentifier := request.Node.Id
+	if identifierVal, ok := metadataMap[instanceIdentifierKey]; ok {
+		nodeIdentifier = request.Node.Id + ":" + identifierVal.(string)
+	}
+	return nodeIdentifier
 }

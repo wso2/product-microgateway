@@ -30,6 +30,7 @@ import org.wso2.choreo.connect.discovery.service.config.ConfigDiscoveryServiceGr
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
@@ -46,16 +47,19 @@ public class ConfigDiscoveryClient implements Runnable {
     private static ConfigDiscoveryClient instance;
     private final String host;
     private final int port;
-    private final String nodeId;
     private final CountDownLatch latch;
     private ConfigDiscoveryServiceGrpc.ConfigDiscoveryServiceBlockingStub blockingStub;
     private ManagedChannel channel;
+    /**
+     * Node struct for the discovery client
+     */
+    private final Node node;
 
     private ConfigDiscoveryClient(String host, int port, CountDownLatch latch) {
         this.host = host;
         this.port = port;
         this.latch = latch;
-        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
+        this.node = XDSCommonUtils.generateXDSNode(AdapterConstants.COMMON_ENFORCER_LABEL);
         initConnection();
     }
 
@@ -110,7 +114,7 @@ public class ConfigDiscoveryClient implements Runnable {
 
     public void requestInitConfig() {
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setTypeUrl(Constants.CONFIG_TYPE_URL).build();
         try {
             DiscoveryResponse res = blockingStub.withDeadlineAfter(60, TimeUnit.SECONDS).fetchConfigs(req);
