@@ -101,9 +101,9 @@ func TestCreateRoute(t *testing.T) {
 					MaxProgramSize: nil,
 				},
 			},
-			Regex: "/xWso2BasePath",
+			Regex: "^/xWso2BasePath/resourcePath(/{0,1})",
 		},
-		Substitution: "/basepath",
+		Substitution: "/basepath/resourcePath",
 	}
 
 	UpgradeConfigsDisabled := []*routev3.RouteAction_UpgradeConfig{{
@@ -275,6 +275,24 @@ func TestGenerateRegex(t *testing.T) {
 			isMatched:     true,
 		},
 		{
+			inputpath:     "/v2/pet/{petId}",
+			userInputPath: "/v2/pet/5/",
+			message:       "when the input path does not have tailing slash and user input path has trailing slash",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/",
+			userInputPath: "/v2/pet/5",
+			message:       "when the input path has tailing slash and user input path does not have trailing slash",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/",
+			userInputPath: "/v2/pet/5/",
+			message:       "when both the input path and user input path has trailing slash",
+			isMatched:     true,
+		},
+		{
 			inputpath:     "/v2/pet/{petId}/info",
 			userInputPath: "/v2/pet/5/info",
 			message:       "when path parameter is provided in the middle of the path",
@@ -384,6 +402,130 @@ func TestGenerateRegex(t *testing.T) {
 
 		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
 		assert.Nil(t, err)
+	}
+}
+
+func TestGenerateSubstitutionString(t *testing.T) {
+	type generateSubsStringTestItem struct {
+		inputPath          string
+		expectedSubsString string
+		message            string
+		shouldEqual        bool
+	}
+	dataItems := []generateSubsStringTestItem{
+		{
+			"/v2/pet",
+			"/basepath/v2/pet",
+			"when input path does not have a trailing slash",
+			true,
+		},
+		{
+			"/v2/pet/",
+			"/basepath/v2/pet/",
+			"when input path has a trailing slash",
+			true,
+		},
+		{
+			"/v2/pet/",
+			"/basepath/v2/pet",
+			"when input path has a trailing slash",
+			false,
+		},
+		{
+			"/v2/pet/{petId}",
+			"/basepath/v2/pet/\\1",
+			"when input path has a path param",
+			true,
+		},
+		{
+			"/v2/pet/{petId}/",
+			"/basepath/v2/pet/\\1/",
+			"when input path has a path param and trailing slash",
+			true,
+		},
+		{
+			"/v2/pet/{petId}/info",
+			"/basepath/v2/pet/\\1/info",
+			"when input path has a path param in the middle of the path",
+			true,
+		},
+		{
+			"/v2/pet/{petId}/test/{petId}",
+			"/basepath/v2/pet/\\1/test/\\2",
+			"when input path has a two path params",
+			true,
+		},
+		{
+			"/v2/*",
+			"/basepath/v2",
+			"when input path has a wildcard at the end",
+			true,
+		},
+		{
+			"/v2/{petId}/*",
+			"/basepath/v2/\\1",
+			"when input path has a path param and a wildcard at the end",
+			true,
+		},
+	}
+	for _, item := range dataItems {
+		generatedSubstitutionString := generateSubstitutionString(item.inputPath, "/basepath")
+		isEqual := generatedSubstitutionString == item.expectedSubsString
+		assert.Equal(t, item.shouldEqual, isEqual, item.message)
+	}
+}
+
+func TestGenerateRegexSegment(t *testing.T) {
+
+	type generateRegexSegmentTestItem struct {
+		inputPath    string
+		regexSegment string
+		message      string
+		shouldEqual  bool
+	}
+	dataItems := []generateRegexSegmentTestItem{
+		{
+			inputPath:    "/v2/pet/",
+			regexSegment: "/v2/pet(/{0,1})",
+			message:      "when the input path has a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet",
+			regexSegment: "/v2/pet(/{0,1})",
+			message:      "when the input path does not have a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/{petId}",
+			regexSegment: "/v2/pet/([^/]+)(/{0,1})",
+			message:      "when the input path has a path param and does not have a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/{petId}/",
+			regexSegment: "/v2/pet/([^/]+)(/{0,1})",
+			message:      "when the input path has a path param and a trailing slash",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/{petId}/test/{petId}",
+			regexSegment: "/v2/pet/([^/]+)/test/([^/]+)(/{0,1})",
+			message:      "when the input path has two path params",
+			shouldEqual:  true,
+		},
+		{
+			inputPath:    "/v2/pet/*",
+			regexSegment: "/v2/pet((/(.*))*)",
+			message:      "when the input path ends with *",
+			shouldEqual:  true,
+		},
+	}
+
+	for _, item := range dataItems {
+		generatedPathRegexSegment := generatePathRegexSegment(item.inputPath)
+		isEqual := generatedPathRegexSegment == item.regexSegment
+		assert.Equal(t, item.shouldEqual, isEqual, item.message)
 	}
 }
 
