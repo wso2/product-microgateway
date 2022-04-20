@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.discovery.subscription.APIList;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
@@ -50,9 +51,9 @@ public class ApiListDiscoveryClient implements Runnable {
     private ManagedChannel channel;
     private ApiListDiscoveryServiceGrpc.ApiListDiscoveryServiceStub stub;
     private StreamObserver<DiscoveryRequest> reqObserver;
-    private SubscriptionDataStoreImpl subscriptionDataStore;
-    private String host;
-    private int port;
+    private final SubscriptionDataStoreImpl subscriptionDataStore;
+    private final String host;
+    private final int port;
 
     /**
      * This is a reference to the latest received response from the ADS.
@@ -73,16 +74,16 @@ public class ApiListDiscoveryClient implements Runnable {
     private DiscoveryResponse latestACKed;
 
     /**
-     * Label of this node.
+     * Node struct for the discovery client
      */
-    private final String nodeId;
+    private final Node node;
 
     private ApiListDiscoveryClient(String host, int port) {
         this.host = host;
         this.port = port;
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
         initConnection();
-        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
+        this.node = XDSCommonUtils.generateXDSNode(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel());
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
@@ -157,7 +158,7 @@ public class ApiListDiscoveryClient implements Runnable {
 
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                    .setNode(Node.newBuilder().setId(nodeId).build())
+                    .setNode(node)
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.API_LIST_TYPE_URL).build();
             reqObserver.onNext(req);
@@ -175,7 +176,7 @@ public class ApiListDiscoveryClient implements Runnable {
      */
     private void ack() {
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.API_LIST_TYPE_URL).build();
@@ -188,7 +189,7 @@ public class ApiListDiscoveryClient implements Runnable {
             return;
         }
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestACKed.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.API_LIST_TYPE_URL)
