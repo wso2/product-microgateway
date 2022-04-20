@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.discovery.service.keymgt.KMDiscoveryServiceGrpc;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
@@ -53,8 +54,8 @@ public class KeyManagerDiscoveryClient implements Runnable {
     private StreamObserver<DiscoveryRequest> reqObserver;
     private static final Logger log = LogManager.getLogger(KeyManagerDiscoveryClient.class);
     private final KeyManagerHolder kmHolder;
-    private String host;
-    private int port;
+    private final String host;
+    private final int port;
     /**
      * This is a reference to the latest received response from the ADS.
      * <p>
@@ -73,15 +74,15 @@ public class KeyManagerDiscoveryClient implements Runnable {
      */
     private DiscoveryResponse latestACKed;
     /**
-     * Label of this node.
+     * Node struct for the discovery client
      */
-    private final String nodeId;
+    private final Node node;
 
     private KeyManagerDiscoveryClient(String host, int port) {
         this.host = host;
         this.port = port;
         initConnection();
-        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
+        this.node = XDSCommonUtils.generateXDSNode(AdapterConstants.COMMON_ENFORCER_LABEL);
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
         this.kmHolder = KeyManagerHolder.getInstance();
     }
@@ -155,7 +156,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
 
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                    .setNode(Node.newBuilder().setId(nodeId).build())
+                    .setNode(node)
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.KEY_MANAGER_TYPE_URL).build();
             reqObserver.onNext(req);
@@ -171,7 +172,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
      */
     private void ack() {
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.KEY_MANAGER_TYPE_URL).build();
@@ -184,7 +185,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
             return;
         }
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestACKed.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.KEY_MANAGER_TYPE_URL)

@@ -24,6 +24,8 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
+const instanceIdentifierKey string = "instanceIdentifier"
+
 // Callbacks is used to debug the xds server related communication.
 type Callbacks struct {
 }
@@ -55,7 +57,8 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 }
 
 // OnStreamResponse prints debug logs
-func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
+func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest,
+	response *discovery.DiscoveryResponse) {
 	nodeIdentifier := getNodeIdentifier(request)
 	logger.LoggerRouterXdsCallbacks.Debugf("stream response on stream id: %d, to node: %s, version: %s, for type: %v", id,
 		nodeIdentifier, response.VersionInfo, response.TypeUrl)
@@ -93,7 +96,7 @@ func (cb *Callbacks) OnStreamDeltaRequest(id int64, req *discovery.DeltaDiscover
 func getNodeIdentifier(request *discovery.DiscoveryRequest) string {
 	metadataMap := request.Node.Metadata.AsMap()
 	nodeIdentifier := request.Node.Id
-	if identifierVal, ok := metadataMap["instanceIdentifier"]; ok {
+	if identifierVal, ok := metadataMap[instanceIdentifierKey]; ok {
 		nodeIdentifier = request.Node.Id + ":" + identifierVal.(string)
 	}
 	return nodeIdentifier
