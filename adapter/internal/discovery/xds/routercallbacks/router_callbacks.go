@@ -44,18 +44,21 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
+	nodeIdentifier := getNodeIdentifier(request)
 	logger.LoggerRouterXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
-		id, request.Node.Id, request.VersionInfo, request.TypeUrl)
+		id, nodeIdentifier, request.VersionInfo, request.TypeUrl)
 	if request.ErrorDetail != nil {
-		logger.LoggerEnforcerXdsCallbacks.Errorf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(), id, request.ErrorDetail.Message)
+		logger.LoggerEnforcerXdsCallbacks.Errorf("Stream request for type %s on stream id: %d, from node: %s, Error: %s", request.GetTypeUrl(),
+			id, nodeIdentifier, request.ErrorDetail.Message)
 	}
 	return nil
 }
 
 // OnStreamResponse prints debug logs
 func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
+	nodeIdentifier := getNodeIdentifier(request)
 	logger.LoggerRouterXdsCallbacks.Debugf("stream response on stream id: %d, to node: %s, version: %s, for type: %v", id,
-		request.Node.Id, response.VersionInfo, response.TypeUrl)
+		nodeIdentifier, response.VersionInfo, response.TypeUrl)
 }
 
 // OnFetchRequest prints debug logs
@@ -85,4 +88,13 @@ func (cb *Callbacks) OnStreamDeltaResponse(id int64, req *discovery.DeltaDiscove
 // OnStreamDeltaRequest is unused.
 func (cb *Callbacks) OnStreamDeltaRequest(id int64, req *discovery.DeltaDiscoveryRequest) error {
 	return nil
+}
+
+func getNodeIdentifier(request *discovery.DiscoveryRequest) string {
+	metadataMap := request.Node.Metadata.AsMap()
+	nodeIdentifier := request.Node.Id
+	if identifierVal, ok := metadataMap["instanceIdentifier"]; ok {
+		nodeIdentifier = request.Node.Id + ":" + identifierVal.(string)
+	}
+	return nodeIdentifier
 }
