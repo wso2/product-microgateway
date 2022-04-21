@@ -33,6 +33,7 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -42,9 +43,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class TokenUtil {
 
-    public static String getBasicJWT(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo, String keyType,
+    public static String getBasicJWT(ApplicationDTO applicationDTO, JSONObject overridingJwtInfo, String keyType,
             int validityPeriod, String scopes) throws Exception {
 
+        JSONObject jwtTokenInfo = new JSONObject();
         jwtTokenInfo.put("aud", "http://org.wso2.apimgt/gateway");
         jwtTokenInfo.put("sub", "admin");
         if (scopes != null) {
@@ -56,6 +58,11 @@ public class TokenUtil {
         jwtTokenInfo.put("iat", System.currentTimeMillis());
         jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
         jwtTokenInfo.put("jti", UUID.randomUUID());
+
+        for (Iterator it = overridingJwtInfo.keys(); it.hasNext(); ) {
+            String overriddenKey = (String) it.next();
+            jwtTokenInfo.put(overriddenKey, overridingJwtInfo.get(overriddenKey));
+        }
 
         String payload = jwtTokenInfo.toString();
 
@@ -161,6 +168,25 @@ public class TokenUtil {
      */
     public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
                                 int validityPeriod, String scopes, boolean isInternalKey) throws Exception {
+        JSONObject jwtTokenInfo = new JSONObject();
+        return getJWT(api, applicationDTO, tier, keyType, validityPeriod, scopes, isInternalKey, jwtTokenInfo);
+    }
+
+    /**
+     * Get a self-contained JWT using an already populated jwtInfo JSONObject.
+     *
+     * @param api            API info to include in the JWT
+     * @param applicationDTO Application info to include in the JWT
+     * @param tier           Subscription tier info to include in the JWT
+     * @param keyType        whether Production or Sandbox
+     * @param validityPeriod validity period
+     * @param jwtTokenInfo   JSON object containing values to override the default
+     * @throws Exception if an error occurs while signing the JWT
+     * @return a self-contained JWT
+     */
+    public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
+                                int validityPeriod, String scopes, boolean isInternalKey, JSONObject jwtTokenInfo)
+            throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
         if (!api.getContext().startsWith("/")) {
             api.setContext("/" + api.getContext());
@@ -172,8 +198,6 @@ public class TokenUtil {
 
         subscribedApiDTO.setSubscriptionTier(tier);
         subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
-
-        JSONObject jwtTokenInfo = new JSONObject();
 
         JSONObject tierDTO = new JSONObject();
         tierDTO.put("stopOnQuotaReach", true);

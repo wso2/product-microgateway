@@ -21,7 +21,7 @@
     <groupId>org.wso2.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0-rc2-SNAPSHOT</version>
+    <version>1.2.0-m1-SNAPSHOT</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -515,8 +515,8 @@
         <slf4j.version>1.7.21</slf4j.version>
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
-        <testcontainers.version>1.15.0</testcontainers.version>
-        <ryuk.image.version>0.3.0</ryuk.image.version>
+        <testcontainers.version>1.16.2</testcontainers.version>
+        <ryuk.image.version>0.3.2</ryuk.image.version>
         <testng.version>6.11</testng.version>
         <tomcat.annotations.api.version>6.0.53</tomcat.annotations.api.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -524,7 +524,7 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
-        <apictl.version>4.1.0-rc1</apictl.version>
+        <apictl.version>4.1.0</apictl.version>
         <apim.version>4.1.0-beta</apim.version>
         <grpc.healthProbe.version>0.3.6</grpc.healthProbe.version>
         <analytics.publisher.client.version>1.0.8</analytics.publisher.client.version>

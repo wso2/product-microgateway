@@ -19,6 +19,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,20 +39,22 @@ import java.util.Map;
 public class ExistingApiTestCase extends ApimBaseTest {
     private static final String API_CONTEXT = "existing_api";
     private static final String APP_NAME = "ExistingApiApp";
+    private String applicationId;
+    private String accessTokenProd;
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
         super.initWithSuperTenant();
+
+        applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
+        accessTokenProd = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
     }
 
     @Test
     public void testExistingApiWithProdKey() throws Exception {
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
-        String accessToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
-                user, storeRestClient);
-
         Map<String, String> headers = new HashMap<>();
-        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessTokenProd);
         headers.put(HttpHeaderNames.HOST.toString(), "localhost");
 
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
@@ -63,7 +66,6 @@ public class ExistingApiTestCase extends ApimBaseTest {
 
     @Test
     public void testExistingApiWithSandboxKey() throws Exception {
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
         String accessToken = StoreUtils.generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
 
@@ -76,5 +78,44 @@ public class ExistingApiTestCase extends ApimBaseTest {
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
+    }
+
+    @Test
+    public void checkHeadersSentToBackend() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessTokenProd);
+
+        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/headers");
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+                "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
+
+        // Request headers received by the backend
+        JSONObject headersToBackend = new JSONObject(response.getData());
+        Assert.assertEquals(headersToBackend.length(), 10, "Unexpected number of headers received by the backend");
+
+        Assert.assertNotNull(headersToBackend.get("X-trace-key"));
+        Assert.assertNotNull(headersToBackend.get("Accept"));
+        Assert.assertNotNull(headersToBackend.get("X-request-id"));
+        Assert.assertNotNull(headersToBackend.get("X-jwt-assertion"));
+        Assert.assertNotNull(headersToBackend.get("X-forwarded-proto"));
+        Assert.assertNotNull(headersToBackend.get("Host"));
+        Assert.assertNotNull(headersToBackend.get("Pragma"));
+        Assert.assertNotNull(headersToBackend.get("X-envoy-original-path"));
+        Assert.assertNotNull(headersToBackend.get("User-agent"));
+        Assert.assertNotNull(headersToBackend.get("Cache-control"));
+
+        Assert.assertFalse(headersToBackend.has("x-wso2-cluster-header"));
+        Assert.assertFalse(headersToBackend.has("x-envoy-expected-rq-timeout-ms"));
+
+        // Response headers received by the client
+        Map<String, String> headersToClient = response.getHeaders();
+        Assert.assertEquals(headersToClient.size(), 4, "Unexpected number of headers received by the client");
+
+        Assert.assertNotNull(headersToClient.get("date"));      // = Fri, 15 Apr 2022 05:10:41 GMT
+        Assert.assertNotNull(headersToClient.get("server"));    // = envoy
+        Assert.assertNotNull(headersToClient.get("content-length"));
+        Assert.assertNotNull(headersToClient.get("content-type"));
     }
 }

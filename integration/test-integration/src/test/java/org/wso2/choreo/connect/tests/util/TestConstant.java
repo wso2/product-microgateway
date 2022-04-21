@@ -93,8 +93,8 @@ public class TestConstant {
     public static final int ADAPTER_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
     public final static int MOCK_SERVER2_PORT = 2390;
-    public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
-    public final static int APIM_SERVLET_TRP_HTTP_PORT = 9763;
+    public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9444;
+    public final static int APIM_SERVLET_TRP_HTTP_PORT = 9764;
     public static final String MOCK_BACKEND_BASEPATH = "/v2";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;

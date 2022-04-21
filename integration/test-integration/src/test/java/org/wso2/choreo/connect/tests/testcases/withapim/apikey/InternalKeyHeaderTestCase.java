@@ -22,7 +22,6 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.publisher.api.ApiResponse;
@@ -46,8 +45,6 @@ public class InternalKeyHeaderTestCase extends ApimBaseTest {
     protected String apiKey;
     private String endPoint;
     private String internalKey;
-    private String applicationId;
-    private String apiId;
 
     @BeforeClass(description = "Initialise the setup for API key tests")
     void start() throws Exception {
@@ -67,13 +64,13 @@ public class InternalKeyHeaderTestCase extends ApimBaseTest {
         apiProperties.put("version", SAMPLE_API_VERSION);
         apiProperties.put("provider", user.getUserName());
         apiProperties.put("securityScheme", securityScheme);
-        apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
+        String apiId = PublisherUtils.createAPIUsingOAS(apiProperties, filePath, publisherRestClient);
 
         publisherRestClient.changeAPILifeCycleStatus(apiId, "Publish");
 
         //Create and subscribe to app
         Application app = new Application(APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        applicationId = StoreUtils.createApplication(app, storeRestClient);
+        String applicationId = StoreUtils.createApplication(app, storeRestClient);
 
         PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
 
@@ -115,12 +112,5 @@ public class InternalKeyHeaderTestCase extends ApimBaseTest {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-    }
-
-    @AfterClass
-    public void clean() throws Exception {
-        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
-        storeRestClient.removeApplicationById(applicationId);
-        publisherRestClient.deleteAPI(apiId);
     }
 }
