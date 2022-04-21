@@ -1391,5 +1391,5 @@ func getDefaultResourceMethods(apiType string) []string {
 
 func getDefaultVersionBasepath(basePath string, version string) string {
 	context := strings.ReplaceAll(basePath, "/"+version, "")
-	return fmt.Sprintf("(%s|%s)", basePath, context)
+	return fmt.Sprintf("(?:%s|%s)", basePath, context)
 }
