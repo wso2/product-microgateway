@@ -534,7 +534,7 @@
         <snakeyaml.version>1.26</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
-       
+
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.12.4</jackson.annotations.version>
         <applicationinsights.core.version>2.6.3</applicationinsights.core.version>
