@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim.throttle;
 
 import com.google.common.net.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -117,8 +118,12 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         application.setName("jwtApp");
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
+
+        JSONObject jwtTokenInfo = new JSONObject();
+        // In apim mode, we use the port 9444 since 9443 is already used by Rancher
+        jwtTokenInfo.put("iss", "https://localhost:9444/oauth2/token");
         String jwtToken = TokenUtil.getJWT(api, application, "15PerMin", TestConstant.KEY_TYPE_PRODUCTION,
-                3600, "write:pets", false);
+                3600, "write:pets", false, jwtTokenInfo);
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + jwtToken);

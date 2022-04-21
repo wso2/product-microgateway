@@ -98,32 +98,36 @@ func (resource *Resource) GetRewriteResource() (string, bool) {
 	rewritePath := ""
 	rewriteMethod := false
 	for _, method := range resource.methods {
-		if len(method.policies.Request) > 0 {
-			for _, policy := range method.policies.Request {
-				if strings.EqualFold(constants.RewritePathAction, policy.Action) {
-					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
-							rewritePath, found = paramValue.(string)
-							if found {
-								if regexPath, err := getRewriteRegexFromPathTemplate(resource.path, rewritePath); err != nil {
-									logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
-										Message:   fmt.Sprintf("Invalid rewrite path %q: %v", rewritePath, err),
-										Severity:  logging.MINOR,
-										ErrorCode: 2212,
-									})
-									rewritePath = ""
-								} else {
-									rewritePath = regexPath
-									// get the first success rewrite path and ignore other rewrite methods in the same resource path
-									break
-								}
+		for _, policy := range method.policies.Request {
+			if strings.EqualFold(constants.RewritePathAction, policy.Action) {
+				if rewritePath != "" {
+					// get the first success rewrite path and ignore other rewrite paths in the same resource path
+					continue
+				}
+				if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
+					if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
+						rewritePath, found = paramValue.(string)
+						if found {
+							if regexPath, err := getRewriteRegexFromPathTemplate(resource.path, rewritePath); err != nil {
+								logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+									Message:   fmt.Sprintf("Invalid rewrite path %q: %v", rewritePath, err),
+									Severity:  logging.MINOR,
+									ErrorCode: 2212,
+								})
+								rewritePath = ""
+							} else {
+								rewritePath = regexPath
 							}
 						}
 					}
-				} else if strings.EqualFold(constants.RewriteMethodAction, policy.Action) {
-					rewriteMethod = true
 				}
+			} else if strings.EqualFold(constants.RewriteMethodAction, policy.Action) {
+				rewriteMethod = true
 			}
+		}
+		if rewritePath != "" && rewriteMethod {
+			// both rewrite path and rewrite methods are set, ignore others
+			break
 		}
 	}
 	return rewritePath, rewriteMethod

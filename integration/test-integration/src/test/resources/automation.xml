@@ -132,51 +132,6 @@
                         <userName>testu1</userName>
                         <password>testu1pass</password>
                     </user>
-                    <user key="userKey2">
-                        <userName>testu2</userName>
-                        <password>testu2pass</password>
-                    </user>
-                    <user key="userKey3">
-                        <userName>testu3</userName>
-                        <password>testu3pass</password>
-                    </user>
-                    <user key="emailUser">
-                        <userName>test@gmail.com</userName>
-                        <password>testuser31</password>
-                        <roles>
-                            <role>Internal/publisher</role>
-                            <role>Internal/creator</role>
-                            <role>Internal/subscriber</role>
-                            <role>admin</role>
-                        </roles>
-                    </user>
-                    <user key="emailUser2">
-                        <userName>test2@gmail.com</userName>
-                        <password>testuser31</password>
-                        <roles>
-                            <role>Internal/publisher</role>
-                            <role>Internal/creator</role>
-                            <role>Internal/subscriber</role>
-                        </roles>
-                    </user>
-                    <user key="emailUser3">
-                        <userName>test3@gmail.com</userName>
-                        <password>testuser31</password>
-                        <roles>
-                            <role>Internal/publisher</role>
-                            <role>Internal/creator</role>
-                            <role>Internal/subscriber</role>
-                        </roles>
-                    </user>
-                    <user key="userStoreUser">
-                        <userName>secondary/secondaryuser</userName>
-                        <password>testuser31</password>
-                        <roles>
-                            <role>Internal/publisher</role>
-                            <role>Internal/creator</role>
-                            <role>Internal/subscriber</role>
-                        </roles>
-                    </user>
                 </users>
             </tenant>
         </superTenant>
@@ -193,10 +148,6 @@
                         <userName>testuser11</userName>
                         <password>testuser11</password>
                     </user>
-                    <user key="user2">
-                        <userName>testuser21</userName>
-                        <password>testuser21</password>
-                    </user>
                     <user key="emailUser">
                         <userName>test@gmail.com</userName>
                         <password>testuser31</password>
@@ -207,62 +158,9 @@
                             <role>admin</role>
                         </roles>
                     </user>
-                    <user key="emailUser2">
-                        <userName>test2@gmail.com</userName>
-                        <password>testuser31</password>
-                        <roles>
-                            <role>Internal/publisher</role>
-                            <role>Internal/creator</role>
-                            <role>Internal/subscriber</role>
-                        </roles>
-                    </user>
-                    <user key="emailUser3">
-                        <userName>test3@gmail.com</userName>
-                        <password>testuser31</password>
-                        <roles>
-                            <role>Internal/publisher</role>
-                            <role>Internal/creator</role>
-                            <role>Internal/subscriber</role>
-                        </roles>
-                    </user>
                 </users>
             </tenant>
-            <!--<tenant domain="abc.com" key="abcDomainKey">-->
-                <!--<admin>-->
-                    <!--<user key="admin">-->
-                        <!--<userName>admin</userName>-->
-                        <!--<password>admin</password>-->
-                    <!--</user>-->
-                <!--</admin>-->
-                <!--<users>-->
-                    <!--<user key="user1">-->
-                        <!--<userName>testuser11</userName>-->
-                        <!--<password>testuser11</password>-->
-                    <!--</user>-->
-                    <!--<user key="user2">-->
-                        <!--<userName>testuser21</userName>-->
-                        <!--<password>testuser21</password>-->
-                    <!--</user>-->
-                <!--</users>-->
-            <!--</tenant>-->
-            <!--<tenant domain="malintha.com" key="malinthaDomainKey">-->
-                <!--<admin>-->
-                    <!--<user key="admin">-->
-                        <!--<userName>admin</userName>-->
-                        <!--<password>admin</password>-->
-                    <!--</user>-->
-                <!--</admin>-->
-                <!--<users>-->
-                    <!--<user key="userm1">-->
-                        <!--<userName>testuse11</userName>-->
-                        <!--<password>testuse11</password>-->
-                    <!--</user>-->
-                    <!--<user key="userm2">-->
-                        <!--<userName>testuse21</userName>-->
-                        <!--<password>testuse21</password>-->
-                    <!--</user>-->
-                <!--</users>-->
-            <!--</tenant>-->
+
         </tenants>
         <roles>
             <role name="role1">
@@ -295,80 +193,8 @@
                     <host type="default">localhost</host>
                 </hosts>
                 <ports>
-                    <port type="http">9763</port>
-                    <port type="https">9443</port>
-                </ports>
-                <properties>
-                </properties>
-            </instance>
-            <!--configuration of APIM Store instance -->
-            <instance name="store-old" type="standalone" nonBlockingTransportEnabled="false">
-                <hosts>
-                    <host type="default">localhost</host>
-                </hosts>
-                <ports>
-                    <port type="http">10263</port>
-                    <port type="https">9943</port>
-                </ports>
-                <properties>
-                </properties>
-            </instance>
-            <instance name="publisher-old" type="standalone" nonBlockingTransportEnabled="false">
-                <hosts>
-                    <host type="default">localhost</host>
-                </hosts>
-                <ports>
-                    <port type="http">10263</port>
-                    <port type="https">9943</port>
-                </ports>
-                <properties>
-                </properties>
-            </instance>
-            <instance name="keyManager" type="standalone" nonBlockingTransportEnabled="false">
-                <hosts>
-                    <host type="default">localhost</host>
-                </hosts>
-                <ports>
-                    <port type="http">10263</port>
-                    <port type="https">9943</port>
-                </ports>
-                <properties>
-                </properties>
-            </instance>
-            <instance name="gateway-mgt" type="standalone" nonBlockingTransportEnabled="false">
-                <hosts>
-                    <host type="default">localhost</host>
-                </hosts>
-                <ports>
-                    <port type="http">10263</port>
-                    <port type="https">9943</port>
-                </ports>
-                <properties>
-                </properties>
-            </instance>
-            <instance name="gateway-wrk" type="standalone" nonBlockingTransportEnabled="true">
-                <hosts>
-                    <host type="default">localhost</host>
-                </hosts>
-                <ports>
-                    <port type="http">10263</port>
-                    <port type="https">9943</port>
-                    <port type="nhttps">8743</port>
-                    <port type="nhttp">8780</port>
-                </ports>
-                <properties>
-                </properties>
-            </instance>
-            <!--Backend server where the actual services deployed-->
-            <instance name="backend-server" type="standalone" nonBlockingTransportEnabled="true">
-                <hosts>
-                    <host type="default">localhost</host>
-                </hosts>
-                <ports>
-                    <port type="http">10263</port>
-                    <port type="https">9943</port>
-                    <!--<port type="nhttps">8780</port>-->
-                    <!--<port type="nhttp">8743</port>-->
+                    <port type="http">9764</port>
+                    <port type="https">9444</port>
                 </ports>
                 <properties>
                 </properties>

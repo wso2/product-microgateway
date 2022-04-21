@@ -703,6 +703,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		action                  *routev3.Route_Route
 		match                   *routev3.RouteMatch
 		decorator               *routev3.Decorator
+		requestHeadersToRemove  []string
 		responseHeadersToRemove []string
 	)
 
@@ -915,6 +916,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if corsPolicy != nil {
 		action.Route.Cors = corsPolicy
 	}
+
+	// remove 'x-wso2-cluster-header' and `x-envoy-expected-rq-timeout-ms` headers from the request from router to backend
+	requestHeadersToRemove = append(requestHeadersToRemove, clusterHeaderName)
+	requestHeadersToRemove = append(requestHeadersToRemove, "x-envoy-expected-rq-timeout-ms")
+
 	// remove the 'x-envoy-upstream-service-time' from the response.
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
 
@@ -930,6 +936,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			wellknown.Lua:                       luaFilter,
 		},
 		ResponseHeadersToRemove: responseHeadersToRemove,
+		RequestHeadersToRemove:  requestHeadersToRemove,
 	}
 	return &router
 }
