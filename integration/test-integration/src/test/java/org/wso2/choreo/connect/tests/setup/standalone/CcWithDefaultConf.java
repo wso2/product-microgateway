@@ -54,6 +54,7 @@ public class CcWithDefaultConf {
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
+        ApictlUtils.createProject( "trailing_slash_openAPI.yaml", "trailing_slash");
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore");
         //todo:(amali) enable this test once apictl side get fixed.
         // ApictlUtils.createProject( "endpoint_ref_openAPI.yaml", "ep_ref_petstore", null, null);
@@ -76,6 +77,7 @@ public class CcWithDefaultConf {
         ApictlUtils.login("test");
 
         ApictlUtils.deployAPI("petstore", "test");
+        ApictlUtils.deployAPI("trailing_slash", "test");
         ApictlUtils.deployAPI("prod_and_sand_petstore", "test");
 //        ApictlUtils.deployAPI("ep_ref_petstore", "test");
         ApictlUtils.deployAPI("prod_petstore", "test");
