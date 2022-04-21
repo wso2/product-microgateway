@@ -74,6 +74,17 @@ public class AnalyticsFilter {
             // We are always expecting <String, String> Map as configuration.
             publisherConfig.put(entry.getKey(), getEnvValue(entry.getValue()).toString());
         }
+
+        boolean elkEnabled = configuration.containsKey(AnalyticsConstants.TYPE_CONFIG_KEY)
+                && configuration.get(AnalyticsConstants.TYPE_CONFIG_KEY)
+                        .toLowerCase().equals(AnalyticsConstants.ELK_TYPE);
+        if (elkEnabled) {
+            if (!configuration.containsKey(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY)) {
+                publisherConfig.put(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY,
+                        AnalyticsConstants.DEFAULT_PUBLISHER_REPORTER_CLASS);
+            }
+        }
+
         publisher = loadAnalyticsPublisher(customAnalyticsPublisher, isChoreoDeployment);
         if (publisher != null) {
             publisher.init(publisherConfig);

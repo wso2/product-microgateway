@@ -101,10 +101,9 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
     public void init(Map<String, String> configuration) {
         if (StringUtils.isEmpty(configuration.get(AnalyticsConstants.AUTH_URL_CONFIG_KEY))
                 || StringUtils.isEmpty(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY)) {
-            logger.error(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
+            logger.warn(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
                     AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY +
                     "  are not provided under analytics configurations.");
-            return;
         }
         Map<String, String> publisherConfig = new HashMap<>(2);
         for (Map.Entry<String, String> entry : configuration.entrySet()) {
