@@ -36,5 +36,6 @@ public class AnalyticsConstants {
     protected static final String CHOREO_FAULT_SCHEMA = "CHOREO_ERROR";
 
     protected static final String ELK_TYPE = "elk";
-    protected static final String DEFAULT_PUBLISHER_REPORTER_CLASS = "org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter";
+    protected static final String DEFAULT_PUBLISHER_REPORTER_CLASS 
+            = "org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter";
 }
