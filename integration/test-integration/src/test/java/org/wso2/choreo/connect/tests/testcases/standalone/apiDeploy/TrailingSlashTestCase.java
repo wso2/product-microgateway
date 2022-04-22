@@ -49,30 +49,36 @@ public class TrailingSlashTestCase {
 
     @Test(description = "test path with trailing slash but without path parameters")
     public void testTrailingSlashWithoutPathParam() throws Exception {
-        EchoResponse echoResponse = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/findByStatus", jwtTokenProd, headers);
+        EchoResponse echoResponse = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/findByStatus",
+                headers, jwtTokenProd);
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/findByStatus","Request path mismatched");
 
-        EchoResponse echoResponse2 = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/findByStatus/", jwtTokenProd, headers);
+        EchoResponse echoResponse2 = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/findByStatus/",
+                headers, jwtTokenProd);
         // Asserting without slash, which is the resource given in the API definition.
         Assert.assertEquals(echoResponse2.getPath(), "/v2/echo-full/findByStatus","Request path mismatched");
     }
 
     @Test(description = "test path with trailing slash with path parameter")
     public void testTrailingSlashWithPathParam() throws Exception {
-        EchoResponse echoResponse = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1", jwtTokenProd, headers);
+        EchoResponse echoResponse = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1",
+                headers, jwtTokenProd);
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/1","Request path mismatched");
 
-        EchoResponse echoResponse2 = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1/", jwtTokenProd, headers);
+        EchoResponse echoResponse2 = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1/",
+                headers, jwtTokenProd);
         // Asserting without slash, which is the resource given in the API definition.
         Assert.assertEquals(echoResponse2.getPath(), "/v2/echo-full/1","Request path mismatched");
     }
 
     @Test(description = "test path with trailing slash with multiple path parameters")
     public void testTrailingSlashWithMultiplePathParams() throws Exception {
-        EchoResponse echoResponse = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1/pet/123", jwtTokenProd, headers);
+        EchoResponse echoResponse = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1/pet/123",
+                headers, jwtTokenProd);
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/1/pet/123","Request path mismatched");
 
-        EchoResponse echoResponse2 = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1/pet/123/", jwtTokenProd, headers);
+        EchoResponse echoResponse2 = Utils.invokeEchoGet(API_CONTEXT, "/echo-full/1/pet/123/",
+                headers, jwtTokenProd);
         // Asserting without slash, which is the resource given in the API definition.
         Assert.assertEquals(echoResponse2.getPath(), "/v2/echo-full/1/pet/123","Request path mismatched");
     }
