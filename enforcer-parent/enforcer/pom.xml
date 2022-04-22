@@ -407,6 +407,7 @@
         <dependency>
             <groupId>org.wso2.am.analytics.publisher</groupId>
             <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+            <version>1.0.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
