@@ -149,6 +149,18 @@ public class APIPolicyTestCase {
         assertOriginalClientRequestInfo(echoResponse);
     }
 
+    @Test(description = "Test rewrite path API Policy with capture groups with trailing slash in path")
+    public void testRewritePathAPIPolicyWithCaptureGroupsWithTrailingSlashInPath() throws Exception {
+        // HTTP method: GET with trailing slash
+        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
+                "/echo-full/rewrite-policy-with-capture-groups/shops/shop1234.xyz/pets/pet890/orders/"
+                        + queryParams, headers, jwtTokenProd);
+
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/pets/pet890.pets/hello-shops/abcd-shops/shop1234");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
     @Test(description = "Test rewrite path API Policy with capture groups with invalid param")
     public void testRewritePathAPIPolicyWithCaptureGroupsInvalidParam() throws Exception {
         // HTTP method: GET
@@ -182,6 +194,17 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.DELETE.name());
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path2");
         Assert.assertTrue(echoResponse.getQuery().isEmpty(), "Query params has not been discarded");
+    }
+
+    @Test(description = "Test rewrite path and discard queries in rewrite path API Policies with trailing slash in path")
+    public void testRewritePathAndDiscardQueriesAPIPolicyWithTrailingSlashInPath() throws Exception {
+        // HTTP method: GET with trailing slash
+        EchoResponse echoResponse1 = Utils.invokeEchoGet(basePath, "/echo-full/rewrite-policy/discard-query-params/"
+                + queryParams, headers, jwtTokenProd);
+
+        Assert.assertEquals(echoResponse1.getMethod(), HttpMethod.DELETE.name());
+        Assert.assertEquals(echoResponse1.getPath(), "/v2/echo-full/new-path2");
+        Assert.assertTrue(echoResponse1.getQuery().isEmpty(), "Query params has not been discarded");
     }
 
     @Test(description = "Test OPA API policy - Success Validation")
