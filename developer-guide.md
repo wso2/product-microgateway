@@ -7,7 +7,7 @@ This provides the information to how to work with the current microgateway setup
 - docker & docker-compose
 - jdk-11
 - maven 3.6
-- Golang version below 1.17
+- Golang version 1.18
 
 ## Quick Start Guide
 
