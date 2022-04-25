@@ -1,0 +1,34 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Trailing Slash For Wildcard
+servers:
+  - url: http://mockBackend:2383/v2/echo-full
+x-wso2-basePath: /all_http_methods_for_wildcard
+paths:
+  /*:
+    get:
+      responses:
+        '200':
+          description: OK
+    put:
+      responses:
+        '200':
+          description: OK
+    post:
+      responses:
+        '200':
+          description: OK
+    delete:
+      responses:
+        '200':
+          description: OK
+    head:
+      responses:
+        '200':
+          description: OK
+    patch:
+      responses:
+        '200':
+          description: OK
+

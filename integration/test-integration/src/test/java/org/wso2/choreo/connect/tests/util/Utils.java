@@ -321,8 +321,8 @@ public class Utils {
     public static EchoResponse invokeEchoGet(String basePath, String resourcePath,
                                              Map<String, String> headers, String jwtToken) throws Exception {
         HttpResponse response = invokeGet(basePath, resourcePath, headers, jwtToken);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         return new Gson().fromJson(response.getData(), EchoResponse.class);
     }
 
@@ -340,13 +340,32 @@ public class Utils {
     public static EchoResponse invokeEchoPost(String basePath, String resourcePath, String payload,
                                               Map<String, String> headers, String jwtToken) throws Exception {
         HttpResponse response = invokePost(basePath, resourcePath, payload, headers, jwtToken);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         return new Gson().fromJson(response.getData(), EchoResponse.class);
     }
 
     /**
-     * Send a GET request with provided headers and an authorization bearer token
+     * Extract the HttpResponse payload received after calling the endpoint /echo-full
+     * into an EchoResponse object and return.
+     *
+     * @param response a HttpResponse
+     * @return extracted EchoResponse
+     */
+    public static EchoResponse extractToEchoResponse(HttpResponse response) {
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        return new Gson().fromJson(response.getData(), EchoResponse.class);
+    }
+
+    public static EchoResponse extractToEchoResponse(java.net.http.HttpResponse<String> response) {
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.statusCode(), HttpStatus.SC_OK, "Response code mismatched");
+        return new Gson().fromJson(response.body(), EchoResponse.class);
+    }
+
+    /**
+     * Send a GET request with provided headers and an authorization bearer token.
      *
      * @param basePath      Context of the API
      * @param resourcePath  Resource to be invoked
@@ -362,7 +381,7 @@ public class Utils {
     }
 
     /**
-     * Send a POST request with provided headers and an authorization bearer token
+     * Send a POST request with provided headers and an authorization bearer token.
      *
      * @param basePath      Context of the API
      * @param resourcePath  Resource to be invoked
