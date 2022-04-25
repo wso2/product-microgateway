@@ -492,6 +492,10 @@ enabled = true
   # Enforcer related configurations
   [analytics.enforcer]
     [analytics.enforcer.configProperties]
+      # Enables elk analytics logging
+      type = "elk"
+      # Overrides default analytics publisher reporter class
+      "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
       # Authentication endpoint for Choreo Analytics Publishing
       authURL = "$env{analytics_authURL}"
       # Authentication token for Choreo Analytics Publishing

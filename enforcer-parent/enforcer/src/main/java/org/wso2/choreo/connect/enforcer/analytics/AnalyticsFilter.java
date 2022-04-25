@@ -80,7 +80,7 @@ public class AnalyticsFilter {
                         .toLowerCase().equals(AnalyticsConstants.ELK_TYPE);
         if (elkEnabled && !configuration.containsKey(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY)) {
             publisherConfig.put(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY,
-                    AnalyticsConstants.DEFAULT_PUBLISHER_REPORTER_CLASS);
+                    AnalyticsConstants.DEFAULT_ELK_PUBLISHER_REPORTER_CLASS);
         }
 
         publisher = loadAnalyticsPublisher(customAnalyticsPublisher, isChoreoDeployment);
