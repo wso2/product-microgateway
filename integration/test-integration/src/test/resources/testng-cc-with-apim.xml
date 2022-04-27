@@ -63,13 +63,13 @@
         </classes>
     </test>
 
-    <test name="Restart API-M" parallel="false">
+    <!-- <test name="Restart API-M" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
         </classes>
-    </test>
+    </test> -->
 
-   <test name="Test new and existing APIs apps subscriptions after API-M restart" parallel="false">
+   <!-- <test name="Test new and existing APIs apps subscriptions after API-M restart" parallel="false">
        <classes>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>
@@ -87,9 +87,9 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApplicationThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketSubscriptionThrottleTestCase"/>
        </classes>
-   </test>
+   </test> -->
 
-    <test name="Clean and Re-deploy the same set of APIs apps subscriptions" parallel="false">
+    <!-- <test name="Clean and Re-deploy the same set of APIs apps subscriptions" parallel="false">
         <parameter name = "apimArtifactsIndex" value="1"/>
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
@@ -100,10 +100,10 @@
         <classes>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/> -->
             <!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.with_apim.throttle.DenyConditionTestCase"/>-->
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
+            <!-- <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
@@ -135,7 +135,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.CreateStateInternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketTimeoutTestCase"/>
         </classes>
-    </test>
+    </test> -->
 
     <test name="Shutdown Choreo Connect and API-M" parallel="false">
         <classes>
