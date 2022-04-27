@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org).
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -40,24 +40,18 @@ public class BasicAuth implements Filter {
     @Override
     public boolean handleRequest(RequestContext requestContext) {
         String headerName = configProperties.get("HeaderName");
-
         if(headerName!=null){
             String basicauthHeader = requestContext.getHeaders().get(headerName);
-
             if(basicauthHeader!=null){
                 String regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
-
                 if(basicauthHeader.matches(regex)){
                     byte[] decodedHeader = Base64.getDecoder().decode(basicauthHeader);
-
                     if(decodedHeader!=null){
                         String decodedString = new String(decodedHeader);
                         String[] basicauthArray = decodedString.split(":");
-
                         if(basicauthArray.length==2){
                             String headerUsername = basicauthArray[0];
                             String headerPassword = basicauthArray[1];
-                    
                             String username = configProperties.get("Username");
                             String password = configProperties.get("Password");
 
@@ -76,20 +70,4 @@ public class BasicAuth implements Filter {
                 .put(APIConstants.MessageFormat.STATUS_CODE, HttpResponseStatus.UNAUTHORIZED.code());
         return false;
     }
-        
-        
-        
-    
-        
-        
-        
-        
-      
-      
-        
-
-        
-    
-
-        
 }
