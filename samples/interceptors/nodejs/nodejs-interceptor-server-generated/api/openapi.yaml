@@ -73,7 +73,7 @@ components:
           $ref: '#/components/schemas/Trailers'
         requestBody:
           $ref: '#/components/schemas/Body'
-        InvocationContext:
+        invocationContext:
           $ref: '#/components/schemas/InvocationContext'
     RequestHandlerResponseBody:
       title: Response body of Request handler

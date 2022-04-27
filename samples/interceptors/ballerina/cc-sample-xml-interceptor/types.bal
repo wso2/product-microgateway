@@ -66,7 +66,7 @@ public type RequestHandlerRequestBody record {
     Trailers requestTrailers?;
     # Base64 encoded body
     Body requestBody?;
-    InvocationContext InvocationContext?;
+    InvocationContext invocationContext?;
 };
 
 public type InvocationContext record {

@@ -15,5 +15,5 @@ type RequestHandlerRequestBody struct {
 
 	RequestBody string `json:"requestBody,omitempty"`
 
-	InvocationContext *InvocationContext `json:"InvocationContext,omitempty"`
+	InvocationContext *InvocationContext `json:"invocationContext,omitempty"`
 }

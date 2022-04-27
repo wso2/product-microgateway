@@ -28,7 +28,7 @@ public class RequestHandlerRequestBody   {
   @JsonProperty("requestBody")
   private String requestBody = null;
 
-  @JsonProperty("InvocationContext")
+  @JsonProperty("invocationContext")
   private InvocationContext invocationContext = null;
 
   public RequestHandlerRequestBody requestHeaders(Headers requestHeaders) {
