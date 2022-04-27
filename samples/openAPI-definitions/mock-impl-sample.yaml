@@ -1,0 +1,102 @@
+openapi: 3.0.1
+info:
+  title: SwaggerPetstore
+  version: 1.0.6
+servers:
+  - url: /
+security:
+  - default: []
+paths:
+  /pet/findByStatus:
+    get:
+      responses:
+        "200":
+          description: OK
+          headers:
+            x-wso2-example:
+              style: simple
+              explode: false
+              example: example header value
+          content:
+            application/json:
+              example:
+                - id: 0
+                  name: doggie
+                  status: available
+                - id: 1
+                  name: kitty
+                  status: available
+      security:
+        - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+  /pet/{petId}:
+    get:
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        "50X":
+          description: Service Unavailable
+          headers:
+            x-wso2-example:
+              style: simple
+              explode: false
+              example: example header value
+          content:
+            application/json:
+              examples:
+                ref1:
+                  value:
+                    some response: Ref 1 Service Unavailable
+                ref2:
+                  value:
+                    another response: Ref 2 Service Unavailable
+        default:
+          description: default response
+          headers:
+            x-wso2-example:
+              style: simple
+              explode: false
+              example: default header value
+          content:
+            application/json:
+              examples:
+                ref1:
+                  value:
+                    id: 0
+                    name: doggie
+                    status: available
+                ref2:
+                  value:
+                    id: 1
+                    name: kitty
+                    status: available
+      security:
+        - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://test.com
+          scopes: {}
+x-wso2-auth-header: Authorization
+x-wso2-basePath: /v3/1.0.6
