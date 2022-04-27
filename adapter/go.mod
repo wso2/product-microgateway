@@ -2,8 +2,6 @@ module github.com/wso2/product-microgateway/adapter
 
 go 1.15
 
-replace golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
-
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v0.3.6
 	github.com/envoyproxy/go-control-plane v0.10.2-0.20211124143408-6141aee35516
@@ -29,6 +27,7 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
+	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e
 	google.golang.org/grpc v1.36.0
