@@ -313,6 +313,7 @@ var defaultConfig = &Config{
 	},
 	Analytics: analytics{
 		Enabled: false,
+		Type:    "",
 		Adapter: analyticsAdapter{
 			BufferFlushInterval: 1000000000,
 			BufferSizeBytes:     16384,

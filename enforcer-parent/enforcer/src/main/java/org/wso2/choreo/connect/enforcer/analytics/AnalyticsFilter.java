@@ -75,12 +75,17 @@ public class AnalyticsFilter {
             publisherConfig.put(entry.getKey(), getEnvValue(entry.getValue()).toString());
         }
 
-        boolean elkEnabled = configuration.containsKey(AnalyticsConstants.TYPE_CONFIG_KEY)
-                && configuration.get(AnalyticsConstants.TYPE_CONFIG_KEY)
-                        .toLowerCase().equals(AnalyticsConstants.ELK_TYPE);
-        if (elkEnabled && !configuration.containsKey(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY)) {
-            publisherConfig.put(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY,
-                    AnalyticsConstants.DEFAULT_ELK_PUBLISHER_REPORTER_CLASS);
+        boolean elkEnabled = AnalyticsConstants.ELK_TYPE
+                .equalsIgnoreCase(ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getType());
+        if (elkEnabled) {
+            // Remove Choreo pulisher related configs
+            publisherConfig.remove(AnalyticsConstants.AUTH_URL_CONFIG_KEY);
+            publisherConfig.remove(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY);
+            // Add default elk publisher class config
+            if (!configuration.containsKey(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY)) {
+                publisherConfig.put(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY,
+                        AnalyticsConstants.DEFAULT_ELK_PUBLISHER_REPORTER_CLASS);
+            }
         }
 
         publisher = loadAnalyticsPublisher(customAnalyticsPublisher, isChoreoDeployment);
