@@ -1393,5 +1393,8 @@ func getDefaultVersionBasepath(basePath string, version string) string {
 	// Following is used to replace only the version when basepath = /foo/v2 and version = v2 and context => /foo/v2/v2
 	indexOfVersionString := strings.LastIndex(basePath, "/"+version)
 	context := strings.Replace(basePath, "/"+version, "", indexOfVersionString)
+
+	// Having ?: in the regex below, avoids this regex acting as a capturing group. Without this the basepath
+	// would again be added in the locations of path variables when sending the request to backend.
 	return fmt.Sprintf("(?:%s|%s)", basePath, context)
 }
