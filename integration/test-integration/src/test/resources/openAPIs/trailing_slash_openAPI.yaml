@@ -6,7 +6,7 @@ servers:
   - url: http://mockBackend:2383/v2
 x-wso2-basePath: /trailing-slash
 paths:
-  /echo-full/findByStatus:
+  /echo-full/no-slash/findByStatus:
     get:
       summary: Info for a pet
       responses:
@@ -16,7 +16,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pet"
-  /echo-full/{petId}:
+  /echo-full/no-slash/{petId}:
     get:
       summary: Info for a specific pet
       parameters:
@@ -33,7 +33,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pet"
-  /echo-full/{id}/pet/{petId}:
+  /echo-full/no-slash/{id}/pet/{petId}:
+    get:
+      summary: Info for a specific pet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+  /echo-full/with-slash/findByStatus/:
+    get:
+      summary: Info for a pet
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+  /echo-full/with-slash/{petId}/:
+    get:
+      summary: Info for a specific pet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+  /echo-full/with-slash/{id}/pet/{petId}/:
     get:
       summary: Info for a specific pet
       parameters:
