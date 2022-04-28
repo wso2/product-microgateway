@@ -51,6 +51,10 @@ public class AllHttpMethodsForWildcardTestCase {
                 headers, jwtTokenProd);
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/","Request path mismatched");
 
+        EchoResponse echoResponse0 = Utils.invokeEchoGet(API_CONTEXT, "",
+                headers, jwtTokenProd);
+        Assert.assertEquals(echoResponse0.getPath(), "/v2/echo-full","Request path mismatched");
+
         EchoResponse echoResponse1 = Utils.invokeEchoGet(API_CONTEXT, "/test",
                 headers, jwtTokenProd);
         Assert.assertEquals(echoResponse1.getPath(), "/v2/echo-full/test","Request path mismatched");
@@ -61,6 +65,10 @@ public class AllHttpMethodsForWildcardTestCase {
         EchoResponse echoResponse = Utils.invokeEchoPost(API_CONTEXT, "/",
                 "Hello", headers, jwtTokenProd);
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/","Request path mismatched");
+
+        EchoResponse echoResponse0 = Utils.invokeEchoPost(API_CONTEXT, "",
+                "Hello", headers, jwtTokenProd);
+        Assert.assertEquals(echoResponse0.getPath(), "/v2/echo-full","Request path mismatched");
 
         EchoResponse echoResponse1 = Utils.invokeEchoPost(API_CONTEXT, "/test",
                 "Hello", headers, jwtTokenProd);

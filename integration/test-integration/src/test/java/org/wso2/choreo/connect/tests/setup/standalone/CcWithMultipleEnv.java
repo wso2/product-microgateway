@@ -48,18 +48,12 @@ public class CcWithMultipleEnv {
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
-        ApictlUtils.createProject( "all_http_methods_for_wildcard_openAPI.yaml",
-                "all_http_methods_for_wildcard_openAPI");
         ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore2", null,
                 "apictl_test_deploy_multiple_env.yaml", null, null);
-
-        ApictlUtils.addEnv("test");
-        ApictlUtils.login("test");
 
         ApictlUtils.addEnv("test2");
         ApictlUtils.login("test2");
 
-        ApictlUtils.deployAPI("all_http_methods_for_wildcard_openAPI", "test");
         ApictlUtils.deployAPI("apictl_petstore2", "test2");
 
         String endpoint = Utils.getServiceURLHttps(

@@ -41,6 +41,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.TrailingSlashTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.AllHttpMethodsForWildcardTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.BackendSecurityTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
@@ -94,7 +95,6 @@
     <test name="cc-with-multiple-env" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithMultipleEnv"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.AllHttpMethodsForWildcardTestCase"/>
         </classes>
     </test>
     <test name="cc-with-source-control" preserve-order="true" parallel="false">
