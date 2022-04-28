@@ -1390,6 +1390,8 @@ func getDefaultResourceMethods(apiType string) []string {
 }
 
 func getDefaultVersionBasepath(basePath string, version string) string {
-	context := strings.ReplaceAll(basePath, "/"+version, "")
+	// Following is used to replace only the version when basepath = /foo/v2 and version = v2 and context => /foo/v2/v2
+	indexOfVersionString := strings.LastIndex(basePath, "/"+version)
+	context := strings.Replace(basePath, "/"+version, "", indexOfVersionString)
 	return fmt.Sprintf("(?:%s|%s)", basePath, context)
 }
