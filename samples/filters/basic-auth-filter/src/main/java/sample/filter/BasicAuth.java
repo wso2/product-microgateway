@@ -21,11 +21,6 @@ package org.example.tests;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
-
-import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
-
 import java.util.Base64;
 import java.util.Map;
 
@@ -40,34 +35,33 @@ public class BasicAuth implements Filter {
     @Override
     public boolean handleRequest(RequestContext requestContext) {
         String headerName = configProperties.get("HeaderName");
-        if(headerName!=null){
+        if (headerName != null) {
             String basicauthHeader = requestContext.getHeaders().get(headerName);
-            if(basicauthHeader!=null){
+            if (basicauthHeader != null) {
                 String regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
-                if(basicauthHeader.matches(regex)){
+                if (basicauthHeader.matches(regex)) {
                     byte[] decodedHeader = Base64.getDecoder().decode(basicauthHeader);
-                    if(decodedHeader!=null){
+                    if (decodedHeader != null) {
                         String decodedString = new String(decodedHeader);
                         String[] basicauthArray = decodedString.split(":");
-                        if(basicauthArray.length==2){
+                        if (basicauthArray.length == 2) {
                             String headerUsername = basicauthArray[0];
                             String headerPassword = basicauthArray[1];
                             String username = configProperties.get("Username");
                             String password = configProperties.get("Password");
 
-                            if(password!=null && username!=null){
-                                if(username.equals(headerUsername) && password.equals(headerPassword)){
+                            if (password != null && username != null) {
+                                if (username.equals(headerUsername) && password.equals(headerPassword)) {
                                     return true;
                                 }
                             }
                         }
-                      }
                     }
                 }
             }
+        }
 
-        requestContext.getProperties()
-                .put(APIConstants.MessageFormat.STATUS_CODE, HttpResponseStatus.UNAUTHORIZED.code());
+        requestContext.getProperties().put("status_code", 401);
         return false;
     }
 }

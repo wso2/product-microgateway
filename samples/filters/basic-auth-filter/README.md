@@ -26,7 +26,7 @@ Update the config.toml.
 # ClassName of the filter
 className = "org.example.tests.BasicAuth"
 # Position of the filter within final filter-chain
-position = 3
+position = 1
 # Custom Configurations
 [enforcer.filters.configProperties]
 HeaderName = "basicauth"
