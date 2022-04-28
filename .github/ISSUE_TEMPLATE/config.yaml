@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+- name: '💬 Slack Channel'
+  url: 'https://apim-slack.wso2.com/'
+  about: |
+    Chat with the community to get quick clarifications for your questions.
+    
