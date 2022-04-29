@@ -26,7 +26,6 @@ choreo-connect-1.1.0
 │   │           │   ├── local-dc-client-consul-0-key.pem
 │   │           │   └── local-dc-client-consul-0.pem
 │   │           ├── controlplane.pem
-│   │           ├── global-adapter.pem
 │   │           └── mg.pem
 │   ├── Dockerfile
 │   ├── Dockerfile.ubuntu
