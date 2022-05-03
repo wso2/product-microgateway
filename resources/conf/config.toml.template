@@ -496,9 +496,9 @@ enabled = true
     [analytics.enforcer.configProperties]
       # Overrides default analytics publisher reporter class
       "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
-      # Authentication endpoint for Choreo Analytics Publishing (This is not used when tpye is "elk")
+      # Authentication endpoint for Choreo Analytics Publishing (This is not used when the type is "elk")
       authURL = "$env{analytics_authURL}"
-      # Authentication token for Choreo Analytics Publishing (This is not used when tpye is "elk")
+      # Authentication token for Choreo Analytics Publishing (This is not used when the type is "elk")
       authToken = "$env{analytics_authToken}"
 
     # gRPC access log service within Enforcer
