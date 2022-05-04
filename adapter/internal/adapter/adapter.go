@@ -27,6 +27,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/api"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
@@ -335,13 +336,15 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)
 
+	var queryParamMap map[string]string
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	// Get API details.
 	if apiUUIDList == nil {
 		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut)
+			sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut, queryParamMap)
 	} else {
 		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.APIArtifactEndpoint, true, apiUUIDList, requestTimeOut)
+			sync.APIArtifactEndpoint, true, apiUUIDList, requestTimeOut, queryParamMap)
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
@@ -376,7 +379,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			})
 			health.SetControlPlaneRestAPIStatus(false)
 			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)
+				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut, queryParamMap)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
