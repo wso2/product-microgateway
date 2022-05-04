@@ -218,20 +218,19 @@ func handleLifeCycleEvents(data []byte) {
 			apiEvent.APIName, apiEvent.APIVersion, apiEvent.TenantDomain)
 		return
 	}
-	// conf, _ := config.ReadConfigs()
-	// configuredEnvs := conf.ControlPlane.EnvironmentLabels
+	conf, _ := config.ReadConfigs()
+	configuredEnvs := conf.ControlPlane.EnvironmentLabels
 	logger.LoggerInternalMsg.Debugf("%s : %s API life cycle state change event is discarded", apiEvent.APIName, apiEvent.APIVersion)
 
-	// TODO: (VirajSalaka) Temporarily removed as API Blocked LC state change is ignored atm.
-	// if len(configuredEnvs) == 0 {
-	// 	configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
-	// }
-	// for _, configuredEnv := range configuredEnvs {
-	// 	xdsAPIList := xds.MarshalAPIForLifeCycleChangeEventAndReturnList(apiEvent.UUID, apiEvent.APIStatus, configuredEnv)
-	// 	if xdsAPIList != nil {
-	// 		xds.UpdateEnforcerAPIList(configuredEnv, xdsAPIList)
-	// 	}
-	// }
+	if len(configuredEnvs) == 0 {
+		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
+	}
+	for _, configuredEnv := range configuredEnvs {
+		xdsAPIList := xds.MarshalAPIForLifeCycleChangeEventAndReturnList(apiEvent.UUID, apiEvent.APIStatus, configuredEnv)
+		if xdsAPIList != nil {
+			xds.UpdateEnforcerAPIList(configuredEnv, xdsAPIList)
+		}
+	}
 }
 
 // handleApplicationEvents to process application related events

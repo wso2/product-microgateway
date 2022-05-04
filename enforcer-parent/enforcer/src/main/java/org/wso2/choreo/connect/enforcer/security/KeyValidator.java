@@ -25,8 +25,10 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
@@ -263,12 +265,14 @@ public class KeyValidator {
             infoDTO.setAuthorized(false);
             return;
         }
-        // TODO: (VirajSalaka) checking for blocked APIs implementation is temporarily removed.
-//        else if (APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
-//            infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
-//            infoDTO.setAuthorized(false);
-//            return;
-//        }
+        API apiFromSubscriptionDataStore = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore()
+                .getApiByContextAndVersion(apiConfig.getUuid());
+        if (apiFromSubscriptionDataStore != null &&
+                APIConstants.LifecycleStatus.BLOCKED.equals(apiFromSubscriptionDataStore.getLcState())) {
+            infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
+            infoDTO.setAuthorized(false);
+            return;
+        }
         infoDTO.setTier(sub.getPolicyId());
         infoDTO.setSubscriber(app.getSubName());
         infoDTO.setApplicationId(app.getId());

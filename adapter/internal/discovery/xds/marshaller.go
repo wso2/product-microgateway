@@ -529,9 +529,16 @@ func MarshalAPIForLifeCycleChangeEventAndReturnList(apiUUID, status, gatewayLabe
 		return nil
 	}
 	if _, ok := APIListMap[gatewayLabel][apiUUID]; !ok {
-		logger.LoggerXds.Debugf("No API Metadata for API ID: %s is available under gateway Environment : %s",
-			apiUUID, gatewayLabel)
-		return nil
+		// If the Lifecycle statue is not blocked, and the API is not included in the map, the APIListMap need not to be updated.
+		if status != blockedStatus {
+			return nil
+		}
+		logger.LoggerXds.Debugf("No API Metadata for API ID: %s is available under gateway Environment : %s. Hence"+
+			"a new record is added.", apiUUID, gatewayLabel)
+		APIListMap[gatewayLabel][apiUUID] = &subscription.APIs{
+			Uuid:    apiUUID,
+			LcState: status,
+		}
 	}
 	storedAPILCState := APIListMap[gatewayLabel][apiUUID].LcState
 
