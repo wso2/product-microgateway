@@ -202,19 +202,24 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	if !ok {
 		gatewayLabel = ""
 	}
-	if queryParamMap != nil && len(queryParamMap) > 0 {
-		q := req.URL.Query()
-		// Making necessary query parameters for the request
-		for queryParamKey, queryParamValue := range queryParamMap {
-			q.Add(queryParamKey, queryParamValue)
-		}
-		req.URL.RawQuery = q.Encode()
-	}
 	if err != nil {
 		c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
 		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
 		return
 	}
+	q := req.URL.Query()
+	conf, _ := config.ReadConfigs()
+	if conf.GlobalAdapter.Enabled {
+		q.Add("organizationId", "ALL")
+	}
+
+	if queryParamMap != nil && len(queryParamMap) > 0 {
+		// Making necessary query parameters for the request
+		for queryParamKey, queryParamValue := range queryParamMap {
+			q.Add(queryParamKey, queryParamValue)
+		}
+	}
+	req.URL.RawQuery = q.Encode()
 
 	// Check if TLS is enabled
 	skipSSL := conf.ControlPlane.SkipSSLVerification

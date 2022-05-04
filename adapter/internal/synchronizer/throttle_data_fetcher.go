@@ -84,6 +84,15 @@ func FetchThrottleData(endpoint string, c chan sync.SyncAPIResponse) {
 	skipSSL := ehConfigs.SkipSSLVerification
 
 	req, err := http.NewRequest("GET", ehURL, nil)
+	if err != nil {
+		logger.LoggerSync.Errorf("Error while creating http request for ThrottleData Endpoint : %v", err)
+	}
+
+	if conf.GlobalAdapter.Enabled {
+		q := req.URL.Query()
+		q.Add("organizationId", "ALL")
+		req.URL.RawQuery = q.Encode()
+	}
 	req.Header.Set(sync.Authorization, basicAuth)
 
 	logger.LoggerSync.Debug("Sending the throttle data request to Traffic Manager")

@@ -162,8 +162,13 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 
 	c := make(chan sync.SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
+	var queryParamMap map[string]string
+	if conf.GlobalAdapter.Enabled {
+		queryParamMap := make(map[string]string, 1)
+		queryParamMap["organizationId"] = "ALL"
+	}
 	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-		sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut)
+		sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut, queryParamMap)
 	for {
 		data := <-c
 		logger.LoggerSync.Debug("Receiving data for an environment")
@@ -182,7 +187,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)
+				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut, queryParamMap)
 		}
 	}
 

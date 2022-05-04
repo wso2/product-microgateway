@@ -73,6 +73,14 @@ func RetrieveTokens(c chan sync.SyncAPIResponse) {
 	logger.LoggerSync.Debugf("Fetching revoked tokens from the URL %v: ", ehURL)
 	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
+	if err != nil {
+		logger.LoggerSync.Errorf("Error while creating http request for Revoked Tokens Endpoint : %v", err)
+	}
+	if conf.GlobalAdapter.Enabled {
+		q := req.URL.Query()
+		q.Add("organizationId", "ALL")
+		req.URL.RawQuery = q.Encode()
+	}
 
 	// Setting authorization header
 	req.Header.Set(sync.Authorization, basicAuth)
