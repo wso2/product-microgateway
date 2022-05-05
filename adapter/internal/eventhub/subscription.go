@@ -29,6 +29,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
@@ -207,11 +208,8 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
 		return
 	}
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	q := req.URL.Query()
-	conf, _ := config.ReadConfigs()
-	if conf.GlobalAdapter.Enabled {
-		q.Add("organizationId", "ALL")
-	}
 
 	if queryParamMap != nil && len(queryParamMap) > 0 {
 		// Making necessary query parameters for the request

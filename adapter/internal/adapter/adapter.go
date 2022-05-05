@@ -27,6 +27,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/api"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
@@ -302,11 +303,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	c := make(chan sync.SyncAPIResponse)
 
 	var queryParamMap map[string]string
-	if conf.GlobalAdapter.Enabled {
-		queryParamMap := make(map[string]string, 1)
-		queryParamMap["organizationId"] = "ALL"
-	}
-
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	// Get API details.
 	if apiUUIDList == nil {
 		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,

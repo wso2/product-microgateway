@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 
@@ -163,10 +164,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	c := make(chan sync.SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
 	var queryParamMap map[string]string
-	if conf.GlobalAdapter.Enabled {
-		queryParamMap := make(map[string]string, 1)
-		queryParamMap["organizationId"] = "ALL"
-	}
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, serviceURL, userName, password, skipSSL, truststoreLocation,
 		sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut, queryParamMap)
 	for {
