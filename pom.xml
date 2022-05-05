@@ -226,11 +226,6 @@
                 <version>${swagger.v3.models.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.swagger.parser.v3</groupId>
-                <artifactId>swagger-parser</artifactId>
-                <version>${swagger.v3.parser.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.json.wso2</groupId>
                 <artifactId>json</artifactId>
                 <version>${org.json.version}</version>
@@ -513,6 +508,11 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${javax.validation.api.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -550,7 +550,6 @@
         <otel.version>1.6.0</otel.version>
         <shade.plugin.version>3.2.4</shade.plugin.version>
         <slf4j.version>1.7.21</slf4j.version>
-        <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
         <testcontainers.version>1.16.2</testcontainers.version>
         <ryuk.image.version>0.3.2</ryuk.image.version>
@@ -571,6 +570,7 @@
         <snakeyaml.version>1.26</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
+        <javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.13.2</jackson.annotations.version>
