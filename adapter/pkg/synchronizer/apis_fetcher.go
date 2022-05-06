@@ -60,9 +60,9 @@ const (
 // FetchAPIs pulls the API artifact calling to the API manager
 // API Manager returns a .zip file as a response and this function
 // returns a byte slice of that ZIP file.
-func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL string,
-	userName string, password string, skipSSL bool, truststoreLocation string,
-	resourceEndpoint string, sendType bool, apiUUIDList []string, requestTimeOut time.Duration) {
+func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL string, userName string,
+	password string, skipSSL bool, truststoreLocation string, resourceEndpoint string, sendType bool, apiUUIDList []string,
+	requestTimeOut time.Duration, queryParamMap map[string]string) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
 	respSyncAPI := SyncAPIResponse{}
 	var (
@@ -128,6 +128,13 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	}
 	// Making necessary query parameters for the request
 	q := req.URL.Query()
+
+	if queryParamMap != nil && len(queryParamMap) > 0 {
+		// Making necessary query parameters for the request
+		for queryParamKey, queryParamValue := range queryParamMap {
+			q.Add(queryParamKey, queryParamValue)
+		}
+	}
 
 	// If an API ID is present, make a query parameter
 	if id != nil {
@@ -199,7 +206,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 // RetryFetchingAPIs function keeps retrying to fetch APIs from runtime-artifact endpoint.
 func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName string, password string, skipSSL bool,
 	truststoreLocation string, retryInterval time.Duration, data SyncAPIResponse, endpoint string, sendType bool,
-	requestTimeOut time.Duration) {
+	requestTimeOut time.Duration, queryParamMap map[string]string) {
 	go func(d SyncAPIResponse) {
 		// Retry fetching from control plane after a configured time interval
 		if retryInterval == 0 {
@@ -210,7 +217,7 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName strin
 		time.Sleep(retryInterval * time.Second)
 		logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
 		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-			endpoint, sendType, nil, requestTimeOut)
+			endpoint, sendType, nil, requestTimeOut, queryParamMap)
 	}(data)
 }
 
