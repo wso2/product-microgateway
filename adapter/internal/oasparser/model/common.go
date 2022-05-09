@@ -143,7 +143,7 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
+		logger.LoggerOasparser.Debugf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
 		return nil, err
 	}
 

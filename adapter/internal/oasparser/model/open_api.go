@@ -92,7 +92,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 				productionUrls = append(productionUrls, *endpoint)
 				swagger.xWso2Basepath = endpoint.Basepath
 			} else {
-				logger.LoggerOasparser.Errorf("error encountered when parsing the endpoint under openAPI servers object")
+				logger.LoggerOasparser.Error("Error encountered when parsing the endpoint under openAPI servers object ", err)
 			}
 		}
 		if len(productionUrls) > 0 {
@@ -159,7 +159,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 						productionUrls = append(productionUrls, *endpoint)
 
 					} else {
-						logger.LoggerOasparser.Errorf("error encountered when parsing the endpoint under openAPI servers object")
+						logger.LoggerOasparser.Error("Error encountered when parsing the endpoint under openAPI servers object ", err)
 					}
 
 				}
