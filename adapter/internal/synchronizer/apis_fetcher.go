@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 
@@ -162,7 +163,9 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 
 	c := make(chan sync.SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
-	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, sync.RuntimeArtifactEndpoint, true, nil)
+	var queryParamMap map[string]string
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
+	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 	for {
 		data := <-c
 		logger.LoggerSync.Debug("Receiving data for an environment")
@@ -180,7 +183,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
-			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true)
+			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
 		}
 	}
 }

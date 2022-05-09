@@ -27,6 +27,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/api"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
@@ -294,11 +295,13 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)
 
+	var queryParamMap map[string]string
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	// Get API details.
 	if apiUUIDList == nil {
-		adapter.GetAPIs(c, nil, envs, sync.RuntimeArtifactEndpoint, true, nil)
+		adapter.GetAPIs(c, nil, envs, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 	} else {
-		adapter.GetAPIs(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList)
+		adapter.GetAPIs(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList, queryParamMap)
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
@@ -320,7 +323,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
-			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true)
+			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.

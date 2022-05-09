@@ -23,14 +23,15 @@ import (
 )
 
 // GetAPIs function calls the FetchAPIs() with relevant environment labels defined in the config.
-func GetAPIs(c chan synchronizer.SyncAPIResponse, id *string, envs []string, endpoint string, sendType bool, apiUUIDList []string) {
+func GetAPIs(c chan synchronizer.SyncAPIResponse, id *string, envs []string, endpoint string, sendType bool, apiUUIDList []string,
+	queryParamMap map[string]string) {
 	if len(envs) > 0 {
 		// If the envrionment labels are present, call the controle plane with labels.
 		logger.LoggerAdapter.Debugf("Environments label present: %v", envs)
-		go synchronizer.FetchAPIs(id, envs, c, endpoint, sendType, apiUUIDList)
+		go synchronizer.FetchAPIs(id, envs, c, endpoint, sendType, apiUUIDList, queryParamMap)
 	} else {
 		// If the environments are not give, fetch the APIs from default envrionment
 		logger.LoggerAdapter.Debug("Environments label  NOT present.")
-		go synchronizer.FetchAPIs(id, nil, c, endpoint, sendType, apiUUIDList)
+		go synchronizer.FetchAPIs(id, nil, c, endpoint, sendType, apiUUIDList, queryParamMap)
 	}
 }

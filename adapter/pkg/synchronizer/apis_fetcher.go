@@ -58,14 +58,16 @@ const (
 // FetchAPIs pulls the API artifact calling to the API manager
 // API Manager returns a .zip file as a response and this function
 // returns a byte slice of that ZIP file.
-func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, resourceEndpoint string, sendType bool, apiUUIDList []string) {
+func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, resourceEndpoint string, sendType bool,
+	apiUUIDList []string, queryParamMap map[string]string) {
 	if id != nil {
 		logger.LoggerSync.Infof("Fetching API from Control Plane for Id %q.", *id)
 	} else {
 		logger.LoggerSync.Info("Fetching APIs from Control Plane")
 	}
 
-	req := ConstructControlPlaneRequest(id, gwLabel, workerPool.controlPlaneParams, resourceEndpoint, sendType, apiUUIDList)
+	req := ConstructControlPlaneRequest(id, gwLabel, workerPool.controlPlaneParams, resourceEndpoint, sendType, apiUUIDList,
+		queryParamMap)
 	workerReq := workerRequest{
 		Req:                *req,
 		APIUUID:            id,
@@ -140,7 +142,7 @@ func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []stri
 
 // ConstructControlPlaneRequest constructs the http Request used to send to the control plane
 func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlaneParams controlPlaneParameters,
-	resourceEndpoint string, sendType bool, apiUUIDList []string) *http.Request {
+	resourceEndpoint string, sendType bool, apiUUIDList []string, queryParamMap map[string]string) *http.Request {
 	var (
 		req      *http.Request
 		err      error
@@ -186,6 +188,13 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 	// Making necessary query parameters for the request
 	q := req.URL.Query()
 
+	if queryParamMap != nil && len(queryParamMap) > 0 {
+		// Making necessary query parameters for the request
+		for queryParamKey, queryParamValue := range queryParamMap {
+			q.Add(queryParamKey, queryParamValue)
+		}
+	}
+
 	// If an API ID is present, make a query parameter
 	if id != nil {
 		logger.LoggerSync.Debugf("API ID: %v", *id)
@@ -215,7 +224,8 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 }
 
 // RetryFetchingAPIs function keeps retrying to fetch APIs from runtime-artifact endpoint.
-func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint string, sendType bool) {
+func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint string, sendType bool,
+	queryParamMap map[string]string) {
 	retryInterval := workerPool.controlPlaneParams.retryInterval
 	go func(d SyncAPIResponse) {
 		// Retry fetching from control plane after a configured time interval
@@ -226,7 +236,7 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint st
 		logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
 		time.Sleep(retryInterval * time.Second)
 		logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
-		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, endpoint, sendType, nil)
+		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, endpoint, sendType, nil, queryParamMap)
 	}(data)
 }
 
