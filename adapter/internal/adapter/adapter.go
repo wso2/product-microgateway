@@ -272,7 +272,7 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
 	} else {
-		if conf.Adapter.SourceControl.Enabled{
+		if conf.Adapter.SourceControl.Enabled {
 			err := sourcewatcher.Start()
 			if err != nil {
 				logger.LoggerMgw.ErrorC(logging.ErrorDetails{
@@ -284,7 +284,7 @@ func Run(conf *config.Config) {
 			}
 		} else {
 			_, err := api.ProcessMountedAPIProjects()
-		  	if err != nil {
+			if err != nil {
 				logger.LoggerMgw.ErrorC(logging.ErrorDetails{
 					Message:   fmt.Sprintf("Readiness probe is not set as local api artifacts processing has failed. %v", err.Error()),
 					Severity:  logging.CRITICAL,
@@ -323,25 +323,17 @@ OUTER:
 // to the router and enforcer components.
 func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Populate data from config.
-	serviceURL := conf.ControlPlane.ServiceURL
-	userName := conf.ControlPlane.Username
-	password := conf.ControlPlane.Password
 	envs := conf.ControlPlane.EnvironmentLabels
-	skipSSL := conf.ControlPlane.SkipSSLVerification
-	retryInterval := conf.ControlPlane.RetryInterval
-	truststoreLocation := conf.Adapter.Truststore.Location
-	requestTimeOut := conf.ControlPlane.HTTPClient.RequestTimeOut
 
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)
 
+	var queryParamMap map[string]string
 	// Get API details.
 	if apiUUIDList == nil {
-		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.RuntimeArtifactEndpoint, true, nil, requestTimeOut)
+		adapter.GetAPIs(c, nil, envs, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 	} else {
-		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.APIArtifactEndpoint, true, apiUUIDList, requestTimeOut)
+		adapter.GetAPIs(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList, queryParamMap)
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
@@ -375,8 +367,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 				ErrorCode: 1107,
 			})
 			health.SetControlPlaneRestAPIStatus(false)
-			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true, requestTimeOut)
+			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
