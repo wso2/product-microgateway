@@ -47,9 +47,9 @@ const (
 func init() {
 	conf, _ := config.ReadConfigs()
 	sync.InitializeWorkerPool(conf.ControlPlane.RequestWorkerPool.PoolSize, conf.ControlPlane.RequestWorkerPool.QueueSizePerPool,
-		conf.ControlPlane.RetryInterval, conf.Adapter.Truststore.Location, conf.ControlPlane.SkipSSLVerification,
-		conf.ControlPlane.HTTPClient.RequestTimeOut, conf.ControlPlane.RetryInterval, conf.ControlPlane.ServiceURL,
-		conf.ControlPlane.Username, conf.ControlPlane.Password)
+		conf.ControlPlane.RequestWorkerPool.PauseTimeAfterFailure, conf.Adapter.Truststore.Location,
+		conf.ControlPlane.SkipSSLVerification, conf.ControlPlane.HTTPClient.RequestTimeOut, conf.ControlPlane.RetryInterval,
+		conf.ControlPlane.ServiceURL, conf.ControlPlane.Username, conf.ControlPlane.Password)
 }
 
 // PushAPIProjects configure the router and enforcer using the zip containing API project(s) as
@@ -168,21 +168,21 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 	for {
 		data := <-c
-		logger.LoggerSync.Debug("Receiving data for an environment")
+		logger.LoggerSync.Debug("Receiving data for the API: %q", updatedAPIID)
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
-			logger.LoggerSync.Info("Pushing data to router and enforcer")
+			logger.LoggerSync.Infof("Pushing data to router and enforcer for the API %q", updatedAPIID)
 			err := PushAPIProjects(data.Resp, finalEnvs)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error occurred while pushing API data: %v ", err)
+				logger.LoggerSync.Errorf("Error occurred while pushing API data for the API %q: %v ", updatedAPIID, err)
 			}
 			break
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-			logger.LoggerSync.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Error occurred when retrieving API %q from control plane: %v", updatedAPIID, data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
-			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane for the API %q: %v. Retrying again.", updatedAPIID, data.Err)
 			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
 		}
 	}

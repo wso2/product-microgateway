@@ -289,8 +289,9 @@ var defaultConfig = &Config{
 			RequestTimeOut: 30,
 		},
 		RequestWorkerPool: requestWorkerPool{
-			PoolSize:         4,
-			QueueSizePerPool: 1000,
+			PoolSize:              4,
+			QueueSizePerPool:      1000,
+			PauseTimeAfterFailure: 5,
 		},
 	},
 	GlobalAdapter: globalAdapter{

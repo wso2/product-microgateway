@@ -49,11 +49,8 @@ type workerRequest struct {
 
 // pool is the worker pool which is handling
 type pool struct {
-	// TODO: (VirajSalaka) remove timeout
 	internalQueue      chan workerRequest
 	workers            []*worker
-	quit               chan bool
-	timeout            time.Duration
 	client             http.Client
 	controlPlaneParams controlPlaneParameters
 }
@@ -89,7 +86,6 @@ var (
 // delayForFaultRequests indicate the delay a worker enforce (in seconds) when a fault response is received.
 func InitializeWorkerPool(maxWorkers, jobQueueCapacity int, delayForFaultRequests time.Duration, trustStoreLocation string,
 	skipSSL bool, requestTimeout, retryInterval time.Duration, serviceURL, username, password string) {
-	// TODO: (VirajSalaka) Think on whether this could be moved to global adapter seamlessly.
 	oncePoolInitiated.Do(func() {
 		workerPool = newWorkerPool(maxWorkers, jobQueueCapacity, delayForFaultRequests)
 		workerPool.controlPlaneParams = controlPlaneParameters{
@@ -142,7 +138,6 @@ func newWorkerPool(maxWorkers, jobQueueCapacity int, delayForFaultRequests time.
 	return &pool{
 		internalQueue: requestChannel,
 		workers:       workers,
-		quit:          make(chan bool),
 	}
 }
 
@@ -159,30 +154,6 @@ func (q *pool) Enqueue(req workerRequest) bool {
 	case q.internalQueue <- req:
 		return true
 	default:
-		return false
-	}
-}
-
-// EnqueueWithTimeout Tries to enqueue but fails if queue becomes not vacant within the defined period of time.
-func (q *pool) EnqueueWithTimeout(req workerRequest) bool {
-	// TODO: (VirajSalaka) Remove this
-	timeout := q.timeout
-	if timeout <= 0 {
-		timeout = 1 * time.Second
-	}
-
-	ch := make(chan bool, 1)
-	t := time.AfterFunc(timeout, func() {
-		ch <- false
-	})
-	defer func() {
-		t.Stop()
-	}()
-
-	select {
-	case q.internalQueue <- req:
-		return true
-	case <-ch:
 		return false
 	}
 }

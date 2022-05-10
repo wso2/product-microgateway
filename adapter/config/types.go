@@ -432,8 +432,9 @@ type controlPlane struct {
 }
 
 type requestWorkerPool struct {
-	PoolSize         int
-	QueueSizePerPool int
+	PoolSize              int
+	QueueSizePerPool      int
+	PauseTimeAfterFailure time.Duration
 }
 
 type globalAdapter struct {

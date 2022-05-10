@@ -162,8 +162,6 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 	}
 	logger.LoggerSync.Debugf("Fetching APIs from the URL %v: ", serviceURL)
 
-	basicAuth := "Basic " + auth.GetBasicAuth(userName, password)
-
 	// Populating the payload body with API UUID list
 	if apiUUIDList != nil {
 		body := postData{
@@ -196,14 +194,11 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 
 	// If an API ID is present, make a query parameter
 	if id != nil {
-		logger.LoggerSync.Debugf("API ID: %v", *id)
-		// respSyncAPI.APIUUID = *id
 		q.Add(apiID, *id)
 	}
 	// If the gateway label is present, make a query parameter
 	if len(gwLabel) > 0 {
 		logger.LoggerSync.Debugf("Gateway Label: %v", gwLabel)
-		// respSyncAPI.GatewayLabels = gwLabel
 		gatewaysQStr := strings.Join(gwLabel, "|")
 		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(gatewaysQStr)))
 	}
@@ -213,7 +208,9 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 		q.Add(gwType, envoy)
 	}
 	req.URL.RawQuery = q.Encode()
+
 	// Setting authorization header
+	basicAuth := "Basic " + auth.GetBasicAuth(userName, password)
 	req.Header.Set(Authorization, basicAuth)
 	// If API UUID list is present, set the content-type header
 	if apiUUIDList != nil {
@@ -226,17 +223,17 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint string, sendType bool,
 	queryParamMap map[string]string) {
 	retryInterval := workerPool.controlPlaneParams.retryInterval
-	go func(d SyncAPIResponse) {
-		// Retry fetching from control plane after a configured time interval
-		if retryInterval == 0 {
-			// Assign default retry interval
-			retryInterval = 5
-		}
-		logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
-		time.Sleep(retryInterval * time.Second)
-		logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
-		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, endpoint, sendType, nil, queryParamMap)
-	}(data)
+
+	// Retry fetching from control plane after a configured time interval
+	if retryInterval == 0 {
+		// Assign default retry interval
+		retryInterval = 5
+	}
+	logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
+	time.Sleep(retryInterval * time.Second)
+	logger.LoggerSync.Infof("Retrying to fetch API data from control plane for the API %q.", data.APIUUID)
+	FetchAPIs(&data.APIUUID, data.GatewayLabels, c, endpoint, sendType, nil, queryParamMap)
+
 }
 
 // ReadRootFiles function reads following files inside the root zip
