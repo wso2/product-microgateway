@@ -55,9 +55,8 @@ const (
 	httpTimeout time.Duration = 30
 )
 
-// FetchAPIs pulls the API artifact calling to the API manager
-// API Manager returns a .zip file as a response and this function
-// returns a byte slice of that ZIP file.
+// FetchAPIs submits the control plane http request to the thread pool. The thread pool would process it and return
+// the http response to the channel which contains a zip file.
 func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, resourceEndpoint string, sendType bool,
 	apiUUIDList []string, queryParamMap map[string]string) {
 	if id != nil {
@@ -89,7 +88,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, resourceEnd
 func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []string, c chan SyncAPIResponse,
 	client *http.Client) bool {
 	// Make the request
-	logger.LoggerSync.Debug("Sending the controle plane request")
+	logger.LoggerSync.Debug("Sending the control plane request")
 	resp, err := client.Do(req)
 
 	respSyncAPI := SyncAPIResponse{}

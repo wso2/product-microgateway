@@ -1,4 +1,20 @@
 /*
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+/*
  * Package "synchronizer" contains artifacts relate to fetching APIs and
  * API related updates from the control plane event-hub.
  * This file contains functions to retrieve APIs and API updates.
@@ -21,12 +37,9 @@ type worker struct {
 	internalQueue   <-chan workerRequest
 	processFunc     processHTTPRequest
 	delayAfterFault time.Duration
-	// done          *sync.WaitGroup
-	// work          chan Work
-	// quit          chan bool
 }
 
-// WorkerRequest is the task which can be submitted to the pool.
+// workerRequest is the task which can be submitted to the pool.
 type workerRequest struct {
 	Req                http.Request
 	APIUUID            *string
@@ -74,7 +87,6 @@ var (
 // maxWorkers indicate the maximum number of parallel workers sending requests to the control plane.
 // jobQueueCapacity indicate the maximum number of requests can kept inside a single worker's queue.
 // delayForFaultRequests indicate the delay a worker enforce (in seconds) when a fault response is received.
-// TODO: (VirajSalaka) comment
 func InitializeWorkerPool(maxWorkers, jobQueueCapacity int, delayForFaultRequests time.Duration, trustStoreLocation string,
 	skipSSL bool, requestTimeout, retryInterval time.Duration, serviceURL, username, password string) {
 	// TODO: (VirajSalaka) Think on whether this could be moved to global adapter seamlessly.
