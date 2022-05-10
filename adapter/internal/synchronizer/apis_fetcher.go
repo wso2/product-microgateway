@@ -168,7 +168,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 	for {
 		data := <-c
-		logger.LoggerSync.Debug("Receiving data for the API: %q", updatedAPIID)
+		logger.LoggerSync.Debugf("Receiving data for the API: %q", updatedAPIID)
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerSync.Infof("Pushing data to router and enforcer for the API %q", updatedAPIID)

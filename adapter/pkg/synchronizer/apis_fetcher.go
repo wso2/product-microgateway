@@ -232,6 +232,8 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint st
 	logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
 	time.Sleep(retryInterval * time.Second)
 	logger.LoggerSync.Infof("Retrying to fetch API data from control plane for the API %q.", data.APIUUID)
+	channelFillPercentage := float64(len(workerPool.internalQueue)) / float64(cap(workerPool.internalQueue)) * 100
+	logger.LoggerSync.Infof("Workerpool channel size as a percentage is : %f", channelFillPercentage)
 	FetchAPIs(&data.APIUUID, data.GatewayLabels, c, endpoint, sendType, nil, queryParamMap)
 
 }

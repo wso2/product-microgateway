@@ -143,13 +143,6 @@ func newWorkerPool(maxWorkers, jobQueueCapacity int, delayForFaultRequests time.
 
 // Enqueue Tries to enqueue but fails if queue is full
 func (q *pool) Enqueue(req workerRequest) bool {
-	if len(q.internalQueue) > cap(q.internalQueue)/10*8 {
-		loggers.LoggerSync.Errorf("Queue size for worker pool is at %d."+
-			"Please check the reason for control plane request failures", len(q.internalQueue))
-	} else if len(q.internalQueue) > cap(q.internalQueue)/10*5 {
-		loggers.LoggerSync.Warnf("Queue size for worker pool is at %d."+
-			"Please check the reason for control plane request failures", len(q.internalQueue))
-	}
 	select {
 	case q.internalQueue <- req:
 		return true
