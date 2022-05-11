@@ -182,7 +182,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 			health.SetControlPlaneRestAPIStatus(false)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
-			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane for the API %q: %v. Retrying again.", updatedAPIID, data.Err)
+			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane for the API %q: %v. Hence retrying..", updatedAPIID, data.Err)
 			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
 		}
 	}
