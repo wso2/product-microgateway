@@ -22,11 +22,18 @@ import (
 	"fmt"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds/common"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 const instanceIdentifierKey string = "instanceIdentifier"
+
+var nodeQueueInstance *common.NodeQueue
+
+func init() {
+	nodeQueueInstance = common.GenerateNodeQueue()
+}
 
 // Callbacks is used to debug the xds server related communication.
 type Callbacks struct {
@@ -49,6 +56,10 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	nodeIdentifier := getNodeIdentifier(request)
+	if common.IsNewNode(nodeQueueInstance, nodeIdentifier) {
+		logger.LoggerEnforcerXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s",
+			id, nodeIdentifier, request.VersionInfo)
+	}
 	logger.LoggerEnforcerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
 		id, nodeIdentifier, request.GetVersionInfo(), request.GetTypeUrl())
 	if request.ErrorDetail != nil {
