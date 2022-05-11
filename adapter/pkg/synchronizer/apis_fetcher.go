@@ -88,7 +88,11 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, resourceEnd
 func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []string, c chan SyncAPIResponse,
 	client *http.Client) bool {
 	// Make the request
-	logger.LoggerSync.Debug("Sending the control plane request")
+	if apiID != nil {
+		logger.LoggerSync.Debugf("Sending the control plane request for the API: %q", *apiID)
+	} else {
+		logger.LoggerSync.Debug("Sending the control plane request")
+	}
 	resp, err := client.Do(req)
 
 	respSyncAPI := SyncAPIResponse{}
@@ -131,7 +135,7 @@ func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []stri
 	}
 	// If the response is not successful, create a new error with the response and log it and return
 	// Ex: for 401 scenarios, 403 scenarios.
-	logger.LoggerSync.Errorf("Failure response: %v", string(respBytes))
+	logger.LoggerSync.Errorf("Failure response from control plane: %v", string(respBytes))
 	respSyncAPI.Err = errors.New(string(respBytes))
 	respSyncAPI.Resp = nil
 	respSyncAPI.ErrorCode = resp.StatusCode
