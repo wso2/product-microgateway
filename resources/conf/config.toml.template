@@ -481,8 +481,11 @@ enabled = true
 [analytics]
   # Enable/Disable Analytics in Choreo Connect
   enabled = false
-  # Enables elk analytics, if the type remains unassigned, choreo analytics will enabled
-  type = "elk"
+  type = "Default"
+  
+  # Use following type to enable ELK analytics
+  # type = "ELK"
+
   [analytics.adapter]
     # Buffer flush interval for gRPC access log client in Router
     bufferFlushInterval = "1s"
@@ -495,7 +498,7 @@ enabled = true
   [analytics.enforcer]
     [analytics.enforcer.configProperties]
       # Overrides default analytics publisher reporter class
-      "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
+      # "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
       # Authentication endpoint for Choreo Analytics Publishing (This is not used when the type is "elk")
       authURL = "$env{analytics_authURL}"
       # Authentication token for Choreo Analytics Publishing (This is not used when the type is "elk")
