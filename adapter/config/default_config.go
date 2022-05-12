@@ -285,6 +285,7 @@ var defaultConfig = &Config{
 			ReconnectInterval:       5000, //in milli seconds
 			ReconnectRetryCount:     60,
 		},
+		SendRevisionUpdate: false,
 		HTTPClient: httpClient{
 			RequestTimeOut: 30,
 		},

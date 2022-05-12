@@ -418,6 +418,8 @@ enabled = true
   retryInterval = 5
   # Skip SSL verification
   skipSSLVerification = false
+  # Send revision update success message
+  sendRevisionUpdate = false
   # Message broker connection URL of the control plane
   [controlPlane.brokerConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
