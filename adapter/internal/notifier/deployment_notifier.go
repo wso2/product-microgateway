@@ -42,19 +42,20 @@ func UpdateDeployedRevisions(apiID string, revisionID int, envs []string, vhost 
 
 //SendRevisionUpdate sends deployment status to the control plane
 func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
-	logger.LoggerNotifier.Debugf("Revision deployed message is sending to Control plane")
 	conf, _ := config.ReadConfigs()
 	cpConfigs := conf.ControlPlane
+
+	if len(deployedRevisionList) < 1 || !cpConfigs.Enabled || !cpConfigs.SendRevisionUpdate {
+		return
+	}
+
+	logger.LoggerNotifier.Debugf("Revision deployed message is sending to Control plane")
 
 	revisionEP := cpConfigs.ServiceURL
 	if strings.HasSuffix(revisionEP, "/") {
 		revisionEP += deployedRevisionEP
 	} else {
 		revisionEP += "/" + deployedRevisionEP
-	}
-
-	if len(deployedRevisionList) < 1 || !cpConfigs.Enabled {
-		return
 	}
 
 	jsonValue, _ := json.Marshal(deployedRevisionList)
@@ -102,7 +103,7 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment string) {
 	conf, _ := config.ReadConfigs()
 	cpConfigs := conf.ControlPlane
-	if apiUUID == "" || revisionUUID == "" || environment == "" || !cpConfigs.Enabled {
+	if apiUUID == "" || revisionUUID == "" || environment == "" || !cpConfigs.Enabled || !cpConfigs.SendRevisionUpdate {
 		return
 	}
 	revisionEP := cpConfigs.ServiceURL

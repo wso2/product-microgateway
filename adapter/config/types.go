@@ -457,6 +457,7 @@ type controlPlane struct {
 	Username                   string
 	Password                   string
 	SyncApisOnStartUp          bool
+	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
