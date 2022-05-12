@@ -92,7 +92,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 				productionUrls = append(productionUrls, *endpoint)
 				swagger.xWso2Basepath = endpoint.Basepath
 			} else {
-				logger.LoggerOasparser.Info("Parsing the endpoint under openAPI servers object has failed. ", err)
+				logger.LoggerOasparser.Info("Not considering the URL in servers object as parsing has failed. ", err)
 			}
 		}
 		if len(productionUrls) > 0 {
@@ -159,11 +159,11 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 						productionUrls = append(productionUrls, *endpoint)
 
 					} else {
-						logger.LoggerOasparser.Info("Parsing the endpoint under openAPI servers object has failed. ", err)
+						logger.LoggerOasparser.Info("Not considering the URL in servers object as parsing has failed. ", err)
 					}
 
 				}
-				if productionUrls != nil && len(productionUrls) > 0 {
+				if len(productionUrls) > 0 {
 					resource.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
 				}
 			}
