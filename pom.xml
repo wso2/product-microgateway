@@ -519,6 +519,18 @@
                 <artifactId>validation-api</artifactId>
                 <version>${javax.validation.api.version}</version>
             </dependency>
+            <!-- upgrades apache tomcat annotations version used for jaeger tracing -->
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-annotations-api</artifactId>
+                <version>${apache.tomcat.annotations.version}</version>
+            </dependency>
+            <!-- upgrades apache tomcat embed core version used for jaeger tracing -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${apache.tomcat.embed.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -536,11 +548,13 @@
         <grpc.netty.shaded.version>1.45.1</grpc.netty.shaded.version>
         <grpc.protobuf.version>1.45.1</grpc.protobuf.version>
         <grpc.stub.version>1.45.1</grpc.stub.version>
-        <gson.version>2.8.6</gson.version>
+        <gson.version>2.8.9</gson.version>
         <guava.version>30.0-jre</guava.version>
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
         <io.netty.version>4.1.71.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
+        <apache.tomcat.annotations.version>10.0.20</apache.tomcat.annotations.version>
+        <apache.tomcat.embed.version>10.0.20</apache.tomcat.embed.version>
         <java.websocket.version>1.5.1</java.websocket.version>
         <json.smart.version>2.4.7</json.smart.version>
         <junit.version>4.13.2</junit.version>
@@ -562,7 +576,7 @@
         <testng.version>6.11</testng.version>
         <tomcat.annotations.api.version>6.0.53</tomcat.annotations.api.version>
         <toml4j.version>0.7.2</toml4j.version>
-        <analytics.common.version>6.1.45</analytics.common.version>
+        <analytics.common.version>6.1.59</analytics.common.version>
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
