@@ -18,6 +18,8 @@
 
 package org.wso2.choreo.connect.tests.util;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
@@ -27,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.wso2.choreo.connect.mockbackend.Constants;
+import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.yaml.snakeyaml.Yaml;
 
@@ -305,7 +308,94 @@ public class Utils {
         Assert.assertEquals(responseCode, response.getResponseCode(), "Response code mismatched");
     }
 
+    /**
+     * Invoke with GET and return exacted response as an EchoResponse from /echo-full endpoint.
+     *
+     * @param basePath      Context of the API
+     * @param resourcePath  Resource to be invoked
+     * @param headers       Headers to include in the request
+     * @param jwtToken      Access token to include in the authorization header
+     * @return exacted response as an EchoResponse
+     * @throws Exception if an error occurs when invoking the API or extracting the response
+     */
+    public static EchoResponse invokeEchoGet(String basePath, String resourcePath,
+                                             Map<String, String> headers, String jwtToken) throws Exception {
+        HttpResponse response = invokeGet(basePath, resourcePath, headers, jwtToken);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        return new Gson().fromJson(response.getData(), EchoResponse.class);
+    }
 
+    /**
+     * Invoke with POST and return exacted response as an EchoResponse from /echo-full endpoint.
+     *
+     * @param basePath      Context of the API
+     * @param resourcePath  Resource to be invoked
+     * @param payload       Payload for the POST request
+     * @param headers       Headers to include in the request
+     * @param jwtToken      Access token to include in the authorization header
+     * @return exacted response as an EchoResponse
+     * @throws Exception if an error occurs when invoking the API or extracting the response
+     */
+    public static EchoResponse invokeEchoPost(String basePath, String resourcePath, String payload,
+                                              Map<String, String> headers, String jwtToken) throws Exception {
+        HttpResponse response = invokePost(basePath, resourcePath, payload, headers, jwtToken);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        return new Gson().fromJson(response.getData(), EchoResponse.class);
+    }
+
+    /**
+     * Extract the HttpResponse payload received after calling the endpoint /echo-full
+     * into an EchoResponse object and return.
+     *
+     * @param response a HttpResponse
+     * @return extracted EchoResponse
+     */
+    public static EchoResponse extractToEchoResponse(HttpResponse response) {
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        return new Gson().fromJson(response.getData(), EchoResponse.class);
+    }
+
+    public static EchoResponse extractToEchoResponse(java.net.http.HttpResponse<String> response) {
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.statusCode(), HttpStatus.SC_OK, "Response code mismatched");
+        return new Gson().fromJson(response.body(), EchoResponse.class);
+    }
+
+    /**
+     * Send a GET request with provided headers and an authorization bearer token.
+     *
+     * @param basePath      Context of the API
+     * @param resourcePath  Resource to be invoked
+     * @param headers       Headers to include in the request
+     * @param jwtToken      Access token to include in the authorization header
+     * @return HttpResponse
+     * @throws Exception if an error occurs when invoking the API
+     */
+    public static HttpResponse invokeGet(String basePath, String resourcePath,
+                                          Map<String, String> headers, String jwtToken) throws Exception {
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
+        return HttpsClientRequest.doGet(Utils.getServiceURLHttps(basePath + resourcePath), headers);
+    }
+
+    /**
+     * Send a POST request with provided headers and an authorization bearer token.
+     *
+     * @param basePath      Context of the API
+     * @param resourcePath  Resource to be invoked
+     * @param payload       Payload for the POST request
+     * @param headers       Headers to include in the request
+     * @param jwtToken      Access token to include in the authorization header
+     * @return HttpResponse
+     * @throws Exception if an error occurs when invoking the API
+     */
+    public static HttpResponse invokePost(String basePath, String resourcePath, String payload,
+                                           Map<String, String> headers, String jwtToken) throws Exception {
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
+        return HttpsClientRequest.doPost(Utils.getServiceURLHttps(basePath + resourcePath), payload, headers);
+    }
 
     /**
      * Delay the program for a given time period

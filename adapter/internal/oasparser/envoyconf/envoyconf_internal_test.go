@@ -156,9 +156,8 @@ func TestCreateRoute(t *testing.T) {
 	generatedRouteWithDefaultVersion := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, context, version,
 		endpoint.Basepath, resourceWithGetPost.GetPath(), resourceWithGetPost.GetMethodList(), clusterName, "", nil, true))
 	assert.NotNil(t, generatedRouteWithDefaultVersion, "Route should not be null")
-	assert.True(t, strings.HasPrefix(generatedRouteWithDefaultVersion.GetMatch().GetSafeRegex().Regex, fmt.Sprintf("^(%s|%s)", context, xWso2BasePath)),
+	assert.True(t, strings.HasPrefix(generatedRouteWithDefaultVersion.GetMatch().GetSafeRegex().Regex, fmt.Sprintf("^(?:%s|%s)", context, xWso2BasePath)),
 		"Default version basepath is not generated correctly")
-
 }
 
 func TestCreateRouteClusterSpecifier(t *testing.T) {
