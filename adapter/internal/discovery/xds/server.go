@@ -274,12 +274,14 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
 	if err != nil {
+		logger.LoggerXds.Error("Error while populating swagger from api.yaml. ", err)
 		return nil, err
 	}
 
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
 		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
+			logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)
 			return nil, err
 		}
 		// the following will be used for APIM specific security config.

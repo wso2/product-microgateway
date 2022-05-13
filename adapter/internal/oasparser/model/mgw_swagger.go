@@ -424,8 +424,8 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 		if err == nil {
 			productionUrls = append(productionUrls, *endpoint)
 		} else {
-			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties for %v : %v",
-				swagger.title, swagger.version)
+			logger.LoggerOasparser.Errorf("Error encountered when parsing the production endpoints in env properties for %v : %v. %v",
+				swagger.title, swagger.version, err.Error())
 		}
 	}
 
@@ -440,8 +440,8 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 		if err == nil {
 			sandboxUrls = append(sandboxUrls, *endpoint)
 		} else {
-			logger.LoggerOasparser.Errorf("error encountered when parsing the production endpoints in env properties %v : %v",
-				swagger.title, swagger.version)
+			logger.LoggerOasparser.Errorf("Error encountered when parsing the production endpoints in env properties %v : %v. %v",
+				swagger.title, swagger.version, err.Error())
 		}
 	}
 
