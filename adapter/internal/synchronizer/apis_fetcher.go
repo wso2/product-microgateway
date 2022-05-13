@@ -120,7 +120,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	if conf.GlobalAdapter.Enabled && len(deploymentList) > 0 {
 		notifier.SendRevisionUpdate(deploymentList)
 	}
-	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
+	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(deploymentList))
 	// Error nil for successful execution
 	return nil
 }
