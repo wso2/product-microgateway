@@ -455,7 +455,7 @@ enabled = true
   retryInterval = 5
   # Skip SSL verification
   skipSSLVerification = false
-  # Send revision update success message
+  # Send revision update success acknowlegdement to the control plane
   sendRevisionUpdate = false
   # Message broker connection URL of the control plane
   [controlPlane.brokerConnectionParameters]
