@@ -26,6 +26,7 @@ import java.util.Map;
 public class AnalyticsDTO {
 
     private boolean isEnabled;
+    private String type;
     private Map<String, String> configProperties;
     private AnalyticsReceiverConfigDTO serverConfig;
 
@@ -35,6 +36,14 @@ public class AnalyticsDTO {
 
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public AnalyticsReceiverConfigDTO getServerConfig() {

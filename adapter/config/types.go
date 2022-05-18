@@ -383,6 +383,7 @@ type cache struct {
 
 type analytics struct {
 	Enabled  bool
+	Type     string
 	Adapter  analyticsAdapter
 	Enforcer analyticsEnforcer
 }
