@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"text/template"
 
+	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
@@ -71,6 +72,17 @@ type InvocationContext struct {
 	Vhost            string
 	ProdClusterName  string
 	SandClusterName  string
+}
+
+type DebugLogValues struct {
+	RequestPathLogger  string
+	ResponsePathLogger string
+	DebugLogEnabled    bool
+}
+
+type CombinedTemplateValues struct {
+	DebugLogValues
+	Interceptor
 }
 
 const (
@@ -133,6 +145,7 @@ function envoy_on_request(request_handle)
 	interceptor.handle_request_interceptor(
 		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context
 	)
+	{{if .DebugLogEnabled}} {{- .RequestPathLogger -}} {{end}}
 end
 `
 
@@ -145,6 +158,7 @@ function envoy_on_response(response_handle)
 	interceptor.handle_response_interceptor(
 		response_handle, res_call_config, resp_flow_list
 	)
+	{{if .DebugLogEnabled}} {{- .ResponsePathLogger -}} {{end}}
 end
 `
 	// defaultRequestInterceptorTemplate is the template that is applied when request flow is disabled
@@ -152,11 +166,13 @@ end
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
 	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true)
+	{{if .DebugLogEnabled}} {{- .RequestPathLogger -}} {{end}}
 end
 `
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
 	defaultResponseInterceptorTemplate = `
 function envoy_on_response(response_handle)
+	{{if .DebugLogEnabled}} {{- .ResponsePathLogger -}} {{end}}
 end
 `
 	// emptyRequestInterceptorTemplate is the template that is applied when request flow and response flow is disabled
@@ -183,7 +199,18 @@ func GetInterceptor(values *Interceptor) string {
 	}
 	templ := template.Must(t, err)
 	var out bytes.Buffer
-	err = templ.Execute(&out, values)
+
+	logConf := config.ReadLogConfigs()
+	combinedTemplateValues := CombinedTemplateValues{
+		DebugLogValues{
+			RequestPathLogger:  requestPathLogger,
+			ResponsePathLogger: responsePathLogger,
+			DebugLogEnabled:    logConf.DebugLogs.Enable,
+		},
+		*values,
+	}
+
+	err = templ.Execute(&out, combinedTemplateValues)
 	if err != nil {
 		logger.LoggerInterceptor.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("executing request interceptor template: %v", err.Error()),
