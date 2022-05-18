@@ -695,7 +695,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
-	config, _ := config.ReadConfigs()
+	adapterConfig, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -810,33 +810,42 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	var luaPerFilterConfig lua.LuaPerRoute
 	if len(requestInterceptor) < 1 && len(responseInterceptor) < 1 {
-		luaPerFilterConfig = lua.LuaPerRoute{
-			Override: &lua.LuaPerRoute_SourceCode{SourceCode: &corev3.DataSource{Specifier: &corev3.DataSource_InlineString{
-				InlineString: `
-function envoy_on_request(request_handle)
-	local request_headers = request_handle:headers()
-	local log_output = "\n"
-	for header_name, header_value in pairs(request_headers) do
-		log_output = log_output .. ">> request path >> " .. header_name .. ": " .. header_value .. "\n"
-	end
-	if request_handle:body() then
-		log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
-	end
-	request_handle:logDebug(log_output)
-end
 
-function envoy_on_response(response_handle)
-	local response_headers = response_handle:headers()
-	local log_output = "\n"
-	for header_name, header_value in pairs(response_headers) do
-		log_output = log_output .. "<< response path << " .. header_name .. ": " .. header_value .. "\n"
+		logConf := config.ReadLogConfigs()
+
+		if logConf.DebugLogs.Enable {
+			luaPerFilterConfig = lua.LuaPerRoute{
+				Override: &lua.LuaPerRoute_SourceCode{SourceCode: &corev3.DataSource{Specifier: &corev3.DataSource_InlineString{
+					InlineString: `
+	function envoy_on_request(request_handle)
+		local request_headers = request_handle:headers()
+		local log_output = "\n"
+		for header_name, header_value in pairs(request_headers) do
+			log_output = log_output .. ">> request path >> " .. header_name .. ": " .. header_value .. "\n"
+		end
+		if request_handle:body() then
+			log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
+		end
+		request_handle:logDebug(log_output)
 	end
-	if response_handle:body() then
-		log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
-	end
-	response_handle:logDebug(log_output)
-end`,
-			}}},
+	
+	function envoy_on_response(response_handle)
+		local response_headers = response_handle:headers()
+		local log_output = "\n"
+		for header_name, header_value in pairs(response_headers) do
+			log_output = log_output .. "<< response path << " .. header_name .. ": " .. header_value .. "\n"
+		end
+		if response_handle:body() then
+			log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
+		end
+		response_handle:logDebug(log_output)
+	end`,
+				}}},
+			}
+		} else {
+			luaPerFilterConfig = lua.LuaPerRoute{
+				Override: &lua.LuaPerRoute_Disabled{Disabled: true},
+			}
 		}
 
 	} else {
@@ -899,8 +908,8 @@ end`,
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
-				IdleTimeout:       durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+				Timeout:           durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+				IdleTimeout:       durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
 	} else {
@@ -921,7 +930,7 @@ end`,
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
 		// Retry configs are always added via headers. This is to update the
 		// default retry back-off base interval, which cannot be updated via headers.
-		retryConfig := config.Envoy.Upstream.Retry
+		retryConfig := adapterConfig.Envoy.Upstream.Retry
 		commonRetryPolicy := &routev3.RetryPolicy{
 			RetryOn: retryPolicyRetriableStatusCodes,
 			NumRetries: &wrapperspb.UInt32Value{

@@ -73,6 +73,30 @@ type InvocationContext struct {
 	SandClusterName  string
 }
 
+const (
+	requestPathLogger = `
+local request_headers = request_handle:headers()
+local log_output = "\n"
+for header_name, header_value in pairs(request_headers) do
+	log_output = log_output .. ">> request path >> " .. header_name .. ": " .. header_value .. "\n"
+end
+if request_handle:body() then
+	log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
+end
+request_handle:logDebug(log_output)`
+
+	responsePathLogger = `
+local response_headers = response_handle:headers()
+local log_output = "\n"
+for header_name, header_value in pairs(response_headers) do
+	log_output = log_output .. "<< request path << " .. header_name .. ": " .. header_value .. "\n"
+end
+if response_handle:body() then
+	log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
+end
+response_handle:logDebug(log_output)`
+)
+
 var (
 	// commonTemplate contains common lua code for request and response intercept
 	// Note: this template only applies if request or response interceptor is enabled
