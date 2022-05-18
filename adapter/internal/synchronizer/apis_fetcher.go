@@ -110,7 +110,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 			deploymentList = append(deploymentList, deployedRevisionList...)
 		}
 	}
-	notifier.SendRevisionUpdate(deploymentList)
+	notifier.SendRevisionUpdateAck(deploymentList)
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(deploymentList))
 	// Error nil for successful execution
 	return nil

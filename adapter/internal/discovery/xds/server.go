@@ -697,7 +697,7 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
-				notifier.SendRevisionUndeploy(uuid, revisionUUID, environment)
+				notifier.SendRevisionUndeployAck(uuid, revisionUUID, environment)
 			}
 		}
 	}

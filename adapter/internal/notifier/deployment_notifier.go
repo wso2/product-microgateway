@@ -40,8 +40,8 @@ func UpdateDeployedRevisions(apiID string, revisionID int, envs []string, vhost 
 	return revisions
 }
 
-//SendRevisionUpdate sends deployment status to the control plane
-func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
+//SendRevisionUpdateAck sends succeeded revision deployment acknowledgement to the control plane
+func SendRevisionUpdateAck(deployedRevisionList []*DeployedAPIRevision) {
 	conf, _ := config.ReadConfigs()
 	cpConfigs := conf.ControlPlane
 
@@ -99,8 +99,8 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 	}
 }
 
-// SendRevisionUndeploy - send the undeployed revision information to control plane
-func SendRevisionUndeploy(apiUUID string, revisionUUID string, environment string) {
+// SendRevisionUndeployAck - send the undeployed revision acknowledgement to control plane
+func SendRevisionUndeployAck(apiUUID string, revisionUUID string, environment string) {
 	conf, _ := config.ReadConfigs()
 	cpConfigs := conf.ControlPlane
 	if apiUUID == "" || revisionUUID == "" || environment == "" || !cpConfigs.Enabled || !cpConfigs.SendRevisionUpdate {
