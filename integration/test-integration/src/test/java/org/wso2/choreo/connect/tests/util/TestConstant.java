@@ -29,6 +29,7 @@ public class TestConstant {
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST";
     public static final String HTTP_METHOD_PUT = "PUT";
+    public static final String HTTP_METHOD_PATCH = "PATCH";
     public static final String HTTP_METHOD_DELETE = "DELETE";
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD_HEAD = "HEAD";
@@ -174,12 +175,6 @@ public class TestConstant {
 
     public static class RESOURCE_TIER {
         public static final String UNLIMITED = "Unlimited";
-        public static final String TENK_PER_MIN = "10KPerMin";
-        public static final String TWENTYK_PER_MIN = "20KPerMin";
-        public static final String FIFTYK_PER_MIN = "50KPerMin";
-        public static final int ULTIMATE_LIMIT = 20;
-        public static final int PLUS_LIMIT = 5;
-        public static final int BASIC_LIMIT = 1;
 
         public RESOURCE_TIER() {
         }
@@ -187,13 +182,6 @@ public class TestConstant {
 
     public static class API_TIER {
         public static final String UNLIMITED = "Unlimited";
-        public static final String GOLD = "Gold";
-        public static final String SILVER = "Silver";
-        public static final String BRONZE = "Bronze";
-        public static final String ASYNC_UNLIMITED = "AsyncWHUnlimited";
-        public static final int GOLD_LIMIT = 20;
-        public static final int SILVER_LIMIT = 5;
-        public static final int BRONZE_LIMIT = 1;
 
         public API_TIER() {
         }
@@ -201,14 +189,6 @@ public class TestConstant {
 
     public static final class APPLICATION_TIER {
         public static final String UNLIMITED = "Unlimited";
-        public static final String LARGE = "Large";
-        public static final String MEDIUM = "Medium";
-        public static final String SMALL = "Small";
-        public static final String TEN_PER_MIN = "10PerMin";
-        public static final int LARGE_LIMIT = 20;
-        public static final int MEDIUM_LIMIT = 5;
-        public static final int SMALL_LIMIT = 1;
-        public static final String DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN = "50PerMin";
 
         public APPLICATION_TIER() {
         }
@@ -223,12 +203,5 @@ public class TestConstant {
 
         public SUBSCRIPTION_TIER() {
         }
-    }
-
-    public static final class SRARTUP_TEST {
-        public static final String API_NAME = "ApiBeforeStartingCC";
-        public static final String API_CONTEXT = "before_starting_CC";
-        public static final String API_VERSION = "1.0.0";
-        public static final String APP_NAME = "AppBeforeStartingCC";
     }
 }
