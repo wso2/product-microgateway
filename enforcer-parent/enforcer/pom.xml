@@ -391,6 +391,10 @@
             <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.am.analytics.publisher</groupId>
+            <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
         </dependency>

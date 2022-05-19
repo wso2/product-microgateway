@@ -63,7 +63,7 @@ func init() {
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
 // further process
 func InitiateBrokerConnectionAndValidate(connectionString string, componentName string, reconnectRetryCount int,
-	reconnectInterval time.Duration, subscriptionIdleTimeDuration time.Duration) ([]Subscription, error) {
+	reconnectInterval time.Duration, subscriptionIdleTimeDuration string) ([]Subscription, error) {
 	subscriptionMetaDataList := make([]Subscription, 0)
 	subProps := &admin.SubscriptionProperties{
 		AutoDeleteOnIdle: &subscriptionIdleTimeDuration,
@@ -133,7 +133,9 @@ func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString 
 		func() {
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
-			_, subscriptionCreationError = adminClient.CreateSubscription(ctx, key, subscriptionName, opts, nil)
+			_, subscriptionCreationError = adminClient.CreateSubscription(ctx, key, subscriptionName, &admin.CreateSubscriptionOptions{
+				Properties: opts,
+			})
 		}()
 		if subscriptionCreationError != nil {
 			errorValue = errors.New("Error occurred while trying to create subscription " + subscriptionName + " in ASB for topic name " +

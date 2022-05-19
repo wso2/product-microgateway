@@ -383,6 +383,7 @@ type cache struct {
 
 type analytics struct {
 	Enabled  bool
+	Type     string
 	Adapter  analyticsAdapter
 	Enforcer analyticsEnforcer
 }
@@ -457,6 +458,7 @@ type controlPlane struct {
 	Username                   string
 	Password                   string
 	SyncApisOnStartUp          bool
+	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool

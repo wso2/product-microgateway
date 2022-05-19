@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 # --------------------------------------------------------------------
 # Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
@@ -54,7 +54,7 @@ fi
 golint -set_exit_status ./...
 if [ $? -ne 0 ]; then
   echo "INFO: Trying to install golint"
-  go get -u golang.org/x/lint/golint
+  go install golang.org/x/lint/golint
   golint -set_exit_status ./...
   if [ $? -ne 0 ]; then
     echo "FAILED: golint Failure"
