@@ -275,6 +275,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 
 	err = apiProject.APIYaml.ValidateAPIType()
 	if err != nil {
+		logger.LoggerXds.Error("Error while populating swagger from api.yaml. ", err)
 		return nil, err
 	}
 
@@ -285,6 +286,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 
 	err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
 	if err != nil {
+		logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)
 		return nil, err
 	}
 
