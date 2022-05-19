@@ -74,12 +74,14 @@ type InvocationContext struct {
 	SandClusterName  string
 }
 
+// DebugLogValues holds debug logging inside lua filter related template values
 type DebugLogValues struct {
 	RequestPathLogger  string
 	ResponsePathLogger string
 	DebugLogEnabled    bool
 }
 
+// CombinedTemplateValues holds combined values for both DebugLogValues properties and Interceptor properties in the same level
 type CombinedTemplateValues struct {
 	DebugLogValues
 	Interceptor
@@ -90,7 +92,7 @@ const (
 local request_headers = request_handle:headers()
 local log_output = "\n"
 for header_name, header_value in pairs(request_headers) do
-	log_output = log_output .. ">> request path >> " .. header_name .. ": " .. header_value .. "\n"
+	log_output = log_output .. ">> interceptor request path >> " .. header_name .. ": " .. header_value .. "\n"
 end
 if request_handle:body() then
 	log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
@@ -101,7 +103,7 @@ request_handle:logDebug(log_output)`
 local response_headers = response_handle:headers()
 local log_output = "\n"
 for header_name, header_value in pairs(response_headers) do
-	log_output = log_output .. "<< request path << " .. header_name .. ": " .. header_value .. "\n"
+	log_output = log_output .. "<< interceptor response path << " .. header_name .. ": " .. header_value .. "\n"
 end
 if response_handle:body() then
 	log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
