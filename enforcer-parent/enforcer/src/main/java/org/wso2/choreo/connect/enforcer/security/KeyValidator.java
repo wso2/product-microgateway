@@ -35,7 +35,6 @@ import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
 import org.wso2.choreo.connect.enforcer.models.ApplicationPolicy;
 import org.wso2.choreo.connect.enforcer.models.Subscription;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
-import org.wso2.choreo.connect.enforcer.models.URLMapping;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -334,24 +333,5 @@ public class KeyValidator {
         // condition id list for all throttling tiers associated with this API.
         infoDTO.setThrottlingDataList(list);
         infoDTO.setAuthorized(true);
-    }
-
-    private boolean isResourcePathMatching(String resourceString, URLMapping urlMapping) {
-
-        String resource = resourceString.trim();
-        String urlPattern = urlMapping.getUrlPattern().trim();
-
-        if (resource.equalsIgnoreCase(urlPattern)) {
-            return true;
-        }
-
-        // If the urlPattern is only one character longer than the resource and the urlPattern ends with a '/'
-        if (resource.length() + 1 == urlPattern.length() && urlPattern.endsWith("/")) {
-            // Check if resource is equal to urlPattern if the trailing '/' of the urlPattern is ignored
-            String urlPatternWithoutSlash = urlPattern.substring(0, urlPattern.length() - 1);
-            return resource.equalsIgnoreCase(urlPatternWithoutSlash);
-        }
-
-        return false;
     }
 }

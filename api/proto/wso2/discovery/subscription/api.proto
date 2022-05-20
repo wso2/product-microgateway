@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package wso2.discovery.subscription;
 
-import "wso2/discovery/subscription/url_mapping.proto";
-
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/subscription;subscription";
 option java_package = "org.wso2.choreo.connect.discovery.subscription";
 option java_outer_classname = "APIsProto";
@@ -13,15 +11,7 @@ option java_multiple_files = true;
 
 // APIs data model
 message APIs {
-    string apiId = 1;
-	string name = 2;
-	string provider = 3;
-	string version = 4;
-	string context = 5;
-	string policy = 6;
-	string apiType = 7;
-	bool isDefaultVersion = 8;
-	URLMapping urlMappings = 9;
-	string uuid = 10;
-	string lcState = 11;
+	string uuid = 1;
+	string lcState = 2;
+	bool isDefaultVersion = 3;
 }

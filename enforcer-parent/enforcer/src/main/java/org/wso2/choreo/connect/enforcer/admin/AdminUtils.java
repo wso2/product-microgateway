@@ -20,8 +20,6 @@ package org.wso2.choreo.connect.enforcer.admin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
-import org.wso2.choreo.connect.enforcer.models.API;
-import org.wso2.choreo.connect.enforcer.models.APIInfo;
 import org.wso2.choreo.connect.enforcer.models.Application;
 import org.wso2.choreo.connect.enforcer.models.ApplicationInfo;
 import org.wso2.choreo.connect.enforcer.models.ApplicationInfoList;
@@ -44,19 +42,19 @@ import java.util.List;
  */
 public class AdminUtils {
 
-    public static APIInfo toAPIInfo(API api, List<SubscriptionInfo> subscriptionInfoList) {
-        APIInfo apiInfo = new APIInfo();
-        apiInfo.setSubscriptions(subscriptionInfoList);
-        apiInfo.setApiId(api.getApiId());
-        apiInfo.setApiUUID(api.getApiUUID());
-        apiInfo.setContext(api.getContext());
-        apiInfo.setName(api.getApiName());
-        apiInfo.setLcState(api.getLcState());
-        apiInfo.setTier(api.getApiTier());
-        apiInfo.setVersion(api.getApiVersion());
-        apiInfo.setProvider(api.getApiProvider());
-        return apiInfo;
-    }
+//    public static APIInfo toAPIInfo(API api, List<SubscriptionInfo> subscriptionInfoList) {
+//        APIInfo apiInfo = new APIInfo();
+//        apiInfo.setSubscriptions(subscriptionInfoList);
+//        apiInfo.setApiId(api.getApiId());
+//        apiInfo.setApiUUID(api.getApiUUID());
+//        apiInfo.setContext(api.getContext());
+//        apiInfo.setName(api.getApiName());
+//        apiInfo.setLcState(api.getLcState());
+//        apiInfo.setTier(api.getApiTier());
+//        apiInfo.setVersion(api.getApiVersion());
+//        apiInfo.setProvider(api.getApiProvider());
+//        return apiInfo;
+//    }
 
     public static ApplicationInfo toApplicationInfo(Application application,
                                                     ApplicationKeyMapping applicationKeyMapping) {

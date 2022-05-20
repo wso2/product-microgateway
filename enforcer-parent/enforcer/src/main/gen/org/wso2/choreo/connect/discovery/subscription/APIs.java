@@ -20,13 +20,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private APIs() {
-    apiId_ = "";
-    name_ = "";
-    provider_ = "";
-    version_ = "";
-    context_ = "";
-    policy_ = "";
-    apiType_ = "";
     uuid_ = "";
     lcState_ = "";
   }
@@ -64,73 +57,18 @@ private static final long serialVersionUID = 0L;
           case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            apiId_ = s;
+            uuid_ = s;
             break;
           }
           case 18: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            name_ = s;
+            lcState_ = s;
             break;
           }
-          case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            provider_ = s;
-            break;
-          }
-          case 34: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            version_ = s;
-            break;
-          }
-          case 42: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            context_ = s;
-            break;
-          }
-          case 50: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            policy_ = s;
-            break;
-          }
-          case 58: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            apiType_ = s;
-            break;
-          }
-          case 64: {
+          case 24: {
 
             isDefaultVersion_ = input.readBool();
-            break;
-          }
-          case 74: {
-            org.wso2.choreo.connect.discovery.subscription.URLMapping.Builder subBuilder = null;
-            if (urlMappings_ != null) {
-              subBuilder = urlMappings_.toBuilder();
-            }
-            urlMappings_ = input.readMessage(org.wso2.choreo.connect.discovery.subscription.URLMapping.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(urlMappings_);
-              urlMappings_ = subBuilder.buildPartial();
-            }
-
-            break;
-          }
-          case 82: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            uuid_ = s;
-            break;
-          }
-          case 90: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            lcState_ = s;
             break;
           }
           default: {
@@ -165,313 +103,10 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.subscription.APIs.class, org.wso2.choreo.connect.discovery.subscription.APIs.Builder.class);
   }
 
-  public static final int APIID_FIELD_NUMBER = 1;
-  private volatile java.lang.Object apiId_;
-  /**
-   * <code>string apiId = 1;</code>
-   * @return The apiId.
-   */
-  @java.lang.Override
-  public java.lang.String getApiId() {
-    java.lang.Object ref = apiId_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      apiId_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string apiId = 1;</code>
-   * @return The bytes for apiId.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getApiIdBytes() {
-    java.lang.Object ref = apiId_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      apiId_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int NAME_FIELD_NUMBER = 2;
-  private volatile java.lang.Object name_;
-  /**
-   * <code>string name = 2;</code>
-   * @return The name.
-   */
-  @java.lang.Override
-  public java.lang.String getName() {
-    java.lang.Object ref = name_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      name_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string name = 2;</code>
-   * @return The bytes for name.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getNameBytes() {
-    java.lang.Object ref = name_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      name_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int PROVIDER_FIELD_NUMBER = 3;
-  private volatile java.lang.Object provider_;
-  /**
-   * <code>string provider = 3;</code>
-   * @return The provider.
-   */
-  @java.lang.Override
-  public java.lang.String getProvider() {
-    java.lang.Object ref = provider_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      provider_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string provider = 3;</code>
-   * @return The bytes for provider.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getProviderBytes() {
-    java.lang.Object ref = provider_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      provider_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int VERSION_FIELD_NUMBER = 4;
-  private volatile java.lang.Object version_;
-  /**
-   * <code>string version = 4;</code>
-   * @return The version.
-   */
-  @java.lang.Override
-  public java.lang.String getVersion() {
-    java.lang.Object ref = version_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      version_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string version = 4;</code>
-   * @return The bytes for version.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getVersionBytes() {
-    java.lang.Object ref = version_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      version_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int CONTEXT_FIELD_NUMBER = 5;
-  private volatile java.lang.Object context_;
-  /**
-   * <code>string context = 5;</code>
-   * @return The context.
-   */
-  @java.lang.Override
-  public java.lang.String getContext() {
-    java.lang.Object ref = context_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      context_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string context = 5;</code>
-   * @return The bytes for context.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getContextBytes() {
-    java.lang.Object ref = context_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      context_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int POLICY_FIELD_NUMBER = 6;
-  private volatile java.lang.Object policy_;
-  /**
-   * <code>string policy = 6;</code>
-   * @return The policy.
-   */
-  @java.lang.Override
-  public java.lang.String getPolicy() {
-    java.lang.Object ref = policy_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      policy_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string policy = 6;</code>
-   * @return The bytes for policy.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getPolicyBytes() {
-    java.lang.Object ref = policy_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      policy_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int APITYPE_FIELD_NUMBER = 7;
-  private volatile java.lang.Object apiType_;
-  /**
-   * <code>string apiType = 7;</code>
-   * @return The apiType.
-   */
-  @java.lang.Override
-  public java.lang.String getApiType() {
-    java.lang.Object ref = apiType_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      apiType_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string apiType = 7;</code>
-   * @return The bytes for apiType.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getApiTypeBytes() {
-    java.lang.Object ref = apiType_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      apiType_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int ISDEFAULTVERSION_FIELD_NUMBER = 8;
-  private boolean isDefaultVersion_;
-  /**
-   * <code>bool isDefaultVersion = 8;</code>
-   * @return The isDefaultVersion.
-   */
-  @java.lang.Override
-  public boolean getIsDefaultVersion() {
-    return isDefaultVersion_;
-  }
-
-  public static final int URLMAPPINGS_FIELD_NUMBER = 9;
-  private org.wso2.choreo.connect.discovery.subscription.URLMapping urlMappings_;
-  /**
-   * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-   * @return Whether the urlMappings field is set.
-   */
-  @java.lang.Override
-  public boolean hasUrlMappings() {
-    return urlMappings_ != null;
-  }
-  /**
-   * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-   * @return The urlMappings.
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.subscription.URLMapping getUrlMappings() {
-    return urlMappings_ == null ? org.wso2.choreo.connect.discovery.subscription.URLMapping.getDefaultInstance() : urlMappings_;
-  }
-  /**
-   * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.subscription.URLMappingOrBuilder getUrlMappingsOrBuilder() {
-    return getUrlMappings();
-  }
-
-  public static final int UUID_FIELD_NUMBER = 10;
+  public static final int UUID_FIELD_NUMBER = 1;
   private volatile java.lang.Object uuid_;
   /**
-   * <code>string uuid = 10;</code>
+   * <code>string uuid = 1;</code>
    * @return The uuid.
    */
   @java.lang.Override
@@ -488,7 +123,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string uuid = 10;</code>
+   * <code>string uuid = 1;</code>
    * @return The bytes for uuid.
    */
   @java.lang.Override
@@ -506,10 +141,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int LCSTATE_FIELD_NUMBER = 11;
+  public static final int LCSTATE_FIELD_NUMBER = 2;
   private volatile java.lang.Object lcState_;
   /**
-   * <code>string lcState = 11;</code>
+   * <code>string lcState = 2;</code>
    * @return The lcState.
    */
   @java.lang.Override
@@ -526,7 +161,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string lcState = 11;</code>
+   * <code>string lcState = 2;</code>
    * @return The bytes for lcState.
    */
   @java.lang.Override
@@ -544,6 +179,17 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int ISDEFAULTVERSION_FIELD_NUMBER = 3;
+  private boolean isDefaultVersion_;
+  /**
+   * <code>bool isDefaultVersion = 3;</code>
+   * @return The isDefaultVersion.
+   */
+  @java.lang.Override
+  public boolean getIsDefaultVersion() {
+    return isDefaultVersion_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -558,38 +204,14 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getApiIdBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, apiId_);
-    }
-    if (!getNameBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
-    }
-    if (!getProviderBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, provider_);
-    }
-    if (!getVersionBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, version_);
-    }
-    if (!getContextBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, context_);
-    }
-    if (!getPolicyBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, policy_);
-    }
-    if (!getApiTypeBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 7, apiType_);
-    }
-    if (isDefaultVersion_ != false) {
-      output.writeBool(8, isDefaultVersion_);
-    }
-    if (urlMappings_ != null) {
-      output.writeMessage(9, getUrlMappings());
-    }
     if (!getUuidBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, uuid_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, uuid_);
     }
     if (!getLcStateBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, lcState_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, lcState_);
+    }
+    if (isDefaultVersion_ != false) {
+      output.writeBool(3, isDefaultVersion_);
     }
     unknownFields.writeTo(output);
   }
@@ -600,40 +222,15 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!getApiIdBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, apiId_);
+    if (!getUuidBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, uuid_);
     }
-    if (!getNameBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
-    }
-    if (!getProviderBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, provider_);
-    }
-    if (!getVersionBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, version_);
-    }
-    if (!getContextBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, context_);
-    }
-    if (!getPolicyBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, policy_);
-    }
-    if (!getApiTypeBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, apiType_);
+    if (!getLcStateBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, lcState_);
     }
     if (isDefaultVersion_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(8, isDefaultVersion_);
-    }
-    if (urlMappings_ != null) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(9, getUrlMappings());
-    }
-    if (!getUuidBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, uuid_);
-    }
-    if (!getLcStateBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, lcState_);
+        .computeBoolSize(3, isDefaultVersion_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -650,31 +247,12 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.subscription.APIs other = (org.wso2.choreo.connect.discovery.subscription.APIs) obj;
 
-    if (!getApiId()
-        .equals(other.getApiId())) return false;
-    if (!getName()
-        .equals(other.getName())) return false;
-    if (!getProvider()
-        .equals(other.getProvider())) return false;
-    if (!getVersion()
-        .equals(other.getVersion())) return false;
-    if (!getContext()
-        .equals(other.getContext())) return false;
-    if (!getPolicy()
-        .equals(other.getPolicy())) return false;
-    if (!getApiType()
-        .equals(other.getApiType())) return false;
-    if (getIsDefaultVersion()
-        != other.getIsDefaultVersion()) return false;
-    if (hasUrlMappings() != other.hasUrlMappings()) return false;
-    if (hasUrlMappings()) {
-      if (!getUrlMappings()
-          .equals(other.getUrlMappings())) return false;
-    }
     if (!getUuid()
         .equals(other.getUuid())) return false;
     if (!getLcState()
         .equals(other.getLcState())) return false;
+    if (getIsDefaultVersion()
+        != other.getIsDefaultVersion()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -686,31 +264,13 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + APIID_FIELD_NUMBER;
-    hash = (53 * hash) + getApiId().hashCode();
-    hash = (37 * hash) + NAME_FIELD_NUMBER;
-    hash = (53 * hash) + getName().hashCode();
-    hash = (37 * hash) + PROVIDER_FIELD_NUMBER;
-    hash = (53 * hash) + getProvider().hashCode();
-    hash = (37 * hash) + VERSION_FIELD_NUMBER;
-    hash = (53 * hash) + getVersion().hashCode();
-    hash = (37 * hash) + CONTEXT_FIELD_NUMBER;
-    hash = (53 * hash) + getContext().hashCode();
-    hash = (37 * hash) + POLICY_FIELD_NUMBER;
-    hash = (53 * hash) + getPolicy().hashCode();
-    hash = (37 * hash) + APITYPE_FIELD_NUMBER;
-    hash = (53 * hash) + getApiType().hashCode();
-    hash = (37 * hash) + ISDEFAULTVERSION_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getIsDefaultVersion());
-    if (hasUrlMappings()) {
-      hash = (37 * hash) + URLMAPPINGS_FIELD_NUMBER;
-      hash = (53 * hash) + getUrlMappings().hashCode();
-    }
     hash = (37 * hash) + UUID_FIELD_NUMBER;
     hash = (53 * hash) + getUuid().hashCode();
     hash = (37 * hash) + LCSTATE_FIELD_NUMBER;
     hash = (53 * hash) + getLcState().hashCode();
+    hash = (37 * hash) + ISDEFAULTVERSION_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getIsDefaultVersion());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -848,31 +408,11 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      apiId_ = "";
-
-      name_ = "";
-
-      provider_ = "";
-
-      version_ = "";
-
-      context_ = "";
-
-      policy_ = "";
-
-      apiType_ = "";
-
-      isDefaultVersion_ = false;
-
-      if (urlMappingsBuilder_ == null) {
-        urlMappings_ = null;
-      } else {
-        urlMappings_ = null;
-        urlMappingsBuilder_ = null;
-      }
       uuid_ = "";
 
       lcState_ = "";
+
+      isDefaultVersion_ = false;
 
       return this;
     }
@@ -900,21 +440,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.subscription.APIs buildPartial() {
       org.wso2.choreo.connect.discovery.subscription.APIs result = new org.wso2.choreo.connect.discovery.subscription.APIs(this);
-      result.apiId_ = apiId_;
-      result.name_ = name_;
-      result.provider_ = provider_;
-      result.version_ = version_;
-      result.context_ = context_;
-      result.policy_ = policy_;
-      result.apiType_ = apiType_;
-      result.isDefaultVersion_ = isDefaultVersion_;
-      if (urlMappingsBuilder_ == null) {
-        result.urlMappings_ = urlMappings_;
-      } else {
-        result.urlMappings_ = urlMappingsBuilder_.build();
-      }
       result.uuid_ = uuid_;
       result.lcState_ = lcState_;
+      result.isDefaultVersion_ = isDefaultVersion_;
       onBuilt();
       return result;
     }
@@ -963,40 +491,6 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.subscription.APIs other) {
       if (other == org.wso2.choreo.connect.discovery.subscription.APIs.getDefaultInstance()) return this;
-      if (!other.getApiId().isEmpty()) {
-        apiId_ = other.apiId_;
-        onChanged();
-      }
-      if (!other.getName().isEmpty()) {
-        name_ = other.name_;
-        onChanged();
-      }
-      if (!other.getProvider().isEmpty()) {
-        provider_ = other.provider_;
-        onChanged();
-      }
-      if (!other.getVersion().isEmpty()) {
-        version_ = other.version_;
-        onChanged();
-      }
-      if (!other.getContext().isEmpty()) {
-        context_ = other.context_;
-        onChanged();
-      }
-      if (!other.getPolicy().isEmpty()) {
-        policy_ = other.policy_;
-        onChanged();
-      }
-      if (!other.getApiType().isEmpty()) {
-        apiType_ = other.apiType_;
-        onChanged();
-      }
-      if (other.getIsDefaultVersion() != false) {
-        setIsDefaultVersion(other.getIsDefaultVersion());
-      }
-      if (other.hasUrlMappings()) {
-        mergeUrlMappings(other.getUrlMappings());
-      }
       if (!other.getUuid().isEmpty()) {
         uuid_ = other.uuid_;
         onChanged();
@@ -1004,6 +498,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getLcState().isEmpty()) {
         lcState_ = other.lcState_;
         onChanged();
+      }
+      if (other.getIsDefaultVersion() != false) {
+        setIsDefaultVersion(other.getIsDefaultVersion());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1034,691 +531,9 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object apiId_ = "";
-    /**
-     * <code>string apiId = 1;</code>
-     * @return The apiId.
-     */
-    public java.lang.String getApiId() {
-      java.lang.Object ref = apiId_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        apiId_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string apiId = 1;</code>
-     * @return The bytes for apiId.
-     */
-    public com.google.protobuf.ByteString
-        getApiIdBytes() {
-      java.lang.Object ref = apiId_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        apiId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string apiId = 1;</code>
-     * @param value The apiId to set.
-     * @return This builder for chaining.
-     */
-    public Builder setApiId(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      apiId_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string apiId = 1;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearApiId() {
-      
-      apiId_ = getDefaultInstance().getApiId();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string apiId = 1;</code>
-     * @param value The bytes for apiId to set.
-     * @return This builder for chaining.
-     */
-    public Builder setApiIdBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      apiId_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object name_ = "";
-    /**
-     * <code>string name = 2;</code>
-     * @return The name.
-     */
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        name_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @return The bytes for name.
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @param value The name to set.
-     * @return This builder for chaining.
-     */
-    public Builder setName(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      name_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearName() {
-      
-      name_ = getDefaultInstance().getName();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string name = 2;</code>
-     * @param value The bytes for name to set.
-     * @return This builder for chaining.
-     */
-    public Builder setNameBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      name_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object provider_ = "";
-    /**
-     * <code>string provider = 3;</code>
-     * @return The provider.
-     */
-    public java.lang.String getProvider() {
-      java.lang.Object ref = provider_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        provider_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string provider = 3;</code>
-     * @return The bytes for provider.
-     */
-    public com.google.protobuf.ByteString
-        getProviderBytes() {
-      java.lang.Object ref = provider_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        provider_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string provider = 3;</code>
-     * @param value The provider to set.
-     * @return This builder for chaining.
-     */
-    public Builder setProvider(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      provider_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string provider = 3;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearProvider() {
-      
-      provider_ = getDefaultInstance().getProvider();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string provider = 3;</code>
-     * @param value The bytes for provider to set.
-     * @return This builder for chaining.
-     */
-    public Builder setProviderBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      provider_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object version_ = "";
-    /**
-     * <code>string version = 4;</code>
-     * @return The version.
-     */
-    public java.lang.String getVersion() {
-      java.lang.Object ref = version_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        version_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string version = 4;</code>
-     * @return The bytes for version.
-     */
-    public com.google.protobuf.ByteString
-        getVersionBytes() {
-      java.lang.Object ref = version_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        version_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string version = 4;</code>
-     * @param value The version to set.
-     * @return This builder for chaining.
-     */
-    public Builder setVersion(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      version_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string version = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearVersion() {
-      
-      version_ = getDefaultInstance().getVersion();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string version = 4;</code>
-     * @param value The bytes for version to set.
-     * @return This builder for chaining.
-     */
-    public Builder setVersionBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      version_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object context_ = "";
-    /**
-     * <code>string context = 5;</code>
-     * @return The context.
-     */
-    public java.lang.String getContext() {
-      java.lang.Object ref = context_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        context_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string context = 5;</code>
-     * @return The bytes for context.
-     */
-    public com.google.protobuf.ByteString
-        getContextBytes() {
-      java.lang.Object ref = context_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        context_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string context = 5;</code>
-     * @param value The context to set.
-     * @return This builder for chaining.
-     */
-    public Builder setContext(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      context_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string context = 5;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearContext() {
-      
-      context_ = getDefaultInstance().getContext();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string context = 5;</code>
-     * @param value The bytes for context to set.
-     * @return This builder for chaining.
-     */
-    public Builder setContextBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      context_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object policy_ = "";
-    /**
-     * <code>string policy = 6;</code>
-     * @return The policy.
-     */
-    public java.lang.String getPolicy() {
-      java.lang.Object ref = policy_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        policy_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string policy = 6;</code>
-     * @return The bytes for policy.
-     */
-    public com.google.protobuf.ByteString
-        getPolicyBytes() {
-      java.lang.Object ref = policy_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        policy_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string policy = 6;</code>
-     * @param value The policy to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPolicy(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      policy_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string policy = 6;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearPolicy() {
-      
-      policy_ = getDefaultInstance().getPolicy();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string policy = 6;</code>
-     * @param value The bytes for policy to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPolicyBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      policy_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object apiType_ = "";
-    /**
-     * <code>string apiType = 7;</code>
-     * @return The apiType.
-     */
-    public java.lang.String getApiType() {
-      java.lang.Object ref = apiType_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        apiType_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string apiType = 7;</code>
-     * @return The bytes for apiType.
-     */
-    public com.google.protobuf.ByteString
-        getApiTypeBytes() {
-      java.lang.Object ref = apiType_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        apiType_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string apiType = 7;</code>
-     * @param value The apiType to set.
-     * @return This builder for chaining.
-     */
-    public Builder setApiType(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      apiType_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string apiType = 7;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearApiType() {
-      
-      apiType_ = getDefaultInstance().getApiType();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string apiType = 7;</code>
-     * @param value The bytes for apiType to set.
-     * @return This builder for chaining.
-     */
-    public Builder setApiTypeBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      apiType_ = value;
-      onChanged();
-      return this;
-    }
-
-    private boolean isDefaultVersion_ ;
-    /**
-     * <code>bool isDefaultVersion = 8;</code>
-     * @return The isDefaultVersion.
-     */
-    @java.lang.Override
-    public boolean getIsDefaultVersion() {
-      return isDefaultVersion_;
-    }
-    /**
-     * <code>bool isDefaultVersion = 8;</code>
-     * @param value The isDefaultVersion to set.
-     * @return This builder for chaining.
-     */
-    public Builder setIsDefaultVersion(boolean value) {
-      
-      isDefaultVersion_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool isDefaultVersion = 8;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearIsDefaultVersion() {
-      
-      isDefaultVersion_ = false;
-      onChanged();
-      return this;
-    }
-
-    private org.wso2.choreo.connect.discovery.subscription.URLMapping urlMappings_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.subscription.URLMapping, org.wso2.choreo.connect.discovery.subscription.URLMapping.Builder, org.wso2.choreo.connect.discovery.subscription.URLMappingOrBuilder> urlMappingsBuilder_;
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     * @return Whether the urlMappings field is set.
-     */
-    public boolean hasUrlMappings() {
-      return urlMappingsBuilder_ != null || urlMappings_ != null;
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     * @return The urlMappings.
-     */
-    public org.wso2.choreo.connect.discovery.subscription.URLMapping getUrlMappings() {
-      if (urlMappingsBuilder_ == null) {
-        return urlMappings_ == null ? org.wso2.choreo.connect.discovery.subscription.URLMapping.getDefaultInstance() : urlMappings_;
-      } else {
-        return urlMappingsBuilder_.getMessage();
-      }
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     */
-    public Builder setUrlMappings(org.wso2.choreo.connect.discovery.subscription.URLMapping value) {
-      if (urlMappingsBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        urlMappings_ = value;
-        onChanged();
-      } else {
-        urlMappingsBuilder_.setMessage(value);
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     */
-    public Builder setUrlMappings(
-        org.wso2.choreo.connect.discovery.subscription.URLMapping.Builder builderForValue) {
-      if (urlMappingsBuilder_ == null) {
-        urlMappings_ = builderForValue.build();
-        onChanged();
-      } else {
-        urlMappingsBuilder_.setMessage(builderForValue.build());
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     */
-    public Builder mergeUrlMappings(org.wso2.choreo.connect.discovery.subscription.URLMapping value) {
-      if (urlMappingsBuilder_ == null) {
-        if (urlMappings_ != null) {
-          urlMappings_ =
-            org.wso2.choreo.connect.discovery.subscription.URLMapping.newBuilder(urlMappings_).mergeFrom(value).buildPartial();
-        } else {
-          urlMappings_ = value;
-        }
-        onChanged();
-      } else {
-        urlMappingsBuilder_.mergeFrom(value);
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     */
-    public Builder clearUrlMappings() {
-      if (urlMappingsBuilder_ == null) {
-        urlMappings_ = null;
-        onChanged();
-      } else {
-        urlMappings_ = null;
-        urlMappingsBuilder_ = null;
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     */
-    public org.wso2.choreo.connect.discovery.subscription.URLMapping.Builder getUrlMappingsBuilder() {
-      
-      onChanged();
-      return getUrlMappingsFieldBuilder().getBuilder();
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     */
-    public org.wso2.choreo.connect.discovery.subscription.URLMappingOrBuilder getUrlMappingsOrBuilder() {
-      if (urlMappingsBuilder_ != null) {
-        return urlMappingsBuilder_.getMessageOrBuilder();
-      } else {
-        return urlMappings_ == null ?
-            org.wso2.choreo.connect.discovery.subscription.URLMapping.getDefaultInstance() : urlMappings_;
-      }
-    }
-    /**
-     * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
-     */
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.subscription.URLMapping, org.wso2.choreo.connect.discovery.subscription.URLMapping.Builder, org.wso2.choreo.connect.discovery.subscription.URLMappingOrBuilder> 
-        getUrlMappingsFieldBuilder() {
-      if (urlMappingsBuilder_ == null) {
-        urlMappingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.subscription.URLMapping, org.wso2.choreo.connect.discovery.subscription.URLMapping.Builder, org.wso2.choreo.connect.discovery.subscription.URLMappingOrBuilder>(
-                getUrlMappings(),
-                getParentForChildren(),
-                isClean());
-        urlMappings_ = null;
-      }
-      return urlMappingsBuilder_;
-    }
-
     private java.lang.Object uuid_ = "";
     /**
-     * <code>string uuid = 10;</code>
+     * <code>string uuid = 1;</code>
      * @return The uuid.
      */
     public java.lang.String getUuid() {
@@ -1734,7 +549,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string uuid = 10;</code>
+     * <code>string uuid = 1;</code>
      * @return The bytes for uuid.
      */
     public com.google.protobuf.ByteString
@@ -1751,7 +566,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string uuid = 10;</code>
+     * <code>string uuid = 1;</code>
      * @param value The uuid to set.
      * @return This builder for chaining.
      */
@@ -1766,7 +581,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string uuid = 10;</code>
+     * <code>string uuid = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearUuid() {
@@ -1776,7 +591,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string uuid = 10;</code>
+     * <code>string uuid = 1;</code>
      * @param value The bytes for uuid to set.
      * @return This builder for chaining.
      */
@@ -1794,7 +609,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object lcState_ = "";
     /**
-     * <code>string lcState = 11;</code>
+     * <code>string lcState = 2;</code>
      * @return The lcState.
      */
     public java.lang.String getLcState() {
@@ -1810,7 +625,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string lcState = 11;</code>
+     * <code>string lcState = 2;</code>
      * @return The bytes for lcState.
      */
     public com.google.protobuf.ByteString
@@ -1827,7 +642,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string lcState = 11;</code>
+     * <code>string lcState = 2;</code>
      * @param value The lcState to set.
      * @return This builder for chaining.
      */
@@ -1842,7 +657,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string lcState = 11;</code>
+     * <code>string lcState = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearLcState() {
@@ -1852,7 +667,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string lcState = 11;</code>
+     * <code>string lcState = 2;</code>
      * @param value The bytes for lcState to set.
      * @return This builder for chaining.
      */
@@ -1864,6 +679,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       lcState_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean isDefaultVersion_ ;
+    /**
+     * <code>bool isDefaultVersion = 3;</code>
+     * @return The isDefaultVersion.
+     */
+    @java.lang.Override
+    public boolean getIsDefaultVersion() {
+      return isDefaultVersion_;
+    }
+    /**
+     * <code>bool isDefaultVersion = 3;</code>
+     * @param value The isDefaultVersion to set.
+     * @return This builder for chaining.
+     */
+    public Builder setIsDefaultVersion(boolean value) {
+      
+      isDefaultVersion_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool isDefaultVersion = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearIsDefaultVersion() {
+      
+      isDefaultVersion_ = false;
       onChanged();
       return this;
     }

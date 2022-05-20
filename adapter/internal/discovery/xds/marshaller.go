@@ -3,7 +3,6 @@ package xds
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -606,13 +605,6 @@ func marshalKeyMapping(keyMappingInternal *types.ApplicationKeyMapping) *subscri
 
 func marshalAPIMetadata(api *types.API) *subscription.APIs {
 	return &subscription.APIs{
-		ApiId:            strconv.Itoa(api.APIID),
-		Name:             api.Name,
-		Provider:         api.Provider,
-		Version:          api.Version,
-		Context:          api.Context,
-		Policy:           api.Policy,
-		ApiType:          api.APIType,
 		Uuid:             api.UUID,
 		IsDefaultVersion: api.IsDefaultVersion,
 		LcState:          api.APIStatus,

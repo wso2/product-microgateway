@@ -48,6 +48,8 @@ const (
 	VersionParam string = "version"
 	// GatewayLabelParam is trequired to call /apis endpoint
 	GatewayLabelParam string = "gatewayLabel"
+	// ExpandParam is a specific query parameter to pull blocked APIs and default apis (for that the value should be false).
+	ExpandParam string = "expand"
 	// APIUUIDParam is required to call /apis endpoint
 	APIUUIDParam string = "apiId"
 	// ApisEndpoint is the resource path of /apis endpoint
@@ -157,7 +159,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 	for _, configuredEnv := range configuredEnvs {
 		queryParamMap := make(map[string]string, 1)
 		queryParamMap[GatewayLabelParam] = configuredEnv
-		queryParamMap["expand"] = "false"
+		queryParamMap[ExpandParam] = "false"
 		go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
 		for {
 			data := <-APIListChannel
