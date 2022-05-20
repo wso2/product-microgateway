@@ -36,5 +36,28 @@
         <module>commons</module>
         <module>enforcer</module>
     </modules>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency.check.maven.version}</version>
+                <configuration>
+                    <failBuildOnCVSS>${dependency.check.cvss.threshold.value}</failBuildOnCVSS>
+                    <suppressionFiles>
+<!--                        ${session.executionRootDirectory}/../resources/owasp/owasp-suppressions.xml-->
+                        ${session.executionRootDirectory}/../${owasp.suppression.path}
+<!--                        ${myproject.basedir}/${owasp.suppression.path}-->
+                    </suppressionFiles>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
