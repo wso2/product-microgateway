@@ -18,9 +18,14 @@
 // Package common includes the common functions shared between enforcer and router callbacks.
 package common
 
-import "sync"
+import (
+	"sync"
+
+	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+)
 
 const nodeIDArrayMaxLength int = 20
+const instanceIdentifierKey string = "instanceIdentifier"
 
 // NodeQueue struct is used to keep track of the nodes connected via the XDS.
 type NodeQueue struct {
@@ -41,26 +46,26 @@ type NodeQueue struct {
 func CheckEntryAndSwapToEnd(array []string, nodeID string) (modifiedArray []string, isNewAddition bool) {
 	matchedIndex := -1
 	arraySize := len(array)
-	for index, entry := range array {
+	for index := arraySize - 1; index >= 0; index-- {
+		entry := array[index]
 		if entry == nodeID {
 			matchedIndex = index
 			break
 		}
 	}
 
-	if matchedIndex < 0 && arraySize < nodeIDArrayMaxLength-1 {
+	if matchedIndex == nodeIDArrayMaxLength-1 {
+		return array, false
+	} else if matchedIndex > 0 {
+		array = append(array[0:matchedIndex], array[matchedIndex+1:]...)
 		array = append(array, nodeID)
-		return array, true
-	} else if matchedIndex < 0 && arraySize >= nodeIDArrayMaxLength {
-		array = append(array, nodeID)
-		array = array[1:]
-		return array, true
-	} else if matchedIndex == 9 {
 		return array, false
 	}
-	array = append(array[0:matchedIndex], array[matchedIndex+1:]...)
+	if arraySize >= nodeIDArrayMaxLength {
+		array = array[1:]
+	}
 	array = append(array, nodeID)
-	return array, false
+	return array, true
 }
 
 // GenerateNodeQueue creates an instance of nodeQueue with a mutex and a string array assigned.
@@ -78,4 +83,14 @@ func IsNewNode(nodeQueueInstance *NodeQueue, nodeIdentifier string) bool {
 	var isNewAddition bool
 	nodeQueueInstance.queue, isNewAddition = CheckEntryAndSwapToEnd(nodeQueueInstance.queue, nodeIdentifier)
 	return isNewAddition
+}
+
+// GetNodeIdentifier constructs the nodeIdentifier from discovery request's node property, label:<instanceIdentifierProperty>
+func GetNodeIdentifier(request *discovery.DiscoveryRequest) string {
+	metadataMap := request.Node.Metadata.AsMap()
+	nodeIdentifier := request.Node.Id
+	if identifierVal, ok := metadataMap[instanceIdentifierKey]; ok {
+		nodeIdentifier = request.Node.Id + ":" + identifierVal.(string)
+	}
+	return nodeIdentifier
 }
