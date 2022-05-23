@@ -46,7 +46,7 @@
                     <failBuildOnCVSS>${dependency.check.cvss.threshold.value}</failBuildOnCVSS>
                     <suppressionFiles>
 <!--                        ${session.executionRootDirectory}/../resources/owasp/owasp-suppressions.xml-->
-                        ${session.executionRootDirectory}/../${owasp.suppression.path}
+<!--                        ${session.executionRootDirectory}/../${owasp.suppression.path}-->
 <!--                        ${myproject.basedir}/${owasp.suppression.path}-->
                     </suppressionFiles>
                 </configuration>
