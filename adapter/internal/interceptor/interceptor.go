@@ -74,11 +74,9 @@ type InvocationContext struct {
 	SandClusterName  string
 }
 
-// DebugLogValues holds debug logging inside lua filter related template values
+// DebugLogValues holds debug logging related template values
 type DebugLogValues struct {
-	RequestPathLogger  string
-	ResponsePathLogger string
-	DebugLogEnabled    bool
+	DebugLogEnabled bool
 }
 
 // CombinedTemplateValues holds combined values for both DebugLogValues properties and Interceptor properties in the same level
@@ -87,35 +85,12 @@ type CombinedTemplateValues struct {
 	Interceptor
 }
 
-const (
-	requestPathLogger = `
-local request_headers = request_handle:headers()
-local log_output = "\n"
-for header_name, header_value in pairs(request_headers) do
-	log_output = log_output .. ">> interceptor request path >> " .. header_name .. ": " .. header_value .. "\n"
-end
-if request_handle:body() then
-	log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
-end
-request_handle:logDebug(log_output)`
-
-	responsePathLogger = `
-local response_headers = response_handle:headers()
-local log_output = "\n"
-for header_name, header_value in pairs(response_headers) do
-	log_output = log_output .. "<< interceptor response path << " .. header_name .. ": " .. header_value .. "\n"
-end
-if response_handle:body() then
-	log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
-end
-response_handle:logDebug(log_output)`
-)
-
 var (
 	// commonTemplate contains common lua code for request and response intercept
 	// Note: this template only applies if request or response interceptor is enabled
 	commonTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
+local utils = require 'home.wso2.interceptor.lib.utils'
 {{if .IsResponseFlowEnabled -}} {{/* resp_flow details are required in req flow if request info needed in resp flow */}}
 local resp_flow_list = {  
 	{{- range $key, $value := .ResponseFlow -}} 
@@ -145,9 +120,8 @@ local req_call_config = {
 	{{- end -}}}
 function envoy_on_request(request_handle)
 	interceptor.handle_request_interceptor(
-		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context
+		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context, false, {{- .DebugLogEnabled -}}
 	)
-	{{if .DebugLogEnabled}} {{- .RequestPathLogger -}} {{end}}
 end
 `
 
@@ -158,23 +132,21 @@ local res_call_config = {
 	{{- end -}}}
 function envoy_on_response(response_handle)
 	interceptor.handle_response_interceptor(
-		response_handle, res_call_config, resp_flow_list
+		response_handle, res_call_config, resp_flow_list, {{- .DebugLogEnabled -}}
 	)
-	{{if .DebugLogEnabled}} {{- .ResponsePathLogger -}} {{end}}
 end
 `
 	// defaultRequestInterceptorTemplate is the template that is applied when request flow is disabled
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
-	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true)
-	{{if .DebugLogEnabled}} {{- .RequestPathLogger -}} {{end}}
+	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, {{- .DebugLogEnabled -}})
 end
 `
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
 	defaultResponseInterceptorTemplate = `
 function envoy_on_response(response_handle)
-	{{if .DebugLogEnabled}} {{- .ResponsePathLogger -}} {{end}}
+	utils.debug_log_body_and_headers(response_handle, "<< response path body << ", "<< response path headers << ", {{- .DebugLogEnabled -}})
 end
 `
 	// emptyRequestInterceptorTemplate is the template that is applied when request flow and response flow is disabled
@@ -205,9 +177,7 @@ func GetInterceptor(values *Interceptor) string {
 	logConf := config.ReadLogConfigs()
 	combinedTemplateValues := CombinedTemplateValues{
 		DebugLogValues{
-			RequestPathLogger:  requestPathLogger,
-			ResponsePathLogger: responsePathLogger,
-			DebugLogEnabled:    logConf.DebugLogs.Enable,
+			DebugLogEnabled: logConf.DebugLogs.Enable,
 		},
 		*values,
 	}

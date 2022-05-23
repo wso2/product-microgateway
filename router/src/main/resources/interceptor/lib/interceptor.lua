@@ -266,7 +266,7 @@ end
 ---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
 ---@param inv_context table
 ---@param skip_interceptor_call boolean
-function interceptor.handle_request_interceptor(request_handle, intercept_service_list, req_flow_includes_list, resp_flow_includes_list, inv_context, skip_interceptor_call)
+function interceptor.handle_request_interceptor(request_handle, intercept_service_list, req_flow_includes_list, resp_flow_includes_list, inv_context, skip_interceptor_call, debug_log_enabled)
     local shared_info = {}
 
     local request_headers = request_handle:headers()
@@ -305,7 +305,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
 
     --#region read request body and update shared_info
     local request_body_base64
-    if req_flow_includes[INCLUDES.REQ_BODY] or resp_flow_includes[INCLUDES.REQ_BODY] then
+    if req_flow_includes[INCLUDES.REQ_BODY] or resp_flow_includes[INCLUDES.REQ_BODY] or debug_log_enabled then
         local request_body = request_handle:body()
         local request_body_str
         if request_body then
@@ -361,8 +361,10 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         -- error thrown, exiting
         return
     end
+    debug_log_body(request_handle, ">> request path body >> ", debug_log_enabled)
     modify_headers(request_handle, interceptor_response_body)
     modify_trailers(request_handle, interceptor_response_body)
+    debug_log_headers(request_handle, ">> request path headers >> ", debug_log_enabled)
 
     --#region handle dynamic endpoint
     -- handle this after update headers, in case if user modify the header "x-wso2-cluster-header"
@@ -381,7 +383,7 @@ end
 ---@param response_handle table - response_handle
 ---@param intercept_service_list {method: {cluster_name: string, resource_path: string, timeout: number}}
 ---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
-function interceptor.handle_response_interceptor(response_handle, intercept_service_list, resp_flow_includes_list)
+function interceptor.handle_response_interceptor(response_handle, intercept_service_list, resp_flow_includes_list, debug_log_enabled)
     local meta = response_handle:streamInfo():dynamicMetadata():get(LUA_FILTER_NAME)
     local shared_info = meta and meta[SHARED_INFO_META_KEY]
     if not shared_info then
@@ -421,7 +423,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     --#endregion
 
     --#region read backend body
-    if resp_flow_includes[INCLUDES.RESP_BODY] then
+    if resp_flow_includes[INCLUDES.RESP_BODY] or debug_log_enabled then
         local request_body = response_handle:body():getBytes(0, response_handle:body():length())
         interceptor_request_body[REQUEST.RESP_BODY] = base64_encode(request_body)
     end
@@ -468,8 +470,10 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         -- error thrown, exiting
         return
     end
+    debug_log_body(response_handle, "<< response path body << ", debug_log_enabled)
     modify_headers(response_handle, interceptor_response_body)
     modify_trailers(response_handle, interceptor_response_body)
+    debug_log_headers(response_handle, "<< response path headers << ", debug_log_enabled)
 
     --#region status code
     if interceptor_response_body[RESPONSE.RESPONSE_CODE] then

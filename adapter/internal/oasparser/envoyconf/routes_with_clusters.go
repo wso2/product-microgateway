@@ -817,29 +817,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			luaPerFilterConfig = lua.LuaPerRoute{
 				Override: &lua.LuaPerRoute_SourceCode{SourceCode: &corev3.DataSource{Specifier: &corev3.DataSource_InlineString{
 					InlineString: `
-	function envoy_on_request(request_handle)
-		local request_headers = request_handle:headers()
-		local log_output = "\n"
-		for header_name, header_value in pairs(request_headers) do
-			log_output = log_output .. ">> request path >> " .. header_name .. ": " .. header_value .. "\n"
-		end
-		if request_handle:body() then
-			log_output = log_output .. request_handle:body():getBytes(0, request_handle:body():length()) .. "\n"
-		end
-		request_handle:logDebug(log_output)
-	end
-	
-	function envoy_on_response(response_handle)
-		local response_headers = response_handle:headers()
-		local log_output = "\n"
-		for header_name, header_value in pairs(response_headers) do
-			log_output = log_output .. "<< response path << " .. header_name .. ": " .. header_value .. "\n"
-		end
-		if response_handle:body() then
-			log_output = log_output .. response_handle:body():getBytes(0, response_handle:body():length()) .. "\n"
-		end
-		response_handle:logDebug(log_output)
-	end`,
+local utils = require 'home.wso2.interceptor.lib.utils'
+function envoy_on_request(request_handle)
+	utils.debug_log_body_and_headers(request_handle, ">> request path body >> ", ">> request path headers >> ", true)
+end
+
+function envoy_on_response(response_handle)
+	utils.debug_log_body_and_headers(response_handle, "<< response path body << ", "<< response path headers << ", true)
+end`,
 				}}},
 			}
 		} else {
