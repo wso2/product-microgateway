@@ -31,6 +31,8 @@ public class AdapterConstants {
     public static final String SAND_CLUSTER_HEADER_KEY = "sandClusterName";
     // The common enforcer Label
     public static final String COMMON_ENFORCER_LABEL = "commonEnforcerLabel";
+    // The node identifier Key
+    public static final String NODE_IDENTIFIER_KEY = "instanceIdentifier";
 
     /**
      * Key in a Key-Value pair of a router http header to configure retry, etc.

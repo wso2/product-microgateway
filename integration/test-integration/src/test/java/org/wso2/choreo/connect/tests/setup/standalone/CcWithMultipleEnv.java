@@ -55,6 +55,7 @@ public class CcWithMultipleEnv {
         ApictlUtils.login("test2");
 
         ApictlUtils.deployAPI("apictl_petstore2", "test2");
+
         String endpoint = Utils.getServiceURLHttps(
                 "/v2/new/pet/findByStatus?status=available");
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
@@ -97,6 +98,7 @@ public class CcWithMultipleEnv {
     @AfterTest(description = "stop the setup")
     void stop() throws CCTestException {
         ccInstance.stop();
+        ApictlUtils.removeEnv("test");
         ApictlUtils.removeEnv("test2");
     }
 }
