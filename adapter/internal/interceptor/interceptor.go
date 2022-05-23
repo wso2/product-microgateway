@@ -140,7 +140,8 @@ end
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
-	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, {{- .DebugLogEnabled -}})
+	utils.debug_log_body_and_headers(request_handle, ">> request path body >> ", ">> request path headers >> ", {{- .DebugLogEnabled -}})
+	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, false)
 end
 `
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
