@@ -35,7 +35,7 @@ public class MockBackend2 extends Thread {
 
     public void run() {
         if (backEndServerPort < 0) {
-            throw new RuntimeException("Server port is not defined");
+            throw new RuntimeException("Mock backend server2 port is not defined");
         }
         try {
             HttpServer httpServer = HttpServer.create(new InetSocketAddress(backEndServerPort), 0);
