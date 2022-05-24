@@ -28,10 +28,12 @@ public class MockServices {
     public static void main(String[] args) {
         MockBackendProd mockBackendProd = new MockBackendProd(Constants.MOCK_BACKEND_SERVER_PORT);
         MockBackendSandbox mockBackendSandbox = new MockBackendSandbox(Constants.MOCK_SANDBOX_SERVER_PORT);
+        MockBackend2 mockBackend2 = new MockBackend2(Constants.MOCK_BACKEND2_SERVER_PORT);
         // TODO: (VirajSalaka) start analytics server only when it requires
         MockAnalyticsServer mockAnalyticsServer = new MockAnalyticsServer(Constants.MOCK_ANALYTICS_SERVER_PORT);
         mockBackendProd.start();
         mockBackendSandbox.start();
+        mockBackend2.start();
         mockAnalyticsServer.start();
         List<String> argList = Arrays.asList(args);
         if (argList.contains("-tls-enabled")) {

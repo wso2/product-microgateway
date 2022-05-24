@@ -85,6 +85,12 @@ function respond_error(handle, shared_info, error_info, is_request_flow)
     --#endregion
 end
 
+function table.shallow_copy(src, des)
+    for k,v in pairs(src) do
+        des[k] = v
+    end
+end
+
 --- log body and headers retrieved from the handle
 ---@param handle table
 ---@param log_message string
