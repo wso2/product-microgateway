@@ -813,17 +813,17 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 		logConf := config.ReadLogConfigs()
 
-		if logConf.DebugLogs.Enable {
+		if logConf.WireLogs.Enable {
 			luaPerFilterConfig = lua.LuaPerRoute{
 				Override: &lua.LuaPerRoute_SourceCode{SourceCode: &corev3.DataSource{Specifier: &corev3.DataSource_InlineString{
 					InlineString: `
 local utils = require 'home.wso2.interceptor.lib.utils'
 function envoy_on_request(request_handle)
-	utils.debug_log_body_and_headers(request_handle, ">> request path body >> ", ">> request path headers >> ", true)
+	utils.wire_log_body_and_headers(request_handle, " >> request path body >> ", " >> request path headers >> ", true)
 end
 
 function envoy_on_response(response_handle)
-	utils.debug_log_body_and_headers(response_handle, "<< response path body << ", "<< response path headers << ", true)
+	utils.wire_log_body_and_headers(response_handle, " << response path body << ", " << response path headers << ", true)
 end`,
 				}}},
 			}

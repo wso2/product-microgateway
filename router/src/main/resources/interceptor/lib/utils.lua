@@ -88,9 +88,9 @@ end
 --- log body and headers retrieved from the handle
 ---@param handle table
 ---@param log_message string
-function debug_log_body(handle, log_message, debug_log_enabled)
-    if debug_log_enabled then 
-        local log_output = "\n" .. log_message .. "\n"
+function wire_log_body(handle, log_message, wire_log_enabled)
+    if wire_log_enabled then 
+        local log_output = "\n" .. "[wirelog]" .. log_message .. "\n"
         if handle:body() then
             handle:logInfo(log_output .. handle:body():getBytes(0, handle:body():length()) .. log_output)
         else 
@@ -102,12 +102,12 @@ end
 --- log body and headers retrieved from the handle
 ---@param handle table
 ---@param log_message string
-function debug_log_headers(handle, log_message, debug_log_enabled)
-    if debug_log_enabled then 
+function wire_log_headers(handle, log_message, wire_log_enabled)
+    if wire_log_enabled then 
         local headers = handle:headers()
         local log_output = "\n"
         for header_name, header_value in pairs(headers) do
-            log_output = log_output .. log_message .. header_name .. ": " .. header_value .. "\n"
+            log_output = log_output .. "[wirelog]" .. log_message .. header_name .. ": " .. header_value .. "\n"
         end
         handle:logInfo(log_output)
     end
@@ -116,10 +116,10 @@ end
 --- log body and headers retrieved from the handle
 ---@param log_message_body string
 ---@param log_message_header string
-function utils.debug_log_body_and_headers(handle, log_message_body, log_message_header, debug_log_enabled)
-    if debug_log_enabled then 
-        debug_log_body(handle, log_message_body, debug_log_enabled)
-        debug_log_headers(handle, log_message_header, debug_log_enabled)
+function utils.wire_log_body_and_headers(handle, log_message_body, log_message_header, wire_log_enabled)
+    if wire_log_enabled then 
+        wire_log_body(handle, log_message_body, wire_log_enabled)
+        wire_log_headers(handle, log_message_header, wire_log_enabled)
     end
 end
 

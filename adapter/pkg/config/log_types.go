@@ -28,7 +28,7 @@ type accessLog struct {
 	Format  string
 }
 
-type debugLogs struct {
+type wireLogs struct {
 	Enable bool
 }
 
@@ -49,7 +49,7 @@ type LogConfig struct {
 
 	Pkg        []pkg
 	AccessLogs *accessLog
-	DebugLogs  *debugLogs
+	WireLogs   *wireLogs
 }
 
 func getDefaultLogConfig() *LogConfig {
@@ -64,7 +64,7 @@ func getDefaultLogConfig() *LogConfig {
 				"%RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%" +
 				"'%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n",
 		},
-		DebugLogs: &debugLogs{
+		WireLogs: &wireLogs{
 			Enable: false,
 		},
 	}

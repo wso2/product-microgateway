@@ -74,14 +74,14 @@ type InvocationContext struct {
 	SandClusterName  string
 }
 
-// DebugLogValues holds debug logging related template values
-type DebugLogValues struct {
+// WireLogValues holds debug logging related template values
+type WireLogValues struct {
 	DebugLogEnabled bool
 }
 
-// CombinedTemplateValues holds combined values for both DebugLogValues properties and Interceptor properties in the same level
+// CombinedTemplateValues holds combined values for both WireLogValues properties and Interceptor properties in the same level
 type CombinedTemplateValues struct {
-	DebugLogValues
+	WireLogValues
 	Interceptor
 }
 
@@ -140,14 +140,14 @@ end
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
-	utils.debug_log_body_and_headers(request_handle, ">> request path body >> ", ">> request path headers >> ", {{- .DebugLogEnabled -}})
+	utils.wire_log_body_and_headers(request_handle, ">> request path body >> ", ">> request path headers >> ", {{- .DebugLogEnabled -}})
 	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, false)
 end
 `
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
 	defaultResponseInterceptorTemplate = `
 function envoy_on_response(response_handle)
-	utils.debug_log_body_and_headers(response_handle, "<< response path body << ", "<< response path headers << ", {{- .DebugLogEnabled -}})
+	utils.wire_log_body_and_headers(response_handle, "<< response path body << ", "<< response path headers << ", {{- .DebugLogEnabled -}})
 end
 `
 	// emptyRequestInterceptorTemplate is the template that is applied when request flow and response flow is disabled
@@ -177,8 +177,8 @@ func GetInterceptor(values *Interceptor) string {
 
 	logConf := config.ReadLogConfigs()
 	combinedTemplateValues := CombinedTemplateValues{
-		DebugLogValues{
-			DebugLogEnabled: logConf.DebugLogs.Enable,
+		WireLogValues{
+			DebugLogEnabled: logConf.WireLogs.Enable,
 		},
 		*values,
 	}
