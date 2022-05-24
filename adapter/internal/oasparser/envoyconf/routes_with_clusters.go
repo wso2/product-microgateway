@@ -94,6 +94,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// The any upstream endpoint's basepath.
 	// The developer has to stick into the same basePath when adding any endpoint to an api.
 	apiLevelbasePath := ""
+	// If the production endpoint basepath and sandbox endpoint basepath are different, an additional
+	// API level basepath is required
+	apiLevelbasePathSand := ""
 	// Restricting all endpoints belongs to same api to have same basepath when x-wso2-endpoints referencing is enabled
 	strictBasePath := false
 
@@ -126,15 +129,29 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	}
 	// check API level sandbox endpoints available
 	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
+		selectedBasePathSand := apiLevelbasePath
 		apiLevelEndpointSand := mgwSwagger.GetSandEndpoints()
 		if apiLevelbasePath == "" {
+			// no production endpoint, assign sandbox endpoint basepath as apiLevelbasePath
 			apiLevelbasePath = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
+			selectedBasePathSand = apiLevelbasePath
+		} else {
+			// production and sandbox endpoint basepaths are different, assign sandbox endpoint basepath to
+			// apiLevelbasePathSand
+			if mgwSwagger.GetProdEndpoints().Endpoints[0].Basepath != mgwSwagger.GetSandEndpoints().Endpoints[0].Basepath {
+				apiLevelbasePathSand = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
+				selectedBasePathSand = apiLevelbasePathSand
+			} else {
+				// production and sandbox endpoint basepaths are same, select apiLevelbasePath which contains the
+				// production endpoint basepath
+				selectedBasePathSand = apiLevelbasePath
+			}
 		}
 		apiLevelClusterNameSand = getClusterName(apiLevelEndpointSand.EndpointPrefix, organizationID, vHost,
 			apiTitle, apiVersion, "")
 		if !strings.Contains(apiLevelEndpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
 			cluster, address, err := processEndpoints(apiLevelClusterNameSand, apiLevelEndpointSand,
-				upstreamCerts, timeout, apiLevelbasePath)
+				upstreamCerts, timeout, selectedBasePathSand)
 			if err != nil {
 				apiLevelClusterNameSand = ""
 				logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
@@ -210,7 +227,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	if mgwSwagger.GetAPIType() == constants.WS {
 		for _, resource := range mgwSwagger.GetResources() {
 			routesP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelbasePath, apiLevelClusterNameProd,
-				apiLevelClusterNameSand, nil, nil, organizationID))
+				apiLevelClusterNameSand, nil, nil, organizationID, false))
 			routes = append(routes, routesP)
 		}
 		return routes, clusters, endpoints
@@ -222,6 +239,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		clusterNameProd := apiLevelClusterNameProd
 		clusterNameSand := apiLevelClusterNameSand
 		resourceBasePath := ""
+		resourceBasePathSand := ""
 		resourcePath := resource.GetPath()
 		if strictBasePath || ((resource.GetProdEndpoints() == nil || len(resource.GetProdEndpoints().Endpoints) < 1) &&
 			(resource.GetSandEndpoints() == nil || len(resource.GetSandEndpoints().Endpoints) < 1)) {
@@ -260,21 +278,26 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 
 		// resource level check sandbox endpoints
 		if resource.GetSandEndpoints() != nil && len(resource.GetSandEndpoints().Endpoints) > 0 {
-			prevResourceBasePath := resourceBasePath
+			resourceBasePathSand = resourceBasePath
+			// production and sandbox endpoint basepaths are different, so use sandbox endpoint basepath
+			if apiLevelbasePathSand != "" {
+				resourceBasePathSand = apiLevelbasePathSand
+			}
+			prevResourceBasePath := resourceBasePathSand
 			endpointSand := resource.GetSandEndpoints()
-			if resourceBasePath == "" {
-				resourceBasePath = strings.TrimSuffix(endpointSand.Endpoints[0].Basepath, "/")
+			if resourceBasePathSand == "" {
+				resourceBasePathSand = strings.TrimSuffix(endpointSand.Endpoints[0].Basepath, "/")
 			}
 			clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
 				apiVersion, "")
 			if !strings.Contains(endpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
 				clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
 					apiVersion, resource.GetID())
-				clusterSand, addressSand, err := processEndpoints(clusterNameSand, endpointSand, upstreamCerts, timeout, resourceBasePath)
+				clusterSand, addressSand, err := processEndpoints(clusterNameSand, endpointSand, upstreamCerts, timeout, resourceBasePathSand)
 				if err != nil {
 					clusterNameSand = apiLevelClusterNameSand
 					// reverting resource base path setting as sandbox cluster creation has failed
-					resourceBasePath = prevResourceBasePath
+					resourceBasePathSand = prevResourceBasePath
 					logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. %v",
 						apiTitle, apiVersion, resourcePath, err.Error())
 				} else {
@@ -291,14 +314,21 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		// if both resource level sandbox and production are same as api level, api level clusters will be applied with the api level basepath
 		if clusterNameProd == apiLevelClusterNameProd && clusterNameSand == apiLevelClusterNameSand {
 			resourceBasePath = apiLevelbasePath
+			resourceBasePathSand = apiLevelbasePathSand
 		}
 		if clusterNameProd != "" && clusterNameProd == apiLevelClusterNameProd && resourceBasePath != apiLevelbasePath {
 			logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. sandbox endpoint basepath : %v and production basepath : %v mismatched",
 				apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
 			clusterNameProd = ""
-		} else if clusterNameSand != "" && clusterNameSand == apiLevelClusterNameSand && resourceBasePath != apiLevelbasePath {
+		} else if clusterNameSand != "" && apiLevelbasePathSand != "" && clusterNameSand == apiLevelClusterNameSand && resourceBasePathSand != apiLevelbasePathSand {
+			// production endpoint basepath and sandbox endpoint basepath are different
 			logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. production endpoint basepath : %v and sandbox basepath : %v mismatched",
-				apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
+				apiTitle, apiVersion, resourcePath, resourceBasePathSand, apiLevelbasePathSand)
+			clusterNameSand = ""
+		} else if clusterNameSand != "" && apiLevelbasePathSand == "" && clusterNameSand == apiLevelClusterNameSand && resourceBasePathSand != apiLevelbasePath {
+			// production ednpoint basepath and sandbox endpoint basepath are same
+			logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. production endpoint basepath : %v and sandbox basepath : %v mismatched",
+				apiTitle, apiVersion, resourcePath, resourceBasePathSand, apiLevelbasePath)
 			clusterNameSand = ""
 		}
 
@@ -381,10 +411,15 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 
 		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
-			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID))
+			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, false))
+		if apiLevelbasePathSand != "" {
+			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
+			routeS := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
+				clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, true))
+			routes = append(routes, routeS)
+		}
 		routes = append(routes, routeP)
 	}
-
 	return routes, clusters, endpoints
 }
 
@@ -769,6 +804,18 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			},
 		}
 		match.Headers = []*routev3.HeaderMatcher{&headerMatcherArray}
+		// if sandbox route, add additional header match based on cluster name header
+		if params.isSandbox {
+			clusterHeaderMatcher := routev3.HeaderMatcher{
+				Name: clusterHeaderName,
+				HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
+					StringMatch: &envoy_type_matcherv3.StringMatcher{
+						MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{Exact: params.sandClusterName},
+					},
+				},
+			}
+			match.Headers = append(match.Headers, &clusterHeaderMatcher)
+		}
 	}
 
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
@@ -1370,7 +1417,7 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 
 func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
-	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
+	responseInterceptor map[string]model.InterceptEndpoint, organizationID string, isSandbox bool) *routeCreateParams {
 	params := &routeCreateParams{
 		organizationID:               organizationID,
 		title:                        swagger.GetTitle(),
@@ -1391,6 +1438,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		rewriteMethod:                false,
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 		isDefaultVersion:             swagger.IsDefaultVersion,
+		isSandbox:                    isSandbox,
 	}
 
 	if resource != nil {
