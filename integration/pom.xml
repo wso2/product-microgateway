@@ -38,17 +38,4 @@
         <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>7.1.0</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
-
 </project>

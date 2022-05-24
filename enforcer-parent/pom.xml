@@ -44,7 +44,7 @@
                 <version>${dependency.check.maven.version}</version>
                 <configuration>
                     <failBuildOnCVSS>${dependency.check.cvss.threshold.value}</failBuildOnCVSS>
-                    <suppressionFiles>/home/ubuntu/owasp/owasp-suppressions.xml </suppressionFiles>
+                    <suppressionFiles>/home/ubuntu/owasp/owasp-suppressions.xml</suppressionFiles>
                 </configuration>
             </plugin>
         </plugins>
