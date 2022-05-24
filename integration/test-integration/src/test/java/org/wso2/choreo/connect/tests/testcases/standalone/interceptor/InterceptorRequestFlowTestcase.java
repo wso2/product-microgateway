@@ -27,6 +27,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.InterceptorConstants;
+import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -245,14 +246,23 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertEquals(response.getData(), interceptorRespBody);
     }
 
-    @Test(description = "Test dynamic endpoints")
-    public void testDynamicEndpoints() throws Exception {
+    @DataProvider(name = "dynamicEndpointDataProvider")
+    public Object[][] dynamicEndpointDataProvider() {
+        // {dynamicEpName, expectedResponse}
+        return new Object[][]{
+                {"myDynamicEndpoint", "UPDATED BODY"},
+                {"myDynamicEndpoint2", ResponseConstants.DYNAMIC_EP_RESPONSE},
+        };
+    }
+
+    @Test(description = "Test dynamic endpoints", dataProvider = "dynamicEndpointDataProvider", invocationCount = 3)
+    public void testDynamicEndpoints(String dynamicEpName, String expectedResponse) throws Exception {
         // setting response body of interceptor service
         JSONObject interceptorRespBodyJSON = new JSONObject();
         // test updating body is also work with dynamic endpoint
         interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("UPDATED BODY".getBytes()));
         interceptorRespBodyJSON.put("headersToReplace", Collections.singletonMap("x-wso2-cluster-header", "foo-invalid-attempt"));
-        interceptorRespBodyJSON.put("dynamicEndpoint", Collections.singletonMap("endpointName", "myDynamicEndpoint"));
+        interceptorRespBodyJSON.put("dynamicEndpoint", Collections.singletonMap("endpointName", dynamicEpName));
         setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
 
         // setting client
@@ -267,7 +277,7 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
 
-        Assert.assertEquals(response.getData(), "UPDATED BODY");
+        Assert.assertEquals(response.getData(), expectedResponse);
     }
 
     @Test(description = "Enforcer denied request when response interceptor enabled")
