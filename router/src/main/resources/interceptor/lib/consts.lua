@@ -84,7 +84,6 @@ DYNAMIC_ENDPOINT = {
 -- table of information shared between request and response flow
 SHARED = {
     REQUEST_ID = "requestId",
-    ORG_ID = "organizationId"
 }
 
 ERROR_CODES = {

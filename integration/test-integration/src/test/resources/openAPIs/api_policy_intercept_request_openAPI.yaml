@@ -32,6 +32,10 @@ x-wso2-endpoints:
       urls:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
+  - myDynamicEndpoint2:
+      urls:
+        - http://mockBackend:2391/v2 # same base path as x-wso2-production-endpoints
+      type: loadbalance
 
 # Call Interceptor Service API Policies is applied for all operations, hence this should override from all
 # API Policies in all operations

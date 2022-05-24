@@ -67,14 +67,16 @@ local function modify_trailers(handle, interceptor_response_body)
     end
 end
 
-local function handle_dynamic_endpoint(handle, interceptor_response_body, inv_context, shared_info)
+local function handle_dynamic_endpoint(handle, interceptor_response_body, inv_context)
     local dynamicEp = interceptor_response_body[RESPONSE.DYNAMIC_ENDPOINT]
     if dynamicEp and dynamicEp[DYNAMIC_ENDPOINT.ENDPOINT_NAME] ~= "" then
         local dynamicEpName = dynamicEp[DYNAMIC_ENDPOINT.ENDPOINT_NAME]
         handle:logDebug("dynamic endpoint found: " .. dynamicEpName)
         -- template: <organizationID>_<EndpointName>_xwso2cluster_<vHost>_<API name><API version>
-        local endpoint = string.format("%s_%s_xwso2cluster_%s_%s%s", shared_info[SHARED.ORG_ID], dynamicEpName,
-            inv_context[INV_CONTEXT.VHOST], inv_context[INV_CONTEXT.API_NAME], inv_context[INV_CONTEXT.API_VERSION])
+        local endpoint = string.format("%s_%s_xwso2cluster_%s_%s%s", inv_context[INV_CONTEXT.ORG_ID],
+                dynamicEpName, inv_context[INV_CONTEXT.VHOST], inv_context[INV_CONTEXT.API_NAME],
+                inv_context[INV_CONTEXT.API_VERSION])
+        handle:logDebug('Setting header "x-wso2-cluster-header": ' .. endpoint)
         handle:headers():replace("x-wso2-cluster-header", endpoint)
     end
 end
@@ -196,10 +198,6 @@ end
 
 local function include_invocation_context(handle, req_flow_includes, resp_flow_includes, inv_context, interceptor_request_body, shared_info, request_headers)
     if req_flow_includes[INCLUDES.INV_CONTEXT] or resp_flow_includes[INCLUDES.INV_CONTEXT] then
-        -- remove organizationId from invocationContext, since it should not be sent to the interceptor service
-        shared_info[SHARED.ORG_ID] = inv_context[INV_CONTEXT.ORG_ID]
-        inv_context[INV_CONTEXT.ORG_ID] = nil
-
         -- We first read from "x-forwarded-for" which is the actual client IP, when it comes to scenarios like the request is coming through a load balancer
         -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For the header contains the original clients IP.
         local client_ip = request_headers:get("x-forwarded-for")
@@ -207,18 +205,23 @@ local function include_invocation_context(handle, req_flow_includes, resp_flow_i
             client_ip = handle:streamInfo():downstreamDirectRemoteAddress()
         end
 
-        --#region append runtime invocation details
-        inv_context[INV_CONTEXT.PROTOCOL] = handle:streamInfo():protocol()
-        inv_context[INV_CONTEXT.SCHEME] = request_headers:get(":scheme")
-        inv_context[INV_CONTEXT.PATH] = request_headers:get(":path")
-        inv_context[INV_CONTEXT.METHOD] = request_headers:get(":method")
-        inv_context[INV_CONTEXT.REQ_ID] = request_headers:get("x-request-id")
-        inv_context[INV_CONTEXT.SOURCE] = client_ip
+        --#region runtime invocation details
+        local inv_context_body = {
+            [INV_CONTEXT.PROTOCOL] = handle:streamInfo():protocol(),
+            [INV_CONTEXT.SCHEME] = request_headers:get(":scheme"),
+            [INV_CONTEXT.PATH] = request_headers:get(":path"),
+            [INV_CONTEXT.METHOD] = request_headers:get(":method"),
+            [INV_CONTEXT.REQ_ID] = request_headers:get("x-request-id"),
+            [INV_CONTEXT.SOURCE] = client_ip
+        }
+        table.shallow_copy(inv_context, inv_context_body)
+        -- remove organizationId from invocationContext, since it should not be sent to the interceptor service
+        inv_context_body[INV_CONTEXT.ORG_ID] = nil
 
         --#region auth context
         local ext_authz_meta =  handle:streamInfo():dynamicMetadata():get(EXT_AUTHZ_FILTER)
         if ext_authz_meta then
-            inv_context[INV_CONTEXT.AUTH_CTX] = {
+            inv_context_body[INV_CONTEXT.AUTH_CTX] = {
                 [AUTH_CTX.TOKEN_TYPE] = ext_authz_meta["tokenType"], -- API Key|JWT Auth|Internal Key
                 [AUTH_CTX.TOKEN] = ext_authz_meta["token"],
                 [AUTH_CTX.KEY_TYPE] = ext_authz_meta["keyType"] -- PRODUCTION|SANDBOX
@@ -226,12 +229,13 @@ local function include_invocation_context(handle, req_flow_includes, resp_flow_i
         end
         --#endregion
         --#endregion
-    end
-    if req_flow_includes[INCLUDES.INV_CONTEXT] then
-        interceptor_request_body[REQUEST.INV_CONTEXT] = inv_context
-    end
-    if resp_flow_includes[INCLUDES.INV_CONTEXT] then
-        shared_info[REQUEST.INV_CONTEXT] = inv_context
+
+        if req_flow_includes[INCLUDES.INV_CONTEXT] then
+            interceptor_request_body[REQUEST.INV_CONTEXT] = inv_context_body
+        end
+        if resp_flow_includes[INCLUDES.INV_CONTEXT] then
+            shared_info[REQUEST.INV_CONTEXT] = inv_context_body
+        end
     end
 end
 
@@ -366,7 +370,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
 
     --#region handle dynamic endpoint
     -- handle this after update headers, in case if user modify the header "x-wso2-cluster-header"
-    handle_dynamic_endpoint(request_handle, interceptor_response_body, inv_context, shared_info)
+    handle_dynamic_endpoint(request_handle, interceptor_response_body, inv_context)
     --#endregion
 
     if interceptor_response_body[RESPONSE.INTCPT_CONTEXT] then
@@ -385,6 +389,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     local meta = response_handle:streamInfo():dynamicMetadata():get(LUA_FILTER_NAME)
     local shared_info = meta and meta[SHARED_INFO_META_KEY]
     if not shared_info then
+        response_handle:logDebug("Meta data 'shared_info' set in request flow not found (e.g. auth failure), skipping interceptor response flow.")
         -- no shared info found, request interceptor flow is not executed (eg: enforcer validation failed)
         -- TODO: (renuka) check again, if we want to go response flow if enforcer validation failed, have to set request info metadata from enforcer
         return
