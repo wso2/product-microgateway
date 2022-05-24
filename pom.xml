@@ -216,28 +216,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.commonjava.maven.plugins</groupId>
-                <artifactId>directory-maven-plugin</artifactId>
-                <version>0.1</version>
-                <executions>
-                    <execution>
-                        <id>directories</id>
-                        <goals>
-                            <goal>directory-of</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <property>myproject.basedir</property>
-                            <project>
-                                <groupId>org.wso2.choreo.connect</groupId>
-                                <artifactId>choreo-connect-parent</artifactId>
-                            </project>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
     <dependencyManagement>

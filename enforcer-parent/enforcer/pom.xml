@@ -343,6 +343,12 @@
         <dependency>
             <groupId>org.wso2.andes.wso2</groupId>
             <artifactId>andes-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>
@@ -389,6 +395,12 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-httpclient</groupId>
+                    <artifactId>commons-httpclient</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.am.analytics.publisher</groupId>
@@ -432,6 +444,16 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core-http-okhttp</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
