@@ -525,9 +525,10 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			ClusterName: clusterName,
 			Endpoints:   lbEPs,
 		},
-		TransportSocketMatches: transportSocketMatches,
-		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
-		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		TransportSocketMatches:      transportSocketMatches,
+		DnsRefreshRate:              durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
+		RespectDnsTtl:               conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		UpstreamHttpProtocolOptions: &corev3.UpstreamHttpProtocolOptions{},
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
