@@ -381,46 +381,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public List<API> getMatchingAPIs(String name, String context, String version, String uuid) {
-//        List<API> apiList = new ArrayList<>();
-//        for (API api : apiMap.values()) {
-//            boolean isNameMatching = true;
-//            boolean isContextMatching = true;
-//            boolean isVersionMatching = true;
-//            boolean isUUIDMatching = true;
-//            if (StringUtils.isNotEmpty(name)) {
-//                isNameMatching = api.getApiName().contains(name);
-//            }
-//            if (StringUtils.isNotEmpty(context)) {
-//                isContextMatching = api.getContext().equals(context);
-//            }
-//            if (StringUtils.isNotEmpty(version)) {
-//                isVersionMatching = api.getApiVersion().equals(version);
-//            }
-//            if (StringUtils.isNotEmpty(uuid)) {
-//                isUUIDMatching = api.getApiUUID().equals(uuid);
-//            }
-//            if (isNameMatching && isContextMatching && isVersionMatching && isUUIDMatching) {
-//                apiList.add(api);
-//            }
-//        }
-//        return apiList;
-        return null;
-    }
-
-    @Override
-    public API getMatchingAPI(String context, String version) {
-//        for (API api : apiMap.values()) {
-//            if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
-//                if (api.getContext().equals(context) && api.getApiVersion().equals(version)) {
-//                    return api;
-//                }
-//            }
-//        }
-        return null;
-    }
-
-    @Override
     public List<Application> getMatchingApplications(String name, String organizationID, String uuid) {
         List<Application> applicationList = new ArrayList<>();
         for (Application application : applicationMap.values()) {

@@ -27,7 +27,7 @@ import java.util.List;
 public class APIList {
 
     private Integer count = null;
-    private List<API> list = new ArrayList<>();
+    private List<BasicAPIInfo> list = new ArrayList<>();
 
     public Integer getCount() {
 
@@ -39,12 +39,12 @@ public class APIList {
         this.count = count;
     }
 
-    public List<API> getList() {
+    public List<BasicAPIInfo> getList() {
 
         return list;
     }
 
-    public void setList(List<API> list) {
+    public void setList(List<BasicAPIInfo> list) {
 
         this.list = list;
     }

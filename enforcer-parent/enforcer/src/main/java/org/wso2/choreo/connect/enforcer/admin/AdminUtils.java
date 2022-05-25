@@ -20,12 +20,15 @@ package org.wso2.choreo.connect.enforcer.admin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
+import org.wso2.choreo.connect.enforcer.api.API;
+import org.wso2.choreo.connect.enforcer.models.APIInfo;
 import org.wso2.choreo.connect.enforcer.models.Application;
 import org.wso2.choreo.connect.enforcer.models.ApplicationInfo;
 import org.wso2.choreo.connect.enforcer.models.ApplicationInfoList;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
 import org.wso2.choreo.connect.enforcer.models.ApplicationPolicy;
 import org.wso2.choreo.connect.enforcer.models.ApplicationPolicyList;
+import org.wso2.choreo.connect.enforcer.models.BasicAPIInfo;
 import org.wso2.choreo.connect.enforcer.models.ResponsePayload;
 import org.wso2.choreo.connect.enforcer.models.RevokedToken;
 import org.wso2.choreo.connect.enforcer.models.RevokedTokenList;
@@ -42,19 +45,33 @@ import java.util.List;
  */
 public class AdminUtils {
 
-//    public static APIInfo toAPIInfo(API api, List<SubscriptionInfo> subscriptionInfoList) {
-//        APIInfo apiInfo = new APIInfo();
-//        apiInfo.setSubscriptions(subscriptionInfoList);
-//        apiInfo.setApiId(api.getApiId());
-//        apiInfo.setApiUUID(api.getApiUUID());
-//        apiInfo.setContext(api.getContext());
-//        apiInfo.setName(api.getApiName());
-//        apiInfo.setLcState(api.getLcState());
-//        apiInfo.setTier(api.getApiTier());
-//        apiInfo.setVersion(api.getApiVersion());
-//        apiInfo.setProvider(api.getApiProvider());
-//        return apiInfo;
-//    }
+    public static APIInfo toAPIInfo(API api, String lcState, List<SubscriptionInfo> subscriptionInfoList) {
+        APIInfo apiInfo = new APIInfo();
+        apiInfo.setSubscriptions(subscriptionInfoList);
+        apiInfo.setApiUUID(api.getAPIConfig().getUuid());
+        apiInfo.setContext(api.getAPIConfig().getBasePath());
+        apiInfo.setName(api.getAPIConfig().getName());
+        apiInfo.setLcState(lcState);
+        apiInfo.setTier(api.getAPIConfig().getTier());
+        apiInfo.setVersion(api.getAPIConfig().getVersion());
+        apiInfo.setProvider(api.getAPIConfig().getApiProvider());
+        apiInfo.setApiType(api.getAPIConfig().getApiType());
+        return apiInfo;
+    }
+
+    public static BasicAPIInfo toBasicAPIInfo(API api, String lifeCycleState, boolean isDefaultVersion) {
+        BasicAPIInfo apiInfo = new BasicAPIInfo();
+        apiInfo.setApiUUID(api.getAPIConfig().getUuid());
+        apiInfo.setContext(api.getAPIConfig().getBasePath());
+        apiInfo.setName(api.getAPIConfig().getName());
+        apiInfo.setLcState(lifeCycleState);
+        apiInfo.setDefaultVersion(isDefaultVersion);
+        apiInfo.setApiType(api.getAPIConfig().getApiType());
+        apiInfo.setVersion(api.getAPIConfig().getVersion());
+        apiInfo.setProvider(api.getAPIConfig().getApiProvider());
+        apiInfo.setPolicy(api.getAPIConfig().getTier());
+        return apiInfo;
+    }
 
     public static ApplicationInfo toApplicationInfo(Application application,
                                                     ApplicationKeyMapping applicationKeyMapping) {
