@@ -22,6 +22,7 @@ local interceptor = {}
 require 'home.wso2.interceptor.lib.consts'
 require 'home.wso2.interceptor.lib.encoders'
 require 'home.wso2.interceptor.lib.utils'
+local utils = require 'home.wso2.interceptor.lib.utils'
 
 local function modify_headers(handle, interceptor_response_body)
     -- priority: headersToAdd, headersToReplace, headersToRemove
@@ -365,11 +366,11 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         -- error thrown, exiting
         return
     end
-    wire_log_body(request_handle, " >> request body >> ", wire_log_config.log_body_enabled)
+    utils.wire_log_body(request_handle, " >> request body >> ", wire_log_config.log_body_enabled)
     modify_headers(request_handle, interceptor_response_body)
     modify_trailers(request_handle, interceptor_response_body)
-    wire_log_headers(request_handle, " >> request headers >> ", wire_log_config.log_headers_enabled)
-    wire_log_trailers(request_handle, " >> request trailers >> ", wire_log_config.log_trailers_enabled)
+    utils.wire_log_headers(request_handle, " >> request headers >> ", wire_log_config.log_headers_enabled)
+    utils.wire_log_trailers(request_handle, " >> request trailers >> ", wire_log_config.log_trailers_enabled)
 
     --#region handle dynamic endpoint
     -- handle this after update headers, in case if user modify the header "x-wso2-cluster-header"
@@ -476,7 +477,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         -- error thrown, exiting
         return
     end
-    wire_log_body(response_handle, " << response body << ", wire_log_config.log_body_enabled)
+    utils.wire_log_body(response_handle, " << response body << ", wire_log_config.log_body_enabled)
     modify_headers(response_handle, interceptor_response_body)
     modify_trailers(response_handle, interceptor_response_body)
 
@@ -486,8 +487,8 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     --#endregion
 
-    wire_log_headers(response_handle, " << response headers << ", wire_log_config.log_headers_enabled)
-    wire_log_trailers(response_handle, " >> response trailers >> ", wire_log_config.log_trailers_enabled)
+    utils.wire_log_headers(response_handle, " << response headers << ", wire_log_config.log_headers_enabled)
+    utils.wire_log_trailers(response_handle, " >> response trailers >> ", wire_log_config.log_trailers_enabled)
 end
 
 return interceptor
