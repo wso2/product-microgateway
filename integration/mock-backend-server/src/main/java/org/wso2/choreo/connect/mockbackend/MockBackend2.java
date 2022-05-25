@@ -50,7 +50,7 @@ public class MockBackend2 extends Thread {
             String diffContext = "/v2sand";
 
             httpServer.createContext(diffContext + "/pet/findByStatus", exchange -> {
-                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
