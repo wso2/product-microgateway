@@ -128,7 +128,6 @@ function utils.wire_log_trailers(handle, log_message, log_trailers_enabled)
     if log_trailers_enabled then 
         local trailers = handle:trailers()
         local log_output = "\n"
-        handle:logInfo("==== trailers ====")
         if trailers ~= nil then
             for trailer_name, trailer_value in pairs(trailers) do
                 log_output = log_output .. "[wirelog]" .. log_message .. trailer_name .. ": " .. trailer_value .. "\n"
