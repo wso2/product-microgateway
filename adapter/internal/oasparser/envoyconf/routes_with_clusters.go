@@ -819,11 +819,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					InlineString: `
 local utils = require 'home.wso2.interceptor.lib.utils'
 function envoy_on_request(request_handle)
-	utils.wire_log_body_and_headers(request_handle, " >> request path body >> ", " >> request path headers >> ", true)
+	utils.wire_log_body_and_headers(request_handle, " >> request body >> ", " >> request headers >> ", true)
 end
 
 function envoy_on_response(response_handle)
-	utils.wire_log_body_and_headers(response_handle, " << response path body << ", " << response path headers << ", true)
+	utils.wire_log_body_and_headers(response_handle, " << response body << ", " << response headers << ", true)
 end`,
 				}}},
 			}
