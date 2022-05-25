@@ -525,10 +525,10 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			ClusterName: clusterName,
 			Endpoints:   lbEPs,
 		},
-		TransportSocketMatches:      transportSocketMatches,
-		DnsRefreshRate:              durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
-		RespectDnsTtl:               conf.Envoy.Upstream.DNS.RespectDNSTtl,
-		UpstreamHttpProtocolOptions: &corev3.UpstreamHttpProtocolOptions{},
+		TransportSocketMatches: transportSocketMatches,
+		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
+		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		Http2ProtocolOptions:   &corev3.Http2ProtocolOptions{},
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
@@ -609,6 +609,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 				CipherSuites:              ciphersArray,
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+			// AlpnProtocols:   []string{"h2", "http/1.1"},
 		},
 	}
 
