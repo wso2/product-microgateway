@@ -32,3 +32,4 @@ format = "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PRO
 
 [wireLogs]
 enable = false
+include = ["Body", "Headers", "Trailers"]

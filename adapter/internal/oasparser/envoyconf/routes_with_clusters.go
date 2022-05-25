@@ -42,7 +42,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -52,7 +51,19 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	interceptor "github.com/wso2/product-microgateway/adapter/internal/interceptor"
 )
+
+// WireLogValues holds debug logging related template values
+type WireLogValues struct {
+	LogConfig *config.WireLogConfig
+}
+
+// CombinedTemplateValues holds combined values for both WireLogValues properties and Interceptor properties in the same level
+type CombinedTemplateValues struct {
+	WireLogValues
+	interceptor.Interceptor
+}
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
 // This creates routes for all the swagger resources and link to clusters.
@@ -814,17 +825,27 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		logConf := config.ReadLogConfigs()
 
 		if logConf.WireLogs.Enable {
-			luaPerFilterConfig = lua.LuaPerRoute{
-				Override: &lua.LuaPerRoute_SourceCode{SourceCode: &corev3.DataSource{Specifier: &corev3.DataSource_InlineString{
-					InlineString: `
+
+			templateString := `
 local utils = require 'home.wso2.interceptor.lib.utils'
+local wire_log_config = {
+	log_body_enabled = {{ .LogConfig.LogBodyEnabled }},
+	log_headers_enabled = {{ .LogConfig.LogHeadersEnabled }},
+	log_trailers_enabled = {{ .LogConfig.LogTrailersEnabled }}
+}
 function envoy_on_request(request_handle)
-	utils.wire_log_body_and_headers(request_handle, " >> request body >> ", " >> request headers >> ", true)
+	utils.wire_log(request_handle, " >> request body >> ", " >> request headers >> ", " >> request trailers >> ", wire_log_config)
 end
 
 function envoy_on_response(response_handle)
-	utils.wire_log_body_and_headers(response_handle, " << response body << ", " << response headers << ", true)
-end`,
+	utils.wire_log(response_handle, " << response body << ", " << response headers << ", " << response trailers << ", wire_log_config)
+end`
+			templateValues := WireLogValues{
+				LogConfig: config.GetWireLogConfig(),
+			}
+			luaPerFilterConfig = lua.LuaPerRoute{
+				Override: &lua.LuaPerRoute_SourceCode{SourceCode: &corev3.DataSource{Specifier: &corev3.DataSource_InlineString{
+					InlineString: interceptor.GetInterceptor(templateValues, templateString),
 				}}},
 			}
 		} else {
@@ -1007,7 +1028,17 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 			}
 		}
 	}
-	return interceptor.GetInterceptor(i)
+	templateValues := CombinedTemplateValues{
+		WireLogValues{
+			LogConfig: config.GetWireLogConfig(),
+		},
+		*i,
+	}
+
+	templateString := interceptor.GetTemplate(i.IsRequestFlowEnabled,
+		i.IsResponseFlowEnabled)
+
+	return interceptor.GetInterceptor(templateValues, templateString)
 }
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint

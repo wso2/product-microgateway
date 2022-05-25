@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
@@ -74,17 +73,6 @@ type InvocationContext struct {
 	SandClusterName  string
 }
 
-// WireLogValues holds debug logging related template values
-type WireLogValues struct {
-	DebugLogEnabled bool
-}
-
-// CombinedTemplateValues holds combined values for both WireLogValues properties and Interceptor properties in the same level
-type CombinedTemplateValues struct {
-	WireLogValues
-	Interceptor
-}
-
 var (
 	// commonTemplate contains common lua code for request and response intercept
 	// Note: this template only applies if request or response interceptor is enabled
@@ -108,6 +96,11 @@ local inv_context = {
 	prodClusterName = "{{.Context.ProdClusterName}}",
 	sandClusterName = "{{.Context.SandClusterName}}"
 }
+local wire_log_config = {
+	log_body_enabled = {{ .LogConfig.LogBodyEnabled }},
+	log_headers_enabled = {{ .LogConfig.LogHeadersEnabled }},
+	log_trailers_enabled = {{ .LogConfig.LogTrailersEnabled }}
+}
 `
 	requestInterceptorTemplate = `
 local req_flow_list = {  
@@ -120,7 +113,7 @@ local req_call_config = {
 	{{- end -}}}
 function envoy_on_request(request_handle)
 	interceptor.handle_request_interceptor(
-		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context, false, {{- .DebugLogEnabled -}}
+		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context, false, wire_log_config
 	)
 end
 `
@@ -132,7 +125,7 @@ local res_call_config = {
 	{{- end -}}}
 function envoy_on_response(response_handle)
 	interceptor.handle_response_interceptor(
-		response_handle, res_call_config, resp_flow_list, {{- .DebugLogEnabled -}}
+		response_handle, res_call_config, resp_flow_list, wire_log_config
 	)
 end
 `
@@ -140,14 +133,14 @@ end
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
-	utils.wire_log_body_and_headers(request_handle, " >> request body >> ", " >> request headers >> ", {{- .DebugLogEnabled -}})
-	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, false)
+	utils.wire_log(request_handle, " >> request body >> ", " >> request headers >> ", " >> request trailers >> ", wire_log_config)
+	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, { log_body_enabled = false, log_headers_enabled = false, log_trailers_enabled = false })
 end
 `
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
 	defaultResponseInterceptorTemplate = `
 function envoy_on_response(response_handle)
-	utils.wire_log_body_and_headers(response_handle, " << response body << ", " << response headers << ", {{- .DebugLogEnabled -}})
+	utils.wire_log(response_handle, " << response body << ", " << response headers << ", " << response trailers << ", wire_log_config)
 end
 `
 	// emptyRequestInterceptorTemplate is the template that is applied when request flow and response flow is disabled
@@ -161,9 +154,8 @@ end
 
 //GetInterceptor inject values and get request interceptor
 // Note: This method is called only if one of request or response interceptor is enabled
-func GetInterceptor(values *Interceptor) string {
-	t, err := template.New("lua-filter").Parse(getTemplate(values.IsRequestFlowEnabled,
-		values.IsResponseFlowEnabled))
+func GetInterceptor(templateValues any, templateString string) string {
+	t, err := template.New("lua-filter").Parse(templateString)
 	if err != nil {
 		logger.LoggerInterceptor.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("error while parsing the interceptor template: %v", err.Error()),
@@ -175,15 +167,7 @@ func GetInterceptor(values *Interceptor) string {
 	templ := template.Must(t, err)
 	var out bytes.Buffer
 
-	logConf := config.ReadLogConfigs()
-	combinedTemplateValues := CombinedTemplateValues{
-		WireLogValues{
-			DebugLogEnabled: logConf.WireLogs.Enable,
-		},
-		*values,
-	}
-
-	err = templ.Execute(&out, combinedTemplateValues)
+	err = templ.Execute(&out, templateValues)
 	if err != nil {
 		logger.LoggerInterceptor.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("executing request interceptor template: %v", err.Error()),
@@ -195,7 +179,8 @@ func GetInterceptor(values *Interceptor) string {
 	return out.String()
 }
 
-func getTemplate(isReqIntercept bool, isResIntercept bool) string {
+// GetTemplate returns the combined tempalate for the interceptor lua script
+func GetTemplate(isReqIntercept bool, isResIntercept bool) string {
 	reqT := defaultRequestInterceptorTemplate
 	resT := defaultResponseInterceptorTemplate
 	if isReqIntercept {

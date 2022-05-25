@@ -270,7 +270,7 @@ end
 ---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
 ---@param inv_context table
 ---@param skip_interceptor_call boolean
-function interceptor.handle_request_interceptor(request_handle, intercept_service_list, req_flow_includes_list, resp_flow_includes_list, inv_context, skip_interceptor_call, wire_log_enabled)
+function interceptor.handle_request_interceptor(request_handle, intercept_service_list, req_flow_includes_list, resp_flow_includes_list, inv_context, skip_interceptor_call, wire_log_config)
     local shared_info = {}
 
     local request_headers = request_handle:headers()
@@ -309,7 +309,7 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
 
     --#region read request body and update shared_info
     local request_body_base64
-    if req_flow_includes[INCLUDES.REQ_BODY] or resp_flow_includes[INCLUDES.REQ_BODY] or wire_log_enabled then
+    if req_flow_includes[INCLUDES.REQ_BODY] or resp_flow_includes[INCLUDES.REQ_BODY] or wire_log_config.log_body_enabled then
         local request_body = request_handle:body()
         local request_body_str
         if request_body then
@@ -365,10 +365,11 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         -- error thrown, exiting
         return
     end
-    wire_log_body(request_handle, " >> request body >> ", wire_log_enabled)
+    wire_log_body(request_handle, " >> request body >> ", wire_log_config.log_body_enabled)
     modify_headers(request_handle, interceptor_response_body)
     modify_trailers(request_handle, interceptor_response_body)
-    wire_log_headers(request_handle, " >> request headers >> ", wire_log_enabled)
+    wire_log_headers(request_handle, " >> request headers >> ", wire_log_config.log_headers_enabled)
+    wire_log_trailers(request_handle, " >> request trailers >> ", wire_log_config.log_trailers_enabled)
 
     --#region handle dynamic endpoint
     -- handle this after update headers, in case if user modify the header "x-wso2-cluster-header"
@@ -387,7 +388,7 @@ end
 ---@param response_handle table - response_handle
 ---@param intercept_service_list {method: {cluster_name: string, resource_path: string, timeout: number}}
 ---@param resp_flow_includes_list {method: {requestHeaders: boolean, requestBody: boolean, requestTrailer: boolean, responseHeaders: boolean, responseBody: boolean, responseTrailers: boolean}}
-function interceptor.handle_response_interceptor(response_handle, intercept_service_list, resp_flow_includes_list, wire_log_enabled)
+function interceptor.handle_response_interceptor(response_handle, intercept_service_list, resp_flow_includes_list, wire_log_config)
     local meta = response_handle:streamInfo():dynamicMetadata():get(LUA_FILTER_NAME)
     local shared_info = meta and meta[SHARED_INFO_META_KEY]
     if not shared_info then
@@ -428,7 +429,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     --#endregion
 
     --#region read backend body
-    if resp_flow_includes[INCLUDES.RESP_BODY] or wire_log_enabled then
+    if resp_flow_includes[INCLUDES.RESP_BODY] or wire_log_config.log_body_enabled then
         local request_body = response_handle:body():getBytes(0, response_handle:body():length())
         interceptor_request_body[REQUEST.RESP_BODY] = base64_encode(request_body)
     end
@@ -475,7 +476,7 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         -- error thrown, exiting
         return
     end
-    wire_log_body(response_handle, " << response body << ", wire_log_enabled)
+    wire_log_body(response_handle, " << response body << ", wire_log_config.log_body_enabled)
     modify_headers(response_handle, interceptor_response_body)
     modify_trailers(response_handle, interceptor_response_body)
 
@@ -485,7 +486,8 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     --#endregion
 
-    wire_log_headers(response_handle, " << response headers << ", wire_log_enabled)
+    wire_log_headers(response_handle, " << response headers << ", wire_log_config.log_headers_enabled)
+    wire_log_trailers(response_handle, " >> response trailers >> ", wire_log_config.log_trailers_enabled)
 end
 
 return interceptor

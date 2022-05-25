@@ -29,7 +29,8 @@ type accessLog struct {
 }
 
 type wireLogs struct {
-	Enable bool
+	Enable  bool
+	Include []string
 }
 
 // LogConfig represents the configurations related to adapter logs and envoy access logs.
@@ -65,7 +66,8 @@ func getDefaultLogConfig() *LogConfig {
 				"'%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n",
 		},
 		WireLogs: &wireLogs{
-			Enable: false,
+			Enable:  false,
+			Include: []string{"Body", "Headers", "Trailers"},
 		},
 	}
 	adapterLogConfig.Rotation.MaxSize = 10
