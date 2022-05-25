@@ -47,6 +47,13 @@ public class MockBackend2 extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
+            String diffContext = "/v2sand";
+
+            httpServer.createContext(diffContext + "/pet/findByStatus", exchange -> {
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
             httpServer.start();
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Error occurred while setting up sandbox server", ex);
