@@ -225,6 +225,9 @@
                     <suppressionFiles>/home/ubuntu/owasp/owasp-suppressions.xml</suppressionFiles>
                     <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
                     <ossindexAnalyzerUseCache>false</ossindexAnalyzerUseCache>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+                    <nuspecAnalyzerEnabled>false</nuspecAnalyzerEnabled>
                 </configuration>
             </plugin>
         </plugins>
