@@ -216,6 +216,17 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency.check.maven.version}</version>
+                <configuration>
+                    <failBuildOnCVSS>${dependency.check.cvss.threshold.value}</failBuildOnCVSS>
+                    <suppressionFiles>/home/ubuntu/owasp/owasp-suppressions.xml</suppressionFiles>
+                    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
+                    <ossindexAnalyzerUseCache>false</ossindexAnalyzerUseCache>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencyManagement>
