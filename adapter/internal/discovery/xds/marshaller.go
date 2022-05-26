@@ -510,12 +510,13 @@ func MarshalAPIMetataAndReturnList(apiList *types.APIList, initialAPIUUIDListMap
 // DeleteAPIAndReturnList removes the API from internal maps and returns the marshalled API List.
 // If the apiUUID is not found in the internal map under the provided environment, then it would return a
 // nil value. Hence it is required to check if the return value is nil, prior to updating the XDS cache.
-func DeleteAPIAndReturnList(apiUUID, organizationUUID string, gatewayLabel string) *subscription.APIList {
+func DeleteAPIAndReturnList(apiUUID string, gatewayLabel string) *subscription.APIList {
 	if _, ok := APIListMap[gatewayLabel]; !ok {
 		logger.LoggerXds.Debugf("No API Metadata is available under gateway Environment : %s", gatewayLabel)
 		return nil
 	}
 	delete(APIListMap[gatewayLabel], apiUUID)
+	logger.LoggerXds.Debugf("API Metadata for : %s is removed under gateway Environment : %s", apiUUID, gatewayLabel)
 	return marshalAPIListMapToList(APIListMap[gatewayLabel])
 }
 
@@ -527,9 +528,11 @@ func MarshalAPIForLifeCycleChangeEventAndReturnList(apiUUID, status, gatewayLabe
 		logger.LoggerXds.Debugf("No API Metadata is available under gateway Environment : %s", gatewayLabel)
 		return nil
 	}
-	if _, ok := APIListMap[gatewayLabel][apiUUID]; !ok {
+	if apiEntry, ok := APIListMap[gatewayLabel][apiUUID]; !ok {
 		// If the Lifecycle statue is not blocked, and the API is not included in the map, the APIListMap need not to be updated.
 		if status != blockedStatus {
+			logger.LoggerXds.Debugf("%s : %s API life cycle state change event is discarded as the API is unavailable",
+				apiUUID, gatewayLabel)
 			return nil
 		}
 		logger.LoggerXds.Debugf("No API Metadata for API ID: %s is available under gateway Environment : %s. Hence"+
@@ -538,14 +541,27 @@ func MarshalAPIForLifeCycleChangeEventAndReturnList(apiUUID, status, gatewayLabe
 			Uuid:    apiUUID,
 			LcState: status,
 		}
+	} else {
+		// If the update for existing API entry is not "BLOCKED" then the API can be removed from the list.
+		// when the API is unavailable in the api metadata list received in the enforcer, it would be treated as
+		// an unblocked API.
+		// But if the API is a default version, those APIs needs to be kept. But with the lifecycle state != BLOCKED.
+		if status != blockedStatus && !apiEntry.IsDefaultVersion {
+			return DeleteAPIAndReturnList(apiUUID, gatewayLabel)
+		}
 	}
+
 	storedAPILCState := APIListMap[gatewayLabel][apiUUID].LcState
 
 	// Because the adapter only required to update the XDS if it is related to blocked state.
 	if !(storedAPILCState == blockedStatus || status == blockedStatus) {
+		logger.LoggerXds.Debugf("%s : %s API life cycle state change event with state %q is discarded as the information is not required.",
+			apiUUID, gatewayLabel, status)
 		return nil
 	}
 	APIListMap[gatewayLabel][apiUUID].LcState = status
+	logger.LoggerXds.Infof("%s : %s API life cycle state change event with state %q is updated.",
+		apiUUID, gatewayLabel, status)
 	return marshalAPIListMapToList(APIListMap[gatewayLabel])
 }
 

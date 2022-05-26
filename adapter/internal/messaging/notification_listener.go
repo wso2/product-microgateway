@@ -171,13 +171,12 @@ func handleAPIEvents(data []byte, eventType string) {
 		// to delete. Hence we could simply delete after checking against just one iteration.
 		if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
 			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels, "")
-			// TODO: (VirajSalaka) Temporarily Removed.
-			// for _, env := range apiEvent.GatewayLabels {
-			// 	xdsAPIList := xds.DeleteAPIAndReturnList(apiEvent.UUID, apiEvent.TenantDomain, env)
-			// 	if xdsAPIList != nil {
-			// 		xds.UpdateEnforcerAPIList(env, xdsAPIList)
-			// 	}
-			// }
+			for _, env := range apiEvent.GatewayLabels {
+				xdsAPIList := xds.DeleteAPIAndReturnList(apiEvent.UUID, env)
+				if xdsAPIList != nil {
+					xds.UpdateEnforcerAPIList(env, xdsAPIList)
+				}
+			}
 			return
 		}
 		// TODO: (VirajSalaka) Temporarily removed.
@@ -220,7 +219,6 @@ func handleLifeCycleEvents(data []byte) {
 	}
 	conf, _ := config.ReadConfigs()
 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
-	logger.LoggerInternalMsg.Debugf("%s : %s API life cycle state change event is discarded", apiEvent.APIName, apiEvent.APIVersion)
 
 	if len(configuredEnvs) == 0 {
 		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
