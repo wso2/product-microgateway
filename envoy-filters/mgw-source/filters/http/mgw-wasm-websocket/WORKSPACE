@@ -3,8 +3,8 @@ workspace(name = "mgw-wasm-websocket")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Pulls proxy wasm cpp SDK with a specific SHA
-PROXY_WASM_CPP_SDK_SHA = "258b4c6974dba5255a9c433450971a56b29228ff"
-PROXY_WASM_CPP_SDK_SHA256 = "8ff6231a5f0cc07bc865293e56eb37f60f5fd8d5a3889455c4e4ad9dbe54a5f7"
+PROXY_WASM_CPP_SDK_SHA = "c32d380ca6c9b1afac38a3841be99c37af2698bf"
+PROXY_WASM_CPP_SDK_SHA256 = "f83b83fe919905d8a6bb6ed6a0afb30d41a02cb52f33b616292c1de010d237db"
 
 http_archive(
     name = "proxy_wasm_cpp_sdk",
@@ -13,13 +13,18 @@ http_archive(
     url = "https://github.com/proxy-wasm/proxy-wasm-cpp-sdk/archive/" + PROXY_WASM_CPP_SDK_SHA + ".tar.gz",
 )
 
-load("@proxy_wasm_cpp_sdk//bazel/dep:deps.bzl", "wasm_dependencies")
+load("@proxy_wasm_cpp_sdk//bazel:repositories.bzl", "proxy_wasm_cpp_host_repositories")
 
-wasm_dependencies()
+proxy_wasm_cpp_host_repositories()
 
-load("@proxy_wasm_cpp_sdk//bazel/dep:deps_extra.bzl", "wasm_dependencies_extra")
 
-wasm_dependencies_extra()
+load("@proxy_wasm_cpp_sdk//bazel:dependencies.bzl", "proxy_wasm_cpp_host_dependencies")
+
+proxy_wasm_cpp_host_dependencies()
+
+load("@proxy_wasm_cpp_sdk//bazel:dependencies_extra.bzl", "proxy_wasm_cpp_host_dependencies_extra")
+
+proxy_wasm_cpp_host_dependencies_extra()
 
 local_repository(
     name = "mgw_wasm_websocket_api",

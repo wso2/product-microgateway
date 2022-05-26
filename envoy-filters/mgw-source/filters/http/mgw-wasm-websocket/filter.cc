@@ -11,7 +11,7 @@
 #include "handler.h"
 
 #include "proxy_wasm_intrinsics.h"
-#include "proxy_wasm_intrinsics_lite.pb.h"
+#include "proxy_wasm_intrinsics.pb.h"
 
 #include "google/protobuf/util/json_util.h"
 
