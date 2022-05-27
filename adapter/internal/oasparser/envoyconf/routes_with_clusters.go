@@ -39,7 +39,6 @@ import (
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 
-	upstreams_http_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
@@ -517,15 +516,15 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	}
 	conf, _ := config.ReadConfigs()
 
-	autoHTTPConfig := &upstreams_http_v3.HttpProtocolOptions_AutoHttpConfig{
-		HttpProtocolOptions:  &corev3.Http1ProtocolOptions{},
-		Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
-	}
+	// autoHTTPConfig := &upstreams_http_v3.HttpProtocolOptions_AutoHttpConfig{
+	// 	HttpProtocolOptions:  &corev3.Http1ProtocolOptions{},
+	// 	Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
+	// }
 
-	ext, err2 := proto.Marshal(autoHTTPConfig)
-	if err2 != nil {
-		logger.LoggerOasparser.Error(err2)
-	}
+	// ext, err2 := proto.Marshal(autoHTTPConfig)
+	// if err2 != nil {
+	// 	logger.LoggerOasparser.Error(err2)
+	// }
 
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
