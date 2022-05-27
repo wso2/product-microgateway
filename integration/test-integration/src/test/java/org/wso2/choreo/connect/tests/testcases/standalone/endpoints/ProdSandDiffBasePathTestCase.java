@@ -40,7 +40,7 @@ public class ProdSandDiffBasePathTestCase {
 
         Assert.assertNotNull(sandResponse);
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
                 "Response message mismatch.");
     }
 }

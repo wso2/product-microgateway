@@ -66,7 +66,7 @@ paths:
         - http://mockBackend:2390/
     x-wso2-sandbox-endpoints:
       urls:
-        - http://mockBackend:2383
+        - http://mockBackend:2383/
     get:
       tags:
         - pet
@@ -194,7 +194,85 @@ paths:
             items:
               $ref: '#/definitions/Pet'
         '400':
-          description: Invalid tag value
+          description: Invalid tag
+  /pet/patch/same/findByStatus:
+    x-wso2-production-endpoints:
+      urls:
+        - http://mockBackend:2391/v2sand
+    x-wso2-sandbox-endpoints:
+      urls:
+        - http://mockBackend:2391/v2sand
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: status
+          in: query
+          description: Status values that need to be considered for filter
+          required: true
+          type: array
+          items:
+            type: string
+            enum:
+              - available
+              - pending
+              - sold
+            default: available
+          collectionFormat: multi
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+        '400':
+          description: Invalid status value
+  /pet/patch/diff/findByStatus:
+    x-wso2-production-endpoints:
+      urls:
+        - http://mockBackend:2390/v2
+    x-wso2-sandbox-endpoints:
+      urls:
+        - http://mockBackend:2391/v2sand
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findPetsByStatus
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: status
+          in: query
+          description: Status values that need to be considered for filter
+          required: true
+          type: array
+          items:
+            type: string
+            enum:
+              - available
+              - pending
+              - sold
+            default: available
+          collectionFormat: multi
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+        '400':
+          description: Invalid status value
 definitions:
   Pet:
     type: object
