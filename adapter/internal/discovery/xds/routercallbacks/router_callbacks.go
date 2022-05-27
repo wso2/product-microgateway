@@ -52,7 +52,7 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	nodeIdentifier := common.GetNodeIdentifier(request)
-	if common.IsNewNode(nodeQueueInstance, nodeIdentifier) {
+	if nodeQueueInstance.IsNewNode(nodeIdentifier) {
 		logger.LoggerRouterXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s",
 			id, nodeIdentifier, request.VersionInfo)
 	}

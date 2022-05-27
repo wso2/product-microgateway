@@ -15,54 +15,54 @@
  *
  */
 
-package common_test
+package common
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds/common"
 )
 
 func TestCheckEntryAndSwapToEnd(t *testing.T) {
-	array := generateNodeArray(5)
 	entry := "node-40"
-	resultArray, isNewAddition := common.CheckEntryAndSwapToEnd(array, entry)
-	assert.Equal(t, 6, len(resultArray), "array length mismatch")
-	assert.Equal(t, "node-40", resultArray[5], "array element mismatch")
+	nodeQueue := GenerateNodeQueue()
+	nodeQueue.queue = generateNodeArray(5)
+	isNewAddition := nodeQueue.IsNewNode(entry)
+	assert.Equal(t, 6, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-40", nodeQueue.queue[5], "array element mismatch")
 	assert.True(t, isNewAddition, "isNewAddition flag is not correct.")
 
-	array = generateNodeArray(5)
 	entry = "node-2"
-	resultArray, isNewAddition = common.CheckEntryAndSwapToEnd(array, entry)
-	assert.Equal(t, 5, len(resultArray), "array length mismatch")
-	assert.Equal(t, "node-2", resultArray[4], "array element mismatch")
-	assert.Equal(t, "node-3", resultArray[2], "array element mismatch")
+	nodeQueue.queue = generateNodeArray(5)
+	isNewAddition = nodeQueue.IsNewNode(entry)
+	assert.Equal(t, 5, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-2", nodeQueue.queue[4], "array element mismatch")
+	assert.Equal(t, "node-3", nodeQueue.queue[2], "array element mismatch")
 	assert.False(t, isNewAddition, "isNewAddition flag is not correct.")
 
-	array = generateNodeArray(20)
 	entry = "node-19"
-	resultArray, isNewAddition = common.CheckEntryAndSwapToEnd(array, entry)
-	assert.Equal(t, 20, len(resultArray), "array length mismatch")
-	assert.Equal(t, "node-19", resultArray[19], "array element mismatch")
+	nodeQueue.queue = generateNodeArray(20)
+	isNewAddition = nodeQueue.IsNewNode(entry)
+	assert.Equal(t, 20, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-19", nodeQueue.queue[19], "array element mismatch")
 	assert.False(t, isNewAddition, "isNewAddition flag is not correct.")
 
-	array = generateNodeArray(20)
+	nodeQueue.queue = generateNodeArray(20)
 	entry = "node-40"
-	resultArray, isNewAddition = common.CheckEntryAndSwapToEnd(array, entry)
-	assert.Equal(t, 20, len(resultArray), "array length mismatch")
-	assert.Equal(t, "node-40", resultArray[19], "array element mismatch")
-	assert.Equal(t, "node-1", resultArray[0], "array element mismatch")
+	isNewAddition = nodeQueue.IsNewNode(entry)
+	assert.Equal(t, 20, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-40", nodeQueue.queue[19], "array element mismatch")
+	assert.Equal(t, "node-1", nodeQueue.queue[0], "array element mismatch")
 	assert.True(t, isNewAddition, "isNewAddition flag is not correct.")
 
-	array = generateNodeArray(20)
+	nodeQueue.queue = generateNodeArray(20)
 	entry = "node-10"
-	resultArray, isNewAddition = common.CheckEntryAndSwapToEnd(array, entry)
-	assert.Equal(t, 20, len(resultArray), "array length mismatch")
-	assert.Equal(t, "node-10", resultArray[19], "array element mismatch")
-	assert.Equal(t, "node-11", resultArray[10], "array element mismatch")
-	assert.Equal(t, "node-9", resultArray[9], "array element mismatch")
+	isNewAddition = nodeQueue.IsNewNode(entry)
+	assert.Equal(t, 20, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-10", nodeQueue.queue[19], "array element mismatch")
+	assert.Equal(t, "node-11", nodeQueue.queue[10], "array element mismatch")
+	assert.Equal(t, "node-9", nodeQueue.queue[9], "array element mismatch")
 	assert.False(t, isNewAddition, "isNewAddition flag is not correct.")
 }
 
