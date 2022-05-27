@@ -38,6 +38,8 @@ import (
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
+
+	upstreams_http_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
@@ -515,6 +517,16 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	}
 	conf, _ := config.ReadConfigs()
 
+	autoHTTPConfig := &upstreams_http_v3.HttpProtocolOptions_AutoHttpConfig{
+		HttpProtocolOptions:  &corev3.Http1ProtocolOptions{},
+		Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
+	}
+
+	ext, err2 := proto.Marshal(autoHTTPConfig)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
 		ConnectTimeout:       durationpb.New(timeout * time.Second),
@@ -528,7 +540,15 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
-		Http2ProtocolOptions:   &corev3.Http2ProtocolOptions{},
+		// Http2ProtocolOptions:   &corev3.Http2ProtocolOptions{},
+		// UpstreamHttpProtocolOptions: &corev3.UpstreamHttpProtocolOptions{},
+		// ProtocolSelection: clusterv3.Cluster_USE_DOWNSTREAM_PROTOCOL,
+		// TypedExtensionProtocolOptions: map[string]*anypb.Any{
+		// 	wellknown.Router: &any.Any{
+		// 		TypeUrl: "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions.AutoHttpConfig",
+		// 		Value:   ext,
+		// 	},
+		// },
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
