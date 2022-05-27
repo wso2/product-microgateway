@@ -43,4 +43,102 @@ public class ProdSandDiffBasePathTestCase {
         Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
                 "Response message mismatch.");
     }
+
+    @Test(description = "Invoke Production and Sandbox endpoint when both API level basepaths are different and " +
+            "resource level basepaths are same")
+    public void invokeProdSandResourceSameEndpoints() throws Exception {
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/pets/findByStatus"), prodHeaders);
+
+        Assert.assertNotNull(prodResponse);
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+                "Response message mismatch.");
+
+        Map<String, String> sandHeaders = new HashMap<String, String>();
+        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/pets/findByStatus"), sandHeaders);
+
+        Assert.assertNotNull(sandResponse);
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "Invoke Production and Sandbox endpoint when both API level basepaths are different and " +
+            "resource level basepaths are different")
+    public void invokeProdSandResourceDiffEndpoints() throws Exception {
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/pet/findByTags"), prodHeaders);
+
+        Assert.assertNotNull(prodResponse);
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+                "Response message mismatch.");
+
+        Map<String, String> sandHeaders = new HashMap<String, String>();
+        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/pet/findByTags"), sandHeaders);
+
+        Assert.assertNotNull(sandResponse);
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "Invoke Production and Sandbox endpoint when both API level basepaths are different and " +
+            "resource level sandbox basepath is different")
+    public void invokeProdSandResourceSandEndpoints() throws Exception {
+        Map<String, String> sandHeaders = new HashMap<String, String>();
+        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/v2/pets/findByStatus"), sandHeaders);
+
+        Assert.assertNotNull(sandResponse);
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+                "Response message mismatch.");
+
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/v2/pets/findByStatus"), prodHeaders);
+
+        Assert.assertNotNull(prodResponse);
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "Invoke Production and Sandbox endpoint when both API level basepaths are different and " +
+            "resource level production basepath is different")
+    public void invokeProdSandResourceProdEndpoints() throws Exception {
+        Map<String, String> sandHeaders = new HashMap<String, String>();
+        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/v2/pets/findByStatus"), sandHeaders);
+
+        Assert.assertNotNull(sandResponse);
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+                "Response message mismatch.");
+
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/prodsand/v2/pets/findByStatus"), prodHeaders);
+
+        Assert.assertNotNull(prodResponse);
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
+                "Response message mismatch.");
+    }
+
+
 }
