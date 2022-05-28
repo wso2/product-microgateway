@@ -118,6 +118,11 @@ public class MockBackendProd extends Thread {
                 byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+            httpServer.createContext(context + "/v2/pets/findByTags", exchange -> {
+
+                byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
             httpServer.createContext(context + "/store/inventory", exchange -> {
 
                 byte[] response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();

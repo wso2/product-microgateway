@@ -66,6 +66,21 @@ public class MockBackend2 extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
+            httpServer.createContext(diffContext + "/pets/findByStatus", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE_2.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
+            httpServer.createContext(diffContext + "/pets/findByTags", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE_2.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
+            httpServer.createContext(diffContext + "/v2/pets/findByTags", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE_2.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
             httpServer.start();
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Error occurred while setting up sandbox server", ex);
