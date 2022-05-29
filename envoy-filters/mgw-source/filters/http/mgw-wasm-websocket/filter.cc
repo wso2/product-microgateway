@@ -24,7 +24,6 @@ static constexpr char EnforcerServiceName[] = "envoy.extensions.filters.http.mgw
 static constexpr char PublishFrameData[] = "PublishFrameData";
 
 using google::protobuf::util::JsonParseOptions;
-// using google::protobuf::util::status_internal::StatusCode;
 using google::protobuf::util::Status;
 
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest;
