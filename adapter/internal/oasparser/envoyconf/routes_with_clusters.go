@@ -345,13 +345,6 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				apiTitle, apiVersion, resourcePath, resourceBasePathSand, apiLevelbasePathSand)
 			clusterNameSand = ""
 		}
-		//else if clusterNameSand != "" && apiLevelbasePathSand == "" && clusterNameSand == apiLevelClusterNameSand && resourceBasePathSand != apiLevelbasePath {
-		//	// TODO: Re-evaluate this check for circuit breakers test and invokeProdEndpointOnlyDiffBasePath
-		//	// production endpoint basepath and sandbox endpoint basepath are different
-		//	logger.LoggerOasparser.Errorf("Error while adding resource level sandbox endpoints for %s:%v-%v. production endpoint basepath : %v and sandbox basepath : %v mismatched",
-		//		apiTitle, apiVersion, resourcePath, resourceBasePathSand, apiLevelbasePath)
-		//	clusterNameSand = ""
-		//}
 
 		reqInterceptorVal := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor, ResourceLevelInterceptor)
 		if reqInterceptorVal.Enable {
