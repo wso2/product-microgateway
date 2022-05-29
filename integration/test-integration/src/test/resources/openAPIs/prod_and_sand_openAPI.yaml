@@ -102,7 +102,7 @@ paths:
   /v2/pets/findByStatus:
     x-wso2-sandbox-endpoints:
       urls:
-        - http://mockBackend:2390/
+        - http://mockBackend:2391/v2sand
     get:
       tags:
         - pet
@@ -167,7 +167,7 @@ paths:
   /v2/pets/findByTags:
     x-wso2-production-endpoints:
       urls:
-        - http://mockBackend:2383/
+        - http://mockBackend:2391/v2sand
     get:
       tags:
         - pet

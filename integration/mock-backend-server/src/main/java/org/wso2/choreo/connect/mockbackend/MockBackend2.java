@@ -47,6 +47,7 @@ public class MockBackend2 extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
+            // For production and sandbox different basepaths test cases
             String diffContext = "/v2sand";
 
             httpServer.createContext(diffContext + "/pet/findByStatus", exchange -> {
@@ -71,7 +72,17 @@ public class MockBackend2 extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
+            httpServer.createContext(diffContext + "/v2/pets/findByStatus", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE_2.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
             httpServer.createContext(diffContext + "/pets/findByTags", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE_2.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
+            httpServer.createContext(diffContext + "/pet/findByTags", exchange -> {
                 byte[] response = ResponseConstants.API_SANDBOX_RESPONSE_2.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });

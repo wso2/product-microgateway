@@ -62,6 +62,11 @@ public class MockBackendSandbox extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
+            httpServer.createContext(context + "/v2/pets/findByTags", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
             httpServer.createContext(context + "/pet/findByTags", exchange -> {
                 byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);

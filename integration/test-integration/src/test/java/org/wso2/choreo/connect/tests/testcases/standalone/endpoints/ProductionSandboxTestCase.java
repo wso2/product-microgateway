@@ -125,7 +125,7 @@ public class ProductionSandboxTestCase {
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
                 "Response message mismatch.");
 
         // api level prod endpoint should not be added to resource if basepath is different
@@ -172,7 +172,7 @@ public class ProductionSandboxTestCase {
 
         Assert.assertNotNull(response, "Production endpoint response should not be null");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+        Assert.assertEquals(response.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
                 "Response message mismatch.");
 
         // api level sand endpoint should not be added if basepath is different

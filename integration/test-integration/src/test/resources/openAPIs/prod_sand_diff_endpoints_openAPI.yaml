@@ -102,7 +102,7 @@ paths:
   /pet/findByTags:
     x-wso2-production-endpoints:
       urls:
-        - http://mockBackend:2383/v2
+        - http://mockBackend:2391/v2sand
     x-wso2-sandbox-endpoints:
       urls:
         - http://mockBackend:2390/v2

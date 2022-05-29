@@ -21,7 +21,7 @@ public class ProdSandDiffBasePathTestCase {
         jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
-    @Test(description = "Invoke Production and Sandbox endpoint when both endpoints provided")
+    @Test(description = "Invoke Production and Sandbox endpoint when both endpoints provided and basepaths are different")
     public void invokeProdSandEndpoints() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -78,7 +78,7 @@ public class ProdSandDiffBasePathTestCase {
 
         Assert.assertNotNull(prodResponse);
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertEquals(prodResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
                 "Response message mismatch.");
 
         Map<String, String> sandHeaders = new HashMap<String, String>();
