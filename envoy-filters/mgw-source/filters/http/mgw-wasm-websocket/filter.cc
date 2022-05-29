@@ -7,6 +7,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <sstream>
+#include "sys/time.h"
 
 #include "handler.h"
 
@@ -23,7 +24,7 @@ static constexpr char EnforcerServiceName[] = "envoy.extensions.filters.http.mgw
 static constexpr char PublishFrameData[] = "PublishFrameData";
 
 using google::protobuf::util::JsonParseOptions;
-using google::protobuf::util::error::Code;
+// using google::protobuf::util::status_internal::StatusCode;
 using google::protobuf::util::Status;
 
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest;
@@ -56,7 +57,7 @@ bool MgwWebSocketRootContext::onConfigure(size_t config_size) {
   const Status options_status = google::protobuf::util::JsonStringToMessage(
       configuration->toString(),
       &config_, json_options);
-  if (options_status != Status::OK) {
+  if (!options_status.ok()) {
     LOG_WARN("Cannot parse plugin configuration JSON string: " + configuration->toString());
     return false;
   }
@@ -64,7 +65,7 @@ bool MgwWebSocketRootContext::onConfigure(size_t config_size) {
   return true;
 }
 
-MgwWebSocketContext::~MgwWebSocketContext(){
+MgwWebSocketContext::~MgwWebSocketContext() {
   LOG_TRACE(std::string("MgwContext destructed") + this->x_request_id_);
 }
 
@@ -141,7 +142,6 @@ FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
   for (auto& p : pairs) {
     if (std::string(p.first) == STATUS_HEADER && std::string(p.second) == STATUS_101) {
       std::string upstream_address;
-      auto buffer = getValue({"upstream", "address"}, &upstream_address);
       WebSocketFrameRequest request;
       request.set_node_id(this->node_id_);
       request.set_frame_length(0);
@@ -170,7 +170,6 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
   if(isDataFrame(data)){
     // Get remoteIP of the upstream 
     std::string upstream_address;
-    auto buffer = getValue({"upstream", "address"}, &upstream_address);
     
     // Create WebSocketFrameRequest with related fields
     WebSocketFrameRequest request;
@@ -245,7 +244,6 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
   if(isDataFrame(data)){
     // Get remoteIP of the upstream 
     std::string upstream_address;
-    auto buffer = getValue({"upstream", "address"}, &upstream_address);
     
     // Create WebSocketFrameRequest with related fields
     WebSocketFrameRequest request;
