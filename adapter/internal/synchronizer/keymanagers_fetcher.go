@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
@@ -79,9 +80,20 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
 	if err != nil {
-		logger.LoggerSync.Infof("Error happens %v", err)
+		logger.LoggerSync.Errorf("Error while creating http request for Key Manager Endpoint : %v", err)
 	}
 
+	var queryParamMap map[string]string
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
+
+	if queryParamMap != nil && len(queryParamMap) > 0 {
+		q := req.URL.Query()
+		// Making necessary query parameters for the request
+		for queryParamKey, queryParamValue := range queryParamMap {
+			q.Add(queryParamKey, queryParamValue)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
 	// Setting authorization header
 	req.Header.Set(sync.Authorization, basicAuth)
 

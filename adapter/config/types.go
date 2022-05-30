@@ -423,11 +423,19 @@ type controlPlane struct {
 	Username                   string
 	Password                   string
 	SyncApisOnStartUp          bool
+	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters
 	HTTPClient                 httpClient
+	RequestWorkerPool          requestWorkerPool
+}
+
+type requestWorkerPool struct {
+	PoolSize              int
+	QueueSizePerPool      int
+	PauseTimeAfterFailure time.Duration
 }
 
 type globalAdapter struct {

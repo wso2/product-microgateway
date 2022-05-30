@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM ubuntu:focal-20211006
+FROM ubuntu:focal-20220415
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apt-get update && apt-get upgrade -y

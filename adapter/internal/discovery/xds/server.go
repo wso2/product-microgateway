@@ -274,12 +274,14 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiProject.APIYaml, apiProject.APIType)
 	if err != nil {
+		logger.LoggerXds.Error("Error while populating swagger from api.yaml. ", err)
 		return nil, err
 	}
 
 	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
 		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
 		if err != nil {
+			logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)
 			return nil, err
 		}
 		// the following will be used for APIM specific security config.
@@ -637,10 +639,6 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 // DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
 func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, revisionUUID string) {
 	apiIdentifiers := make(map[string]struct{})
-
-	conf, _ := config.ReadConfigs()
-	gaEnabled := conf.GlobalAdapter.Enabled
-
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
 
@@ -661,9 +659,7 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
-				if gaEnabled && revisionUUID != "" {
-					notifier.SendRevisionUndeploy(uuid, revisionUUID, environment)
-				}
+				notifier.SendRevisionUndeploy(uuid, revisionUUID, environment)
 			}
 		}
 	}
