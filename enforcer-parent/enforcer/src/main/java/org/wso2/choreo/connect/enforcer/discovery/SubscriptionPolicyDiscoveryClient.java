@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.discovery.subscription.SubscriptionPolicyList;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
@@ -51,9 +52,9 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
     private ManagedChannel channel;
     private SubscriptionPolicyDiscoveryServiceGrpc.SubscriptionPolicyDiscoveryServiceStub stub;
     private StreamObserver<DiscoveryRequest> reqObserver;
-    private SubscriptionDataStoreImpl subscriptionDataStore;
-    private String host;
-    private int port;
+    private final SubscriptionDataStoreImpl subscriptionDataStore;
+    private final String host;
+    private final int port;
 
     /**
      * This is a reference to the latest received response from the ADS.
@@ -72,18 +73,17 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
      * </p>
      */
     private DiscoveryResponse latestACKed;
-
     /**
-     * Label of this node.
+     * Node struct for the discovery client
      */
-    private final String nodeId;
+    private final Node node;
 
     private SubscriptionPolicyDiscoveryClient(String host, int port) {
         this.host = host;
         this.port = port;
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
         initConnection();
-        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
+        this.node = XDSCommonUtils.generateXDSNode(AdapterConstants.COMMON_ENFORCER_LABEL);
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
@@ -122,7 +122,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
 
     public void watchSubscriptionPolicies() {
         // TODO: (Praminda) implement a deadline with retries
-        reqObserver = stub.streamSubscriptionPolicies(new StreamObserver<DiscoveryResponse>() {
+        reqObserver = stub.streamSubscriptionPolicies(new StreamObserver<>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.info("Subscription policy event received with version : " + response.getVersionInfo());
@@ -158,7 +158,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
 
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                    .setNode(Node.newBuilder().setId(nodeId).build())
+                    .setNode(node)
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.SUBSCRIPTION_POLICY_LIST_TYPE_URL).build();
             reqObserver.onNext(req);
@@ -176,7 +176,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
      */
     private void ack() {
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.SUBSCRIPTION_POLICY_LIST_TYPE_URL).build();
@@ -189,7 +189,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
             return;
         }
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestACKed.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.SUBSCRIPTION_POLICY_LIST_TYPE_URL)
