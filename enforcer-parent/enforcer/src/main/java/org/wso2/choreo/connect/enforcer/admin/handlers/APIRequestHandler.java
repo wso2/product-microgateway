@@ -88,7 +88,6 @@ public class APIRequestHandler extends RequestHandler {
         APIList apiList = new APIList();
         apiList.setCount(apis.size());
         List<BasicAPIInfo> modelAPIs = new ArrayList<>(apis.size());
-        // TODO: (VirajSalaka) Revisit the logic
         for (API api : apis) {
             org.wso2.choreo.connect.enforcer.models.API apiMetadata =
                     SubscriptionDataHolder.getInstance().getTenantSubscriptionStore()

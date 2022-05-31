@@ -148,7 +148,6 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 		}
 	}
 
-	// TODO: (VirajSalaka) Calling /apis endpoint is temporarily removed.
 	// Take the configured labels from the adapter
 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
 
@@ -188,9 +187,6 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 			}
 		}
 	}
-	// TODO: (VirajSalaka) APIList (/apis response) processing is temporarily blocked.
-	// InitialAPIUUIDList is already processed (if available). Then onwards, that list is not required.
-	go retrieveAPIListFromChannel(APIListChannel, nil)
 }
 
 // InvokeService invokes the internal data resource
