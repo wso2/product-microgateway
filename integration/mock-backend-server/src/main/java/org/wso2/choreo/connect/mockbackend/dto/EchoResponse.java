@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.mockbackend;
+package org.wso2.choreo.connect.mockbackend.dto;
 
 import com.sun.net.httpserver.Headers;
 

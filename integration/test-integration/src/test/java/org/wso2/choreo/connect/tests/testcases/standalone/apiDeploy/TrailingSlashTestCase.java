@@ -22,7 +22,7 @@ import com.google.common.net.HttpHeaders;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.mockbackend.EchoResponse;
+import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
