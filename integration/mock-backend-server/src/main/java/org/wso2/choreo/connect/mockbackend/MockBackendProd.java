@@ -18,16 +18,13 @@
 
 package org.wso2.choreo.connect.mockbackend;
 
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import javax.net.ssl.SSLContext;
@@ -296,6 +293,9 @@ public class MockBackendProd extends Thread {
             // sent request body in response body
             httpServer.createContext(context + "/echo", Utils::echo);
             httpServer.createContext(context + "/echo2", Utils::echo);
+
+            // echo request body, request headers in echo response payload
+            httpServer.createContext(context + "/echo-full", Utils::echoFullRequest);
 
             httpServer.start();
         } catch (Exception ex) {
