@@ -29,6 +29,7 @@ public class TestConstant {
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST";
     public static final String HTTP_METHOD_PUT = "PUT";
+    public static final String HTTP_METHOD_PATCH = "PATCH";
     public static final String HTTP_METHOD_DELETE = "DELETE";
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD_HEAD = "HEAD";
