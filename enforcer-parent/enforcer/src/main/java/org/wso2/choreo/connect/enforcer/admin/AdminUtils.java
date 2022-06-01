@@ -45,13 +45,13 @@ import java.util.List;
  */
 public class AdminUtils {
 
-    public static APIInfo toAPIInfo(API api, String lcState, List<SubscriptionInfo> subscriptionInfoList) {
+    public static APIInfo toAPIInfo(API api, List<SubscriptionInfo> subscriptionInfoList) {
         APIInfo apiInfo = new APIInfo();
         apiInfo.setSubscriptions(subscriptionInfoList);
         apiInfo.setApiUUID(api.getAPIConfig().getUuid());
         apiInfo.setContext(api.getAPIConfig().getBasePath());
         apiInfo.setName(api.getAPIConfig().getName());
-        apiInfo.setLcState(lcState);
+        apiInfo.setLcState(api.getAPIConfig().getApiLifeCycleState());
         apiInfo.setTier(api.getAPIConfig().getTier());
         apiInfo.setVersion(api.getAPIConfig().getVersion());
         apiInfo.setProvider(api.getAPIConfig().getApiProvider());
@@ -59,12 +59,12 @@ public class AdminUtils {
         return apiInfo;
     }
 
-    public static BasicAPIInfo toBasicAPIInfo(API api, String lifeCycleState, boolean isDefaultVersion) {
+    public static BasicAPIInfo toBasicAPIInfo(API api, boolean isDefaultVersion) {
         BasicAPIInfo apiInfo = new BasicAPIInfo();
         apiInfo.setApiUUID(api.getAPIConfig().getUuid());
         apiInfo.setContext(api.getAPIConfig().getBasePath());
         apiInfo.setName(api.getAPIConfig().getName());
-        apiInfo.setLcState(lifeCycleState);
+        apiInfo.setLcState(api.getAPIConfig().getApiLifeCycleState());
         apiInfo.setDefaultVersion(isDefaultVersion);
         apiInfo.setApiType(api.getAPIConfig().getApiType());
         apiInfo.setVersion(api.getAPIConfig().getVersion());

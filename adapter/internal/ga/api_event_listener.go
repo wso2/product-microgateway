@@ -35,12 +35,6 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 		}
 		if !event.IsDeployEvent {
 			xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, configuredEnvs, event.RevisionUUID)
-			for _, env := range configuredEnvs {
-				xdsAPIList := xds.DeleteAPIAndReturnList(event.APIUUID, env)
-				if xdsAPIList != nil {
-					xds.UpdateEnforcerAPIList(env, xdsAPIList)
-				}
-			}
 			continue
 		}
 

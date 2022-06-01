@@ -32,7 +32,6 @@ import org.wso2.choreo.connect.enforcer.models.BasicAPIInfo;
 import org.wso2.choreo.connect.enforcer.models.ResponsePayload;
 import org.wso2.choreo.connect.enforcer.models.Subscription;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionInfo;
-import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,16 +88,8 @@ public class APIRequestHandler extends RequestHandler {
         apiList.setCount(apis.size());
         List<BasicAPIInfo> modelAPIs = new ArrayList<>(apis.size());
         for (API api : apis) {
-            org.wso2.choreo.connect.enforcer.models.API apiMetadata =
-                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore()
-                            .getApiByContextAndVersion(api.getAPIConfig().getUuid());
-            String lcState = "Created/Published";
-            boolean isDefaultVersion = false;
-            if (apiMetadata != null) {
-                lcState = apiMetadata.getLcState();
-                isDefaultVersion = apiMetadata.isDefaultVersion();
-            }
-            modelAPIs.add(AdminUtils.toBasicAPIInfo(api, lcState, isDefaultVersion));
+            // TODO: (VirajSalaka) fix
+            modelAPIs.add(AdminUtils.toBasicAPIInfo(api, false));
         }
         apiList.setList(modelAPIs);
         return AdminUtils.buildResponsePayload(apiList, HttpResponseStatus.OK, false);
@@ -155,14 +146,8 @@ public class APIRequestHandler extends RequestHandler {
                 SubscriptionInfo subscriptionInfo = AdminUtils.toSubscriptionInfo(subscription, applicationInfo);
                 subscriptionInfoList.add(subscriptionInfo);
             }
-            org.wso2.choreo.connect.enforcer.models.API apiMetadata =
-                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore()
-                            .getApiByContextAndVersion(apis.get(0).getAPIConfig().getUuid());
-            String lcState = "Created/Published";
-            if (apiMetadata != null) {
-                lcState = apiMetadata.getLcState();
-            }
-            apiInfo = AdminUtils.toAPIInfo(apis.get(0), lcState, subscriptionInfoList);
+
+            apiInfo = AdminUtils.toAPIInfo(apis.get(0), subscriptionInfoList);
             return AdminUtils.buildResponsePayload(apiInfo, HttpResponseStatus.OK, false);
         } else {
             // No api found for the provided search parameters...

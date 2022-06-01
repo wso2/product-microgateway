@@ -277,9 +277,7 @@ func retrieveAPIList(response response, initialAPIUUIDListMap map[string]int) {
 						logger.LoggerSubscription.Debugf("Received API List information for API : %s", api.UUID)
 					}
 				}
-
-				xds.UpdateEnforcerAPIList(response.GatewayLabel,
-					xds.MarshalAPIMetataAndReturnList(apiListResponse, initialAPIUUIDListMap, response.GatewayLabel))
+				xds.UpdateAPIMetataMapWithMultipleAPIs(apiListResponse, initialAPIUUIDListMap)
 			default:
 				logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
 			}

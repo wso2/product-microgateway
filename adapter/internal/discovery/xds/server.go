@@ -45,6 +45,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/api"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
@@ -83,7 +84,7 @@ var (
 	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:API_UUID -> Envoy Routes map
 	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:API_UUID -> Envoy Clusters map
 	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:API_UUID -> API Resource map
+	orgIDOpenAPIEnforcerApisMap map[string]map[string]*api.Api             // organizationID -> Vhost:API_UUID -> API Resource map
 	orgIDvHostBasepathMap       map[string]map[string]string               // organizationID -> Vhost:basepath -> Vhost:API_UUID
 
 	reverseAPINameVersionMap map[string]string
@@ -119,6 +120,8 @@ const (
 	maxRandomInt         int    = 999999999
 	prototypedAPI        string = "PROTOTYPED"
 	apiKeyFieldSeparator string = ":"
+	blockedStatus        string = "BLOCKED"
+	nonBlockedStatus     string = "CREATED/PUBLISHED"
 )
 
 // IDHash uses ID field as the node hash.
@@ -161,7 +164,7 @@ func init() {
 	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:API_UUID -> Envoy Routes map
 	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:API_UUID -> Envoy Clusters map
 	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:API_UUID -> API Resource map
+	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]*api.Api)         // organizationID -> Vhost:API_UUID -> API Resource map
 	orgIDvHostBasepathMap = make(map[string]map[string]string)
 
 	reverseAPINameVersionMap = make(map[string]string)
@@ -334,6 +337,14 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 			apiYaml.Name, apiYaml.Version, organizationID)
 		return nil, validationErr
 	}
+	// Update the LifecycleStatus of the API.
+	updateLCStateOfMgwSwagger(&mgwSwagger)
+
+	// TODO: (VirajSalaka) finalize whether we need this check.
+	// We make it a special case if it is a prototyped endpoint case. This feature is removed in the APIM 4.1.0.
+	if apiYaml.LifeCycleStatus == prototypedAPI {
+		mgwSwagger.LifeCycleState = prototypedAPI
+	}
 
 	// -------- Finished updating mgwSwagger struct
 
@@ -434,12 +445,10 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 
 	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
-		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger,
-			apiProject.APILifeCycleStatus, vHost)
+		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, vHost)
 	} else {
-		enforcerAPIMap := make(map[string]types.Resource)
-		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
-			vHost)
+		enforcerAPIMap := make(map[string]*api.Api)
+		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, vHost)
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 
@@ -447,13 +456,41 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if revisionStatus {
 		// send updated revision to control plane
-		deployedRevision = notifier.UpdateDeployedRevisions(apiYaml.ID, apiYaml.RevisionID, environments,
-			vHost)
+		deployedRevision = notifier.UpdateDeployedRevisions(apiYaml.ID, apiYaml.RevisionID, environments, vHost)
 	}
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery(organizationID) //consul service discovery starting point
 	}
 	return deployedRevision, nil
+}
+
+// UpdateAPIInEnforcerForBlockedAPIUpdate updates the state of APIMetadataMap under apiID with the lifecycle state and then
+// XDS cache for enforcerAPIs is updated.
+func UpdateAPIInEnforcerForBlockedAPIUpdate(apiID, organizationID, state string) {
+	mutexForInternalMapUpdate.Lock()
+	defer mutexForInternalMapUpdate.Unlock()
+	UpdateAPIMetataMapWithAPILCEvent(apiID, state)
+	if openAPIEnforcerAPIsMap, orgFound := orgIDOpenAPIEnforcerApisMap[organizationID]; orgFound {
+		// The reference is vhost:apiUUID. Hence it is required to iterate through all API entries as there could be multiple deployments of the same API
+		// under different vhosts.
+		for apiReference, enforcerAPI := range openAPIEnforcerAPIsMap {
+			if strings.HasSuffix(apiReference, ":"+apiID) && (state == blockedStatus || enforcerAPI.ApiLifeCycleState == blockedStatus) {
+				logger.LoggerXds.Infof("API Lifecycle status is updated for the API %s to %s state", apiReference, state)
+				enforcerAPI.ApiLifeCycleState = state
+			}
+		}
+	}
+
+	if openAPIEnvoyLabelMap, ok := orgIDOpenAPIEnvoyMap[organizationID]; ok {
+		for apiReference, labels := range openAPIEnvoyLabelMap {
+			if strings.HasSuffix(apiReference, ":"+apiID) {
+				updateXdsCacheForEnforcerAPIsOnly(labels)
+			}
+		}
+	} else {
+		logger.LoggerXds.Infof("API Life Cycle event is discarded due to irrelevant tenant domain : %s.", organizationID)
+	}
+
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
@@ -782,6 +819,12 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
 	return revisionStatus
 }
 
+func updateXdsCacheForEnforcerAPIsOnly(labels []string) {
+	for _, label := range labels {
+		UpdateEnforcerApis(label, generateEnforcerAPIsForLabel(label), "")
+	}
+}
+
 // GenerateEnvoyResoucesForLabel generates envoy resources for a given label
 // This method will list out all APIs mapped to the label. and generate envoy resources for all of these APIs.
 func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
@@ -848,6 +891,24 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	endpointArray = append(endpointArray, envoyEndpointConfigMap[label]...)
 	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listenerArray, routesConfig)
 	return endpoints, clusters, listeners, routeConfigs, apis
+}
+
+// generateEnforcerAPIsForLabel generates ebforcerAPIs resource array for a given label.
+// This is used when the envoy resources are not required to have changes but the enforcer APIs are required to (Blocked State APIs)
+func generateEnforcerAPIsForLabel(label string) []types.Resource {
+	var apis []types.Resource
+
+	for organizationID, entityMap := range orgIDOpenAPIEnvoyMap {
+		for apiKey, labels := range entityMap {
+			if arrayContains(labels, label) {
+				enforcerAPI, ok := orgIDOpenAPIEnforcerApisMap[organizationID][apiKey]
+				if ok {
+					apis = append(apis, enforcerAPI)
+				}
+			}
+		}
+	}
+	return apis
 }
 
 // GenerateGlobalClusters generates the globally available clusters and endpoints.
@@ -1238,4 +1299,14 @@ func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 	}
 	enforcerThrottleData = t
 	logger.LoggerXds.Infof("New Throttle Data cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+func updateLCStateOfMgwSwagger(mgwSwagger *model.MgwSwagger) {
+	// If there are any metadata stored under the APIMetadataMap and Life Cycle state is blocked, update the mgwSwagger
+	apiEntry, apiFound := APIMetadataMap[mgwSwagger.GetID()]
+	if apiFound && apiEntry.LcState == blockedStatus {
+		mgwSwagger.LifeCycleState = blockedStatus
+		return
+	}
+	mgwSwagger.LifeCycleState = nonBlockedStatus
 }

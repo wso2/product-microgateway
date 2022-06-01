@@ -28,7 +28,6 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
-import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
@@ -264,10 +263,7 @@ public class KeyValidator {
             infoDTO.setAuthorized(false);
             return;
         }
-        API apiFromSubscriptionDataStore = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore()
-                .getApiByContextAndVersion(apiConfig.getUuid());
-        if (apiFromSubscriptionDataStore != null &&
-                APIConstants.LifecycleStatus.BLOCKED.equals(apiFromSubscriptionDataStore.getLcState())) {
+        if (APIConstants.LifecycleStatus.BLOCKED.equals(apiConfig.getApiLifeCycleState())) {
             infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
             infoDTO.setAuthorized(false);
             return;
