@@ -141,6 +141,7 @@ FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
   for (auto& p : pairs) {
     if (std::string(p.first) == STATUS_HEADER && std::string(p.second) == STATUS_101) {
       std::string upstream_address;
+      getValue({"upstream", "address"}, &upstream_address);
       WebSocketFrameRequest request;
       request.set_node_id(this->node_id_);
       request.set_frame_length(0);
@@ -169,7 +170,7 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
   if(isDataFrame(data)){
     // Get remoteIP of the upstream 
     std::string upstream_address;
-    
+    getValue({"upstream", "address"}, &upstream_address);
     // Create WebSocketFrameRequest with related fields
     WebSocketFrameRequest request;
     request.set_node_id(this->node_id_);
@@ -243,6 +244,7 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
   if(isDataFrame(data)){
     // Get remoteIP of the upstream 
     std::string upstream_address;
+    getValue({"upstream", "address"}, &upstream_address);
     
     // Create WebSocketFrameRequest with related fields
     WebSocketFrameRequest request;
