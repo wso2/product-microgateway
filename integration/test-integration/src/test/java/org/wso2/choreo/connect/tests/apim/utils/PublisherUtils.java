@@ -418,8 +418,8 @@ public class PublisherUtils {
                 throw new CCTestException("Error while changing lifecycle status to " + targetState + ". API Id : " + apiId);
             }
             return response;
-        } catch (ApiException e) {
-            log.error(e.getResponseBody());
+        } catch (ApiException | APIManagerIntegrationTestException e) {
+            log.error(e.getMessage());
             throw new CCTestException("Error while changing lifecycle status to " + targetState + ". API Id : " + apiId);
         }
     }
