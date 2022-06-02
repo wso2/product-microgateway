@@ -228,7 +228,16 @@ public class PublisherUtils {
     }
 
 
-
+    /**
+     * Create a sample API request
+     *
+     * @param apiName API name
+     * @param apiContext API context
+     * @param apiVersion API version
+     * @param provider Provider
+     * @return apiRequest
+     * @throws CCTestException if an error occurs while creating a sample API request
+     */
     public static APIRequest createSampleAPIRequest(String apiName, String apiContext, String apiVersion,
                                                     String provider) throws CCTestException {
         APIRequest apiRequest;
