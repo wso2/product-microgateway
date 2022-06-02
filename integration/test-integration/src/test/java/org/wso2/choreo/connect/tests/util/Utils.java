@@ -536,4 +536,12 @@ public class Utils {
     public static String getAPIMServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.APIM_SERVLET_TRP_HTTP_PORT), servicePath).toString();
     }
+
+    public static String getDockerMockServiceURLHttp2ClearText(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://mockBackend2:" + TestConstant.MOCK_BACKEND_HTTP2_CLEAR_TEXT_SERVER_PORT), servicePath).toString();
+    }
+
+    public static String getDockerMockServiceURLHttp2Secured(String servicePath) throws MalformedURLException {
+        return new URL(new URL("https://mockBackend:" + TestConstant.MOCK_BACKEND_HTTP2_SECURED_SERVER_PORT), servicePath).toString();
+    }
 }

@@ -25,6 +25,16 @@
     "tier": "Unlimited"
   },
   {
+    "apiName": "Http2ClearTextAPI",
+    "appName": "Http2ClearTextAPIApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "Http2SecuredAPI",
+    "appName": "Http2SecuredAPIApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "ExistingAPI",
     "appName": "ExistingApiApp",
     "tier": "Unlimited"

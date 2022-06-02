@@ -93,6 +93,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// check API level production endpoints available
 	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
 		apiLevelEndpointProd := mgwSwagger.GetProdEndpoints()
+		apiLevelEndpointProd.HTTP2Enabled = mgwSwagger.GetXWso2HTTP2Enabled()
 		apiLevelbasePath = strings.TrimSuffix(apiLevelEndpointProd.Endpoints[0].Basepath, "/")
 		apiLevelClusterNameProd = getClusterName(apiLevelEndpointProd.EndpointPrefix, organizationID, vHost, apiTitle,
 			apiVersion, "")
@@ -117,6 +118,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// check API level sandbox endpoints available
 	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
 		apiLevelEndpointSand := mgwSwagger.GetSandEndpoints()
+		apiLevelEndpointSand.HTTP2Enabled = mgwSwagger.GetXWso2HTTP2Enabled()
 		if apiLevelbasePath == "" {
 			apiLevelbasePath = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
 		}
@@ -516,16 +518,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	}
 	conf, _ := config.ReadConfigs()
 
-	// autoHTTPConfig := &upstreams_http_v3.HttpProtocolOptions_AutoHttpConfig{
-	// 	HttpProtocolOptions:  &corev3.Http1ProtocolOptions{},
-	// 	Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
-	// }
-
-	// ext, err2 := proto.Marshal(autoHTTPConfig)
-	// if err2 != nil {
-	// 	logger.LoggerOasparser.Error(err2)
-	// }
-
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
 		ConnectTimeout:       durationpb.New(timeout * time.Second),
@@ -539,15 +531,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
-		// Http2ProtocolOptions:   &corev3.Http2ProtocolOptions{},
-		// UpstreamHttpProtocolOptions: &corev3.UpstreamHttpProtocolOptions{},
-		// ProtocolSelection: clusterv3.Cluster_USE_DOWNSTREAM_PROTOCOL,
-		// TypedExtensionProtocolOptions: map[string]*anypb.Any{
-		// 	wellknown.Router: &any.Any{
-		// 		TypeUrl: "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions.AutoHttpConfig",
-		// 		Value:   ext,
-		// 	},
-		// },
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
@@ -577,6 +560,11 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 				thresholds,
 			},
 		}
+	}
+
+	// Enable http2 protocol for the cluster
+	if clusterDetails.HTTP2Enabled {
+		cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{}
 	}
 
 	// service discovery itself will be handling loadbancing etc.

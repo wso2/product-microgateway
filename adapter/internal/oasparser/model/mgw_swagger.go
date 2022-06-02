@@ -57,6 +57,7 @@ type MgwSwagger struct {
 	xWso2Endpoints             map[string]*EndpointCluster
 	resources                  []*Resource
 	xWso2Basepath              string
+	xWso2HTTP2Enabled          bool
 	xWso2Cors                  *CorsConfig
 	securityScheme             []SecurityScheme
 	security                   []map[string][]string
@@ -80,6 +81,8 @@ type EndpointCluster struct {
 	EndpointType   string
 	Config         *EndpointConfig
 	SecurityConfig EndpointSecurity
+	// Is http2 protocol enabled
+	HTTP2Enabled bool
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -183,6 +186,11 @@ func (swagger *MgwSwagger) GetTitle() string {
 // GetXWso2Basepath returns the basepath set via the vendor extension.
 func (swagger *MgwSwagger) GetXWso2Basepath() string {
 	return swagger.xWso2Basepath
+}
+
+// GetXWso2HTTP2Enabled returns the http2enabled set via the vendor extension.
+func (swagger *MgwSwagger) GetXWso2HTTP2Enabled() bool {
+	return swagger.xWso2HTTP2Enabled
 }
 
 // GetVendorExtensions returns the map of vendor extensions which are defined
@@ -424,6 +432,7 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
+	swagger.setXWso2HTTP2Enabled()
 
 	// Error nil for successful execution
 	return nil
@@ -894,6 +903,11 @@ func (swagger *MgwSwagger) setXWso2Basepath() {
 	if extBasepath != "" {
 		swagger.xWso2Basepath = extBasepath
 	}
+}
+
+func (swagger *MgwSwagger) setXWso2HTTP2Enabled() {
+	extHTTP2Enabled := getXWso2HTTP2Enabled(swagger.vendorExtensions)
+	swagger.xWso2HTTP2Enabled = extHTTP2Enabled
 }
 
 func (swagger *MgwSwagger) setXWso2Cors() {
