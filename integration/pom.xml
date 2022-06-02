@@ -37,5 +37,17 @@
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
-
+    <build>
+        <plugins>
+            <!-- added dependency scan plugin here to skip scanning dependencies used for tests -->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency.check.maven.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
