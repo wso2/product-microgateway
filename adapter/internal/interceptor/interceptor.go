@@ -133,8 +133,8 @@ end
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
-	utils.wire_log_body(request_handle, " >> request body >> ", {{ .LogConfig.LogBodyEnabled }})
 	utils.wire_log_headers(request_handle, " >> request headers >> ", {{ .LogConfig.LogHeadersEnabled }})
+	utils.wire_log_body(request_handle, " >> request body >> ", {{ .LogConfig.LogBodyEnabled }})
 	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, { log_body_enabled = false, log_headers_enabled = false, log_trailers_enabled = false })
     utils.wire_log_trailers(request_handle, " >> request trailers >> ", {{ .LogConfig.LogTrailersEnabled }})
 end

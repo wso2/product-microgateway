@@ -366,10 +366,14 @@ function interceptor.handle_request_interceptor(request_handle, intercept_servic
         -- error thrown, exiting
         return
     end
-    utils.wire_log_body(request_handle, " >> request body >> ", wire_log_config.log_body_enabled)
+    
     modify_headers(request_handle, interceptor_response_body)
-    modify_trailers(request_handle, interceptor_response_body)
+
     utils.wire_log_headers(request_handle, " >> request headers >> ", wire_log_config.log_headers_enabled)
+    utils.wire_log_body(request_handle, " >> request body >> ", wire_log_config.log_body_enabled)
+
+    modify_trailers(request_handle, interceptor_response_body)
+    
     utils.wire_log_trailers(request_handle, " >> request trailers >> ", wire_log_config.log_trailers_enabled)
 
     --#region handle dynamic endpoint
@@ -477,8 +481,12 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         -- error thrown, exiting
         return
     end
-    utils.wire_log_body(response_handle, " << response body << ", wire_log_config.log_body_enabled)
+    
     modify_headers(response_handle, interceptor_response_body)
+
+    utils.wire_log_headers(response_handle, " << response headers << ", wire_log_config.log_headers_enabled)
+    utils.wire_log_body(response_handle, " << response body << ", wire_log_config.log_body_enabled)
+
     modify_trailers(response_handle, interceptor_response_body)
 
     --#region status code
@@ -487,7 +495,6 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
     end
     --#endregion
 
-    utils.wire_log_headers(response_handle, " << response headers << ", wire_log_config.log_headers_enabled)
     utils.wire_log_trailers(response_handle, " >> response trailers >> ", wire_log_config.log_trailers_enabled)
 end
 

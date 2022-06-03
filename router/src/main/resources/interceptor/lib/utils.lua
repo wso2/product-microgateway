@@ -141,8 +141,8 @@ end
 ---@param log_message_body string
 ---@param log_message_header string
 function utils.wire_log(handle, log_message_body, log_message_header, log_message_trailer, wire_log_config)
-    utils.wire_log_body(handle, log_message_body, wire_log_config.log_body_enabled)
     utils.wire_log_headers(handle, log_message_header, wire_log_config.log_headers_enabled)
+    utils.wire_log_body(handle, log_message_body, wire_log_config.log_body_enabled)
     utils.wire_log_trailers(handle, log_message_trailer, wire_log_config.log_trailers_enabled)
 end
 
