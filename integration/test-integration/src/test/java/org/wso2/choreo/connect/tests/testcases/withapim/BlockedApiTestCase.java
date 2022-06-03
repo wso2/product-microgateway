@@ -88,9 +88,7 @@ public class BlockedApiTestCase extends ApimBaseTest {
     @Test(description = "Send a request to a blocked  REST API and check 700700 error code is received",
             dependsOnMethods = "testPublishedStateAPI")
     public void testBlockedStateAPI() throws CCTestException, InterruptedException {
-        try {
-            PublisherUtils.changeLCStateAPI(apiId, APILifeCycleAction.BLOCK.getAction(), publisherRestClient, false);
-        } catch (CCTestException ignored) {}
+        PublisherUtils.changeLCStateAPI(apiId, APILifeCycleAction.BLOCK.getAction(), publisherRestClient, false);
         Thread.sleep(3000);
         HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");

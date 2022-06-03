@@ -30,6 +30,7 @@ import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.WorkflowResponseDTO;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
@@ -411,15 +412,21 @@ public class PublisherUtils {
             lifecycleChecklist = "Requires re-subscription when publishing the API:true";
         }
         try {
-            HttpResponse response = publisherRestClient
-                    .changeAPILifeCycleStatus(apiId, targetState, lifecycleChecklist);
+            publisherRestClient.apiPublisherClient.addDefaultHeader("activityID",
+                    System.getProperty(RestAPIPublisherImpl.testNameProperty));
+            WorkflowResponseDTO workflowResponseDTO = publisherRestClient.apiLifecycleApi
+                    .changeAPILifecycle(targetState, apiId, lifecycleChecklist, null);
+            HttpResponse response = null;
+            if (StringUtils.isNotEmpty(workflowResponseDTO.getLifecycleState().getState())) {
+                response = new HttpResponse(workflowResponseDTO.getLifecycleState().getState(), 200);
+            }
             if (Objects.isNull(response)) {
                 log.error("Received a null response when changing lifecycle status to " + targetState);
                 throw new CCTestException("Error while changing lifecycle status to " + targetState + ". API Id : " + apiId);
             }
             return response;
-        } catch (ApiException | APIManagerIntegrationTestException e) {
-            log.error(e.getMessage());
+        } catch (ApiException e) {
+            log.error(e.getResponseBody());
             throw new CCTestException("Error while changing lifecycle status to " + targetState + ". API Id : " + apiId);
         }
     }
