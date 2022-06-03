@@ -68,7 +68,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
     public APIKeyAuthenticator() {
-        log.info("API key authenticator initialized.");
+        log.debug("API key authenticator initialized.");
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
         this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
