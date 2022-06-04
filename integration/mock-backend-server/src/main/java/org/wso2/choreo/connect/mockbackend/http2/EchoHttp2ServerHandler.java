@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.choreo.connect.mockbackend.http2;
 
 import io.netty.buffer.EmptyByteBuf;
@@ -15,8 +33,10 @@ import io.netty.handler.codec.http2.Http2HeadersFrame;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 /**
- * Handler implementation for the http/2 echo server without content aggregation. This echo backs the header/data
- * frames as soon as they arrive without any content aggregation against stream id.
+ * Handler implementation for the http/2 echo server without content
+ * aggregation. This echo backs the header/data
+ * frames as soon as they arrive without any content aggregation against stream
+ * id.
  */
 public class EchoHttp2ServerHandler extends ChannelDuplexHandler {
 

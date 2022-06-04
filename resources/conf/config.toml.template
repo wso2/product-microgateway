@@ -99,6 +99,11 @@ artifactsDirectory = "/home/wso2/artifacts"
   securedListenerHost = "0.0.0.0"
   # Port for secured listener of Router
   securedListenerPort = 9095
+  
+  # Set the listener side http protocol version. Default to AUTO where both http1 and http2 connections are handled
+  # It can be specifically set to either HTTP1 or HTTP2
+  # listenerCodecType = "AUTO"
+
   # The timeout for new network connections to hosts in the cluster in seconds
   clusterTimeoutInSeconds = 20
   # The timeout for response coming from enforcer to route per API request

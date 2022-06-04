@@ -1,22 +1,24 @@
 /*
- * Copyright 2017 The Netty Project
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * The Netty Project licenses this file to you under the Apache License, version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a
- * copy of the License at:
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.choreo.connect.mockbackend.http2;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -31,22 +33,15 @@ import io.netty.handler.codec.http2.Http2Flags;
 import io.netty.handler.codec.http2.Http2FrameListener;
 import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2Settings;
-import io.netty.util.CharsetUtil;
-
-import static io.netty.buffer.Unpooled.copiedBuffer;
-import static io.netty.buffer.Unpooled.unreleasableBuffer;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 /**
- * A simple handler that responds with the message "Hello World!".
+ * A simple handler for http2 with prior knowledge
  */
-public final class HelloWorldHttp2Handler extends Http2ConnectionHandler implements Http2FrameListener {
+public final class Http2ClearTextEchoHandler extends Http2ConnectionHandler implements Http2FrameListener {
 
-    static final ByteBuf RESPONSE_BYTES = unreleasableBuffer(
-            copiedBuffer("Hello World", CharsetUtil.UTF_8)).asReadOnly();
-
-    HelloWorldHttp2Handler(Http2ConnectionDecoder decoder, Http2ConnectionEncoder encoder,
-                           Http2Settings initialSettings) {
+    Http2ClearTextEchoHandler(Http2ConnectionDecoder decoder, Http2ConnectionEncoder encoder,
+            Http2Settings initialSettings) {
         super(decoder, encoder, initialSettings);
     }
 
@@ -63,15 +58,15 @@ public final class HelloWorldHttp2Handler extends Http2ConnectionHandler impleme
     }
 
     /**
-     * Handles the cleartext HTTP upgrade event. If an upgrade occurred, sends a simple response via HTTP/2
+     * Handles the cleartext HTTP upgrade event. If an upgrade occurred, sends a
+     * simple response via HTTP/2
      * on stream 1 (the stream specifically reserved for cleartext HTTP upgrade).
      */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof HttpServerUpgradeHandler.UpgradeEvent) {
-            HttpServerUpgradeHandler.UpgradeEvent upgradeEvent =
-                    (HttpServerUpgradeHandler.UpgradeEvent) evt;
-            onHeadersRead(ctx, 1, http1HeadersToHttp2Headers(upgradeEvent.upgradeRequest()), 0 , true);
+            HttpServerUpgradeHandler.UpgradeEvent upgradeEvent = (HttpServerUpgradeHandler.UpgradeEvent) evt;
+            onHeadersRead(ctx, 1, http1HeadersToHttp2Headers(upgradeEvent.upgradeRequest()), 0, true);
         }
         super.userEventTriggered(ctx, evt);
     }
@@ -106,24 +101,22 @@ public final class HelloWorldHttp2Handler extends Http2ConnectionHandler impleme
 
     @Override
     public void onHeadersRead(ChannelHandlerContext ctx, int streamId,
-                              Http2Headers headers, int padding, boolean endOfStream) {
+            Http2Headers headers, int padding, boolean endOfStream) {
         if (endOfStream) {
             ByteBuf content = ctx.alloc().buffer();
-            content.writeBytes(RESPONSE_BYTES.duplicate());
-            ByteBufUtil.writeAscii(content, " - via HTTP/2");
             sendResponse(ctx, streamId, content);
         }
     }
 
     @Override
     public void onHeadersRead(ChannelHandlerContext ctx, int streamId, Http2Headers headers, int streamDependency,
-                              short weight, boolean exclusive, int padding, boolean endOfStream) {
+            short weight, boolean exclusive, int padding, boolean endOfStream) {
         onHeadersRead(ctx, streamId, headers, padding, endOfStream);
     }
 
     @Override
     public void onPriorityRead(ChannelHandlerContext ctx, int streamId, int streamDependency,
-                               short weight, boolean exclusive) {
+            short weight, boolean exclusive) {
     }
 
     @Override
@@ -148,7 +141,7 @@ public final class HelloWorldHttp2Handler extends Http2ConnectionHandler impleme
 
     @Override
     public void onPushPromiseRead(ChannelHandlerContext ctx, int streamId, int promisedStreamId,
-                                  Http2Headers headers, int padding) {
+            Http2Headers headers, int padding) {
     }
 
     @Override
@@ -161,6 +154,6 @@ public final class HelloWorldHttp2Handler extends Http2ConnectionHandler impleme
 
     @Override
     public void onUnknownFrame(ChannelHandlerContext ctx, byte frameType, int streamId,
-                               Http2Flags flags, ByteBuf payload) {
+            Http2Flags flags, ByteBuf payload) {
     }
 }

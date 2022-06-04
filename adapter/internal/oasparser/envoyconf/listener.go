@@ -81,7 +81,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 	var listeners []*listenerv3.Listener
 
 	manager := &hcmv3.HttpConnectionManager{
-		CodecType:  hcmv3.HttpConnectionManager_AUTO,
+		CodecType:  getListenerCodecType(conf.Envoy.ListenerCodecType),
 		StatPrefix: httpConManagerStartPrefix,
 		// WebSocket upgrades enabled from the HCM
 		UpgradeConfigs: []*hcmv3.HttpConnectionManager_UpgradeConfig{{
@@ -316,4 +316,19 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 	}
 
 	return tracing, nil
+}
+
+func getListenerCodecType(codecType string) hcmv3.HttpConnectionManager_CodecType {
+	switch codecType {
+	case "AUTO":
+		return hcmv3.HttpConnectionManager_AUTO
+	case "HTTP1":
+		return hcmv3.HttpConnectionManager_HTTP1
+	case "HTTP2":
+		return hcmv3.HttpConnectionManager_HTTP2
+	case "HTTP3":
+		return hcmv3.HttpConnectionManager_HTTP3
+	default:
+		return hcmv3.HttpConnectionManager_AUTO
+	}
 }

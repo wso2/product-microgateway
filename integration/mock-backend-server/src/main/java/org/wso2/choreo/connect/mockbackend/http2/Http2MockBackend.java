@@ -1,7 +1,23 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.choreo.connect.mockbackend.http2;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -17,13 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.ApplicationProtocolNames;
@@ -35,14 +48,10 @@ import io.netty.handler.ssl.ApplicationProtocolConfig.Protocol;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectedListenerFailureBehavior;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectorFailureBehavior;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
-import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http2.Http2SecurityUtil;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.channel.ChannelInitializer;
 
 /**
- * Mock HTTP2 server for testing Open API tests.
+ * Mock HTTP2 server for testing
  */
 public class Http2MockBackend {
     private static final Logger logger = LoggerFactory.getLogger(Http2MockBackend.class);
@@ -80,8 +89,6 @@ public class Http2MockBackend {
             // Start the server.
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(backendServerPort).sync();
-
-            logger.info("HTTP/2 Server is listening on https://127.0.0.1:" + backendServerPort + '/');
 
             // Wait until the server socket is closed.
             f.channel().closeFuture().sync();
@@ -145,8 +152,8 @@ public class Http2MockBackend {
         String tlsStoreType = "PKCS12";
 
         if (keyStoreName != null && keyStorePassword != null) {
-            try (InputStream is =  Thread.currentThread().getContextClassLoader()
-            .getResourceAsStream(keyStoreName)) {
+            try (InputStream is = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream(keyStoreName)) {
                 keyStore = KeyStore.getInstance(tlsStoreType);
                 keyStore.load(is, keyStorePassword.toCharArray());
             } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException e) {

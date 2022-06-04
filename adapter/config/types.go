@@ -103,6 +103,7 @@ type envoy struct {
 	ListenerPort                     uint32
 	SecuredListenerHost              string
 	SecuredListenerPort              uint32
+	ListenerCodecType                string `default:"AUTO"`
 	ClusterTimeoutInSeconds          time.Duration
 	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
 	KeyStore                         keystore
