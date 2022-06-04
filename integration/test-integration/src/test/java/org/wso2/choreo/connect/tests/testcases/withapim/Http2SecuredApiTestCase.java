@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -34,9 +33,6 @@ import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
-import org.wso2.choreo.connect.tests.apim.dto.Application;
-import com.google.common.net.HttpHeaders;
 
 import java.util.HashMap;
 import java.util.Map;

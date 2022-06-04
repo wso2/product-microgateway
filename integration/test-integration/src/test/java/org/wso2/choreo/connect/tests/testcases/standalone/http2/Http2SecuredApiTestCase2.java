@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
+import org.wso2.choreo.connect.tests.util.Http2ClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.Utils;
 
@@ -66,6 +67,19 @@ public class Http2SecuredApiTestCase2 {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+    }
+
+    @Test(description = "Invoke HTTP2 secured endpoint with prior knowledge with http2 downstream connection")
+    public void invokeHttp2SecuredEndpointWithHttp2DownsteamSuccess() throws Exception {
+
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        java.net.http.HttpResponse<String> response = Http2ClientRequest.doGet(Utils.getServiceURLHttps(
+                "/http2_secured/hello") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.statusCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
 }

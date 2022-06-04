@@ -25,18 +25,15 @@ import org.testng.annotations.Test;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.Http2ClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
-import org.wso2.choreo.connect.tests.apim.dto.Application;
-import com.google.common.net.HttpHeaders;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,11 +81,19 @@ public class Http2ClearTextApiTestCase extends ApimBaseTest {
         endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/hello");
     }
 
-    @Test(description = "Send a request to a subscribed REST API in a published state")
-    public void testPublishedStateAPI() throws CCTestException, InterruptedException {
+    @Test(description = "Invoke HTTP2 clear text endpoint with prior knowledge")
+    public void invokeHttp2ClearTextEndpointSuccess() throws CCTestException, InterruptedException {
         HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+                "Valid subscription should be able to invoke the associated API");
+    }
+
+    @Test(description = "Invoke HTTP2 clear text endpoint with prior knowledge with http2 downstream connection")
+    public void invokeHttp2ClearTextEndpointWithHttp2DownsteamSuccess() throws Exception {
+        java.net.http.HttpResponse<String>  response = Http2ClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
+        Assert.assertEquals(response.statusCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
     }
     
