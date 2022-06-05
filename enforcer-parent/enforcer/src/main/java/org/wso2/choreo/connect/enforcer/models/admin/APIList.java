@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,32 +15,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.enforcer.models;
+
+package org.wso2.choreo.connect.enforcer.models.admin;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Model class for Application Information list
+ * Holds details about list of APIs.
  */
-public class ApplicationInfoList {
+public class APIList {
 
     private Integer count = null;
-    private List<ApplicationInfo> list = new ArrayList<>();
+    private List<BasicAPIInfo> list = new ArrayList<>();
 
     public Integer getCount() {
+
         return count;
     }
 
     public void setCount(Integer count) {
+
         this.count = count;
     }
 
-    public List<ApplicationInfo> getList() {
+    public List<BasicAPIInfo> getList() {
+
         return list;
     }
 
-    public void setList(List<ApplicationInfo> list) {
+    public void setList(List<BasicAPIInfo> list) {
+
         this.list = list;
     }
 }

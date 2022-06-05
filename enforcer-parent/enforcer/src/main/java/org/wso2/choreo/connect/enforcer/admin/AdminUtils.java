@@ -21,22 +21,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import org.wso2.choreo.connect.enforcer.api.API;
-import org.wso2.choreo.connect.enforcer.models.APIInfo;
 import org.wso2.choreo.connect.enforcer.models.Application;
-import org.wso2.choreo.connect.enforcer.models.ApplicationInfo;
-import org.wso2.choreo.connect.enforcer.models.ApplicationInfoList;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
 import org.wso2.choreo.connect.enforcer.models.ApplicationPolicy;
 import org.wso2.choreo.connect.enforcer.models.ApplicationPolicyList;
-import org.wso2.choreo.connect.enforcer.models.BasicAPIInfo;
 import org.wso2.choreo.connect.enforcer.models.ResponsePayload;
 import org.wso2.choreo.connect.enforcer.models.RevokedToken;
 import org.wso2.choreo.connect.enforcer.models.RevokedTokenList;
 import org.wso2.choreo.connect.enforcer.models.Subscription;
-import org.wso2.choreo.connect.enforcer.models.SubscriptionInfo;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionList;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicyList;
+import org.wso2.choreo.connect.enforcer.models.admin.APIInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.ApplicationInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.ApplicationInfoList;
+import org.wso2.choreo.connect.enforcer.models.admin.BasicAPIInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.SubscriptionInfo;
 
 import java.util.List;
 

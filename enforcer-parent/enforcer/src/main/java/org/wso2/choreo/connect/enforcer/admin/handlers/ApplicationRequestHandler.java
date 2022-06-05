@@ -22,10 +22,10 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.choreo.connect.enforcer.admin.AdminUtils;
 import org.wso2.choreo.connect.enforcer.constants.AdminConstants;
 import org.wso2.choreo.connect.enforcer.models.Application;
-import org.wso2.choreo.connect.enforcer.models.ApplicationInfo;
-import org.wso2.choreo.connect.enforcer.models.ApplicationInfoList;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
 import org.wso2.choreo.connect.enforcer.models.ResponsePayload;
+import org.wso2.choreo.connect.enforcer.models.admin.ApplicationInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.ApplicationInfoList;
 
 import java.util.ArrayList;
 import java.util.List;
