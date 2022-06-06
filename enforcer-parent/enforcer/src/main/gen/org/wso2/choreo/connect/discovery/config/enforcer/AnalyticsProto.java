@@ -36,17 +36,17 @@ public final class AnalyticsProto {
       "\n.wso2/discovery/config/enforcer/analyti" +
       "cs.proto\022\036wso2.discovery.config.enforcer" +
       "\032,wso2/discovery/config/enforcer/service" +
-      ".proto\"\352\001\n\tAnalytics\022\017\n\007enabled\030\001 \001(\010\022Y\n" +
+      ".proto\"\370\001\n\tAnalytics\022\017\n\007enabled\030\001 \001(\010\022Y\n" +
       "\020configProperties\030\002 \003(\0132?.wso2.discovery" +
       ".config.enforcer.Analytics.ConfigPropert" +
       "iesEntry\0228\n\007service\030\003 \001(\0132\'.wso2.discove" +
-      "ry.config.enforcer.Service\0327\n\025ConfigProp" +
-      "ertiesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:" +
-      "\0028\001B\225\001\n1org.wso2.choreo.connect.discover" +
-      "y.config.enforcerB\016AnalyticsProtoP\001ZNgit" +
-      "hub.com/envoyproxy/go-control-plane/wso2" +
-      "/discovery/config/enforcer;enforcerb\006pro" +
-      "to3"
+      "ry.config.enforcer.Service\022\014\n\004type\030\004 \001(\t" +
+      "\0327\n\025ConfigPropertiesEntry\022\013\n\003key\030\001 \001(\t\022\r" +
+      "\n\005value\030\002 \001(\t:\0028\001B\225\001\n1org.wso2.choreo.co" +
+      "nnect.discovery.config.enforcerB\016Analyti" +
+      "csProtoP\001ZNgithub.com/envoyproxy/go-cont" +
+      "rol-plane/wso2/discovery/config/enforcer" +
+      ";enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -58,7 +58,7 @@ public final class AnalyticsProto {
     internal_static_wso2_discovery_config_enforcer_Analytics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Analytics_descriptor,
-        new java.lang.String[] { "Enabled", "ConfigProperties", "Service", });
+        new java.lang.String[] { "Enabled", "ConfigProperties", "Service", "Type", });
     internal_static_wso2_discovery_config_enforcer_Analytics_ConfigPropertiesEntry_descriptor =
       internal_static_wso2_discovery_config_enforcer_Analytics_descriptor.getNestedTypes().get(0);
     internal_static_wso2_discovery_config_enforcer_Analytics_ConfigPropertiesEntry_fieldAccessorTable = new

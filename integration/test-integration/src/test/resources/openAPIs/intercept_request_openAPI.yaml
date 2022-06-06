@@ -32,6 +32,10 @@ x-wso2-endpoints:
       urls:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
+  - myDynamicEndpoint2:
+      urls:
+        - http://mockBackend:2391/v2 # same base path as x-wso2-production-endpoints
+      type: loadbalance
 x-wso2-request-interceptor: # API level interceptor definition
   serviceURL: https://mockBackend:2371
   includes:

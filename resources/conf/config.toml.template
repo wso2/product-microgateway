@@ -455,6 +455,8 @@ enabled = true
   retryInterval = 5
   # Skip SSL verification
   skipSSLVerification = false
+  # Send revision update success acknowlegdement to the control plane
+  sendRevisionUpdate = false
   # Message broker connection URL of the control plane
   [controlPlane.brokerConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
@@ -487,6 +489,11 @@ enabled = true
 [analytics]
   # Enable/Disable Analytics in Choreo Connect
   enabled = false
+  type = "Default"
+  
+  # Use following type to enable ELK analytics
+  # type = "ELK"
+
   [analytics.adapter]
     # Buffer flush interval for gRPC access log client in Router
     bufferFlushInterval = "1s"
@@ -498,9 +505,11 @@ enabled = true
   # Enforcer related configurations
   [analytics.enforcer]
     [analytics.enforcer.configProperties]
-      # Authentication endpoint for Choreo Analytics Publishing
+      # Overrides default analytics publisher reporter class
+      # "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
+      # Authentication endpoint for Choreo Analytics Publishing (This is not used when the type is "elk")
       authURL = "$env{analytics_authURL}"
-      # Authentication token for Choreo Analytics Publishing
+      # Authentication token for Choreo Analytics Publishing (This is not used when the type is "elk")
       authToken = "$env{analytics_authToken}"
 
     # gRPC access log service within Enforcer

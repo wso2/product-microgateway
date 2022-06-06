@@ -216,6 +216,20 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency.check.maven.version}</version>
+                <configuration>
+                    <failBuildOnCVSS>${dependency.check.cvss.threshold.value}</failBuildOnCVSS>
+                    <suppressionFiles>/home/ubuntu/owasp/owasp-suppressions.xml</suppressionFiles>
+                    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
+                    <ossindexAnalyzerUseCache>false</ossindexAnalyzerUseCache>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+                    <nuspecAnalyzerEnabled>false</nuspecAnalyzerEnabled>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencyManagement>
@@ -224,11 +238,6 @@
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-models</artifactId>
                 <version>${swagger.v3.models.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger.parser.v3</groupId>
-                <artifactId>swagger-parser</artifactId>
-                <version>${swagger.v3.parser.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.json.wso2</groupId>
@@ -409,6 +418,12 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
                 <version>${carbon.apimgt.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.wso2.orbit.commons-fileupload</groupId>
+                        <artifactId>commons-fileupload</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -425,6 +440,12 @@
                 <groupId>org.wso2.am.analytics.publisher</groupId>
                 <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
                 <version>${analytics.publisher.client.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.squareup.okhttp3</groupId>
+                        <artifactId>okhttp</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.java-websocket</groupId>
@@ -513,6 +534,23 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${javax.validation.api.version}</version>
+            </dependency>
+            <!-- upgrades apache tomcat annotations version used for jaeger tracing -->
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-annotations-api</artifactId>
+                <version>${apache.tomcat.annotations.version}</version>
+            </dependency>
+            <!-- upgrades apache tomcat embed core version used for jaeger tracing -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${apache.tomcat.embed.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -530,11 +568,13 @@
         <grpc.netty.shaded.version>1.45.1</grpc.netty.shaded.version>
         <grpc.protobuf.version>1.45.1</grpc.protobuf.version>
         <grpc.stub.version>1.45.1</grpc.stub.version>
-        <gson.version>2.8.6</gson.version>
+        <gson.version>2.8.9</gson.version>
         <guava.version>30.0-jre</guava.version>
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
-        <io.netty.version>4.1.71.Final</io.netty.version>
+        <io.netty.version>4.1.77.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
+        <apache.tomcat.annotations.version>10.0.20</apache.tomcat.annotations.version>
+        <apache.tomcat.embed.version>10.0.21</apache.tomcat.embed.version>
         <java.websocket.version>1.5.1</java.websocket.version>
         <json.smart.version>2.4.7</json.smart.version>
         <junit.version>4.13.2</junit.version>
@@ -550,32 +590,35 @@
         <otel.version>1.6.0</otel.version>
         <shade.plugin.version>3.2.4</shade.plugin.version>
         <slf4j.version>1.7.21</slf4j.version>
-        <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
         <testcontainers.version>1.16.2</testcontainers.version>
         <ryuk.image.version>0.3.2</ryuk.image.version>
         <testng.version>6.11</testng.version>
         <tomcat.annotations.api.version>6.0.53</tomcat.annotations.api.version>
         <toml4j.version>0.7.2</toml4j.version>
-        <analytics.common.version>6.1.45</analytics.common.version>
+        <analytics.common.version>6.1.59</analytics.common.version>
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
         <apictl.version>4.1.0</apictl.version>
         <apim.version>4.1.0-beta</apim.version>
-        <grpc.healthProbe.version>0.3.7</grpc.healthProbe.version>
-        <analytics.publisher.client.version>1.0.4</analytics.publisher.client.version>
+        <grpc.healthProbe.version>0.4.11</grpc.healthProbe.version>
+        <analytics.publisher.client.version>1.0.8</analytics.publisher.client.version>
         <awaitility.version>3.1.2</awaitility.version>
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
         <jackson.databind.version>2.13.2.1</jackson.databind.version>
         <snakeyaml.version>1.26</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
+        <javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.13.2</jackson.annotations.version>
         <applicationinsights.core.version>2.6.3</applicationinsights.core.version>
         <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.5</azure.monitor.opentelemetry.exporter.version>
         <azure.core.http.okhttp.version>1.3.3</azure.core.http.okhttp.version>
+        <!-- dependency check plugin properties -->
+        <dependency.check.maven.version>7.1.0</dependency.check.maven.version>
+        <dependency.check.cvss.threshold.value>4</dependency.check.cvss.threshold.value>
     </properties>
 </project>

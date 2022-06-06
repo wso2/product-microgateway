@@ -298,6 +298,7 @@ var defaultConfig = &Config{
 			ReconnectInterval:       5000, //in milli seconds
 			ReconnectRetryCount:     60,
 		},
+		SendRevisionUpdate: false,
 		HTTPClient: httpClient{
 			RequestTimeOut: 30,
 		},
@@ -318,6 +319,7 @@ var defaultConfig = &Config{
 	},
 	Analytics: analytics{
 		Enabled: false,
+		Type:    "Default",
 		Adapter: analyticsAdapter{
 			BufferFlushInterval: 1000000000,
 			BufferSizeBytes:     16384,

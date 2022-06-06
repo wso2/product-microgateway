@@ -350,6 +350,10 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 				})
 			}
 			health.SetControlPlaneRestAPIStatus(err == nil)
+		} else if data.ErrorCode == 204 {
+          			logger.LoggerMgw.Infof("No API Artifacts are available in the control plane for the envionments :%s",
+          				strings.Join(envs, ", "))
+          			health.SetControlPlaneRestAPIStatus(true)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
 				Message:   fmt.Sprintf("Error occurred when retrieving APIs from control plane(unrecoverable error): %v", data.Err.Error()),

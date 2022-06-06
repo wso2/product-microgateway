@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.discovery.throttle.ThrottleData;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -71,17 +72,17 @@ public class ThrottleDataDiscoveryClient implements Runnable {
      */
     private DiscoveryResponse latestACKed;
     /**
-     * Label of this node.
+     * Node struct for the discovery client
      */
-    private final String nodeId;
+    private final Node node;
 
     private ThrottleDataDiscoveryClient(String host, int port) {
         this.host = host;
         this.port = port;
         initConnection();
-        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
         this.throttleData = ThrottleDataHolder.getInstance();
+        this.node = XDSCommonUtils.generateXDSNode(AdapterConstants.COMMON_ENFORCER_LABEL);
     }
 
     private void initConnection() {
@@ -120,39 +121,39 @@ public class ThrottleDataDiscoveryClient implements Runnable {
     public void watchThrottleData() {
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
         reqObserver = stub.withMaxInboundMessageSize(maxSize)
-                .streamThrottleData(new StreamObserver<DiscoveryResponse>() {
-            @Override
-            public void onNext(DiscoveryResponse response) {
-                logger.info("Throttle data event received with version : " + response.getVersionInfo());
-                logger.debug("Received ThrottleData discovery response " + response);
-                XdsSchedulerManager.getInstance().stopThrottleDataDiscoveryScheduling();
-                latestReceived = response;
+                .streamThrottleData(new StreamObserver<>() {
+                    @Override
+                    public void onNext(DiscoveryResponse response) {
+                        logger.info("Throttle data event received with version : " + response.getVersionInfo());
+                        logger.debug("Received ThrottleData discovery response " + response);
+                        XdsSchedulerManager.getInstance().stopThrottleDataDiscoveryScheduling();
+                        latestReceived = response;
 
-                try {
-                    handleResponse(response);
-                    ack();
-                } catch (Exception e) {
-                    // catching generic error here to wrap any grpc communication errors in the runtime
-                    onError(e);
-                }
-            }
+                        try {
+                            handleResponse(response);
+                            ack();
+                        } catch (Exception e) {
+                            // catching generic error here to wrap any grpc communication errors in the runtime
+                            onError(e);
+                        }
+                    }
 
-            @Override
-            public void onError(Throwable throwable) {
-                logger.error("Error occurred during ThrottleData discovery", throwable);
-                XdsSchedulerManager.getInstance().startThrottleDataDiscoveryScheduling();
-                nack(throwable);
-            }
+                    @Override
+                    public void onError(Throwable throwable) {
+                        logger.error("Error occurred during ThrottleData discovery", throwable);
+                        XdsSchedulerManager.getInstance().startThrottleDataDiscoveryScheduling();
+                        nack(throwable);
+                    }
 
-            @Override
-            public void onCompleted() {
-                logger.info("Completed receiving ThrottleData");
-            }
-        });
+                    @Override
+                    public void onCompleted() {
+                        logger.info("Completed receiving ThrottleData");
+                    }
+                });
 
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                    .setNode(Node.newBuilder().setId(nodeId).build())
+                    .setNode(this.node)
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.THROTTLE_DATA_TYPE_URL).build();
             reqObserver.onNext(req);
@@ -168,7 +169,7 @@ public class ThrottleDataDiscoveryClient implements Runnable {
      */
     private void ack() {
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(this.node)
                 .setVersionInfo(latestReceived.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.THROTTLE_DATA_TYPE_URL).build();
@@ -181,7 +182,7 @@ public class ThrottleDataDiscoveryClient implements Runnable {
             return;
         }
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(this.node)
                 .setVersionInfo(latestACKed.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.THROTTLE_DATA_TYPE_URL)
