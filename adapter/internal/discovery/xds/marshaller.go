@@ -512,39 +512,67 @@ func RemoveFromAPIMetadataMap(apiUUID string) {
 // the record will be removed.
 func UpdateAPIMetataMapWithAPILCEvent(apiUUID, status string) {
 
-	if apiEntry, ok := APIMetadataMap[apiUUID]; !ok {
-		// If the Lifecycle statue is not blocked, and the API is not included in the map, the APIListMap need not to be updated.
-		if status != blockedStatus {
-			logger.LoggerXds.Debugf("API life cycle state change event is discarded as the API : %s is unavailable",
-				apiUUID)
-			return
-		}
+	// if apiEntry, ok := APIMetadataMap[apiUUID]; !ok {
+	// 	// If the Lifecycle statue is not blocked, and the API is not included in the map, the APIListMap need not to be updated.
+	// 	if status != blockedStatus {
+	// 		logger.LoggerXds.Debugf("API life cycle state change event is discarded as the API : %s is unavailable",
+	// 			apiUUID)
+	// 		return
+	// 	}
+	// 	logger.LoggerXds.Debugf("No API Metadata for API ID: %s is available. Hence a new record is added.", apiUUID)
+	// 	APIMetadataMap[apiUUID] = &subscription.APIs{
+	// 		Uuid:    apiUUID,
+	// 		LcState: status,
+	// 	}
+	// } else {
+	// 	// If the update for existing API entry is not "BLOCKED" then the API can be removed from the list.
+	// 	// when the API is unavailable in the api metadata list received in the enforcer, it would be treated as
+	// 	// an unblocked API.
+	// 	// But if the API is a default version, those APIs needs to be kept. But with the lifecycle state != BLOCKED.
+	// 	if status != blockedStatus && !apiEntry.IsDefaultVersion {
+	// 		return
+	// 	}
+	// }
+
+	// // Because the adapter only required to update the XDS if it is related to blocked state.
+	// if !(storedAPILCState == blockedStatus || status == blockedStatus) {
+	// 	logger.LoggerXds.Debugf("API life cycle state change event with state %q is discarded for the API %s as the information is not required.",
+	// 		status, apiUUID)
+	// 	return
+	// }
+	// APIMetadataMap[apiUUID].LcState = status
+	// logger.LoggerXds.Infof("API life cycle state change event with state %q is updated for the API : %s",
+	// 	status, apiUUID)
+
+	apiEntry, apiFound := APIMetadataMap[apiUUID]
+	// IF API is not stored within the metadata Map and the lifecycle state is something else other BLOCKED state, those are discarded.
+	if !apiFound && status != blockedStatus {
+		logger.LoggerXds.Debugf("API life cycle state change event is discarded for the API : %s", apiUUID)
+		return
+	} else if !apiFound {
+		// IF API is not available and state is BLOCKED, needs to create a new instance and store within the Map.
 		logger.LoggerXds.Debugf("No API Metadata for API ID: %s is available. Hence a new record is added.", apiUUID)
 		APIMetadataMap[apiUUID] = &subscription.APIs{
 			Uuid:    apiUUID,
 			LcState: status,
 		}
+		logger.LoggerXds.Infof("API life cycle state change event with state %q is updated for the API : %s",
+			status, apiUUID)
+		return
 	} else {
+		// If the API is available in the metadata map it should be either a BLOCKED API and/or default versioned API.
 		// If the update for existing API entry is not "BLOCKED" then the API can be removed from the list.
 		// when the API is unavailable in the api metadata list received in the enforcer, it would be treated as
 		// an unblocked API.
-		// But if the API is a default version, those APIs needs to be kept. But with the lifecycle state != BLOCKED.
+		// But if the API is not the default version, those records won't be stored.
 		if status != blockedStatus && !apiEntry.IsDefaultVersion {
+			delete(APIMetadataMap, apiUUID)
 			return
 		}
-	}
-
-	storedAPILCState := APIMetadataMap[apiUUID].LcState
-
-	// Because the adapter only required to update the XDS if it is related to blocked state.
-	if !(storedAPILCState == blockedStatus || status == blockedStatus) {
-		logger.LoggerXds.Debugf("API life cycle state change event with state %q is discarded for the API %s as the information is not required.",
+		APIMetadataMap[apiUUID].LcState = status
+		logger.LoggerXds.Infof("API life cycle state change event with state %q is updated for the API : %s",
 			status, apiUUID)
-		return
 	}
-	APIMetadataMap[apiUUID].LcState = status
-	logger.LoggerXds.Infof("API life cycle state change event with state %q is updated for the API : %s",
-		status, apiUUID)
 }
 
 func marshalSubscription(subscriptionInternal *types.Subscription) *subscription.Subscription {
