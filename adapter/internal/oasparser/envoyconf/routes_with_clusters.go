@@ -564,7 +564,14 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 
 	// Enable http2 protocol for the cluster
 	if clusterDetails.HTTP2Enabled {
-		cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{}
+		cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{
+			InitialConnectionWindowSize: &wrapperspb.UInt32Value{
+				Value: conf.Envoy.Upstream.HTTP2.InitialConnectionWindowSize,
+			},
+			InitialStreamWindowSize: &wrapperspb.UInt32Value{
+				Value: conf.Envoy.Upstream.HTTP2.InitialStreamWindowSize,
+			},
+		}
 	}
 
 	// service discovery itself will be handling loadbancing etc.

@@ -71,6 +71,7 @@ var defaultConfig = &Config{
 		ListenerPort:                     9090,
 		SecuredListenerHost:              "0.0.0.0",
 		SecuredListenerPort:              9095,
+		ListenerCodecType:                "AUTO",
 		ClusterTimeoutInSeconds:          20,
 		EnforcerResponseTimeoutInSeconds: 20,
 		KeyStore: keystore{
@@ -117,6 +118,10 @@ var defaultConfig = &Config{
 			DNS: upstreamDNS{
 				DNSRefreshRate: 5000,
 				RespectDNSTtl:  false,
+			},
+			HTTP2: upstreamHTTP2Options{
+				InitialConnectionWindowSize: 1048576.0,
+				InitialStreamWindowSize:     65536.0,
 			},
 		},
 		Connection: connection{
