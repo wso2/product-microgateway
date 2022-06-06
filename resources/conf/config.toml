@@ -18,7 +18,7 @@
   listenerPort = 9090
   securedListenerPort = 9095
   systemHost = "localhost"
-  edgeProxyMode = false
+  useRemoteAddress = false
 
 [router.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
