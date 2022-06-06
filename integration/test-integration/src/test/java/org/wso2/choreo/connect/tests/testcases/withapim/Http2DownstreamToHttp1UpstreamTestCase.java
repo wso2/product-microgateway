@@ -28,30 +28,29 @@ import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.Http2ClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
-import io.netty.handler.codec.http.HttpHeaderNames;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Http1DownstreamToHttp2UpstreamTestCase extends ApimBaseTest {
-    private static final String API_CONTEXT = "existing_api";
-    private static final String APP_NAME = "ExistingApiApp";
+public class Http2DownstreamToHttp1UpstreamTestCase extends ApimBaseTest {
+    private static final String API_CONTEXT = "http1_api";
+    private static final String APP_NAME = "Http1APIApp";
     private String applicationId;
-    private String accessTokenProd;
+    private String accessToken;
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
         super.initWithSuperTenant();
 
         applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
-        accessTokenProd = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId,
+        accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
     }
 
     @Test
     public void invokeHttp1EnpointWithHttp2DownstreamConnection() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessTokenProd);
+        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
         java.net.http.HttpResponse<String> response = Http2ClientRequest.retryGetRequestUntilDeployed(endpoint,

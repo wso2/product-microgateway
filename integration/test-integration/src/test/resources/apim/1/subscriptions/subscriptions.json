@@ -35,6 +35,11 @@
     "tier": "Unlimited"
   },
   {
+    "apiName": "Http1API",
+    "appName": "Http1APIApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "ExistingAPI",
     "appName": "ExistingApiApp",
     "tier": "Unlimited"

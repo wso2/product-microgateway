@@ -28,6 +28,10 @@
     "throttleTier": "Unlimited"
   },
   {
+    "appName": "Http1APIApp",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "EndpointWithTrailingSlashApiApp",
     "throttleTier": "Unlimited"
   },
