@@ -85,7 +85,7 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 					dataChannel <- body
 					logger.LoggerMsg.Debugf("Message %s from ASB is processed", message.MessageID)
 
-					err = receiver.CompleteMessage(ctx, message)
+					err = receiver.CompleteMessage(ctx, message, &asb.CompleteMessageOptions{})
 					if err != nil {
 						logger.LoggerMsg.Warnf("Failed to complete the ASB message. %v", err)
 					}

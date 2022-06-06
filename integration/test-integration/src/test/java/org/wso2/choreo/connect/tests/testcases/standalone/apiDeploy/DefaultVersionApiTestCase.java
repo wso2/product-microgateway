@@ -99,9 +99,49 @@ public class DefaultVersionApiTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("John Doe"), "Response body mismatched");
 
-        // V1 doesn't have /user/john resource. We should try to invoke it and see if the traffic is routing to the
+        // V1 doesn't have /store/inventory resource. We should try to invoke it and see if the traffic is routing to the
         // correct API
         response = HttpsClientRequest.doGet("https://localhost:9095" + v1Context + "/store/inventory", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND, "Response code mismatched");
+    }
+
+    /**
+     * Test default versioned APIs with trailing a slash in the path
+     */
+
+    @Test(description = "Test invoking default versioned API without version in the context with trailing slash in path")
+    public void testInvokingDefaultVersionWithTrailingSlashInPath() throws CCTestException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", testKeyV2);
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095" + basePath + "store/inventory/", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("233539"), "Response body mismatched");
+    }
+
+    @Test(description = "Test invoking default versioned API with version in the context with trailing slash in path")
+    public void testInvokingDefaultVersionWithVersionWithTrailingSlashInPath() throws CCTestException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", testKeyV2);
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095" + v2Context + "/store/inventory/", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("233539"), "Response body mismatched");
+    }
+
+    @Test(description = "Test invoking `non` default versioned API with trailing slash in path")
+    public void testInvokingNoneDefaultVersionWithTrailingSlashInPath() throws CCTestException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", testKeyV1);
+        HttpResponse response = HttpsClientRequest.doGet("https://localhost:9095" + v1Context + "/pet/3/", headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("John Doe"), "Response body mismatched");
+
+        // V1 doesn't have /store/inventory resource. We should try to invoke it and see if the traffic is routing to the
+        // correct API
+        response = HttpsClientRequest.doGet("https://localhost:9095" + v1Context + "/store/inventory/", headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND, "Response code mismatched");
     }

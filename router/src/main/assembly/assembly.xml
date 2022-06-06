@@ -60,6 +60,9 @@
         <fileSet>
             <directory>src/main/resources/interceptor</directory>
             <outputDirectory>interceptor</outputDirectory>
+            <excludes>
+                <exclude>README.md</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
 </assembly>

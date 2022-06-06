@@ -162,7 +162,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 		req.Header.Set("Content-Type", "application/json")
 	}
 	// Make the request
-	logger.LoggerSync.Debug("Sending the controle plane request")
+	logger.LoggerSync.Debug("Sending the control plane request")
 	resp, err = client.Do(req)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
@@ -195,7 +195,6 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	}
 	// If the response is not successful, create a new error with the response and log it and return
 	// Ex: for 401 scenarios, 403 scenarios.
-	logger.LoggerSync.Errorf("Failure response: %v", string(respBytes))
 	respSyncAPI.Err = errors.New(string(respBytes))
 	respSyncAPI.Resp = nil
 	respSyncAPI.ErrorCode = resp.StatusCode
