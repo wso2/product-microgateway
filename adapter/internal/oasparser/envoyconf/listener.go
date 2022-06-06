@@ -113,6 +113,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		HttpProtocolOptions: &corev3.Http1ProtocolOptions{
 			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
 		},
+		UseRemoteAddress: &wrappers.BoolValue{Value: conf.Envoy.EdgeProxyMode},
 	}
 
 	if len(accessLogs) > 0 {

@@ -73,6 +73,7 @@ var defaultConfig = &Config{
 		SecuredListenerPort:              9095,
 		ClusterTimeoutInSeconds:          20,
 		EnforcerResponseTimeoutInSeconds: 20,
+		EdgeProxyMode:                    false,
 		KeyStore: keystore{
 			KeyPath:  "/home/wso2/security/keystore/mg.key",
 			CertPath: "/home/wso2/security/keystore/mg.pem",

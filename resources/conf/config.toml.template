@@ -105,6 +105,8 @@ artifactsDirectory = "/home/wso2/artifacts"
   enforcerResponseTimeoutInSeconds = 20
   # System hostname for system API resources (eg: /testkey and /health)
   systemHost = "localhost"
+  # Set this to true if the router is used as an edge proxy
+  edgeProxyMode = false
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]

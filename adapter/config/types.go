@@ -111,6 +111,7 @@ type envoy struct {
 	Upstream                         envoyUpstream
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
+	EdgeProxyMode                    bool
 }
 
 type connectionTimeouts struct {
