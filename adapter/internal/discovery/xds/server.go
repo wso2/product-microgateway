@@ -463,7 +463,11 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 func UpdateAPIInEnforcerForBlockedAPIUpdate(apiID, organizationID, state string) {
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
+	// First needs to update the API Metadata Map
 	UpdateAPIMetataMapWithAPILCEvent(apiID, state)
+	var apiReferenceArray []string
+	// Iterate through the enforcerAPIsMap and update the lifecycle status for the map. This is the map representing
+	// runtime-artifact for each API
 	if openAPIEnforcerAPIsMap, orgFound := orgIDOpenAPIEnforcerApisMap[organizationID]; orgFound {
 		// The reference is vhost:apiUUID. Hence it is required to iterate through all API entries as there could be multiple deployments of the same API
 		// under different vhosts.
@@ -471,20 +475,22 @@ func UpdateAPIInEnforcerForBlockedAPIUpdate(apiID, organizationID, state string)
 			if strings.HasSuffix(apiReference, ":"+apiID) && (state == blockedStatus || enforcerAPI.ApiLifeCycleState == blockedStatus) {
 				logger.LoggerXds.Infof("API Lifecycle status is updated for the API %s to %s state", apiReference, state)
 				enforcerAPI.ApiLifeCycleState = state
-			}
-		}
-	}
-
-	if openAPIEnvoyLabelMap, ok := orgIDOpenAPIEnvoyMap[organizationID]; ok {
-		for apiReference, labels := range openAPIEnvoyLabelMap {
-			if strings.HasSuffix(apiReference, ":"+apiID) {
-				updateXdsCacheForEnforcerAPIsOnly(labels)
+				apiReferenceArray = append(apiReferenceArray, apiReference)
 			}
 		}
 	} else {
-		logger.LoggerXds.Infof("API Life Cycle event is discarded due to irrelevant tenant domain : %s.", organizationID)
+		logger.LoggerXds.Infof("API Life Cycle event is not applied due to irrelevant tenant domain : %s.", organizationID)
+		return
 	}
 
+	// For all the gateway labels containing the API, the enforcer XDS cache needs to be updated.
+	if openAPIEnvoyLabelMap, ok := orgIDOpenAPIEnvoyMap[organizationID]; ok {
+		for _, apiReference := range apiReferenceArray {
+			if labels, labelsFound := openAPIEnvoyLabelMap[apiReference]; labelsFound {
+				updateXdsCacheForEnforcerAPIsOnly(labels)
+			}
+		}
+	}
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments

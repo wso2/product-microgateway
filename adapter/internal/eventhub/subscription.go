@@ -182,7 +182,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
-					go InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
+					InvokeService(ApisEndpoint, apiList, queryParamMap, APIListChannel, 0)
 				}(data)
 			}
 		}
