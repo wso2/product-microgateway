@@ -464,6 +464,13 @@ type controlPlane struct {
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters
 	HTTPClient                 httpClient
+	RequestWorkerPool          requestWorkerPool
+}
+
+type requestWorkerPool struct {
+	PoolSize              int
+	QueueSizePerPool      int
+	PauseTimeAfterFailure time.Duration
 }
 
 type globalAdapter struct {
