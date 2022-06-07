@@ -52,11 +52,6 @@
             <artifactId>andes-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.ballerina.jre.artifacts</groupId>
-            <artifactId>ballerina-jre-artifacts</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>io.prometheus.jmx</groupId>
             <artifactId>jmx_prometheus_javaagent</artifactId>
         </dependency>
@@ -132,6 +127,42 @@
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>download-jdk-linux</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u332-b09/OpenJDK8U-jre_x64_linux_hotspot_8u332b09.tar.gz</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/extracted-jre-linux</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-jdk-mac</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u332-b09/OpenJDK8U-jre_x64_mac_hotspot_8u332b09.tar.gz</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/extracted-jre-macos</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-jdk-windows</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u332-b09/OpenJDK8U-jre_x64_windows_hotspot_8u332b09.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/extracted-jre-windows</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -147,21 +178,6 @@
                         <configuration>
                             <includeClassifiers>mgw-balo</includeClassifiers>
                             <outputDirectory>${project.build.directory}/lib/gw-balo/</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack-jre</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>ballerina-jre-artifacts</includeArtifactIds>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
-                            <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
                     <execution>
@@ -204,20 +220,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>extract-jre</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <target>
-                                <unzip src="${jre.location}/jre-1.8-linux.zip" dest="${project.build.directory}/extracted-jre-linux" />
-                                <unzip src="${jre.location}/jre-1.8-macos.zip" dest="${project.build.directory}/extracted-jre-macos" />
-                                <unzip src="${jre.location}/jre-1.8-windows.zip" dest="${project.build.directory}/extracted-jre-windows" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <phase>verify</phase>
                         <goals>
                             <goal>run</goal>
@@ -228,7 +230,6 @@
                                 <delete dir="${project.build.directory}/extracted-jre-linux" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/extracted-jre-macos" includeemptydirs="true" />
                                 <delete dir="${project.build.directory}/extracted-jre-windows" includeemptydirs="true" />
-                                <delete dir="${project.build.directory}/ballerina-jre-artifacts-zip" includeemptydirs="true" />
                             </target>
                         </configuration>
                     </execution>
@@ -414,9 +415,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <properties>
-        <jre.location>target/ballerina-jre-artifacts-zip/ballerina-jre-artifacts-${ballerina.jre.artifacts.version}</jre.location>
-    </properties>
-
 </project>
