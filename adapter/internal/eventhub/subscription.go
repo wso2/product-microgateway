@@ -30,6 +30,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
@@ -226,19 +227,21 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	if !ok {
 		gatewayLabel = ""
 	}
-	if queryParamMap != nil && len(queryParamMap) > 0 {
-		q := req.URL.Query()
-		// Making necessary query parameters for the request
-		for queryParamKey, queryParamValue := range queryParamMap {
-			q.Add(queryParamKey, queryParamValue)
-		}
-		req.URL.RawQuery = q.Encode()
-	}
 	if err != nil {
 		c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
 		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
 		return
 	}
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
+	q := req.URL.Query()
+
+	if queryParamMap != nil && len(queryParamMap) > 0 {
+		// Making necessary query parameters for the request
+		for queryParamKey, queryParamValue := range queryParamMap {
+			q.Add(queryParamKey, queryParamValue)
+		}
+	}
+	req.URL.RawQuery = q.Encode()
 
 	// Check if TLS is enabled
 	skipSSL := conf.ControlPlane.SkipSSLVerification
