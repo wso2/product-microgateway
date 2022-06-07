@@ -479,7 +479,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 				epCert = defaultCerts
 			}
 
-			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
+			upstreamtlsContext := createUpstreamTLSContext(epCert, address, clusterDetails.HTTP2Enabled)
 			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
@@ -601,7 +601,7 @@ func createHealthCheck() []*corev3.HealthCheck {
 	}
 }
 
-func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tlsv3.UpstreamTlsContext {
+func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, http2Enabled bool) *tlsv3.UpstreamTlsContext {
 	conf, errReadConfig := config.ReadConfigs()
 	//TODO: (VirajSalaka) Error Handling
 	if errReadConfig != nil {
@@ -623,8 +623,11 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 				CipherSuites:              ciphersArray,
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
-			AlpnProtocols:   []string{"h2", "http/1.1"},
 		},
+	}
+
+	if http2Enabled {
+		upstreamTLSContext.CommonTlsContext.AlpnProtocols = []string{"h2", "http/1.1"}
 	}
 
 	sanType := tlsv3.SubjectAltNameMatcher_IP_ADDRESS
