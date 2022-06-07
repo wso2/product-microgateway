@@ -326,8 +326,6 @@ func getListenerCodecType(codecType string) hcmv3.HttpConnectionManager_CodecTyp
 		return hcmv3.HttpConnectionManager_HTTP1
 	case "HTTP2":
 		return hcmv3.HttpConnectionManager_HTTP2
-	case "HTTP3":
-		return hcmv3.HttpConnectionManager_HTTP3
 	default:
 		return hcmv3.HttpConnectionManager_AUTO
 	}

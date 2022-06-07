@@ -623,7 +623,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 				CipherSuites:              ciphersArray,
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
-			// AlpnProtocols:   []string{"h2", "http/1.1"},
+			AlpnProtocols:   []string{"h2", "http/1.1"},
 		},
 	}
 

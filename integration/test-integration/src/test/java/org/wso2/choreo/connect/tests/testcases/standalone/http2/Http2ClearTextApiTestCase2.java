@@ -42,7 +42,7 @@ public class Http2ClearTextApiTestCase2 {
     void start() throws Exception {
         API api = new API();
         api.setName("Http2ClearTextAPI");
-        api.setContext("http2_secured");
+        api.setContext("http2_clear_text");
         api.setProdEndpoint(Utils.getDockerMockServiceURLHttp2ClearText(""));
         api.setVersion("v1");
         api.setProvider("admin");
