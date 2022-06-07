@@ -340,12 +340,6 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	// Update the LifecycleStatus of the API.
 	updateLCStateOfMgwSwagger(&mgwSwagger)
 
-	// TODO: (VirajSalaka) finalize whether we need this check.
-	// We make it a special case if it is a prototyped endpoint case. This feature is removed in the APIM 4.1.0.
-	if apiYaml.LifeCycleStatus == prototypedAPI {
-		mgwSwagger.LifeCycleState = prototypedAPI
-	}
-
 	// -------- Finished updating mgwSwagger struct
 
 	uniqueIdentifier := apiYaml.ID
