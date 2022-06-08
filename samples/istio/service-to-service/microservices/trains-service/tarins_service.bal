@@ -16,7 +16,7 @@ import ballerina/http;
 
 listener http:Listener ep0 = new (8080);
 
-service /'train\-service/v1 on ep0 {
+service /'trains\-service/v1 on ep0 {
 
     isolated resource function get trains() returns Train[] {
         lock {

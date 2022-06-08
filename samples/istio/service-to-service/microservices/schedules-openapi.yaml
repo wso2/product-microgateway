@@ -1,0 +1,155 @@
+openapi: 3.0.1
+info:
+  title: Schedules
+  description: | 
+    This is the API definition for Coltrain's schedule listing API
+  version: 1.0.0
+servers:
+  - url: http://schedules-service:8080/train-service/v1
+paths:
+  /schedules:
+    get:
+      parameters:
+       - in: query
+         name: from
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: to
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: startTime
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: endTime
+         schema:
+           type: string
+           description: Train starting station
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleItemList'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleItem'
+        required: true
+      responses:
+        '200':
+          description: ok
+  /schedules/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleItemInfo'
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleItem'
+      responses:
+        '200':
+          description: ok
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+components:
+  schemas:
+    ScheduleItem:
+      title: Schedule information 
+      type: object
+      properties:
+        entryId:
+          type: string
+          description: Id of the schedule item.
+        startTime:
+          type: string
+          description: Train starting time.
+        endTime:
+          type: string
+          description: Train destination arrival time.
+        from:
+          type: string
+          description: Train starting station.
+        to:
+          type: string
+          description: Train destination station.
+        trainId:
+          type: string
+          description: Id of the train.
+    ScheduleItemInfo:
+      title: Schedule information
+      type: object
+      properties:
+        entryId:
+          type: string
+          description: Id of the schedule item.
+        startTime:
+          type: string
+          description: Train starting time.
+        endTime:
+          type: string
+          description: Train destination arrival time.
+        from:
+          type: string
+          description: Train starting station.
+        to:
+          type: string
+          description: Train destination station.
+        trainId:
+          type: string
+          description: Id of the train.
+        facilities:
+          type: string
+          description: Facilities provided in the train.
+        imageURL:
+          type: string
+          description: Image URL of the train.
+    ScheduleItemList:
+      title: List of schedule items information
+      type: array
+      items:
+        $ref: '#/components/schemas/ScheduleItemInfo'
