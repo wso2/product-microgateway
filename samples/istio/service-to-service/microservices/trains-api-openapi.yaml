@@ -1,0 +1,103 @@
+openapi: 3.0.1
+info:
+  title: Trains
+  description: | 
+    This is the API definition for Coltrain's trains listing API
+  version: 1.0.0
+servers:
+  - url: http://train-service:8080/train-service/v1
+paths:
+  /trains:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainList'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+        required: true
+      responses:
+        '200':
+          description: ok
+  /trains/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Train'
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+      responses:
+        '200':
+          description: ok
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+components:
+  schemas:
+    Train:
+      title: Train information
+      type: object
+      properties:
+        trainId:
+          type: string
+          description: Id of the schedule item.
+        numberOfCarriage:
+          type: integer
+          description: Number of train carriages.
+        imageURL:
+          type: string
+          description: Image URL of the train.
+        engineModel:
+          type: string
+          description: Engine model.
+        facilities:
+          type: string
+          description: Facilities provided in the train.
+    TrainList:
+      title: List of trains
+      type: array
+      items:
+        $ref: '#/components/schemas/Train'
