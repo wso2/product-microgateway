@@ -320,8 +320,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		// In case resource level production endpoints exist and no resource level sandbox
 		// use API level sandbox for sandbox route creation
 		if resourceBasePath != "" && resourceBasePathSand == "" {
-			apiLevelbasePathSand = apiLevelbasePath
+			if apiLevelbasePathSand == "" {
+				apiLevelbasePathSand = apiLevelbasePath
+			}
 			resourceBasePathSand = apiLevelbasePathSand
+		} else if resourceBasePath == "" && resourceBasePathSand != "" {
+			resourceBasePath = apiLevelbasePath
 		}
 
 		// if both resource level sandbox and production are same as api level, api level clusters will be applied with the api level basepath
@@ -334,7 +338,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		}
 
 		if clusterNameProd != "" && clusterNameProd == apiLevelClusterNameProd && resourceBasePath != apiLevelbasePath &&
-			resourceBasePath != ""{
+			resourceBasePath != "" {
 			logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. sandbox endpoint basepath : %v and production basepath : %v mismatched",
 				apiTitle, apiVersion, resourcePath, resourceBasePath, apiLevelbasePath)
 			clusterNameProd = ""
