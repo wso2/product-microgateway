@@ -20,7 +20,11 @@
     "throttleTier": "Unlimited"
   },
   {
-    "appName": "DefaultAPIApp",
+    "appName": "Http2SecuredAPIApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "Http2ClearTextAPIApp",
     "throttleTier": "Unlimited"
   },
   {

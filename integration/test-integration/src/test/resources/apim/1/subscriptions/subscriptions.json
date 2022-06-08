@@ -26,12 +26,12 @@
   },
   {
     "apiName": "Http2ClearTextAPI",
-    "appName": "DefaultAPIApp",
+    "appName": "Http2ClearTextAPIApp",
     "tier": "Unlimited"
   },
   {
     "apiName": "Http2SecuredAPI",
-    "appName": "DefaultAPIApp",
+    "appName": "Http2SecuredAPIApp",
     "tier": "Unlimited"
   },
   {

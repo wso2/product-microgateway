@@ -87,8 +87,7 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApplicationThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketSubscriptionThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2ClearTextApiTestCase"/>
-           <!-- TODO: Amila Find a way to add backend cert to apim project -->
-           <!-- <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2SecuredApiTestCase"/> -->
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2SecuredApiTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2DownstreamToHttp1UpstreamTestCase"/>
        </classes>
    </test>

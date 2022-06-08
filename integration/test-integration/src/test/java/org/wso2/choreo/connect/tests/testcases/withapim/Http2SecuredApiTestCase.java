@@ -28,12 +28,15 @@ import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
+import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,10 +47,10 @@ import java.util.Map;
 public class Http2SecuredApiTestCase extends ApimBaseTest {
     private static final String API_NAME = "Http2SecuredAPI";
     private static final String API_CONTEXT = "http2_secured";
-    private static final String APPLICATION_NAME = "DefaultAPIApp";
+    private static final String APPLICATION_NAME = "Http2SecuredAPIApp";
     private static final String API_VERSION = "1.0.0";
     private final Map<String, String> requestHeaders = new HashMap<>();
-  
+
     String apiId;
     String revisionUUID;
     String applicationId;
@@ -75,17 +78,24 @@ public class Http2SecuredApiTestCase extends ApimBaseTest {
         api.setVersion("1.0.0");
         api.setProvider("admin");
 
+        String targetDir = Utils.getTargetDirPath();
+        File certFile = new File(targetDir + ApictlUtils.BACKEND_CERTS_PATH + "backend_tls.crt");
+        publisherRestClient.uploadEndpointCertificate(certFile, "http2-secured-endpoint", "https://mockBackend:2351");
+        revisionUUID = PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
+
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
+
         internalKey = TokenUtil.getJWT(api, null, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
                 3600, null, true);
         endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/hello");
     }
 
-    @Test(description = "Send a request to a subscribed REST API in a published state")
-    public void testPublishedStateAPI() throws CCTestException, InterruptedException {
+    @Test(description = "Invoke HTTP2 secured endpoint with prior knowledge")
+    public void invokeHttp2SecuredEndpointSuccess() throws CCTestException, InterruptedException {
         HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
     }
-    
+
 }
