@@ -429,6 +429,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
 			routeS := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
 				clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, true))
+			// Sandbox route should be appended before to prod route to have the expected header based sandbox routing.
 			routes = append(routes, routeS)
 		}
 		routes = append(routes, routeP)
