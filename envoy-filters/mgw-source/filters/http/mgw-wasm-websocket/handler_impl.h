@@ -31,7 +31,7 @@ class MgwGrpcStreamHandler : public GrpcStreamHandler<WebSocketFrameRequest, Web
 
     void onRemoteClose(GrpcStatus status) override;
 
-    bool sendMessage(WebSocketFrameRequest request) override;
+    void sendMessage(WebSocketFrameRequest request) override;
 
   private:
     HandlerCallbacks *callbacks_;
