@@ -53,7 +53,7 @@ public class Http2DownstreamToHttp1UpstreamTestCase extends ApimBaseTest {
         headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
-        java.net.http.HttpResponse<String> response = Http2ClientRequest.retryGetRequestUntilDeployed(endpoint,
+        java.net.http.HttpResponse<String> response = Http2ClientRequest.doGet(endpoint,
                 headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
         Assert.assertEquals(response.statusCode(), HttpStatus.SC_SUCCESS,

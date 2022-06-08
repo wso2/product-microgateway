@@ -83,7 +83,7 @@ public class Http2ClearTextApiTestCase extends ApimBaseTest {
 
     @Test(description = "Invoke HTTP2 clear text endpoint with prior knowledge")
     public void invokeHttp2ClearTextEndpointSuccess() throws CCTestException, InterruptedException {
-        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
+        HttpResponse response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
@@ -91,7 +91,7 @@ public class Http2ClearTextApiTestCase extends ApimBaseTest {
 
     @Test(description = "Invoke HTTP2 clear text endpoint with prior knowledge with http2 downstream connection")
     public void invokeHttp2ClearTextEndpointWithHttp2DownsteamSuccess() throws Exception {
-        java.net.http.HttpResponse<String>  response = Http2ClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
+        java.net.http.HttpResponse<String>  response = Http2ClientRequest.doGet(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
         Assert.assertEquals(response.statusCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");

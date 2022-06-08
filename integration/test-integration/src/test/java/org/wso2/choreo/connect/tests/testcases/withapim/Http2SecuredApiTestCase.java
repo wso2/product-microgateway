@@ -92,7 +92,7 @@ public class Http2SecuredApiTestCase extends ApimBaseTest {
 
     @Test(description = "Invoke HTTP2 secured endpoint with prior knowledge")
     public void invokeHttp2SecuredEndpointSuccess() throws CCTestException, InterruptedException {
-        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
+        HttpResponse response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
