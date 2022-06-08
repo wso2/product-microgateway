@@ -35,7 +35,7 @@ const (
 	XWso2BasePath                     string = "x-wso2-basePath"
 	XWso2Label                        string = "x-wso2-label"
 	XWso2Cors                         string = "x-wso2-cors"
-	XWso2HTTP2Enabled                 string = "x-wso2-http2-enabled"
+	XWso2HTTP2BackendEnabled          string = "x-wso2-http2-backend-enabled"
 	XThrottlingTier                   string = "x-throttling-tier"
 	XWso2ThrottlingTier               string = "x-wso2-throttling-tier"
 	XAuthHeader                       string = "x-wso2-auth-header"

@@ -39,13 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test case to check the behaviour when APIs are blocked from APIM publisher lifecycle tab.
+ * Test case to check http2 clear text endpoints
  *
  */
 public class Http2ClearTextApiTestCase extends ApimBaseTest {
     private static final String API_NAME = "Http2ClearTextAPI";
     private static final String API_CONTEXT = "http2_clear_text";
-    private static final String APPLICATION_NAME = "Http2ClearTextAPIApp";
+    private static final String APPLICATION_NAME = "DefaultAPIApp";
     private static final String API_VERSION = "1.0.0";
     private final Map<String, String> requestHeaders = new HashMap<>();
   

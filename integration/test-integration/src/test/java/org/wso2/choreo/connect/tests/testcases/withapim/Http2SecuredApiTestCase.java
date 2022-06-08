@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -38,13 +38,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test case to check the behaviour when APIs are blocked from APIM publisher lifecycle tab.
+ * Test case to check the http2 secured endpoints
  *
  */
 public class Http2SecuredApiTestCase extends ApimBaseTest {
     private static final String API_NAME = "Http2SecuredAPI";
     private static final String API_CONTEXT = "http2_secured";
-    private static final String APPLICATION_NAME = "Http2SecuredAPIApp";
+    private static final String APPLICATION_NAME = "DefaultAPIApp";
     private static final String API_VERSION = "1.0.0";
     private final Map<String, String> requestHeaders = new HashMap<>();
   

@@ -10,7 +10,7 @@ paths:
         "200":
           description: successful operation
 x-wso2-basePath: /http2_secured
-x-wso2-http2-enabled: true
+x-wso2-http2-backend-enabled: true
 x-wso2-production-endpoints:
   urls:
     - https://mockBackend:2351

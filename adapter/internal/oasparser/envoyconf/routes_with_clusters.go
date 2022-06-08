@@ -93,7 +93,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// check API level production endpoints available
 	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
 		apiLevelEndpointProd := mgwSwagger.GetProdEndpoints()
-		apiLevelEndpointProd.HTTP2Enabled = mgwSwagger.GetXWso2HTTP2Enabled()
+		apiLevelEndpointProd.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
 		apiLevelbasePath = strings.TrimSuffix(apiLevelEndpointProd.Endpoints[0].Basepath, "/")
 		apiLevelClusterNameProd = getClusterName(apiLevelEndpointProd.EndpointPrefix, organizationID, vHost, apiTitle,
 			apiVersion, "")
@@ -118,7 +118,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// check API level sandbox endpoints available
 	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
 		apiLevelEndpointSand := mgwSwagger.GetSandEndpoints()
-		apiLevelEndpointSand.HTTP2Enabled = mgwSwagger.GetXWso2HTTP2Enabled()
+		apiLevelEndpointSand.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
 		if apiLevelbasePath == "" {
 			apiLevelbasePath = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
 		}
@@ -479,7 +479,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 				epCert = defaultCerts
 			}
 
-			upstreamtlsContext := createUpstreamTLSContext(epCert, address, clusterDetails.HTTP2Enabled)
+			upstreamtlsContext := createUpstreamTLSContext(epCert, address, clusterDetails.HTTP2BackendEnabled)
 			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
@@ -563,7 +563,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	}
 
 	// Enable http2 protocol for the cluster
-	if clusterDetails.HTTP2Enabled {
+	if clusterDetails.HTTP2BackendEnabled {
 		cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{
 			InitialConnectionWindowSize: &wrapperspb.UInt32Value{
 				Value: conf.Envoy.Upstream.HTTP2.InitialConnectionWindowSize,
@@ -601,7 +601,7 @@ func createHealthCheck() []*corev3.HealthCheck {
 	}
 }
 
-func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, http2Enabled bool) *tlsv3.UpstreamTlsContext {
+func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, hTTP2BackendEnabled bool) *tlsv3.UpstreamTlsContext {
 	conf, errReadConfig := config.ReadConfigs()
 	//TODO: (VirajSalaka) Error Handling
 	if errReadConfig != nil {
@@ -626,7 +626,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, htt
 		},
 	}
 
-	if http2Enabled {
+	if hTTP2BackendEnabled {
 		upstreamTLSContext.CommonTlsContext.AlpnProtocols = []string{"h2", "http/1.1"}
 	}
 
