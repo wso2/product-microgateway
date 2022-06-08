@@ -27,7 +27,7 @@ func GetAPIs(c chan synchronizer.SyncAPIResponse, id *string, envs []string, end
 	queryParamMap map[string]string) {
 	if len(envs) > 0 {
 		// If the envrionment labels are present, call the controle plane with labels.
-		logger.LoggerAdapter.Debugf("Environments label present: %v", envs)
+		logger.LoggerAdapter.Debugf("Environment labels present: %v", envs)
 		go synchronizer.FetchAPIs(id, envs, c, endpoint, sendType, apiUUIDList, queryParamMap)
 	} else {
 		// If the environments are not give, fetch the APIs from default envrionment

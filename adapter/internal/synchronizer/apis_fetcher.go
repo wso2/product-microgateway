@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 
@@ -164,6 +165,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	c := make(chan sync.SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
 	var queryParamMap map[string]string
+	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 	for {
 		data := <-c

@@ -239,7 +239,6 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint st
 	channelFillPercentage := float64(len(workerPool.internalQueue)) / float64(cap(workerPool.internalQueue)) * 100
 	logger.LoggerSync.Infof("Workerpool channel size as a percentage is : %f", channelFillPercentage)
 	FetchAPIs(&data.APIUUID, data.GatewayLabels, c, endpoint, sendType, nil, queryParamMap)
-
 }
 
 // ReadRootFiles function reads following files inside the root zip

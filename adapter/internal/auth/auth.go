@@ -30,6 +30,7 @@ import (
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	stringutils "github.com/wso2/product-microgateway/adapter/internal/utils"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
@@ -167,7 +168,7 @@ func ValidateToken(accessToken string, resourceScopes []string, conf *config.Con
 		return false, nil
 	}
 	tokenScope, _ := token.Get(scopeConst)
-	if !stringInSlice(tokenScope.(string), resourceScopes) {
+	if !stringutils.StringInSlice(tokenScope.(string), resourceScopes) {
 		loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
 			Message:   "Invalid scope in token.",
 			Severity:  logging.MINOR,
@@ -184,13 +185,4 @@ func getPrivateKey() (*rsa.PrivateKey, error) {
 		return storedPrivateKey, nil
 	}
 	return nil, errors.New("private key not present")
-}
-
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }

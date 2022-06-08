@@ -110,6 +110,9 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
 			IdleTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.IdleTimeoutInSeconds * time.Second), // Default 1 hr
 		},
+		HttpProtocolOptions: &corev3.Http1ProtocolOptions{
+			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
+		},
 	}
 
 	if len(accessLogs) > 0 {

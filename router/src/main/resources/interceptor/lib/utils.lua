@@ -15,6 +15,10 @@ limitations under the License.
 
 ]]
 
+--- utils module
+-- @module utils
+local utils = {}
+
 function is_starts_with(text, startsWith)
     return string.sub(text, 1, string.len(startsWith)) == startsWith
 end
@@ -86,3 +90,60 @@ function table.shallow_copy(src, des)
         des[k] = v
     end
 end
+
+--- log body retrieved from the handle
+---@param handle table
+---@param log_message string
+function utils.wire_log_body(handle, log_message, log_body_enabled)
+    if log_body_enabled then 
+        local log_output = "\n" .. "[wirelog]" .. log_message .. "\n"
+        if handle:body() then
+            handle:logInfo(log_output .. handle:body():getBytes(0, handle:body():length()) .. log_output)
+        else 
+            handle:logInfo("Body is empty")
+        end
+    end
+end
+
+--- log headers retrieved from the handle
+---@param handle table
+---@param log_message string
+function utils.wire_log_headers(handle, log_message, log_headers_enabled)
+    if log_headers_enabled then 
+        local headers = handle:headers()
+        local log_output = "\n"
+        if headers ~= nil then
+            for header_name, header_value in pairs(headers) do
+                log_output = log_output .. "[wirelog]" .. log_message .. header_name .. ": " .. header_value .. "\n"
+            end
+        end
+        handle:logInfo(log_output)
+    end
+end
+
+--- log trailers retrieved from the handle
+---@param handle table
+---@param log_message string
+function utils.wire_log_trailers(handle, log_message, log_trailers_enabled)
+    if log_trailers_enabled then 
+        local trailers = handle:trailers()
+        local log_output = "\n"
+        if trailers ~= nil then
+            for trailer_name, trailer_value in pairs(trailers) do
+                log_output = log_output .. "[wirelog]" .. log_message .. trailer_name .. ": " .. trailer_value .. "\n"
+            end
+        end
+        handle:logInfo(log_output)
+    end
+end
+
+--- log body and headers retrieved from the handle
+---@param log_message_body string
+---@param log_message_header string
+function utils.wire_log(handle, log_message_body, log_message_header, log_message_trailer, wire_log_config)
+    utils.wire_log_headers(handle, log_message_header, wire_log_config.log_headers_enabled)
+    utils.wire_log_body(handle, log_message_body, wire_log_config.log_body_enabled)
+    utils.wire_log_trailers(handle, log_message_trailer, wire_log_config.log_trailers_enabled)
+end
+
+return utils
