@@ -140,6 +140,7 @@
                 <include>com.beust:jcommander:jar</include>
                 <include>org.wso2.carbon.callhome:core</include>
                 <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                <include>javax.xml.bind:jaxb-api</include>
             </includes>
         </dependencySet>
         <dependencySet>
