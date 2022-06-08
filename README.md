@@ -8,7 +8,7 @@ consumers, internal consumers and partners. It applies the common quality of ser
 security, rate limiting and analytics and also offers a wide range of features which helps organizations to deploy APIs 
 microservice architectures efficiently.
 
-[![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/products/job/product-microgateway)
+[![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/products/job/product-microgateway_3.2.x)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/slack-microgateway-blueviolet)](https://join.slack.com/t/wso2-apim/shared_invite/enQtNzEzMzk5Njc5MzM0LTgwODI3NmQ1MjI0ZDQyMGNmZGI4ZjdkZmI1ZWZmMjNkY2E0NmY3ZmExYjkxYThjNzNkOTU2NWJmYzM4YzZiOWU)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3312/badge)](https://bestpractices.coreinfrastructure.org/projects/3312)
