@@ -42,7 +42,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -52,7 +51,19 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	interceptor "github.com/wso2/product-microgateway/adapter/internal/interceptor"
 )
+
+// WireLogValues holds debug logging related template values
+type WireLogValues struct {
+	LogConfig *config.WireLogConfig
+}
+
+// CombinedTemplateValues holds combined values for both WireLogValues properties and Interceptor properties in the same level
+type CombinedTemplateValues struct {
+	WireLogValues
+	interceptor.Interceptor
+}
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
 // This creates routes for all the swagger resources and link to clusters.
@@ -528,6 +539,9 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		HttpProtocolOptions: &corev3.Http1ProtocolOptions{
+			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
+		},
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
@@ -695,7 +709,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
-	config, _ := config.ReadConfigs()
+	adapterConfig, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -810,9 +824,39 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	var luaPerFilterConfig lua.LuaPerRoute
 	if len(requestInterceptor) < 1 && len(responseInterceptor) < 1 {
-		luaPerFilterConfig = lua.LuaPerRoute{
-			Override: &lua.LuaPerRoute_Disabled{Disabled: true},
+
+		logConf := config.ReadLogConfigs()
+
+		if logConf.WireLogs.Enable {
+
+			templateString := `
+local utils = require 'home.wso2.interceptor.lib.utils'
+local wire_log_config = {
+	log_body_enabled = {{ .LogConfig.LogBodyEnabled }},
+	log_headers_enabled = {{ .LogConfig.LogHeadersEnabled }},
+	log_trailers_enabled = {{ .LogConfig.LogTrailersEnabled }}
+}
+function envoy_on_request(request_handle)
+	utils.wire_log(request_handle, " >> request body >> ", " >> request headers >> ", " >> request trailers >> ", wire_log_config)
+end
+
+function envoy_on_response(response_handle)
+	utils.wire_log(response_handle, " << response body << ", " << response headers << ", " << response trailers << ", wire_log_config)
+end`
+			templateValues := WireLogValues{
+				LogConfig: config.GetWireLogConfig(),
+			}
+			luaPerFilterConfig = lua.LuaPerRoute{
+				Override: &lua.LuaPerRoute_SourceCode{SourceCode: &corev3.DataSource{Specifier: &corev3.DataSource_InlineString{
+					InlineString: interceptor.GetInterceptor(templateValues, templateString),
+				}}},
+			}
+		} else {
+			luaPerFilterConfig = lua.LuaPerRoute{
+				Override: &lua.LuaPerRoute_Disabled{Disabled: true},
+			}
 		}
+
 	} else {
 		// read from contextExtensions map since, it is updated with correct values with conditions
 		// so, no need to change two places
@@ -883,8 +927,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
-				IdleTimeout:       durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+				Timeout:           durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+				IdleTimeout:       durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
 	} else {
@@ -905,7 +949,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
 		// Retry configs are always added via headers. This is to update the
 		// default retry back-off base interval, which cannot be updated via headers.
-		retryConfig := config.Envoy.Upstream.Retry
+		retryConfig := adapterConfig.Envoy.Upstream.Retry
 		commonRetryPolicy := &routev3.RetryPolicy{
 			RetryOn: retryPolicyRetriableStatusCodes,
 			NumRetries: &wrapperspb.UInt32Value{
@@ -987,7 +1031,17 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 			}
 		}
 	}
-	return interceptor.GetInterceptor(i)
+	templateValues := CombinedTemplateValues{
+		WireLogValues{
+			LogConfig: config.GetWireLogConfig(),
+		},
+		*i,
+	}
+
+	templateString := interceptor.GetTemplate(i.IsRequestFlowEnabled,
+		i.IsResponseFlowEnabled)
+
+	return interceptor.GetInterceptor(templateValues, templateString)
 }
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
