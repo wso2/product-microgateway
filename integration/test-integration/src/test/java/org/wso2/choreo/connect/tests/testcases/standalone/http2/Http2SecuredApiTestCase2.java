@@ -62,7 +62,7 @@ public class Http2SecuredApiTestCase2 {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps(
                 "/http2_secured/hello") , headers);
 
         Assert.assertNotNull(response);
@@ -75,7 +75,7 @@ public class Http2SecuredApiTestCase2 {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        java.net.http.HttpResponse<String> response = Http2ClientRequest.doGet(Utils.getServiceURLHttps(
+        java.net.http.HttpResponse<String> response = Http2ClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps(
                 "/http2_secured/hello") , headers);
 
         Assert.assertNotNull(response);

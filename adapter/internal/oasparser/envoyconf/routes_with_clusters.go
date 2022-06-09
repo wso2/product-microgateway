@@ -49,6 +49,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
+	upstreams_http_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -529,6 +530,38 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	}
 	conf, _ := config.ReadConfigs()
 
+	httpProtocolOptions := &upstreams_http_v3.HttpProtocolOptions{
+		UpstreamProtocolOptions: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_{
+			ExplicitHttpConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig{
+				ProtocolConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_HttpProtocolOptions{
+					HttpProtocolOptions: &corev3.Http1ProtocolOptions{
+						EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
+					},
+				},
+			},
+		},
+	}
+
+	if clusterDetails.HTTP2BackendEnabled {
+		httpProtocolOptions.UpstreamProtocolOptions = &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_{
+			ExplicitHttpConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig{
+				ProtocolConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_Http2ProtocolOptions{
+					Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
+				},
+			},
+		}
+	}
+
+	// httpProtocolOptions.UpstreamProtocolOptions = &upstreams_http_v3.HttpProtocolOptions_AutoConfig{
+	// 	AutoConfig: &upstreams_http_v3.HttpProtocolOptions_AutoHttpConfig{
+	// 		Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
+	// 	},
+
+	ext, err2 := proto.Marshal(httpProtocolOptions)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
 		ConnectTimeout:       durationpb.New(timeout * time.Second),
@@ -542,6 +575,12 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		TypedExtensionProtocolOptions: map[string]*anypb.Any{
+			"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": &any.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions",
+				Value:   ext,
+			},
+		},
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
@@ -573,23 +612,42 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		}
 	}
 
-	// Enable http2 protocol for the cluster
-	if clusterDetails.HTTP2BackendEnabled {
-		cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{
-			InitialConnectionWindowSize: &wrapperspb.UInt32Value{
-				Value: conf.Envoy.Upstream.HTTP2.InitialConnectionWindowSize,
-			},
-			InitialStreamWindowSize: &wrapperspb.UInt32Value{
-				Value: conf.Envoy.Upstream.HTTP2.InitialStreamWindowSize,
-			},
-		}
-	}
+	// // Enable http2 protocol for the cluster
+	// if clusterDetails.HTTP2BackendEnabled {
+	// 	http2Options := conf.Envoy.Upstream.HTTP2
+	// 	cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{
+	// 		HpackTableSize: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialConnectionWindowSize,
+	// 		},
+	// 		MaxConcurrentStreams: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialConnectionWindowSize,
+	// 		},
+	// 		MaxOutboundFrames: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialConnectionWindowSize,
+	// 		},
+	// 		InitialConnectionWindowSize: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialConnectionWindowSize,
+	// 		},
+	// 		InitialStreamWindowSize: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialStreamWindowSize,
+	// 		},
+	// 		MaxConsecutiveInboundFramesWithEmptyPayload: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialStreamWindowSize,
+	// 		},
+	// 		MaxInboundPriorityFramesPerStream: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialStreamWindowSize,
+	// 		},
+	// 		MaxInboundWindowUpdateFramesPerDataFrameSent: &wrapperspb.UInt32Value{
+	// 			Value: http2Options.InitialStreamWindowSize,
+	// 		},
+	// 	}
+	// }
 
-	if !clusterDetails.HTTP2BackendEnabled && config.GetWireLogConfig().LogTrailersEnabled {
-		cluster.HttpProtocolOptions = &corev3.Http1ProtocolOptions{
-			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
-		}
-	}
+	// if !clusterDetails.HTTP2BackendEnabled && config.GetWireLogConfig().LogTrailersEnabled {
+	// 	cluster.HttpProtocolOptions = &corev3.Http1ProtocolOptions{
+	// 		EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
+	// 	}
+	// }
 
 	// service discovery itself will be handling loadbancing etc.
 	// Therefore mutiple endpoint support is not needed, hence consider only.
