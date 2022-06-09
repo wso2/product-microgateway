@@ -21,6 +21,7 @@ package adapter
 import (
 	"crypto/tls"
 	"strings"
+	"time"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
@@ -61,6 +62,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 )
 
 var (
@@ -116,6 +118,13 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 		logger.LoggerMgw.Warn("failed to initiate the ssl context: ", err)
 		panic(err)
 	}
+
+	grpcOptions = append(grpcOptions, grpc.KeepaliveParams(
+		keepalive.ServerParameters{
+			Time:    time.Duration(5 * time.Minute),
+			Timeout: time.Duration(20 * time.Second),
+		}),
+	)
 	grpcServer := grpc.NewServer(grpcOptions...)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
