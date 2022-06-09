@@ -542,9 +542,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
-		HttpProtocolOptions: &corev3.Http1ProtocolOptions{
-			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
-		},
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
@@ -585,6 +582,12 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			InitialStreamWindowSize: &wrapperspb.UInt32Value{
 				Value: conf.Envoy.Upstream.HTTP2.InitialStreamWindowSize,
 			},
+		}
+	}
+
+	if !clusterDetails.HTTP2BackendEnabled && config.GetWireLogConfig().LogTrailersEnabled {
+		cluster.HttpProtocolOptions = &corev3.Http1ProtocolOptions{
+			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
 		}
 	}
 
