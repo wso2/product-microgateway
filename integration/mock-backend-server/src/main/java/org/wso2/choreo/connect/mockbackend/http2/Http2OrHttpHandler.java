@@ -66,13 +66,6 @@ public class Http2OrHttpHandler extends ApplicationProtocolNegotiationHandler {
             return;
         }
 
-        if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
-            ctx.pipeline().addLast(new HttpServerCodec(),
-                    new HttpObjectAggregator(MAX_CONTENT_LENGTH),
-                    new EchoHttpServerHandler(sleepTime, false));
-            return;
-        }
-
         throw new IllegalStateException("Unknown protocol: " + protocol);
     }
 }
