@@ -120,8 +120,8 @@ var defaultConfig = &Config{
 				RespectDNSTtl:  false,
 			},
 			HTTP2: upstreamHTTP2Options{
-				InitialConnectionWindowSize: 1048576.0,
-				InitialStreamWindowSize:     65536.0,
+				HpackTableSize:       4096,
+				MaxConcurrentStreams: 2147483647,
 			},
 		},
 		Connection: connection{

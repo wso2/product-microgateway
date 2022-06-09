@@ -255,8 +255,8 @@ type upstreamDNS struct {
 }
 
 type upstreamHTTP2Options struct {
-	InitialConnectionWindowSize uint32
-	InitialStreamWindowSize     uint32
+	HpackTableSize       uint32
+	MaxConcurrentStreams uint32
 }
 
 type upstreamRetry struct {

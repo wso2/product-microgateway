@@ -546,16 +546,18 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		httpProtocolOptions.UpstreamProtocolOptions = &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_{
 			ExplicitHttpConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig{
 				ProtocolConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_Http2ProtocolOptions{
-					Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
+					Http2ProtocolOptions: &corev3.Http2ProtocolOptions{
+						HpackTableSize: &wrapperspb.UInt32Value{
+							Value: conf.Envoy.Upstream.HTTP2.HpackTableSize,
+						},
+						MaxConcurrentStreams: &wrapperspb.UInt32Value{
+							Value: conf.Envoy.Upstream.HTTP2.MaxConcurrentStreams,
+						},
+					},
 				},
 			},
 		}
 	}
-
-	// httpProtocolOptions.UpstreamProtocolOptions = &upstreams_http_v3.HttpProtocolOptions_AutoConfig{
-	// 	AutoConfig: &upstreams_http_v3.HttpProtocolOptions_AutoHttpConfig{
-	// 		Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
-	// 	},
 
 	ext, err2 := proto.Marshal(httpProtocolOptions)
 	if err2 != nil {
@@ -611,43 +613,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			},
 		}
 	}
-
-	// // Enable http2 protocol for the cluster
-	// if clusterDetails.HTTP2BackendEnabled {
-	// 	http2Options := conf.Envoy.Upstream.HTTP2
-	// 	cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{
-	// 		HpackTableSize: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialConnectionWindowSize,
-	// 		},
-	// 		MaxConcurrentStreams: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialConnectionWindowSize,
-	// 		},
-	// 		MaxOutboundFrames: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialConnectionWindowSize,
-	// 		},
-	// 		InitialConnectionWindowSize: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialConnectionWindowSize,
-	// 		},
-	// 		InitialStreamWindowSize: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialStreamWindowSize,
-	// 		},
-	// 		MaxConsecutiveInboundFramesWithEmptyPayload: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialStreamWindowSize,
-	// 		},
-	// 		MaxInboundPriorityFramesPerStream: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialStreamWindowSize,
-	// 		},
-	// 		MaxInboundWindowUpdateFramesPerDataFrameSent: &wrapperspb.UInt32Value{
-	// 			Value: http2Options.InitialStreamWindowSize,
-	// 		},
-	// 	}
-	// }
-
-	// if !clusterDetails.HTTP2BackendEnabled && config.GetWireLogConfig().LogTrailersEnabled {
-	// 	cluster.HttpProtocolOptions = &corev3.Http1ProtocolOptions{
-	// 		EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
-	// 	}
-	// }
 
 	// service discovery itself will be handling loadbancing etc.
 	// Therefore mutiple endpoint support is not needed, hence consider only.

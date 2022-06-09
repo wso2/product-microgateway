@@ -187,6 +187,13 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Used when retry config is set via API-M UI or all given status codes are out of range.
   statusCodes = [ 504 ]
 
+# Configs http2 protocol options for upstream http2 cluster endpoints
+[router.upstream.http2]
+  # Maximum table size (in octets) that the encoder is permitted to use for the dynamic HPACK table: https://httpwg.org/specs/rfc7541.html#rfc.section.4.2
+  hpackTableSize = 4096
+  # Maximum concurrent streams allowed for peer on one HTTP/2 connection
+	maxConcurrentStreams = 2147483647
+
 # Timeouts managed by the connection manager
 [router.connectionTimeout]
   # The amount of time that Envoy will wait for the entire request to be received. Time from client to upstream.
