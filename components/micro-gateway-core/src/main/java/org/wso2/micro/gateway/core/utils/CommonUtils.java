@@ -114,7 +114,23 @@ public class CommonUtils {
     }
 
     public static String getQualifiedServiceName(String apiName, String apiVersion) {
-        return trim(apiName) + "__" + replaceAllNonAlphaNumeric(apiVersion);
+        return trimAPIName(apiName) + "__" + replaceAllNonAlphaNumeric(apiVersion);
 
+    }
+
+    public static String trimAPIName(String key) {
+        if (key == null) {
+            return null;
+        }
+        //Replacing special characters with some tokens to avoid parsing issues during code generation
+        key = key.replaceAll("(\\{)|(})|(/)", "_");
+        //Following are handled individually, so that they can be reverted back, to keep the api name unchanged
+        key = key.replaceAll("(-)", "_hyphen_");
+        key = key.replaceAll("(\\.)", "_dot_");
+        key = key.replaceAll("(\\s)", "_space_");
+        if (key.contains("*")) {
+            key = key.replaceAll("\\*", UUID.randomUUID().toString().replaceAll("-", "_"));
+        }
+        return key;
     }
 }
