@@ -20,56 +20,55 @@ service /'trains\-service/v1 on ep0 {
 
     isolated resource function get trains() returns Train[] {
         lock {
-            Train[] filteredTrains = [];
-            foreach Train t in trains {
-                if t?.trainId != () {
-                    filteredTrains.push(t);
-                }
-            }
-            return filteredTrains.clone();
+            return trains.toArray().clone();
         }
     }
 
     isolated resource function post trains(@http:Payload {} Train payload) returns http:Ok {
+        string id;
         lock {
-            payload.trainId = nextIndex.toString();
+            id = nextIndex.toString();
+            payload.trainId = id;
         }
         lock {
-            trains.push(payload.clone());
+            trains[id] = payload.clone();
         }
         return {body: {message: "Train added successfully"}};
     }
 
     isolated resource function get trains/[int id]() returns Train|http:NotFound {
-        if !isTrainExists(id) {
-            return <http:NotFound>{body: {message: "Train Not Found"}};
-        } else {
-            lock {
-                return trains[id - 1].clone();
+        lock {
+            Train? train = trains[id.toString()];
+            if train is Train {
+                return train.clone();
+            } else {
+                return <http:NotFound>{body: {message: "Train Not Found"}};
             }
         }
     }
 
-    isolated resource function put trains/[int id](@http:Payload {} Train payload) returns http:Ok|http:NotFound {
-        if !isTrainExists(id) {
-            return <http:NotFound>{body: {message: "Train Not Found"}};
-        } else {
-            payload.trainId = id.toString();
-            lock {
-                trains[id - 1] = payload.clone();
+    isolated resource function put trains/[int id](@http:Payload {} Train payload) returns http:Ok|http:BadRequest {
+        lock {
+            Train? train = trains[id.toString()];
+            if train is Train {
+                payload.trainId = id.toString();
+                trains[id.toString()] = payload.clone();
+                return <http:Ok>{body: {status: "Train updated successfully"}};
+            } else {
+                return <http:BadRequest>{body: {message: "Train Not Found"}};
             }
-            return <http:Ok>{body: {message: "Train updated successfully"}};
         }
     }
 
-    isolated resource function delete trains/[int id]() returns http:Ok|http:NotFound {
-        if !isTrainExists(id) {
-            return <http:NotFound>{body: {message: "Train Not Found"}};
-        } else {
-            lock {
-                trains[id - 1] = {};
+    isolated resource function delete trains/[int id]() returns http:Ok|http:BadRequest {
+        lock {
+            Train? train = trains[id.toString()];
+            if train is Train {
+                _ = trains.remove(id.toString());
+                return <http:Ok>{body: {status: "Train deleted successfully"}};
+            } else {
+                return <http:BadRequest>{body: {message: "Train Not Found"}};
             }
-            return <http:Ok>{body: {status: "Train deleted successfully"}};
         }
     }
 }

@@ -19,27 +19,45 @@
 
 2.  Invoke services.
 
-    ```sh
-    curl http://localhost:8080/train-service/v1/trains
-    curl http://localhost:8080/train-service/v1/trains -d '{"trainId":"2", "numberOfCarriage":10, "imageURL":"foo.com", "engineModel":"F", "facilities":"WiFi"}'
-    curl http://localhost:8080/train-service/v1/trains/2
-    ```
+    -   Trains Service
+        ```sh
+        curl http://localhost:8080/trains-service/v1/trains
+        
+        curl http://localhost:8080/trains-service/v1/trains -H "Content-Type:application/json" \
+            -d '{
+                    "trainId": "5",
+                    "numberOfCarriage": 10,
+                    "imageURL": "https://abc.train.org/resources/image/98215.png",
+                    "engineModel": "TigerJet",
+                    "facilities": "WiFi"
+                }'
 
-## Build and Test the sample
+        curl http://localhost:8080/trains-service/v1/trains/5 -X PUT -H "Content-Type:application/json" \
+            -d '{
+                    "numberOfCarriage": 10,
+                    "imageURL": "https://abc.train.org/resources/image/98215-new-image-441152335.png",
+                    "engineModel": "TigerJet",
+                    "facilities": "WiFi"
+                }'
+        
+        curl http://localhost:8080/trains-service/v1/trains/5
+        ```
 
-1.  Build the backend service.
+    -   Schedules Service
+        ```sh
+        curl http://localhost:8081/schedules-service/v1/schedules
+        
+        curl http://localhost:8081/schedules-service/v1/schedules/2
+        ```
+
+## Build Images
+
+-   Trains Service
     ```sh
     bal build --cloud=docker trains-service
     ```
 
-2.  Test the backend service.
+-   Schedules Service
     ```sh
-    docker run --rm --name trains-service -p 8080:8080 wso2am/cc-trains-service:1.0.0
-    ```
-   
-   In another shell
-    ```sh
-    curl -X POST http://localhost:9080/books \
-      -d '<name>The Prisoner</name>' \
-      -H 'x-user: admin' -v
+    bal build --cloud=docker schedules-service
     ```

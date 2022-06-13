@@ -12,22 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-isolated Train[] trains = [
-    {
+isolated map<Train> trains = {
+    "1": {
         trainId: "1",
-        engineModel: "F",
+        engineModel: "Heavier",
+        numberOfCarriage: 7,
+        facilities: "Canteen",
+        imageURL: "https://abc.train.org/resources/image/0931.png"
+    },
+    "2": {
+        trainId: "2",
+        engineModel: "Heavier",
+        numberOfCarriage: 12,
+        facilities: "WiFi, Canteen",
+        imageURL: "https://abc.train.org/resources/image/19234.png"
+    },
+    "3": {
+        trainId: "3",
+        engineModel: "TigerJet",
+        numberOfCarriage: 8,
+        facilities: "Canteen",
+        imageURL: "https://abc.train.org/resources/image/87622.png"
+    },
+    "4": {
+        trainId: "4",
+        engineModel: "TigerJet",
         numberOfCarriage: 10,
-        facilities: "WiFi",
-        imageURL: "foo.com"
+        facilities: "WiFi, Canteen",
+        imageURL: "https://abc.train.org/resources/image/47102.png"
     }
-];
-isolated int nextIndex = 2;
+};
 
-isolated function isTrainExists(int id) returns boolean {
-    lock {
-        if id > trains.length() {
-            return false;
-        }
-        return trains[id - 1]?.trainId != ();
-    }
-}
+isolated int nextIndex = 5;

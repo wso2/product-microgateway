@@ -15,36 +15,53 @@
 import ballerina/os;
 import ballerina/http;
 
-final string trainServiceURL = os:getEnv("");
+final string trainServiceURL = os:getEnv("TRAIN_SERVICE_URL");
+final string trainServiceApiKey = os:getEnv("TRAIN_SERVICE_API_KEY");
+final string trainServiceHost = os:getEnv("TRAIN_SERVICE_HOST");
 final http:Client httpClient = check new (trainServiceURL == "" ? "http://localhost:8080/trains-service/v1" : trainServiceURL);
 
-isolated ScheduleItem[] schedules = [
-    {
+isolated map<ScheduleItem> schedules = {
+    "1": {
         entryId: "1",
-        startTime: "",
-        endTime: "d",
-        'from: "X",
-        to: "Y",
+        startTime: "14:50",
+        endTime: "19:59",
+        'from: "London",
+        to: "Glasgow",
+        trainId: "1"
+    },
+    "2": {
+        entryId: "2",
+        startTime: "14:50",
+        endTime: "19:20",
+        'from: "London",
+        to: "Edinburgh",
         trainId: "2"
+    },
+    "3": {
+        entryId: "3",
+        startTime: "07:10",
+        endTime: "15:20",
+        'from: "London",
+        to: "Cardiff",
+        trainId: "1"
+    },
+    "4": {
+        entryId: "3",
+        startTime: "08:30",
+        endTime: "08:30",
+        'from: "London",
+        to: "Manchester",
+        trainId: "4"
     }
-];
-isolated int nextIndex = 2;
-
-isolated function isScheduleExists(int id) returns boolean {
-    lock {
-        if id > schedules.length() {
-            return false;
-        }
-        return schedules[id - 1]?.entryId != ();
-    }
-}
+};
+isolated int nextIndex = 5;
 
 isolated function getScheduleInfo(ScheduleItem schedule) returns ScheduleItemInfo|error {
     if schedule?.trainId == () || schedule?.trainId == "" {
         return {};
     }
     string id = schedule?.trainId ?: "1";
-    Train train = check httpClient->get("/trains/" + id, {});
+    Train train = check httpClient->get("/trains/" + id, {apikey: trainServiceApiKey, host: trainServiceHost});
     ScheduleItemInfo info = schedule;
     info.imageURL = train?.imageURL ?: "";
     info.facilities = train?.facilities ?: "";

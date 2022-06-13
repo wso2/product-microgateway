@@ -9,7 +9,7 @@ dependencies-toml-version = "2"
 [[package]]
 org = "ballerina"
 name = "auth"
-version = "2.0.0"
+version = "2.3.0"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -22,7 +22,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "cache"
-version = "3.0.0"
+version = "3.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "task"},
@@ -32,7 +32,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.0.0"
+version = "2.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -41,8 +41,9 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "file"
-version = "1.0.0"
+version = "1.3.0"
 dependencies = [
+	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "os"},
@@ -53,7 +54,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.0.0"
+version = "2.3.0"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -83,13 +84,10 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "io"
-version = "1.0.0"
+version = "1.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
-]
-modules = [
-	{org = "ballerina", packageName = "io", moduleName = "io"}
 ]
 
 [[package]]
@@ -100,7 +98,7 @@ version = "0.0.0"
 [[package]]
 org = "ballerina"
 name = "jwt"
-version = "2.0.0"
+version = "2.3.0"
 dependencies = [
 	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "crypto"},
@@ -156,9 +154,7 @@ org = "ballerina"
 name = "lang.runtime"
 version = "0.0.0"
 dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "lang.array"},
-	{org = "ballerina", name = "lang.value"}
+	{org = "ballerina", name = "jballerina.java"}
 ]
 
 [[package]]
@@ -180,7 +176,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "log"
-version = "2.0.0"
+version = "2.3.0"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -194,7 +190,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "mime"
-version = "2.0.0"
+version = "2.3.0"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -204,7 +200,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "oauth2"
-version = "2.0.0"
+version = "2.3.0"
 dependencies = [
 	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "crypto"},
@@ -216,7 +212,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "observe"
-version = "1.0.0"
+version = "1.0.5"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -224,7 +220,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "os"
-version = "1.0.0"
+version = "1.3.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -235,15 +231,16 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "regex"
-version = "1.0.0"
+version = "1.3.0"
 dependencies = [
-	{org = "ballerina", name = "jballerina.java"}
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.string"}
 ]
 
 [[package]]
 org = "ballerina"
 name = "task"
-version = "2.0.0"
+version = "2.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -252,7 +249,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "time"
-version = "2.0.0"
+version = "2.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -260,36 +257,22 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "url"
-version = "2.0.0"
+version = "2.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
 
 [[package]]
-org = "ballerinai"
-name = "observe"
-version = "0.0.0"
-dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "observe"}
-]
-modules = [
-	{org = "ballerinai", packageName = "observe", moduleName = "observe"}
-]
-
-[[package]]
-org = "renuka"
-name = "schedules_service"
-version = "0.1.0"
+org = "wso2am"
+name = "cc_schedules_service"
+version = "1.0.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "os"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerina", name = "os"}
 ]
 modules = [
-	{org = "renuka", packageName = "schedules_service", moduleName = "schedules_service"}
+	{org = "wso2am", packageName = "cc_schedules_service", moduleName = "cc_schedules_service"}
 ]
 
 

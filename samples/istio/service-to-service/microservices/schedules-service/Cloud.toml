@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[package]
-org = "wso2am"
-name = "cc_schedules_service"
-version = "1.0.0"
+[container.image]
+repository="wso2am"
+name="cc-schedules-service"
+tag="1.0.0"
 
-[build-options]
-observabilityIncluded = false
+# [[container.copy.files]]
+# sourceFile="../resources/certs"
+# target="/home/ballerina/certs"

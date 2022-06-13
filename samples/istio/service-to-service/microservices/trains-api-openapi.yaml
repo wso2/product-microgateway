@@ -2,10 +2,10 @@ openapi: 3.0.1
 info:
   title: Trains
   description: | 
-    This is the API definition for Coltrain's trains listing API
+    This is the API definition for Trains-Service
   version: 1.0.0
 servers:
-  - url: http://train-service:8080/train-service/v1
+  - url: http://trains-service:8080/trains-service/v1
 paths:
   /trains:
     get:
