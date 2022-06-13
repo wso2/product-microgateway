@@ -28,11 +28,11 @@ import (
 var supportedPoliciesMap = map[string]policyLayout{
 	"SET_HEADER": {
 		RequiredParams:   []string{"headerName", "headerValue"},
-		IsPassToEnforcer: true,
+		IsPassToEnforcer: false,
 	},
 	"REMOVE_HEADER": {
 		RequiredParams:   []string{"headerName"},
-		IsPassToEnforcer: true,
+		IsPassToEnforcer: false,
 	},
 	"ADD_QUERY": {
 		RequiredParams:   []string{"queryParamName", "queryParamValue"},

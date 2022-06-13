@@ -151,7 +151,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 				PolicyName:       "fooAddRequestHeader",
 				PolicyVersion:    "v1",
 				Action:           "SET_HEADER",
-				IsPassToEnforcer: true,
+				IsPassToEnforcer: false,
 				Parameters: map[string]interface{}{
 					"headerName":  "fooHeaderName",
 					"headerValue": "fooHeaderValue",

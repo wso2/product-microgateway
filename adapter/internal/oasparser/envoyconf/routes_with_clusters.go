@@ -38,11 +38,11 @@ import (
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
-
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -53,7 +53,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	interceptor "github.com/wso2/product-microgateway/adapter/internal/interceptor"
 )
 
 // WireLogValues holds debug logging related template values
@@ -224,9 +223,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// No topic level endpoints.
 	if mgwSwagger.GetAPIType() == constants.WS {
 		for _, resource := range mgwSwagger.GetResources() {
-			routesP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
+			routesP := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
 				apiLevelClusterNameSand, nil, nil, organizationID, false))
-			routes = append(routes, routesP)
+			routes = append(routes, routesP...)
 		}
 		return routes, clusters, endpoints
 	}
@@ -426,16 +425,16 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
-		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
+		routeP := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
 			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, false))
 		if apiLevelBasePathSand != "" || isResourceBasePathSandAvailable {
 			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
-			routeS := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
+			routeS := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
 				clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, true))
 			// Sandbox route should be appended before to prod route to have the expected header based sandbox routing.
-			routes = append(routes, routeS)
+			routes = append(routes, routeS...)
 		}
-		routes = append(routes, routeP)
+		routes = append(routes, routeP...)
 	}
 	return routes, clusters, endpoints
 }
@@ -782,18 +781,19 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 	}
 }
 
-// createRoute creates route elements for the route configurations. API title, VHost, xWso2Basepath, API version,
+// createRoutes creates route elements for the route configurations. API title, VHost, xWso2Basepath, API version,
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
-func createRoute(params *routeCreateParams) *routev3.Route {
+func createRoutes(params *routeCreateParams) []*routev3.Route {
 	title := params.title
 	version := params.version
 	vHost := params.vHost
 	xWso2Basepath := params.xWSO2BasePath
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
-	resourcePath := params.resourcePathParam
-	resourceMethods := params.resourceMethods
+	resource := params.resource
+	resourcePath := resource.GetPath()
+	resourceMethods := resource.GetMethodList()
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	prodRouteConfig := params.prodRouteConfig
@@ -802,7 +802,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
-	adapterConfig, _ := config.ReadConfigs()
+	config, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -814,7 +814,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		responseHeadersToRemove []string
 	)
 
-	basePath := getFilteredBasePath(xWso2Basepath, endpointBasepath)
+	basePath := strings.TrimSuffix(xWso2Basepath, "/")
 	if isDefaultVersion {
 		basePath = getDefaultVersionBasepath(basePath, version)
 	}
@@ -833,48 +833,18 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		},
 	}
 
-	// if any of the operations on the route path has a method rewrite policy,
-	// we remove the :method header matching,
-	// because envoy does not allow method rewrting later if the following method regex does not have the new method.
-	// hence when method rewriting is enabled for the resource, the method validation will be handled by the enforcer instead of the router.
-	if !params.rewriteMethod {
-		// OPTIONS is always added even if it is not listed under resources
-		// This is required to handle CORS preflight request fail scenario
-		methodRegex := strings.Join(resourceMethods, "|")
-		if !strings.Contains(methodRegex, "OPTIONS") {
-			methodRegex = methodRegex + "|OPTIONS"
-		}
-		headerMatcherArray := routev3.HeaderMatcher{
-			Name: httpMethodHeader,
-			HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
-				StringMatch: &envoy_type_matcherv3.StringMatcher{
-					MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
-						SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-							EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-								GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-									MaxProgramSize: nil,
-								},
-							},
-							Regex: "^(" + methodRegex + ")$",
-						},
-					},
-				},
-			},
-		}
-		match.Headers = []*routev3.HeaderMatcher{&headerMatcherArray}
-		// if sandbox route, add additional header match based on cluster name header
-		if params.isSandbox {
-			clusterHeaderMatcher := routev3.HeaderMatcher{
-				Name: clusterHeaderName,
-				HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
-					StringMatch: &envoy_type_matcherv3.StringMatcher{
-						MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{Exact: params.sandClusterName},
-					},
-				},
-			}
-			match.Headers = append(match.Headers, &clusterHeaderMatcher)
-		}
-	}
+	// if sandbox route, add additional header match based on cluster name header
+    if params.isSandbox {
+        clusterHeaderMatcher := routev3.HeaderMatcher{
+            Name: clusterHeaderName,
+            HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
+                StringMatch: &envoy_type_matcherv3.StringMatcher{
+                    MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{Exact: params.sandClusterName},
+                },
+            },
+        }
+        match.Headers = append(match.Headers, &clusterHeaderMatcher)
+    }
 
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
 		AutoHostRewrite: &wrapperspb.BoolValue{
@@ -996,52 +966,14 @@ end`
 		Value:   luaMarshelled.Bytes(),
 	}
 
-	pathRegex := basePath
-	substitutionString := endpointBasepath
-	if params.rewritePath != "" {
-		pathRegex = routePath
-		if params.rewritePath != "/" {
-			substitutionString = endpointBasepath + params.rewritePath
-		}
-	} else {
-		if strings.Contains(resourcePath, "?") {
-			resourcePath = strings.Split(resourcePath, "?")[0]
-		}
-		resourceRegex := generatePathRegexSegment(resourcePath)
-		substitutionString = generateSubstitutionString(resourcePath, endpointBasepath)
-		if strings.HasSuffix(resourcePath, "/*") {
-			resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
-		}
-		pathRegex = "^" + basePath + resourceRegex
-	}
-	if xWso2Basepath != "" {
-		action = &routev3.Route_Route{
-			Route: &routev3.RouteAction{
-				HostRewriteSpecifier: hostRewriteSpecifier,
-				// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
-				RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
-					Pattern: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
-						Regex: pathRegex,
-					},
-					Substitution: substitutionString,
-				},
-				UpgradeConfigs:    getUpgradeConfig(apiType),
-				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
-				IdleTimeout:       durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
-			},
-		}
-	} else {
-		action = &routev3.Route_Route{
-			Route: &routev3.RouteAction{
-				HostRewriteSpecifier: hostRewriteSpecifier,
-			},
-		}
+	action = &routev3.Route_Route{
+		Route: &routev3.RouteAction{
+			HostRewriteSpecifier: hostRewriteSpecifier,
+			UpgradeConfigs:       getUpgradeConfig(apiType),
+			MaxStreamDuration:    getMaxStreamDuration(apiType),
+			Timeout:              durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+			IdleTimeout:          durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+		},
 	}
 
 	headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
@@ -1054,7 +986,7 @@ end`
 		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
 		// Retry configs are always added via headers. This is to update the
 		// default retry back-off base interval, which cannot be updated via headers.
-		retryConfig := adapterConfig.Envoy.Upstream.Retry
+		retryConfig := config.Envoy.Upstream.Retry
 		commonRetryPolicy := &routev3.RetryPolicy{
 			RetryOn: retryPolicyRetriableStatusCodes,
 			NumRetries: &wrapperspb.UInt32Value{
@@ -1084,20 +1016,93 @@ end`
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
-	router = routev3.Route{
-		Name:      xWso2Basepath, //Categorize routes with same base path
-		Match:     match,
-		Action:    action,
-		Metadata:  nil,
-		Decorator: decorator,
-		TypedPerFilterConfig: map[string]*any.Any{
-			wellknown.HTTPExternalAuthorization: extAuthzFilter,
-			wellknown.Lua:                       luaFilter,
-		},
-		ResponseHeadersToRemove: responseHeadersToRemove,
-		RequestHeadersToRemove:  requestHeadersToRemove,
+
+	routes := []*routev3.Route{}
+	if resource.IsWithPolicies() {
+		requestHeadersToAdd := []*corev3.HeaderValueOption{}
+
+		// Create route per HTTP method
+		for _, operation := range resource.GetOperations() {
+			var regexRewriteForOperation envoy_type_matcherv3.RegexMatchAndSubstitute
+			// Request Policy
+			for _, requestPolicy := range operation.GetPolicies().Request {
+				policyParams, err := castPolicyParamMap(requestPolicy.Parameters)
+				if err != nil {
+					logger.LoggerOasparser.Errorf("Error adding policy to operation {} of resource {}. Skipping the operation.",
+						operation.GetMethod(), resourcePath)
+					continue
+				}
+				switch requestPolicy.Action {
+
+				case "SET_HEADER":
+					requestHeaderToAdd := corev3.HeaderValueOption{
+						Header: &corev3.HeaderValue{
+							Key:   policyParams[constants.HeaderName],
+							Value: policyParams[constants.HeaderValue],
+						},
+						Append: &wrapperspb.BoolValue{
+							Value: false,
+						}, // if true the header values are appended to the existing value
+					}
+					requestHeadersToAdd = append(requestHeadersToAdd, &requestHeaderToAdd)
+
+				case "REMOVE_HEADER":
+					requestHeaderToRemove := policyParams[constants.HeaderName]
+					requestHeadersToRemove = append(requestHeadersToRemove, requestHeaderToRemove)
+
+				case constants.RewritePathAction:
+					if rewritePath, found := policyParams[constants.RewritePathResourcePath]; found {
+						regexRewriteForOperation = generateRegexMatchAndSubstitute(routePath, endpointBasepath, rewritePath)
+					}
+				}
+			}
+
+			match.Headers = generateHTTPMethodMatcher(operation.GetMethod())
+
+			if &regexRewriteForOperation == nil {
+				regexRewriteForOperation = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
+			}
+			action.Route.RegexRewrite = &regexRewriteForOperation
+
+			route := routev3.Route{
+				Name:      xWso2Basepath, //Categorize routes with same base path
+				Match:     match,
+				Action:    action,
+				Metadata:  nil,
+				Decorator: decorator,
+				TypedPerFilterConfig: map[string]*any.Any{
+					wellknown.HTTPExternalAuthorization: extAuthzFilter,
+					wellknown.Lua:                       luaFilter,
+				},
+				ResponseHeadersToRemove: responseHeadersToRemove,
+				RequestHeadersToRemove:  requestHeadersToRemove,
+				RequestHeadersToAdd:     requestHeadersToAdd,
+			}
+
+			routes = append(routes, &route)
+		}
+	} else {
+		methodRegex := strings.Join(resourceMethods, "|")
+		if !strings.Contains(methodRegex, "OPTIONS") {
+			methodRegex = methodRegex + "|OPTIONS"
+		}
+		match.Headers = generateHTTPMethodMatcher(methodRegex)
+		route := routev3.Route{
+			Name:      xWso2Basepath, //Categorize routes with same base path
+			Match:     match,
+			Action:    action,
+			Metadata:  nil,
+			Decorator: decorator,
+			TypedPerFilterConfig: map[string]*any.Any{
+				wellknown.HTTPExternalAuthorization: extAuthzFilter,
+				wellknown.Lua:                       luaFilter,
+			},
+			ResponseHeadersToRemove: responseHeadersToRemove,
+			RequestHeadersToRemove:  requestHeadersToRemove,
+		}
+		routes = append(routes, &route)
 	}
-	return &router
+	return routes
 }
 
 func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, responseInterceptor map[string]model.InterceptEndpoint,

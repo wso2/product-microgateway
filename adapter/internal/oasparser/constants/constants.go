@@ -91,13 +91,16 @@ const (
 
 // operational policy field names
 const (
-	RewriteMethodAction        string = "REWRITE_RESOURCE_METHOD"
-	InterceptorServiceAction   string = "CALL_INTERCEPTOR_SERVICE"
-	RewritePathAction          string = "REWRITE_RESOURCE_PATH"
+	RewriteMethodAction      string = "REWRITE_RESOURCE_METHOD"
+	InterceptorServiceAction string = "CALL_INTERCEPTOR_SERVICE"
+	RewritePathAction        string = "REWRITE_RESOURCE_PATH"
+
 	RewritePathResourcePath    string = "resourcePath"
 	InterceptorServiceURL      string = "interceptorServiceURL"
 	InterceptorServiceIncludes string = "includes"
 	IncludeQueryParams         string = "includeQueryParams"
+	HeaderName                 string = "headerName"
+	HeaderValue                string = "headerValue"
 )
 
 // Constants that occur as values in api.yaml

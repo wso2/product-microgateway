@@ -48,6 +48,7 @@ type Resource struct {
 	productionEndpoints *EndpointCluster
 	sandboxEndpoints    *EndpointCluster
 	vendorExtensions    map[string]interface{}
+	isWithPolicies      bool
 }
 
 // GetProdEndpoints returns the production endpoints object of a given resource.
@@ -91,6 +92,16 @@ func (resource *Resource) GetMethodList() []string {
 		methodList[i] = method.method
 	}
 	return methodList
+}
+
+// GetOperations returns the array of operations of the resource.
+func (resource *Resource) GetOperations() []*Operation {
+	return resource.methods
+}
+
+// IsWithPolicies returns whether the resource has operations that includes policies.
+func (resource *Resource) IsWithPolicies() bool {
+	return resource.isWithPolicies
 }
 
 // GetRewriteResource returns the rewrite upstream path for a given resource.

@@ -69,16 +69,8 @@ public class MediationPolicyFilter implements Filter {
 
     private boolean applyPolicy(RequestContext requestContext, Policy policy) {
         switch (policy.getAction()) {
-            case "SET_HEADER": {
-                addOrModifyHeader(requestContext, policy.getParameters());
-                return true;
-            }
             case "RENAME_HEADER": {
                 renameHeader(requestContext, policy.getParameters());
-                return true;
-            }
-            case "REMOVE_HEADER": {
-                removeHeader(requestContext, policy.getParameters());
                 return true;
             }
             case "ADD_QUERY": {
@@ -112,11 +104,6 @@ public class MediationPolicyFilter implements Filter {
         return false;
     }
 
-    private void addOrModifyHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String headerName = policyAttrib.get("headerName");
-        String headerValue = policyAttrib.get("headerValue");
-        requestContext.addOrModifyHeaders(headerName, headerValue);
-    }
 
     private void renameHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
         String currentHeaderName = policyAttrib.get("currentHeaderName").toLowerCase();
@@ -126,11 +113,6 @@ public class MediationPolicyFilter implements Filter {
             requestContext.getRemoveHeaders().add(currentHeaderName);
             requestContext.addOrModifyHeaders(updatedHeaderValue, headerValue);
         }
-    }
-
-    private void removeHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String headerName = policyAttrib.get("headerName");
-        requestContext.getRemoveHeaders().add(headerName);
     }
 
     private void removeQuery(RequestContext requestContext, Map<String, String> policyAttrib) {

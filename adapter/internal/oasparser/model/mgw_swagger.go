@@ -349,6 +349,9 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 			for _, yamlOperation := range apiProject.APIYaml.Data.Operations {
 				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
 					operation.policies = apiProject.Policies.GetFormattedOperationalPolicies(yamlOperation.OperationPolicies, swagger)
+					if operation.policies.Request != nil || operation.policies.Response != nil || operation.policies.Fault != nil {
+						resource.isWithPolicies = true
+					}
 					break
 				}
 			}
