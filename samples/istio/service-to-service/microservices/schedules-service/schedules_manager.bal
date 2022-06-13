@@ -15,10 +15,11 @@
 import ballerina/os;
 import ballerina/http;
 
-final string trainServiceURL = os:getEnv("TRAIN_SERVICE_URL");
-final string trainServiceApiKey = os:getEnv("TRAIN_SERVICE_API_KEY");
-final string trainServiceHost = os:getEnv("TRAIN_SERVICE_HOST");
-final http:Client httpClient = check new (trainServiceURL == "" ? "http://localhost:8080/trains-service/v1" : trainServiceURL);
+final string trainsServiceURL = os:getEnv("TRAINS_SERVICE_URL");
+final string trainsServiceCert = os:getEnv("TRAINS_SERVICE_CERT");
+final string trainsServiceApiKey = os:getEnv("TRAINS_SERVICE_API_KEY");
+final http:ClientSecureSocket|() clientSecureSocket = trainsServiceCert == "" ? () : {cert: trainsServiceCert};
+final http:Client httpClient = check new (trainsServiceURL == "" ? "http://localhost:8080/trains-service/v1" : trainsServiceURL, secureSocket = clientSecureSocket);
 
 isolated map<ScheduleItem> schedules = {
     "1": {
@@ -46,7 +47,7 @@ isolated map<ScheduleItem> schedules = {
         trainId: "1"
     },
     "4": {
-        entryId: "3",
+        entryId: "4",
         startTime: "08:30",
         endTime: "08:30",
         'from: "London",
@@ -61,7 +62,7 @@ isolated function getScheduleInfo(ScheduleItem schedule) returns ScheduleItemInf
         return {};
     }
     string id = schedule?.trainId ?: "1";
-    Train train = check httpClient->get("/trains/" + id, {apikey: trainServiceApiKey, host: trainServiceHost});
+    Train train = check httpClient->get("/trains/" + id, {apikey: trainsServiceApiKey});
     ScheduleItemInfo info = schedule;
     info.imageURL = train?.imageURL ?: "";
     info.facilities = train?.facilities ?: "";

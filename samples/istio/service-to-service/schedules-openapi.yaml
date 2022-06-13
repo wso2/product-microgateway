@@ -5,7 +5,7 @@ info:
     This is the API definition for Coltrain's schedule listing API
   version: 1.0.0
 servers:
-  - url: http://schedules-service:8080/train-service/v1
+  - url: http://schedules:80/schedules-service/v1
 paths:
   /schedules:
     get:
