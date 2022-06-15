@@ -25,7 +25,6 @@
         
         curl http://localhost:8080/trains-service/v1/trains -H "Content-Type:application/json" \
             -d '{
-                    "trainId": "5",
                     "numberOfCarriage": 10,
                     "imageURL": "https://abc.train.org/resources/image/98215.png",
                     "engineModel": "TigerJet",

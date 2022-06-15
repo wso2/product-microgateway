@@ -33,7 +33,7 @@ service /'trains\-service/v1 on ep0 {
         lock {
             trains[id] = payload.clone();
         }
-        return {body: {message: "Train added successfully"}};
+        return {body: {status: "success", trainId: id}};
     }
 
     isolated resource function get trains/[int id]() returns Train|http:NotFound {
@@ -53,7 +53,7 @@ service /'trains\-service/v1 on ep0 {
             if train is Train {
                 payload.trainId = id.toString();
                 trains[id.toString()] = payload.clone();
-                return <http:Ok>{body: {status: "Train updated successfully"}};
+                return <http:Ok>{body: {status: "success"}};
             } else {
                 return <http:BadRequest>{body: {message: "Train Not Found"}};
             }
@@ -65,7 +65,7 @@ service /'trains\-service/v1 on ep0 {
             Train? train = trains[id.toString()];
             if train is Train {
                 _ = trains.remove(id.toString());
-                return <http:Ok>{body: {status: "Train deleted successfully"}};
+                return <http:Ok>{body: {status: "success"}};
             } else {
                 return <http:BadRequest>{body: {message: "Train Not Found"}};
             }

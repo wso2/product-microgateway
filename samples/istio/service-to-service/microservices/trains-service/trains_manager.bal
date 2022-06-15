@@ -18,28 +18,28 @@ isolated map<Train> trains = {
         engineModel: "Heavier",
         numberOfCarriage: 7,
         facilities: "Canteen",
-        imageURL: "https://abc.train.org/resources/image/0931.png"
+        imageURL: "https://abc.train.org/resources/images/0931.png"
     },
     "2": {
         trainId: "2",
         engineModel: "Heavier",
         numberOfCarriage: 12,
         facilities: "WiFi, Canteen",
-        imageURL: "https://abc.train.org/resources/image/19234.png"
+        imageURL: "https://abc.train.org/resources/images/19234.png"
     },
     "3": {
         trainId: "3",
         engineModel: "TigerJet",
         numberOfCarriage: 8,
         facilities: "Canteen",
-        imageURL: "https://abc.train.org/resources/image/87622.png"
+        imageURL: "https://abc.train.org/resources/images/87622.png"
     },
     "4": {
         trainId: "4",
         engineModel: "TigerJet",
         numberOfCarriage: 10,
         facilities: "WiFi, Canteen",
-        imageURL: "https://abc.train.org/resources/image/47102.png"
+        imageURL: "https://abc.train.org/resources/images/47102.png"
     }
 };
 
