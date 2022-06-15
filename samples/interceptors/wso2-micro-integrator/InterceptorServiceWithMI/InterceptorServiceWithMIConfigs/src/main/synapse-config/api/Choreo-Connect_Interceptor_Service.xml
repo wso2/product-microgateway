@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/api" name="Choreo-Connect Interceptor Service" publishSwagger="/_system/governance/swagger_files/interceptor-service-open-api-v1.yaml" version="v1" version-type="url" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="POST" url-mapping="/handle-request">
+        <inSequence>
+            <property expression="$body//requestBody" name="encodedRequestBody" scope="default" type="STRING"/>
+            <property expression="base64Decode(get-property('encodedRequestBody'))" name="decodedRequestBody" scope="default" type="STRING"/>
+            <payloadFactory media-type="json">
+                <format>
+					$1
+				</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('decodedRequestBody')"/>
+                </args>
+            </payloadFactory>
+            <property expression="$body//name" name="propName" scope="default" type="STRING"/>
+            <payloadFactory media-type="text">
+                <format>
+					&lt;name&gt;$1&lt;/name&gt;
+				</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('propName')"/>
+                </args>
+            </payloadFactory>
+            <property expression="$body/*" name="xmlBodyString" scope="default" type="STRING"/>
+            <property expression="base64Encode(get-property('xmlBodyString'))" name="encodedXmlBody" scope="default" type="STRING"/>
+            <payloadFactory media-type="json">
+                <format>{ "headersToAdd": { "x-user": "admin" }, "headersToReplace": { "content-type": "application/xml" }, "body": "$1" }</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('encodedXmlBody')"/>
+                </args>
+            </payloadFactory>
+            <respond/>
+        </inSequence>
+        <outSequence/>
+        <faultSequence/>
+    </resource>
+    <resource methods="POST" url-mapping="/handle-response">
+        <inSequence>
+            <property expression="$body//responseCode" name="responseCode" scope="default" type="STRING"/>
+            <filter regex="200" source="get-property('responseCode')">
+                <then>
+                    <payloadFactory media-type="json">
+                        <format>{ "responseCode": 201 }</format>
+                        <args/>
+                    </payloadFactory>
+                </then>
+                <else>
+                    <payloadFactory media-type="json">
+                        <format>{}</format>
+                        <args/>
+                    </payloadFactory>
+                </else>
+            </filter>
+            <respond/>
+        </inSequence>
+        <outSequence/>
+        <faultSequence/>
+    </resource>
+</api>

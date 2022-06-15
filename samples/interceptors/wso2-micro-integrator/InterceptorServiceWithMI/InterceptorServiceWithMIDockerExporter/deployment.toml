@@ -1,0 +1,18 @@
+[server]
+hostname = "localhost"
+hot_deployment = false
+
+[user_store]
+type = "read_only_ldap"
+
+[keystore.tls]
+file_name = "interceptor.jks"
+password = "wso2carbon"
+alias = "interceptor"
+key_password = "wso2carbon"
+
+[truststore]
+file_name = "client-truststore.jks"
+password = "wso2carbon"
+alias = "mg"
+algorithm = "AES"

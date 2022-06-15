@@ -1,0 +1,225 @@
+<!--
+  ~ Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<title>HelloWorld Docker Service</title>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400"
+	rel="stylesheet">
+<style>
+    	body {font-weight: 300;} li, p {font-size:13px; }html {line-height: 1.15;-webkit-text-size-adjust: 100% }body {font-family: Roboto, sans-serif;margin: 0;color: #373D3F;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale }#content {margin: 15px;padding-top: 4em }.header {z-index: 9999;background: #efecec;padding: 0px 15px;transition: background-color .25s, color .25s, box-shadow .25s;box-shadow: 0 0 .4rem rgba(0, 0, 0, .1), 0 .4rem .8rem rgba(0, 0, 0, .2);position: fixed;top: 0;width: 100% }h1 {font-size: 2em;margin: .3em 0;letter-spacing: -.01em;color: rgba(0, 0, 0, .54) }h3, li {font-size: 13px }.about-template {background: #f0f4ff;padding: 10px;border: 1px solid rgba(34, 84, 230, 0.47843137254901963);border-left: 5px solid rgba(34, 46, 230, 0.47843137254901963);margin-bottom: 1em;}h3 {display: inline }div.code-toolbar>.toolbar .toolbar-item, li::before {display: inline-block }ol {counter-reset: list;-webkit-padding-start: 10px;list-style: none }li {counter-increment: list;margin-bottom: 10px;color: #2c3e50;font-weight: 400 }li::before {content: counter(list, decimal-leading-zero);background: #2b4353;color: #fff;font-size: 13px;text-align: center;border-radius: 50%;width: 2.2em;height: 2.2em;line-height: 2.3em;margin-right: 1em }code[class*=language-], pre[class*=language-] {color: #f8f8f2;background: 0 0;text-shadow: 0 1px rgba(0, 0, 0, .3);font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;text-align: left;white-space: pre;word-spacing: normal;word-break: normal;word-wrap: normal;line-height: 1.5;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-webkit-hyphens: none;-moz-hyphens: none;-ms-hyphens: none;hyphens: none }pre[class*=language-] {padding: 1em;margin: .5em 0;overflow: auto;border-radius: .3em }:not(pre)>code[class*=language-], pre[class*=language-] {background: #272822 }:not(pre)>code[class*=language-] {padding: .1em;border-radius: .3em;white-space: normal }.token.cdata, .token.comment, .token.doctype, .token.prolog {color: #708090 }.token.punctuation {color: #f8f8f2 }.namespace {opacity: .7 }.token.constant, .token.deleted, .token.property, .token.symbol, .token.tag {color: #f92672 }.token.boolean, .token.number {color: #ae81ff }.token.attr-name, .token.builtin, .token.char, .token.inserted, .token.selector, .token.string {color: #a6e22e }.language-css .token.string, .style .token.string, .token.entity, .token.operator, .token.url, .token.variable {color: #f8f8f2 }.token.atrule, .token.attr-value, .token.class-name, .token.function {color: #e6db74 }.token.keyword {color: #66d9ef }.token.important, .token.regex {color: #fd971f }.token.bold, .token.important {font-weight: 700 }.token.italic {font-style: italic }.token.entity {cursor: help }div.code-toolbar {position: relative }div.code-toolbar>.toolbar {position: absolute;top: .3em;right: .2em;transition: opacity .3s ease-in-out;opacity: 0 }div.code-toolbar:hover>.toolbar {opacity: 1 }div.code-toolbar>.toolbar a {cursor: pointer }div.code-toolbar>.toolbar button {border: 0;font: inherit;line-height: normal;overflow: visible;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none }div.code-toolbar>.toolbar a, div.code-toolbar>.toolbar button, div.code-toolbar>.toolbar span {color: #bbb;font-size: .8em;padding: 0 .5em;background: #f5f2f0;background: rgba(224, 224, 224, .2);box-shadow: 0 2px 0 0 rgba(0, 0, 0, .2);border-radius: .5em }div.code-toolbar>.toolbar a:focus, div.code-toolbar>.toolbar a:hover, div.code-toolbar>.toolbar button:focus, div.code-toolbar>.toolbar button:hover, div.code-toolbar>.toolbar span:focus, div.code-toolbar>.toolbar span:hover {color: inherit;text-decoration: none }.accordion {margin: 1em auto;}.toggle {display: none;}.option {position: relative;margin-bottom: 1em;}.title, .content {-webkit-backface-visibility: hidden;backface-visibility: hidden;-webkit-transform: translateZ(0);transform: translateZ(0);transition: all 0.2s;border: 1px solid #cacaca61;}.title {background: #fff;padding: 1em;display: block;color: #7A7572;font-weight: bold;}.title:after, .title:before {content: '';position: absolute;right: 1.25em;top: 1.25em;width: 2px;height: 0.75em;background-color: #7A7572;transition: all 0.2s;}.title:after {-webkit-transform: rotate(90deg);transform: rotate(90deg);}.content {max-height: 0;overflow: hidden;background-color: #fff;}.content p {margin: 0;padding: 0.5em 1em 1em;font-size: 1em;line-height: 1.5;}.toggle:checked + .title, .toggle:checked + .title + .content {box-shadow: 3px 3px 6px #ddd, -3px 3px 6px #ddd;}.toggle:checked + .title + .content {max-height: 500px;overflow: auto;padding: 20px;}.toggle:checked + .title:before {-webkit-transform: rotate(90deg) !important;transform: rotate(90deg) !important;}.arrow {position: absolute;padding: 9px;box-shadow: 1px -1px 0 1px #6471af inset;-webkit-box-shadow: 4px -4px #6471af inset;border: solid transparent;border-width: 0 0 5px;transition: 0.2s;transform: rotate(45deg);}.arrow:hover {box-shadow: 2px -2px 0 2px orchid inset;-webkit-box-shadow: 4px -4px orchid inset;}h1 span{padding-left: 30px;}
+        pre { background:#F0F0F0 !important; direction: ltr; color:#37474f !important;} 
+        code {
+            color:#37474f !important;} 
+    	    .token.punctuation {color:#37474f !important;} 
+            .token.operator{color:#37474f !important;
+        }
+        body h3 label {
+        	font-size:13px !important; font-weight:bold !important;
+        }
+        .title {
+        	font-size:13px !important; font-weight:bold !important;
+        }
+        .toggle:checked + .title + .content {
+         	padding-left:0;
+        }
+        ol {
+        	padding-left:12px !important;
+        }
+        strong {
+        	font-weight:bold;
+        }
+		.separator {
+			display: flex;
+			align-items: center;
+			text-align: center;
+		}
+		
+		.separator::before, .separator::after {
+			content: '';
+			flex: 1;
+			border-bottom: 1px solid #000;
+		}
+		
+		.separator::before {
+			margin-right: .25em;
+		}
+		
+		.separator::after {
+			margin-left: .25em;
+		}
+</style>
+<script type="text/javascript">
+        /* PrismJS 1.15.0
+		https://prismjs.com/download.html#themes=prism-okaidia&languages=markup+bash+json+sql&plugins=toolbar+normalize-whitespace+copy-to-clipboard */
+        var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(){var e=/\blang(?:uage)?-([\w-]+)\b/i,t=0,n=_self.Prism={manual:_self.Prism&&_self.Prism.manual,disableWorkerMessageHandler:_self.Prism&&_self.Prism.disableWorkerMessageHandler,util:{encode:function(e){return e instanceof r?new r(e.type,n.util.encode(e.content),e.alias):"Array"===n.util.type(e)?e.map(n.util.encode):e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function(e,t){var r=n.util.type(e);switch(t=t||{},r){case"Object":if(t[n.util.objId(e)])return t[n.util.objId(e)];var a={};t[n.util.objId(e)]=a;for(var l in e)e.hasOwnProperty(l)&&(a[l]=n.util.clone(e[l],t));return a;case"Array":if(t[n.util.objId(e)])return t[n.util.objId(e)];var a=[];return t[n.util.objId(e)]=a,e.forEach(function(e,r){a[r]=n.util.clone(e,t)}),a}return e}},languages:{extend:function(e,t){var r=n.util.clone(n.languages[e]);for(var a in t)r[a]=t[a];return r},insertBefore:function(e,t,r,a){a=a||n.languages;var l=a[e];if(2==arguments.length){r=arguments[1];for(var i in r)r.hasOwnProperty(i)&&(l[i]=r[i]);return l}var o={};for(var s in l)if(l.hasOwnProperty(s)){if(s==t)for(var i in r)r.hasOwnProperty(i)&&(o[i]=r[i]);o[s]=l[s]}var u=a[e];return a[e]=o,n.languages.DFS(n.languages,function(t,n){n===u&&t!=e&&(this[t]=o)}),o},DFS:function(e,t,r,a){a=a||{};for(var l in e)e.hasOwnProperty(l)&&(t.call(e,l,e[l],r||l),"Object"!==n.util.type(e[l])||a[n.util.objId(e[l])]?"Array"!==n.util.type(e[l])||a[n.util.objId(e[l])]||(a[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,l,a)):(a[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,null,a)))}},plugins:{},highlightAll:function(e,t){n.highlightAllUnder(document,e,t)},highlightAllUnder:function(e,t,r){var a={callback:r,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};n.hooks.run("before-highlightall",a);for(var l,i=a.elements||e.querySelectorAll(a.selector),o=0;l=i[o++];)n.highlightElement(l,t===!0,a.callback)},highlightElement:function(t,r,a){for(var l,i,o=t;o&&!e.test(o.className);)o=o.parentNode;o&&(l=(o.className.match(e)||[,""])[1].toLowerCase(),i=n.languages[l]),t.className=t.className.replace(e,"").replace(/\s+/g," ")+" language-"+l,t.parentNode&&(o=t.parentNode,/pre/i.test(o.nodeName)&&(o.className=o.className.replace(e,"").replace(/\s+/g," ")+" language-"+l));var s=t.textContent,u={element:t,language:l,grammar:i,code:s};if(n.hooks.run("before-sanity-check",u),!u.code||!u.grammar)return u.code&&(n.hooks.run("before-highlight",u),u.element.textContent=u.code,n.hooks.run("after-highlight",u)),n.hooks.run("complete",u),void 0;if(n.hooks.run("before-highlight",u),r&&_self.Worker){var g=new Worker(n.filename);g.onmessage=function(e){u.highlightedCode=e.data,n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,a&&a.call(u.element),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},g.postMessage(JSON.stringify({language:u.language,code:u.code,immediateClose:!0}))}else u.highlightedCode=n.highlight(u.code,u.grammar,u.language),n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,a&&a.call(t),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},highlight:function(e,t,a){var l={code:e,grammar:t,language:a};return n.hooks.run("before-tokenize",l),l.tokens=n.tokenize(l.code,l.grammar),n.hooks.run("after-tokenize",l),r.stringify(n.util.encode(l.tokens),l.language)},matchGrammar:function(e,t,r,a,l,i,o){var s=n.Token;for(var u in r)if(r.hasOwnProperty(u)&&r[u]){if(u==o)return;var g=r[u];g="Array"===n.util.type(g)?g:[g];for(var c=0;c<g.length;++c){var h=g[c],f=h.inside,d=!!h.lookbehind,m=!!h.greedy,p=0,y=h.alias;if(m&&!h.pattern.global){var v=h.pattern.toString().match(/[imuy]*$/)[0];h.pattern=RegExp(h.pattern.source,v+"g")}h=h.pattern||h;for(var b=a,k=l;b<t.length;k+=t[b].length,++b){var w=t[b];if(t.length>e.length)return;if(!(w instanceof s)){if(m&&b!=t.length-1){h.lastIndex=k;var _=h.exec(e);if(!_)break;for(var j=_.index+(d?_[1].length:0),P=_.index+_[0].length,A=b,x=k,O=t.length;O>A&&(P>x||!t[A].type&&!t[A-1].greedy);++A)x+=t[A].length,j>=x&&(++b,k=x);if(t[b]instanceof s)continue;I=A-b,w=e.slice(k,x),_.index-=k}else{h.lastIndex=0;var _=h.exec(w),I=1}if(_){d&&(p=_[1]?_[1].length:0);var j=_.index+p,_=_[0].slice(p),P=j+_.length,N=w.slice(0,j),S=w.slice(P),C=[b,I];N&&(++b,k+=N.length,C.push(N));var E=new s(u,f?n.tokenize(_,f):_,y,_,m);if(C.push(E),S&&C.push(S),Array.prototype.splice.apply(t,C),1!=I&&n.matchGrammar(e,t,r,b,k,!0,u),i)break}else if(i)break}}}}},tokenize:function(e,t){var r=[e],a=t.rest;if(a){for(var l in a)t[l]=a[l];delete t.rest}return n.matchGrammar(e,r,t,0,0,!1),r},hooks:{all:{},add:function(e,t){var r=n.hooks.all;r[e]=r[e]||[],r[e].push(t)},run:function(e,t){var r=n.hooks.all[e];if(r&&r.length)for(var a,l=0;a=r[l++];)a(t)}}},r=n.Token=function(e,t,n,r,a){this.type=e,this.content=t,this.alias=n,this.length=0|(r||"").length,this.greedy=!!a};if(r.stringify=function(e,t,a){if("string"==typeof e)return e;if("Array"===n.util.type(e))return e.map(function(n){return r.stringify(n,t,e)}).join("");var l={type:e.type,content:r.stringify(e.content,t,a),tag:"span",classes:["token",e.type],attributes:{},language:t,parent:a};if(e.alias){var i="Array"===n.util.type(e.alias)?e.alias:[e.alias];Array.prototype.push.apply(l.classes,i)}n.hooks.run("wrap",l);var o=Object.keys(l.attributes).map(function(e){return e+'="'+(l.attributes[e]||"").replace(/"/g,"&quot;")+'"'}).join(" ");return"<"+l.tag+' class="'+l.classes.join(" ")+'"'+(o?" "+o:"")+">"+l.content+"</"+l.tag+">"},!_self.document)return _self.addEventListener?(n.disableWorkerMessageHandler||_self.addEventListener("message",function(e){var t=JSON.parse(e.data),r=t.language,a=t.code,l=t.immediateClose;_self.postMessage(n.highlight(a,n.languages[r],r)),l&&_self.close()},!1),_self.Prism):_self.Prism;var a=document.currentScript||[].slice.call(document.getElementsByTagName("script")).pop();return a&&(n.filename=a.src,n.manual||a.hasAttribute("data-manual")||("loading"!==document.readyState?window.requestAnimationFrame?window.requestAnimationFrame(n.highlightAll):window.setTimeout(n.highlightAll,16):document.addEventListener("DOMContentLoaded",n.highlightAll))),_self.Prism}();"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+        Prism.languages.markup={comment:/<!--[\s\S]*?-->/,prolog:/<\?[\s\S]+?\?>/,doctype:/<!DOCTYPE[\s\S]+?>/i,cdata:/<!\[CDATA\[[\s\S]*?]]>/i,tag:{pattern:/<\/?(?!\d)[^\s>\/=$<%]+(?:\s+[^\s>\/=]+(?:=(?:("|')(?:\\[\s\S]|(?!\1)[^\\])*\1|[^\s'">=]+))?)*\s*\/?>/i,greedy:!0,inside:{tag:{pattern:/^<\/?[^\s>\/]+/i,inside:{punctuation:/^<\/?/,namespace:/^[^\s>\/:]+:/}},"attr-value":{pattern:/=(?:("|')(?:\\[\s\S]|(?!\1)[^\\])*\1|[^\s'">=]+)/i,inside:{punctuation:[/^=/,{pattern:/(^|[^\\])["']/,lookbehind:!0}]}},punctuation:/\/?>/,"attr-name":{pattern:/[^\s>\/]+/,inside:{namespace:/^[^\s>\/:]+:/}}}},entity:/&#?[\da-z]{1,8};/i},Prism.languages.markup.tag.inside["attr-value"].inside.entity=Prism.languages.markup.entity,Prism.hooks.add("wrap",function(a){"entity"===a.type&&(a.attributes.title=a.content.replace(/&amp;/,"&"))}),Prism.languages.xml=Prism.languages.markup,Prism.languages.html=Prism.languages.markup,Prism.languages.mathml=Prism.languages.markup,Prism.languages.svg=Prism.languages.markup;
+        !function(e){var t={variable:[{pattern:/\$?\(\([\s\S]+?\)\)/,inside:{variable:[{pattern:/(^\$\(\([\s\S]+)\)\)/,lookbehind:!0},/^\$\(\(/],number:/\b0x[\dA-Fa-f]+\b|(?:\b\d+\.?\d*|\B\.\d+)(?:[Ee]-?\d+)?/,operator:/--?|-=|\+\+?|\+=|!=?|~|\*\*?|\*=|\/=?|%=?|<<=?|>>=?|<=?|>=?|==?|&&?|&=|\^=?|\|\|?|\|=|\?|:/,punctuation:/\(\(?|\)\)?|,|;/}},{pattern:/\$\([^)]+\)|`[^`]+`/,greedy:!0,inside:{variable:/^\$\(|^`|\)$|`$/}},/\$(?:[\w#?*!@]+|\{[^}]+\})/i]};e.languages.bash={shebang:{pattern:/^#!\s*\/bin\/bash|^#!\s*\/bin\/sh/,alias:"important"},comment:{pattern:/(^|[^"{\\])#.*/,lookbehind:!0},string:[{pattern:/((?:^|[^<])<<\s*)["']?(\w+?)["']?\s*\r?\n(?:[\s\S])*?\r?\n\2/,lookbehind:!0,greedy:!0,inside:t},{pattern:/(["'])(?:\\[\s\S]|\$\([^)]+\)|`[^`]+`|(?!\1)[^\\])*\1/,greedy:!0,inside:t}],variable:t.variable,"function":{pattern:/(^|[\s;|&])(?:alias|apropos|apt-get|aptitude|aspell|awk|basename|bash|bc|bg|builtin|bzip2|cal|cat|cd|cfdisk|chgrp|chmod|chown|chroot|chkconfig|cksum|clear|cmp|comm|command|cp|cron|crontab|csplit|curl|cut|date|dc|dd|ddrescue|df|diff|diff3|dig|dir|dircolors|dirname|dirs|dmesg|du|egrep|eject|enable|env|ethtool|eval|exec|expand|expect|export|expr|fdformat|fdisk|fg|fgrep|file|find|fmt|fold|format|free|fsck|ftp|fuser|gawk|getopts|git|grep|groupadd|groupdel|groupmod|groups|gzip|hash|head|help|hg|history|hostname|htop|iconv|id|ifconfig|ifdown|ifup|import|install|jobs|join|kill|killall|less|link|ln|locate|logname|logout|look|lpc|lpr|lprint|lprintd|lprintq|lprm|ls|lsof|make|man|mkdir|mkfifo|mkisofs|mknod|more|most|mount|mtools|mtr|mv|mmv|nano|netstat|nice|nl|nohup|notify-send|npm|nslookup|open|op|passwd|paste|pathchk|ping|pkill|popd|pr|printcap|printenv|printf|ps|pushd|pv|pwd|quota|quotacheck|quotactl|ram|rar|rcp|read|readarray|readonly|reboot|rename|renice|remsync|rev|rm|rmdir|rsync|screen|scp|sdiff|sed|seq|service|sftp|shift|shopt|shutdown|sleep|slocate|sort|source|split|ssh|stat|strace|su|sudo|sum|suspend|sync|tail|tar|tee|test|time|timeout|times|touch|top|traceroute|trap|tr|tsort|tty|type|ulimit|umask|umount|unalias|uname|unexpand|uniq|units|unrar|unshar|uptime|useradd|userdel|usermod|users|uuencode|uudecode|v|vdir|vi|vmstat|wait|watch|wc|wget|whereis|which|who|whoami|write|xargs|xdg-open|yes|zip)(?=$|[\s;|&])/,lookbehind:!0},keyword:{pattern:/(^|[\s;|&])(?:let|:|\.|if|then|else|elif|fi|for|break|continue|while|in|case|function|select|do|done|until|echo|exit|return|set|declare)(?=$|[\s;|&])/,lookbehind:!0},"boolean":{pattern:/(^|[\s;|&])(?:true|false)(?=$|[\s;|&])/,lookbehind:!0},operator:/&&?|\|\|?|==?|!=?|<<<?|>>|<=?|>=?|=~/,punctuation:/\$?\(\(?|\)\)?|\.\.|[{}[\];]/};var a=t.variable[1].inside;a.string=e.languages.bash.string,a["function"]=e.languages.bash["function"],a.keyword=e.languages.bash.keyword,a["boolean"]=e.languages.bash["boolean"],a.operator=e.languages.bash.operator,a.punctuation=e.languages.bash.punctuation,e.languages.shell=e.languages.bash}(Prism);
+        Prism.languages.json={property:/"(?:\\.|[^\\"\r\n])*"(?=\s*:)/i,string:{pattern:/"(?:\\.|[^\\"\r\n])*"(?!\s*:)/,greedy:!0},number:/-?\d+\.?\d*([Ee][+-]?\d+)?/,punctuation:/[{}[\],]/,operator:/:/g,"boolean":/\b(?:true|false)\b/i,"null":/\bnull\b/i},Prism.languages.jsonp=Prism.languages.json;
+        Prism.languages.sql={comment:{pattern:/(^|[^\\])(?:\/\*[\s\S]*?\*\/|(?:--|\/\/|#).*)/,lookbehind:!0},variable:[{pattern:/@(["'`])(?:\\[\s\S]|(?!\1)[^\\])+\1/,greedy:!0},/@[\w.$]+/],string:{pattern:/(^|[^@\\])("|')(?:\\[\s\S]|(?!\2)[^\\]|\2\2)*\2/,greedy:!0,lookbehind:!0},"function":/\b(?:AVG|COUNT|FIRST|FORMAT|LAST|LCASE|LEN|MAX|MID|MIN|MOD|NOW|ROUND|SUM|UCASE)(?=\s*\()/i,keyword:/\b(?:ACTION|ADD|AFTER|ALGORITHM|ALL|ALTER|ANALYZE|ANY|APPLY|AS|ASC|AUTHORIZATION|AUTO_INCREMENT|BACKUP|BDB|BEGIN|BERKELEYDB|BIGINT|BINARY|BIT|BLOB|BOOL|BOOLEAN|BREAK|BROWSE|BTREE|BULK|BY|CALL|CASCADED?|CASE|CHAIN|CHAR(?:ACTER|SET)?|CHECK(?:POINT)?|CLOSE|CLUSTERED|COALESCE|COLLATE|COLUMNS?|COMMENT|COMMIT(?:TED)?|COMPUTE|CONNECT|CONSISTENT|CONSTRAINT|CONTAINS(?:TABLE)?|CONTINUE|CONVERT|CREATE|CROSS|CURRENT(?:_DATE|_TIME|_TIMESTAMP|_USER)?|CURSOR|CYCLE|DATA(?:BASES?)?|DATE(?:TIME)?|DAY|DBCC|DEALLOCATE|DEC|DECIMAL|DECLARE|DEFAULT|DEFINER|DELAYED|DELETE|DELIMITERS?|DENY|DESC|DESCRIBE|DETERMINISTIC|DISABLE|DISCARD|DISK|DISTINCT|DISTINCTROW|DISTRIBUTED|DO|DOUBLE|DROP|DUMMY|DUMP(?:FILE)?|DUPLICATE|ELSE(?:IF)?|ENABLE|ENCLOSED|END|ENGINE|ENUM|ERRLVL|ERRORS|ESCAPED?|EXCEPT|EXEC(?:UTE)?|EXISTS|EXIT|EXPLAIN|EXTENDED|FETCH|FIELDS|FILE|FILLFACTOR|FIRST|FIXED|FLOAT|FOLLOWING|FOR(?: EACH ROW)?|FORCE|FOREIGN|FREETEXT(?:TABLE)?|FROM|FULL|FUNCTION|GEOMETRY(?:COLLECTION)?|GLOBAL|GOTO|GRANT|GROUP|HANDLER|HASH|HAVING|HOLDLOCK|HOUR|IDENTITY(?:_INSERT|COL)?|IF|IGNORE|IMPORT|INDEX|INFILE|INNER|INNODB|INOUT|INSERT|INT|INTEGER|INTERSECT|INTERVAL|INTO|INVOKER|ISOLATION|ITERATE|JOIN|KEYS?|KILL|LANGUAGE|LAST|LEAVE|LEFT|LEVEL|LIMIT|LINENO|LINES|LINESTRING|LOAD|LOCAL|LOCK|LONG(?:BLOB|TEXT)|LOOP|MATCH(?:ED)?|MEDIUM(?:BLOB|INT|TEXT)|MERGE|MIDDLEINT|MINUTE|MODE|MODIFIES|MODIFY|MONTH|MULTI(?:LINESTRING|POINT|POLYGON)|NATIONAL|NATURAL|NCHAR|NEXT|NO|NONCLUSTERED|NULLIF|NUMERIC|OFF?|OFFSETS?|ON|OPEN(?:DATASOURCE|QUERY|ROWSET)?|OPTIMIZE|OPTION(?:ALLY)?|ORDER|OUT(?:ER|FILE)?|OVER|PARTIAL|PARTITION|PERCENT|PIVOT|PLAN|POINT|POLYGON|PRECEDING|PRECISION|PREPARE|PREV|PRIMARY|PRINT|PRIVILEGES|PROC(?:EDURE)?|PUBLIC|PURGE|QUICK|RAISERROR|READS?|REAL|RECONFIGURE|REFERENCES|RELEASE|RENAME|REPEAT(?:ABLE)?|REPLACE|REPLICATION|REQUIRE|RESIGNAL|RESTORE|RESTRICT|RETURNS?|REVOKE|RIGHT|ROLLBACK|ROUTINE|ROW(?:COUNT|GUIDCOL|S)?|RTREE|RULE|SAVE(?:POINT)?|SCHEMA|SECOND|SELECT|SERIAL(?:IZABLE)?|SESSION(?:_USER)?|SET(?:USER)?|SHARE|SHOW|SHUTDOWN|SIMPLE|SMALLINT|SNAPSHOT|SOME|SONAME|SQL|START(?:ING)?|STATISTICS|STATUS|STRIPED|SYSTEM_USER|TABLES?|TABLESPACE|TEMP(?:ORARY|TABLE)?|TERMINATED|TEXT(?:SIZE)?|THEN|TIME(?:STAMP)?|TINY(?:BLOB|INT|TEXT)|TOP?|TRAN(?:SACTIONS?)?|TRIGGER|TRUNCATE|TSEQUAL|TYPES?|UNBOUNDED|UNCOMMITTED|UNDEFINED|UNION|UNIQUE|UNLOCK|UNPIVOT|UNSIGNED|UPDATE(?:TEXT)?|USAGE|USE|USER|USING|VALUES?|VAR(?:BINARY|CHAR|CHARACTER|YING)|VIEW|WAITFOR|WARNINGS|WHEN|WHERE|WHILE|WITH(?: ROLLUP|IN)?|WORK|WRITE(?:TEXT)?|YEAR)\b/i,"boolean":/\b(?:TRUE|FALSE|NULL)\b/i,number:/\b0x[\da-f]+\b|\b\d+\.?\d*|\B\.\d+\b/i,operator:/[-+*\/=%^~]|&&?|\|\|?|!=?|<(?:=>?|<|>)?|>[>=]?|\b(?:AND|BETWEEN|IN|LIKE|NOT|OR|IS|DIV|REGEXP|RLIKE|SOUNDS LIKE|XOR)\b/i,punctuation:/[;[\]()`,.]/};
+        !function(){if("undefined"!=typeof self&&self.Prism&&self.document){var t=[],e={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var o;o="function"==typeof a?a:function(t){var e;return"function"==typeof a.onClick?(e=document.createElement("button"),e.type="button",e.addEventListener("click",function(){a.onClick.call(this,t)})):"string"==typeof a.url?(e=document.createElement("a"),e.href=a.url):e=document.createElement("span"),e.textContent=a.text,e},t.push(e[n]=o)},o=Prism.plugins.toolbar.hook=function(a){var o=a.element.parentNode;if(o&&/pre/i.test(o.nodeName)&&!o.parentNode.classList.contains("code-toolbar")){var r=document.createElement("div");r.classList.add("code-toolbar"),o.parentNode.insertBefore(r,o),r.appendChild(o);var i=document.createElement("div");i.classList.add("toolbar"),document.body.hasAttribute("data-toolbar-order")&&(t=document.body.getAttribute("data-toolbar-order").split(",").map(function(t){return e[t]||n})),t.forEach(function(t){var e=t(a);if(e){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(e),i.appendChild(n)}}),r.appendChild(i)}};a("label",function(t){var e=t.element.parentNode;if(e&&/pre/i.test(e.nodeName)&&e.hasAttribute("data-label")){var n,a,o=e.getAttribute("data-label");try{a=document.querySelector("template#"+o)}catch(r){}return a?n=a.content:(e.hasAttribute("data-url")?(n=document.createElement("a"),n.href=e.getAttribute("data-url")):n=document.createElement("span"),n.textContent=o),n}}),Prism.hooks.add("complete",o)}}();
+        !function(){function e(e){this.defaults=r({},e)}function n(e){return e.replace(/-(\w)/g,function(e,n){return n.toUpperCase()})}function t(e){for(var n=0,t=0;t<e.length;++t)e.charCodeAt(t)=="	".charCodeAt(0)&&(n+=3);return e.length+n}var r=Object.assign||function(e,n){for(var t in n)n.hasOwnProperty(t)&&(e[t]=n[t]);return e};e.prototype={setDefaults:function(e){this.defaults=r(this.defaults,e)},normalize:function(e,t){t=r(this.defaults,t);for(var i in t){var o=n(i);"normalize"!==i&&"setDefaults"!==o&&t[i]&&this[o]&&(e=this[o].call(this,e,t[i]))}return e},leftTrim:function(e){return e.replace(/^\s+/,"")},rightTrim:function(e){return e.replace(/\s+$/,"")},tabsToSpaces:function(e,n){return n=0|n||4,e.replace(/\t/g,new Array(++n).join(" "))},spacesToTabs:function(e,n){return n=0|n||4,e.replace(RegExp(" {"+n+"}","g"),"	")},removeTrailing:function(e){return e.replace(/\s*?$/gm,"")},removeInitialLineFeed:function(e){return e.replace(/^(?:\r?\n|\r)/,"")},removeIndent:function(e){var n=e.match(/^[^\S\n\r]*(?=\S)/gm);return n&&n[0].length?(n.sort(function(e,n){return e.length-n.length}),n[0].length?e.replace(RegExp("^"+n[0],"gm"),""):e):e},indent:function(e,n){return e.replace(/^[^\S\n\r]*(?=\S)/gm,new Array(++n).join("	")+"$&")},breakLines:function(e,n){n=n===!0?80:0|n||80;for(var r=e.split("\n"),i=0;i<r.length;++i)if(!(t(r[i])<=n)){for(var o=r[i].split(/(\s+)/g),a=0,s=0;s<o.length;++s){var l=t(o[s]);a+=l,a>n&&(o[s]="\n"+o[s],a=l)}r[i]=o.join("")}return r.join("\n")}},"undefined"!=typeof module&&module.exports&&(module.exports=e),"undefined"!=typeof Prism&&(Prism.plugins.NormalizeWhitespace=new e({"remove-trailing":!0,"remove-indent":!0,"left-trim":!0,"right-trim":!0}),Prism.hooks.add("before-sanity-check",function(e){var n=Prism.plugins.NormalizeWhitespace;if(!e.settings||e.settings["whitespace-normalization"]!==!1){if((!e.element||!e.element.parentNode)&&e.code)return e.code=n.normalize(e.code,e.settings),void 0;var t=e.element.parentNode,r=/\bno-whitespace-normalization\b/;if(e.code&&t&&"pre"===t.nodeName.toLowerCase()&&!r.test(t.className)&&!r.test(e.element.className)){for(var i=t.childNodes,o="",a="",s=!1,l=0;l<i.length;++l){var c=i[l];c==e.element?s=!0:"#text"===c.nodeName&&(s?a+=c.nodeValue:o+=c.nodeValue,t.removeChild(c),--l)}if(e.element.children.length&&Prism.plugins.KeepMarkup){var u=o+e.element.innerHTML+a;e.element.innerHTML=n.normalize(u,e.settings),e.code=e.element.textContent}else e.code=o+e.code+a,e.code=n.normalize(e.code,e.settings)}}}))}();
+        !function(){if("undefined"!=typeof self&&self.Prism&&self.document){if(!Prism.plugins.toolbar)return console.warn("Copy to Clipboard plugin loaded before Toolbar plugin."),void 0;var o=window.ClipboardJS||void 0;o||"function"!=typeof require||(o=require("clipboard"));var e=[];if(!o){var t=document.createElement("script"),n=document.querySelector("head");t.onload=function(){if(o=window.ClipboardJS)for(;e.length;)e.pop()()},t.src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js",n.appendChild(t)}Prism.plugins.toolbar.registerButton("copy-to-clipboard",function(t){function n(){var e=new o(i,{text:function(){return t.code}});e.on("success",function(){i.textContent="Copied!",r()}),e.on("error",function(){i.textContent="Press Ctrl+C to copy",r()})}function r(){setTimeout(function(){i.textContent="Copy"},5e3)}var i=document.createElement("a");return i.textContent="Copy",o?n():e.push(n),i})}}();
+    </script>
+</head>
+<body>
+	<div class="header">
+		<div style="margin-top:12px;">
+			<h1>
+				<a href="../DefaultReadMe.html" class="arrow"></a>
+			</h1>
+		</div>
+		<div style="margin-top:-12px;">
+			<h1>
+				<span id="page_title" style="font-size: 16px; font-weight: bold;">Docker Hello World Service</span>
+			</h1>
+		</div>
+	</div>
+	<div id="content" style="margin-top: 40px;">
+
+		<div class="about-template">
+			<h3><strong>About</strong></h3>
+			<p>This sample leads you to build a docker image locally in your
+				machine with a given target repository name and the target
+				repository tag and push it to your docker repository.</p>
+			<p>Three modules get created with this sample. <strong>ESB Configs</strong> module contains all the ESB 
+				artifacts, the <strong>Composite Exporter</strong> module which is used to package and export the 
+				artifacts created within the ESB module, the <strong>Docker Exporter</strong> module which facilitates
+				building and pushing of the docker image with the selected Composite Exporter modules (Capps).</p>
+			<p>ESB module contains a simple <strong>REST API</strong> called
+				&lsquo;HelloWorld&rsquo;. When you invoke it, it generates a JSON message and sends it to the client.
+			</p>
+		</div>
+
+		<div class="accordion">
+			<div class="option" style="border-left: 5px solid #ff9100;">
+				<input type="checkbox" id="toggle1" class="toggle" checked />
+				<label class="title" for="toggle1" 
+                  style="border-bottom-color: rgba(255,145,0,.1);background-color: rgba(255,145,0,.1);
+                      box-shadow: none !important;">
+                  Build and Run the Docker Image
+                </label>
+				<div class="content">
+					<ol>
+						<li>
+							<h3>Configure docker image name</h3>
+							<p>
+								- Open the POM.xml file in the <b>Docker Exporter</b> module and change the Docker 
+								image name by changing the <b>Target Repository</b> value and <b>Target Tag</b> value.
+							</p>
+						</li>
+						<li>
+							<h3>Build the Docker Image</h3>
+							<p style="font-size: 13px;">
+								- Open the <b>pom.xml</b> file and click the <b>Build</b> button in
+								the top right corner.
+							</p>
+							<div class="separator">or</div>
+							<p style="font-size: 13px;">
+								<b>- Right click</b> the Docker Exporter project and select the <b>Build
+									Docker Image</b> option.
+							</p>
+						</li>
+						<li>
+							<h3>View the built docker image</h3>
+							<p>- Execute the following command in your terminal and you will see built docker image 
+								with given repository name and tag.</p>
+							<pre>
+								<code class="language-bash">docker images</code>
+							</pre>
+						</li>
+						<li>
+							<h3>Run the docker image</h3>
+							<p>- Execute the following command with the appropriate docker username, repository name 
+								and version.</p>
+							<pre>
+								<code class="language-bash">docker run -p 8290:8290 -it docker_username/repository:v1.0.0</code>
+							</pre>
+						</li>
+						<li>
+							<h3>Invoke the HelloWorld API</h3>
+							<p>Open the <strong>HTTP Client</strong> of WSO2 Integration Studio (If you don't 
+							see the HTTP Client pane, go to <strong>Window -> Show View - Other</strong> and 
+							select HTTP Client to enable the client pane).</p>					  
+					   
+							<p>Enter the request information as given below and click the Send 
+							<span>
+								<img src="https://github.com/wso2/integration-studio/raw/main/components/esb-tools/plugins/org.wso2.integrationstudio.esb.dashboard.templates/NewSamples/Resources/play-head-icon.png" 
+									style="width:20px; margin: 0 2px -5px 2px;" />
+							</span> icon.</p>
+							
+							<p><b>Method:</b></p>
+							<p style="margin-top:-30px;"><pre><code class="language-bash">GET</code></pre></p>
+							
+							<p style="margin-top:-15px;"><b>URL:</b></p>
+							<p style="margin-top:-30px;">
+								<pre>
+									<code class="language-bash">http://localhost:8290/HelloWorld</code>
+								</pre>
+							</p>
+						</li>
+					</ol>
+				</div>
+			</div>
+
+			<div class="option" style="border-left: 5px solid #448AFF;">
+				<input type="checkbox" id="toggle2" class="toggle" />
+				<label class="title" for="toggle2"  
+                  style="border-bottom-color: rgba(68, 138, 255,.1); 
+                      background-color: rgba(68, 138, 255,.1); box-shadow: none !important;">
+                Push the Docker Image
+                </label>
+				<div class="content">
+					<p style="font-size: 13px;">
+						Open the <b>pom.xml</b> file and click the <b>Push</b> button in
+						the top right corner.
+					</p>
+					<div class="separator">or</div>
+					<p style="font-size: 13px;">
+						<b>Right click</b> the Docker Exporter project and select the <b>Push
+							Docker Image</b> option.
+					</p>
+					<p style="font-size: 13px;">Both actions will open a wizard. Enter username and the password
+						of your docker account and click on <b>Push Image</b> button.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	    Prism.plugins.NormalizeWhitespace.setDefaults({
+	        'remove-trailing': true,
+	        'remove-indent': true,
+	        'left-trim': true,
+	        'right-trim': true,
+	    });
+	
+	   var url = window.location.pathname;
+	   var filename = url.substring(url.lastIndexOf('/')+1);
+	   if (filename == 'ReadMe.html') {
+	      var arrow_element = document.getElementsByClassName('arrow')[0];
+	      var heading_title = document.getElementById('page_title');
+	      arrow_element.style.visibility = 'hidden';
+	      heading_title.style.paddingLeft = 0;
+	   }
+	</script>
+</body>
+</html>
