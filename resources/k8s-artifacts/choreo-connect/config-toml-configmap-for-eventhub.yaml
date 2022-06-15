@@ -38,6 +38,7 @@ data:
       listenerPort = 9090
       securedListenerPort = 9095
       systemHost = "gw.wso2.com"
+      useRemoteAddress = false
 
     [router.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
