@@ -1,6 +1,6 @@
 # Service to Service - East-West Traffic
 
-In this scenario, we deploy Choreo Connect within the Istio service mesh where it applies API Management for microservices to microservice communication.
+In this scenario, we deploy Choreo Connect as an Internal API Gateway within the Istio service mesh, where it applies API Management to microservices communication.
 
 ![east-west-traffic](east-west-traffic.png)
 
@@ -122,11 +122,6 @@ kubectl label namespace default istio-injection=enabled
 
 ### 5. Deploy the Schedules Microservice
 
-- Create a Kubernetes secret with API Key of **Trains** API.
-  ```sh
-  kubectl create secret generic schedules-creds --from-literal=trains_service_api_key=$API_KEY
-  ```
-
 - Create a Virtual Service named `choreo-connect-internal` to set header `host: gw.wso2.com` (to set the Vhost of the gateway environment).
   ```sh
   kubectl apply -f cc-internal-vs.yaml
@@ -136,8 +131,9 @@ kubectl label namespace default istio-injection=enabled
   >
   > We have used the Virtual Service `choreo-connect-internal` to set the header `host: gw.wso2.com`, hence the Virtual Service routes requests to the HTTP port of the Choreo Connect gateway. You can also use the HTTPS port of Choreo Connect and set the host header from the microservice (backend).
 
-- Deploy **Schedules** service.
+- Create a Kubernetes secret with API Key of **Trains** API using the variable `$API_KEY` and deploy **Schedules** service.
   ```sh
+  kubectl create secret generic schedules-creds --from-literal=trains_service_api_key=$API_KEY
   kubectl apply -f microservices/schedules.yaml
   ```
 

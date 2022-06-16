@@ -31,14 +31,6 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
-name = "cloud"
-version = "2.2.0"
-modules = [
-	{org = "ballerina", packageName = "cloud", moduleName = "cloud"}
-]
-
-[[package]]
-org = "ballerina"
 name = "crypto"
 version = "2.2.2"
 dependencies = [
@@ -275,7 +267,6 @@ org = "wso2am"
 name = "cc_schedules_service"
 version = "1.0.0"
 dependencies = [
-	{org = "ballerina", name = "cloud"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "os"}
