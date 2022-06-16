@@ -1,0 +1,24 @@
+{
+  "name": "SOAPApi",
+  "version": "1.0.0",
+  "context": "soap",
+  "type": "SOAP",
+  "tiersCollection": "Unlimited",
+  "wsdlInfo": {
+    "type": "WSDL"
+  },
+  "wsdlUrl": "wsdl/PhoneVerification.wsdl",
+  "operationsDTOS": [
+    {
+      "verb": "POST",
+      "target": "/phoneverify",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2340"
+    }
+  }
+}

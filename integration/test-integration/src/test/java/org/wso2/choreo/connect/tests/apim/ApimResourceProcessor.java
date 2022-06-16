@@ -19,6 +19,7 @@ package org.wso2.choreo.connect.tests.apim;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottlePolicyDTO;
@@ -27,6 +28,8 @@ import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDT
 import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
@@ -135,17 +138,23 @@ public class ApimResourceProcessor {
 
         Path apisLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
                 APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + APIS_FOLDER);
-        try (Stream<Path> paths = Files.walk(apisLocation)) {
+        try (Stream<Path> paths = Files.walk(apisLocation, 1)) {
             for (Iterator<Path> apiFiles = paths.filter(Files::isRegularFile).iterator(); apiFiles.hasNext();) {
                 Path apiFilePath = apiFiles.next();
                 String apiFileContent = Files.readString(apiFilePath);
-
                 APIRequest apiRequest = new Gson().fromJson(apiFileContent, TYPE_API_REQUEST);
                 apiRequest.setProvider(apiProvider);
                 apiRequest.setTags("tags"); // otherwise, throws a NPE
 
-                // Create API
-                String apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                // create API
+                String apiId;
+                if (apiRequest.getType().equals(TestConstant.API_TYPES.SOAP)){
+                    apiId = PublisherUtils.createSoapApiFromWsdl(apiRequest, apimArtifactsIndex,
+                            apiFileContent, publisherRestClient);
+                } else {
+                    apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                }
+                
                 if(apiToOpenAPI.containsKey(apiRequest.getName())) {
                     String openAPIFileName = apiToOpenAPI.get(apiRequest.getName());
                     PublisherUtils.updateOpenAPIDefinition(apiId, openAPIFileName, publisherRestClient);

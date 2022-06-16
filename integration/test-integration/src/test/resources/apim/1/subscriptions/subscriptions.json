@@ -93,5 +93,10 @@
     "apiName": "WebsocketSubscriptionThrottleAPI",
     "appName": "WebSocketSubscriptionEventCountThrottleApp",
     "tier": "5EventsPerMin"
+  },
+  {
+    "apiName": "SOAPApi",
+    "appName": "DefaultAPIApp",
+    "tier": "Unlimited"
   }
 ]

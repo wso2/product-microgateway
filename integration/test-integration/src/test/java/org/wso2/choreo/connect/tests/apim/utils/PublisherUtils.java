@@ -25,11 +25,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.*;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
@@ -59,6 +55,8 @@ import static org.testng.Assert.assertEquals;
 
 public class PublisherUtils {
     private static final Logger log = LoggerFactory.getLogger(PublisherUtils.class);
+    private static final String APIM_ARTIFACTS_FOLDER = File.separator + "apim" + File.separator;
+    private static final String APIS_FOLDER = File.separator + "apis";
 
     /**
      * Create and publish an API
@@ -206,6 +204,49 @@ public class PublisherUtils {
             log.error(errorMsg);
             throw new CCTestException(errorMsg);
         }
+    }
+
+    /**
+     * creates a SOAP API with given WSDL definition
+     *
+     * @param apiRequest          An APIRequest object
+     * @param apimArtifactsIndex  APIM artifacts categorization index
+     * @param apiFileContent      API definition file content
+     * @param publisherRestClient Instance of RestAPIPublisherImpl
+     * @return ID of the created API
+     * @throws ApiException If importWSDLSchemaDefinition fails
+     * @throws IOException  If WSDL definition file read fails
+     */
+    public static String createSoapApiFromWsdl(APIRequest apiRequest, String apimArtifactsIndex,
+                                               String apiFileContent, RestAPIPublisherImpl publisherRestClient)
+            throws ApiException, IOException {
+        String apiId = null;
+        Path apisLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
+                APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + APIS_FOLDER);
+        if (apiRequest.getType().equals(TestConstant.API_TYPES.SOAP)) {
+            Path wsdlFilePath = Paths.get(apisLocation + "/" + new JSONObject(apiFileContent).get("wsdlUrl"));
+            File file = new File(wsdlFilePath.toString());
+            WSDLValidationResponseDTO wsdlValidationResponseDTO =
+                    publisherRestClient.validateWsdlDefinition(null, file);
+            if (wsdlValidationResponseDTO.isIsValid()) {
+                apiRequest.setWsdl(Files.readString(wsdlFilePath));
+                JSONObject additionalPropertiesObj = new JSONObject();
+                additionalPropertiesObj.put("name", apiRequest.getName());
+                additionalPropertiesObj.put("context", apiRequest.getContext());
+                additionalPropertiesObj.put("version", apiRequest.getVersion());
+
+                additionalPropertiesObj.put("endpointConfig", apiRequest.getEndpointConfig());
+
+                ArrayList<String> policies = new ArrayList<>();
+                policies.add(apiRequest.getTiersCollection());
+                additionalPropertiesObj.put("policies", policies);
+
+                APIDTO apidto = publisherRestClient.importWSDLSchemaDefinition(file, null,
+                        additionalPropertiesObj.toString(), "SOAP");
+                apiId = apidto.getId();
+            }
+        }
+        return apiId;
     }
 
     /**

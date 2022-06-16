@@ -304,6 +304,25 @@ public class ApictlUtils {
         log.info("Logged out from apictl microgateway environment: " + mgwEnv);
     }
 
+    public static void deploySampleProject(String projectName, String mgwEnv) throws CCTestException{
+        String samplesDirPath = Utils.getCCSamplesDirPath();
+        String projectPath = samplesDirPath + API_PROJECTS_PATH + projectName;
+
+        String[] cmdArray = { MG, DEPLOY, API };
+        String[] argsArray = { FILE_FLAG, projectPath, ENV_FLAG, mgwEnv };
+        try {
+            String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
+            if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_DEPLOYED_RESPONSE)) {
+                throw new CCTestException("Unable to deploy API project: "
+                        + projectName + " to microgateway adapter environment: " + mgwEnv);
+            }
+        } catch (IOException e) {
+            throw new CCTestException("Unable to deploy API project: "
+                    + projectName + " to microgateway adapter environment: " + mgwEnv, e);
+        }
+        log.info("Deployed API project: " + projectName + " to microgateway adapter environment: " + mgwEnv);
+    }
+
     /**
      * Deploy an API via apictl
      *

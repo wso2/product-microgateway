@@ -102,6 +102,7 @@ public class TestConstant {
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
 
     public static final String LINE = "\r\n";
+    public static final String URL_SEPARATOR = "/";
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
@@ -138,6 +139,7 @@ public class TestConstant {
     public static final String ADMIN_PASSWORD = "admin";
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String CONTENT_TYPE_HEADER = "content-type";
 
     //apim instances names
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
@@ -203,5 +205,13 @@ public class TestConstant {
 
         public SUBSCRIPTION_TIER() {
         }
+    }
+
+    public static final class CONTENT_TYPES {
+        public static final String TEXT_XML = "text/xml";
+    }
+
+    public static final class API_TYPES {
+        public static final String SOAP = "SOAP";
     }
 }

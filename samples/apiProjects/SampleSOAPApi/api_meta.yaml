@@ -1,0 +1,7 @@
+deploy:
+  import:
+    preserveProvider: true
+    rotateRevision: false
+    update: true
+name: SampleSOAPApi
+version: "1.0"
