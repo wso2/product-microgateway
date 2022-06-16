@@ -25,7 +25,13 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.*;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.WorkflowResponseDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
@@ -269,7 +275,16 @@ public class PublisherUtils {
     }
 
 
-
+    /**
+     * Create a sample API request
+     *
+     * @param apiName API name
+     * @param apiContext API context
+     * @param apiVersion API version
+     * @param provider Provider
+     * @return apiRequest
+     * @throws CCTestException if an error occurs while creating a sample API request
+     */
     public static APIRequest createSampleAPIRequest(String apiName, String apiContext, String apiVersion,
                                                     String provider) throws CCTestException {
         APIRequest apiRequest;
@@ -443,8 +458,14 @@ public class PublisherUtils {
             lifecycleChecklist = "Requires re-subscription when publishing the API:true";
         }
         try {
-            HttpResponse response = publisherRestClient
-                    .changeAPILifeCycleStatus(apiId, targetState, lifecycleChecklist);
+            publisherRestClient.apiPublisherClient.addDefaultHeader("activityID",
+                    System.getProperty(RestAPIPublisherImpl.testNameProperty));
+            WorkflowResponseDTO workflowResponseDTO = publisherRestClient.apiLifecycleApi
+                    .changeAPILifecycle(targetState, apiId, lifecycleChecklist, null);
+            HttpResponse response = null;
+            if (StringUtils.isNotEmpty(workflowResponseDTO.getLifecycleState().getState())) {
+                response = new HttpResponse(workflowResponseDTO.getLifecycleState().getState(), 200);
+            }
             if (Objects.isNull(response)) {
                 log.error("Received a null response when changing lifecycle status to " + targetState);
                 throw new CCTestException("Error while changing lifecycle status to " + targetState + ". API Id : " + apiId);

@@ -47,3 +47,13 @@ func MaskString(str string, visibleLength int, maskCharacter string, maskRight b
 func MaskToken(token string) string {
 	return MaskString(token, 4, "*", false)
 }
+
+// StringInSlice checks whether a given string is included in the slice
+func StringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
