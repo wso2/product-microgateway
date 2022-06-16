@@ -21,11 +21,11 @@ services:
     networks:
       - choreo-connect_default
   xml-interceptor:
-    image: wso2am/cc-sample-xml-interceptor-wso2-mi
+    image: wso2am/cc-sample-xml-interceptor-wso2-mi:v1.0.0
     ports:
-      - "8290:8290"
+      - "8290:8253"
     networks:
       - choreo-connect_default
 networks:
   choreo-connect_default:
-    # external: true
+    external: true

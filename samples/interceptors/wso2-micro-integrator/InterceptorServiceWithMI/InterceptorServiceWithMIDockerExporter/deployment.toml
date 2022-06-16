@@ -6,7 +6,7 @@ hot_deployment = false
 type = "read_only_ldap"
 
 [keystore.tls]
-file_name = "interceptor.jks"
+file_name = "wso2carbon.jks"
 password = "wso2carbon"
 alias = "interceptor"
 key_password = "wso2carbon"
