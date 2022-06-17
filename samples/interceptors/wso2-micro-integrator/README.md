@@ -1,7 +1,7 @@
 # Sample Interceptor - WSO2 Micro Integrator
 
 The interceptor service is generated using the interceptor service Open API definition.
-[Swagger Editor](https://editor.swagger.io/) is used to generate the spring service.
+[Swagger Editor](https://editor.swagger.io/) is used to generate the Synapse API configuration file in Micro Integrator.
 
 To learn about interceptors and for instructions on how to run it please head over to the
 [home directory of interceptor samples](../README.md#samples).
