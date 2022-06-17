@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: "3.7"
-services:
-  legacy-xml-backend:
-    image: wso2am/cc-sample-legacy-xml-backend:v1.0.0
-    ports:
-      - "9080:9080"
-    networks:
-      - choreo-connect_default
-  xml-interceptor:
-    image: wso2am/cc-sample-xml-interceptor-wso2-mi:v1.0.0
-    ports:
-      - "9081:8253"
-    networks:
-      - choreo-connect_default
-networks:
-  choreo-connect_default:
-    external: true
+SRC="InterceptorServiceWithMI"
+
+# Copy the keystore file from resources as keystore and truststore
+rm -rf "${SRC}/InterceptorServiceWithMIDockerExporter/Resources/wso2carbon.jks"
+rm -rf "${SRC}/InterceptorServiceWithMIDockerExporter/Resources/client-truststore.jks"
+cp ../resources/interceptor.jks "${SRC}/InterceptorServiceWithMIDockerExporter/Resources/wso2carbon.jks"
+cp ../resources/interceptor.jks "${SRC}/InterceptorServiceWithMIDockerExporter/Resources/client-truststore.jks"
