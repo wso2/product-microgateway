@@ -61,12 +61,12 @@ public class MockBackendSOAP extends Thread{
     }
 
     public void run(){
-        log.info("Starting mock backend for SOAP");
-        startWiremockServer();
+        startWiremockServer(Constants.MOCK_BACKEND_SOAP_SERVER_PORT);
     }
 
-    private void startWiremockServer() {
-        wireMockServer = new WireMockServer(options().port(2340));
+    private void startWiremockServer(int port) {
+        log.info("Starting mock backend for SOAP service...");
+        wireMockServer = new WireMockServer(options().port(port));
         wireMockServer.stubFor(WireMock
                 .get(urlEqualTo("/phoneverify/wsdl"))
                 .willReturn(
@@ -83,6 +83,7 @@ public class MockBackendSOAP extends Thread{
                                 .withHeader("Content-Type", "text/xml")
                                 .withBody(responseBody)));
         wireMockServer.start();
+        log.info("Mock backend for SOAP service successfully started.");
     }
 
     private void stopWiremockServer(){
