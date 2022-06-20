@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------
-# Copyright (c) 2021, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+# Copyright (c) 2022, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,38 +14,42 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
+apiVersion: apps/v1
+kind: Deployment
 metadata:
- name: istio-gateway
+  labels:
+    app: trains
+  name: trains
 spec:
- selector:
-   istio: ingressgateway
- servers:
- - port:
-     number: 80
-     name: http
-     protocol: HTTP
-   hosts:
-   - "*"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trains
+  template:
+    metadata:
+      labels:
+        app: trains
+    spec:
+      containers:
+      - image: wso2am/cc-trains-service:1.0.0
+        imagePullPolicy: IfNotPresent
+        name: trains
+        ports:
+          - containerPort: 8080
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
+
+apiVersion: v1
+kind: Service
 metadata:
- name: httpbin
+  labels:
+    app: trains
+  name: trains
 spec:
- hosts:
- - "*"
- gateways:
- - istio-gateway
- http:
- - match:
-     - uri:
-         prefix: "/httpbin/v1.0.0/"
-   rewrite:
-     uri: "/"
-   route:
-     - destination:
-         host: httpbin
-         port:
-           number: 80
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: trains
+  type: ClusterIP
