@@ -1,5 +1,7 @@
 # Development Guide
 
+## Dev and Test Interceptor Lua Scripts
+
 1. Build the Choreo Connect from the root directory.
 2. Extract the distribution and change dir to docker-compose dir.
 3. Open an interceptor sample (e.g. NodeJS sample) do required changes, before build the sample append "-test" to the docker tag (to keep the original docker image).
@@ -39,3 +41,23 @@
     ```
 8. Copy interceptor certs to the APICTL project (i.e. Endpoint-certificates/interceptors).
 9. Start the docker-compose file.
+
+## Build Router Docker Image - for Integration/Local Testing
+
+Set `ROUTER_BASE_IMAGE` with the latest compatible Router docker image and `TARGET_ROUTER_IMAGE` with the image name that you want to be built.
+
+For example:
+- ROUTER_BASE_IMAGE=wso2/choreo-connect-router:1.1.0
+- TARGET_ROUTER_IMAGE=wso2/choreo-connect-router:1.2.0-m1-SNAPSHOT
+
+Change directory to here and execute the following script.
+
+```shell
+cat <<EOF > DockerfileAddInterceptor
+FROM $ROUTER_BASE_IMAGE
+COPY interceptor /home/wso2/interceptor
+EOF
+
+docker build -t $TARGET_ROUTER_IMAGE -f DockerfileAddInterceptor ../
+rm DockerfileAddInterceptor
+```
