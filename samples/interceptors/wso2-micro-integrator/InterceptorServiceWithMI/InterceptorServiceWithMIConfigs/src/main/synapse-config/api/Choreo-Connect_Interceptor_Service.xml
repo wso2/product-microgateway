@@ -24,7 +24,17 @@
             <property expression="$body/*" name="xmlBodyString" scope="default" type="STRING"/>
             <property expression="base64Encode(get-property('xmlBodyString'))" name="encodedXmlBody" scope="default" type="STRING"/>
             <payloadFactory media-type="json">
-                <format>{ "headersToAdd": { "x-user": "admin" }, "headersToReplace": { "content-type": "application/xml" }, "body": "$1" }</format>
+                <format>
+					{
+					"headersToAdd":{
+					"x-user":"admin"
+					},
+					"headersToReplace":{
+					"content-type":"application/xml"
+					},
+					"body":"$1"
+					}
+				</format>
                 <args>
                     <arg evaluator="xml" expression="get-property('encodedXmlBody')"/>
                 </args>
@@ -40,13 +50,17 @@
             <filter regex="200" source="get-property('responseCode')">
                 <then>
                     <payloadFactory media-type="json">
-                        <format>{ "responseCode": 201 }</format>
+                        <format>
+							{ "responseCode": 201 }
+						</format>
                         <args/>
                     </payloadFactory>
                 </then>
                 <else>
                     <payloadFactory media-type="json">
-                        <format>{}</format>
+                        <format>
+							{}
+						</format>
                         <args/>
                     </payloadFactory>
                 </else>

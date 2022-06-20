@@ -1,9 +1,6 @@
 # Sample Interceptor - WSO2 Micro Integrator
 
-The interceptor service is generated using the interceptor service Open API definition.
-[Swagger Editor](https://editor.swagger.io/) is used to generate the Synapse API configuration file in Micro Integrator.
-
-NOTE: You need to convert the open-api 3.0.0 to swagger 2.0, to sucessfully add a new REST API in Micro Integrator.
+The interceptor service REST API is added using swagger definition file which generates the Synapse API configuration file in Micro Integrator. You need to convert the [interceptor service definition](https://github.com/wso2/product-microgateway/blob/main/resources/interceptor-service-open-api-v1.yaml) in open-api 3.0.0 to swagger 2.0, then it will be successfully added as new REST API in Micro Integrator.
 
 To learn about interceptors and for instructions on how to run it please head over to the
 [home directory of interceptor samples](../README.md#samples).
@@ -67,3 +64,14 @@ To learn about interceptors and for instructions on how to run it please head ov
    ```sh
    docker rm -f interceptor-wso2-mi
    ```
+
+When testing this interceptor service, you need to change the [bookstore-api.yaml](https://github.com/wso2/product-microgateway/blob/main/samples/interceptors/bookstore-api.yaml) file with the http ports as given below:
+
+```yaml
+x-wso2-request-interceptor:
+  serviceURL: https://xml-interceptor:8253
+  includes:
+    - request_body
+x-wso2-response-interceptor:
+  serviceURL: https://xml-interceptor:8253
+```
