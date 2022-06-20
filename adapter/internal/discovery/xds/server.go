@@ -457,8 +457,12 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	}
 	interceptCertMap["default"] = apiProject.InterceptorCerts
 
-	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
+	routes, clusters, endpoints, err := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
 		interceptCertMap, vHost, organizationID)
+	if err != nil {
+		return nil, fmt.Errorf("Error while deploying API. Name: %s Version: %s, OrgID: %s, Error: %s",
+			mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID, err.Error())
+	}
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes

@@ -76,7 +76,7 @@ type CombinedTemplateValues struct {
 // First set of routes, clusters, addresses represents the production endpoints related
 // configurations. Next set represents the sandbox endpoints related configurations.
 func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[string][]byte, interceptorCerts map[string][]byte, vHost string, organizationID string) (routesP []*routev3.Route,
-	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
+	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address, err error) {
 	var (
 		routes    []*routev3.Route
 		clusters  []*clusterv3.Cluster
@@ -223,11 +223,14 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// No topic level endpoints.
 	if mgwSwagger.GetAPIType() == constants.WS {
 		for _, resource := range mgwSwagger.GetResources() {
-			routesP := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
+			routesP, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
 				apiLevelClusterNameSand, nil, nil, organizationID, false))
+			if err != nil {
+                return nil, nil, nil, fmt.Errorf("Error while creating routes for Websocket API. %v", err)
+            }
 			routes = append(routes, routesP...)
 		}
-		return routes, clusters, endpoints
+		return routes, clusters, endpoints, nil
 	}
 
 	for _, resource := range mgwSwagger.GetResources() {
@@ -425,18 +428,25 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
-		routeP := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
+		routeP, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
 			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, false))
+		if err != nil {
+            return nil, nil, nil, fmt.Errorf("Error while creating routes. %v", err)
+        }
 		if apiLevelBasePathSand != "" || isResourceBasePathSandAvailable {
 			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
-			routeS := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
+			routeS, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
 				clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, true))
+			if err != nil {
+                return nil, nil, nil, fmt.Errorf("Error while creating sandbox routes. %v", err)
+            }
 			// Sandbox route should be appended before to prod route to have the expected header based sandbox routing.
 			routes = append(routes, routeS...)
 		}
 		routes = append(routes, routeP...)
 	}
-	return routes, clusters, endpoints
+
+	return routes, clusters, endpoints, nil
 }
 
 func getClusterName(epPrefix string, organizationID string, vHost string, swaggerTitle string, swaggerVersion string,
@@ -784,7 +794,7 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // createRoutes creates route elements for the route configurations. API title, VHost, xWso2Basepath, API version,
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
-func createRoutes(params *routeCreateParams) []*routev3.Route {
+func createRoutes(params *routeCreateParams) ([]*routev3.Route, error) {
 	title := params.title
 	version := params.version
 	vHost := params.vHost
@@ -1035,19 +1045,16 @@ end`
 				case constants.ActionRequestHeaderAdd:
 					requestHeaderToAdd, err := generateHeaderToAddRouteConfig(requestPolicy.Parameters)
 					if err != nil {
-						logger.LoggerOasparser.Errorf("Error adding request policy %s to operation %s of resource %s."+
-							" Skipping the policy. %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
-						continue
+						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					requestHeadersToAdd = append(requestHeadersToAdd, requestHeaderToAdd)
 
 				case constants.ActionRequestHeaderRemove:
 					requestHeaderToRemove, err := generateHeaderToRemoveString(requestPolicy.Parameters)
 					if err != nil {
-						logger.LoggerOasparser.Errorf("Error adding request policy %s to operation %s of resource %s."+
-							" Skipping the policy. %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
-						continue
-						//TODO: return error
+						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					requestHeadersToRemove = append(requestHeadersToRemove, requestHeaderToRemove)
 
@@ -1055,13 +1062,14 @@ end`
 					regexRewrite, err := generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath,
 						requestPolicy.Parameters)
 					if err != nil {
+						errMsg := fmt.Sprintf("Error adding request policy %s to operation %s of resource %s. %v",
+							constants.ActionRewritePath, operation.GetMethod(), resourcePath, err)
 						logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
-							Message: fmt.Sprintf("Error adding request policy %s to operation %s of resource %s. %v",
-								constants.ActionRewritePath, operation.GetMethod(), resourcePath, err),
+							Message:   errMsg,
 							Severity:  logging.MINOR,
 							ErrorCode: 2212,
 						})
-						continue
+						return nil, errors.New(errMsg)
 					}
 					regexRewriteForOperation = regexRewrite
 
@@ -1069,20 +1077,22 @@ end`
 					var paramsToRewriteMethod map[string]interface{}
 					var ok bool
 					if paramsToRewriteMethod, ok = requestPolicy.Parameters.(map[string]interface{}); !ok {
-						logger.LoggerOasparser.Error("Error while processing policy parameter map. Map: %v", requestPolicy.Parameters)
-						continue
+						return nil, fmt.Errorf("Error while processing policy parameter map for "+
+							"request policy %s to operation %s of resource %s. Map: %v",
+							constants.ActionRewriteMethod, operation.GetMethod(), resourcePath, requestPolicy.Parameters)
 					}
 
-					currentMethod, ok := paramsToRewriteMethod["currentMethod"].(string)
+					currentMethod, ok := paramsToRewriteMethod[constants.CurrentMethod].(string)
 					if ok && currentMethod != operation.GetMethod() {
 						continue
 					}
 					isMethodRewritten = true
 					newMethod, ok = paramsToRewriteMethod[constants.UpdatedMethod].(string)
 					if !ok {
-						logger.LoggerOasparser.Error("Policy parameter map must include updatedMethod")
+						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+							" Policy parameter map must include updatedMethod", constants.ActionRewriteMethod,
+							operation.GetMethod(), resourcePath)
 					}
-
 				}
 			}
 			if isMethodRewritten {
@@ -1099,9 +1109,8 @@ end`
 				newMethodRoute, err := generateRewriteMethodRouteConfig(newMethod, xWso2Basepath, routePath, action,
 					decorator, requestHeadersToAdd, requestHeadersToRemove, nil, nil)
 				if err != nil {
-					logger.LoggerOasparser.Errorf("Error adding request policy to operation %s of resource %s."+
+					return nil, fmt.Errorf("Error adding request policy to operation %s of resource %s."+
 						". %v", operation.GetMethod(), resourcePath, err)
-					//TODO: Return error
 				}
 
 				routes = append(routes, route)
@@ -1135,7 +1144,7 @@ end`
 			nil, nil, nil, nil)
 		routes = append(routes, route)
 	}
-	return routes
+	return routes, nil
 }
 
 func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, responseInterceptor map[string]model.InterceptEndpoint,

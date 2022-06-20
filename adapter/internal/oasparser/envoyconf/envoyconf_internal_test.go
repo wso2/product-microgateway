@@ -116,8 +116,9 @@ func TestCreateRoute(t *testing.T) {
 		},
 	}
 
-	generatedRouteArrayWithXWso2BasePath := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
+	generatedRouteArrayWithXWso2BasePath, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
 		endpoint.Basepath, &resourceWithGet, clusterName, "", nil, false))
+	assert.Nil(t, err, "Error while creating routes WithXWso2BasePath")
 	generatedRouteWithXWso2BasePath := generatedRouteArrayWithXWso2BasePath[0]
 	assert.NotNil(t, generatedRouteWithXWso2BasePath, "Route should not be null.")
 	assert.Equal(t, expectedRouteActionWithXWso2BasePath, generatedRouteWithXWso2BasePath.Action,
@@ -126,8 +127,9 @@ func TestCreateRoute(t *testing.T) {
 	assert.Equal(t, "^(GET|OPTIONS)$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
 		"Assigned HTTP Method Regex is incorrect when single method is available.")
 
-	generatedRouteArrayWithoutXWso2BasePath := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, "", version,
+	generatedRouteArrayWithoutXWso2BasePath, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, "", version,
 		endpoint.Basepath, &resourceWithGetPost, clusterName, "", nil, false))
+	assert.Nil(t, err, "Error while creating routes WithoutXWso2BasePath")
 	generatedRouteWithoutXWso2BasePath := generatedRouteArrayWithoutXWso2BasePath[0]
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath, "Route should not be null")
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
@@ -135,8 +137,9 @@ func TestCreateRoute(t *testing.T) {
 		"Assigned HTTP Method Regex is incorrect when multiple methods are available.")
 
 	context := fmt.Sprintf("%s/%s", xWso2BasePath, version)
-	generatedRouteWithDefaultVersion := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, context, version,
+	generatedRouteWithDefaultVersion, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, context, version,
 		endpoint.Basepath, &resourceWithGetPost, clusterName, "", nil, true))
+	assert.Nil(t, err, "Error while creating routes WithDefaultVersion")
 	assert.NotNil(t, generatedRouteWithDefaultVersion, "Route should not be null")
 	assert.True(t, strings.HasPrefix(generatedRouteWithDefaultVersion[0].GetMatch().GetSafeRegex().Regex, fmt.Sprintf("^(?:%s|%s)", context, xWso2BasePath)),
 		"Default version basepath is not generated correctly")
@@ -160,26 +163,29 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routeWithProdEp := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
-		&resourceWithGet, prodClusterName, "", nil, false))[0]
-	assert.NotNil(t, routeWithProdEp, "Route should not be null")
-	assert.NotNil(t, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
-	assert.Empty(t, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
-	assert.Equal(t, clusterHeaderName, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+	routeWithProdEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
+		&resourceWithGet, prodClusterName, "", nil, false))
+	assert.Nil(t, err, "Error while creating routeWithProdEp")
+	assert.NotNil(t, routeWithProdEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithProdEp[0].GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithProdEp[0].GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithProdEp[0].GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 
-	routeWithSandEp := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
-		&resourceWithGet, "", sandClusterName, nil, false))[0]
-	assert.NotNil(t, routeWithSandEp, "Route should not be null")
-	assert.NotNil(t, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
-	assert.Empty(t, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
-	assert.Equal(t, clusterHeaderName, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+	routeWithSandEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
+		&resourceWithGet, "", sandClusterName, nil, false))
+	assert.Nil(t, err, "Error while creating routeWithSandEp")
+	assert.NotNil(t, routeWithSandEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithSandEp[0].GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 
-	routeWithProdSandEp := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
-		&resourceWithGet, prodClusterName, sandClusterName, nil, false))[0]
-	assert.NotNil(t, routeWithProdSandEp, "Route should not be null")
-	assert.NotNil(t, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
-	assert.Empty(t, routeWithProdSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
-	assert.Equal(t, clusterHeaderName, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+	routeWithProdSandEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
+		&resourceWithGet, prodClusterName, sandClusterName, nil, false))
+	assert.Nil(t, err, "Error while creating routeWithProdSandEp")
+	assert.NotNil(t, routeWithProdSandEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithProdSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithProdSandEp[0].GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithProdSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 }
 
 func TestCreateRouteExtAuthzContext(t *testing.T) {
@@ -199,15 +205,16 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routeWithProdEp := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
-		endpointBasePath, &resourceWithGet, prodClusterName, sandClusterName, nil, false))[0]
-	assert.NotNil(t, routeWithProdEp, "Route should not be null")
-	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
-	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig()[wellknown.HTTPExternalAuthorization],
+	routeWithProdEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
+		endpointBasePath, &resourceWithGet, prodClusterName, sandClusterName, nil, false))
+	assert.Nil(t, err, "Error while creating routeWithProdEp")
+	assert.NotNil(t, routeWithProdEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithProdEp[0].GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
+	assert.NotNil(t, routeWithProdEp[0].GetTypedPerFilterConfig()[wellknown.HTTPExternalAuthorization],
 		"ExtAuthzPerRouteConfig should not be empty")
 
 	extAuthPerRouteConfig := &extAuthService.ExtAuthzPerRoute{}
-	err := ptypes.UnmarshalAny(routeWithProdEp.TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
+	err = ptypes.UnmarshalAny(routeWithProdEp[0].TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
 		extAuthPerRouteConfig)
 	assert.Nilf(t, err, "Error while parsing ExtAuthzPerRouteConfig %v", extAuthPerRouteConfig)
 	assert.NotEmpty(t, extAuthPerRouteConfig.GetCheckSettings(), "Check Settings per ext authz route should not be empty")
@@ -592,13 +599,15 @@ func TestGetCorsPolicy(t *testing.T) {
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
 	// Route without CORS configuration
-	routeWithoutCors := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+	routeWithoutCors, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
 		&resourceWithGet, "test-cluster", "", nil, false))
+	assert.Nil(t, err, "Error while creating routeWithoutCors")
 	assert.Nil(t, routeWithoutCors[0].GetRoute().Cors, "Cors Configuration should be null.")
 
 	// Route with CORS configuration
-	routeWithCors := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+	routeWithCors, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
 		&resourceWithGet, "test-cluster", "", corsConfigModel3, false))
+	assert.Nil(t, err, "Error while creating routeWithCors")
 	assert.NotNil(t, routeWithCors[0].GetRoute().Cors, "Cors Configuration should not be null.")
 }
 
