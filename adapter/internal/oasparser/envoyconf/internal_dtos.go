@@ -39,7 +39,6 @@ type routeCreateParams struct {
 	requestInterceptor           map[string]model.InterceptEndpoint
 	responseInterceptor          map[string]model.InterceptEndpoint
 	corsPolicy                   *model.CorsConfig
-	rewriteMethod                bool
 	passRequestPayloadToEnforcer bool
 	isDefaultVersion             bool
 	isSandbox                    bool
