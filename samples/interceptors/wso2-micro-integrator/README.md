@@ -3,6 +3,8 @@
 The interceptor service is generated using the interceptor service Open API definition.
 [Swagger Editor](https://editor.swagger.io/) is used to generate the Synapse API configuration file in Micro Integrator.
 
+NOTE: You need to convert the open-api 3.0.0 to swagger 2.0, to sucessfully add a new REST API in Micro Integrator.
+
 To learn about interceptors and for instructions on how to run it please head over to the
 [home directory of interceptor samples](../README.md#samples).
 
