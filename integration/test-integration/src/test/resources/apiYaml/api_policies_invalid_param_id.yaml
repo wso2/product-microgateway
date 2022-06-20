@@ -1,0 +1,43 @@
+type: api
+version: v4.1.0
+data:
+  name: API-Policy API invalid param ID
+  context: /api-policy-invalid-param-id
+  version: v1.0
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+    - http
+    - https
+  policies:
+    - Unlimited
+  visibility: PUBLIC
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: http://mockBackend:2383/v2
+  endpointImplementationType: ENDPOINT
+  organizationId: carbon.super
+  operations:
+    -
+      target: /echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/{shopId}/pets/{petId}/orders
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: GET
+              updatedMethod: PUT
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/pets/{uri.var.invalidParamId}/hello-shops
+              includeQueryParams: true
+        response: [ ]
+        fault: [ ]

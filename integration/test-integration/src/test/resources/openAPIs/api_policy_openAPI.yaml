@@ -56,18 +56,6 @@ paths:
       responses:
         '200':
           description: successful operation
-  /echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/{shopId}/pets/{petId}/orders:
-    get:
-      summary: rewrite based policies appied with capture groups with invalid params
-      responses:
-        '200':
-          description: successful operation
-  /echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/{shopId}/pets/{petId}/orders:
-    get:
-      summary: rewrite based policies appied with capture groups with invalid chars
-      responses:
-        '200':
-          description: successful operation
   /echo-full/rewrite-policy/discard-query-params:
     get:
       summary: rewrite path with discard queries

@@ -27,6 +27,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -163,26 +164,15 @@ public class APIPolicyTestCase {
 
     @Test(description = "Test rewrite path API Policy with capture groups with invalid param")
     public void testRewritePathAPIPolicyWithCaptureGroupsInvalidParam() throws Exception {
-        // HTTP method: GET
-        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
-                "/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders"
-                        + queryParams, headers, jwtTokenProd);
+        boolean errorWhenDeploying = false;
+        ApictlUtils.createProject( "api_policy_invalid_param_id_openAPI.yaml", "api_policy_invalid_param_id", null, null, null, "api_policies_invalid_param_id.yaml", true);
 
-        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders");
-        assertOriginalClientRequestInfo(echoResponse);
-    }
-
-    @Test(description = "Test rewrite path API Policy with capture groups with invalid chars")
-    public void testRewritePathAPIPolicyWithCaptureGroupsInvalidChars() throws Exception {
-        // HTTP method: GET
-        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
-                "/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders"
-                        + queryParams, headers, jwtTokenProd);
-
-        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders");
-        assertOriginalClientRequestInfo(echoResponse);
+        try {
+            ApictlUtils.deployAPI("api_policy_invalid_param_id", "test");
+        } catch (CCTestException e) {
+            errorWhenDeploying = true;
+        }
+        Assert.assertTrue(errorWhenDeploying, "An error must occur while deploying if an invalid param is provided.");
     }
 
     @Test(description = "Test rewrite path and discard queries in rewrite path API Policies")
