@@ -110,6 +110,8 @@ artifactsDirectory = "/home/wso2/artifacts"
   enforcerResponseTimeoutInSeconds = 20
   # System hostname for system API resources (eg: /testkey and /health)
   systemHost = "localhost"
+  # If configured true, router appends the immediate downstream ip address to the x-forward-for header
+  useRemoteAddress = false
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]

@@ -112,6 +112,7 @@ type envoy struct {
 	Upstream                         envoyUpstream
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
+	UseRemoteAddress                 bool
 }
 
 type connectionTimeouts struct {
