@@ -16,7 +16,7 @@
 # -----------------------------------------------------------------------
 
 ENFORCER_PORT="${ENFORCER_PORT:-8081}"
-grpc_health_probe -addr "localhost:${ENFORCER_PORT}" \
+grpc_health_probe -addr "127.0.0.1:${ENFORCER_PORT}" \
     -tls \
     -tls-ca-cert "${ENFORCER_PUBLIC_CERT_PATH}" \
     -tls-client-cert "${ENFORCER_PUBLIC_CERT_PATH}" \
