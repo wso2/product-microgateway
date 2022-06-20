@@ -4,4 +4,4 @@ Choreo Connect can be integrated with Istio service mesh using the approaches li
 
 - [MTLS Mode](mtls-mode)
 - [Sidecar Mode](sidecar-mode)
-
+- [Service to Service - East-West Traffic](service-to-service)
