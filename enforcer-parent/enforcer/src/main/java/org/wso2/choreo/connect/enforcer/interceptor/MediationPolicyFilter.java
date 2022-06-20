@@ -96,7 +96,8 @@ public class MediationPolicyFilter implements Filter {
         }
 
         // should not reach here, if reached, it is due to a validation error in Adapter
-        log.error("Operation policy action \"{}\" is not supported. Adapter has failed to validate the policy action",
+        log.error("Operation policy action \"{}\" is not supported. " +
+                        "Adapter has failed to validate the policy action. {}",
                 policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6100));
         FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
                 APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
@@ -168,7 +169,9 @@ public class MediationPolicyFilter implements Filter {
             HttpMethod updatedMethod = HttpMethod.valueOf(policyAttrib.get("updatedMethod"));
 
             if (currentMethod.equalsIgnoreCase(requestContext.getHeaders().get(":method"))) {
-                requestContext.addOrModifyHeaders(":method", updatedMethod.toString().toUpperCase());
+                String newMethod = updatedMethod.toString().toUpperCase();
+                requestContext.addOrModifyHeaders(":method", newMethod);
+                requestContext.addOrModifyHeaders("rewritten-method", newMethod);
             }
         } catch (IllegalArgumentException ex) {
             log.error("Error while getting mediation policy rewrite method", ex);
@@ -187,7 +190,8 @@ public class MediationPolicyFilter implements Filter {
             }
             return isValid;
         } catch (OPASecurityException e) {
-            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(),
+            log.error("Error while validating the OPA policy for the request: {} {} {}",
+                    requestContext.getRequestPath(),
                     ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101), e);
             FilterUtils.setErrorToContext(requestContext, e);
             return false;

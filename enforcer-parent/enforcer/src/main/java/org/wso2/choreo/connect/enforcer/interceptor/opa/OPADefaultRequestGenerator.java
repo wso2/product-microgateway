@@ -102,8 +102,9 @@ public class OPADefaultRequestGenerator implements OPARequestGenerator {
             JSONObject response = new JSONObject(opaResponse);
             return response.getBoolean("result");
         } catch (JSONException e) {
-            log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean" +
-                    ", response: {}", opaResponse, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
+            log.error("Error parsing OPA JSON response, the field \"result\" not found or not a Boolean, " +
+                            "response: {} {} {}", opaResponse,
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e.getMessage());
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.OPA_RESPONSE_FAILURE, e);
         }
