@@ -50,14 +50,19 @@ For example:
 - ROUTER_BASE_IMAGE=wso2/choreo-connect-router:1.1.0
 - TARGET_ROUTER_IMAGE=wso2/choreo-connect-router:1.2.0-m1-SNAPSHOT
 
-Change directory to here and execute the following script.
+Change directory to here (to `<SRC_ROOT>/router/src/main/resources/interceptor`) and execute the following script.
 
 ```shell
 cat <<EOF > DockerfileAddInterceptor
 FROM $ROUTER_BASE_IMAGE
-COPY interceptor /home/wso2/interceptor
+COPY . /home/wso2/interceptor
 EOF
 
-docker build -t $TARGET_ROUTER_IMAGE -f DockerfileAddInterceptor ../
-rm DockerfileAddInterceptor
+cat <<EOF > .dockerignore
+README.md
+DockerfileAddInterceptor
+EOF
+
+docker build -t $TARGET_ROUTER_IMAGE -f DockerfileAddInterceptor .
+rm DockerfileAddInterceptor .dockerignore
 ```
