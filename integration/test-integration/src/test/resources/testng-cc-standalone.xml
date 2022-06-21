@@ -66,12 +66,12 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestcase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
         </classes>
     </test>

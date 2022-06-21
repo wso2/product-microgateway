@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
+public class InterceptorResponseFlowTestCase extends InterceptorBaseTestCase {
     private final boolean isRequestFlow = false;
 
     @BeforeClass
@@ -101,14 +101,14 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/echo/123"), clientReqBody, headers);
 
-        Assert.assertNotNull(response);
-        int expectedRespCode = StringUtils.isEmpty(expectedRespToClient) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
-        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.RESPONSE_ONLY);
+
+        Assert.assertNotNull(response);
+        int expectedRespCode = StringUtils.isEmpty(expectedRespToClient) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
+        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // test headers
         Map<String, String> respHeaders = response.getHeaders();
@@ -136,13 +136,13 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/pet/findByStatus/update-status-code"), "REQUEST-BODY", headers);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 404, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.RESPONSE_ONLY);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 404, "Response code mismatched");
     }
 
     @Test(description = "Test updating response body when it is not included - invalid operation")
@@ -158,13 +158,13 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/echo/both-intercept/resp-body-not-included"), "REQUEST-BODY", headers);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.BOTH);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
 
         // test body: should be equal to the backend response
         Assert.assertEquals(response.getData(), "REQUEST-BODY", "Response body mismatched");
@@ -181,13 +181,13 @@ public class InterceptorResponseFlowTestcase extends InterceptorBaseTestCase {
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/echo/123"), "REQUEST-BODY", headers);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.RESPONSE_ONLY);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
 
         // test error code
         JSONObject respJSON = new JSONObject(response.getData());

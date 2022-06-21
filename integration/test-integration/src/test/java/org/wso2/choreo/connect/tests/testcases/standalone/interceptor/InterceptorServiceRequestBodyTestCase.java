@@ -60,9 +60,6 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/echo/123"), body, headers);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
@@ -90,6 +87,10 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
         if (!isRequestFlow) {
             Assert.assertEquals(interceptReqBodyJSON.getInt(RESPONSE_CODE), 200, "Response code mismatched in request body");
         }
+
+        // assert response to the client
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     @Test(description = "Test interceptor context")
@@ -110,9 +111,6 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/pet/findByStatus/interceptor-context"), "REQUEST-BODY", headers);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
@@ -123,6 +121,10 @@ public class InterceptorServiceRequestBodyTestCase extends InterceptorBaseTestCa
         JSONObject contextFromRespFlow = new JSONObject(new JSONObject(respFlowReqBody).getString(INTERCEPTOR_CONTEXT));
         Assert.assertEquals(contextFromRespFlow.getString("foo-key1"), "foo-val1", "Interceptor context read by interceptor service is not matching");
         Assert.assertEquals(contextFromRespFlow.getString("foo-key2"), "foo-val2", "Interceptor context read by interceptor service is not matching");
+
+        // assert response to the client
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     void testInvocationContext(JSONObject bodyJSON, String apiName, String basePath, List<String> supportedMethods,
