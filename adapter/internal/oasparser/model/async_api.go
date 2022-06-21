@@ -156,6 +156,7 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 		// we ignore other topic vendor extensions except x-auth-type and x-wso2-disable-security
 		channelVendorExtensions := map[string]interface{}{}
 		resource := unmarshalSwaggerResources(channel, methodsArray, channelVendorExtensions)
+		resource.isWithPolicies = true // to rewrite path depending on x-uri-mapping
 		resources = append(resources, &resource)
 	}
 
