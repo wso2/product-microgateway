@@ -35,16 +35,20 @@ import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SOAPApisTestCase extends ApimBaseTest {
     private static final String API_NAME = "SOAPApi";
     private static final String API_CONTEXT = "soap";
     private static final String APPLICATION_NAME = "DefaultAPIApp";
     private static final String API_VERSION = "1.0.0";
-    private final Map<String, String> requestHeaders = new HashMap<>();
+    private static final String SOAP_ACTION = "http://mockbackend:2340/phoneverify/query/CheckPhoneNumber";
+    private final Map<String, String> requestHeaders_11 = new HashMap<>();
+    private final Map<String, String> requestHeaders_12 = new HashMap<>();
 
     String internalKey;
-    String endpointURL;
+    String endpointURL11;
+    String endpointURL12;
 
     @BeforeClass(alwaysRun = true, description = "Create access token and define endpoint URL")
     void setEnvironment() throws Exception {
@@ -55,8 +59,11 @@ public class SOAPApisTestCase extends ApimBaseTest {
 
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
-        requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
-        requestHeaders.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.TEXT_XML);
+        requestHeaders_11.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        requestHeaders_11.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.TEXT_XML);
+        requestHeaders_11.put(TestConstant.SOAP_ACTION_HEADER, SOAP_ACTION);
+        requestHeaders_12.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        requestHeaders_12.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.SOAP_XML);
         API api = new API();
         api.setContext(API_CONTEXT + TestConstant.URL_SEPARATOR + "1.0.0");
         api.setName(API_NAME);
@@ -65,12 +72,14 @@ public class SOAPApisTestCase extends ApimBaseTest {
 
         internalKey = TokenUtil.getJWT(api, null, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
                 3600, null, true);
-        endpointURL = Utils.getServiceURLHttps(API_CONTEXT + TestConstant.URL_SEPARATOR +
-                API_VERSION + "/phoneverify");
+        endpointURL11 = Utils.getServiceURLHttps(API_CONTEXT + TestConstant.URL_SEPARATOR +
+                API_VERSION + "/phoneverify11");
+        endpointURL12 = Utils.getServiceURLHttps(API_CONTEXT + TestConstant.URL_SEPARATOR +
+                API_VERSION + "/phoneverify12");
     }
 
-    @Test(description = "Send a request to a subscribed REST API")
-    public void testInvokeSoapAPI() throws CCTestException, InterruptedException {
+    @Test(description = "Send a request to the subscribed SOAP API using SOAP 1.1")
+    public void testInvokeSoapAPIv11() throws CCTestException, InterruptedException {
         String payload = "<soap:Envelope\n" +
                 "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
                 "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -83,9 +92,48 @@ public class SOAPApisTestCase extends ApimBaseTest {
                 "\t\t</CheckPhoneNumber>\n" +
                 "\t</soap:Body>\n" +
                 "</soap:Envelope>";
-        HttpResponse response = HttpsClientRequest.doPost(endpointURL, payload, requestHeaders);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
+        HttpResponse response = HttpsClientRequest.doPost(endpointURL11, payload, requestHeaders_11);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL11 + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
+        Assert.assertTrue(response.getData().contains("<Valid>true</Valid>"), "Response body mismatched");
+        Map<String, String> responseHeaders = response.getHeaders().entrySet().stream().collect(
+                Collectors.toMap(
+                        entry -> entry.getKey().toLowerCase(),
+                        entry -> entry.getValue()
+                )
+        );
+        Assert.assertEquals(responseHeaders.get(TestConstant.CONTENT_TYPE_HEADER), TestConstant.CONTENT_TYPES.TEXT_XML,
+                "Response content-type mismatch");
+    }
+
+    @Test(description = "Send a request to the subscribed SOAP API using SOAP 1.2")
+    public void testInvokeSoapAPIv12() throws CCTestException, InterruptedException {
+        String payload = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<soap12:Envelope\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                "\txmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+                "\t<soap12:Body>\n" +
+                "\t\t<CheckPhoneNumber\n" +
+                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+                "\t\t</CheckPhoneNumber>\n" +
+                "\t</soap12:Body>\n" +
+                "</soap12:Envelope>";
+        HttpResponse response = HttpsClientRequest.doPost(endpointURL12, payload, requestHeaders_12);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL12 + ". HttpResponse");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+                "Valid subscription should be able to invoke the associated API");
+        Assert.assertTrue(response.getData().contains("<Valid>true</Valid>"), "Response body mismatched");
+        Map<String, String> responseHeaders = response.getHeaders().entrySet().stream().collect(
+                Collectors.toMap(
+                        entry -> entry.getKey().toLowerCase(),
+                        entry -> entry.getValue()
+                )
+        );
+        Assert.assertEquals(responseHeaders.get(TestConstant.CONTENT_TYPE_HEADER), TestConstant.CONTENT_TYPES.SOAP_XML,
+                "Response content-type mismatch");
     }
 }

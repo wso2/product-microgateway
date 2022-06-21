@@ -139,7 +139,9 @@ public class TestConstant {
     public static final String ADMIN_PASSWORD = "admin";
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String INTERNAL_KEY_HEADER = "Internal-Key";
     public static final String CONTENT_TYPE_HEADER = "content-type";
+    public static final String SOAP_ACTION_HEADER = "SOAPAction";
 
     //apim instances names
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
@@ -209,6 +211,7 @@ public class TestConstant {
 
     public static final class CONTENT_TYPES {
         public static final String TEXT_XML = "text/xml";
+        public static final String SOAP_XML = "application/soap+xml";
     }
 
     public static final class API_TYPES {

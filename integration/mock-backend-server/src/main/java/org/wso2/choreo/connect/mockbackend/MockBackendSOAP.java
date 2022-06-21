@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToXml;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
@@ -31,9 +32,10 @@ public class MockBackendSOAP extends Thread{
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(MockBackendSOAP.class);
     private WireMockServer wireMockServer;
     private String wsdlDefinition;
-    private String responseBody;
+    private String responseBodySoap11;
+    private String responseBodySoap12;
 
-    private static final String REQ_PAYLOAD = "<soap:Envelope\n" +
+    private static final String REQ_PAYLOAD_11 = "<soap:Envelope\n" +
             "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
             "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
             "\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
@@ -46,15 +48,29 @@ public class MockBackendSOAP extends Thread{
             "\t</soap:Body>\n" +
             "</soap:Envelope>";
 
-    private String REQ_PAYLOAD_2 = "";
+    private static final String REQ_PAYLOAD_12 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+            "<soap12:Envelope\n" +
+            "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+            "\txmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+            "\t<soap12:Body>\n" +
+            "\t\t<CheckPhoneNumber\n" +
+            "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+            "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+            "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+            "\t\t</CheckPhoneNumber>\n" +
+            "\t</soap12:Body>\n" +
+            "</soap12:Envelope>";
 
     public MockBackendSOAP(){
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         try {
             wsdlDefinition = Utils.readFileFromInputStream(
                     classloader.getResourceAsStream("wsdl/PhoneVerification.wsdl"));
-            responseBody = Utils.readFileFromInputStream(
-                    classloader.getResourceAsStream("soap/checkPhoneNumberResponseBody.xml"));
+            responseBodySoap11 = Utils.readFileFromInputStream(
+                    classloader.getResourceAsStream("soap/checkPhoneNumberResponseBody_11.xml"));
+            responseBodySoap12 = Utils.readFileFromInputStream(
+                    classloader.getResourceAsStream("soap/checkPhoneNumberResponseBody_12.xml"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -72,16 +88,25 @@ public class MockBackendSOAP extends Thread{
                 .willReturn(
                         aResponse()
                                 .withStatus(200)
-                                .withHeader("Content-Type", "text/xml")
+                                .withHeader(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_TEXT_XML)
                                 .withBody(wsdlDefinition)));
         wireMockServer.stubFor(WireMock
-                .post(urlEqualTo("/phoneverify"))
-                .withRequestBody(equalToXml(REQ_PAYLOAD))
+                .post(urlEqualTo("/phoneverify11"))
+                .withRequestBody(equalToXml(REQ_PAYLOAD_11))
+                .withHeader(Constants.SOAP_ACTION, containing("http://mockbackend:2340/phoneverify/query/CheckPhoneNumber"))
                 .willReturn(
                         aResponse()
                                 .withStatus(200)
-                                .withHeader("Content-Type", "text/xml")
-                                .withBody(responseBody)));
+                                .withHeader(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_TEXT_XML)
+                                .withBody(responseBodySoap11)));
+        wireMockServer.stubFor(WireMock
+                .post(urlEqualTo("/phoneverify12"))
+                .withRequestBody(equalToXml(REQ_PAYLOAD_12))
+                .willReturn(
+                        aResponse()
+                                .withStatus(200)
+                                .withHeader(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_SOAP_XML)
+                                .withBody(responseBodySoap12)));
         wireMockServer.start();
         log.info("Mock backend for SOAP service successfully started.");
     }
