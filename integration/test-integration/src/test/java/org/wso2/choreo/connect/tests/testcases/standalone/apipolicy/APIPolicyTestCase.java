@@ -58,8 +58,8 @@ public class APIPolicyTestCase {
         headers.put("Sample2", "Sample Value");
     }
 
-    @Test(description = "Test header based API Policies")
-    public void testSetHeaderRemoveHeaderAPIPolicies() throws Exception {
+    @Test(description = "Test header based API Policies for request flow")
+    public void testSetHeaderRemoveHeaderAPIPoliciesForRequestFlow() throws Exception {
         headers.put("RemoveThisHeader", "Unnecessary Header");
         EchoResponse echoResponse = Utils.invokeEchoPost(basePath,
                 "/echo-full/headers-policy/123" + queryParams, "Hello World!", headers, jwtTokenProd);
@@ -69,6 +69,28 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey1"), "newHeaderVal1",
                 getPolicyFailAssertMessage("Add Header"));
         Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey2"), "newHeaderVal2",
+                getPolicyFailAssertMessage("Add Header"));
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test header based API Policies for response flow")
+    public void testSetHeaderRemoveHeaderAPIPoliciesForResponseFlow() throws Exception {
+        // backend will set the headers "header_1_from_backend, header_2_from_backend" by reading "set_headers"
+        headers.put("Set-headers", "KeepThisHeader, RemoveThisHeader");
+        HttpResponse httpResponse = Utils.invokePost(basePath,
+                "/echo-full/headers-policy-response-flow/123" + queryParams,
+                "Hello World!", headers, jwtTokenProd);
+        EchoResponse echoResponse = Utils.extractToEchoResponse(httpResponse);
+
+        // Envoy changes the case of the headers.
+        // https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/header_casing
+        Assert.assertTrue(httpResponse.getHeaders().containsKey("keepthisheader"),
+                "The backend has not added the specifies headers");
+        Assert.assertFalse(httpResponse.getHeaders().containsKey("removethisheader"),
+                getPolicyFailAssertMessage("Remove Header"));
+        Assert.assertEquals(httpResponse.getHeaders().get("newheaderkey1"), "newHeaderVal1",
+                getPolicyFailAssertMessage("Add Header"));
+        Assert.assertEquals(httpResponse.getHeaders().get("newheaderkey2"), "newHeaderVal2",
                 getPolicyFailAssertMessage("Add Header"));
         assertOriginalClientRequestInfo(echoResponse);
     }
