@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------
-# Copyright (c) 2021, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+# Copyright (c) 2022, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,38 +14,35 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
+apiVersion: v1
+kind: Service
 metadata:
- name: istio-gateway
+  labels:
+    app: choreo-connect-internal
+  name: choreo-connect-internal
 spec:
- selector:
-   istio: ingressgateway
- servers:
- - port:
-     number: 80
-     name: http
-     protocol: HTTP
-   hosts:
-   - "*"
+  ports:
+    - name: http-internal
+      port: 80
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    app: choreo-connect-deployment
+  type: ClusterIP
 ---
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
- name: httpbin
+  name: choreo-connect-internal
 spec:
- hosts:
- - "*"
- gateways:
- - istio-gateway
- http:
- - match:
-     - uri:
-         prefix: "/httpbin/v1.0.0/"
-   rewrite:
-     uri: "/"
-   route:
-     - destination:
-         host: httpbin
-         port:
-           number: 80
+  hosts:
+    - "choreo-connect-internal"
+  http:
+    - headers:
+       request:
+         set:
+           host: gw.wso2.com
+      route:
+        - destination:
+            host: choreo-connect-internal

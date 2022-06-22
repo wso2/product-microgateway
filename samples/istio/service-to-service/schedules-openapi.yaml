@@ -1,0 +1,169 @@
+# Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.0.1
+info:
+  title: Schedules
+  description: | 
+    This is the API definition for Coltrain's schedule listing API
+  version: 1.0.0
+servers:
+  - url: http://schedules:80/schedules-service/v1
+paths:
+  /schedules:
+    get:
+      parameters:
+       - in: query
+         name: from
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: to
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: startTime
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: endTime
+         schema:
+           type: string
+           description: Train starting station
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleItemList'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleItem'
+        required: true
+      responses:
+        '200':
+          description: ok
+  /schedules/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleItemInfo'
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleItem'
+      responses:
+        '200':
+          description: ok
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+components:
+  schemas:
+    ScheduleItem:
+      title: Schedule information 
+      type: object
+      properties:
+        entryId:
+          type: string
+          description: Id of the schedule item.
+        startTime:
+          type: string
+          description: Train starting time.
+        endTime:
+          type: string
+          description: Train destination arrival time.
+        from:
+          type: string
+          description: Train starting station.
+        to:
+          type: string
+          description: Train destination station.
+        trainId:
+          type: string
+          description: Id of the train.
+    ScheduleItemInfo:
+      title: Schedule information
+      type: object
+      properties:
+        entryId:
+          type: string
+          description: Id of the schedule item.
+        startTime:
+          type: string
+          description: Train starting time.
+        endTime:
+          type: string
+          description: Train destination arrival time.
+        from:
+          type: string
+          description: Train starting station.
+        to:
+          type: string
+          description: Train destination station.
+        trainId:
+          type: string
+          description: Id of the train.
+        facilities:
+          type: string
+          description: Facilities provided in the train.
+        imageURL:
+          type: string
+          description: Image URL of the train.
+    ScheduleItemList:
+      title: List of schedule items information
+      type: array
+      items:
+        $ref: '#/components/schemas/ScheduleItemInfo'
