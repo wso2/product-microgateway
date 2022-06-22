@@ -1,12 +1,12 @@
 # Sample Interceptor - WSO2 Micro Integrator
 
-The interceptor service REST API is added using swagger definition file which generates the Synapse API configuration file in Micro Integrator. You need to convert the [interceptor service definition](https://github.com/wso2/product-microgateway/blob/main/resources/interceptor-service-open-api-v1.yaml) in open-api 3.0.0 to swagger 2.0, then it will be successfully added as new REST API in Micro Integrator.
+The interceptor service REST API is added using swagger definition file which generates the Synapse API configuration file in Micro Integrator.
 
 To learn about interceptors and for instructions on how to run it please head over to the
 [home directory of interceptor samples](../README.md#samples).
 
 ## Prerequisites
-- [WSO2 Integration Studio](https://wso2.com/integration/integration-studio/)
+- [WSO2 Integration Studio](https://wso2.com/integration/integration-studio/) 8.1.0 or latest
 - Docker
 - Java 11
 - Maven
