@@ -91,11 +91,11 @@ const (
 
 // operational policy field names
 const (
-	ActionRequestHeaderAdd    string = "SET_HEADER"
-	ActionRequestHeaderRemove string = "REMOVE_HEADER"
-	ActionRewriteMethod       string = "REWRITE_RESOURCE_METHOD"
-	ActionInterceptorService  string = "CALL_INTERCEPTOR_SERVICE"
-	ActionRewritePath         string = "REWRITE_RESOURCE_PATH"
+	ActionHeaderAdd          string = "SET_HEADER"
+	ActionHeaderRemove       string = "REMOVE_HEADER"
+	ActionRewriteMethod      string = "REWRITE_RESOURCE_METHOD"
+	ActionInterceptorService string = "CALL_INTERCEPTOR_SERVICE"
+	ActionRewritePath        string = "REWRITE_RESOURCE_PATH"
 
 	RewritePathResourcePath    string = "resourcePath"
 	InterceptorServiceURL      string = "interceptorServiceURL"

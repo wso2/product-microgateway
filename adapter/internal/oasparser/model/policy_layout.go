@@ -26,11 +26,11 @@ import (
 
 // supportedPoliciesMap maps (policy action name) -> (policy layout)
 var supportedPoliciesMap = map[string]policyLayout{
-	constants.ActionRequestHeaderAdd: {
+	constants.ActionHeaderAdd: {
 		RequiredParams:   []string{constants.HeaderName, constants.HeaderValue},
 		IsPassToEnforcer: false,
 	},
-	constants.ActionRequestHeaderRemove: {
+	constants.ActionHeaderRemove: {
 		RequiredParams:   []string{constants.HeaderName},
 		IsPassToEnforcer: false,
 	},

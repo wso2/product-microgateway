@@ -1032,6 +1032,8 @@ end`
 		for _, operation := range resource.GetOperations() {
 			var requestHeadersToAdd []*corev3.HeaderValueOption
 			var requestHeadersToRemove []string
+			var responseHeadersToAdd []*corev3.HeaderValueOption
+			var responseHeadersToRemove []string
 			var regexRewriteForOperation *envoy_type_matcherv3.RegexMatchAndSubstitute
 
 			isMethodRewritten := false
@@ -1042,7 +1044,7 @@ end`
 			for _, requestPolicy := range operation.GetPolicies().Request {
 				switch requestPolicy.Action {
 
-				case constants.ActionRequestHeaderAdd:
+				case constants.ActionHeaderAdd:
 					requestHeaderToAdd, err := generateHeaderToAddRouteConfig(requestPolicy.Parameters)
 					if err != nil {
 						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
@@ -1050,7 +1052,7 @@ end`
 					}
 					requestHeadersToAdd = append(requestHeadersToAdd, requestHeaderToAdd)
 
-				case constants.ActionRequestHeaderRemove:
+				case constants.ActionHeaderRemove:
 					requestHeaderToRemove, err := generateHeaderToRemoveString(requestPolicy.Parameters)
 					if err != nil {
 						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
@@ -1095,6 +1097,31 @@ end`
 					}
 				}
 			}
+
+			// Policies - for response flow
+			for _, responsePolicy := range operation.GetPolicies().Response {
+				switch responsePolicy.Action {
+
+				case constants.ActionHeaderAdd:
+					responseHeaderToAdd, err := generateHeaderToAddRouteConfig(responsePolicy.Parameters)
+					if err != nil {
+						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
+					}
+					responseHeadersToAdd = append(responseHeadersToAdd, responseHeaderToAdd)
+
+				case constants.ActionHeaderRemove:
+					responseHeaderToRemove, err := generateHeaderToRemoveString(responsePolicy.Parameters)
+					if err != nil {
+						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
+					}
+					responseHeadersToRemove = append(responseHeadersToRemove, responseHeaderToRemove)
+				}
+			}
+
+			// TODO: (suksw) Should we remove X-envoy-original-path
+			// TODO: (suksw) preserve header key case?
 			if isMethodRewritten {
 				// create route for current method. Do not add policies to route config. Send via enforcer
 				match.Headers = generateHTTPMethodMatcher(operation.GetMethod())
@@ -1107,7 +1134,7 @@ end`
 					action.Route.RegexRewrite = regexRewriteForOperation
 				}
 				newMethodRoute, err := generateRewriteMethodRouteConfig(newMethod, xWso2Basepath, routePath, action,
-					decorator, requestHeadersToAdd, requestHeadersToRemove, nil, nil)
+					decorator, requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd, responseHeadersToRemove)
 				if err != nil {
 					return nil, fmt.Errorf("Error adding request policy to operation %s of resource %s."+
 						". %v", operation.GetMethod(), resourcePath, err)
@@ -1124,7 +1151,7 @@ end`
 					action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 				}
 				route := generateRouteConfig(xWso2Basepath, match, action, nil, decorator, perRouteFilterConfigs,
-					requestHeadersToAdd, requestHeadersToRemove, nil, nil)
+					requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd, responseHeadersToRemove)
 				routes = append(routes, route)
 			}
 
@@ -1141,7 +1168,7 @@ end`
 		action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 
 		route := generateRouteConfig(xWso2Basepath, match, action, nil, decorator, perRouteFilterConfigs,
-			nil, nil, nil, nil)
+			nil, nil, nil, nil) // general headers to add and remove are included in this methods
 		routes = append(routes, route)
 	}
 	return routes, nil
