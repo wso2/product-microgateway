@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
+import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 
 import java.util.Map;
 
@@ -62,6 +63,8 @@ public class CustomFilter implements Filter {
         }
         if (configProperties.containsKey("fooKey")) {
             requestContext.addOrModifyHeaders("fooKey", configProperties.get("fooKey"));
+            requestContext.getProperties().put(ThrottleConstants.CUSTOM_THROTTLE_PROPERTIES,
+                    "fooKey=" + configProperties.get("fooKey"));
         }
         // custom filter response body supporting condition
         if (requestContext.getRequestPayload() != null && !requestContext.getRequestPayload().isBlank()) {
