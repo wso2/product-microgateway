@@ -6,7 +6,7 @@ To learn about interceptors and for instructions on how to run it please head ov
 [home directory of interceptor samples](../README.md#samples).
 
 ## Prerequisites
-- [WSO2 Integration Studio](https://wso2.com/integration/integration-studio/) 8.1.0 or latest
+- [WSO2 Integration Studio](https://wso2.com/integration/integration-studio/) 8.1.0
 - Docker
 - Java 11
 - Maven
