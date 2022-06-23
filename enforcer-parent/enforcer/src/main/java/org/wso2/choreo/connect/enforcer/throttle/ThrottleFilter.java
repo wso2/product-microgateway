@@ -470,7 +470,11 @@ public class ThrottleFilter implements Filter {
             String[] customPropertyList = customPropertyString.split(" ");
             for (String customProperty: customPropertyList) {
                 String[] propertyPair = customProperty.split("=");
-                jsonObMap.put(propertyPair[0], propertyPair[1]);
+                if (propertyPair.length == 2) {
+                    jsonObMap.put(propertyPair[0], propertyPair[1]);
+                } else {
+                    log.debug("Invalid custom property string : {}", customProperty);
+                }
             }
         }
 

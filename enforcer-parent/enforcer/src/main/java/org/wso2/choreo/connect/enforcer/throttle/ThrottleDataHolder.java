@@ -409,7 +409,11 @@ public class ThrottleDataHolder {
                     String[] customPropertyList = customPropertyString.split(" ");
                     for (String customProperty: customPropertyList) {
                         String[] propertyPair = customProperty.split("=");
-                        key = key.replaceAll("\\$customProperty." + propertyPair[0], propertyPair[1]);
+                        if (propertyPair.length == 2) {
+                            key = key.replaceAll("\\$customProperty." + propertyPair[0], propertyPair[1]);
+                        } else {
+                            log.debug("Invalid custom property string : {}", customProperty);
+                        }
                     }
                 }
 
