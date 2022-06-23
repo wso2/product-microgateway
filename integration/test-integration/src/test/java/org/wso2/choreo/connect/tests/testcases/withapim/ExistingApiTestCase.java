@@ -108,7 +108,7 @@ public class ExistingApiTestCase extends ApimBaseTest {
 
         // Headers added by the custom filter.
         Assert.assertNotNull(headersToBackend.get("Custom-header-1"));
-        Assert.assertNotNull(headersToBackend.get("FooKey"));
+        Assert.assertNotNull(headersToBackend.get("Fookey"));
 
         Assert.assertFalse(headersToBackend.has("x-wso2-cluster-header"));
         Assert.assertFalse(headersToBackend.has("x-envoy-expected-rq-timeout-ms"));
