@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim.throttle;
 
 import com.google.gson.Gson;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
@@ -40,9 +41,9 @@ import java.util.Map;
 public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
 
     private final String customThrottlePolicyName = "customThrottlePolicyName";
-    private static final String API_NAME = "AdvancedThrottlingAPI";
-    private static final String API_CONTEXT = "advanced_throttling";
-    private static final String APPLICATION_NAME = "AdvanceThrottlingApp";
+    private static final String API_NAME = "KeyTemplateThrottlingAPI";
+    private static final String API_CONTEXT = "keytemplate_throttling";
+    private static final String APPLICATION_NAME = "KeyTemplateThrottlingApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
     private String apiId;
     private String applicationId;
@@ -56,13 +57,13 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
             "  userId,\n" +
             "  (\n" +
             "    userId == 'admin@carbon.super'\n" +
-            "    and apiContext == '/advanced_throttling/1.0.0'\n" +
+            "    and apiContext == '/keytemplate_throttling/1.0.0'\n" +
             "    and apiVersion == '1.0.0'\n" +
             "  ) AS isEligible,\n" +
             "  str: concat(\n" +
             "    'admin@carbon.super',\n" +
             "    ':',\n" +
-            "    '/advanced_throttling/1.0.0:1.0.0',\n" +
+            "    '/keytemplate_throttling/1.0.0:1.0.0',\n" +
             "    ':',\n" +
             "    'fooVal'\n" +
             "  ) as throttleKey\n" +
@@ -95,8 +96,9 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
         endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
-    @Test(description = "Dummy test case for custom throttling")
+    @Test(description = "Test Key Template throttling with custom properties")
     public void testCustomPropertyThrottling() throws Exception {
+        // Set all throttling limits to unlimited to throttle based on key templates only.
         HttpResponse api = publisherRestClient.getAPI(apiId);
         Gson gson = new Gson();
         APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
@@ -111,6 +113,7 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
         Assert.assertFalse(isThrottled(endpointURL, requestHeaders, null, limitNoThrottle),
                 "Request was throttled unexpectedly in Unlimited API tier");
 
+        // Create custom throttle policy using key templates
         CustomRuleDTO customRuleDTO = DtoFactory.createCustomThrottlePolicyDTO(customThrottlePolicyName,
                 "Custom throttle policy to throttle requests based on custom properties",
                 true, siddhiQuery, keyTemplate);
@@ -120,10 +123,16 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
         Assert.assertEquals(addedCustomThrottlingPolicy.getData().getSiddhiQuery(), siddhiQuery, "Sidhdhi query should be equal");
 
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit5Req),
-                "Request not throttled by request count condition in api tier");
-        Utils.delay(40000, "Could not wait until the throttle decision expired");
+                "Request not throttled by key template condition with custom property");
 
         adminRestClient.deleteCustomThrottlingPolicy(addedCustomThrottlingPolicy.getData().getPolicyId());
+    }
+
+    @AfterClass
+    public void destroy() throws Exception {
+        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
+        storeRestClient.removeApplicationById(applicationId);
+        publisherRestClient.deleteAPI(apiId);
     }
 
 }

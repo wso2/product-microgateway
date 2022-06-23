@@ -74,5 +74,9 @@
   {
     "appName": "WebSocketSubscriptionEventCountThrottleApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "KeyTemplateThrottlingApp",
+    "throttleTier": "Unlimited"
   }
 ]
