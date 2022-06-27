@@ -31,6 +31,12 @@
           receiverURLs = ["tcp://apim:9612"]
           authURLs = ["ssl://apim:9712"]
 
+[[enforcer.filters]]
+    className = "org.wso2.choreo.connect.tests.CustomFilter"
+    position = 2
+    [enforcer.filters.configProperties]
+        fooKey = "fooVal"
+
 [controlPlane]
     enabled = true
     serviceURL = "https://apim:9444/"

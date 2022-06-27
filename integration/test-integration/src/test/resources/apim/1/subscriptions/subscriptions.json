@@ -93,10 +93,5 @@
     "apiName": "WebsocketSubscriptionThrottleAPI",
     "appName": "WebSocketSubscriptionEventCountThrottleApp",
     "tier": "5EventsPerMin"
-  },
-  {
-    "apiName": "KeyTemplateThrottlingAPI",
-    "appName": "KeyTemplateThrottlingApp",
-    "tier": "Unlimited"
   }
 ]

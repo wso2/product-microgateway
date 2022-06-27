@@ -92,6 +92,7 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        requestHeaders.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER, TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
 
         endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }

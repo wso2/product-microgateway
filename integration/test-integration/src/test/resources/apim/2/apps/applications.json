@@ -6,5 +6,9 @@
   {
     "appName": "WebSocketTimeoutApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "KeyTemplateThrottlingApp",
+    "throttleTier": "Unlimited"
   }
 ]
