@@ -93,7 +93,7 @@ public class ExistingApiTestCase extends ApimBaseTest {
 
         // Request headers received by the backend
         JSONObject headersToBackend = new JSONObject(response.getData());
-        Assert.assertEquals(headersToBackend.length(), 12, "Unexpected number of headers received by the backend");
+        Assert.assertEquals(headersToBackend.length(), 10, "Unexpected number of headers received by the backend");
 
         Assert.assertNotNull(headersToBackend.get("X-trace-key"));
         Assert.assertNotNull(headersToBackend.get("Accept"));
@@ -105,10 +105,6 @@ public class ExistingApiTestCase extends ApimBaseTest {
         Assert.assertNotNull(headersToBackend.get("X-envoy-original-path"));
         Assert.assertNotNull(headersToBackend.get("User-agent"));
         Assert.assertNotNull(headersToBackend.get("Cache-control"));
-
-        // Headers added by the custom filter.
-        Assert.assertNotNull(headersToBackend.get("Custom-header-1"));
-        Assert.assertNotNull(headersToBackend.get("Fookey"));
 
         Assert.assertFalse(headersToBackend.has("x-wso2-cluster-header"));
         Assert.assertFalse(headersToBackend.has("x-envoy-expected-rq-timeout-ms"));
