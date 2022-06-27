@@ -39,6 +39,12 @@ public class CustomFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
+        // Bypass custom filter if the header "enable-custom-filter" is not present.
+        // Add "enable-custom-filter" header in test cases to activate this custom filter.
+        if (!requestContext.getHeaders().containsKey("enable-custom-filter")) {
+            log.debug("enable-custom-filter header not found. skipping custom filter");
+            return true;
+        }
         requestContext.addOrModifyHeaders("Custom-header-1", "Foo");
         if (requestContext.getPathParameters() != null) {
             for (Map.Entry<String, String> entry: requestContext.getPathParameters().entrySet()) {
