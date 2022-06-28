@@ -68,9 +68,10 @@ public class APIConstants {
     public static final String SWAGGER_API_KEY_IN_QUERY = "query";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
+    public static final String API_SECURITY_MUTUAL_SSL_NAME = "mtls";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
-    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
     public static final String BEGIN_PUBLIC_KEY_STRING = "-----BEGIN PUBLIC KEY-----\n";
     public static final String END_PUBLIC_KEY_STRING = "-----END PUBLIC KEY-----";

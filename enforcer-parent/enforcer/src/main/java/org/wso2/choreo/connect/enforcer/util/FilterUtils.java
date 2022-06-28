@@ -47,6 +47,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
+import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
@@ -613,7 +614,24 @@ public class FilterUtils {
         return authHeaderName.toLowerCase();
     }
 
+    public static String getCertificateHeaderName() {
+        MutualSSLDto mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
+        String certificateHeaderName = mtlsInfo.getCertificateHeader();
+        if (StringUtils.isEmpty(certificateHeaderName)) {
+            certificateHeaderName = "SSL-CLIENT-CERT";
+        }
+        return certificateHeaderName.toLowerCase();
+    }
 
+    public static boolean getClientValidationStatus() {
+        MutualSSLDto  mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
+        return mtlsInfo.isEnableClientValidation();
+    }
+
+    public static boolean getCertificateEncodeStatus() {
+        MutualSSLDto  mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
+        return mtlsInfo.isClientCertificateEncode();
+    }
 
     /**
      * Provides list of arbitrary names used to define API keys.

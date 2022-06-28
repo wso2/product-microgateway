@@ -47,6 +47,7 @@ public class RequestContext {
     private String requestID;
     private String clientIp;
     private String requestPayload;
+    private String clientCertificate;
     // Denotes the cluster header name for each environment. Both properties can be null if
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
@@ -179,6 +180,15 @@ public class RequestContext {
      */
     public String getRequestPayload() {
         return requestPayload;
+    }
+
+    /**
+     * Returns the client certificate.
+     *
+     * @return Client certificate
+     */
+    public String getClientCertificate() {
+        return clientCertificate;
     }
 
     /**
@@ -374,6 +384,13 @@ public class RequestContext {
     }
 
     /**
+     * Set the client certificate for the request
+     */
+    public void setClientCertificate(String clientCertificate) {
+        this.clientCertificate = clientCertificate;
+    }
+
+    /**
      * Implements builder pattern to build an {@link RequestContext} object.
      */
     public static class Builder {
@@ -391,6 +408,7 @@ public class RequestContext {
         private String requestID;
         private String clientIp;
         private String requestPayload;
+        private String clientCertificate;
         private WebSocketFrameContext webSocketFrameContext;
 
         public Builder(String requestPath) {
@@ -451,6 +469,11 @@ public class RequestContext {
             return this;
         }
 
+        public Builder certificate(String certificate) {
+            this.clientCertificate = certificate;
+            return this;
+        }
+
         public Builder webSocketFrameContext(WebSocketFrameContext webSocketFrameContext) {
             this.webSocketFrameContext = webSocketFrameContext;
             return this;
@@ -477,6 +500,7 @@ public class RequestContext {
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
             requestContext.requestPayload = this.requestPayload;
+            requestContext.clientCertificate = this.clientCertificate;
             requestContext.addHeaders = new HashMap<>();
             requestContext.removeHeaders = new ArrayList<>();
             requestContext.queryParamsToRemove = new ArrayList<>();
