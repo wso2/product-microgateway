@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?><artifacts>
+    <artifact name="Choreo-Connect_Interceptor_Service" groupId="wso2.sampleHelloWorldDocker.api" version="1.0.0" type="synapse/api" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/api/Choreo-Connect_Interceptor_Service.xml</file>
+    </artifact>
+</artifacts>
