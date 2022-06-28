@@ -213,6 +213,14 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         }
     }
 
+    public static void addCaCertToRouterTruststore() throws CCTestException {
+        String certPath = ChoreoConnectImpl.class.getClassLoader()
+                .getResource("certs/rootCA.crt").getPath();
+        Utils.copyFile(certPath, Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH
+                + TestConstant.DOCKER_COMPOSE_DIR + TestConstant.ROUTER_TRUSTSTORE_DIR + File.separator
+                + "rootCA.crt");
+    }
+
     public static void addCertsToEnforcerTruststore(String certsDir) throws CCTestException {
         String certsDirPath = ChoreoConnectImpl.class.getClassLoader()
                 .getResource("certs/" + certsDir).getPath();

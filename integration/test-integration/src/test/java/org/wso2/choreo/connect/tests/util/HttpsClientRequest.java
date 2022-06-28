@@ -21,23 +21,39 @@ package org.wso2.choreo.connect.tests.util;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.ProtocolException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -45,6 +61,9 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * This class can be used to send http request.
@@ -55,6 +74,68 @@ public class HttpsClientRequest {
 
     private static final Logger log = LoggerFactory.getLogger(HttpsClientRequest.class);
 
+    /**
+     * Sends an HTTP Mutual SSL GET request to a url.
+     *
+     * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
+     * @param headers- http request header value for authorization key
+     * @param keyStoreName - Keystore name for mutual ssl
+     * @return - HttpResponse from the end point
+     * @throws CCTestException If an error occurs while sending the GET request
+     */
+    public static CloseableHttpResponse doMutualSSLGet(String requestUrl, Map<String, String> headers, String keyStoreName)
+            throws KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException,
+            KeyManagementException, IOException, CCTestException {
+
+        String keyStorePath = Objects.requireNonNull(HttpsClientRequest.class.getClassLoader()
+                .getResource("keystore/" + keyStoreName)).getPath();
+        String trustStorePath = Objects.requireNonNull(HttpsClientRequest.class.getClassLoader()
+                .getResource("keystore/client-truststore.jks")).getPath();
+        CloseableHttpClient httpclient;
+
+        // Get the keystore
+        KeyStore keyStore = KeyStore.getInstance("jks");
+        InputStream ksIn = new FileInputStream(keyStorePath);
+        keyStore.load(ksIn, "password".toCharArray());
+        ksIn.close();
+        KeyManagerFactory keyManagerFactory =
+                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        keyManagerFactory.init(keyStore, "password".toCharArray());
+
+        // Get the truststore
+        KeyStore trustStore = KeyStore.getInstance("jks");
+        InputStream tsIn = new FileInputStream(trustStorePath);
+        trustStore.load(tsIn, "wso2carbon".toCharArray());
+        tsIn.close();
+        TrustManagerFactory trustManagerFactory =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        trustManagerFactory.init(trustStore);
+
+        // Create the SSL configs
+        SSLContext ssl = SSLContext.getInstance("TLS");
+        ssl.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(ssl);
+
+        // Create the request using org.apache.http classes
+        try {
+            int timeout = 7;
+            RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 10000)
+                    .setConnectionRequestTimeout(timeout * 10000).setSocketTimeout(timeout * 10000).build();
+
+            httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).disableRedirectHandling().setDefaultRequestConfig(config)
+                    .setHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER).build();
+            HttpGet request = new HttpGet(requestUrl);
+            if (headers != null) {
+                for (Map.Entry<String, String> head : headers.entrySet()) {
+                    request.addHeader(head.getKey(), head.getValue());
+                }
+            }
+            CloseableHttpResponse responseBuilder =  httpclient.execute(request);
+            return responseBuilder;
+        } catch (Exception e) {
+            throw new CCTestException("Error while sending GET request URL:" + requestUrl, e);
+        }
+    }
     /**
      * Sends an HTTP GET request to a url.
      *
@@ -150,15 +231,28 @@ public class HttpsClientRequest {
      * @return - HttpResponse from the endpoint
      * @throws CCTestException If an error occurs during the PATCH request
      */
-    public static java.net.http.HttpResponse<String> doPatch(String endpoint, String payload, Map<String, String> headers)
+    public static org.apache.http.HttpResponse doPatch(String endpoint, String payload, Map<String, String> headers)
             throws Exception {
-        // HttpsURLConnection does not support PATCH. Therefore, java.net.http classes are used here.
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(endpoint))
-                .method(TestConstant.HTTP_METHOD_PATCH, HttpRequest.BodyPublishers.ofString(payload));
-        headers.forEach(requestBuilder::setHeader);
-        return client.send(requestBuilder.build(), java.net.http.HttpResponse.BodyHandlers.ofString());
+        // HttpsURLConnection does not support PATCH. Therefore, org.apache.http classes are used here.
+        int timeout = 7;
+        RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 10000)
+                .setConnectionRequestTimeout(timeout * 10000).setSocketTimeout(timeout * 10000).build();
+        CloseableHttpClient httpClient = HttpClients.custom().disableRedirectHandling()
+                .setDefaultRequestConfig(config).setHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER)
+                .build();
+        HttpPatch httpPatch = new HttpPatch(endpoint);
+        for (String headerType : headers.keySet()) {
+            httpPatch.setHeader(headerType, headers.get(headerType));
+        }
+        if (null != payload) {
+            HttpEntity httpEntity = new ByteArrayEntity(payload.getBytes(StandardCharsets.UTF_8));
+            if (headers.get("Content-Type") == null) {
+                httpPatch.setHeader("Content-Type", "application/json");
+            }
+            httpPatch.setEntity(httpEntity);
+        }
+        org.apache.http.HttpResponse httpResponse = httpClient.execute(httpPatch);
+        return httpResponse;
     }
 
     /**
@@ -267,9 +361,9 @@ public class HttpsClientRequest {
 
     private static HttpsURLConnection getURLConnection(String requestUrl, boolean doOutput)
             throws IOException {
+
         setSSlSystemProperties();
         URL url = new URL(requestUrl);
-
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setDoOutput(doOutput);
         conn.setReadTimeout(70000);

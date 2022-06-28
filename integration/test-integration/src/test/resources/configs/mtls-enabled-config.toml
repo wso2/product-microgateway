@@ -1,0 +1,19 @@
+[router]
+  enableMtlsApis = true
+
+# For API key without APIM
+[[enforcer.security.tokenService]]
+name = "Resident Key Manager"
+issuer = "https://localhost:9443/oauth2/token"
+certificateAlias = "wso2carbon"
+jwksURL = ""
+validateSubscription = false
+consumerKeyClaim = "azp"
+certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+[[enforcer.security.tokenService]]
+name = "APIM Publisher"
+issuer = "https://localhost:9443/publisher"
+validateSubscription = false # set this to false when using API key without APIM
+certificateAlias = ""
+certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
