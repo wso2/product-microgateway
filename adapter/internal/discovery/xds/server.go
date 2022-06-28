@@ -301,16 +301,28 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		// it will enable folowing securities globally for the API, overriding swagger securities.
 		isYamlAPIKey := false
 		isYamlOauth := false
+		isYamlMutualssl := false
+		isYamlMutualsslMandatory := false
+		isYamlOauthBasicAuthAPIKeyMandatory := false
 		for _, value := range apiYaml.SecurityScheme {
-			if value == constants.APIMAPIKeyType {
+			switch value {
+			case constants.APIMAPIKeyType:
 				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
 				isYamlAPIKey = true
-			} else if value == constants.APIMOauth2Type {
+			case constants.APIMOauth2Type:
 				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
 				isYamlOauth = true
+			case constants.APIMMutualSSLType:
+				logger.LoggerXds.Debugf("Mutual SSL is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlMutualssl = true
+			case constants.APIMMutualSSLMandatoryType:
+				logger.LoggerXds.Debugf("Mutual SSL Mandatory is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlMutualsslMandatory = true
+			case constants.APIOauthBasicAuthAPIKeyMandatoryType:
+				isYamlOauthBasicAuthAPIKeyMandatory = true
 			}
 		}
-		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
+		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth, isYamlMutualssl, isYamlMutualsslMandatory, isYamlOauthBasicAuthAPIKeyMandatory)
 		mgwSwagger.SetOperationPolicies(apiProject)
 	}
 	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
@@ -344,6 +356,30 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		})
 		return nil, validationErr
 	}
+
+	// create client map for API
+	var clientCerts []model.Certificate
+	if len(apiProject.ClientCerts) > 0 && len(apiProject.DownstreamCerts) > 0 {
+		for _, certFile := range apiProject.ClientCerts {
+			var certificate model.Certificate
+			if certBytes, found := apiProject.DownstreamCerts[certFile.CertificateName]; found {
+				certificate.Alias = certFile.Alias
+				certificate.Tier = certFile.Tier
+				certificate.Content = certBytes
+				clientCerts = append(clientCerts, certificate)
+				delete(apiProject.DownstreamCerts, certFile.CertificateName)
+			} else {
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Certificate file %v not found for the alias %v in the API %s:%s", certFile.CertificateName,
+						certFile.Alias, apiYaml.Name, apiYaml.Version),
+					Severity:  logging.MINOR,
+					ErrorCode: 1415,
+				})
+			}
+		}
+	}
+
+	mgwSwagger.SetClientCerts(clientCerts)
 
 	// -------- Finished updating mgwSwagger struct
 

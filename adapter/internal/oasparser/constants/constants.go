@@ -57,15 +57,21 @@ const (
 
 // sub-property values and keys relevant for x-wso2-application security extension
 const (
-	APIMAPIKeyType            string = "api_key"
-	APIKeyNameWithApim        string = "apikey"
-	APIKeyTypeInOAS           string = "apiKey"
-	APIMOauth2Type            string = "oauth2"
-	APIMDefaultOauth2Security string = "default"
-	APIKeyInHeaderOAS         string = "header"
-	APIKeyInQueryOAS          string = "query"
-	APIMAPIKeyInHeader        string = "api_key_header"
-	APIMAPIKeyInQuery         string = "api_key_query"
+	APIMAPIKeyType                       string = "api_key"
+	APIKeyNameWithApim                   string = "apikey"
+	APIKeyTypeInOAS                      string = "apiKey"
+	APIMOauth2Type                       string = "oauth2"
+	APIMDefaultOauth2Security            string = "default"
+	APIKeyInHeaderOAS                    string = "header"
+	APIKeyInQueryOAS                     string = "query"
+	APIMAPIKeyInHeader                   string = "api_key_header"
+	APIMAPIKeyInQuery                    string = "api_key_query"
+	APIMutualSSL                         string = "mutualSSL"
+	APIMutualSSLMandartory               string = "mandatoryMutualSSL"
+	APIMMutualSSLType                    string = "mutualssl"
+	APIMMutualSSLMandatoryType           string = "mutualssl_mandatory"
+	APIOauthBasicAuthAPIKeyMandatory     string = "mandatoryOauthBasicAuthApiKey"
+	APIOauthBasicAuthAPIKeyMandatoryType string = "oauth_basic_auth_api_key_mandatory"
 )
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor

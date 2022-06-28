@@ -70,6 +70,7 @@ type MgwSwagger struct {
 	LifecycleStatus            string
 	xWso2RequestBodyPass       bool
 	IsDefaultVersion           bool
+	clientCertificates         []Certificate
 }
 
 // EndpointCluster represent an upstream cluster
@@ -160,6 +161,13 @@ type InterceptEndpoint struct {
 	Includes *interceptor.RequestInclusions
 }
 
+// Certificate contains information of a client certificate
+type Certificate struct {
+	Alias   string
+	Tier    string
+	Content []byte
+}
+
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
 	return swagger.xWso2Cors
@@ -237,6 +245,16 @@ func (swagger *MgwSwagger) GetXWso2RequestBodyPass() bool {
 	return swagger.xWso2RequestBodyPass
 }
 
+// GetClientCerts returns the client certificates of the API
+func (swagger *MgwSwagger) GetClientCerts() []Certificate {
+	return swagger.clientCertificates
+}
+
+// SetClientCerts set the client certificates of the API
+func (swagger *MgwSwagger) SetClientCerts(certs []Certificate) {
+	swagger.clientCertificates = certs
+}
+
 // SetID set the Id of the API
 func (swagger *MgwSwagger) SetID(id string) {
 	swagger.id = id
@@ -310,8 +328,8 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 
 // SanitizeAPISecurity this will validate api level and operation level swagger security
 // if apiyaml security is provided swagger security will be removed accordingly
-func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool) {
-	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
+func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool, isYamlMutualssl bool, isYamlMutualsslMandatory bool, isYamlOauthBasicAuthAPIKeyMandatory bool) {
+	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth || isYamlMutualssl || isYamlMutualsslMandatory
 	apiSecurityDefinitionNames := []string{}
 	overridenAPISecurityDefinitions := []SecurityScheme{}
 
@@ -326,6 +344,22 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			SecurityScheme{DefinitionName: constants.APIMAPIKeyInQuery, Type: constants.APIKeyTypeInOAS,
 				Name: constants.APIKeyNameWithApim, In: constants.APIKeyInQueryOAS})
 	}
+
+	if isYamlMutualssl {
+		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, SecurityScheme{DefinitionName: constants.APIMutualSSL, Type: constants.APIMMutualSSLType,
+			Name: "", In: ""})
+	}
+
+	if isYamlMutualsslMandatory {
+		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, SecurityScheme{DefinitionName: constants.APIMutualSSLMandartory, Type: constants.APIMMutualSSLMandatoryType,
+			Name: "", In: ""})
+	}
+
+	if isYamlOauthBasicAuthAPIKeyMandatory {
+		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, SecurityScheme{DefinitionName: constants.APIOauthBasicAuthAPIKeyMandatory,
+			Type: constants.APIOauthBasicAuthAPIKeyMandatoryType, Name: "", In: ""})
+	}
+
 	for _, securityDef := range swagger.securityScheme {
 		//read default oauth2 security with scopes when oauth2 enabled
 		if isYamlOauth && securityDef.DefinitionName == constants.APIMDefaultOauth2Security {
