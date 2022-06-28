@@ -145,6 +145,8 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 	filters = append(filters, &connectionManagerFilterP)
 
 	if conf.Envoy.SecuredListenerPort > 0 {
+		var tlsFilter *tlsv3.DownstreamTlsContext
+
 		listenerHostAddress := defaultListenerHostAddress
 		if len(conf.Envoy.SecuredListenerHost) > 0 {
 			listenerHostAddress = conf.Envoy.SecuredListenerHost
@@ -172,11 +174,34 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 
 		tlsCert := generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
 		//TODO: (VirajSalaka) Make it configurable via SDS
-		tlsFilter := &tlsv3.DownstreamTlsContext{
-			CommonTlsContext: &tlsv3.CommonTlsContext{
-				//TlsCertificateSdsSecretConfigs
-				TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
-			},
+		if conf.Envoy.EnableMtlsApis {
+			tlsFilter = &tlsv3.DownstreamTlsContext{
+				// This is false since the authentication will be done at the enforcer
+				RequireClientCertificate: &wrappers.BoolValue{
+					Value: false,
+				},
+				CommonTlsContext: &tlsv3.CommonTlsContext{
+					//TlsCertificateSdsSecretConfigs
+					TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+					//For the purpose of including peer certificate into the request context
+					ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
+						ValidationContext: &tlsv3.CertificateValidationContext{
+							TrustedCa: &corev3.DataSource{
+								Specifier: &corev3.DataSource_Filename{
+									Filename: conf.Envoy.Downstream.TLS.TrustedCertPath,
+								},
+							},
+						},
+					},
+				},
+			}
+		} else {
+			tlsFilter = &tlsv3.DownstreamTlsContext{
+				CommonTlsContext: &tlsv3.CommonTlsContext{
+					//TlsCertificateSdsSecretConfigs
+					TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+				},
+			}
 		}
 
 		marshalledTLSFilter, err := ptypes.MarshalAny(tlsFilter)
