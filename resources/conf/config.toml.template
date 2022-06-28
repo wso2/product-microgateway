@@ -107,6 +107,8 @@ artifactsDirectory = "/home/wso2/artifacts"
   systemHost = "localhost"
   # If configured true, router appends the immediate downstream ip address to the x-forward-for header
   useRemoteAddress = false
+  # If configured true, router enables the client certificate validation for providing client certificates
+  enableMtlsApis = false
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]
@@ -321,7 +323,19 @@ enabled = true
   # Header name for the authorization token coming from the downstream client
   authorizationHeader = "authorization"
   testConsoleHeaderName = "Internal-Key"
-  
+
+# Configurations related to Mutual SSL
+[enforcer.security.mutualSSL]
+  # Header name for the client certificate header coming from the downstream client
+  certificateHeader = "X-WSO2-CLIENT-CERTIFICATE"
+  # Enables the mTLS validation using the client certificate coming from TLS handshake
+  # If configured false, mTLS validation is done using the client certificate coming from the header
+  enableClientValidation = true
+  # Enables the decoding process for the encoded client certificate in the header
+  clientCertificateEncode = false
+  # Sends the client certificate header to the backend
+  enableOutboundCertificateHeader = false
+
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
 [[enforcer.security.tokenService]]
