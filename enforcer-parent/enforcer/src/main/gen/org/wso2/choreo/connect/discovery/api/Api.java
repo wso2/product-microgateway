@@ -34,6 +34,7 @@ private static final long serialVersionUID = 0L;
     authorizationHeader_ = "";
     vhost_ = "";
     organizationId_ = "";
+    clientCertificates_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -209,6 +210,15 @@ private static final long serialVersionUID = 0L;
             isMockedApi_ = input.readBool();
             break;
           }
+          case 162: {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+              clientCertificates_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Certificate>();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            clientCertificates_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.api.Certificate.parser(), extensionRegistry));
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -232,6 +242,9 @@ private static final long serialVersionUID = 0L;
       }
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         security_ = java.util.Collections.unmodifiableList(security_);
+      }
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+        clientCertificates_ = java.util.Collections.unmodifiableList(clientCertificates_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -888,6 +901,46 @@ private static final long serialVersionUID = 0L;
     return isMockedApi_;
   }
 
+  public static final int CLIENTCERTIFICATES_FIELD_NUMBER = 20;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> clientCertificates_;
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> getClientCertificatesList() {
+    return clientCertificates_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> 
+      getClientCertificatesOrBuilderList() {
+    return clientCertificates_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public int getClientCertificatesCount() {
+    return clientCertificates_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.Certificate getClientCertificates(int index) {
+    return clientCertificates_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.CertificateOrBuilder getClientCertificatesOrBuilder(
+      int index) {
+    return clientCertificates_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -958,6 +1011,9 @@ private static final long serialVersionUID = 0L;
     }
     if (isMockedApi_ != false) {
       output.writeBool(19, isMockedApi_);
+    }
+    for (int i = 0; i < clientCertificates_.size(); i++) {
+      output.writeMessage(20, clientCertificates_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -1033,6 +1089,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(19, isMockedApi_);
     }
+    for (int i = 0; i < clientCertificates_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(20, clientCertificates_.get(i));
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1095,6 +1155,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getOrganizationId())) return false;
     if (getIsMockedApi()
         != other.getIsMockedApi()) return false;
+    if (!getClientCertificatesList()
+        .equals(other.getClientCertificatesList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1158,6 +1220,10 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + ISMOCKEDAPI_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getIsMockedApi());
+    if (getClientCertificatesCount() > 0) {
+      hash = (37 * hash) + CLIENTCERTIFICATES_FIELD_NUMBER;
+      hash = (53 * hash) + getClientCertificatesList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1293,6 +1359,7 @@ private static final long serialVersionUID = 0L;
         getResourcesFieldBuilder();
         getSecuritySchemeFieldBuilder();
         getSecurityFieldBuilder();
+        getClientCertificatesFieldBuilder();
       }
     }
     @java.lang.Override
@@ -1360,6 +1427,12 @@ private static final long serialVersionUID = 0L;
 
       isMockedApi_ = false;
 
+      if (clientCertificatesBuilder_ == null) {
+        clientCertificates_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+      } else {
+        clientCertificatesBuilder_.clear();
+      }
       return this;
     }
 
@@ -1442,6 +1515,15 @@ private static final long serialVersionUID = 0L;
       result.vhost_ = vhost_;
       result.organizationId_ = organizationId_;
       result.isMockedApi_ = isMockedApi_;
+      if (clientCertificatesBuilder_ == null) {
+        if (((bitField0_ & 0x00000008) != 0)) {
+          clientCertificates_ = java.util.Collections.unmodifiableList(clientCertificates_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.clientCertificates_ = clientCertificates_;
+      } else {
+        result.clientCertificates_ = clientCertificatesBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -1626,6 +1708,32 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getIsMockedApi() != false) {
         setIsMockedApi(other.getIsMockedApi());
+      }
+      if (clientCertificatesBuilder_ == null) {
+        if (!other.clientCertificates_.isEmpty()) {
+          if (clientCertificates_.isEmpty()) {
+            clientCertificates_ = other.clientCertificates_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureClientCertificatesIsMutable();
+            clientCertificates_.addAll(other.clientCertificates_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.clientCertificates_.isEmpty()) {
+          if (clientCertificatesBuilder_.isEmpty()) {
+            clientCertificatesBuilder_.dispose();
+            clientCertificatesBuilder_ = null;
+            clientCertificates_ = other.clientCertificates_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+            clientCertificatesBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getClientCertificatesFieldBuilder() : null;
+          } else {
+            clientCertificatesBuilder_.addAllMessages(other.clientCertificates_);
+          }
+        }
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3630,6 +3738,246 @@ private static final long serialVersionUID = 0L;
       isMockedApi_ = false;
       onChanged();
       return this;
+    }
+
+    private java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> clientCertificates_ =
+      java.util.Collections.emptyList();
+    private void ensureClientCertificatesIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        clientCertificates_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Certificate>(clientCertificates_);
+        bitField0_ |= 0x00000008;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.Certificate, org.wso2.choreo.connect.discovery.api.Certificate.Builder, org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> clientCertificatesBuilder_;
+
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> getClientCertificatesList() {
+      if (clientCertificatesBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(clientCertificates_);
+      } else {
+        return clientCertificatesBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public int getClientCertificatesCount() {
+      if (clientCertificatesBuilder_ == null) {
+        return clientCertificates_.size();
+      } else {
+        return clientCertificatesBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate getClientCertificates(int index) {
+      if (clientCertificatesBuilder_ == null) {
+        return clientCertificates_.get(index);
+      } else {
+        return clientCertificatesBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder setClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate value) {
+      if (clientCertificatesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.set(index, value);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder setClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate.Builder builderForValue) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(org.wso2.choreo.connect.discovery.api.Certificate value) {
+      if (clientCertificatesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(value);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate value) {
+      if (clientCertificatesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(index, value);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(
+        org.wso2.choreo.connect.discovery.api.Certificate.Builder builderForValue) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(builderForValue.build());
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate.Builder builderForValue) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addAllClientCertificates(
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.Certificate> values) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, clientCertificates_);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder clearClientCertificates() {
+      if (clientCertificatesBuilder_ == null) {
+        clientCertificates_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder removeClientCertificates(int index) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.remove(index);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate.Builder getClientCertificatesBuilder(
+        int index) {
+      return getClientCertificatesFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.CertificateOrBuilder getClientCertificatesOrBuilder(
+        int index) {
+      if (clientCertificatesBuilder_ == null) {
+        return clientCertificates_.get(index);  } else {
+        return clientCertificatesBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> 
+         getClientCertificatesOrBuilderList() {
+      if (clientCertificatesBuilder_ != null) {
+        return clientCertificatesBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(clientCertificates_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate.Builder addClientCertificatesBuilder() {
+      return getClientCertificatesFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.api.Certificate.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate.Builder addClientCertificatesBuilder(
+        int index) {
+      return getClientCertificatesFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.api.Certificate.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.Certificate.Builder> 
+         getClientCertificatesBuilderList() {
+      return getClientCertificatesFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.Certificate, org.wso2.choreo.connect.discovery.api.Certificate.Builder, org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> 
+        getClientCertificatesFieldBuilder() {
+      if (clientCertificatesBuilder_ == null) {
+        clientCertificatesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.Certificate, org.wso2.choreo.connect.discovery.api.Certificate.Builder, org.wso2.choreo.connect.discovery.api.CertificateOrBuilder>(
+                clientCertificates_,
+                ((bitField0_ & 0x00000008) != 0),
+                getParentForChildren(),
+                isClean());
+        clientCertificates_ = null;
+      }
+      return clientCertificatesBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
