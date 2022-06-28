@@ -187,6 +187,12 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				AuthorizationHeader:      config.Enforcer.Security.AuthHeader.AuthorizationHeader,
 				TestConsoleHeaderName:    config.Enforcer.Security.AuthHeader.TestConsoleHeaderName,
 			},
+			MutualSSL: &enforcer.MutualSSL{
+				CertificateHeader:               config.Enforcer.Security.MutualSSL.CertificateHeader,
+				EnableClientValidation:          config.Enforcer.Security.MutualSSL.EnableClientValidation,
+				ClientCertificateEncode:         config.Enforcer.Security.MutualSSL.ClientCertificateEncode,
+				EnableOutboundCertificateHeader: config.Enforcer.Security.MutualSSL.EnableOutboundCertificateHeader,
+			},
 		},
 		Cache:     cache,
 		Tracing:   tracing,

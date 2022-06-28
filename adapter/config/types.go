@@ -109,9 +109,11 @@ type envoy struct {
 	SystemHost                       string `default:"localhost"`
 	Cors                             globalCors
 	Upstream                         envoyUpstream
+	Downstream                       envoyDownstream
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
 	UseRemoteAddress                 bool
+	EnableMtlsApis                   bool
 }
 
 type connectionTimeouts struct {
@@ -226,6 +228,16 @@ type envoyUpstream struct {
 	Retry    upstreamRetry
 }
 
+// Envoy Downstream Related Configurations
+type envoyDownstream struct {
+	// DownstreamTLS related Configuration
+	TLS downstreamTLS
+}
+
+type downstreamTLS struct {
+	TrustedCertPath string
+}
+
 type upstreamTLS struct {
 	MinimumProtocolVersion string
 	MaximumProtocolVersion string
@@ -262,6 +274,7 @@ type upstreamRetry struct {
 type security struct {
 	TokenService []tokenService
 	AuthHeader   authHeader
+	MutualSSL    mutualSSL
 }
 
 type authService struct {
@@ -513,4 +526,11 @@ type filter struct {
 
 type httpClient struct {
 	RequestTimeOut time.Duration
+}
+
+type mutualSSL struct {
+	CertificateHeader               string
+	EnableClientValidation          bool
+	ClientCertificateEncode         bool
+	EnableOutboundCertificateHeader bool
 }
