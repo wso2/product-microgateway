@@ -42,8 +42,8 @@ public class APIPolicyPerOperationTestCase {
     private static final String REQUEST_HEADER_BY_POLICY_VALUE = "Request-Header-By-Policy-value";
     private static final String RESPONSE_HEADER = "response-header"; // All lower case
     private static final String RESPONSE_HEADER_VALUE = "response-header-value";
-    private static final String RESPONSE_HEADER_BY_POLICY = "Response-Header-By-Policy";
-    private static final String RESPONSE_HEADER_BY_POLICY_VALUE = "Response-Header-By-Policy-value"; // First letter upper case, the remaining lower case
+    private static final String RESPONSE_HEADER_BY_POLICY = "response-header-by-policy"; // All lower case
+    private static final String RESPONSE_HEADER_BY_POLICY_VALUE = "Response-Header-By-Policy-value";
 
     private String jwtTokenProd;
     private static final String basePath = "/api-policy-per-operation";
@@ -198,8 +198,8 @@ public class APIPolicyPerOperationTestCase {
                 "Request policy header has not been added");
         Assert.assertFalse(httpResponse.getHeaders().containsKey(RESPONSE_HEADER),
                 "Response Header has not been removed");
-        Assert.assertEquals(echoResponse.getHeaders().getFirst(RESPONSE_HEADER_BY_POLICY), RESPONSE_HEADER_BY_POLICY_VALUE,
-                "Response policy header must not exist");
+        Assert.assertEquals(httpResponse.getHeaders().get(RESPONSE_HEADER_BY_POLICY), RESPONSE_HEADER_BY_POLICY_VALUE,
+                "Response policy header has not been added");
         Assert.assertEquals(echoResponse.getQuery().get("newQ1"), "newQ1Value",
                 "Query param has not been added");
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
