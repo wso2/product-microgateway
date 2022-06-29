@@ -1,0 +1,59 @@
+openapi: "3.0.0"
+info:
+  version: v1.0
+  title: API-Policy Per Operation API
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: http://mockBackend:2383/v2
+x-wso2-basePath: /api-policy-per-operation
+paths:
+  /echo-full/policies:
+    get:
+      summary: No policies applied
+      responses:
+        '200':
+          description: successful operation
+    post:
+      summary: Set and remove header policies for request flow
+      responses:
+        '200':
+          description: successful operation
+    delete:
+      summary: Set and remove header policies for response flow
+      responses:
+        '200':
+          description: successful operation
+    patch:
+      summary: query based policies applied
+      responses:
+        '200':
+          description: successful operation
+    put:
+      summary: rewrite method and path
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}.xyz/pets/{petId}/orders:
+    put:
+      summary: rewrite based policies applied with capture groups
+      responses:
+        '200':
+          description: successful operation
+    get:
+      summary: rewrite path with discard queries
+      responses:
+        '200':
+          description: successful operation
+    patch:
+      summary: opa policy applied
+      responses:
+        '200':
+          description: successful operation
+    post:
+      summary: all policies applied
+      responses:
+        '200':
+          description: successful operation
+

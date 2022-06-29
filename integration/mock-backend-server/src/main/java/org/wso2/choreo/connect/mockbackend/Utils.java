@@ -79,7 +79,7 @@ public class Utils {
         if (requestHeaders.containsKey("Set-headers")) {
             String headerKey = requestHeaders.getFirst("Set-headers");
             for (String headerToAdd : headerKey.split(",")) {
-                exchange.getResponseHeaders().set(headerToAdd.trim(), "a_header_value");
+                exchange.getResponseHeaders().set(headerToAdd.trim(), "response-header-value");
             }
         }
 
