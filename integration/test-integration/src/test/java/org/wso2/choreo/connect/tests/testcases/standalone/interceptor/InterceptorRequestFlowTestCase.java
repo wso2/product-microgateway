@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
+public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
     @BeforeClass
     public void init() {
         apiName = "SwaggerPetstoreRequestIntercept";
@@ -126,14 +126,14 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/echo/123"), clientReqBody, headers);
 
-        Assert.assertNotNull(response);
-        int expectedRespCode = StringUtils.isEmpty(expectedBody) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
-        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+
+        Assert.assertNotNull(response);
+        int expectedRespCode = StringUtils.isEmpty(expectedBody) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
+        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // test headers
         Map<String, String> respHeaders = response.getHeaders();
@@ -187,14 +187,14 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/pet/findByStatus/resp-intercept-enabled"), clientReqBody, headers);
 
-        Assert.assertNotNull(response);
-        int expectedRespCode = StringUtils.isEmpty(clientRespBody) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
-        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+
+        Assert.assertNotNull(response);
+        int expectedRespCode = StringUtils.isEmpty(clientRespBody) ? HttpStatus.SC_NO_CONTENT : HttpStatus.SC_OK;
+        Assert.assertEquals(response.getResponseCode(), expectedRespCode, "Response code mismatched");
 
         // test headers
         Map<String, String> respHeaders = response.getHeaders();
@@ -235,13 +235,13 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/pet/findByStatus/resp-intercept-enabled"), "INITIAL BODY", headers);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), 202, "Response code mismatched");
-
         // check which flows are invoked in interceptor service
         JSONObject status = getInterceptorStatus();
         String handler = status.getString(InterceptorConstants.StatusPayload.HANDLER);
         testInterceptorHandler(handler, InterceptorConstants.Handler.REQUEST_ONLY);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 202, "Response code mismatched");
 
         Assert.assertEquals(response.getData(), interceptorRespBody);
     }

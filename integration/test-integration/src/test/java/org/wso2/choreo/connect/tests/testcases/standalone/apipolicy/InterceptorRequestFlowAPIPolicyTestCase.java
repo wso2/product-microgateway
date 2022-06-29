@@ -19,12 +19,12 @@
 package org.wso2.choreo.connect.tests.testcases.standalone.apipolicy;
 
 import org.testng.annotations.BeforeClass;
-import org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestcase;
+import org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestCase;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.util.concurrent.TimeUnit;
 
-public class InterceptorRequestFlowAPIPolicyTestcase extends InterceptorRequestFlowTestcase {
+public class InterceptorRequestFlowAPIPolicyTestCase extends InterceptorRequestFlowTestCase {
     // TestNG runs same test cases twice when we have test classes that extends the first test class.
 
     @BeforeClass(description = "Init APIs")
