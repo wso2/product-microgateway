@@ -194,7 +194,7 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Maximum table size (in octets) that the encoder is permitted to use for the dynamic HPACK table: https://httpwg.org/specs/rfc7541.html#rfc.section.4.2
   hpackTableSize = 4096
   # Maximum concurrent streams allowed for peer on one HTTP/2 connection
-	maxConcurrentStreams = 2147483647
+  maxConcurrentStreams = 2147483647
 
 # Timeouts managed by the connection manager
 [router.connectionTimeout]
