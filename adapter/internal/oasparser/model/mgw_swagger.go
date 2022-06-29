@@ -341,14 +341,17 @@ func (swagger *MgwSwagger) GetXWSO2ApplicationSecurity() bool {
 }
 
 // SetOperationPolicies this will merge operation level policies provided in api yaml
-func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
+func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) (err error) {
 	for _, resource := range swagger.resources {
 		path := strings.TrimSuffix(resource.path, "/")
 		for _, operation := range resource.methods {
 			method := operation.method
 			for _, yamlOperation := range apiProject.APIYaml.Data.Operations {
 				if strings.TrimSuffix(yamlOperation.Target, "/") == path && strings.EqualFold(method, yamlOperation.Verb) {
-					operation.policies = apiProject.Policies.GetFormattedOperationalPolicies(yamlOperation.OperationPolicies, swagger)
+					operation.policies, err = apiProject.Policies.GetFormattedOperationalPolicies(yamlOperation.OperationPolicies, swagger)
+					if err != nil {
+						return err
+					}
 					if operation.policies.Request != nil || operation.policies.Response != nil || operation.policies.Fault != nil {
 						resource.isWithPolicies = true
 					}
@@ -357,6 +360,7 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 			}
 		}
 	}
+	return nil
 }
 
 // SanitizeAPISecurity this will validate api level and operation level swagger security

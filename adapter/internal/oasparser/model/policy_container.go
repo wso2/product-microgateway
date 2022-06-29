@@ -96,7 +96,7 @@ type PolicyDefinition struct {
 
 // GetFormattedOperationalPolicies returns formatted, Choreo Connect policy from a user templated policy
 // here, the struct swagger is only used for logging purpose, in case if we introduce logger context to get org ID, API ID, we can remove it from here
-func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPolicies, swagger *MgwSwagger) OperationPolicies {
+func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPolicies, swagger *MgwSwagger) (OperationPolicies, error) {
 	fmtPolicies := OperationPolicies{}
 
 	for _, policy := range policies.Request {
@@ -104,6 +104,8 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 			fmtPolicies.Request = append(fmtPolicies.Request, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in request flow, for API %q in org %q, formatted policy %v",
 				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
+		} else {
+			return fmtPolicies, err
 		}
 	}
 
@@ -112,6 +114,8 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 			fmtPolicies.Response = append(fmtPolicies.Response, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in response flow, for API %q in org %q, formatted policy %v",
 				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
+		} else {
+			return fmtPolicies, err
 		}
 	}
 
@@ -120,10 +124,12 @@ func (p PolicyContainerMap) GetFormattedOperationalPolicies(policies OperationPo
 			fmtPolicies.Fault = append(fmtPolicies.Fault, fmtPolicy)
 			loggers.LoggerOasparser.Debugf("Applying operation policy %q in fault flow, for API %q in org %q, formatted policy %v",
 				policy.GetFullName(), swagger.GetID(), swagger.OrganizationID, fmtPolicy)
+		} else {
+			return fmtPolicies, err
 		}
 	}
 
-	return fmtPolicies
+	return fmtPolicies, nil
 }
 
 // getFormattedPolicyFromTemplated returns formatted, Choreo Connect policy from a user templated policy
@@ -133,7 +139,7 @@ func (p PolicyContainerMap) getFormattedPolicyFromTemplated(policy Policy, flow 
 	if err := spec.validatePolicy(policy, flow); err != nil {
 		swagger.GetID()
 		loggers.LoggerOasparser.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Operation policy validation failed for API %q in org %q:, ignoring the policy %q: %v", swagger.GetID(), swagger.OrganizationID, policyFullName, err),
+			Message:   fmt.Sprintf("Operation policy validation failed for API %q in org %q:, policy %q: %v", swagger.GetID(), swagger.OrganizationID, policyFullName, err),
 			Severity:  logging.MINOR,
 			ErrorCode: 2204,
 		})

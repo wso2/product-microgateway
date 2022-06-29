@@ -323,7 +323,11 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 			}
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth, isYamlMutualssl, isYamlMutualsslMandatory, isYamlOauthBasicAuthAPIKeyMandatory)
-		mgwSwagger.SetOperationPolicies(apiProject)
+		err = mgwSwagger.SetOperationPolicies(apiProject)
+		if err != nil {
+			logger.LoggerXds.Error("Error while populating operational policies. ", err)
+			return nil, err
+		}
 	}
 	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)

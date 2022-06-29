@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
@@ -30,9 +31,12 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -52,7 +56,7 @@ func generateRouteConfig(routeName string, match *routev3.RouteMatch, action *ro
 		Name:                    routeName,
 		Match:                   match,
 		Action:                  action,
-		Metadata:                nil,
+		Metadata:                metadata,
 		Decorator:               decorator,
 		TypedPerFilterConfig:    typedPerFilterConfig,
 		RequestHeadersToAdd:     requestHeadersToAdd,
@@ -80,9 +84,69 @@ func generateRouteMatch(routeRegex string) *routev3.RouteMatch {
 	return match
 }
 
-func generateHTTPMethodMatcher(methodRegex string) []*routev3.HeaderMatcher {
-	headerMatcherArray := generateHeaderMatcher(httpMethodHeader, methodRegex)
-	return []*routev3.HeaderMatcher{headerMatcherArray}
+func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model.EndpointConfig,
+	corsPolicy *routev3.CorsPolicy) (action *routev3.Route_Route) {
+
+	config, _ := config.ReadConfigs()
+
+	action = &routev3.Route_Route{
+		Route: &routev3.RouteAction{
+			HostRewriteSpecifier: &routev3.RouteAction_AutoHostRewrite{
+				AutoHostRewrite: &wrapperspb.BoolValue{
+					Value: true,
+				},
+			},
+			UpgradeConfigs:    getUpgradeConfig(apiType),
+			MaxStreamDuration: getMaxStreamDuration(apiType),
+			Timeout:           durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
+			IdleTimeout:       durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+			ClusterSpecifier: &routev3.RouteAction_ClusterHeader{
+				ClusterHeader: clusterHeaderName,
+			},
+		},
+	}
+
+	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
+		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
+		// Retry configs are always added via headers. This is to update the
+		// default retry back-off base interval, which cannot be updated via headers.
+		retryConfig := config.Envoy.Upstream.Retry
+		commonRetryPolicy := &routev3.RetryPolicy{
+			RetryOn: retryPolicyRetriableStatusCodes,
+			NumRetries: &wrapperspb.UInt32Value{
+				Value: 0,
+				// If not set to 0, default value 1 will be
+				// applied to both prod and sandbox even if they are not set.
+			},
+			RetriableStatusCodes: retryConfig.StatusCodes,
+			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
+				BaseInterval: &durationpb.Duration{
+					Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000,
+				},
+			},
+		}
+		action.Route.RetryPolicy = commonRetryPolicy
+	}
+	action.Route.Cors = corsPolicy
+	return action
+}
+
+func generateHTTPMethodMatcher(methodRegex string, isSandbox bool, sandClusterName string) []*routev3.HeaderMatcher {
+	headerMatcher := generateHeaderMatcher(httpMethodHeader, methodRegex)
+	headerMatcherArray := []*routev3.HeaderMatcher{headerMatcher}
+	// if sandbox route, add additional header match based on cluster name header
+	if isSandbox {
+		clusterHeaderMatcher := routev3.HeaderMatcher{
+			Name: clusterHeaderName,
+			HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
+				StringMatch: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{Exact: sandClusterName},
+				},
+			},
+		}
+		headerMatcherArray = append(headerMatcherArray, &clusterHeaderMatcher)
+	}
+	return headerMatcherArray
 }
 
 func generateHeaderMatcher(headerName, valueRegex string) *routev3.HeaderMatcher {
@@ -187,18 +251,7 @@ func generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath st
 	return rewriteRegex, nil
 }
 
-func generateRewriteMethodRouteConfig(newMethod, routeName, routePath string, action *routev3.Route_Route,
-	decorator *routev3.Decorator, requestHeadersToAdd []*corev3.HeaderValueOption, requestHeadersToRemove []string,
-	responseHeadersToAdd []*corev3.HeaderValueOption, responseHeadersToRemove []string) (*routev3.Route, error) {
-
-	// This header will be added by the enforcer to requests of which the HTTP method must be rewritten.
-	policyHeaderMatch := generateHeaderMatcher("rewritten-method", newMethod)
-	newHTTPMethodHeaderMatch := generateHTTPMethodMatcher(newMethod)
-	newHTTPMethodHeaderMatch = append(newHTTPMethodHeaderMatch, policyHeaderMatch)
-
-	matchForNewMethod := generateRouteMatch(routePath)
-	matchForNewMethod.Headers = newHTTPMethodHeaderMatch
-
+func generateFilterConfigToSkipEnforcer() map[string]*anypb.Any {
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
 			Disabled: true,
@@ -213,12 +266,54 @@ func generateRewriteMethodRouteConfig(newMethod, routeName, routePath string, ac
 		Value:   b.Bytes(),
 	}
 
-	typedPerRouteConfig := map[string]*any.Any{
+	return map[string]*any.Any{
 		wellknown.HTTPExternalAuthorization: filter,
 	}
+}
 
-	return generateRouteConfig(routeName, matchForNewMethod, action, nil, decorator, typedPerRouteConfig,
-		requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd, responseHeadersToRemove), nil
+func generateMetadataMatcherForInternalRoutes(metadataValue string) (dynamicMetadata []*envoy_type_matcherv3.MetadataMatcher) {
+	path := &envoy_type_matcherv3.MetadataMatcher_PathSegment{
+		Segment: &envoy_type_matcherv3.MetadataMatcher_PathSegment_Key{
+			Key: methodRewrite,
+		},
+	}
+	metadataMatcher := &envoy_type_matcherv3.MetadataMatcher{
+		Filter: extAuthzFilterName,
+		Path:   []*envoy_type_matcherv3.MetadataMatcher_PathSegment{path},
+		Value: &envoy_type_matcherv3.ValueMatcher{
+			MatchPattern: &envoy_type_matcherv3.ValueMatcher_StringMatch{
+				StringMatch: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+						Exact: metadataValue,
+					},
+				},
+			},
+		},
+	}
+	return []*envoy_type_matcherv3.MetadataMatcher{
+		metadataMatcher,
+	}
+}
+
+func generateMetadataMatcherForExternalRoutes() (dynamicMetadata []*envoy_type_matcherv3.MetadataMatcher) {
+	path := &envoy_type_matcherv3.MetadataMatcher_PathSegment{
+		Segment: &envoy_type_matcherv3.MetadataMatcher_PathSegment_Key{
+			Key: methodRewrite,
+		},
+	}
+	metadataMatcher := &envoy_type_matcherv3.MetadataMatcher{
+		Filter: extAuthzFilterName,
+		Path:   []*envoy_type_matcherv3.MetadataMatcher_PathSegment{path},
+		Value: &envoy_type_matcherv3.ValueMatcher{
+			MatchPattern: &envoy_type_matcherv3.ValueMatcher_PresentMatch{
+				PresentMatch: true,
+			},
+		},
+		Invert: true,
+	}
+	return []*envoy_type_matcherv3.MetadataMatcher{
+		metadataMatcher,
+	}
 }
 
 // getRewriteRegexFromPathTemplate returns a regex with capture groups for given rewritePathTemplate.

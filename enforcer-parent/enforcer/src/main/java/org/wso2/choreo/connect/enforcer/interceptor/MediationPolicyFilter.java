@@ -164,15 +164,12 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private void modifyMethod(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String currentMethod = policyAttrib.get("currentMethod");
         try {
             HttpMethod updatedMethod = HttpMethod.valueOf(policyAttrib.get("updatedMethod"));
-
-            if (currentMethod.equalsIgnoreCase(requestContext.getHeaders().get(":method"))) {
-                String newMethod = updatedMethod.toString().toUpperCase();
-                requestContext.addOrModifyHeaders(":method", newMethod);
-                requestContext.addOrModifyHeaders("rewritten-method", newMethod);
-            }
+            String newMethod = updatedMethod.toString().toUpperCase();
+            String currentMethod = requestContext.getRequestMethod().toUpperCase();
+            requestContext.addOrModifyHeaders(":method", newMethod);
+            requestContext.addMetadataToMap("method-rewrite", currentMethod + "_to_" + newMethod);
         } catch (IllegalArgumentException ex) {
             log.error("Error while getting mediation policy rewrite method", ex);
         }

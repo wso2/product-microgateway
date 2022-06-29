@@ -43,7 +43,7 @@ var supportedPoliciesMap = map[string]policyLayout{
 		IsPassToEnforcer: false,
 	},
 	constants.ActionRewriteMethod: {
-		RequiredParams:   []string{constants.CurrentMethod, constants.UpdatedMethod},
+		RequiredParams:   []string{constants.UpdatedMethod},
 		IsPassToEnforcer: true,
 	},
 	constants.ActionRewritePath: {
