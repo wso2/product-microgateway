@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>wso2.sampleHelloWorldDocker</groupId>
+  <artifactId>InterceptorServiceWithMI</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>InterceptorServiceWithMI</name>
+  <description>InterceptorServiceWithMI</description>
+  <modules>
+    <module>InterceptorServiceWithMIConfigs</module>
+    <module>InterceptorServiceWithMICompositeExporter</module>
+  </modules>
+  <build />
+  <profiles>
+    <profile>
+      <id>Solution</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-eclipse-plugin</artifactId>
+            <version>2.9</version>
+            <configuration>
+              <buildcommands />
+              <projectnatures>
+                <projectnature>org.wso2.developerstudio.eclipse.mavenmultimodule.project.nature</projectnature>
+              </projectnatures>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>Docker</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-eclipse-plugin</artifactId>
+            <version>2.9</version>
+            <configuration>
+              <buildcommands />
+              <projectnatures>
+                <projectnature>org.wso2.developerstudio.eclipse.mavenmultimodule.project.nature</projectnature>
+              </projectnatures>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <modules>
+        <module>InterceptorServiceWithMIDockerExporter</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>Kubernetes</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-eclipse-plugin</artifactId>
+            <version>2.9</version>
+            <configuration>
+              <buildcommands />
+              <projectnatures>
+                <projectnature>org.wso2.developerstudio.eclipse.mavenmultimodule.project.nature</projectnature>
+              </projectnatures>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-eclipse-plugin</artifactId>
+            <version>2.9</version>
+            <configuration>
+              <buildcommands />
+              <projectnatures>
+                <projectnature>org.wso2.developerstudio.eclipse.mavenmultimodule.project.nature</projectnature>
+              </projectnatures>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <modules>
+        <module>InterceptorServiceWithMIDockerExporter</module>
+      </modules>
+    </profile>
+  </profiles>
+</project>
