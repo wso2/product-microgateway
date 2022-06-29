@@ -32,7 +32,7 @@
 
 [router.upstream.http2]
   hpackTableSize = 4096
-	maxConcurrentStreams = 2147483647
+  maxConcurrentStreams = 2147483647
 
 [enforcer]
 [enforcer.jwtIssuer]
