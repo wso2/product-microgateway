@@ -58,6 +58,10 @@ public class AllHttpMethodsForWildcardTestCase {
         EchoResponse echoResponse1 = Utils.invokeEchoGet(API_CONTEXT, "/test",
                 headers, jwtTokenProd);
         Assert.assertEquals(echoResponse1.getPath(), "/v2/echo-full/test","Request path mismatched");
+
+        EchoResponse echoResponse2 = Utils.invokeEchoGet(API_CONTEXT, "/test1/test2/test3?foo=foo1&bar=bar1",
+                headers, jwtTokenProd);
+        Assert.assertEquals(echoResponse2.getPath(), "/v2/echo-full/test1/test2/test3","Request path mismatched");
     }
 
     @Test(description = "test path with trailing slash for POST")

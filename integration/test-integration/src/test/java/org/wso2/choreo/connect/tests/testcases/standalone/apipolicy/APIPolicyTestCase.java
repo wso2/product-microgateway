@@ -151,13 +151,11 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path");
         assertOriginalClientRequestInfo(echoResponse);
 
-        // HTTP method: POST
-        echoResponse = Utils.invokeEchoPost(basePath,
+        // HTTP method: POST but "currentMethod" provided as GET
+        HttpResponse httpResponse = Utils.invokePost(basePath,
                 "/echo-full/rewrite-policy/345" + queryParams, "Hello World", headers, jwtTokenProd);
 
-        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.POST.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path");
-        assertOriginalClientRequestInfo(echoResponse);
+        Assert.assertEquals(httpResponse.getResponseCode(), HttpStatus.SC_NOT_FOUND, "Response code mismatched");
     }
 
     @Test(description = "Test rewrite path API Policy with capture groups")
