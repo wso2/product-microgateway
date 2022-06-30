@@ -45,11 +45,12 @@ func generateRouteConfig(routeName string, match *routev3.RouteMatch, action *ro
 	requestHeadersToAdd []*corev3.HeaderValueOption, requestHeadersToRemove []string,
 	responseHeadersToAdd []*corev3.HeaderValueOption, responseHeadersToRemove []string) *routev3.Route {
 
-	// remove 'x-wso2-cluster-header' and `x-envoy-expected-rq-timeout-ms` headers from the request from router to backend
+	// headers removed from the request (from router to backend)
 	requestHeadersToRemove = append(requestHeadersToRemove, clusterHeaderName)
 	requestHeadersToRemove = append(requestHeadersToRemove, "x-envoy-expected-rq-timeout-ms")
+	requestHeadersToRemove = append(requestHeadersToRemove, "X-envoy-original-path")
 
-	// remove the 'x-envoy-upstream-service-time' from the response.
+	// headers removed from the response (from router to client).
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
 
 	route := &routev3.Route{

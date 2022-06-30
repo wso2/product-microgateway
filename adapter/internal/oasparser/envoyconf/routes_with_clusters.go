@@ -1031,7 +1031,6 @@ end`
 				}
 			}
 
-			// TODO: (suksw) Should we remove X-envoy-original-path
 			// TODO: (suksw) preserve header key case?
 			if isRewriteMethod {
 				match1 := generateRouteMatch(routePath)
