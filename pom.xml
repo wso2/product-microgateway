@@ -556,6 +556,11 @@
                 <artifactId>wiremock-jre8</artifactId>
                 <version>${wiremock.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.caching</groupId>
+                <artifactId>wso2caching-core</artifactId>
+                <version>${org.wso2.caching.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -617,6 +622,7 @@
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
         <javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
         <wiremock.version>2.33.2</wiremock.version>
+        <org.wso2.caching.version>4.0.3</org.wso2.caching.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.13.2</jackson.annotations.version>

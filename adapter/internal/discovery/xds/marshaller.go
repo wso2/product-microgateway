@@ -143,6 +143,10 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Enable: config.Enforcer.RestServer.Enabled,
 	}
 
+	soap := &enforcer.Soap{
+		SoapErrorXmlFormatEnabled: config.Adapter.SoapErrorXMLFormatEnabled,
+	}
+
 	filters := []*enforcer.Filter{}
 
 	for _, filterConfig := range config.Enforcer.Filters {
@@ -234,6 +238,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Management: management,
 		RestServer: restServer,
 		Filters:    filters,
+		Soap:       soap,
 	}
 }
 

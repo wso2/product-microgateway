@@ -23,6 +23,7 @@ metadata:
 data:
   config.toml: |
     [adapter]
+    soapErrorXmlFormatEnabled = false
     [adapter.server]
       enabled = true
       port = "9843"

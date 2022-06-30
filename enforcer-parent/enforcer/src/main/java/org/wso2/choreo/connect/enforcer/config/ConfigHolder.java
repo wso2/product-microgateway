@@ -39,6 +39,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.Metrics;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
 import org.wso2.choreo.connect.discovery.config.enforcer.RestServer;
 import org.wso2.choreo.connect.discovery.config.enforcer.Service;
+import org.wso2.choreo.connect.discovery.config.enforcer.Soap;
 import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
 import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
@@ -56,6 +57,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.SoapErrorResponseConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -168,11 +170,19 @@ public class ConfigHolder {
 
         populateRestServer(config.getRestServer());
 
+        populateSoapErrorResponseConfigs(config.getSoap());
+
         // Populates the custom filter configurations applied along with enforcer filters.
         populateCustomFilters(config.getFiltersList());
 
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
+    }
+
+    private void populateSoapErrorResponseConfigs(Soap soap) {
+        SoapErrorResponseConfigDto soapErrorResponseConfigDto = new SoapErrorResponseConfigDto();
+        soapErrorResponseConfigDto.setEnable(soap.getSoapErrorXmlFormatEnabled());
+        config.setSoapErrorResponseConfigDto(soapErrorResponseConfigDto);
     }
 
     private void populateRestServer(RestServer restServer) {
