@@ -74,31 +74,36 @@ public class AuthFilter implements Filter {
         isOAuthBasicAuthMandatory = false;
 
         // Set security conditions
+        if (apiConfig.getApplicationSecurity()) {
+            isOAuthBasicAuthMandatory = true;
+        }
+
+        if (!Objects.isNull(apiConfig.getMutualSSL())) {
+            if (apiConfig.getMutualSSL().equalsIgnoreCase(APIConstants.Optionality.MANDATORY)) {
+                isMutualSSLProtected = true;
+                isMutualSSLMandatory = true;
+            } else if (apiConfig.getMutualSSL().equalsIgnoreCase(APIConstants.Optionality.OPTIONAL)) {
+                isMutualSSLProtected = true;
+            }
+        }
+
         if (apiConfig.getSecuritySchemeDefinitions() == null) {
             isOAuthProtected = true;
-            isOAuthBasicAuthMandatory = true;
         } else {
             for (Map.Entry<String, SecuritySchemaConfig> securityDefinition :
                     apiConfig.getSecuritySchemeDefinitions().entrySet()) {
                 String apiSecurityLevel = securityDefinition.getValue().getType();
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH2)) {
                     isOAuthProtected = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    isMutualSSLProtected = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
                     isBasicAuthProtected = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
-                    isMutualSSLMandatory = true;
-                } else if (apiSecurityLevel.trim().
-                        equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
-                    isOAuthBasicAuthMandatory = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
                     isApiKeyProtected = true;
                 }
             }
         }
 
-        if (!isMutualSSLProtected) {
+        if (!isMutualSSLMandatory) {
             isOAuthBasicAuthMandatory = true;
         }
 
@@ -147,14 +152,18 @@ public class AuthFilter implements Filter {
             return true;
         }
 
+        // Authentication status of the request
         boolean authenticated = false;
+        // Any auth token has been provided for application-level security or not
         boolean canAuthenticated = false;
         for (Authenticator authenticator : authenticators) {
             if (authenticator.canAuthenticate(requestContext)) {
+                // For transport level securities (mTLS), canAuthenticated will not be applied
                 if (!authenticator.getName().contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
                     canAuthenticated = true;
                 }
                 AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
+                // Authentication status will be updated only if the authentication is a mandatory one
                 if (authenticateResponse.isMandatoryAuthentication()) {
                     authenticated = authenticateResponse.isAuthenticated();
                     setInterceptorAuthContextMetadata(authenticator, requestContext);
@@ -163,11 +172,16 @@ public class AuthFilter implements Filter {
                     break;
                 }
             } else {
+                // Check if the failed authentication is mandatory mTLS
                 if (isMutualSSLMandatory && authenticator.getName()
                         .contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
-                    log.debug("mTLS authentication was failed for the request: " + requestContext.getRequestPath());
+                    authenticated = false;
+                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} ",
+                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                            requestContext.getMatchedAPI().getVersion());
                     break;
                 }
+                // Check if the failed authentication is a mandatory application level security
                 if (isOAuthBasicAuthMandatory && !authenticator.getName()
                         .contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
                     authenticated = false;
@@ -195,32 +209,36 @@ public class AuthFilter implements Filter {
             AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
             requestContext.setAuthenticationContext(authenticate);
             if (authenticator.getName().contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
+                // This section is for mTLS authentication
                 if (authenticate.isAuthenticated()) {
                     updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                     // set backend security
                     EndpointSecurityUtils.addEndpointSecurity(requestContext);
-                    log.debug("mTLS authentication was passed for the request: " + requestContext.getRequestPath());
+                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{} ",
+                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                            requestContext.getMatchedAPI().getVersion());
                     return new AuthenticationResponse(true, isMutualSSLMandatory, true);
                 } else {
                     if (isMutualSSLMandatory) {
-                        log.debug("Mandatory mTLS authentication was failed for the request: "
-                                + requestContext.getRequestPath());
+                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{} ",
+                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
+                                        .getName(), requestContext.getMatchedAPI().getVersion());
                         return new AuthenticationResponse(false, true, false);
                     } else {
-                        log.debug("Optional mTLS authentication was failed for the request: "
-                                + requestContext.getRequestPath());
+                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{} ",
+                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
+                                        .getName(), requestContext.getMatchedAPI().getVersion());
                         return new AuthenticationResponse(false, false, true);
                     }
                 }
-            } else {
-                if (authenticate.isAuthenticated()) {
-                    if (!requestContext.getMatchedAPI().isMockedApi()) {
-                        updateClusterHeaderAndCheckEnv(requestContext, authenticate);
-                        // set backend security
-                        EndpointSecurityUtils.addEndpointSecurity(requestContext);
-                    }
-                    return new AuthenticationResponse(true, isOAuthBasicAuthMandatory, false);
+            } else if (authenticate.isAuthenticated()) {
+                // This section is for application level securities
+                if (!requestContext.getMatchedAPI().isMockedApi()) {
+                    updateClusterHeaderAndCheckEnv(requestContext, authenticate);
+                    // set backend security
+                    EndpointSecurityUtils.addEndpointSecurity(requestContext);
                 }
+                return new AuthenticationResponse(true, isOAuthBasicAuthMandatory, false);
             }
         } catch (APISecurityException e) {
             //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)

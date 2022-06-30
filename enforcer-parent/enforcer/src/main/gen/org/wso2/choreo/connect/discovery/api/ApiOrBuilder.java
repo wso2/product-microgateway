@@ -291,4 +291,22 @@ public interface ApiOrBuilder extends
    */
   org.wso2.choreo.connect.discovery.api.CertificateOrBuilder getClientCertificatesOrBuilder(
       int index);
+
+  /**
+   * <code>string mutualSSL = 21;</code>
+   * @return The mutualSSL.
+   */
+  java.lang.String getMutualSSL();
+  /**
+   * <code>string mutualSSL = 21;</code>
+   * @return The bytes for mutualSSL.
+   */
+  com.google.protobuf.ByteString
+      getMutualSSLBytes();
+
+  /**
+   * <code>bool applicationSecurity = 22;</code>
+   * @return The applicationSecurity.
+   */
+  boolean getApplicationSecurity();
 }

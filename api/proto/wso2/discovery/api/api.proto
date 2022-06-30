@@ -53,4 +53,6 @@ message Api {
 	string organizationId = 18;
 	bool isMockedApi = 19;
 	repeated Certificate clientCertificates = 20;
+	string mutualSSL = 21;
+	bool applicationSecurity = 22;
 }

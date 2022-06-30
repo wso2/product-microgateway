@@ -71,6 +71,8 @@ type MgwSwagger struct {
 	xWso2RequestBodyPass       bool
 	IsDefaultVersion           bool
 	clientCertificates         []Certificate
+	xWso2MutualSSL             string
+	xWso2ApplicationSecurity   bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -310,6 +312,26 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 	return swagger.security
 }
 
+// SetXWSO2MutualSSL sets the optional or mandatory mTLS
+func (swagger *MgwSwagger) SetXWSO2MutualSSL(mutualSSl string) {
+	swagger.xWso2MutualSSL = mutualSSl
+}
+
+// GetXWSO2MutualSSL returns the optional or mandatory mTLS
+func (swagger *MgwSwagger) GetXWSO2MutualSSL() string {
+	return swagger.xWso2MutualSSL
+}
+
+// SetXWSO2ApplicationSecurity sets the optional or mandatory application security
+func (swagger *MgwSwagger) SetXWSO2ApplicationSecurity(applicationSecurity bool) {
+	swagger.xWso2ApplicationSecurity = applicationSecurity
+}
+
+// GetXWSO2ApplicationSecurity returns the optional or mandatory application security
+func (swagger *MgwSwagger) GetXWSO2ApplicationSecurity() bool {
+	return swagger.xWso2ApplicationSecurity
+}
+
 // SetOperationPolicies this will merge operation level policies provided in api yaml
 func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 	for _, resource := range swagger.resources {
@@ -329,7 +351,7 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 // SanitizeAPISecurity this will validate api level and operation level swagger security
 // if apiyaml security is provided swagger security will be removed accordingly
 func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool, isYamlMutualssl bool, isYamlMutualsslMandatory bool, isYamlOauthBasicAuthAPIKeyMandatory bool) {
-	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth || isYamlMutualssl || isYamlMutualsslMandatory
+	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
 	apiSecurityDefinitionNames := []string{}
 	overridenAPISecurityDefinitions := []SecurityScheme{}
 
@@ -343,21 +365,6 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions,
 			SecurityScheme{DefinitionName: constants.APIMAPIKeyInQuery, Type: constants.APIKeyTypeInOAS,
 				Name: constants.APIKeyNameWithApim, In: constants.APIKeyInQueryOAS})
-	}
-
-	if isYamlMutualssl {
-		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, SecurityScheme{DefinitionName: constants.APIMutualSSL, Type: constants.APIMMutualSSLType,
-			Name: "", In: ""})
-	}
-
-	if isYamlMutualsslMandatory {
-		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, SecurityScheme{DefinitionName: constants.APIMutualSSLMandartory, Type: constants.APIMMutualSSLMandatoryType,
-			Name: "", In: ""})
-	}
-
-	if isYamlOauthBasicAuthAPIKeyMandatory {
-		overridenAPISecurityDefinitions = append(overridenAPISecurityDefinitions, SecurityScheme{DefinitionName: constants.APIOauthBasicAuthAPIKeyMandatory,
-			Type: constants.APIOauthBasicAuthAPIKeyMandatoryType, Name: "", In: ""})
 	}
 
 	for _, securityDef := range swagger.securityScheme {
@@ -418,6 +425,27 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			operation.SetSecurity(sanitizedOperationSecurity)
 		}
 	}
+
+	// Adding api level application and transport securities optional or mandatory
+	var mutualSSL string
+	var applicationSecurity bool
+
+	if isYamlMutualssl && isYamlMutualsslMandatory {
+		mutualSSL = constants.Mandatory
+	} else if isYamlMutualssl && !isYamlMutualsslMandatory {
+		mutualSSL = constants.Optional
+	} else {
+		mutualSSL = constants.NotDefined
+	}
+
+	if isYamlOauthBasicAuthAPIKeyMandatory {
+		applicationSecurity = true
+	} else {
+		applicationSecurity = false
+	}
+
+	swagger.SetXWSO2MutualSSL(mutualSSL)
+	swagger.SetXWSO2ApplicationSecurity(applicationSecurity)
 }
 
 // SetXWso2Extensions set the MgwSwagger object with the properties

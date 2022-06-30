@@ -174,7 +174,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 
 		tlsCert := generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
 		//TODO: (VirajSalaka) Make it configurable via SDS
-		if conf.Envoy.EnableMtlsApis {
+		if conf.Envoy.Downstream.TLS.MTLSAPIsEnabled {
 			tlsFilter = &tlsv3.DownstreamTlsContext{
 				// This is false since the authentication will be done at the enforcer
 				RequireClientCertificate: &wrappers.BoolValue{

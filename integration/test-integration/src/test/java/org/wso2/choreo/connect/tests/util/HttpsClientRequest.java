@@ -361,9 +361,9 @@ public class HttpsClientRequest {
 
     private static HttpsURLConnection getURLConnection(String requestUrl, boolean doOutput)
             throws IOException {
-
         setSSlSystemProperties();
         URL url = new URL(requestUrl);
+
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setDoOutput(doOutput);
         conn.setReadTimeout(70000);

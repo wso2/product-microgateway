@@ -113,7 +113,6 @@ type envoy struct {
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
 	UseRemoteAddress                 bool
-	EnableMtlsApis                   bool
 }
 
 type connectionTimeouts struct {
@@ -236,6 +235,7 @@ type envoyDownstream struct {
 
 type downstreamTLS struct {
 	TrustedCertPath string
+	MTLSAPIsEnabled bool
 }
 
 type upstreamTLS struct {

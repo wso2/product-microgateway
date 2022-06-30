@@ -221,6 +221,8 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 		Vhost:               vhost,
 		IsMockedApi:         isMockedAPI,
 		ClientCertificates:  clientCertificates,
+		MutualSSL:           mgwSwagger.GetXWSO2MutualSSL(),
+		ApplicationSecurity: mgwSwagger.GetXWSO2ApplicationSecurity(),
 	}
 }
 

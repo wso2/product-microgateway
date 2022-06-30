@@ -41,7 +41,6 @@ public class CcWithClientCertEncodeDisabled {
         ApictlUtils.deployAPI("MutualSSLOptional", "test");
         ApictlUtils.deployAPI("MutualSSLMandatory", "test");
 
-
         TimeUnit.SECONDS.sleep(5);
     }
 

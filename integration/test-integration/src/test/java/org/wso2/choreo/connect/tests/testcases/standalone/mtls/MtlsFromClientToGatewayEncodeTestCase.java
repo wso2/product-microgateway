@@ -40,7 +40,6 @@ public class MtlsFromClientToGatewayEncodeTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        //TODO: (VirajSalaka) change the token
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
                 null, false);
         encodedCert = URLEncoder.encode(TestConstant.CLIENT_CERT, "UTF-8");

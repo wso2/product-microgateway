@@ -107,8 +107,6 @@ artifactsDirectory = "/home/wso2/artifacts"
   systemHost = "localhost"
   # If configured true, router appends the immediate downstream ip address to the x-forward-for header
   useRemoteAddress = false
-  # If configured true, router enables the client certificate validation for providing client certificates
-  enableMtlsApis = false
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]
@@ -185,6 +183,15 @@ artifactsDirectory = "/home/wso2/artifacts"
   # HTTP status codes, the retry mechanism will be enabled for.
   # Used when retry config is set via API-M UI or all given status codes are out of range.
   statusCodes = [ 504 ]
+
+[router.downstream]
+
+# The configurations for SSL configuration related to the client connection in Choreo Connect
+[router.downstream.tls]
+  # Path to trusted certificates
+  trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
+  # If configured true, router enables the client certificate validation for providing client certificates
+  mTLSAPIsEnabled = false
 
 # Timeouts managed by the connection manager
 [router.connectionTimeout]

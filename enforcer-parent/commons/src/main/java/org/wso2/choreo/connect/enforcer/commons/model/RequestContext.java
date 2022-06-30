@@ -384,7 +384,7 @@ public class RequestContext {
     }
 
     /**
-     * Set the client certificate for the request
+     * Set the client certificate for the request.
      */
     public void setClientCertificate(String clientCertificate) {
         this.clientCertificate = clientCertificate;

@@ -618,19 +618,9 @@ public class FilterUtils {
         MutualSSLDto mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
         String certificateHeaderName = mtlsInfo.getCertificateHeader();
         if (StringUtils.isEmpty(certificateHeaderName)) {
-            certificateHeaderName = "SSL-CLIENT-CERT";
+            certificateHeaderName = APIConstants.CLIENT_CERTIFICATE_HEADER_DEFAULT;
         }
         return certificateHeaderName.toLowerCase();
-    }
-
-    public static boolean getClientValidationStatus() {
-        MutualSSLDto  mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
-        return mtlsInfo.isEnableClientValidation();
-    }
-
-    public static boolean getCertificateEncodeStatus() {
-        MutualSSLDto  mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
-        return mtlsInfo.isClientCertificateEncode();
     }
 
     /**

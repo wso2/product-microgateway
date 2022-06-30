@@ -40,7 +40,6 @@ public class MtlsFromClientToGatewayDefaultTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        //TODO: (VirajSalaka) change the token
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
                 null, false);
         validKeyStore = "client-keystore.jks";

@@ -35,7 +35,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Common functions for certificates.
@@ -60,8 +60,8 @@ public class MtlsUtils {
             }
         }
         if (isPublicCertificate(cert)) {
-            String content = cert.replaceAll("-----BEGIN CERTIFICATE-----", "")
-                    .replaceAll("-----END CERTIFICATE-----", "");
+            String content = cert.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
             return content.trim();
         }
         log.debug("Provided client certificate is not a public certificate.");
@@ -76,8 +76,8 @@ public class MtlsUtils {
             log.debug("Creating the client certificate truststore was unsuccessful.");
             throw new SecurityException(e);
         }
-        X509Certificate x509cert;
         for (Certificate certificate : clientCertificates) {
+            X509Certificate x509cert;
             String alias = certificate.getAlias();
             String cert = certificate.getContent().toStringUtf8();
             String certContent = getCertContent(cert);
@@ -100,7 +100,7 @@ public class MtlsUtils {
             x509Certificate =
                     (X509Certificate) cf.generateCertificate(byteArrayInputStream);
         } catch (IOException e) {
-            log.debug("Unable to generate x509 certificate format.");
+            log.error("Unable to generate x509 certificate format.");
             throw new CertificateException(e);
         }
         return x509Certificate;
@@ -110,21 +110,15 @@ public class MtlsUtils {
             throws CertificateException {
         String alias = null;
         try {
-            if (trustStore != null) {
+            if (!Objects.isNull(trustStore)) {
                 alias = trustStore.getCertificateAlias(certificate);
             } else {
-                log.debug("The API truststore has not been initialized");
+                log.debug("The API truststore has not been initialized.");
             }
         } catch (KeyStoreException e) {
             log.debug("Error occurred while checking the API truststore.");
             throw new CertificateException(e);
         }
-        return (alias);
-    }
-
-    public static String getTier(String alias, Map<String, String> tiersMap) {
-        String tier = "";
-        tier = tiersMap.get(alias);
-        return tier;
+        return alias;
     }
 }

@@ -123,6 +123,7 @@ var defaultConfig = &Config{
 		Downstream: envoyDownstream{
 			TLS: downstreamTLS{
 				TrustedCertPath: "/etc/ssl/certs/ca-certificates.crt",
+				MTLSAPIsEnabled: false,
 			},
 		},
 		Connection: connection{
@@ -139,7 +140,6 @@ var defaultConfig = &Config{
 			AllowPartialMessage: false,
 			PackAsBytes:         false,
 		},
-		EnableMtlsApis: false,
 	},
 	Enforcer: enforcer{
 		Management: management{

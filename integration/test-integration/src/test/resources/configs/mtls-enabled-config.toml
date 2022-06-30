@@ -1,5 +1,5 @@
-[router]
-  enableMtlsApis = true
+[router.downstream.tls]
+  mTLSAPIsEnabled = true
 
 # For API key without APIM
 [[enforcer.security.tokenService]]

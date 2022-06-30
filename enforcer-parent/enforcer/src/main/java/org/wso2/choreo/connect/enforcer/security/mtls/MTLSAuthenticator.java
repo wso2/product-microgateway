@@ -19,12 +19,14 @@
 package org.wso2.choreo.connect.enforcer.security.mtls;
 
 import io.opentelemetry.context.Scope;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
@@ -38,14 +40,17 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implements the authenticator interface to authenticate request using MTLS.
  */
 public class MTLSAuthenticator implements Authenticator {
     private static final Logger log = LogManager.getLogger(MTLSAuthenticator.class);
-    private final boolean isEnableClientValidation = FilterUtils.getClientValidationStatus();
-    private final boolean isClientCertificateEncode = FilterUtils.getCertificateEncodeStatus();
+    private final boolean isEnableClientValidation = ConfigHolder.getInstance().getConfig().getMtlsInfo()
+                                                        .isEnableClientValidation();
+    private final boolean isClientCertificateEncode = ConfigHolder.getInstance().getConfig().getMtlsInfo()
+                                                        .isClientCertificateEncode();
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
@@ -53,13 +58,13 @@ public class MTLSAuthenticator implements Authenticator {
 
         if (isEnableClientValidation) {
             cert = requestContext.getClientCertificate();
-        } else {
-            if (requestContext.getHeaders().containsKey(FilterUtils.getCertificateHeaderName())) {
-                cert = retrieveMTLSHeaderValue(requestContext);
-            }
+        } else if (requestContext.getHeaders().containsKey(FilterUtils.getCertificateHeaderName())) {
+            cert = requestContext.getHeaders().get(FilterUtils.getCertificateHeaderName());
         }
-        if (cert.isEmpty()) {
-            log.debug("Could +not find a valid client certificate in the request: " + requestContext.getRequestPath());
+        if (StringUtils.isBlank(cert)) {
+            log.debug("Could not find a valid client certificate in the request: {} for the API: {}:{} ",
+                    requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                    requestContext.getMatchedAPI().getVersion());
             return false;
         }
         return true;
@@ -81,28 +86,28 @@ public class MTLSAuthenticator implements Authenticator {
             }
 
             AuthenticationContext authenticationContext = new AuthenticationContext();
-            KeyStore trustStore = retrieveTrustStore(requestContext);
-            Map<String, String> mtlsCertificateTiers = retrieveMtlsCertificateTiers(requestContext);
-            X509Certificate clientCert;
+            KeyStore trustStore = requestContext.getMatchedAPI().getTrustStore();
             boolean authenticated = false;
-            String clientCertificateTier;
-            String clientCertificateAlias;
 
             try {
-                clientCert = getClientCertificate(requestContext);
-                clientCertificateAlias = MtlsUtils.getMatchedCertificateAliasFromTrustStore(clientCert, trustStore);
-                if (clientCertificateAlias == null) {
-                    log.debug(String.format("Provided client certificate in request: %s is not in the truststore of " +
-                            "the API: %s", requestContext.getRequestPath(), requestContext.getMatchedAPI().getName()));
+                X509Certificate clientCert = getClientCertificate(requestContext);
+                String clientCertificateAlias = MtlsUtils
+                        .getMatchedCertificateAliasFromTrustStore(clientCert, trustStore);
+                if (StringUtils.isBlank(clientCertificateAlias)) {
+                    log.debug("Provided client certificate in request: {} is not in the truststore of the API: {}:{} ",
+                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                            requestContext.getMatchedAPI().getVersion());
                     clientCert = null;
                 }
-                if (clientCert != null) {
+                if (!Objects.isNull(clientCert)) {
                     authenticated = true;
-                    clientCertificateTier = MtlsUtils.getTier(clientCertificateAlias, mtlsCertificateTiers);
-                    if (clientCertificateTier != null) {
-                        if (!clientCertificateTier.equals("")) {
-                            authenticationContext.setTier(clientCertificateTier);
-                        }
+                    String clientCertificateTier = "";
+                    if (requestContext.getMatchedAPI().getMtlsCertificateTiers().containsKey(clientCertificateAlias)) {
+                        clientCertificateTier = requestContext.getMatchedAPI().getMtlsCertificateTiers()
+                                .get(clientCertificateAlias);
+                    }
+                    if (StringUtils.isNotBlank(clientCertificateTier)) {
+                        authenticationContext.setTier(clientCertificateTier);
                     }
                     String subjectDN = clientCert.getSubjectDN().getName();
                     authenticationContext.setUsername(subjectDN);
@@ -135,42 +140,26 @@ public class MTLSAuthenticator implements Authenticator {
 
         if (isEnableClientValidation) {
             String encodedCert = requestContext.getClientCertificate();
-            if (!encodedCert.isEmpty()) {
+            if (StringUtils.isNotBlank(encodedCert)) {
                 certContent = MtlsUtils.getCertContent(encodedCert, true);
             }
         } else {
             Map<String, String> headers = requestContext.getHeaders();
             if (headers.containsKey(FilterUtils.getCertificateHeaderName())) {
-                String cert = retrieveMTLSHeaderValue(requestContext);
+                String cert = requestContext.getHeaders().get(FilterUtils.getCertificateHeaderName());
                 requestContext.setClientCertificate(cert);
-                if (!cert.isEmpty()) {
+                if (StringUtils.isNotBlank(cert)) {
                     certContent = MtlsUtils.getCertContent(cert, isClientCertificateEncode);
                 }
             }
         }
-        if (!certContent.isEmpty()) {
+        if (StringUtils.isNotBlank(certContent)) {
             return MtlsUtils.getX509Cert(certContent);
         }
-        log.debug(String.format("Provided client certificate in the request: %s is invalid",
-                requestContext.getRequestPath()));
+        log.debug("Provided client certificate in the request: {} for the API: {}:{} is invalid.",
+                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                requestContext.getMatchedAPI().getVersion());
         return null;
-    }
-
-    private String retrieveMTLSHeaderValue(RequestContext requestContext) {
-        Map<String, String> headers = requestContext.getHeaders();
-        return headers.get(FilterUtils.getCertificateHeaderName());
-    }
-
-    private KeyStore retrieveTrustStore(RequestContext requestContext) {
-        KeyStore trustStore;
-        trustStore = requestContext.getMatchedAPI().getTrustStore();
-        return trustStore;
-    }
-
-    private Map<String, String> retrieveMtlsCertificateTiers(RequestContext requestContext) {
-        Map<String, String> mtlsCertificateTiers;
-        mtlsCertificateTiers = requestContext.getMatchedAPI().getMtlsCertificateTiers();
-        return mtlsCertificateTiers;
     }
 
     @Override

@@ -47,6 +47,8 @@ public class APIConfig {
     private boolean isMockedApi;
     private KeyStore trustStore;
     private Map<String, String> mtlsCertificateTiers = new HashMap<>();
+    private String mutualSSL;
+    private boolean applicationSecurity;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -199,7 +201,8 @@ public class APIConfig {
     }
 
     /**
-     * Returns the truststore for the corresponding API
+     * Returns the truststore for the corresponding API.
+     *
      * @return TrustStore
      */
     public KeyStore getTrustStore() {
@@ -207,11 +210,30 @@ public class APIConfig {
     }
 
     /**
-     * Returns the tier map of mutual ssl certificates for the corresponding API
+     * Returns the tier map of mutual ssl certificates for the corresponding API.
+     *
      * @return Tier Map
      */
     public Map<String, String> getMtlsCertificateTiers() {
         return mtlsCertificateTiers;
+    }
+
+    /**
+     * Returns the mTLS optionality for the corresponding API.
+     *
+     * @return mTLS optionality
+     */
+    public String getMutualSSL() {
+        return mutualSSL;
+    }
+
+    /**
+     * Returns the application security optionality for the corresponding API.
+     *
+     * @return application security optionality
+     */
+    public boolean getApplicationSecurity() {
+        return applicationSecurity;
     }
 
     /**
@@ -238,6 +260,8 @@ public class APIConfig {
         private boolean isMockedApi;
         private KeyStore trustStore;
         private Map<String, String> mtlsCertificateTiers;
+        private String mutualSSL;
+        private boolean applicationSecurity;
 
         public Builder(String name) {
             this.name = name;
@@ -333,6 +357,16 @@ public class APIConfig {
             return this;
         }
 
+        public Builder mutualSSL(String mutualSSL) {
+            this.mutualSSL = mutualSSL;
+            return this;
+        }
+
+        public Builder applicationSecurity(boolean applicationSecurity) {
+            this.applicationSecurity = applicationSecurity;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -354,6 +388,8 @@ public class APIConfig {
             apiConfig.isMockedApi = this.isMockedApi;
             apiConfig.trustStore = this.trustStore;
             apiConfig.mtlsCertificateTiers = this.mtlsCertificateTiers;
+            apiConfig.mutualSSL = this.mutualSSL;
+            apiConfig.applicationSecurity = this.applicationSecurity;
             return apiConfig;
         }
     }

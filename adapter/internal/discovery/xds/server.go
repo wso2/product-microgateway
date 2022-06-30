@@ -370,8 +370,8 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 				delete(apiProject.DownstreamCerts, certFile.CertificateName)
 			} else {
 				logger.LoggerXds.ErrorC(logging.ErrorDetails{
-					Message: fmt.Sprintf("Certificate file %v not found for the alias %v in the API %s:%s", certFile.CertificateName,
-						certFile.Alias, apiYaml.Name, apiYaml.Version),
+					Message: fmt.Sprintf("Certificate file %v not found for the alias %v in the API %s - %s:%s", certFile.CertificateName,
+						certFile.Alias, apiYaml.ID, apiYaml.Name, apiYaml.Version),
 					Severity:  logging.MINOR,
 					ErrorCode: 1415,
 				})

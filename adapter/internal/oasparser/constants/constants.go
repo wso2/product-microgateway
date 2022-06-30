@@ -66,11 +66,8 @@ const (
 	APIKeyInQueryOAS                     string = "query"
 	APIMAPIKeyInHeader                   string = "api_key_header"
 	APIMAPIKeyInQuery                    string = "api_key_query"
-	APIMutualSSL                         string = "mutualSSL"
-	APIMutualSSLMandartory               string = "mandatoryMutualSSL"
 	APIMMutualSSLType                    string = "mutualssl"
 	APIMMutualSSLMandatoryType           string = "mutualssl_mandatory"
-	APIOauthBasicAuthAPIKeyMandatory     string = "mandatoryOauthBasicAuthApiKey"
 	APIOauthBasicAuthAPIKeyMandatoryType string = "oauth_basic_auth_api_key_mandatory"
 )
 
@@ -124,4 +121,10 @@ const (
 	AsyncAPI2    string = "asyncapi_2"
 	NotDefined   string = "not_defined"
 	NotSupported string = "not_supported"
+)
+
+// Constants used for optionality
+const (
+	Mandatory string = "mandatory"
+	Optional  string = "optional"
 )

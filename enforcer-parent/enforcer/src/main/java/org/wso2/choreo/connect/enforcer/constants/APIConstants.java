@@ -69,6 +69,7 @@ public class APIConstants {
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String API_SECURITY_MUTUAL_SSL_NAME = "mtls";
+    public static final String CLIENT_CERTIFICATE_HEADER_DEFAULT = "X-WSO2-CLIENT-CERTIFICATE";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
@@ -396,6 +397,14 @@ public class APIConstants {
     public static class MockApiConstants {
         public static final String HEADER = "header";
         public static final String QUERY = "query";
+    }
+
+    /**
+     * Holds values for optionality.
+     */
+    public static class Optionality {
+        public static final String MANDATORY = "mandatory";
+        public static final String OPTIONAL = "optional";
     }
 
 }

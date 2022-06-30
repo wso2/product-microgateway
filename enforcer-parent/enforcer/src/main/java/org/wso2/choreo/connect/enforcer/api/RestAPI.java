@@ -93,6 +93,8 @@ public class RestAPI implements API {
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
         Map<String, String> mtlsCertificateTiers = new HashMap<>();
+        String mutualSSL = api.getMutualSSL();
+        boolean applicationSecurity = api.getApplicationSecurity();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -180,7 +182,8 @@ public class RestAPI implements API {
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
                 .endpoints(endpoints).endpointSecurity(endpointSecurity).mockedApi(api.getIsMockedApi())
                 .trustStore(trustStore).organizationId(api.getOrganizationId())
-                .mtlsCertificateTiers(mtlsCertificateTiers).build();
+                .mtlsCertificateTiers(mtlsCertificateTiers).mutualSSL(mutualSSL)
+                .applicationSecurity(applicationSecurity).build();
 
         initFilters();
         return basePath;
