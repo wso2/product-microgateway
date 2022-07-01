@@ -80,19 +80,8 @@ public class SOAPApisTestCase extends ApimBaseTest {
 
     @Test(description = "Send a request to the subscribed SOAP API using SOAP 1.1")
     public void testInvokeSoapAPIv11() throws CCTestException, InterruptedException {
-        String payload = "<soap:Envelope\n" +
-                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
-                "\t<soap:Body>\n" +
-                "\t\t<CheckPhoneNumber\n" +
-                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
-                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
-                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
-                "\t\t</CheckPhoneNumber>\n" +
-                "\t</soap:Body>\n" +
-                "</soap:Envelope>";
-        HttpResponse response = HttpsClientRequest.doPost(endpointURL11, payload, requestHeaders_11);
+        HttpResponse response = HttpsClientRequest.doPost(endpointURL11,
+                TestConstant.SOAP_ENVELOPES.SOAP11_SAMPLE_REQ_PAYLOAD, requestHeaders_11);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL11 + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
@@ -109,20 +98,8 @@ public class SOAPApisTestCase extends ApimBaseTest {
 
     @Test(description = "Send a request to the subscribed SOAP API using SOAP 1.2")
     public void testInvokeSoapAPIv12() throws CCTestException, InterruptedException {
-        String payload = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                "<soap12:Envelope\n" +
-                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "\txmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
-                "\t<soap12:Body>\n" +
-                "\t\t<CheckPhoneNumber\n" +
-                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
-                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
-                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
-                "\t\t</CheckPhoneNumber>\n" +
-                "\t</soap12:Body>\n" +
-                "</soap12:Envelope>";
-        HttpResponse response = HttpsClientRequest.doPost(endpointURL12, payload, requestHeaders_12);
+        HttpResponse response = HttpsClientRequest.doPost(endpointURL12,
+                TestConstant.SOAP_ENVELOPES.SOAP12_SAMPLE_REQ_PAYLOAD, requestHeaders_12);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL12 + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");

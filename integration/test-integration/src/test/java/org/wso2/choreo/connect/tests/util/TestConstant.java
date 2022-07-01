@@ -217,4 +217,32 @@ public class TestConstant {
     public static final class API_TYPES {
         public static final String SOAP = "SOAP";
     }
+
+    public static final class SOAP_ENVELOPES {
+        public static final String SOAP11_SAMPLE_REQ_PAYLOAD = "<soap:Envelope\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                "\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                "\t<soap:Body>\n" +
+                "\t\t<CheckPhoneNumber\n" +
+                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+                "\t\t</CheckPhoneNumber>\n" +
+                "\t</soap:Body>\n" +
+                "</soap:Envelope>";
+        public static final String SOAP12_SAMPLE_REQ_PAYLOAD = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<soap12:Envelope\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                "\txmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+                "\t<soap12:Body>\n" +
+                "\t\t<CheckPhoneNumber\n" +
+                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+                "\t\t</CheckPhoneNumber>\n" +
+                "\t</soap12:Body>\n" +
+                "</soap12:Envelope>";
+    }
 }

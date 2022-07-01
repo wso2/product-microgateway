@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SOAPApiBasicTestCase {
+public class SOAPApisTestCase {
 
     private final String context = "/soap/1.0.0";
     private final String version = "1.0.0";
@@ -68,24 +68,12 @@ public class SOAPApiBasicTestCase {
 
     @Test(description = "Invoke SOAP API with test key using SOAP 1.1")
     public void invokeSOAPAPI11() throws CCTestException, IOException {
-        String payload = "<soap:Envelope\n" +
-                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
-                "\t<soap:Body>\n" +
-                "\t\t<CheckPhoneNumber\n" +
-                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
-                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
-                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
-                "\t\t</CheckPhoneNumber>\n" +
-                "\t</soap:Body>\n" +
-                "</soap:Envelope>";
         Map<String, String> headers = new HashMap<>();
         headers.put(TestConstant.INTERNAL_KEY_HEADER, testKey);
         headers.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.TEXT_XML);
         headers.put(TestConstant.SOAP_ACTION_HEADER, SOAP_ACTION);
         HttpResponse response = HttpsClientRequest.doPost("https://localhost:9095" +
-                context  +"/phoneverify11", payload, headers);
+                context  +"/phoneverify11", TestConstant.SOAP_ENVELOPES.SOAP11_SAMPLE_REQ_PAYLOAD, headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("<Valid>true</Valid>"), "Response body mismatched");
@@ -101,24 +89,11 @@ public class SOAPApiBasicTestCase {
 
     @Test(description = "Invoke SOAP API with test key using SOAP 1.2")
     public void invokeSOAPAPI12() throws CCTestException, IOException {
-        String payload = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                "<soap12:Envelope\n" +
-                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "\txmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
-                "\t<soap12:Body>\n" +
-                "\t\t<CheckPhoneNumber\n" +
-                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
-                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
-                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
-                "\t\t</CheckPhoneNumber>\n" +
-                "\t</soap12:Body>\n" +
-                "</soap12:Envelope>";
         Map<String, String> headers = new HashMap<>();
         headers.put(TestConstant.INTERNAL_KEY_HEADER, testKey);
         headers.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.SOAP_XML);
         HttpResponse response = HttpsClientRequest.doPost("https://localhost:9095" +
-                context +"/phoneverify12", payload, headers);
+                context +"/phoneverify12", TestConstant.SOAP_ENVELOPES.SOAP12_SAMPLE_REQ_PAYLOAD, headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("<Valid>true</Valid>"), "Response body mismatched");

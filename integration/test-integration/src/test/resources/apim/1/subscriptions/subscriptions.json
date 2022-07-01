@@ -95,7 +95,7 @@
     "tier": "5EventsPerMin"
   },
   {
-    "apiName": "SOAPApi",
+    "apiName": "SoapAPI",
     "appName": "DefaultAPIApp",
     "tier": "Unlimited"
   }

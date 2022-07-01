@@ -1,5 +1,7 @@
 # WSO2 API Manager Project
 
+This is a sample API project can be used to deploy a SOAP api (Pass-Through) in Choreo Connect when running in standalone mode. This sample is using the `PhoneVerification` service from [here](http://ws.cdyne.com/phoneverify/phoneverify.asmx). 
+
 ## Project structure
 
 ```bash
