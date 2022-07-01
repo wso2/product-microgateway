@@ -3,7 +3,7 @@
 [adapter] # --------------------------------------------------------
 
 artifactsDirectory = "/home/wso2/artifacts"
-soapErrorXmlFormatEnabled = false
+soapErrorXMLFormatEnabled = false
 # Configurations required for configuring the deployment parameters that are used for identifying the Choreo Connect Adapter REST APIs
 [adapter.server]
   # Enable/Disable Choreo Connect Adapter REST API

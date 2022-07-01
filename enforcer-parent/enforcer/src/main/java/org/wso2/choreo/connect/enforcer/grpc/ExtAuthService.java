@@ -39,6 +39,7 @@ import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.constants.SoapConstants;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
@@ -128,26 +129,29 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             if (responseObject.getErrorCode() != null) {
                 // Error handling create an application/json error payload
                 if (ConfigHolder.getInstance().getConfig().getSoapErrorResponseConfigDto().isEnable() &&
-                        request.getAttributes().getRequest().getHttp().getHeadersMap().containsKey("soapaction") &&
-                        request.getAttributes().getRequest().getHttp().getHeadersMap().get("content-type")
-                                .equals("text/xml")) {
-                    deniedResponseBuilder.setBody(SOAPUtils.getSoapFaultMessage("SOAP 1.1 Protocol",
+                        request.getAttributes().getRequest().getHttp().getHeadersMap()
+                                .containsKey(SoapConstants.SOAP_ACTION_HEADER_NAME) &&
+                        request.getAttributes().getRequest().getHttp().getHeadersMap()
+                                .get(SoapConstants.CONTENT_TYPE_HEADER_NAME)
+                                .equals(SoapConstants.CONTENT_TYPE_TEXT_XML)) {
+                    deniedResponseBuilder.setBody(SOAPUtils.getSoapFaultMessage(SoapConstants.SOAP11_PROTOCOL,
                             responseObject.getErrorMessage(),
                             responseObject.getErrorDescription(), responseObject.getErrorCode()));
                     HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                            .setHeader(HeaderValue.newBuilder()
-                                    .setKey(APIConstants.CONTENT_TYPE_HEADER).setValue("text/xml").build()).build();
+                            .setHeader(HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
+                                    .setValue(SoapConstants.CONTENT_TYPE_TEXT_XML).build()).build();
                     deniedResponseBuilder.addHeaders(headerValueOption);
                 } else if (ConfigHolder.getInstance().getConfig().getSoapErrorResponseConfigDto().isEnable() &&
-                        request.getAttributes().getRequest().getHttp().getHeadersMap().get("content-type")
-                                .equals("application/soap+xml")) {
-                    deniedResponseBuilder.setBody(SOAPUtils.getSoapFaultMessage("SOAP 1.2 Protocol",
+                        request.getAttributes().getRequest().getHttp().getHeadersMap()
+                                .get(SoapConstants.CONTENT_TYPE_HEADER_NAME)
+                                .equals(SoapConstants.CONTENT_TYPE_SOAP_XML)) {
+                    deniedResponseBuilder.setBody(SOAPUtils.getSoapFaultMessage(SoapConstants.SOAP12_PROTOCOL,
                             responseObject.getErrorMessage(),
                             responseObject.getErrorDescription(), responseObject.getErrorCode()));
                     HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                             .setHeader(HeaderValue.newBuilder()
-                                    .setKey(APIConstants.CONTENT_TYPE_HEADER).setValue("application/soap+xml").build())
-                            .build();
+                                    .setKey(APIConstants.CONTENT_TYPE_HEADER)
+                                    .setValue(SoapConstants.CONTENT_TYPE_SOAP_XML).build()).build();
                     deniedResponseBuilder.addHeaders(headerValueOption);
                 } else {
                     JSONObject responseJson = new JSONObject();
