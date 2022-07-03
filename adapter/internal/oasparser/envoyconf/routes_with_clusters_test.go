@@ -360,9 +360,9 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
-	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+	assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 	productionCluster := clusters[0]
-	sandBoxCluster := clusters[1]
+	sandBoxCluster := clusters[0]
 
 	productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -509,9 +509,9 @@ func commonTestForClusterPrioritiesInWebSocketAPI(t *testing.T, apiYamlFilePath 
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	_, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
-	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+	assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 	productionCluster := clusters[0]
-	sandBoxCluster := clusters[1]
+	sandBoxCluster := clusters[0]
 
 	productionClusterHost0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	productionClusterPort0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()

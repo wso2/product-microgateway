@@ -144,21 +144,24 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			apiLevelBasePathSand = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
 			selectedBasePathSand = apiLevelBasePathSand
 		}
-		apiLevelClusterNameSand = getClusterName(apiLevelEndpointSand.EndpointPrefix, organizationID, vHost,
-			apiTitle, apiVersion, "")
-		if !strings.Contains(apiLevelEndpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
-			cluster, address, err := processEndpoints(apiLevelClusterNameSand, apiLevelEndpointSand,
-				upstreamCerts, timeout, selectedBasePathSand)
-			if err != nil {
-				apiLevelClusterNameSand = ""
-				logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
-					Message:   fmt.Sprintf("Error while adding api level sandbox endpoints for %s. %v", apiTitle, err.Error()),
-					Severity:  logging.CRITICAL,
-					ErrorCode: 2203,
-				})
-			} else {
-				clusters = append(clusters, cluster)
-				endpoints = append(endpoints, address...)
+		apiLevelClusterNameSand = apiLevelClusterNameProd
+		if isSandboxClusterRequired(mgwSwagger.GetProdEndpoints(), mgwSwagger.GetSandEndpoints()) {
+			apiLevelClusterNameSand = getClusterName(apiLevelEndpointSand.EndpointPrefix, organizationID, vHost,
+				apiTitle, apiVersion, "")
+			if !strings.Contains(apiLevelEndpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
+				cluster, address, err := processEndpoints(apiLevelClusterNameSand, apiLevelEndpointSand,
+					upstreamCerts, timeout, selectedBasePathSand)
+				if err != nil {
+					apiLevelClusterNameSand = ""
+					logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+						Message:   fmt.Sprintf("Error while adding api level sandbox endpoints for %s. %v", apiTitle, err.Error()),
+						Severity:  logging.CRITICAL,
+						ErrorCode: 2203,
+					})
+				} else {
+					clusters = append(clusters, cluster)
+					endpoints = append(endpoints, address...)
+				}
 			}
 		}
 	} else {
@@ -299,9 +302,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			if resourceBasePathSand == "" {
 				resourceBasePathSand = strings.TrimSuffix(endpointSand.Endpoints[0].Basepath, "/")
 			}
-			clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
-				apiVersion, "")
-			if !strings.Contains(endpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
+			clusterNameSand = apiLevelClusterNameSand
+			if isSandboxClusterRequired(resource.GetProdEndpoints(), resource.GetSandEndpoints()) {
 				clusterNameSand = getClusterName(endpointSand.EndpointPrefix, organizationID, vHost, apiTitle,
 					apiVersion, resource.GetID())
 				clusterSand, addressSand, err := processEndpoints(clusterNameSand, endpointSand, upstreamCerts, timeout, resourceBasePathSand)
@@ -1600,4 +1602,19 @@ func getDefaultVersionBasepath(basePath string, version string) string {
 	// Having ?: in the regex below, avoids this regex acting as a capturing group. Without this the basepath
 	// would again be added in the locations of path variables when sending the request to backend.
 	return fmt.Sprintf("(?:%s|%s)", basePath, context)
+}
+
+func isSandboxClusterRequired(productionEndpoint *model.EndpointCluster, sandboxEndpoint *model.EndpointCluster) bool {
+	if productionEndpoint == nil {
+		return true
+	}
+	if sandboxEndpoint != nil && len(sandboxEndpoint.Endpoints) > 0 {
+		if productionEndpoint.Endpoints[0].Host != sandboxEndpoint.Endpoints[0].Host {
+			return true
+		}
+		if productionEndpoint.Endpoints[0].Port != sandboxEndpoint.Endpoints[0].Port {
+			return true
+		}
+	}
+	return false
 }
