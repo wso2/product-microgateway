@@ -42,51 +42,51 @@ public class EnforcerAPITestCase extends ApimBaseTest {
         super.initWithSuperTenant();
     }
 
-//    @Test
-//    public void testGetAPIInfo() throws IOException {
-//        String requestUrl = "https://localhost:9001/api/info?context=" + API_CONTEXT + "&version=" + API_VERSION;
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
-//        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
-//        Assert.assertNotNull(httpResponse.getData());
-//        Assert.assertTrue(httpResponse.getData().contains(API_NAME));
-//        Assert.assertTrue(httpResponse.getData().contains(API_CONTEXT));
-//        Assert.assertTrue(httpResponse.getData().contains(API_VERSION));
-//        Assert.assertTrue(httpResponse.getData().contains(APPLICATION_NAME));
-//    }
+    @Test
+    public void testGetAPIInfo() throws IOException {
+        String requestUrl = "https://localhost:9001/api/info?context=" + API_CONTEXT + "&version=" + API_VERSION;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
+        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
+        Assert.assertNotNull(httpResponse.getData());
+        Assert.assertTrue(httpResponse.getData().contains(API_NAME));
+        Assert.assertTrue(httpResponse.getData().contains(API_CONTEXT));
+        Assert.assertTrue(httpResponse.getData().contains(API_VERSION));
+        Assert.assertTrue(httpResponse.getData().contains(APPLICATION_NAME));
+    }
 
-//    @Test
-//    public void testGetNonExistingAPIInfo() throws IOException {
-//        String requestUrl = "https://localhost:9001/api/info?context=" + NON_EXISTING_CONTEXT + "&version=" + API_VERSION;
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
-//        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
-//        Assert.assertNotNull(httpResponse.getData());
-//        Assert.assertTrue(httpResponse.getData().contains("No API information found for context " +
-//                NON_EXISTING_CONTEXT + " and version " + API_VERSION));
-//    }
+    @Test
+    public void testGetNonExistingAPIInfo() throws IOException {
+        String requestUrl = "https://localhost:9001/api/info?context=" + NON_EXISTING_CONTEXT + "&version=" + API_VERSION;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
+        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
+        Assert.assertNotNull(httpResponse.getData());
+        Assert.assertTrue(httpResponse.getData().contains("No API information found for context " +
+                NON_EXISTING_CONTEXT + " and version " + API_VERSION));
+    }
 
-//    @Test
-//    public void testGetAllAPIs() throws IOException {
-//        String requestUrl = "https://localhost:9001/apis";
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
-//        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
-//        Assert.assertNotNull(httpResponse.getData());
-//        Assert.assertTrue(httpResponse.getData().contains("count"));
-//    }
+    @Test
+    public void testGetAllAPIs() throws IOException {
+        String requestUrl = "https://localhost:9001/apis";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
+        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
+        Assert.assertNotNull(httpResponse.getData());
+        Assert.assertTrue(httpResponse.getData().contains("count"));
+    }
 
-//    @Test
-//    public void testQueryAPIs() throws IOException {
-//        String requestUrl = "https://localhost:9001/apis?context=" + API_CONTEXT;
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
-//        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
-//        Assert.assertNotNull(httpResponse.getData());
-//        Assert.assertTrue(httpResponse.getData().contains("\"count\":1"));
-//        Assert.assertTrue(httpResponse.getData().contains(API_CONTEXT));
-//        Assert.assertTrue(httpResponse.getData().contains(API_NAME));
-//    }
+    @Test
+    public void testQueryAPIs() throws IOException {
+        String requestUrl = "https://localhost:9001/apis?context=" + API_CONTEXT;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
+        HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
+        Assert.assertNotNull(httpResponse.getData());
+        Assert.assertTrue(httpResponse.getData().contains("\"count\":1"));
+        Assert.assertTrue(httpResponse.getData().contains(API_CONTEXT));
+        Assert.assertTrue(httpResponse.getData().contains(API_NAME));
+    }
 
     @Test
     public void testGetApplications() throws IOException {

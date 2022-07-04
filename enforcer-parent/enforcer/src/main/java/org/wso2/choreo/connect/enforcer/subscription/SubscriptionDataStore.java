@@ -140,25 +140,6 @@ public interface SubscriptionDataStore {
     API getDefaultApiByContext(String context);
 
     /**
-     * Filter the API map according to the provided parameters
-     * @param name API Name
-     * @param context API Context
-     * @param version API Version
-     * @param uuid API UUID
-     * @return Matching list of apis.
-     */
-    List<API> getMatchingAPIs(String name, String context, String version, String uuid);
-
-    /**
-     * Filter the API map according to the provided parameters
-     *
-     * @param context API Context
-     * @param version API Version
-     * @return Matching list of apis.
-     */
-    API getMatchingAPI(String context, String version);
-
-    /**
      * Filter the applications map based on the criteria.
      * @param name Application Name
      * @param organizationID Application tenant domain/ organization id

@@ -18,6 +18,7 @@
 package org.wso2.choreo.connect.enforcer.api;
 
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
@@ -27,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -142,5 +144,31 @@ public class APIFactory {
 
     private String getApiKey(String vhost, String basePath, String version) {
         return String.format("%s:%s:%s", vhost, basePath, version);
+    }
+
+    public List<API> getMatchingAPIs (String name, String context, String version, String uuid) {
+        List<API> apiList = new ArrayList<>();
+        for (API api : apis.values()) {
+            boolean isNameMatching = true;
+            boolean isContextMatching = true;
+            boolean isVersionMatching = true;
+            boolean isUUIDMatching = true;
+            if (StringUtils.isNotEmpty(name)) {
+                isNameMatching = api.getAPIConfig().getName().contains(name);
+            }
+            if (StringUtils.isNotEmpty(context)) {
+                isContextMatching = api.getAPIConfig().getBasePath().equals(context);
+            }
+            if (StringUtils.isNotEmpty(version)) {
+                isVersionMatching = api.getAPIConfig().getVersion().equals(version);
+            }
+            if (StringUtils.isNotEmpty(uuid)) {
+                isUUIDMatching = api.getAPIConfig().getUuid().equals(uuid);
+            }
+            if (isNameMatching && isContextMatching && isVersionMatching && isUUIDMatching) {
+                apiList.add(api);
+            }
+        }
+        return apiList;
     }
 }

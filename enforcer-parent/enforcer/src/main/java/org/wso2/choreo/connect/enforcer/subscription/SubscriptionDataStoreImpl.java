@@ -41,9 +41,7 @@ import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of the subscription data store.
@@ -198,13 +196,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         for (APIs api : apisList) {
             API newApi = new API();
-            newApi.setApiId(Integer.parseInt(api.getApiId()));
-            newApi.setApiName(api.getName());
-            newApi.setApiProvider(api.getProvider());
-            newApi.setApiType(api.getApiType());
-            newApi.setApiVersion(api.getVersion());
-            newApi.setContext(api.getContext());
-            newApi.setApiTier(api.getPolicy());
             newApi.setApiUUID(api.getUuid());
             newApi.setLcState(api.getLcState());
             newApiMap.put(newApi.getCacheKey(), newApi);
@@ -376,55 +367,16 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public API getDefaultApiByContext(String context) {
-        Set<String> set = apiMap.keySet()
-                .stream()
-                .filter(s -> s.startsWith(context))
-                .collect(Collectors.toSet());
-        for (String key : set) {
-            API api = apiMap.get(key);
-            if (api.isDefaultVersion() && (api.getContext().replace("/" + api.getApiVersion(), "")).equals(context)) {
-                return api;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<API> getMatchingAPIs(String name, String context, String version, String uuid) {
-        List<API> apiList = new ArrayList<>();
-        for (API api : apiMap.values()) {
-            boolean isNameMatching = true;
-            boolean isContextMatching = true;
-            boolean isVersionMatching = true;
-            boolean isUUIDMatching = true;
-            if (StringUtils.isNotEmpty(name)) {
-                isNameMatching = api.getApiName().contains(name);
-            }
-            if (StringUtils.isNotEmpty(context)) {
-                isContextMatching = api.getContext().equals(context);
-            }
-            if (StringUtils.isNotEmpty(version)) {
-                isVersionMatching = api.getApiVersion().equals(version);
-            }
-            if (StringUtils.isNotEmpty(uuid)) {
-                isUUIDMatching = api.getApiUUID().equals(uuid);
-            }
-            if (isNameMatching && isContextMatching && isVersionMatching && isUUIDMatching) {
-                apiList.add(api);
-            }
-        }
-        return apiList;
-    }
-
-    @Override
-    public API getMatchingAPI(String context, String version) {
-        for (API api : apiMap.values()) {
-            if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
-                if (api.getContext().equals(context) && api.getApiVersion().equals(version)) {
-                    return api;
-                }
-            }
-        }
+//        Set<String> set = apiMap.keySet()
+//                .stream()
+//                .filter(s -> s.startsWith(context))
+//                .collect(Collectors.toSet());
+//        for (String key : set) {
+//            API api = apiMap.get(key);
+//            if (api.isDefaultVersion() && (api.getContext().replace("/" + api.getApiVersion(), "")).equals(context)) {
+//                return api;
+//            }
+//        }
         return null;
     }
 

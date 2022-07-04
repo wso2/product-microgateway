@@ -20,16 +20,18 @@ package org.wso2.choreo.connect.enforcer.admin.handlers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import org.wso2.choreo.connect.enforcer.admin.AdminUtils;
+import org.wso2.choreo.connect.enforcer.api.API;
+import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.constants.AdminConstants;
-import org.wso2.choreo.connect.enforcer.models.API;
-import org.wso2.choreo.connect.enforcer.models.APIInfo;
-import org.wso2.choreo.connect.enforcer.models.APIList;
 import org.wso2.choreo.connect.enforcer.models.Application;
-import org.wso2.choreo.connect.enforcer.models.ApplicationInfo;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
 import org.wso2.choreo.connect.enforcer.models.ResponsePayload;
 import org.wso2.choreo.connect.enforcer.models.Subscription;
-import org.wso2.choreo.connect.enforcer.models.SubscriptionInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.APIInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.APIList;
+import org.wso2.choreo.connect.enforcer.models.admin.ApplicationInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.BasicAPIInfo;
+import org.wso2.choreo.connect.enforcer.models.admin.SubscriptionInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +46,8 @@ public class APIRequestHandler extends RequestHandler {
 
         if (AdminConstants.API_TYPE.equals(requestType)) {
             return getAPIs(params);
-        } else {
-            return getAPIInfo(params);
         }
+        return getAPIInfo(params);
     }
 
     /**
@@ -54,7 +55,7 @@ public class APIRequestHandler extends RequestHandler {
      *
      * @param params Array of parameters
      * @return ResponsePayload with APIs as APIList object.
-     * */
+     */
     private ResponsePayload getAPIs(String[] params) throws JsonProcessingException {
         List<API> apis;
         String name = null;
@@ -82,10 +83,15 @@ public class APIRequestHandler extends RequestHandler {
                 }
             }
         }
-        apis = super.dataStore.getMatchingAPIs(name, context, version, uuid);
+        apis = APIFactory.getInstance().getMatchingAPIs(name, context, version, uuid);
         APIList apiList = new APIList();
         apiList.setCount(apis.size());
-        apiList.setList(apis);
+        List<BasicAPIInfo> modelAPIs = new ArrayList<>(apis.size());
+        for (API api : apis) {
+            // TODO: (VirajSalaka) fix
+            modelAPIs.add(AdminUtils.toBasicAPIInfo(api, false));
+        }
+        apiList.setList(modelAPIs);
         return AdminUtils.buildResponsePayload(apiList, HttpResponseStatus.OK, false);
 
     }
@@ -96,7 +102,7 @@ public class APIRequestHandler extends RequestHandler {
      *
      * @param params API Context and API version
      * @return APIInfo in as a ResponsePayload object.
-     * @throws JsonProcessingException
+     * @throws JsonProcessingException If the object cannot be converted into a JSON
      */
     private ResponsePayload getAPIInfo(String[] params) throws JsonProcessingException {
         APIInfo apiInfo;
@@ -117,10 +123,12 @@ public class APIRequestHandler extends RequestHandler {
                 version = param.split("=")[1];
             }
         }
-        API matchingAPI = super.dataStore.getMatchingAPI(context, version);
-        if (matchingAPI != null) {
+        List<API> apis = APIFactory.getInstance().getMatchingAPIs(null, context, version, null);
+        String apiUUID;
+        if (apis.size() > 0) {
+            apiUUID = apis.get(0).getAPIConfig().getUuid();
             List<Subscription> matchingSubscriptions = dataStore.
-                    getMatchingSubscriptions(null, matchingAPI.getApiUUID(), null);
+                    getMatchingSubscriptions(null, apiUUID, null);
             List<SubscriptionInfo> subscriptionInfoList = new ArrayList<>();
             // For each subscription, build the Subscription info with application and key mapping.
             for (Subscription subscription : matchingSubscriptions) {
@@ -138,7 +146,8 @@ public class APIRequestHandler extends RequestHandler {
                 SubscriptionInfo subscriptionInfo = AdminUtils.toSubscriptionInfo(subscription, applicationInfo);
                 subscriptionInfoList.add(subscriptionInfo);
             }
-            apiInfo = AdminUtils.toAPIInfo(matchingAPI, subscriptionInfoList);
+
+            apiInfo = AdminUtils.toAPIInfo(apis.get(0), subscriptionInfoList);
             return AdminUtils.buildResponsePayload(apiInfo, HttpResponseStatus.OK, false);
         } else {
             // No api found for the provided search parameters...

@@ -20,115 +20,18 @@ package org.wso2.choreo.connect.enforcer.models;
 
 import org.wso2.choreo.connect.enforcer.common.CacheableEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Entity for keeping API related information.
  */
 public class API implements CacheableEntity<String> {
 
-    private Integer apiId = null;
-    private String provider = null;
-    private String name = null;
-    private String version = null;
-    private String context = null;
-    private String policy = null;
-    private String apiType = null;
     private boolean isDefaultVersion = false;
     private String apiUUID = null;
     private String lcState = null;
 
-    private List<URLMapping> urlMappings = new ArrayList<>();
-
-
-    public void addResource(URLMapping resource) {
-
-        urlMappings.add(resource);
-    }
-
-    public List<URLMapping> getResources() {
-
-        return urlMappings;
-    }
-
-    public void removeResource(URLMapping resource) {
-        urlMappings.remove(resource);
-    }
-
-    public String getContext() {
-
-        return context;
-    }
-
-    public void setContext(String context) {
-
-        this.context = context;
-    }
-
-    public String getApiTier() {
-
-        return policy;
-    }
-
-    public void setApiTier(String apiTier) {
-
-        this.policy = apiTier;
-    }
-
-    public int getApiId() {
-
-        return apiId;
-    }
-
-    public void setApiId(int apiId) {
-
-        this.apiId = apiId;
-    }
-
-    public String getApiProvider() {
-
-        return provider;
-    }
-
-    public void setApiProvider(String apiProvider) {
-
-        this.provider = apiProvider;
-    }
-
-    public String getApiName() {
-
-        return name;
-    }
-
-    public void setApiName(String apiName) {
-
-        this.name = apiName;
-    }
-
-    public String getApiVersion() {
-
-        return version;
-    }
-
-    public void setApiVersion(String apiVersion) {
-
-        this.version = apiVersion;
-    }
-
     public String getCacheKey() {
 
         return apiUUID;
-    }
-
-    public String getApiType() {
-
-        return apiType;
-    }
-
-    public void setApiType(String apiType) {
-
-        this.apiType = apiType;
     }
 
     public String getLcState() {
@@ -139,12 +42,12 @@ public class API implements CacheableEntity<String> {
         this.lcState = lcState;
     }
 
-    @Override
-    public String toString() {
-        return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
-                + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + ", urlMappings="
-                + urlMappings + "]";
-    }
+    // TODO: (VirajSalaka)
+//    @Override
+//    public String toString() {
+//        return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
+//                + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + "]";
+//    }
 
     public boolean isDefaultVersion() {
         return isDefaultVersion;

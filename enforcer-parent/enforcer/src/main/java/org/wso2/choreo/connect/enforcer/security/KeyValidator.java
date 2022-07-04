@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
@@ -33,7 +34,6 @@ import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
 import org.wso2.choreo.connect.enforcer.models.ApplicationPolicy;
 import org.wso2.choreo.connect.enforcer.models.Subscription;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
-import org.wso2.choreo.connect.enforcer.models.URLMapping;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -263,12 +263,11 @@ public class KeyValidator {
             infoDTO.setAuthorized(false);
             return;
         }
-        // TODO: (VirajSalaka) checking for blocked APIs implementation is temporarily removed.
-//        else if (APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
-//            infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
-//            infoDTO.setAuthorized(false);
-//            return;
-//        }
+        if (APIConstants.LifecycleStatus.BLOCKED.equals(apiConfig.getApiLifeCycleState())) {
+            infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
+            infoDTO.setAuthorized(false);
+            return;
+        }
         infoDTO.setTier(sub.getPolicyId());
         infoDTO.setSubscriber(app.getSubName());
         infoDTO.setApplicationId(app.getId());
@@ -330,24 +329,5 @@ public class KeyValidator {
         // condition id list for all throttling tiers associated with this API.
         infoDTO.setThrottlingDataList(list);
         infoDTO.setAuthorized(true);
-    }
-
-    private boolean isResourcePathMatching(String resourceString, URLMapping urlMapping) {
-
-        String resource = resourceString.trim();
-        String urlPattern = urlMapping.getUrlPattern().trim();
-
-        if (resource.equalsIgnoreCase(urlPattern)) {
-            return true;
-        }
-
-        // If the urlPattern is only one character longer than the resource and the urlPattern ends with a '/'
-        if (resource.length() + 1 == urlPattern.length() && urlPattern.endsWith("/")) {
-            // Check if resource is equal to urlPattern if the trailing '/' of the urlPattern is ignored
-            String urlPatternWithoutSlash = urlPattern.substring(0, urlPattern.length() - 1);
-            return resource.equalsIgnoreCase(urlPatternWithoutSlash);
-        }
-
-        return false;
     }
 }

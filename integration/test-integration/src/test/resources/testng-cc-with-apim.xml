@@ -41,9 +41,9 @@
     </test>
     <test name="apis-apps-subs-pulled-at-startup" parallel="false">
         <classes>
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase">-->
-<!--                <methods><include name="testPublishedStateAPI"/></methods>-->
-<!--            </class>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase">
+                <methods><include name="testPublishedStateAPI"/></methods>
+            </class>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase">
                 <methods><include name="testAPIsForInvalidSubscription"/></methods>
             </class>
@@ -60,7 +60,7 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BackendSecurityTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.jwtValidator.JwtAndScopeTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyTestCase"/>
-<!--           <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyBlockedAPITestCase"/>-->
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyBlockedAPITestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyAppLevelThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeySubLevelThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RetryAndTimeoutTestCase"/>
@@ -77,7 +77,7 @@
             <!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.with_apim.throttle.DenyConditionTestCase"/>-->
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EndpointsWithTrailingSlashTestCase"/>
@@ -89,7 +89,6 @@
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutorTwo"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.InternalKeyHeaderTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrototypedAPITestCase"/>
         </classes>
     </test>
     <test name="cc-shutdown-and-apim-shutdown" parallel="false">
