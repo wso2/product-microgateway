@@ -22,57 +22,11 @@ import java.util.List;
 /**
  * Model class for API Information
  */
-public class APIInfo {
-    private String provider = null;
-    private String name = null;
-    private String version = null;
-    private String context = null;
-    private String tier = null;
+public class APIInfo extends BasicAPIInfo {
     private String apiType = null;
-    private boolean isDefaultVersion = false;
     private String apiUUID = null;
     private String lcState = null;
     private List<SubscriptionInfo> subscriptions = null;
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getTier() {
-        return tier;
-    }
-
-    public void setTier(String tier) {
-        this.tier = tier;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getContext() {
-        return context;
-    }
-
-    public void setContext(String context) {
-        this.context = context;
-    }
 
     public String getApiType() {
         return apiType;
@@ -80,14 +34,6 @@ public class APIInfo {
 
     public void setApiType(String apiType) {
         this.apiType = apiType;
-    }
-
-    public boolean isDefaultVersion() {
-        return isDefaultVersion;
-    }
-
-    public void setDefaultVersion(boolean defaultVersion) {
-        isDefaultVersion = defaultVersion;
     }
 
     public String getApiUUID() {

@@ -88,7 +88,7 @@ public class APIRequestHandler extends RequestHandler {
         apiList.setCount(apis.size());
         List<BasicAPIInfo> modelAPIs = new ArrayList<>(apis.size());
         for (API api : apis) {
-            // TODO: (VirajSalaka) fix
+            // IsDefaultVersion is not populated as it is not required for the enforcer.
             modelAPIs.add(AdminUtils.toBasicAPIInfo(api, false));
         }
         apiList.setList(modelAPIs);

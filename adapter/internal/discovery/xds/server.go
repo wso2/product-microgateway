@@ -121,7 +121,7 @@ const (
 	prototypedAPI        string = "PROTOTYPED"
 	apiKeyFieldSeparator string = ":"
 	blockedStatus        string = "BLOCKED"
-	nonBlockedStatus     string = "CREATED/PUBLISHED"
+	publishedStatus      string = "PUBLISHED"
 )
 
 // IDHash uses ID field as the node hash.
@@ -1308,5 +1308,5 @@ func updateLCStateOfMgwSwagger(mgwSwagger *model.MgwSwagger) {
 		mgwSwagger.LifeCycleState = blockedStatus
 		return
 	}
-	mgwSwagger.LifeCycleState = nonBlockedStatus
+	mgwSwagger.LifeCycleState = publishedStatus
 }

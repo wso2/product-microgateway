@@ -52,7 +52,7 @@ public class AdminUtils {
         apiInfo.setContext(api.getAPIConfig().getBasePath());
         apiInfo.setName(api.getAPIConfig().getName());
         apiInfo.setLcState(api.getAPIConfig().getApiLifeCycleState());
-        apiInfo.setTier(api.getAPIConfig().getTier());
+        apiInfo.setPolicy(api.getAPIConfig().getTier());
         apiInfo.setVersion(api.getAPIConfig().getVersion());
         apiInfo.setProvider(api.getAPIConfig().getApiProvider());
         apiInfo.setApiType(api.getAPIConfig().getApiType());
