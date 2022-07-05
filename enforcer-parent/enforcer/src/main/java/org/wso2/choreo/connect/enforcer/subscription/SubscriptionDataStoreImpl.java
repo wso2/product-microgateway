@@ -21,15 +21,12 @@ package org.wso2.choreo.connect.enforcer.subscription;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.discovery.subscription.APIs;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationPolicyDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
-import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
@@ -65,7 +62,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     // Maps for keeping Subscription related details.
     private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<String, Application> applicationMap;
-    private Map<String, API> apiMap;
     private Map<String, ApiPolicy> apiPolicyMap;
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
@@ -83,7 +79,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         this.applicationKeyMappingMap = new ConcurrentHashMap<>();
         this.applicationMap = new ConcurrentHashMap<>();
-        this.apiMap = new ConcurrentHashMap<>();
         this.subscriptionPolicyMap = new ConcurrentHashMap<>();
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
@@ -100,11 +95,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
         return applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
-    }
-
-    @Override
-    public API getApiByContextAndVersion(String uuid) {
-        return apiMap.get(uuid);
     }
 
     @Override
@@ -140,7 +130,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private void initializeLoadingTasks() {
         SubscriptionDiscoveryClient.getInstance().watchSubscriptions();
         ApplicationDiscoveryClient.getInstance().watchApplications();
-        ApiListDiscoveryClient.getInstance().watchApiList();
         ApplicationPolicyDiscoveryClient.getInstance().watchApplicationPolicies();
         SubscriptionPolicyDiscoveryClient.getInstance().watchSubscriptionPolicies();
         ApplicationKeyMappingDiscoveryClient.getInstance().watchApplicationKeyMappings();
@@ -189,21 +178,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             log.debug("Total Applications in new cache: {}", newApplicationMap.size());
         }
         this.applicationMap = newApplicationMap;
-    }
-
-    public void addApis(List<APIs> apisList) {
-        Map<String, API> newApiMap = new ConcurrentHashMap<>();
-
-        for (APIs api : apisList) {
-            API newApi = new API();
-            newApi.setApiUUID(api.getUuid());
-            newApi.setLcState(api.getLcState());
-            newApiMap.put(newApi.getCacheKey(), newApi);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Total Apis in new cache: {}", newApiMap.size());
-        }
-        this.apiMap = newApiMap;
     }
 
     public void addApplicationPolicies(
@@ -298,20 +272,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public void addOrUpdateAPI(API api) {
-        apiMap.put(api.getCacheKey(), api);
-    }
-
-    @Override
-    public void addOrUpdateAPIWithUrlTemplates(API api) {
-    }
-
-    @Override
-    public void removeAPI(API api) {
-        apiMap.remove(api.getCacheKey());
-    }
-
-    @Override
     public void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping) {
 
         applicationKeyMappingMap.remove(applicationKeyMapping.getCacheKey());
@@ -363,21 +323,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public void removeApiPolicy(ApiPolicy apiPolicy) {
         apiPolicyMap.remove(apiPolicy.getCacheKey());
-    }
-
-    @Override
-    public API getDefaultApiByContext(String context) {
-//        Set<String> set = apiMap.keySet()
-//                .stream()
-//                .filter(s -> s.startsWith(context))
-//                .collect(Collectors.toSet());
-//        for (String key : set) {
-//            API api = apiMap.get(key);
-//            if (api.isDefaultVersion() && (api.getContext().replace("/" + api.getApiVersion(), "")).equals(context)) {
-//                return api;
-//            }
-//        }
-        return null;
     }
 
     @Override
