@@ -60,7 +60,7 @@ public class Http2ClearTextApiTestCase2 {
     public void invokeHttp2ClearTextEndpointSuccess() throws Exception {
 
         // Set header
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps(
                 "/http2_clear_text/hello") , headers);
@@ -73,7 +73,7 @@ public class Http2ClearTextApiTestCase2 {
     public void invokeHttp2ClearTextEndpointWithHttp2DownsteamSuccess() throws Exception {
 
         // Set header
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         java.net.http.HttpResponse<String> response = Http2ClientRequest.retryGetRequestUntilDeployed(Utils.getServiceURLHttps(
                 "/http2_clear_text/hello") , headers);
