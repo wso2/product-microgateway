@@ -160,6 +160,8 @@ public class ThrottleFilter implements Filter {
                 // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
                 String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(),
                         apiTenantDomain);
+                String customPropertyString = String.valueOf(reqContext.getProperties()
+                        .get(ThrottleConstants.CUSTOM_THROTTLE_PROPERTIES));
                 boolean isApiLevelTriggered = false;
 
                 if (!StringUtils.isEmpty(api.getTier())) {
@@ -248,7 +250,7 @@ public class ThrottleFilter implements Filter {
 
                 // Checking Custom policy throttling
                 Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
-                        apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp);
+                        apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp, customPropertyString);
                 log.debug("Custom policy throttle decision is {}", customDecision.isThrottled());
                 if (customDecision.isThrottled()) {
                     log.debug("Setting custom policy throttle out response");
@@ -406,6 +408,8 @@ public class ThrottleFilter implements Filter {
         String remoteIP = requestContext.getClientIp();
         JSONObject jsonObMap = new JSONObject();
         ThrottleConfigDto config = ConfigHolder.getInstance().getConfig().getThrottleConfig();
+        String customPropertyString = String.valueOf(requestContext.getProperties()
+                .get(ThrottleConstants.CUSTOM_THROTTLE_PROPERTIES));
 
         if (remoteIP != null && remoteIP.length() > 0) {
             try {
@@ -458,6 +462,19 @@ public class ThrottleFilter implements Filter {
             Map<String, String> claims = ThrottleUtils.getJWTClaims(callerToken);
             for (String key : claims.keySet()) {
                 jsonObMap.put(key, claims.get(key));
+            }
+        }
+
+        // If custom throttle properties exist, add custom properties to properties map.
+        if (!customPropertyString.equals("null")) {
+            String[] customPropertyList = customPropertyString.split(" ");
+            for (String customProperty: customPropertyList) {
+                String[] propertyPair = customProperty.split("=");
+                if (propertyPair.length == 2) {
+                    jsonObMap.put(propertyPair[0], propertyPair[1]);
+                } else {
+                    log.debug("Invalid custom property string : {}", customProperty);
+                }
             }
         }
 

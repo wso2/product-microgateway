@@ -61,4 +61,5 @@ public class ThrottleConstants {
     // blocking constants
     public static final String BLOCKING_CONDITIONS_IP = "IP";
     public static final String BLOCK_CONDITION_IP_RANGE = "IPRANGE";
+    public static final String CUSTOM_THROTTLE_PROPERTIES = "customProperty";
 }
