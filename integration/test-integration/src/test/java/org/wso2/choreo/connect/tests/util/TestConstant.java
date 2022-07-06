@@ -207,4 +207,6 @@ public class TestConstant {
         public SUBSCRIPTION_TIER() {
         }
     }
+
+    public static final String ENABLE_ENFORCER_CUSTOM_FILTER = "enable-custom-filter";
 }

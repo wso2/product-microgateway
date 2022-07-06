@@ -52,6 +52,26 @@ public class MockBackendSandbox extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
 
+            httpServer.createContext(context + "/pet/patch/diff/findByStatus", exchange -> {
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
+            httpServer.createContext(context + "/pets/findByTags", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
+            httpServer.createContext(context + "/v2/pets/findByTags", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
+            httpServer.createContext(context + "/pet/findByTags", exchange -> {
+                byte[] response = ResponseConstants.API_SANDBOX_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+
             // for interceptor dynamic endpoints test cases
             httpServer.createContext(context + "/pet/findByStatus/dynamic-ep-echo", Utils::echo);
 

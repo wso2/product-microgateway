@@ -8,5 +8,10 @@
     "apiName": "WebSocketTimeoutAPI",
     "appName": "WebSocketTimeoutApp",
     "tier": "AsyncUnlimited"
+  },
+  {
+    "apiName": "KeyTemplateThrottlingAPI",
+    "appName": "KeyTemplateThrottlingApp",
+    "tier": "Unlimited"
   }
 ]
