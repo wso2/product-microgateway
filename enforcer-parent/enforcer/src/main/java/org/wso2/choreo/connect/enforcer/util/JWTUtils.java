@@ -154,10 +154,7 @@ public class JWTUtils {
             Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
             String lineSeparator = System.lineSeparator();
-            // Change the lineSeparator to \r\n if it runs on WSL
-            if (System.getProperty("os.version").toLowerCase().contains("wsl")) {
-                lineSeparator = "\r\n";
-            }
+            
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")
                     .replaceAll(lineSeparator, "")
