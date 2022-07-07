@@ -1511,10 +1511,15 @@ func isSandboxClusterRequired(productionEndpoint *model.EndpointCluster, sandbox
 		return true
 	}
 	if sandboxEndpoint != nil && len(sandboxEndpoint.Endpoints) > 0 {
+		// For general host and port based endpoint, check whether host or port are different.
 		if productionEndpoint.Endpoints[0].Host != sandboxEndpoint.Endpoints[0].Host {
 			return true
 		}
 		if productionEndpoint.Endpoints[0].Port != sandboxEndpoint.Endpoints[0].Port {
+			return true
+		}
+		// For Consul endpoints, check whether the service discovery strings are different.
+		if productionEndpoint.Endpoints[0].ServiceDiscoveryString != sandboxEndpoint.Endpoints[0].ServiceDiscoveryString {
 			return true
 		}
 	}
