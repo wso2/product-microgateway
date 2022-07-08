@@ -48,7 +48,7 @@ import java.util.ServiceLoader;
  */
 public class BackendJwtUtils {
     private static final Logger log = LogManager.getLogger(BackendJwtUtils.class);
-    private static volatile long ttl = -1L;
+    private static volatile long ttl = 3600;
 
     /**
      * Get Time to live.
@@ -56,7 +56,7 @@ public class BackendJwtUtils {
      * @return -1L * 1000
      */
     public static long getTTL() {
-        return ttl * 1000;
+        return ttl;
     }
 
     /**
@@ -84,7 +84,7 @@ public class BackendJwtUtils {
                     Object token = CacheProvider.getGatewayJWTTokenCache().get(jwtTokenCacheKey);
                     if (token != null && !JWTConstants.UNAVAILABLE.equals(token)) {
                         endUserToken = (String) token;
-                        valid = JWTUtils.isExpired(endUserToken);
+                        valid = !JWTUtils.isExpired(endUserToken);
                     }
                 } catch (Exception e) {
                     log.error("Error while getting token from the cache", e);
