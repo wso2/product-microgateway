@@ -188,6 +188,7 @@ var defaultConfig = &Config{
 			ClaimsExtractorImpl:   "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
 			PublicCertificatePath: "/home/wso2/security/truststore/mg.pem",
 			PrivateKeyPath:        "/home/wso2/security/keystore/mg.key",
+			TokenTTL:              3600,
 		},
 		Cache: cache{
 			Enabled:     true,
