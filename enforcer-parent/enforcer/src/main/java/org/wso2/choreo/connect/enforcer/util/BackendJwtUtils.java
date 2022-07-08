@@ -48,16 +48,6 @@ import java.util.ServiceLoader;
  */
 public class BackendJwtUtils {
     private static final Logger log = LogManager.getLogger(BackendJwtUtils.class);
-    private static volatile long ttl = 3600;
-
-    /**
-     * Get Time to live.
-     *
-     * @return -1L * 1000
-     */
-    public static long getTTL() {
-        return ttl;
-    }
 
     /**
      * Generates or gets the Cached Backend JWT token.
@@ -107,7 +97,6 @@ public class BackendJwtUtils {
         String endUserToken;
         JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().
                 getJwtConfigurationDto();
-        jwtConfigurationDto.setTtl(getTTL());
         jwtGenerator.setJWTConfigurationDto(jwtConfigurationDto);
         try {
             endUserToken = jwtGenerator.generateToken(jwtInfoDto);
