@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Jwt generator test cases.
@@ -78,5 +79,55 @@ public class JwtGeneratorTestCase {
                 "Issuer is  not set correctly in JWT generator");
         Assert.assertEquals(tokenBody.get("keytype"), TestConstant.KEY_TYPE_PRODUCTION,
                 "Key type is not set correctly in JWT generator");
+        Assert.assertNotNull(tokenBody.get("iat"));
+        Assert.assertNotNull(tokenBody.get("exp"));
+
+        long expValue =  Long.parseLong(String.valueOf(tokenBody.get("exp")));
+        long iatValue =  Long.parseLong(String.valueOf(tokenBody.get("iat")));
+
+        long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+        Assert.assertEquals(expValue - currentTime, 3600, "Time duration between iat and exp claims is " +
+                "not 3600 seconds.");
+        Assert.assertTrue(expValue > currentTime, "Expiry time is not greater than currentTime.");
+        Assert.assertTrue(iatValue < currentTime, "IAT value is not less than the current Time");
+    }
+
+    @Test(description = "Test JWT Generator token caching")
+    public void testResponseJWTGenerationTokenCaching() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/standard/jwttoken") , headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
+        JSONObject responseJSON = new JSONObject(response.getData());
+        String token1 = responseJSON.get("token").toString();
+
+        response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/standard/jwttoken") , headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
+        responseJSON = new JSONObject(response.getData());
+        String token2 = responseJSON.get("token").toString();
+
+        Assert.assertEquals(token1, token2, "Generated Backend JWTs for two invocations from the same token" +
+                " to same api are different. Hence it is not cached.");
+
+        String newJwtToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + newJwtToken);
+        response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/standard/jwttoken") , headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
+        responseJSON = new JSONObject(response.getData());
+        String token3 = responseJSON.get("token").toString();
+
+        Assert.assertEquals(token1, token3, "Generated Backend JWTs for two invocations from the different " +
+                "tokens to same api are same. Hence there is an issue for backend JWT generation where the generated" +
+                "JWT remains same for different users.");
     }
 }
