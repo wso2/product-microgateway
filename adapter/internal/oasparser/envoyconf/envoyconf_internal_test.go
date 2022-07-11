@@ -559,9 +559,9 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 	}}
 
 	tlsCert := generateTLSCert(defaultMgwKeyPath, defaultMgwCertPath)
-	upstreamTLSContextWithCerts := createUpstreamTLSContext(certByteArr, hostNameAddress)
-	upstreamTLSContextWithoutCerts := createUpstreamTLSContext(nil, hostNameAddress)
-	upstreamTLSContextWithIP := createUpstreamTLSContext(certByteArr, hostNameAddressWithIP)
+	upstreamTLSContextWithCerts := createUpstreamTLSContext(certByteArr, hostNameAddress, false)
+	upstreamTLSContextWithoutCerts := createUpstreamTLSContext(nil, hostNameAddress, false)
+	upstreamTLSContextWithIP := createUpstreamTLSContext(certByteArr, hostNameAddressWithIP, false)
 
 	assert.NotEmpty(t, upstreamTLSContextWithCerts, "Upstream TLS Context should not be null when certs provided")
 	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext, "CommonTLSContext should not be "+

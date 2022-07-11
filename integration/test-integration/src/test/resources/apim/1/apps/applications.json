@@ -20,6 +20,18 @@
     "throttleTier": "Unlimited"
   },
   {
+    "appName": "Http2SecuredAPIApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "Http2ClearTextAPIApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "Http1APIApp",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "EndpointWithTrailingSlashApiApp",
     "throttleTier": "Unlimited"
   },

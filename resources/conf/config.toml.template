@@ -99,6 +99,11 @@ artifactsDirectory = "/home/wso2/artifacts"
   securedListenerHost = "0.0.0.0"
   # Port for secured listener of Router
   securedListenerPort = 9095
+  
+  # Set the listener side http protocol version. Default to AUTO where both http1 and http2 connections are handled
+  # It can be specifically set to either HTTP1 or HTTP2
+  listenerCodecType = "AUTO"
+
   # The timeout for new network connections to hosts in the cluster in seconds
   clusterTimeoutInSeconds = 20
   # The timeout for response coming from enforcer to route per API request
@@ -184,8 +189,14 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Used when retry config is set via API-M UI or all given status codes are out of range.
   statusCodes = [ 504 ]
 
-[router.downstream]
+# Configs http2 protocol options for upstream http2 cluster endpoints
+[router.upstream.http2]
+  # Maximum table size (in octets) that the encoder is permitted to use for the dynamic HPACK table: https://httpwg.org/specs/rfc7541.html#rfc.section.4.2
+  hpackTableSize = 4096
+  # Maximum concurrent streams allowed for peer on one HTTP/2 connection
+  maxConcurrentStreams = 2147483647
 
+[router.downstream]
 # The configurations for SSL configuration related to the client connection in Choreo Connect
 [router.downstream.tls]
   # Path to trusted certificates

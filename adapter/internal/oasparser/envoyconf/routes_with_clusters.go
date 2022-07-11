@@ -38,6 +38,7 @@ import (
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
+
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
@@ -48,6 +49,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
+	upstreams_http_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -105,6 +107,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// check API level production endpoints available
 	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
 		apiLevelEndpointProd := mgwSwagger.GetProdEndpoints()
+		apiLevelEndpointProd.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
 		apiLevelBasePathProd = strings.TrimSuffix(apiLevelEndpointProd.Endpoints[0].Basepath, "/")
 		apiLevelClusterNameProd = getClusterName(apiLevelEndpointProd.EndpointPrefix, organizationID, vHost, apiTitle,
 			apiVersion, "")
@@ -130,6 +133,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
 		selectedBasePathSand := apiLevelBasePathProd
 		apiLevelEndpointSand := mgwSwagger.GetSandEndpoints()
+		apiLevelEndpointSand.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
 		if apiLevelBasePathProd == "" && apiLevelClusterNameProd == "" {
 			// no production endpoint, assign sandbox endpoint basepath as apiLevelbasePath
 			apiLevelBasePathProd = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
@@ -535,7 +539,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 				epCert = defaultCerts
 			}
 
-			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
+			upstreamtlsContext := createUpstreamTLSContext(epCert, address, clusterDetails.HTTP2BackendEnabled)
 			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
@@ -574,6 +578,40 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	}
 	conf, _ := config.ReadConfigs()
 
+	httpProtocolOptions := &upstreams_http_v3.HttpProtocolOptions{
+		UpstreamProtocolOptions: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_{
+			ExplicitHttpConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig{
+				ProtocolConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_HttpProtocolOptions{
+					HttpProtocolOptions: &corev3.Http1ProtocolOptions{
+						EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
+					},
+				},
+			},
+		},
+	}
+
+	if clusterDetails.HTTP2BackendEnabled {
+		httpProtocolOptions.UpstreamProtocolOptions = &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_{
+			ExplicitHttpConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig{
+				ProtocolConfig: &upstreams_http_v3.HttpProtocolOptions_ExplicitHttpConfig_Http2ProtocolOptions{
+					Http2ProtocolOptions: &corev3.Http2ProtocolOptions{
+						HpackTableSize: &wrapperspb.UInt32Value{
+							Value: conf.Envoy.Upstream.HTTP2.HpackTableSize,
+						},
+						MaxConcurrentStreams: &wrapperspb.UInt32Value{
+							Value: conf.Envoy.Upstream.HTTP2.MaxConcurrentStreams,
+						},
+					},
+				},
+			},
+		}
+	}
+
+	ext, err2 := proto.Marshal(httpProtocolOptions)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
 		ConnectTimeout:       durationpb.New(timeout * time.Second),
@@ -587,8 +625,11 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
-		HttpProtocolOptions: &corev3.Http1ProtocolOptions{
-			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
+		TypedExtensionProtocolOptions: map[string]*anypb.Any{
+			"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": &any.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions",
+				Value:   ext,
+			},
 		},
 	}
 
@@ -648,7 +689,7 @@ func createHealthCheck() []*corev3.HealthCheck {
 	}
 }
 
-func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tlsv3.UpstreamTlsContext {
+func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, hTTP2BackendEnabled bool) *tlsv3.UpstreamTlsContext {
 	conf, errReadConfig := config.ReadConfigs()
 	//TODO: (VirajSalaka) Error Handling
 	if errReadConfig != nil {
@@ -671,6 +712,10 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
 		},
+	}
+
+	if hTTP2BackendEnabled {
+		upstreamTLSContext.CommonTlsContext.AlpnProtocols = []string{"h2", "http/1.1"}
 	}
 
 	sanType := tlsv3.SubjectAltNameMatcher_IP_ADDRESS

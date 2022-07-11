@@ -33,4 +33,7 @@ public class Constants {
     public static final int INTERCEPTOR_STATUS_SERVER_PORT = 2370;
     public static final int MTLS_INTERCEPTOR_HANDLER_SERVER_PORT = 2371;
     public static final int WEBSOCKET_SERVER_PORT = 2360;
+
+    public static final int MOCK_BACKEND_HTTP2_SERVER_CLEAR_TEXT_PORT = 2350;
+    public static final int MOCK_BACKEND_HTTP2_SERVER_SECURED_PORT = 2351;
 }

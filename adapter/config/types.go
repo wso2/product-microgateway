@@ -103,6 +103,7 @@ type envoy struct {
 	ListenerPort                     uint32
 	SecuredListenerHost              string
 	SecuredListenerPort              uint32
+	ListenerCodecType                string
 	ClusterTimeoutInSeconds          time.Duration
 	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
 	KeyStore                         keystore
@@ -225,6 +226,7 @@ type envoyUpstream struct {
 	Health   upstreamHealth
 	DNS      upstreamDNS
 	Retry    upstreamRetry
+	HTTP2    upstreamHTTP2Options
 }
 
 // Envoy Downstream Related Configurations
@@ -263,6 +265,11 @@ type upstreamHealth struct {
 type upstreamDNS struct {
 	DNSRefreshRate int32
 	RespectDNSTtl  bool
+}
+
+type upstreamHTTP2Options struct {
+	HpackTableSize       uint32
+	MaxConcurrentStreams uint32
 }
 
 type upstreamRetry struct {

@@ -71,6 +71,7 @@ var defaultConfig = &Config{
 		ListenerPort:                     9090,
 		SecuredListenerHost:              "0.0.0.0",
 		SecuredListenerPort:              9095,
+		ListenerCodecType:                "AUTO",
 		ClusterTimeoutInSeconds:          20,
 		EnforcerResponseTimeoutInSeconds: 20,
 		UseRemoteAddress:                 false,
@@ -118,6 +119,10 @@ var defaultConfig = &Config{
 			DNS: upstreamDNS{
 				DNSRefreshRate: 5000,
 				RespectDNSTtl:  false,
+			},
+			HTTP2: upstreamHTTP2Options{
+				HpackTableSize:       4096,
+				MaxConcurrentStreams: 2147483647,
 			},
 		},
 		Downstream: envoyDownstream{

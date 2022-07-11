@@ -74,6 +74,8 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2ClearTextApiTestCase2"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2SecuredApiTestCase2"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
