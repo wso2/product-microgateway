@@ -86,7 +86,7 @@ public class JwtGeneratorTestCase {
         long iatValue =  Long.parseLong(String.valueOf(tokenBody.get("iat")));
 
         long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-        Assert.assertEquals(expValue - currentTime, 3600, "Time duration between iat and exp claims is " +
+        Assert.assertEquals(expValue - iatValue, 3600, "Time duration between iat and exp claims is " +
                 "not 3600 seconds.");
         Assert.assertTrue(expValue > currentTime, "Expiry time is not greater than currentTime.");
         Assert.assertTrue(iatValue < currentTime, "IAT value is not less than the current Time");
@@ -126,7 +126,7 @@ public class JwtGeneratorTestCase {
         responseJSON = new JSONObject(response.getData());
         String token3 = responseJSON.get("token").toString();
 
-        Assert.assertEquals(token1, token3, "Generated Backend JWTs for two invocations from the different " +
+        Assert.assertNotEquals(token1, token3, "Generated Backend JWTs for two invocations from the different " +
                 "tokens to same api are same. Hence there is an issue for backend JWT generation where the generated" +
                 "JWT remains same for different users.");
     }
