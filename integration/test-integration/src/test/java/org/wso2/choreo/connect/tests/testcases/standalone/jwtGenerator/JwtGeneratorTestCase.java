@@ -89,7 +89,7 @@ public class JwtGeneratorTestCase {
         Assert.assertEquals(expValue - iatValue, 3600, "Time duration between iat and exp claims is " +
                 "not 3600 seconds.");
         Assert.assertTrue(expValue > currentTime, "Expiry time is not greater than currentTime.");
-        Assert.assertTrue(iatValue < currentTime, "IAT value is not less than the current Time");
+        Assert.assertTrue(iatValue <= currentTime, "IAT value is not less than the current Time");
     }
 
     @Test(description = "Test JWT Generator token caching")
