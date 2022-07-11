@@ -120,6 +120,12 @@ var defaultConfig = &Config{
 				RespectDNSTtl:  false,
 			},
 		},
+		Downstream: envoyDownstream{
+			TLS: downstreamTLS{
+				TrustedCertPath: "/etc/ssl/certs/ca-certificates.crt",
+				MTLSAPIsEnabled: false,
+			},
+		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{
 				RequestTimeoutInSeconds:        0,
@@ -176,6 +182,12 @@ var defaultConfig = &Config{
 				EnableOutboundAuthHeader: false,
 				AuthorizationHeader:      "authorization",
 				TestConsoleHeaderName:    "Internal-Key",
+			},
+			MutualSSL: mutualSSL{
+				CertificateHeader:               "X-WSO2-CLIENT-CERTIFICATE",
+				EnableClientValidation:          true,
+				ClientCertificateEncode:         false,
+				EnableOutboundCertificateHeader: false,
 			},
 		},
 		AuthService: authService{

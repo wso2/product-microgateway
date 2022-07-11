@@ -57,15 +57,18 @@ const (
 
 // sub-property values and keys relevant for x-wso2-application security extension
 const (
-	APIMAPIKeyType            string = "api_key"
-	APIKeyNameWithApim        string = "apikey"
-	APIKeyTypeInOAS           string = "apiKey"
-	APIMOauth2Type            string = "oauth2"
-	APIMDefaultOauth2Security string = "default"
-	APIKeyInHeaderOAS         string = "header"
-	APIKeyInQueryOAS          string = "query"
-	APIMAPIKeyInHeader        string = "api_key_header"
-	APIMAPIKeyInQuery         string = "api_key_query"
+	APIMAPIKeyType                       string = "api_key"
+	APIKeyNameWithApim                   string = "apikey"
+	APIKeyTypeInOAS                      string = "apiKey"
+	APIMOauth2Type                       string = "oauth2"
+	APIMDefaultOauth2Security            string = "default"
+	APIKeyInHeaderOAS                    string = "header"
+	APIKeyInQueryOAS                     string = "query"
+	APIMAPIKeyInHeader                   string = "api_key_header"
+	APIMAPIKeyInQuery                    string = "api_key_query"
+	APIMMutualSSLType                    string = "mutualssl"
+	APIMMutualSSLMandatoryType           string = "mutualssl_mandatory"
+	APIOauthBasicAuthAPIKeyMandatoryType string = "oauth_basic_auth_api_key_mandatory"
 )
 
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
@@ -118,4 +121,10 @@ const (
 	AsyncAPI2    string = "asyncapi_2"
 	NotDefined   string = "not_defined"
 	NotSupported string = "not_supported"
+)
+
+// Constants used for optionality
+const (
+	Mandatory string = "mandatory"
+	Optional  string = "optional"
 )

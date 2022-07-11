@@ -90,12 +90,12 @@ public class AllHttpMethodsForWildcardTestCase {
 
     @Test(description = "test path with trailing slash for PATCH")
     public void testTrailingSlashPATCH() throws Exception {
-        java.net.http.HttpResponse<String> httpResponse = HttpsClientRequest.doPatch(
+        org.apache.http.HttpResponse httpResponse = HttpsClientRequest.doPatch(
                 Utils.getServiceURLHttps(API_CONTEXT + "/"), "Hello", headers);
         EchoResponse echoResponse = Utils.extractToEchoResponse(httpResponse);
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/","Request path mismatched");
 
-        java.net.http.HttpResponse<String> httpResponse1 = HttpsClientRequest.doPatch(
+        org.apache.http.HttpResponse httpResponse1 = HttpsClientRequest.doPatch(
                 Utils.getServiceURLHttps(API_CONTEXT + "/test"), "Hello", headers);
         EchoResponse echoResponse1 = Utils.extractToEchoResponse(httpResponse1);
         Assert.assertEquals(echoResponse1.getPath(), "/v2/echo-full/test","Request path mismatched");

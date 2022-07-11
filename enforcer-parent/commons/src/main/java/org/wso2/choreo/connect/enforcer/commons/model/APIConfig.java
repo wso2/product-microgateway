@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.commons.model;
 
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,10 @@ public class APIConfig {
     private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
     private boolean isMockedApi;
+    private KeyStore trustStore;
+    private Map<String, String> mtlsCertificateTiers = new HashMap<>();
+    private String mutualSSL;
+    private boolean applicationSecurity;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -196,6 +201,42 @@ public class APIConfig {
     }
 
     /**
+     * Returns the truststore for the corresponding API.
+     *
+     * @return TrustStore
+     */
+    public KeyStore getTrustStore() {
+        return trustStore;
+    }
+
+    /**
+     * Returns the tier map of mutual ssl certificates for the corresponding API.
+     *
+     * @return Tier Map
+     */
+    public Map<String, String> getMtlsCertificateTiers() {
+        return mtlsCertificateTiers;
+    }
+
+    /**
+     * Returns the mTLS optionality for the corresponding API.
+     *
+     * @return mTLS optionality
+     */
+    public String getMutualSSL() {
+        return mutualSSL;
+    }
+
+    /**
+     * Returns the application security optionality for the corresponding API.
+     *
+     * @return application security optionality
+     */
+    public boolean getApplicationSecurity() {
+        return applicationSecurity;
+    }
+
+    /**
      * Implements builder pattern to build an API Config object.
      */
     public static class Builder {
@@ -217,6 +258,10 @@ public class APIConfig {
         private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
         private boolean isMockedApi;
+        private KeyStore trustStore;
+        private Map<String, String> mtlsCertificateTiers;
+        private String mutualSSL;
+        private boolean applicationSecurity;
 
         public Builder(String name) {
             this.name = name;
@@ -302,6 +347,26 @@ public class APIConfig {
             return this;
         }
 
+        public Builder trustStore(KeyStore trustStore) {
+            this.trustStore = trustStore;
+            return this;
+        }
+
+        public Builder mtlsCertificateTiers(Map<String, String> mtlsCertificateTiers) {
+            this.mtlsCertificateTiers = mtlsCertificateTiers;
+            return this;
+        }
+
+        public Builder mutualSSL(String mutualSSL) {
+            this.mutualSSL = mutualSSL;
+            return this;
+        }
+
+        public Builder applicationSecurity(boolean applicationSecurity) {
+            this.applicationSecurity = applicationSecurity;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -321,6 +386,10 @@ public class APIConfig {
             apiConfig.uuid = this.uuid;
             apiConfig.securitySchemeDefinitions = this.securitySchemeDefinitions;
             apiConfig.isMockedApi = this.isMockedApi;
+            apiConfig.trustStore = this.trustStore;
+            apiConfig.mtlsCertificateTiers = this.mtlsCertificateTiers;
+            apiConfig.mutualSSL = this.mutualSSL;
+            apiConfig.applicationSecurity = this.applicationSecurity;
             return apiConfig;
         }
     }

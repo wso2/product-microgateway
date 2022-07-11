@@ -76,6 +76,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 26: {
+            org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.Builder subBuilder = null;
+            if (mutualSSL_ != null) {
+              subBuilder = mutualSSL_.toBuilder();
+            }
+            mutualSSL_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(mutualSSL_);
+              mutualSSL_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -177,6 +190,32 @@ private static final long serialVersionUID = 0L;
     return getAuthHeader();
   }
 
+  public static final int MUTUALSSL_FIELD_NUMBER = 3;
+  private org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL mutualSSL_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+   * @return Whether the mutualSSL field is set.
+   */
+  @java.lang.Override
+  public boolean hasMutualSSL() {
+    return mutualSSL_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+   * @return The mutualSSL.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL getMutualSSL() {
+    return mutualSSL_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.getDefaultInstance() : mutualSSL_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLOrBuilder getMutualSSLOrBuilder() {
+    return getMutualSSL();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -197,6 +236,9 @@ private static final long serialVersionUID = 0L;
     if (authHeader_ != null) {
       output.writeMessage(2, getAuthHeader());
     }
+    if (mutualSSL_ != null) {
+      output.writeMessage(3, getMutualSSL());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -213,6 +255,10 @@ private static final long serialVersionUID = 0L;
     if (authHeader_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, getAuthHeader());
+    }
+    if (mutualSSL_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(3, getMutualSSL());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -236,6 +282,11 @@ private static final long serialVersionUID = 0L;
       if (!getAuthHeader()
           .equals(other.getAuthHeader())) return false;
     }
+    if (hasMutualSSL() != other.hasMutualSSL()) return false;
+    if (hasMutualSSL()) {
+      if (!getMutualSSL()
+          .equals(other.getMutualSSL())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -254,6 +305,10 @@ private static final long serialVersionUID = 0L;
     if (hasAuthHeader()) {
       hash = (37 * hash) + AUTHHEADER_FIELD_NUMBER;
       hash = (53 * hash) + getAuthHeader().hashCode();
+    }
+    if (hasMutualSSL()) {
+      hash = (37 * hash) + MUTUALSSL_FIELD_NUMBER;
+      hash = (53 * hash) + getMutualSSL().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -405,6 +460,12 @@ private static final long serialVersionUID = 0L;
         authHeader_ = null;
         authHeaderBuilder_ = null;
       }
+      if (mutualSSLBuilder_ == null) {
+        mutualSSL_ = null;
+      } else {
+        mutualSSL_ = null;
+        mutualSSLBuilder_ = null;
+      }
       return this;
     }
 
@@ -445,6 +506,11 @@ private static final long serialVersionUID = 0L;
         result.authHeader_ = authHeader_;
       } else {
         result.authHeader_ = authHeaderBuilder_.build();
+      }
+      if (mutualSSLBuilder_ == null) {
+        result.mutualSSL_ = mutualSSL_;
+      } else {
+        result.mutualSSL_ = mutualSSLBuilder_.build();
       }
       onBuilt();
       return result;
@@ -522,6 +588,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasAuthHeader()) {
         mergeAuthHeader(other.getAuthHeader());
+      }
+      if (other.hasMutualSSL()) {
+        mergeMutualSSL(other.getMutualSSL());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -910,6 +979,125 @@ private static final long serialVersionUID = 0L;
         authHeader_ = null;
       }
       return authHeaderBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL mutualSSL_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL, org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.Builder, org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLOrBuilder> mutualSSLBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     * @return Whether the mutualSSL field is set.
+     */
+    public boolean hasMutualSSL() {
+      return mutualSSLBuilder_ != null || mutualSSL_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     * @return The mutualSSL.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL getMutualSSL() {
+      if (mutualSSLBuilder_ == null) {
+        return mutualSSL_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.getDefaultInstance() : mutualSSL_;
+      } else {
+        return mutualSSLBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     */
+    public Builder setMutualSSL(org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL value) {
+      if (mutualSSLBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        mutualSSL_ = value;
+        onChanged();
+      } else {
+        mutualSSLBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     */
+    public Builder setMutualSSL(
+        org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.Builder builderForValue) {
+      if (mutualSSLBuilder_ == null) {
+        mutualSSL_ = builderForValue.build();
+        onChanged();
+      } else {
+        mutualSSLBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     */
+    public Builder mergeMutualSSL(org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL value) {
+      if (mutualSSLBuilder_ == null) {
+        if (mutualSSL_ != null) {
+          mutualSSL_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.newBuilder(mutualSSL_).mergeFrom(value).buildPartial();
+        } else {
+          mutualSSL_ = value;
+        }
+        onChanged();
+      } else {
+        mutualSSLBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     */
+    public Builder clearMutualSSL() {
+      if (mutualSSLBuilder_ == null) {
+        mutualSSL_ = null;
+        onChanged();
+      } else {
+        mutualSSL_ = null;
+        mutualSSLBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.Builder getMutualSSLBuilder() {
+      
+      onChanged();
+      return getMutualSSLFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLOrBuilder getMutualSSLOrBuilder() {
+      if (mutualSSLBuilder_ != null) {
+        return mutualSSLBuilder_.getMessageOrBuilder();
+      } else {
+        return mutualSSL_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.getDefaultInstance() : mutualSSL_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL, org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.Builder, org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLOrBuilder> 
+        getMutualSSLFieldBuilder() {
+      if (mutualSSLBuilder_ == null) {
+        mutualSSLBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL, org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL.Builder, org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLOrBuilder>(
+                getMutualSSL(),
+                getParentForChildren(),
+                isClean());
+        mutualSSL_ = null;
+      }
+      return mutualSSLBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

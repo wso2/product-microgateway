@@ -40,6 +40,7 @@ import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
+import org.wso2.choreo.connect.enforcer.security.mtls.MTLSAuthenticator;
 import org.wso2.choreo.connect.enforcer.util.EndpointSecurityUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
@@ -55,6 +56,8 @@ import java.util.Objects;
 public class AuthFilter implements Filter {
     private List<Authenticator> authenticators = new ArrayList<>();
     private static final Logger log = LogManager.getLogger(AuthFilter.class);
+    private boolean isMutualSSLMandatory;
+    private boolean isOAuthBasicAuthMandatory;
 
     @Override
     public void init(APIConfig apiConfig, Map<String, String> configProperties) {
@@ -67,10 +70,23 @@ public class AuthFilter implements Filter {
         boolean isMutualSSLProtected = false;
         boolean isBasicAuthProtected = false;
         boolean isApiKeyProtected = false;
-        boolean isMutualSSLMandatory = false;
-        boolean isOAuthBasicAuthMandatory = false;
+        isMutualSSLMandatory = false;
+        isOAuthBasicAuthMandatory = false;
 
         // Set security conditions
+        if (apiConfig.getApplicationSecurity()) {
+            isOAuthBasicAuthMandatory = true;
+        }
+
+        if (!Objects.isNull(apiConfig.getMutualSSL())) {
+            if (apiConfig.getMutualSSL().equalsIgnoreCase(APIConstants.Optionality.MANDATORY)) {
+                isMutualSSLProtected = true;
+                isMutualSSLMandatory = true;
+            } else if (apiConfig.getMutualSSL().equalsIgnoreCase(APIConstants.Optionality.OPTIONAL)) {
+                isMutualSSLProtected = true;
+            }
+        }
+
         if (apiConfig.getSecuritySchemeDefinitions() == null) {
             isOAuthProtected = true;
         } else {
@@ -79,22 +95,24 @@ public class AuthFilter implements Filter {
                 String apiSecurityLevel = securityDefinition.getValue().getType();
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH2)) {
                     isOAuthProtected = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    isMutualSSLProtected = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
                     isBasicAuthProtected = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
-                    isMutualSSLMandatory = true;
-                } else if (apiSecurityLevel.trim().
-                        equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
-                    isOAuthBasicAuthMandatory = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
                     isApiKeyProtected = true;
                 }
             }
         }
 
-        // TODO: Set authenticators for isMutualSSLProtected, isBasicAuthProtected
+        if (!isMutualSSLMandatory) {
+            isOAuthBasicAuthMandatory = true;
+        }
+
+        // TODO: Set authenticator for isBasicAuthProtected
+        if (isMutualSSLProtected) {
+            Authenticator mtlsAuthenticator = new MTLSAuthenticator();
+            authenticators.add(mtlsAuthenticator);
+        }
+        
         if (isOAuthProtected) {
             Authenticator jwtAuthenticator = new JWTAuthenticator();
             authenticators.add(jwtAuthenticator);
@@ -134,16 +152,44 @@ public class AuthFilter implements Filter {
             return true;
         }
 
+        // Authentication status of the request
+        boolean authenticated = false;
+        // Any auth token has been provided for application-level security or not
         boolean canAuthenticated = false;
         for (Authenticator authenticator : authenticators) {
             if (authenticator.canAuthenticate(requestContext)) {
-                canAuthenticated = true;
+                // For transport level securities (mTLS), canAuthenticated will not be applied
+                if (!authenticator.getName().contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
+                    canAuthenticated = true;
+                }
                 AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
-                if (authenticateResponse.isAuthenticated() && !authenticateResponse.isContinueToNextAuthenticator()) {
+                // Authentication status will be updated only if the authentication is a mandatory one
+                if (authenticateResponse.isMandatoryAuthentication()) {
+                    authenticated = authenticateResponse.isAuthenticated();
                     setInterceptorAuthContextMetadata(authenticator, requestContext);
-                    return true;
+                }
+                if (!authenticateResponse.isContinueToNextAuthenticator()) {
+                    break;
+                }
+            } else {
+                // Check if the failed authentication is mandatory mTLS
+                if (isMutualSSLMandatory && authenticator.getName()
+                        .contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
+                    authenticated = false;
+                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} ",
+                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                            requestContext.getMatchedAPI().getVersion());
+                    break;
+                }
+                // Check if the failed authentication is a mandatory application level security
+                if (isOAuthBasicAuthMandatory && !authenticator.getName()
+                        .contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
+                    authenticated = false;
                 }
             }
+        }
+        if (authenticated) {
+            return true;
         }
         if (!canAuthenticated) {
             FilterUtils.setUnauthenticatedErrorToContext(requestContext);
@@ -162,23 +208,44 @@ public class AuthFilter implements Filter {
         try {
             AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
             requestContext.setAuthenticationContext(authenticate);
-            if (authenticate.isAuthenticated()) {
+            if (authenticator.getName().contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
+                // This section is for mTLS authentication
+                if (authenticate.isAuthenticated()) {
+                    updateClusterHeaderAndCheckEnv(requestContext, authenticate);
+                    // set backend security
+                    EndpointSecurityUtils.addEndpointSecurity(requestContext);
+                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{} ",
+                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                            requestContext.getMatchedAPI().getVersion());
+                    return new AuthenticationResponse(true, isMutualSSLMandatory, true);
+                } else {
+                    if (isMutualSSLMandatory) {
+                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{} ",
+                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
+                                        .getName(), requestContext.getMatchedAPI().getVersion());
+                        return new AuthenticationResponse(false, true, false);
+                    } else {
+                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{} ",
+                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
+                                        .getName(), requestContext.getMatchedAPI().getVersion());
+                        return new AuthenticationResponse(false, false, true);
+                    }
+                }
+            } else if (authenticate.isAuthenticated()) {
+                // This section is for application level securities
                 if (!requestContext.getMatchedAPI().isMockedApi()) {
                     updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                     // set backend security
                     EndpointSecurityUtils.addEndpointSecurity(requestContext);
                 }
-                return new AuthenticationResponse(true, false,
-                        false);
+                return new AuthenticationResponse(true, isOAuthBasicAuthMandatory, false);
             }
         } catch (APISecurityException e) {
             //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
             FilterUtils.setErrorToContext(requestContext, e);
         }
-        return new AuthenticationResponse(false, false, true);
+        return new AuthenticationResponse(false, isOAuthBasicAuthMandatory, true);
     }
-
-
 
     /**
      * Update the cluster header based on the keyType and authenticate the token against its respective endpoint

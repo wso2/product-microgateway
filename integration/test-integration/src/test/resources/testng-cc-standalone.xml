@@ -93,6 +93,24 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.BodyPassDisabledTestCase"/>
         </classes>
     </test>
+    <test name="cc-with-mtls-default" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithMtlsDefault"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromClientToGatewayDefaultTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-client-cert-not-encode" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithClientCertEncodeDisabled"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromClientToGatewayNotEncodeTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-client-cert-encode" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithClientCertEncodeEnabled"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromClientToGatewayEncodeTestCase"/>
+        </classes>
+    </test>
     <test name="cc-with-multiple-env" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithMultipleEnv"/>
