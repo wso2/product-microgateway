@@ -1,0 +1,13 @@
+type: client_certificates
+version: v4.0.0
+data:
+ -
+  alias: client_certificate
+  certificate: client_certificate.crt
+  tierName: Gold
+  apiIdentifier:
+    providerName: admin
+    apiName: MutualSSL
+    version: 1.0.5
+    uuid: db038e80-34d9-4503-b590-e12ad216f562
+    id: 0

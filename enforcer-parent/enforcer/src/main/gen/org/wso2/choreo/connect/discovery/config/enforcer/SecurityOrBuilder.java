@@ -45,4 +45,19 @@ public interface SecurityOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+   * @return Whether the mutualSSL field is set.
+   */
+  boolean hasMutualSSL();
+  /**
+   * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+   * @return The mutualSSL.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL getMutualSSL();
+  /**
+   * <code>.wso2.discovery.config.enforcer.MutualSSL mutualSSL = 3;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLOrBuilder getMutualSSLOrBuilder();
 }

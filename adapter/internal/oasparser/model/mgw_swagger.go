@@ -71,6 +71,9 @@ type MgwSwagger struct {
 	LifecycleStatus            string
 	xWso2RequestBodyPass       bool
 	IsDefaultVersion           bool
+	clientCertificates         []Certificate
+	xWso2MutualSSL             string
+	xWso2ApplicationSecurity   bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -163,6 +166,13 @@ type InterceptEndpoint struct {
 	Includes *interceptor.RequestInclusions
 }
 
+// Certificate contains information of a client certificate
+type Certificate struct {
+	Alias   string
+	Tier    string
+	Content []byte
+}
+
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
 	return swagger.xWso2Cors
@@ -245,6 +255,16 @@ func (swagger *MgwSwagger) GetXWso2RequestBodyPass() bool {
 	return swagger.xWso2RequestBodyPass
 }
 
+// GetClientCerts returns the client certificates of the API
+func (swagger *MgwSwagger) GetClientCerts() []Certificate {
+	return swagger.clientCertificates
+}
+
+// SetClientCerts set the client certificates of the API
+func (swagger *MgwSwagger) SetClientCerts(certs []Certificate) {
+	swagger.clientCertificates = certs
+}
+
 // SetID set the Id of the API
 func (swagger *MgwSwagger) SetID(id string) {
 	swagger.id = id
@@ -300,6 +320,26 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 	return swagger.security
 }
 
+// SetXWSO2MutualSSL sets the optional or mandatory mTLS
+func (swagger *MgwSwagger) SetXWSO2MutualSSL(mutualSSl string) {
+	swagger.xWso2MutualSSL = mutualSSl
+}
+
+// GetXWSO2MutualSSL returns the optional or mandatory mTLS
+func (swagger *MgwSwagger) GetXWSO2MutualSSL() string {
+	return swagger.xWso2MutualSSL
+}
+
+// SetXWSO2ApplicationSecurity sets the optional or mandatory application security
+func (swagger *MgwSwagger) SetXWSO2ApplicationSecurity(applicationSecurity bool) {
+	swagger.xWso2ApplicationSecurity = applicationSecurity
+}
+
+// GetXWSO2ApplicationSecurity returns the optional or mandatory application security
+func (swagger *MgwSwagger) GetXWSO2ApplicationSecurity() bool {
+	return swagger.xWso2ApplicationSecurity
+}
+
 // SetOperationPolicies this will merge operation level policies provided in api yaml
 func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 	for _, resource := range swagger.resources {
@@ -318,7 +358,7 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 
 // SanitizeAPISecurity this will validate api level and operation level swagger security
 // if apiyaml security is provided swagger security will be removed accordingly
-func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool) {
+func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool, isYamlMutualssl bool, isYamlMutualsslMandatory bool, isYamlOauthBasicAuthAPIKeyMandatory bool) {
 	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
 	apiSecurityDefinitionNames := []string{}
 	overridenAPISecurityDefinitions := []SecurityScheme{}
@@ -334,6 +374,7 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			SecurityScheme{DefinitionName: constants.APIMAPIKeyInQuery, Type: constants.APIKeyTypeInOAS,
 				Name: constants.APIKeyNameWithApim, In: constants.APIKeyInQueryOAS})
 	}
+
 	for _, securityDef := range swagger.securityScheme {
 		//read default oauth2 security with scopes when oauth2 enabled
 		if isYamlOauth && securityDef.DefinitionName == constants.APIMDefaultOauth2Security {
@@ -392,6 +433,27 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			operation.SetSecurity(sanitizedOperationSecurity)
 		}
 	}
+
+	// Adding api level application and transport securities optional or mandatory
+	var mutualSSL string
+	var applicationSecurity bool
+
+	if isYamlMutualssl && isYamlMutualsslMandatory {
+		mutualSSL = constants.Mandatory
+	} else if isYamlMutualssl && !isYamlMutualsslMandatory {
+		mutualSSL = constants.Optional
+	} else {
+		mutualSSL = constants.NotDefined
+	}
+
+	if isYamlOauthBasicAuthAPIKeyMandatory {
+		applicationSecurity = true
+	} else {
+		applicationSecurity = false
+	}
+
+	swagger.SetXWSO2MutualSSL(mutualSSL)
+	swagger.SetXWSO2ApplicationSecurity(applicationSecurity)
 }
 
 // SetXWso2Extensions set the MgwSwagger object with the properties

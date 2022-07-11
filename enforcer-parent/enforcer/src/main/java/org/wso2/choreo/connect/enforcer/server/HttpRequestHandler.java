@@ -72,6 +72,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         String requestPayload = null;
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
+        String certificate = request.getAttributes().getSource().getCertificate();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
         String pathTemplate = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
         String prodCluster = request.getAttributes().getContextExtensionsMap()
@@ -104,8 +105,9 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         ResourceConfig resourceConfig = null;
         resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
-                .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
-                .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).requestPayload(requestPayload).build();
+                .certificate(certificate).matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID)
+                .address(address).prodClusterHeader(prodCluster).sandClusterHeader(sandCluster)
+                .requestTimeStamp(requestTimeInMillis).pathTemplate(pathTemplate).requestPayload(requestPayload)
+                .build();
     }
 }

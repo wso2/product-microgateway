@@ -1,0 +1,13 @@
+type: client_certificates
+version: v4.0.0
+data:
+ -
+  alias: client_certificate
+  certificate: client_certificate.crt
+  tierName: Unlimited
+  apiIdentifier:
+    providerName: admin
+    apiName: MutualSSLOptional
+    version: 2.0.0
+    uuid: db038e80-34d9-4503-b590-e12ad216f564
+    id: 0

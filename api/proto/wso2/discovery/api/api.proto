@@ -22,6 +22,7 @@ import "wso2/discovery/api/endpoint_cluster.proto";
 import "wso2/discovery/api/Resource.proto";
 import "wso2/discovery/api/endpoint_security.proto";
 import "wso2/discovery/api/security_scheme.proto";
+import "wso2/discovery/api/Certificate.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
 option java_package = "org.wso2.choreo.connect.discovery.api";
@@ -51,4 +52,7 @@ message Api {
 	string vhost = 17;
 	string organizationId = 18;
 	bool isMockedApi = 19;
+	repeated Certificate clientCertificates = 20;
+	string mutualSSL = 21;
+	bool applicationSecurity = 22;
 }

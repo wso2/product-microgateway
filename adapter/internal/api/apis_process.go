@@ -39,8 +39,10 @@ const (
 	apiYAMLFile                string = "api.yaml"
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	endpointCertFile           string = "endpoint_certificates."
+	clientCertFile             string = "client_certificates."
 	apiJSONFile                string = "api.json"
 	endpointCertDir            string = "Endpoint-certificates"
+	clientCertDir              string = "Client-certificates"
 	interceptorCertDir         string = "Endpoint-certificates/interceptors"
 	policiesDir                string = "Policies"
 	policyDefFileExtension     string = ".gotmpl"
@@ -129,6 +131,7 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 					Severity:  logging.MINOR,
 					ErrorCode: 1216,
 				})
+				return err
 			} else if endpointCertificates != nil && len(endpointCertificates.Data) > 0 {
 				for _, val := range endpointCertificates.Data {
 					apiProject.EndpointCerts[val.Endpoint] = val.Certificate
@@ -144,10 +147,57 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 				// TODO: (VirajSalaka) Create standard error handling mechanism
 				return errors.New("certificate Validation Error")
 			}
-
 			if fileNameArray := strings.Split(fileName, string(os.PathSeparator)); len(fileNameArray) > 0 {
 				certFileName := fileNameArray[len(fileNameArray)-1]
 				apiProject.UpstreamCerts[certFileName] = fileContent
+			}
+		}
+
+		// Client certs
+	} else if strings.Contains(fileName, clientCertDir+string(os.PathSeparator)) {
+		if strings.Contains(fileName, clientCertFile) {
+			clCertJSON, conversionErr := utills.ToJSON(fileContent)
+			if conversionErr != nil {
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error converting %v file to json for the API %s - %s:%s : %v", fileName,
+						apiProject.APIYaml.Data.ID, apiProject.APIYaml.Data.Name, apiProject.APIYaml.Data.Version, conversionErr.Error()),
+					Severity:  logging.MINOR,
+					ErrorCode: 1222,
+				})
+				return conversionErr
+			}
+			clientCertificates := &model.ClientCertificatesDetails{}
+			err := json.Unmarshal(clCertJSON, clientCertificates)
+			if err != nil {
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error parsing content of client certificates for the API %s - %s:%s : %v",
+						apiProject.APIYaml.Data.ID, apiProject.APIYaml.Data.Name, apiProject.APIYaml.Data.Version, err.Error()),
+					Severity:  logging.MINOR,
+					ErrorCode: 1223,
+				})
+				return err
+			} else if clientCertificates != nil && len(clientCertificates.Data) > 0 {
+				for _, val := range clientCertificates.Data {
+					var certDetails model.CertificateDetails
+					certDetails.Alias = val.Alias
+					certDetails.Tier = val.TierName
+					certDetails.CertificateName = val.Certificate
+					apiProject.ClientCerts = append(apiProject.ClientCerts, certDetails)
+				}
+			}
+		} else if strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension) {
+			if !tlsutils.IsPublicCertificate(fileContent) {
+				loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Provided certificate: %v is not in the PEM file format for the API %s - %s:%s.",
+						fileName, apiProject.APIYaml.Data.ID, apiProject.APIYaml.Data.Name, apiProject.APIYaml.Data.Version),
+					Severity:  logging.MINOR,
+					ErrorCode: 1224,
+				})
+				return errors.New("Error while validating the client certificate. Provided client certificate is not in the PEM file format")
+			}
+			if fileNameArray := strings.Split(fileName, string(os.PathSeparator)); len(fileNameArray) > 0 {
+				certFileName := fileNameArray[len(fileNameArray)-1]
+				apiProject.DownstreamCerts[certFileName] = fileContent
 			}
 		}
 

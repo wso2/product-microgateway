@@ -196,6 +196,14 @@ artifactsDirectory = "/home/wso2/artifacts"
   # Maximum concurrent streams allowed for peer on one HTTP/2 connection
   maxConcurrentStreams = 2147483647
 
+[router.downstream]
+# The configurations for SSL configuration related to the client connection in Choreo Connect
+[router.downstream.tls]
+  # Path to trusted certificates
+  trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
+  # If configured true, router enables the client certificate validation for providing client certificates
+  mTLSAPIsEnabled = false
+
 # Timeouts managed by the connection manager
 [router.connectionTimeout]
   # The amount of time that Envoy will wait for the entire request to be received. Time from client to upstream.
@@ -333,7 +341,19 @@ enabled = true
   # Header name for the authorization token coming from the downstream client
   authorizationHeader = "authorization"
   testConsoleHeaderName = "Internal-Key"
-  
+
+# Configurations related to Mutual SSL
+[enforcer.security.mutualSSL]
+  # Header name for the client certificate header coming from the downstream client
+  certificateHeader = "X-WSO2-CLIENT-CERTIFICATE"
+  # Enables the mTLS validation using the client certificate coming from TLS handshake
+  # If configured false, mTLS validation is done using the client certificate coming from the header
+  enableClientValidation = true
+  # Enables the decoding process for the encoded client certificate in the header
+  clientCertificateEncode = false
+  # Sends the client certificate header to the backend
+  enableOutboundCertificateHeader = false
+
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
 [[enforcer.security.tokenService]]

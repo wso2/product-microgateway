@@ -89,6 +89,109 @@ public class TestConstant {
             "UmONQ6_gbAAzEOEXD2K6yTfy16KeZvQTdv-zZJzb6ULi0kAuG4txJh38WMagHtu3fuhKm2KIDrflOZEKWmThU6HqB8aoxROABDlId1" +
             "VS_RbajyF8WfeZDv7W_tqNYbKbJVXxSJFFKfPeqL1A1N5po1dfLByPA==";
 
+    public static final String CLIENT_CERT = "-----BEGIN CERTIFICATE-----MIIEnjCCAoYCFEBlls4RcEF1LLuOu0WK4Ng3rbxmMA" +
+            "0GCSqGSIb3DQEBCwUAMIGKMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEM" +
+            "MAoGA1UECgwDQUJDMRAwDgYDVQQLDAdGaW5hbmNlMRAwDgYDVQQDDAdhYmMuY29tMRwwGgYJKoZIhvcNAQkBFg1hZG1pbkBhYmMuY2" +
+            "9tMB4XDTIyMDIwOTA1MTgxNFoXDTIzMDYyNDA1MTgxNFowgYsxCzAJBgNVBAYTAlVTMREwDwYDVQQIDAhOZXcgWW9yazEWMBQGA1UE" +
+            "BwwNTmV3IFlvcmsgQ2l0eTEMMAoGA1UECgwDWFlaMRMwEQYDVQQLDApFbmdpbmVlcm5nMRAwDgYDVQQDDAd4eXouY29tMRwwGgYJKo" +
+            "ZIhvcNAQkBFg1hZG1pbkB4eXouY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArdpOkXeYHD22uXKI6BOIRMYV8y3h" +
+            "3/zgr+Ah861cLdtoQnFA/TqueQ3ua0loTyspcct3sgXTp9F49x86ebpv2rYTTXe5r/iSr4c8IhkyoDcMM4+X+uVijLZGfnq0hA+qdG" +
+            "5FcCfucs7uP3QGQw21fZdGE5MoGt6joMDhG9T6WSsEuBlnVcTN+0tsr7fTa6qpEoo2uLZ+tCxaF31NIb+8a6gyJz1z4AC5CJIXpXaY" +
+            "lWyFMW0878u0cbVpXxgTeuxpA7LeH8RYAuJN+nli1Lix5x/JqZ+JvxlvB8BpCTyBitEDcMfU1EUtQz3UxtqILMnBtc8FALLDnS4a35" +
+            "V0Vpx+pQIDAQABMA0GCSqGSIb3DQEBCwUAA4ICAQAaOzFQB+OibydS+2gwXhWJGt4bMEhmYh6v1VNf27VYv84RtfY+rECixAkxPYOJ" +
+            "0L8685u/XMs6g48wVknaj6VYDYZJyCDYCnjw0q1+WwFi1b5jryFVR5mvHxjCbi3rlNP65xra4VOPeGCXfJzyocqvZ3UGPyY0rx9Ax0" +
+            "Uwt2ONmsBY6JIDjRZQLGLlyi0ZRbA4AIayBdBMrA8LvcsewfEXPYXp3vP2QEw1izaO1Jqh4C5yG2eKYooLfMFR+fVNsPbxEKV7YR4J" +
+            "iKFrbybJM4mjeYjQjcZuaLonCh0UnmsaV+2b6jEE5SjjE+Gt05jkk2kYN8CtwPxIyeYepCCEp2KAq9xleblxW7bo9Vk67eZ8Z1+FCY" +
+            "dkHZdr04JAp2gxuv9lpCyBRee1291yavAk5yp1GYlzC7pyzgwc7N34LnjCI1it1wTNq/wiCEus8w2Toq0fxm8dmx5q91zymxn8nTrd" +
+            "0/YmwdmVHpoe6F03s3LUUYh0pYqufInYXsjMh0CVpKHBGl/xRJxlzmRFwO+GEams7PI+ltvyQw7mtBldGXYy1BVTqs/vItD4vo7ooA" +
+            "tAjuVqLPItN6csPb6R94w2edmrwQmaLxklkA/Lez+Rc1oOJp8u+ChzmhIi63AHwlJjYgamw195U4wCZKjobxqzOcwe8/AU0NM9KYCd" +
+            "5QoQYNZgxw==-----END CERTIFICATE-----";
+
+    public static final String INVALID_CLIENT_CERT = "-----BEGIN CERTIFICATE-----MIIESDCCAjACFBGKEeR93EUJwx69IzikB29U" +
+            "GIlcMA0GCSqGSIb3DQEBCwUAMH4xCzAJBgNVBAYTAlNMMQswCQYDVQQIDAJOQzEMMAoGA1UEBwwDQW51MRAwDgYDVQQKDAdhbnUuY2" +
+            "9tMRAwDgYDVQQLDAdmaW5hbmNlMRAwDgYDVQQDDAd0aGFydWthMR4wHAYJKoZIhvcNAQkBFg90aGFydWthQGFudS5jb20wHhcNMjIw" +
+            "NDIxMDgwODUwWhcNMjMwOTAzMDgwODUwWjBDMQswCQYDVQQGEwJJTjELMAkGA1UECAwCTVIxFTATBgNVBAoMDEluZE9yZywgSW5jLj" +
+            "EQMA4GA1UEAwwHaW5kLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM9DrhWez1JFBs9B4f3LazluwP2kp6JYio3l" +
+            "JECWBoSGK64qMKiSzip2DDM6qf4UUcsJC6ofPreRqCQ487N9yT/LDNHqxOHMi5/m/g3480/2sK87RMiTYkWKH9DscEZyFbD3Ol0yXf" +
+            "Nk1Zbe8tm30Pci7sRo0QTquVRewM5wDgDKvwGVrXBKDVUHlTbmM/XgVT/xgk9CZgHzXqMSH9tzKxqiUdFycj7kHTe1F7NL9QJsNuTh" +
+            "cR1EvL07cxBBHe+XUc6GQv4SzW/QQgljWT663osfqTMNwbazh0puQx6QGWK00taAJ3a3lTEw5um6dthWG811UDgS7VlYMB3syfc4gB" +
+            "ECAwEAATANBgkqhkiG9w0BAQsFAAOCAgEAOoBVhNdbZhrkMnkEGUFUWVjmWrcdBZAABZnzoLhf2z0TxkBDyoLecCuL1VYojVqU+hx0" +
+            "y7Fhs19zW08+kTpfnfocgawENGi1DiRit9n4NahpNMEei1avLP7bjK9TWNKgxub0fj7Zh4yO3+7mpYhc5jhAPh6WJbQutiCZlwlsoL" +
+            "OaD2xkJhwx6QFtZxKTRemzFG10h7nhNbvPEEKzPtKgOiQh8XlqOsBn3eKSzIL+gPX93lOTNdhKdAs5+44tkw6GLY+RoSYlnFMEW4qE" +
+            "pQZ0S8PiQzM1ieT5M7AR46hQ/saSNZYYS0mrlWrMGfvsU4vMBuwQEBYi/uVgkQlGWE5WMberGf/Se67fqPtOk96MvIt8vbCQtQHuWG" +
+            "ezZKZmr+VCoWu0ro73skYyrLAd+ONNXF/o2Nf1j61t5bvyDGrroQ3kPXpppYY6mAemIWU6JE4hAwSrJ7aQnFCa4zsAeM5q0blZs90O" +
+            "tGIFDyNqzsf8nFtUqFk+dPmg5WUDJkT9/Di6oUWHCnYSvuYVs8kCOYUoI2UxwxgAt41/n7VfvZjwecwmyiJ12ryaXlNEV4AtUlzdoK" +
+            "OepULnPOtwhNKhjVP9U5p6JotaffsXT58TrIIH/StUJTxk/CmzeD/MtySLlVQgGeyjLOtQQL+I9nbbcHpaA01NjwGJ+tmHrbt2HnEj" +
+            "boA=-----END CERTIFICATE-----";
+
+    public static final String MUTUAL_SSL_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4Tm1GbE5qZ" +
+            "zRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbG" +
+            "ciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidG" +
+            "llclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJpZCI6MSw" +
+            "idXVpZCI6ImQ3NGNmMTkzLTE5MDQtNDRmMS1iOTYzLTc5OGZmNzhmZDE2ZSJ9LCJpc3MiOiJodHRwczpcL1wvYXBpbTo5NDQ0" +
+            "XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiL" +
+            "CJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcG" +
+            "lrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlBST0RVQ1RJT04iLCJwZXJtaXR" +
+            "0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIi" +
+            "LCJuYW1lIjoiTXV0dWFsU1NMIiwiY29udGV4dCI6IlwvdjJcLzEuMC41IiwicHVibGlzaGVyIjoiYWRtaW4iLCJ2ZXJzaW9uI" +
+            "joiMS4wLjUiLCJzdWJzY3JpcHRpb25UaWVyIjoiVW5saW1pdGVkIn1dLCJ0b2tlbl90eXBlIjoiYXBpS2V5IiwicGVybWl0dG" +
+            "VkSVAiOiIiLCJpYXQiOjE2NTYzMDk2MjMsImp0aSI6IjAxZmQyMDYxLTVlMjctNDg1ZS05MjY0LTdmNjUzNTBmNTE2MiJ9.Rn" +
+            "cQXeiBt2olmWben0ZPm1tKq8o8SDqg7sSbNUTK7T0zT6mWHO7z6Oyp3rzJZKjL5xTnDgsTzMiTCfF2maDFgUHBtGZ3m_fi7iB" +
+            "3lUi8Y-eu8bVNo9eJAQ6XV4-kx43HKx57joyShjvZvmfrk43VI5IGWIfwg4TSZGE3yVnsuAO6WukW2fMzRUi1p43maVTZxMCQ" +
+            "8WNXnMS9FNQMR7Kxt5wIIPEv2iwQWTQMY3n7rbpmFdQG-3zRNenthuhTvG618lb7V8gfyGSXMJ0Dxn_RrbxqMS2UMC3npbiX6" +
+            "PG7HJIsR_3PM1HQeKWYxRfTCoTNBBeLhSYoFJWtgfFh0Mqbfw==";
+
+    public static final String MUTUAL_SSL_INVALID_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4T" +
+            "m1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1" +
+            "QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbW" +
+            "luIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJ" +
+            "pZCI6MSwidXVpZCI6ImE0MDNiNTM1LTIwODUtNDRkYy1iOWFkLTJjZDY4ODZiODM3NyJ9LCJpc3MiOiJodHRwczpcL1wvYXBp" +
+            "bTo5NDQ0XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q" +
+            "291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cn" +
+            "VlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlNBTkRCT1giLCJwZXJ" +
+            "taXR0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3Vw" +
+            "ZXIiLCJuYW1lIjoiTXV0dWFsU1NMIiwiY29udGV4dCI6IlwvdjJcLzEuMC41IiwicHVibGlzaGVyIjoiYWRtaW4iLCJ2ZXJza" +
+            "W9uIjoiMS4wLjUiLCJzdWJzY3JpcHRpb25UaWVyIjoiVW5saW1pdGVkIn1dLCJ0b2tlbl90eXBlIjoiYXBpS2V5IiwicGVybW" +
+            "l0dGVkSVAiOiIiLCJpYXQiOjE2NTU3OTE4NzIsImp0aSI6ImYwZjE3ZjI1LTUzZWQtNDQ4NS04NDMwLTE4YjhiMTg2N2UxZSJ" +
+            "9.HU8Ng_8Z06dN70PbhTaKHJSs1xZY5Pmcu6RAVfUWsVgOe-YPjuN3ZupC3oEb57pazGbqpgR9_qOE7RLM5lyVwgrei1cwoYh" +
+            "0MTEwbT3lI17QqtUfxw1R_rzXAuUZ9LapsPxAIVGiwSL_-_f8T0wyBnWBhjPSq3IrS_wLGwcE_MfBRrZYkFLLfWle2XBrUDRn" +
+            "-9GQKfO_QXJq24JImsyNwy37HDmRu2xWeV6Km9z6xSiVLqXo3-74UKgqbSg8edqjpjD8VI4MJftX11zXAzwntKgB3gyloBtd3" +
+            "LY5uAVGCziHW0zfEa44tXBYGZZc21QvyuaRKZBywjA1TNZ-TXJ-fQ==";
+
+    public static final String MUTUAL_SSL_OPTIONAL_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4" +
+            "Tm1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV" +
+            "1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkb" +
+            "WluIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLC" +
+            "JpZCI6MSwidXVpZCI6IjBiNzhlNjMxLTdjZWEtNDk4My1hNjhmLWEyNzc5NjMyMTUwMyJ9LCJpc3MiOiJodHRwczpcL1wvYXB" +
+            "pbTo5NDQ0XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0" +
+            "Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0c" +
+            "nVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlBST0RVQ1RJT04iLC" +
+            "JwZXJtaXR0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24" +
+            "uc3VwZXIiLCJuYW1lIjoiTXV0dWFsU1NMT3B0aW9uYWwiLCJjb250ZXh0IjoiXC92MlwvMS4wLjUiLCJwdWJsaXNoZXIiOiJh" +
+            "ZG1pbiIsInZlcnNpb24iOiIxLjAuNSIsInN1YnNjcmlwdGlvblRpZXIiOiJVbmxpbWl0ZWQifV0sInRva2VuX3R5cGUiOiJhc" +
+            "GlLZXkiLCJwZXJtaXR0ZWRJUCI6IiIsImlhdCI6MTY1NjMyNTMwOCwianRpIjoiNTVlZTgyY2EtY2FkZS00NGIxLThlOTAtOT" +
+            "M0OWRmYTI5MjQ3In0=.UZx3L-ph7FvpCdCP46-Pc2ydO1Yd5Zi12llQhtityeCOGiZFJdfBzr5moSojiEz53AoYMc5voikocT" +
+            "TNGcTMEXWV41onO2kzmctUr1A0421652Hm7gHh2SDypcRD8uW6Jp7OSRNnRkYExKchn8lk8l8VkuijYD7UVgLghTHbBiSKER1" +
+            "49mQJiZWI5fntM8YIZ9TtznD9hy26ZWFHpcq8jGQPAsOFV_cAUiLKZa-AY_lOc3Y5fcqqpRkqrTmkF4mmIvHp-H8UEjnVgu8W" +
+            "KlZRrSdylPCUEI7F963U1YNQVzcvov37XIoiBhKiaRXarO5zzXALv2il9TEivlC2VwbKBw==";
+
+    public static final String MUTUAL_SSL_OPTIONAL_INVALID_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalpt" +
+            "WTFZVEF4Tm1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0e" +
+            "XAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lci" +
+            "I6ImFkbWluIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXR" +
+            "pb24iLCJpZCI6MSwidXVpZCI6ImE0MDNiNTM1LTIwODUtNDRkYy1iOWFkLTJjZDY4ODZiODM3NyJ9LCJpc3MiOiJodHRwczpc" +
+            "L1wvYXBpbTo5NDQ0XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZ" +
+            "XF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYW" +
+            "NoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlNBTkRCT1g" +
+            "iLCJwZXJtaXR0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJi" +
+            "b24uc3VwZXIiLCJuYW1lIjoiTXV0dWFsU1NMT3B0aW9uYWwiLCJjb250ZXh0IjoiXC92MlwvMS4wLjUiLCJwdWJsaXNoZXIiO" +
+            "iJhZG1pbiIsInZlcnNpb24iOiIxLjAuNSIsInN1YnNjcmlwdGlvblRpZXIiOiJVbmxpbWl0ZWQifV0sInRva2VuX3R5cGUiOi" +
+            "JhcGlLZXkiLCJwZXJtaXR0ZWRJUCI6IiIsImlhdCI6MTY1NTc5MTg3MiwianRpIjoiZjBmMTdmMjUtNTNlZC00NDg1LTg0MzA" +
+            "tMThiOGIxODY3ZTFlIn0dTwoZ06dNQ9uFNhwWWEBVFlgOew93ZkLegRtaZgR9ElwK3otXMHQxMTBtPSNe0KofClECGUAhUSJP" +
+            "TDIGdTPSq3IrSwsbBwRGWFJ9aV5wa1A0Z9GQKUFyatuCSMyNLRw5bFZ5XiguUCptKDx52qMwVAwlV1wDPCcBDBtd3LY5BUYLO" +
+            "FtMEThwWBlcVC8pcjA1TH5Ncn59";
+
+    public static final String CLIENT_CERT_HEADER = "X-WSO2-CLIENT-CERTIFICATE";
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
     public static final int GATEWAY_LISTENER_HTTP_PORT = 9090;
     public static final int ADAPTER_PORT = 9843;
@@ -108,6 +211,7 @@ public class TestConstant {
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
+    public static final String CERTS_DIR = File.separator + "certs";
     public static final String CONF_DIR = File.separator + "conf";
     public static final String DATABASE_DIR = File.separator + "database";
     public static final String TEST_DOCKER_COMPOSE_DIR = File.separator + "dockerCompose";
