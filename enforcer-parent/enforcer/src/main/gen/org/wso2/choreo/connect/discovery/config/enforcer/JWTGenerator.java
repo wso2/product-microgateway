@@ -123,6 +123,11 @@ private static final long serialVersionUID = 0L;
             privateKeyPath_ = s;
             break;
           }
+          case 96: {
+
+            tokenTtl_ = input.readInt32();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -492,6 +497,17 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int TOKEN_TTL_FIELD_NUMBER = 12;
+  private int tokenTtl_;
+  /**
+   * <code>int32 token_ttl = 12;</code>
+   * @return The tokenTtl.
+   */
+  @java.lang.Override
+  public int getTokenTtl() {
+    return tokenTtl_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -539,6 +555,9 @@ private static final long serialVersionUID = 0L;
     if (!getPrivateKeyPathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 11, privateKeyPath_);
     }
+    if (tokenTtl_ != 0) {
+      output.writeInt32(12, tokenTtl_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -584,6 +603,10 @@ private static final long serialVersionUID = 0L;
     if (!getPrivateKeyPathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, privateKeyPath_);
     }
+    if (tokenTtl_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(12, tokenTtl_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -621,6 +644,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getPublicCertificatePath())) return false;
     if (!getPrivateKeyPath()
         .equals(other.getPrivateKeyPath())) return false;
+    if (getTokenTtl()
+        != other.getTokenTtl()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -657,6 +682,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getPublicCertificatePath().hashCode();
     hash = (37 * hash) + PRIVATE_KEY_PATH_FIELD_NUMBER;
     hash = (53 * hash) + getPrivateKeyPath().hashCode();
+    hash = (37 * hash) + TOKEN_TTL_FIELD_NUMBER;
+    hash = (53 * hash) + getTokenTtl();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -816,6 +843,8 @@ private static final long serialVersionUID = 0L;
 
       privateKeyPath_ = "";
 
+      tokenTtl_ = 0;
+
       return this;
     }
 
@@ -853,6 +882,7 @@ private static final long serialVersionUID = 0L;
       result.claimsExtractorImpl_ = claimsExtractorImpl_;
       result.publicCertificatePath_ = publicCertificatePath_;
       result.privateKeyPath_ = privateKeyPath_;
+      result.tokenTtl_ = tokenTtl_;
       onBuilt();
       return result;
     }
@@ -941,6 +971,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getPrivateKeyPath().isEmpty()) {
         privateKeyPath_ = other.privateKeyPath_;
         onChanged();
+      }
+      if (other.getTokenTtl() != 0) {
+        setTokenTtl(other.getTokenTtl());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1668,6 +1701,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       privateKeyPath_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int tokenTtl_ ;
+    /**
+     * <code>int32 token_ttl = 12;</code>
+     * @return The tokenTtl.
+     */
+    @java.lang.Override
+    public int getTokenTtl() {
+      return tokenTtl_;
+    }
+    /**
+     * <code>int32 token_ttl = 12;</code>
+     * @param value The tokenTtl to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTokenTtl(int value) {
+      
+      tokenTtl_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 token_ttl = 12;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTokenTtl() {
+      
+      tokenTtl_ = 0;
       onChanged();
       return this;
     }
