@@ -18,9 +18,14 @@
 // Package common includes the common functions shared between enforcer and router callbacks.
 package common
 
-import "sync"
+import (
+	"sync"
+
+	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+)
 
 const nodeIDArrayMaxLength int = 20
+const instanceIdentifierKey string = "instanceIdentifier"
 
 // NodeQueue struct is used to keep track of the nodes connected via the XDS.
 type NodeQueue struct {
@@ -38,29 +43,29 @@ type NodeQueue struct {
 // 3. If the array is at the maximum length and element is inside the array, the new element should be appended and the already
 // 		existing entry should be removed from the position.
 // Returns the modified array and true if the entry is a new addition.
-func CheckEntryAndSwapToEnd(array []string, nodeID string) (modifiedArray []string, isNewAddition bool) {
+func (nodeQueue *NodeQueue) checkEntryAndMoveToEnd(nodeID string) (isNewAddition bool) {
 	matchedIndex := -1
-	arraySize := len(array)
-	for index, entry := range array {
+	arraySize := len(nodeQueue.queue)
+	for index := arraySize - 1; index >= 0; index-- {
+		entry := nodeQueue.queue[index]
 		if entry == nodeID {
 			matchedIndex = index
 			break
 		}
 	}
 
-	if matchedIndex < 0 && arraySize < nodeIDArrayMaxLength-1 {
-		array = append(array, nodeID)
-		return array, true
-	} else if matchedIndex < 0 && arraySize >= nodeIDArrayMaxLength {
-		array = append(array, nodeID)
-		array = array[1:]
-		return array, true
-	} else if matchedIndex == 9 {
-		return array, false
+	if matchedIndex == nodeIDArrayMaxLength-1 {
+		return false
+	} else if matchedIndex > 0 {
+		nodeQueue.queue = append(nodeQueue.queue[0:matchedIndex], nodeQueue.queue[matchedIndex+1:]...)
+		nodeQueue.queue = append(nodeQueue.queue, nodeID)
+		return false
 	}
-	array = append(array[0:matchedIndex], array[matchedIndex+1:]...)
-	array = append(array, nodeID)
-	return array, false
+	if arraySize >= nodeIDArrayMaxLength {
+		nodeQueue.queue = nodeQueue.queue[1:]
+	}
+	nodeQueue.queue = append(nodeQueue.queue, nodeID)
+	return true
 }
 
 // GenerateNodeQueue creates an instance of nodeQueue with a mutex and a string array assigned.
@@ -72,10 +77,18 @@ func GenerateNodeQueue() *NodeQueue {
 }
 
 // IsNewNode returns true if the provided nodeID does not exist in the nodeQueue
-func IsNewNode(nodeQueueInstance *NodeQueue, nodeIdentifier string) bool {
-	nodeQueueInstance.lock.Lock()
-	defer nodeQueueInstance.lock.Unlock()
-	var isNewAddition bool
-	nodeQueueInstance.queue, isNewAddition = CheckEntryAndSwapToEnd(nodeQueueInstance.queue, nodeIdentifier)
-	return isNewAddition
+func (nodeQueue *NodeQueue) IsNewNode(nodeIdentifier string) bool {
+	nodeQueue.lock.Lock()
+	defer nodeQueue.lock.Unlock()
+	return nodeQueue.checkEntryAndMoveToEnd(nodeIdentifier)
+}
+
+// GetNodeIdentifier constructs the nodeIdentifier from discovery request's node property, label:<instanceIdentifierProperty>
+func GetNodeIdentifier(request *discovery.DiscoveryRequest) string {
+	metadataMap := request.Node.Metadata.AsMap()
+	nodeIdentifier := request.Node.Id
+	if identifierVal, ok := metadataMap[instanceIdentifierKey]; ok {
+		nodeIdentifier = request.Node.Id + ":" + identifierVal.(string)
+	}
+	return nodeIdentifier
 }
