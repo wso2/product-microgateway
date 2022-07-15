@@ -41,6 +41,8 @@ public class CorsTestCase {
     protected String jwtTokenProd;
     private String allowedOrigin1 = "http://test1.com";
     private String allowedOrigin2 = "http://test2.com";
+
+    private String allowedOriginWildCard = "http://foo.wildcard.com";
     private String allowedMethods = "GET,PUT,POST";
     private String allowedHeaders = "Authorization,X-PINGOTHER";
     private String exposeHeaders = "X-Custom-Header";
@@ -121,6 +123,46 @@ public class CorsTestCase {
                 ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER + " header is unavailable");
         Assert.assertTrue(Boolean.parseBoolean(pickHeader(responseHeaders,
                 ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER).getValue()));
+    }
+
+    @Test(description = "Success Scenario, with allow credentials is set to true.")
+    public void testCORSHeadersInSimpleResponseWithWildcardSubdomain() throws IOException {
+
+        HttpClient httpclient = HttpClientBuilder.create().build();
+        HttpUriRequest getRequest = new HttpGet(Utils.getServiceURLHttps("/cors/pet/1"));
+        getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        getRequest.addHeader(ORIGIN_HEADER, allowedOriginWildCard);
+        HttpResponse response = httpclient.execute(getRequest);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertNotNull(response.getAllHeaders());
+
+        Header[] responseHeaders = response.getAllHeaders();
+        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER),
+                ACCESS_CONTROL_ALLOW_ORIGIN_HEADER + " header is unavailable");
+        Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER).getValue(),
+                allowedOriginWildCard);
+    }
+
+    @Test(description = "Success Scenario, with allow credentials is set to true.")
+    public void testCORSHeadersInPreFlightResponseWildcardSubdomain() throws Exception {
+        // AccessControlAllowCredentials set to true
+        HttpClient httpclient = HttpClientBuilder.create().build();
+        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/cors/pet/1"));
+        option.addHeader(ORIGIN_HEADER, allowedOriginWildCard);
+        option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
+        HttpResponse response = httpclient.execute(option);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertNotNull(response.getAllHeaders());
+
+        Header[] responseHeaders = response.getAllHeaders();
+        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER),
+                ACCESS_CONTROL_ALLOW_ORIGIN_HEADER + " header is unavailable");
+        Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER).getValue(),
+                allowedOriginWildCard);
     }
 
     @Test(description = "Invalid Origin, CORS simple request")
