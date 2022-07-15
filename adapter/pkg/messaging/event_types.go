@@ -140,7 +140,6 @@ type ApplicationEvent struct {
 	ApplicationPolicy string      `json:"applicationPolicy"`
 	Attributes        interface{} `json:"attributes"`
 	Subscriber        string      `json:"subscriber"`
-	GroupID           []string    `json:"groupIds"`
 	Event
 }
 

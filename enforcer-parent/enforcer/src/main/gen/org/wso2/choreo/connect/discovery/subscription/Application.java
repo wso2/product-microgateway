@@ -25,7 +25,6 @@ private static final long serialVersionUID = 0L;
     subName_ = "";
     policy_ = "";
     tokenType_ = "";
-    groupIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     tenantDomain_ = "";
   }
 
@@ -101,19 +100,10 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 66: {
-            java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              groupIds_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000001;
-            }
-            groupIds_.add(s);
-            break;
-          }
-          case 74: {
-            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
               attributes_ = com.google.protobuf.MapField.newMapField(
                   AttributesDefaultEntryHolder.defaultEntry);
-              mutable_bitField0_ |= 0x00000002;
+              mutable_bitField0_ |= 0x00000001;
             }
             com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
             attributes__ = input.readMessage(
@@ -122,18 +112,18 @@ private static final long serialVersionUID = 0L;
                 attributes__.getKey(), attributes__.getValue());
             break;
           }
-          case 80: {
+          case 72: {
 
             tenantId_ = input.readInt32();
             break;
           }
-          case 90: {
+          case 82: {
             java.lang.String s = input.readStringRequireUtf8();
 
             tenantDomain_ = s;
             break;
           }
-          case 96: {
+          case 88: {
 
             timestamp_ = input.readInt64();
             break;
@@ -153,9 +143,6 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
-      if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        groupIds_ = groupIds_.getUnmodifiableView();
-      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -170,7 +157,7 @@ private static final long serialVersionUID = 0L;
   protected com.google.protobuf.MapField internalGetMapField(
       int number) {
     switch (number) {
-      case 9:
+      case 8:
         return internalGetAttributes();
       default:
         throw new RuntimeException(
@@ -397,42 +384,7 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int GROUPIDS_FIELD_NUMBER = 8;
-  private com.google.protobuf.LazyStringList groupIds_;
-  /**
-   * <code>repeated string groupIds = 8;</code>
-   * @return A list containing the groupIds.
-   */
-  public com.google.protobuf.ProtocolStringList
-      getGroupIdsList() {
-    return groupIds_;
-  }
-  /**
-   * <code>repeated string groupIds = 8;</code>
-   * @return The count of groupIds.
-   */
-  public int getGroupIdsCount() {
-    return groupIds_.size();
-  }
-  /**
-   * <code>repeated string groupIds = 8;</code>
-   * @param index The index of the element to return.
-   * @return The groupIds at the given index.
-   */
-  public java.lang.String getGroupIds(int index) {
-    return groupIds_.get(index);
-  }
-  /**
-   * <code>repeated string groupIds = 8;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the groupIds at the given index.
-   */
-  public com.google.protobuf.ByteString
-      getGroupIdsBytes(int index) {
-    return groupIds_.getByteString(index);
-  }
-
-  public static final int ATTRIBUTES_FIELD_NUMBER = 9;
+  public static final int ATTRIBUTES_FIELD_NUMBER = 8;
   private static final class AttributesDefaultEntryHolder {
     static final com.google.protobuf.MapEntry<
         java.lang.String, java.lang.String> defaultEntry =
@@ -459,7 +411,7 @@ private static final long serialVersionUID = 0L;
     return internalGetAttributes().getMap().size();
   }
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
 
   @java.lang.Override
@@ -477,7 +429,7 @@ private static final long serialVersionUID = 0L;
     return getAttributesMap();
   }
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
   @java.lang.Override
 
@@ -485,7 +437,7 @@ private static final long serialVersionUID = 0L;
     return internalGetAttributes().getMap();
   }
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
   @java.lang.Override
 
@@ -498,7 +450,7 @@ private static final long serialVersionUID = 0L;
     return map.containsKey(key) ? map.get(key) : defaultValue;
   }
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
   @java.lang.Override
 
@@ -513,10 +465,10 @@ private static final long serialVersionUID = 0L;
     return map.get(key);
   }
 
-  public static final int TENANTID_FIELD_NUMBER = 10;
+  public static final int TENANTID_FIELD_NUMBER = 9;
   private int tenantId_;
   /**
-   * <code>int32 tenantId = 10;</code>
+   * <code>int32 tenantId = 9;</code>
    * @return The tenantId.
    */
   @java.lang.Override
@@ -524,10 +476,10 @@ private static final long serialVersionUID = 0L;
     return tenantId_;
   }
 
-  public static final int TENANTDOMAIN_FIELD_NUMBER = 11;
+  public static final int TENANTDOMAIN_FIELD_NUMBER = 10;
   private volatile java.lang.Object tenantDomain_;
   /**
-   * <code>string tenantDomain = 11;</code>
+   * <code>string tenantDomain = 10;</code>
    * @return The tenantDomain.
    */
   @java.lang.Override
@@ -544,7 +496,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string tenantDomain = 11;</code>
+   * <code>string tenantDomain = 10;</code>
    * @return The bytes for tenantDomain.
    */
   @java.lang.Override
@@ -562,10 +514,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int TIMESTAMP_FIELD_NUMBER = 12;
+  public static final int TIMESTAMP_FIELD_NUMBER = 11;
   private long timestamp_;
   /**
-   * <code>int64 timestamp = 12;</code>
+   * <code>int64 timestamp = 11;</code>
    * @return The timestamp.
    */
   @java.lang.Override
@@ -608,23 +560,20 @@ private static final long serialVersionUID = 0L;
     if (!getTokenTypeBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 7, tokenType_);
     }
-    for (int i = 0; i < groupIds_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 8, groupIds_.getRaw(i));
-    }
     com.google.protobuf.GeneratedMessageV3
       .serializeStringMapTo(
         output,
         internalGetAttributes(),
         AttributesDefaultEntryHolder.defaultEntry,
-        9);
+        8);
     if (tenantId_ != 0) {
-      output.writeInt32(10, tenantId_);
+      output.writeInt32(9, tenantId_);
     }
     if (!getTenantDomainBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, tenantDomain_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, tenantDomain_);
     }
     if (timestamp_ != 0L) {
-      output.writeInt64(12, timestamp_);
+      output.writeInt64(11, timestamp_);
     }
     unknownFields.writeTo(output);
   }
@@ -658,14 +607,6 @@ private static final long serialVersionUID = 0L;
     if (!getTokenTypeBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, tokenType_);
     }
-    {
-      int dataSize = 0;
-      for (int i = 0; i < groupIds_.size(); i++) {
-        dataSize += computeStringSizeNoTag(groupIds_.getRaw(i));
-      }
-      size += dataSize;
-      size += 1 * getGroupIdsList().size();
-    }
     for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
          : internalGetAttributes().getMap().entrySet()) {
       com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
@@ -674,18 +615,18 @@ private static final long serialVersionUID = 0L;
           .setValue(entry.getValue())
           .build();
       size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(9, attributes__);
+          .computeMessageSize(8, attributes__);
     }
     if (tenantId_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(10, tenantId_);
+        .computeInt32Size(9, tenantId_);
     }
     if (!getTenantDomainBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, tenantDomain_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, tenantDomain_);
     }
     if (timestamp_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(12, timestamp_);
+        .computeInt64Size(11, timestamp_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -716,8 +657,6 @@ private static final long serialVersionUID = 0L;
         .equals(other.getPolicy())) return false;
     if (!getTokenType()
         .equals(other.getTokenType())) return false;
-    if (!getGroupIdsList()
-        .equals(other.getGroupIdsList())) return false;
     if (!internalGetAttributes().equals(
         other.internalGetAttributes())) return false;
     if (getTenantId()
@@ -751,10 +690,6 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getPolicy().hashCode();
     hash = (37 * hash) + TOKENTYPE_FIELD_NUMBER;
     hash = (53 * hash) + getTokenType().hashCode();
-    if (getGroupIdsCount() > 0) {
-      hash = (37 * hash) + GROUPIDS_FIELD_NUMBER;
-      hash = (53 * hash) + getGroupIdsList().hashCode();
-    }
     if (!internalGetAttributes().getMap().isEmpty()) {
       hash = (37 * hash) + ATTRIBUTES_FIELD_NUMBER;
       hash = (53 * hash) + internalGetAttributes().hashCode();
@@ -881,7 +816,7 @@ private static final long serialVersionUID = 0L;
     protected com.google.protobuf.MapField internalGetMapField(
         int number) {
       switch (number) {
-        case 9:
+        case 8:
           return internalGetAttributes();
         default:
           throw new RuntimeException(
@@ -892,7 +827,7 @@ private static final long serialVersionUID = 0L;
     protected com.google.protobuf.MapField internalGetMutableMapField(
         int number) {
       switch (number) {
-        case 9:
+        case 8:
           return internalGetMutableAttributes();
         default:
           throw new RuntimeException(
@@ -939,8 +874,6 @@ private static final long serialVersionUID = 0L;
 
       tokenType_ = "";
 
-      groupIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000001);
       internalGetMutableAttributes().clear();
       tenantId_ = 0;
 
@@ -982,11 +915,6 @@ private static final long serialVersionUID = 0L;
       result.subName_ = subName_;
       result.policy_ = policy_;
       result.tokenType_ = tokenType_;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        groupIds_ = groupIds_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000001);
-      }
-      result.groupIds_ = groupIds_;
       result.attributes_ = internalGetAttributes();
       result.attributes_.makeImmutable();
       result.tenantId_ = tenantId_;
@@ -1064,16 +992,6 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getTokenType().isEmpty()) {
         tokenType_ = other.tokenType_;
-        onChanged();
-      }
-      if (!other.groupIds_.isEmpty()) {
-        if (groupIds_.isEmpty()) {
-          groupIds_ = other.groupIds_;
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          ensureGroupIdsIsMutable();
-          groupIds_.addAll(other.groupIds_);
-        }
         onChanged();
       }
       internalGetMutableAttributes().mergeFrom(
@@ -1560,116 +1478,6 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.LazyStringList groupIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    private void ensureGroupIdsIsMutable() {
-      if (!((bitField0_ & 0x00000001) != 0)) {
-        groupIds_ = new com.google.protobuf.LazyStringArrayList(groupIds_);
-        bitField0_ |= 0x00000001;
-       }
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @return A list containing the groupIds.
-     */
-    public com.google.protobuf.ProtocolStringList
-        getGroupIdsList() {
-      return groupIds_.getUnmodifiableView();
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @return The count of groupIds.
-     */
-    public int getGroupIdsCount() {
-      return groupIds_.size();
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @param index The index of the element to return.
-     * @return The groupIds at the given index.
-     */
-    public java.lang.String getGroupIds(int index) {
-      return groupIds_.get(index);
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the groupIds at the given index.
-     */
-    public com.google.protobuf.ByteString
-        getGroupIdsBytes(int index) {
-      return groupIds_.getByteString(index);
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @param index The index to set the value at.
-     * @param value The groupIds to set.
-     * @return This builder for chaining.
-     */
-    public Builder setGroupIds(
-        int index, java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureGroupIdsIsMutable();
-      groupIds_.set(index, value);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @param value The groupIds to add.
-     * @return This builder for chaining.
-     */
-    public Builder addGroupIds(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureGroupIdsIsMutable();
-      groupIds_.add(value);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @param values The groupIds to add.
-     * @return This builder for chaining.
-     */
-    public Builder addAllGroupIds(
-        java.lang.Iterable<java.lang.String> values) {
-      ensureGroupIdsIsMutable();
-      com.google.protobuf.AbstractMessageLite.Builder.addAll(
-          values, groupIds_);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearGroupIds() {
-      groupIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000001);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string groupIds = 8;</code>
-     * @param value The bytes of the groupIds to add.
-     * @return This builder for chaining.
-     */
-    public Builder addGroupIdsBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      ensureGroupIdsIsMutable();
-      groupIds_.add(value);
-      onChanged();
-      return this;
-    }
-
     private com.google.protobuf.MapField<
         java.lang.String, java.lang.String> attributes_;
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
@@ -1697,7 +1505,7 @@ private static final long serialVersionUID = 0L;
       return internalGetAttributes().getMap().size();
     }
     /**
-     * <code>map&lt;string, string&gt; attributes = 9;</code>
+     * <code>map&lt;string, string&gt; attributes = 8;</code>
      */
 
     @java.lang.Override
@@ -1715,7 +1523,7 @@ private static final long serialVersionUID = 0L;
       return getAttributesMap();
     }
     /**
-     * <code>map&lt;string, string&gt; attributes = 9;</code>
+     * <code>map&lt;string, string&gt; attributes = 8;</code>
      */
     @java.lang.Override
 
@@ -1723,7 +1531,7 @@ private static final long serialVersionUID = 0L;
       return internalGetAttributes().getMap();
     }
     /**
-     * <code>map&lt;string, string&gt; attributes = 9;</code>
+     * <code>map&lt;string, string&gt; attributes = 8;</code>
      */
     @java.lang.Override
 
@@ -1736,7 +1544,7 @@ private static final long serialVersionUID = 0L;
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
-     * <code>map&lt;string, string&gt; attributes = 9;</code>
+     * <code>map&lt;string, string&gt; attributes = 8;</code>
      */
     @java.lang.Override
 
@@ -1757,7 +1565,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>map&lt;string, string&gt; attributes = 9;</code>
+     * <code>map&lt;string, string&gt; attributes = 8;</code>
      */
 
     public Builder removeAttributes(
@@ -1776,7 +1584,7 @@ private static final long serialVersionUID = 0L;
       return internalGetMutableAttributes().getMutableMap();
     }
     /**
-     * <code>map&lt;string, string&gt; attributes = 9;</code>
+     * <code>map&lt;string, string&gt; attributes = 8;</code>
      */
     public Builder putAttributes(
         java.lang.String key,
@@ -1788,7 +1596,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>map&lt;string, string&gt; attributes = 9;</code>
+     * <code>map&lt;string, string&gt; attributes = 8;</code>
      */
 
     public Builder putAllAttributes(
@@ -1800,7 +1608,7 @@ private static final long serialVersionUID = 0L;
 
     private int tenantId_ ;
     /**
-     * <code>int32 tenantId = 10;</code>
+     * <code>int32 tenantId = 9;</code>
      * @return The tenantId.
      */
     @java.lang.Override
@@ -1808,7 +1616,7 @@ private static final long serialVersionUID = 0L;
       return tenantId_;
     }
     /**
-     * <code>int32 tenantId = 10;</code>
+     * <code>int32 tenantId = 9;</code>
      * @param value The tenantId to set.
      * @return This builder for chaining.
      */
@@ -1819,7 +1627,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>int32 tenantId = 10;</code>
+     * <code>int32 tenantId = 9;</code>
      * @return This builder for chaining.
      */
     public Builder clearTenantId() {
@@ -1831,7 +1639,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object tenantDomain_ = "";
     /**
-     * <code>string tenantDomain = 11;</code>
+     * <code>string tenantDomain = 10;</code>
      * @return The tenantDomain.
      */
     public java.lang.String getTenantDomain() {
@@ -1847,7 +1655,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string tenantDomain = 11;</code>
+     * <code>string tenantDomain = 10;</code>
      * @return The bytes for tenantDomain.
      */
     public com.google.protobuf.ByteString
@@ -1864,7 +1672,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string tenantDomain = 11;</code>
+     * <code>string tenantDomain = 10;</code>
      * @param value The tenantDomain to set.
      * @return This builder for chaining.
      */
@@ -1879,7 +1687,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string tenantDomain = 11;</code>
+     * <code>string tenantDomain = 10;</code>
      * @return This builder for chaining.
      */
     public Builder clearTenantDomain() {
@@ -1889,7 +1697,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string tenantDomain = 11;</code>
+     * <code>string tenantDomain = 10;</code>
      * @param value The bytes for tenantDomain to set.
      * @return This builder for chaining.
      */
@@ -1907,7 +1715,7 @@ private static final long serialVersionUID = 0L;
 
     private long timestamp_ ;
     /**
-     * <code>int64 timestamp = 12;</code>
+     * <code>int64 timestamp = 11;</code>
      * @return The timestamp.
      */
     @java.lang.Override
@@ -1915,7 +1723,7 @@ private static final long serialVersionUID = 0L;
       return timestamp_;
     }
     /**
-     * <code>int64 timestamp = 12;</code>
+     * <code>int64 timestamp = 11;</code>
      * @param value The timestamp to set.
      * @return This builder for chaining.
      */
@@ -1926,7 +1734,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>int64 timestamp = 12;</code>
+     * <code>int64 timestamp = 11;</code>
      * @return This builder for chaining.
      */
     public Builder clearTimestamp() {

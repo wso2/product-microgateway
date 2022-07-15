@@ -45,7 +45,6 @@ type Application struct {
 	SubName      string            `json:"subName" json:"subscriber"`
 	Policy       string            `json:"policy" json:"applicationPolicy"`
 	TokenType    string            `json:"tokenType"`
-	GroupIds     []string          `json:"groupIds"`
 	Attributes   map[string]string `json:"attributes"`
 	TenantID     int32             `json:"tenanId,omitempty"`
 	TenantDomain string            `json:"tenanDomain,omitempty"`
