@@ -117,7 +117,7 @@ public class APIPolicyPerOperationTestCase {
 
     @Test
     public void testPATCH_AddQuery() throws Exception {
-        java.net.http.HttpResponse httpResponse = HttpsClientRequest.doPatch(
+        org.apache.http.HttpResponse httpResponse = HttpsClientRequest.doPatch(
                 Utils.getServiceURLHttps(endpoint + queryParams), "Hello World!", headers);
         EchoResponse echoResponse = Utils.extractToEchoResponse(httpResponse);
 
