@@ -163,7 +163,7 @@ end
 ---send an HTTP request to the interceptor
 ---@param handle table - request/response handler object
 ---@param interceptor_request_body table - request body for the interceptor service
----@param intercept_service {cluster_name: string, resource_path: string, timeout: number}
+---@param intercept_service {cluster_name: string, resource_path: string, timeout: number, authority_header: string}
 ---@return table - response headers
 ---@return string - response body
 local function send_http_call(handle, interceptor_request_body, intercept_service)
@@ -172,7 +172,7 @@ local function send_http_call(handle, interceptor_request_body, intercept_servic
         {
             [":method"] = "POST",
             [":path"] = intercept_service["resource_path"],
-            [":authority"] = "cc-interceptor",
+            [":authority"] = intercept_service["authority_header"],
             ["content-type"] = "application/json",
             ["accept"] = "application/json",
         },

@@ -310,3 +310,28 @@ func TestValidateBasePath(t *testing.T) {
 		assert.Equal(t, item.errorNil, err == nil, item.message)
 	}
 }
+
+func TestGetAuthorityHeader(t *testing.T) {
+	type getXWso2BasepathTestItem struct {
+		serviceURL      string
+		authorityHeader string
+		message         string
+	}
+	dataItems := []getXWso2BasepathTestItem{
+		{
+			serviceURL:      "https://interceptor-service-host:3000",
+			authorityHeader: "interceptor-service-host:3000",
+			message:         "invalid authority header when port is present",
+		},
+		{
+			serviceURL:      "https://abcd.wxyz.amazonaws.com",
+			authorityHeader: "abcd.wxyz.amazonaws.com:443",
+			message:         "invalid authority header when port is implicit",
+		},
+	}
+	for _, item := range dataItems {
+		endpoint, _ := getHTTPEndpoint(item.serviceURL)
+		authHeader := endpoint.GetAuthorityHeader()
+		assert.Equal(t, authHeader, item.authorityHeader, item.message)
+	}
+}
