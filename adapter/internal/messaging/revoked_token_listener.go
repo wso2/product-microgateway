@@ -45,20 +45,20 @@ func handleTokenRevocation() {
 }
 
 func handleAzureTokenRevocation() {
-	for d := range msg.AzureRevokedTokenChannel {
+	for asbEvent := range msg.AzureRevokedTokenChannel {
+		defer msg.CompleteEvent(asbEvent)
 		var notification msg.EventTokenRevocationNotification
-		error := parseRevokedTokenJSONEvent(d, &notification)
+		error := parseRevokedTokenJSONEvent(asbEvent.Message.Body, &notification)
 		if error != nil {
 			continue
 		}
-		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
-		logger.LoggerInternalMsg.Infof("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
-			notification.Event.PayloadData.Type)
+		logger.LoggerInternalMsg.Infof("Event %s is received. RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.Type,
+			notification.Event.PayloadData.RevokedToken, notification.Event.PayloadData.Type)
 		processTokenRevocationEvent(&notification)
 	}
 }
 
-func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotification)  {
+func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotification) {
 	var revokedTokens []types.Resource
 	token := &keymgt.RevokedToken{}
 	token.Jti = notification.Event.PayloadData.RevokedToken
@@ -70,7 +70,7 @@ func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotificat
 func parseRevokedTokenJSONEvent(data []byte, notification *msg.EventTokenRevocationNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v. " +
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v. "+
 			"Hence dropping the event.", unmarshalErr)
 	}
 	return unmarshalErr

@@ -38,7 +38,7 @@ func InitiateAndProcessEvents(config *config.Config) {
 	var reconnectRetryCount = config.ControlPlane.BrokerConnectionParameters.ReconnectRetryCount
 	var reconnectInterval = config.ControlPlane.BrokerConnectionParameters.ReconnectInterval
 	connectionString := config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints[0]
-	subscriptionKeys := []string{msg.TokenRevocation, msg.Notification}
+	subscriptionKeys := []string{msg.TokenRevocation, msg.Notification, msg.OrganizationPurge}
 	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(connectionString, componentName,
 		reconnectRetryCount, reconnectInterval*time.Millisecond, subscriptionIdleTimeDuration, subscriptionKeys)
 	health.SetControlPlaneBrokerStatus(err == nil)

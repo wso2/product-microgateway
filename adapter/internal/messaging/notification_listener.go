@@ -89,9 +89,10 @@ func handleNotification() {
 
 func handleAzureNotification() {
 	conf, _ := config.ReadConfigs()
-	for d := range msg.AzureNotificationChannel {
+	for asbEvent := range msg.AzureNotificationChannel {
+		defer msg.CompleteEvent(asbEvent)
 		var notification msg.EventNotification
-		error := parseNotificationJSONEvent(d, &notification)
+		error := parseNotificationJSONEvent(asbEvent.Message.Body, &notification)
 		if error != nil {
 			continue
 		}

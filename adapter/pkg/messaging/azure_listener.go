@@ -31,7 +31,7 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 	var topic = sub.TopicName
 	var subName = sub.SubscriptionName
 
-	dataChannel := make(chan []byte)
+	dataChannel := make(chan AzsbEvent)
 	if strings.EqualFold(topic, Notification) {
 		dataChannel = AzureNotificationChannel
 	} else if strings.EqualFold(topic, TokenRevocation) {
@@ -75,8 +75,14 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 				}
 				for _, message := range messages {
 					logger.LoggerMsg.Debugf("Message %s from ASB waits to be processed. Subscription: %s, topic: %s", message.MessageID, subName, topic)
-					body := message.Body
-					dataChannel <- body
+					azsbEvent := AzsbEvent{
+						Topic:    topic,
+						Name:     subName,
+						Message:  message,
+						Receiver: receiver,
+						Context:  &ctx,
+					}
+					dataChannel <- azsbEvent
 					logger.LoggerMsg.Debugf("Message %s from ASB is complete. Subscription: %s, topic: %s", message.MessageID, subName, topic)
 
 					err = receiver.CompleteMessage(ctx, message, &asb.CompleteMessageOptions{})

@@ -38,25 +38,34 @@ type Subscription struct {
 	SubscriptionName string
 }
 
+// AzsbEvent contains azsb event data
+type AzsbEvent struct {
+	Topic    string
+	Name     string
+	Message  *asb.ReceivedMessage
+	Receiver *asb.Receiver
+	Context  *context.Context
+}
+
 var (
 	// AzureRevokedTokenChannel stores the revoked token events
-	AzureRevokedTokenChannel chan []byte
+	AzureRevokedTokenChannel chan AzsbEvent
 	// AzureNotificationChannel stores the notification events
-	AzureNotificationChannel chan []byte
+	AzureNotificationChannel chan AzsbEvent
 	// AzureStepQuotaThresholdChannel stores the step quota threshold events
-	AzureStepQuotaThresholdChannel chan []byte
+	AzureStepQuotaThresholdChannel chan AzsbEvent
 	// AzureStepQuotaResetChannel stores the step quota reset events
-	AzureStepQuotaResetChannel chan []byte
+	AzureStepQuotaResetChannel chan AzsbEvent
 	// AzureOrganizationPurgeChannel stores the Organization Purge events
-	AzureOrganizationPurgeChannel chan []byte
+	AzureOrganizationPurgeChannel chan AzsbEvent
 )
 
 func init() {
-	AzureRevokedTokenChannel = make(chan []byte)
-	AzureNotificationChannel = make(chan []byte)
-	AzureStepQuotaThresholdChannel = make(chan []byte)
-	AzureStepQuotaResetChannel = make(chan []byte)
-	AzureOrganizationPurgeChannel = make(chan []byte)
+	AzureRevokedTokenChannel = make(chan AzsbEvent)
+	AzureNotificationChannel = make(chan AzsbEvent)
+	AzureStepQuotaThresholdChannel = make(chan AzsbEvent)
+	AzureStepQuotaResetChannel = make(chan AzsbEvent)
+	AzureOrganizationPurgeChannel = make(chan AzsbEvent)
 }
 
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
@@ -153,4 +162,13 @@ func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal e
 		retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
 	}
 	logger.LoggerMsg.Errorf("%v. %s .Retrying after %s seconds", errVal, retryAttemptMessage, reconnectInterval)
+}
+
+// CompleteEvent finish processing a asb event
+func CompleteEvent(asbEvent AzsbEvent) {
+	err := asbEvent.Receiver.CompleteMessage(*asbEvent.Context, asbEvent.Message, &asb.CompleteMessageOptions{})
+	if err != nil {
+		logger.LoggerMsg.Warnf("Failed to complete the ASB message. Subscription: %s, topic: %s error: %v",
+			asbEvent.Name, asbEvent.Topic, err)
+	}
 }

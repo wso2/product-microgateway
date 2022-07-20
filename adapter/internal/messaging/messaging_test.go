@@ -19,6 +19,7 @@ package messaging
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
@@ -36,10 +37,7 @@ func TestNotificationChannelSubscriptionAndEventFormat(t *testing.T) {
 
 	var parsedSuccessfully bool
 	var notification msg.EventNotification
-	go func() {
-		msg.AzureNotificationChannel <- []byte(sampleTestEvent)
-	}()
-	outputData := <- msg.AzureNotificationChannel
+	outputData := []byte(sampleTestEvent)
 	error := parseNotificationJSONEvent(outputData, &notification)
 	if error != nil {
 		logger.LoggerMgw.Info("Error occurred", error)
@@ -57,10 +55,7 @@ func TestTokenRevocationChannelSubscriptionAndEventFormat(t *testing.T) {
 		"\"type\":\"Default\",\"tenantId\":-1234}}}"
 	var parsedSuccessfully bool
 	var notification msg.EventTokenRevocationNotification
-	go func() {
-		msg.AzureRevokedTokenChannel <- []byte(sampleTestEvent)
-	}()
-	outputData := <- msg.AzureRevokedTokenChannel
+	outputData := []byte(sampleTestEvent)
 	error := parseRevokedTokenJSONEvent(outputData, &notification)
 	if error != nil {
 		logger.LoggerMgw.Info("Error occurred", error)

@@ -19,6 +19,7 @@ package messaging
 
 import (
 	"encoding/json"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/eventhub"
@@ -28,10 +29,11 @@ import (
 )
 
 func handleAzureOrganizationPurge() {
-	for d := range msg.AzureOrganizationPurgeChannel {
-		logger.LoggerInternalMsg.Info("message received for OrganizationPurgeChannel = " + string(d))
+	for asbEvent := range msg.AzureOrganizationPurgeChannel {
+		defer msg.CompleteEvent(asbEvent)
+		logger.LoggerInternalMsg.Info("message received for OrganizationPurgeChannel = " + string(asbEvent.Message.Body))
 		var event msg.EventOrganizationPurge
-		error := parseOrganizationPurgeJSONEvent(d, &event)
+		error := parseOrganizationPurgeJSONEvent(asbEvent.Message.Body, &event)
 
 		if error != nil {
 			logger.LoggerInternalMsg.Errorf("Error while processing "+
