@@ -31,12 +31,11 @@ import (
 )
 
 // TODO: (erandi) when refactoring, refactor organization purge flow as well
-var bindingKeys = []string{tokenRevocation, notification, stepQuotaThreshold, stepQuotaReset, organizationPurge}
 
 // Subscription stores the meta data of a specific subscription
 type Subscription struct {
-	topicName        string
-	subscriptionName string
+	TopicName        string
+	SubscriptionName string
 }
 
 var (
@@ -63,7 +62,7 @@ func init() {
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
 // further process
 func InitiateBrokerConnectionAndValidate(connectionString string, componentName string, reconnectRetryCount int,
-	reconnectInterval time.Duration, subscriptionIdleTimeDuration string) ([]Subscription, error) {
+	reconnectInterval time.Duration, subscriptionIdleTimeDuration string, subscriptionKeys []string) ([]Subscription, error) {
 	subscriptionMetaDataList := make([]Subscription, 0)
 	subProps := &admin.SubscriptionProperties{
 		AutoDeleteOnIdle: &subscriptionIdleTimeDuration,
@@ -72,11 +71,10 @@ func InitiateBrokerConnectionAndValidate(connectionString string, componentName 
 
 	if err == nil {
 		logger.LoggerMsg.Debugf("ASB client initialized for connection url: %s", connectionString)
-
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
 			err = nil
 			subscriptionMetaDataList, err = retrieveSubscriptionMetadata(subscriptionMetaDataList,
-				connectionString, componentName, subProps)
+				connectionString, componentName, subProps, subscriptionKeys)
 			if err != nil {
 				logError(reconnectRetryCount, reconnectInterval, err)
 				subscriptionMetaDataList = nil
@@ -108,7 +106,7 @@ func InitiateConsumers(connectionString string, subscriptionMetaDataList []Subsc
 }
 
 func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString string, componentName string,
-	opts *admin.SubscriptionProperties) ([]Subscription, error) {
+	opts *admin.SubscriptionProperties, subscriptionKeys []string) ([]Subscription, error) {
 	parentContext := context.Background()
 	adminClient, clientErr := admin.NewClientFromConnectionString(connectionString, nil)
 	if clientErr != nil {
@@ -116,12 +114,9 @@ func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString 
 		return nil, clientErr
 	}
 
-	for _, key := range bindingKeys {
-		var errorValue error
-		subscriptionMetaData := Subscription{
-			topicName:        key,
-			subscriptionName: "",
-		}
+	// check durable subscription existance
+
+	for _, key := range subscriptionKeys {
 		// we are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
 		// idle for three days
 		uniqueID := uuid.New()
@@ -138,13 +133,15 @@ func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString 
 			})
 		}()
 		if subscriptionCreationError != nil {
-			errorValue = errors.New("Error occurred while trying to create subscription " + subscriptionName + " in ASB for topic name " +
+			errorValue := errors.New("Error occurred while trying to create subscription " + subscriptionName + " in ASB for topic name " +
 				key + "." + subscriptionCreationError.Error())
 			return metaDataList, errorValue
 		}
 		logger.LoggerMsg.Debugf("Subscription %s created.", subscriptionName)
-		subscriptionMetaData.subscriptionName = subscriptionName
-		subscriptionMetaData.topicName = key
+		subscriptionMetaData := Subscription{
+			TopicName:        key,
+			SubscriptionName: subscriptionName,
+		}
 		metaDataList = append(metaDataList, subscriptionMetaData)
 	}
 	return metaDataList, nil

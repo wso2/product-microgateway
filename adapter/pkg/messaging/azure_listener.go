@@ -28,19 +28,19 @@ import (
 )
 
 func startBrokerConsumer(connectionString string, sub Subscription, reconnectInterval time.Duration) {
-	var topic = sub.topicName
-	var subName = sub.subscriptionName
+	var topic = sub.TopicName
+	var subName = sub.SubscriptionName
 
 	dataChannel := make(chan []byte)
-	if strings.EqualFold(topic, notification) {
+	if strings.EqualFold(topic, Notification) {
 		dataChannel = AzureNotificationChannel
-	} else if strings.EqualFold(topic, tokenRevocation) {
+	} else if strings.EqualFold(topic, TokenRevocation) {
 		dataChannel = AzureRevokedTokenChannel
-	} else if strings.EqualFold(topic, stepQuotaThreshold) {
+	} else if strings.EqualFold(topic, StepQuotaThreshold) {
 		dataChannel = AzureStepQuotaThresholdChannel
-	} else if strings.EqualFold(topic, stepQuotaReset) {
+	} else if strings.EqualFold(topic, StepQuotaReset) {
 		dataChannel = AzureStepQuotaResetChannel
-	} else if strings.EqualFold(topic, organizationPurge) {
+	} else if strings.EqualFold(topic, OrganizationPurge) {
 		dataChannel = AzureOrganizationPurgeChannel
 	}
 	parentContext := context.Background()

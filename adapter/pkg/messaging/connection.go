@@ -261,7 +261,7 @@ func handleEvent(c *Consumer, key string) error {
 		false,      // noWait
 		nil,        // arguments
 	)
-	if strings.EqualFold(key, notification) {
+	if strings.EqualFold(key, Notification) {
 		for event := range deliveries {
 			NotificationChannel <- event
 		}
@@ -269,7 +269,7 @@ func handleEvent(c *Consumer, key string) error {
 		for event := range deliveries {
 			KeyManagerChannel <- event
 		}
-	} else if strings.EqualFold(key, tokenRevocation) {
+	} else if strings.EqualFold(key, TokenRevocation) {
 		for event := range deliveries {
 			RevokedTokenChannel <- event
 		}
@@ -285,7 +285,7 @@ func handleEvent(c *Consumer, key string) error {
 func InitiateJMSConnection(eventListeningEndpoints []string) error {
 	var err error
 	EventListeningEndpoints = eventListeningEndpoints
-	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
+	bindingKeys := []string{Notification, keymanager, TokenRevocation, throttleData}
 	RabbitConn, err = connectToRabbitMQ()
 
 	if err == nil {

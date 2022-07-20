@@ -39,15 +39,21 @@ const (
 )
 
 const (
-	notification       string = "notification"
-	keymanager         string = "keymanager"
-	tokenRevocation    string = "tokenRevocation"
-	stepQuotaThreshold string = "thresholdEvent"
-	stepQuotaReset     string = "billingCycleResetEvent"
-	throttleData       string = "throttleData"
-	exchange           string = "amq.topic"
-	exchangeType       string = "topic"
-	organizationPurge  string = "organizationPurge"
+	keymanager   string = "keymanager"
+	throttleData string = "throttleData"
+	exchange     string = "amq.topic"
+	exchangeType string = "topic"
+
+	// Notification notification topic
+	Notification string = "notification"
+	// TokenRevocation tokenRevocation topic
+	TokenRevocation string = "tokenRevocation"
+	// StepQuotaThreshold thresholdEvent topic
+	StepQuotaThreshold string = "thresholdEvent"
+	// StepQuotaReset billingCycleResetEvent topic
+	StepQuotaReset string = "billingCycleResetEvent"
+	// OrganizationPurge organizationPurge topic
+	OrganizationPurge string = "organizationPurge"
 )
 
 // StartConsumer for provided key consume data
