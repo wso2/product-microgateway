@@ -108,6 +108,14 @@ public class Utils {
         exchange.close();
     }
 
+    public static void send403Forbidden(HttpExchange exchange, String message) throws IOException {
+        byte[] response = String.format("{\"status\":\"403 Forbidden\", message: \"%s\"}", message).getBytes();
+        exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
+    }
+
     public static void send200OK(HttpExchange exchange) throws IOException {
         byte[] response = "{\"status\":\"OK\"}".getBytes();
         exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);

@@ -312,12 +312,12 @@ func TestValidateBasePath(t *testing.T) {
 }
 
 func TestGetAuthorityHeader(t *testing.T) {
-	type getXWso2BasepathTestItem struct {
+	type getXWso2AuthorityHeaderTestItem struct {
 		serviceURL      string
 		authorityHeader string
 		message         string
 	}
-	dataItems := []getXWso2BasepathTestItem{
+	dataItems := []getXWso2AuthorityHeaderTestItem{
 		{
 			serviceURL:      "https://interceptor-service-host:3000",
 			authorityHeader: "interceptor-service-host:3000",
