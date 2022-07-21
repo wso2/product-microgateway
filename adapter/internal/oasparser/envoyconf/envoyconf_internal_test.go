@@ -91,7 +91,7 @@ func TestCreateRoute(t *testing.T) {
 					MaxProgramSize: nil,
 				},
 			},
-			Regex: "^/xWso2BasePath/resourcePath[/]{0,1}$",
+			Regex: "^/xWso2BasePath/resourcePath[/]{0,1}",
 		},
 		Substitution: "/basepath/resourcePath",
 	}
@@ -344,6 +344,13 @@ func TestGenerateRegex(t *testing.T) {
 		},
 		{
 			basePath:      "/v2",
+			resourcePath:  "/pet/*",
+			userInputPath: "/v2/pet123",
+			message:       "when the resource ends with *, trailing characters substitution passes",
+			isMatched:     false,
+		},
+		{
+			basePath:      "/v2",
 			resourcePath:  "/pet/{petId}.api",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource path param suffixed",
@@ -374,8 +381,13 @@ func TestGenerateRegex(t *testing.T) {
 
 	for _, item := range dataItems {
 		resultPattern := generateRoutePath(item.basePath, item.resourcePath)
-		resultIsMatching, err := regexp.MatchString(resultPattern, item.userInputPath)
-		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
+		// regexp.MatchString also returns true for partial matches. Therefore, an additional $ is added
+		// below to replicate the behavior of envoy proxy. As per the doc,
+		// "The entire path (without the query string) must match the regex.
+		// The rule will not match if only a subsequence of the :path header matches the regex."
+		// https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-safe-regex
+		resultIsMatching, err := regexp.MatchString(resultPattern+"$", item.userInputPath)
+		assert.Equal(t, item.isMatched, resultIsMatching, resultPattern)
 		assert.Nil(t, err)
 	}
 }

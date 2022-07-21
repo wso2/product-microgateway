@@ -148,8 +148,8 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string,
 		assert.Equal(t, uint32(0), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
 	}
 	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")
-	assert.Contains(t, []string{"^/pets[/]{0,1}$", "^/pets/([^/]+)[/]{0,1}$"}, routes[0].GetMatch().GetSafeRegex().Regex)
-	assert.Contains(t, []string{"^/pets[/]{0,1}$", "^/pets/([^/]+)[/]{0,1}$"}, routes[1].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[0].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[1].GetMatch().GetSafeRegex().Regex)
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
 }
@@ -234,8 +234,8 @@ func TestCreateRoutesWithClustersForEndpointRef(t *testing.T) {
 	assert.Equal(t, uint32(1), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
 
 	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")
-	assert.Contains(t, []string{"^/pets[/]{0,1}$", "^/pets/([^/]+)[/]{0,1}$"}, routes[0].GetMatch().GetSafeRegex().Regex)
-	assert.Contains(t, []string{"^/pets[/]{0,1}$", "^/pets/([^/]+)[/]{0,1}$"}, routes[1].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[0].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[1].GetMatch().GetSafeRegex().Regex)
 
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
@@ -287,8 +287,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 		assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
 		route := routes[0].GetMatch().GetSafeRegex().Regex
-		// TODO: (VirajSalaka) fix the topic's url mapping
-		assert.Equal(t, route, "^/echowebsocket/1.0/notifications[/]{0,1}$", "route created mismatch")
+		assert.Equal(t, "^/echowebsocket/1.0/notifications[/]{0,1}", route, "route created mismatch")
 
 		throttlingPolicy := mgwSwagger.GetXWso2ThrottlingTier()
 		assert.Equal(t, throttlingPolicy, "5PerMin", "API throttling policy is not assigned.")
@@ -307,11 +306,11 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 		assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
 		route := routes[0].GetMatch().GetSafeRegex().Regex
-		assert.Equal(t, route, "^/echowebsocketprod/1.0/notifications[/]{0,1}$", "route created mismatch")
+		assert.Equal(t, route, "^/echowebsocketprod/1.0/notifications[/]{0,1}", "route created mismatch")
 
 		// TODO: (VirajSalaka) add Unit test for second resource too.
 		route2 := routes[1].GetMatch().GetSafeRegex().Regex
-		assert.Equal(t, route2, "^/echowebsocketprod/1.0/rooms/([^/]+)[/]{0,1}$", "route created mismatch")
+		assert.Equal(t, route2, "^/echowebsocketprod/1.0/rooms/([^/]+)[/]{0,1}", "route created mismatch")
 
 	}
 	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {

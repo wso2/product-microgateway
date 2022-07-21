@@ -1384,7 +1384,7 @@ func generateRoutePath(basePath, resourcePath string) string {
 	if strings.HasSuffix(newPath, "/*") {
 		newPath = strings.TrimSuffix(newPath, "/*") + "(/.*)*"
 	} else {
-		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex + "$"
+		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex
 	}
 	return "^" + newPath
 }

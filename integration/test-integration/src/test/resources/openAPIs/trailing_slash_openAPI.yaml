@@ -106,6 +106,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pet"
+  /echo-full/chars:
+    get:
+      summary: Info for a pet
+      responses:
+        '200':
+          description: Expected response to a valid request
+  /echo-full/with-param/{petId}:
+    get:
+      summary: Info for a pet
+      responses:
+        '200':
+          description: Expected response to a valid request
+
 components:
   schemas:
     Pet:
