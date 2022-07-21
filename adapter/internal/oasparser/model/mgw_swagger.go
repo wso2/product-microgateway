@@ -353,7 +353,7 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) (err erro
 						return err
 					}
 					if operation.policies.Request != nil || operation.policies.Response != nil || operation.policies.Fault != nil {
-						resource.isWithPolicies = true
+						resource.hasPolicies = true
 					}
 					break
 				}

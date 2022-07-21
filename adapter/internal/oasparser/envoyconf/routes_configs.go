@@ -46,9 +46,8 @@ func generateRouteConfig(routeName string, match *routev3.RouteMatch, action *ro
 	responseHeadersToAdd []*corev3.HeaderValueOption, responseHeadersToRemove []string) *routev3.Route {
 
 	// headers removed from the request (from router to backend)
-	requestHeadersToRemove = append(requestHeadersToRemove, clusterHeaderName)
-	requestHeadersToRemove = append(requestHeadersToRemove, "x-envoy-expected-rq-timeout-ms")
-	requestHeadersToRemove = append(requestHeadersToRemove, "X-envoy-original-path")
+	requestHeadersToRemove = append(requestHeadersToRemove,
+		clusterHeaderName, "x-envoy-expected-rq-timeout-ms", "X-envoy-original-path")
 
 	// headers removed from the response (from router to client).
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
@@ -199,10 +198,10 @@ func generateHeaderToAddRouteConfig(policyParams interface{}) (*corev3.HeaderVal
 	if paramsToSetHeader, ok = policyParams.(map[string]interface{}); !ok {
 		return nil, fmt.Errorf("Error while processing policy parameter map. Map: %v", policyParams)
 	}
-	if headerName, ok = paramsToSetHeader[constants.HeaderName].(string); !ok || headerName == "" {
+	if headerName, ok = paramsToSetHeader[constants.HeaderName].(string); !ok || strings.TrimSpace(headerName) == "" {
 		return nil, errors.New("Policy parameter map must include headerName")
 	}
-	if headerValue, ok = paramsToSetHeader[constants.HeaderValue].(string); !ok || headerValue == "" {
+	if headerValue, ok = paramsToSetHeader[constants.HeaderValue].(string); !ok || strings.TrimSpace(headerValue) == "" {
 		return nil, errors.New("Policy parameter map must include headerValue")
 	}
 	headerToAdd := corev3.HeaderValueOption{
@@ -240,7 +239,8 @@ func generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath st
 	if paramsToSetHeader, ok = policyParams.(map[string]interface{}); !ok {
 		return nil, fmt.Errorf("Error while processing policy parameter map. Map: %v", policyParams)
 	}
-	if rewritePath, ok = paramsToSetHeader[constants.RewritePathResourcePath].(string); !ok || rewritePath == "" {
+	if rewritePath, ok = paramsToSetHeader[constants.RewritePathResourcePath].(string); !ok ||
+		strings.TrimSpace(rewritePath) == "" {
 		return nil, errors.New("Policy parameter map must include rewritePath")
 	}
 

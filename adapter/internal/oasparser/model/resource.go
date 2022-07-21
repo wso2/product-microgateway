@@ -43,7 +43,7 @@ type Resource struct {
 	productionEndpoints *EndpointCluster
 	sandboxEndpoints    *EndpointCluster
 	vendorExtensions    map[string]interface{}
-	isWithPolicies      bool
+	hasPolicies         bool
 }
 
 // GetProdEndpoints returns the production endpoints object of a given resource.
@@ -94,9 +94,9 @@ func (resource *Resource) GetOperations() []*Operation {
 	return resource.methods
 }
 
-// IsWithPolicies returns whether the resource has operations that includes policies.
-func (resource *Resource) IsWithPolicies() bool {
-	return resource.isWithPolicies
+// HasPolicies returns whether the resource has operations that includes policies.
+func (resource *Resource) HasPolicies() bool {
+	return resource.hasPolicies
 }
 
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values

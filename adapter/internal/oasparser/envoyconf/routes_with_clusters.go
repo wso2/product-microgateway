@@ -226,6 +226,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			routesP, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
 				apiLevelClusterNameSand, nil, nil, organizationID, false))
 			if err != nil {
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error while creating routes for Websocket API. For path: %s Error: %s",
+						resource.GetPath(), err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 2230,
+				})
 				return nil, nil, nil, fmt.Errorf("Error while creating routes for Websocket API. %v", err)
 			}
 			routes = append(routes, routesP...)
@@ -431,6 +437,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		routeP, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
 			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, false))
 		if err != nil {
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while creating routes for API %s %s for path: %s Error: %s",
+					mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), resource.GetPath(), err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 2231,
+			})
 			return nil, nil, nil, fmt.Errorf("Error while creating routes. %v", err)
 		}
 		if apiLevelBasePathSand != "" || isResourceBasePathSandAvailable {
@@ -438,6 +450,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			routeS, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
 				clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, true))
 			if err != nil {
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error while creating sandbox cluster routes for API %s %s for path: %s Error: %s",
+						mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), resource.GetPath(), err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 2232,
+				})
 				return nil, nil, nil, fmt.Errorf("Error while creating sandbox routes. %v", err)
 			}
 			// Sandbox route should be appended before to prod route to have the expected header based sandbox routing.
@@ -947,23 +965,28 @@ end`
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 
-	if resource.IsWithPolicies() {
+	if resource.HasPolicies() {
+		logger.LoggerOasparser.Debug("Start creating routes for resource with policies")
+
 		// Policies are per operation (HTTP method). Therefore, create route per HTTP method.
 		for _, operation := range resource.GetOperations() {
 			var requestHeadersToAdd []*corev3.HeaderValueOption
 			var requestHeadersToRemove []string
 			var responseHeadersToAdd []*corev3.HeaderValueOption
 			var responseHeadersToRemove []string
-			var regexRewriteForOperation *envoy_type_matcherv3.RegexMatchAndSubstitute
+			var pathRewriteConfig *envoy_type_matcherv3.RegexMatchAndSubstitute
 
-			isRewriteMethod := false
+			hasMethodRewritePolicy := false
 			var newMethod string
 
 			// Policies - for request flow
 			for _, requestPolicy := range operation.GetPolicies().Request {
+				logger.LoggerOasparser.Debug("Adding request flow policies for ", resourcePath, operation.GetMethod())
 				switch requestPolicy.Action {
 
 				case constants.ActionHeaderAdd:
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
 					requestHeaderToAdd, err := generateHeaderToAddRouteConfig(requestPolicy.Parameters)
 					if err != nil {
 						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
@@ -972,6 +995,8 @@ end`
 					requestHeadersToAdd = append(requestHeadersToAdd, requestHeaderToAdd)
 
 				case constants.ActionHeaderRemove:
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
 					requestHeaderToRemove, err := generateHeaderToRemoveString(requestPolicy.Parameters)
 					if err != nil {
 						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
@@ -980,6 +1005,8 @@ end`
 					requestHeadersToRemove = append(requestHeadersToRemove, requestHeaderToRemove)
 
 				case constants.ActionRewritePath:
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionRewritePath, resourcePath, operation.GetMethod())
 					regexRewrite, err := generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath,
 						requestPolicy.Parameters)
 					if err != nil {
@@ -992,14 +1019,16 @@ end`
 						})
 						return nil, errors.New(errMsg)
 					}
-					regexRewriteForOperation = regexRewrite
+					pathRewriteConfig = regexRewrite
 
 				case constants.ActionRewriteMethod:
-					isRewriteMethod, err = isMethodRewrite(resourcePath, operation.GetMethod(), requestPolicy.Parameters)
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionRewriteMethod, resourcePath, operation.GetMethod())
+					hasMethodRewritePolicy, err = isMethodRewrite(resourcePath, operation.GetMethod(), requestPolicy.Parameters)
 					if err != nil {
 						return nil, err
 					}
-					if !isRewriteMethod {
+					if !hasMethodRewritePolicy {
 						continue
 					}
 					newMethod, err = getRewriteMethod(resourcePath, operation.GetMethod(), requestPolicy.Parameters)
@@ -1011,9 +1040,12 @@ end`
 
 			// Policies - for response flow
 			for _, responsePolicy := range operation.GetPolicies().Response {
+				logger.LoggerOasparser.Debug("Adding response flow policies for ", resourcePath, operation.GetMethod())
 				switch responsePolicy.Action {
 
 				case constants.ActionHeaderAdd:
+					logger.LoggerOasparser.Debug("Adding %s policy to response flow for %s %s",
+						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
 					responseHeaderToAdd, err := generateHeaderToAddRouteConfig(responsePolicy.Parameters)
 					if err != nil {
 						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
@@ -1022,6 +1054,8 @@ end`
 					responseHeadersToAdd = append(responseHeadersToAdd, responseHeaderToAdd)
 
 				case constants.ActionHeaderRemove:
+					logger.LoggerOasparser.Debug("Adding %s policy to response flow for %s %s",
+						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
 					responseHeaderToRemove, err := generateHeaderToRemoveString(responsePolicy.Parameters)
 					if err != nil {
 						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
@@ -1032,7 +1066,9 @@ end`
 			}
 
 			// TODO: (suksw) preserve header key case?
-			if isRewriteMethod {
+			if hasMethodRewritePolicy {
+				logger.LoggerOasparser.Debug("Creating two routes to support method rewrite for %s %s. New method: %s",
+					resourcePath, operation.GetMethod(), newMethod)
 				match1 := generateRouteMatch(routePath)
 				match1.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
 				match2 := generateRouteMatch(routePath)
@@ -1057,8 +1093,8 @@ end`
 
 				// Create route2 for new method.
 				// Add all policies to route config. Do not send via enforcer.
-				if regexRewriteForOperation != nil {
-					action2.Route.RegexRewrite = regexRewriteForOperation
+				if pathRewriteConfig != nil {
+					action2.Route.RegexRewrite = pathRewriteConfig
 				} else {
 					action1.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 				}
@@ -1069,13 +1105,14 @@ end`
 				routes = append(routes, route1)
 				routes = append(routes, route2)
 			} else {
+				logger.LoggerOasparser.Debug("Creating routes for resource with policies", resourcePath, operation.GetMethod())
 				// create route for current method. Add policies to route config. Send via enforcer
 				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
 				match := generateRouteMatch(routePath)
 				match.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
 				match.DynamicMetadata = generateMetadataMatcherForExternalRoutes()
-				if regexRewriteForOperation != nil {
-					action.Route.RegexRewrite = regexRewriteForOperation
+				if pathRewriteConfig != nil {
+					action.Route.RegexRewrite = pathRewriteConfig
 				} else {
 					action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 				}
@@ -1086,6 +1123,7 @@ end`
 
 		}
 	} else {
+		logger.LoggerOasparser.Debug("Creating routes for resource that has no policies")
 		// No policies defined for the resource. Therefore, create one route for all operations.
 		methodRegex := strings.Join(resourceMethods, "|")
 		if !strings.Contains(methodRegex, "OPTIONS") {

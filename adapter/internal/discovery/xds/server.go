@@ -325,7 +325,12 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth, isYamlMutualssl, isYamlMutualsslMandatory, isYamlOauthBasicAuthAPIKeyMandatory)
 		err = mgwSwagger.SetOperationPolicies(apiProject)
 		if err != nil {
-			logger.LoggerXds.Error("Error while populating operational policies. ", err)
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while populating operational policies for the API %s:%s of Organization %s. %s",
+					apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID, err),
+				Severity:  logging.MINOR,
+				ErrorCode: 1416,
+			})
 			return nil, err
 		}
 	}
