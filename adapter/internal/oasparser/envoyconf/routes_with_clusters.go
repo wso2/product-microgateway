@@ -1087,7 +1087,6 @@ end`
 
 				// Create route1 for current method.
 				// Do not add policies to route config. Send via enforcer
-				action1.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 				route1 := generateRouteConfig(xWso2Basepath+operation.GetMethod(), match1, action1, nil, decorator, perRouteFilterConfigs,
 					nil, nil, nil, nil)
 
@@ -1096,7 +1095,7 @@ end`
 				if pathRewriteConfig != nil {
 					action2.Route.RegexRewrite = pathRewriteConfig
 				} else {
-					action1.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
+					action2.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 				}
 				configToSkipEnforcer := generateFilterConfigToSkipEnforcer()
 				route2 := generateRouteConfig(xWso2Basepath, match2, action2, nil, decorator, configToSkipEnforcer,

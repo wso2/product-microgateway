@@ -208,6 +208,20 @@ public class APIPolicyPerOperationTestCase {
         assertOriginalClientRequestInfo(echoResponse);
     }
 
+    @Test(description = "Test HTTP method rewrite and check if query params exists")
+    public void testGET_MethodRewriteOnly() throws Exception {
+        HttpResponse httpResponse = HttpsClientRequest.doGet(
+                Utils.getServiceURLHttps(basePath + "/echo-full/method-rewrite-only" + queryParams), headers);
+        EchoResponse echoResponse = Utils.extractToEchoResponse(httpResponse);
+        
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.POST.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/method-rewrite-only");
+        Assert.assertEquals(echoResponse.getQuery().get("foo1"), "bar1",
+                "Query Param 1 has not been added");
+        Assert.assertEquals(echoResponse.getQuery().get("foo2"), "bar2",
+                "Query Param 2 has not been added");
+    }
+
     private void assertOriginalClientRequestInfo(EchoResponse echoResponse) {
         Assert.assertEquals(echoResponse.getHeaders().getFirst("Sample1"), "Sample Value",
                 "Original header value in client request is missing");

@@ -209,3 +209,15 @@ data:
             parameters:
               headerName: response-header
         fault: []
+    -
+      target: /echo-full/method-rewrite-only
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              updatedMethod: POST
+        response: []
+        fault: []

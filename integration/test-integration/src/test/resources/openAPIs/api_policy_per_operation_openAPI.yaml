@@ -56,4 +56,10 @@ paths:
       responses:
         '200':
           description: successful operation
+  /echo-full/method-rewrite-only:
+    get:
+      summary: rewrite method
+      responses:
+        '200':
+          description: successful operation
 
