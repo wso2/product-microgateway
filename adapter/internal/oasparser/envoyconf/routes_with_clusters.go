@@ -1374,15 +1374,23 @@ func CreateReadyEndpoint() *routev3.Route {
 }
 
 // generateRoutePath generates route paths for the api resources.
+// TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
 func generateRoutePath(basePath, resourcePath string) string {
+	trailingSlashRegex := "[/]{0,1}"
 	if strings.Contains(resourcePath, "?") {
 		resourcePath = strings.Split(resourcePath, "?")[0]
 	}
-	return generateRegex(basePath + resourcePath)
+	newPath := replacePathParamsWithCaptureGroups(basePath + resourcePath)
+	if strings.HasSuffix(newPath, "/*") {
+		newPath = strings.TrimSuffix(newPath, "/*") + "(/.*)*"
+	} else {
+		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex + "$"
+	}
+	return "^" + newPath
 }
 
-// generatePathRegexSegment adds a wildcard to the regex if /* the path, else allows one or zero slashes.
-func generatePathRegexSegment(resourcePath string) string {
+// replacePathParamsWithCaptureGroups updates paths like /pet/{petId} to /pet/([^/]+)
+func replacePathParamsWithCaptureGroups(resourcePath string) string {
 	pathParaRegex := "([^/]+)"
 	matcher := regexp.MustCompile(`{([^}]+)}`)
 	resourceRegex := matcher.ReplaceAllString(resourcePath, pathParaRegex)
@@ -1393,7 +1401,7 @@ func generatePathRegexSegment(resourcePath string) string {
 func generateSubstitutionString(endpointBasepath string, resourcePath string) string {
 	pathParaRegex := "([^/]+)"
 	pathParamIndex := 0
-	resourceRegex := generatePathRegexSegment(resourcePath)
+	resourceRegex := replacePathParamsWithCaptureGroups(resourcePath)
 	for {
 		pathParaRemains := strings.Contains(resourceRegex, pathParaRegex)
 		if !pathParaRemains {
@@ -1407,23 +1415,6 @@ func generateSubstitutionString(endpointBasepath string, resourcePath string) st
 		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + fmt.Sprintf("\\%d", pathParamIndex)
 	}
 	return endpointBasepath + resourceRegex
-}
-
-// generateRegex generates regex for the resources which have path paramaters
-// such that the envoy configuration can use it as a route.
-// If path has path parameters ({id}), append a regex pattern (pathParaRegex).
-// To avoid query parameter issues, add a regex pattern ( endRegex) for end of all routes.
-// It takes the path value as an input and then returns the regex value.
-// TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
-func generateRegex(fullpath string) string {
-	trailingSlashRegex := "[/]{0,1}"
-	newPath := generatePathRegexSegment(fullpath)
-	if strings.HasSuffix(newPath, "/*") {
-		newPath = strings.TrimSuffix(newPath, "/*") + "(/.*)*"
-	} else {
-		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex + "$"
-	}
-	return "^" + newPath
 }
 
 func isMethodRewrite(resourcePath, method string, policyParams interface{}) (isMethodRewrite bool, err error) {

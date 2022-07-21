@@ -161,7 +161,7 @@ func generateHeaderMatcher(headerName, valueRegex string) *routev3.HeaderMatcher
 								MaxProgramSize: nil,
 							},
 						},
-						Regex: "^(" + valueRegex + ")$",
+						Regex: "^" + valueRegex + "$",
 					},
 				},
 			},

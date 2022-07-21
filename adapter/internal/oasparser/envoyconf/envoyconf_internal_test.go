@@ -124,7 +124,7 @@ func TestCreateRoute(t *testing.T) {
 	assert.Equal(t, expectedRouteActionWithXWso2BasePath, generatedRouteWithXWso2BasePath.Action,
 		"Route generation mismatch when xWso2BasePath option is provided.")
 	assert.NotNil(t, generatedRouteWithXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
-	assert.Equal(t, "^(GET|OPTIONS)$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
+	assert.Equal(t, "^GET|OPTIONS$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
 		"Assigned HTTP Method Regex is incorrect when single method is available.")
 
 	generatedRouteArrayWithoutXWso2BasePath, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, "", version,
@@ -133,7 +133,7 @@ func TestCreateRoute(t *testing.T) {
 	generatedRouteWithoutXWso2BasePath := generatedRouteArrayWithoutXWso2BasePath[0]
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath, "Route should not be null")
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
-	assert.Equal(t, "^(GET|POST|OPTIONS)$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
+	assert.Equal(t, "^GET|POST|OPTIONS$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
 		"Assigned HTTP Method Regex is incorrect when multiple methods are available.")
 
 	context := fmt.Sprintf("%s/%s", xWso2BasePath, version)
@@ -250,105 +250,122 @@ func TestGenerateTLSCert(t *testing.T) {
 func TestGenerateRegex(t *testing.T) {
 
 	type generateRegexTestItem struct {
-		inputpath     string
+		basePath      string
+		resourcePath  string
 		userInputPath string
 		message       string
 		isMatched     bool
 	}
 	dataItems := []generateRegexTestItem{
 		{
-			inputpath:     "/v2/pet/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}",
 			userInputPath: "/v2/pet/5",
 			message:       "when path parameter is provided end of the path",
 			isMatched:     true,
 		},
 		{
 			// slash escaped to make the test pass. envoyproxy does not expect escaping slash.
-			inputpath:     `\/v2\/pet\/{petId}`,
+			basePath:      `\/v2`,
+			resourcePath:  `\/pet\/{petId}`,
 			userInputPath: "/v2/pet/5/",
 			message:       "when the input path does not have tailing slash and user input path has trailing slash",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/",
 			userInputPath: "/v2/pet/5",
 			message:       "when the input path has tailing slash and user input path does not have trailing slash",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/",
 			userInputPath: "/v2/pet/5/",
 			message:       "when both the input path and user input path has trailing slash",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/info",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/info",
 			userInputPath: "/v2/pet/5/info",
 			message:       "when path parameter is provided in the middle of the path",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}",
 			userInputPath: "/v2/pet/5",
 			message:       "when path parameter is provided end of the path",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/tst/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/tst/{petId}",
 			userInputPath: "/v2/pet/5/tst/3",
 			message:       "when multiple path parameter are provided",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}",
 			userInputPath: "/v2/pet/5/test",
 			message:       "when path parameter is provided end of the path and provide incorrect path",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/5",
+			basePath:      "/v2",
+			resourcePath:  "/pet/5",
 			userInputPath: "/v2/pett/5",
 			message:       "when provide a incorrect path",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/*",
+			basePath:      "/v2",
+			resourcePath:  "/pet/*",
 			userInputPath: "/v2/pet/",
 			message:       "when the resource ends with *, empty string with / substitution fails.",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/*",
+			basePath:      "/v2",
+			resourcePath:  "/pet/*",
 			userInputPath: "/v2/pet",
 			message:       "when the resource ends with *, empty string substitution fails.",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/*",
+			basePath:      "/v2",
+			resourcePath:  "/pet/*",
 			userInputPath: "/v2/pet/foo/bar",
 			message:       "when the resource ends with *, multiple trailing slashes substitution fails.",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}.api",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}.api",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource path param suffixed",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}.api",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}.api",
 			userInputPath: "/v2/pet/pet1.api",
 			message:       "when the resource path param suffixed",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/pet{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/pet{petId}",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource ends with *",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/pet{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/pet{petId}",
 			userInputPath: "/v2/pet/pet1",
 			message:       "when the resource ends with *",
 			isMatched:     true,
@@ -356,7 +373,7 @@ func TestGenerateRegex(t *testing.T) {
 	}
 
 	for _, item := range dataItems {
-		resultPattern := generateRegex(item.inputpath)
+		resultPattern := generateRoutePath(item.basePath, item.resourcePath)
 		resultIsMatching, err := regexp.MatchString(resultPattern, item.userInputPath)
 		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
 		assert.Nil(t, err)
@@ -484,7 +501,7 @@ func TestGenerateRegexSegment(t *testing.T) {
 	}
 
 	for _, item := range dataItems {
-		generatedPathRegexSegment := generatePathRegexSegment(item.inputPath)
+		generatedPathRegexSegment := replacePathParamsWithCaptureGroups(item.inputPath)
 		isEqual := generatedPathRegexSegment == item.regexSegment
 		assert.Equal(t, item.shouldEqual, isEqual, item.message)
 	}
