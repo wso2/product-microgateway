@@ -76,13 +76,8 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 					continue
 				}
 				for _, message := range messages {
-					body, err := message.Body()
-					if err != nil {
-						logger.LoggerMsg.Errorf("Failed to parse the ASB message. %v", err)
-					}
-
 					logger.LoggerMsg.Debugf("Message %s from ASB is waiting to be processed.", message.MessageID)
-					dataChannel <- body
+					dataChannel <- message.Body
 					logger.LoggerMsg.Debugf("Message %s from ASB is processed", message.MessageID)
 
 					err = receiver.CompleteMessage(ctx, message, &asb.CompleteMessageOptions{})
