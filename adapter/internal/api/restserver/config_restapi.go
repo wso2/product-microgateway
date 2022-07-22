@@ -276,7 +276,7 @@ func StartRestServer(config *config.Config) {
 
 	// expose new port for serving pprof based go profiling endpoints
 	go func() {
-		logger.LoggerAPI.Fatal(http.ListenAndServe("localhost:6060", nil))
+		logger.LoggerAPI.Fatal(http.ListenAndServe("127.0.0.1:6060", nil))
 	}()
 
 	health.RestService.SetStatus(true)

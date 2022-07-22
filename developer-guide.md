@@ -74,6 +74,12 @@ maven plugin would fail to create the new docker images)
  - If you need to run the adaptor as a go executable, make sure you set MGW_HOME environment
  variable to point the directory where your configurations are located.
     - Ex. export MGW_HOME
+
+### Generating grpc code for Adapter and Enforcer using protos 
+1. Run `sudo ./api/protogen.sh` from the project's root folder
+2. Once the code is generated run `sudo chown -R <your-pc-username> .` from the project's root folder to get back the ownership of the files.
+
+More info https://github.com/wso2/product-microgateway/issues/2037
     
 ## Error Logging in Choreo-Connect
 Choreo Connect supports logging errors in formalized way. Which means an error log can be assigned with a severity level and a error code. At the moment this is only supported in `adapter` and `enforcer` components, as the `router` is a pure envoy container.

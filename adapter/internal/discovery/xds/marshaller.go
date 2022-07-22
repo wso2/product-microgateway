@@ -579,7 +579,6 @@ func marshalApplication(appInternal *types.Application) *subscription.Applicatio
 		SubName:      appInternal.SubName,
 		Policy:       appInternal.Policy,
 		TokenType:    appInternal.TokenType,
-		GroupIds:     appInternal.GroupIds,
 		Attributes:   appInternal.Attributes,
 		TenantId:     appInternal.TenantID,
 		TenantDomain: appInternal.TenantDomain,
