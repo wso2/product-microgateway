@@ -18,9 +18,8 @@ message Application {
 	string subName = 5;
 	string policy = 6;
 	string tokenType = 7;
-	repeated string groupIds = 8;
-	map<string, string> attributes = 9;
-	int32 tenantId = 10;
-	string tenantDomain = 11;
-	int64 timestamp = 12;
+	map<string, string> attributes = 8;
+	int32 tenantId = 9;
+	string tenantDomain = 10;
+	int64 timestamp = 11;
 }
