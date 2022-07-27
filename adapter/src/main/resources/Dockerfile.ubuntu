@@ -50,6 +50,9 @@ RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
+
+RUN mkdir -p /home/wso2/artifacts/apis
+
 COPY maven/security security
 COPY maven/conf/config.toml conf/
 COPY maven/conf/log_config.toml conf/
