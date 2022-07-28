@@ -58,6 +58,7 @@ services:
     volumes:
       - ../resources/enforcer/security:/home/wso2/security
       - ./conf/log4j2.properties:/home/wso2/conf/log4j2.properties
+      - ../resources/enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
     environment:
