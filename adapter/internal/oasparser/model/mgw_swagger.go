@@ -784,6 +784,11 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	return err
 }
 
+// GetAuthorityHeader creates the authority header using Host and Port in the form of Host [ ":" Port ]
+func (endpoint *Endpoint) GetAuthorityHeader() string {
+	return strings.Join([]string{endpoint.Host, strconv.FormatUint(uint64(endpoint.Port), 10)}, ":")
+}
+
 func (retryConfig *RetryConfig) validateRetryConfig() {
 	conf, _ := config.ReadConfigs()
 	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxRetryCount

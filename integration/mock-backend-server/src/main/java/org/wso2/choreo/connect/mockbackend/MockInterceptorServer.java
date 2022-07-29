@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.mockbackend;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
@@ -28,6 +29,8 @@ import org.json.JSONObject;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
+
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -160,6 +163,8 @@ public class MockInterceptorServer extends Thread {
                         return;
                     }
 
+                    checkHostHeader(exchange);
+
                     log.info("Called /handle-request of interceptor service");
                     requestFlowRequestBody = Utils.requestBodyToString(exchange);
                     // set which flow has handled by interceptor
@@ -183,6 +188,8 @@ public class MockInterceptorServer extends Thread {
                         return;
                     }
 
+                    checkHostHeader(exchange);
+
                     log.info("Called /handle-response of interceptor service");
                     responseFlowRequestBody = Utils.requestBodyToString(exchange);
                     // set which flow has handled by interceptor
@@ -202,6 +209,24 @@ public class MockInterceptorServer extends Thread {
                 httpServer.start();
             } catch (Exception ex) {
                 log.error("Error occurred while setting up interceptor handler server", ex);
+            }
+        }
+
+        // checks whether the host header exists and matches in interceptor requests
+        private void checkHostHeader(HttpExchange exchange) throws IOException {
+            String expectedHostHeader = Constants.MTLS_INTERCEPTOR_HANDLER_SERVER_HOST + ":"
+                    + Constants.MTLS_INTERCEPTOR_HANDLER_SERVER_PORT;
+
+            if (!exchange.getRequestHeaders().containsKey("Host")) {
+                Utils.send403Forbidden(exchange, "host header not found");
+                return;
+            }
+
+            String foundHostHeader = exchange.getRequestHeaders().get("Host").get(0);
+            if (!expectedHostHeader.equals(foundHostHeader)) {
+                Utils.send403Forbidden(exchange, String.format("host header found: '%s', expected: '%s'",
+                        foundHostHeader, expectedHostHeader));
+                return;
             }
         }
     }

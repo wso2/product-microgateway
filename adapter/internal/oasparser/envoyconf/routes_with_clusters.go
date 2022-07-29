@@ -1116,7 +1116,8 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 					ClusterName: op.ClusterName,
 					// multiplying in seconds here because in configs we are directly getting config to time.Duration
 					// which is in nano seconds, so multiplying it in seconds here
-					Timeout: strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+					Timeout:         strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+					AuthorityHeader: op.EndpointCluster.Endpoints[0].GetAuthorityHeader(),
 				},
 				Include: op.Includes,
 			}
@@ -1130,7 +1131,8 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 					ClusterName: op.ClusterName,
 					// multiplying in seconds here because in configs we are directly getting config to time.Duration
 					// which is in nano seconds, so multiplying it in seconds here
-					Timeout: strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+					Timeout:         strconv.FormatInt((op.RequestTimeout * time.Second).Milliseconds(), 10),
+					AuthorityHeader: op.EndpointCluster.Endpoints[0].GetAuthorityHeader(),
 				},
 				Include: op.Includes,
 			}
