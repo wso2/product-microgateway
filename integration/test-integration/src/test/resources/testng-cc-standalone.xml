@@ -58,7 +58,6 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.extensions.DisableSecurityTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mockEndpoint.MockApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.DefaultVersionApiTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.soap.SOAPApisTestCase"/>
         </classes>
     </test>
     <test name="cc-with-backend-tls-with-opa-server" preserve-order="true" parallel="false">
@@ -74,6 +73,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.soap.SOAPApisTestCase"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">

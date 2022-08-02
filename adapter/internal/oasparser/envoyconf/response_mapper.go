@@ -31,73 +31,58 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+type errorResponseDetails struct {
+	statusCode  int
+	errorCode   int
+	message     string
+	description string
+}
+
+var errorResponseMap map[string]errorResponseDetails
+
+func init() {
+	errorResponseMap = map[string]errorResponseDetails{
+		"NR":    {404, err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription},
+		"UAEX":  {500, err.UaexCode, err.UaexMessage, err.UaexDecription},
+		"UF":    {503, err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%"},
+		"UT":    {504, err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%"},
+		"UO":    {503, err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%"},
+		"URX":   {500, err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%"},
+		"NC":    {500, err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%"},
+		"UH":    {503, err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%"},
+		"UR":    {503, err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%"},
+		"UC":    {503, err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%"},
+		"LR":    {503, err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%"},
+		"IH":    {400, err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%"},
+		"SI":    {500, err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%"},
+		"DPE":   {500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%"},
+		"UPE":   {500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%"},
+		"UMSDR": {500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%"},
+	}
+}
+
 func getErrorResponseMappers() []*hcmv3.ResponseMapper {
+	responseMappers := []*hcmv3.ResponseMapper{}
 	conf, _ := config.ReadConfigs()
-	if conf.Adapter.SoapErrorXMLFormatEnabled {
-		return append(getSoapErrorResponseMappers(), getErrorResponseMappersJSON()...)
+	if conf.Adapter.SoapErrorInXMLEnabled {
+		for flag, details := range errorResponseMap {
+			responseMappers = append(responseMappers,
+				genSoap12ErrorResponseMapper(flag, uint32(details.statusCode), int32(details.errorCode), details.message, details.description),
+				genSoap11ErrorResponseMapper(flag, uint32(details.statusCode), int32(details.errorCode), details.message, details.description),
+			)
+		}
 	}
-	return getErrorResponseMappersJSON()
+
+	for flag, details := range errorResponseMap {
+		responseMappers = append(responseMappers,
+			genErrorResponseMapperJSON(flag, uint32(details.statusCode), int32(details.errorCode), details.message, details.description),
+		)
+	}
+
+	return responseMappers
 }
 
-func getErrorResponseMappersJSON() []*hcmv3.ResponseMapper {
-	return []*hcmv3.ResponseMapper{
-		genErrorResponseMapperJSON(err.NotFoundCode, err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription, "NR"),
-		genErrorResponseMapperJSON(500, err.UaexCode, err.UaexMessage, err.UaexDecription, "UAEX"),
-		genErrorResponseMapperJSON(503, err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%", "UF"),
-		genErrorResponseMapperJSON(504, err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%", "UT"),
-		genErrorResponseMapperJSON(503, err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%", "UO"),
-		genErrorResponseMapperJSON(500, err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%", "URX"),
-		genErrorResponseMapperJSON(500, err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%", "NC"),
-		genErrorResponseMapperJSON(503, err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%", "UH"),
-		genErrorResponseMapperJSON(503, err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%", "UR"),
-		genErrorResponseMapperJSON(503, err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%", "UC"),
-		genErrorResponseMapperJSON(503, err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%", "LR"),
-		genErrorResponseMapperJSON(400, err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%", "IH"),
-		genErrorResponseMapperJSON(500, err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%", "SI"),
-		genErrorResponseMapperJSON(500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
-		genErrorResponseMapperJSON(500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
-		genErrorResponseMapperJSON(500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
-	}
-}
-
-func getSoapErrorResponseMappers() []*hcmv3.ResponseMapper {
-	return []*hcmv3.ResponseMapper{
-		genSoap12ErrorResponseMapper(err.NotFoundCode, err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription, "NR"),
-		genSoap12ErrorResponseMapper(500, err.UaexCode, err.UaexMessage, err.UaexDecription, "UAEX"),
-		genSoap12ErrorResponseMapper(503, err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%", "UF"),
-		genSoap12ErrorResponseMapper(504, err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%", "UT"),
-		genSoap12ErrorResponseMapper(503, err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%", "UO"),
-		genSoap12ErrorResponseMapper(500, err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%", "URX"),
-		genSoap12ErrorResponseMapper(500, err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%", "NC"),
-		genSoap12ErrorResponseMapper(503, err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%", "UH"),
-		genSoap12ErrorResponseMapper(503, err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%", "UR"),
-		genSoap12ErrorResponseMapper(503, err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%", "UC"),
-		genSoap12ErrorResponseMapper(503, err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%", "LR"),
-		genSoap12ErrorResponseMapper(400, err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%", "IH"),
-		genSoap12ErrorResponseMapper(500, err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%", "SI"),
-		genSoap12ErrorResponseMapper(500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
-		genSoap12ErrorResponseMapper(500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
-		genSoap12ErrorResponseMapper(500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
-		genSoap11ErrorResponseMapper(err.NotFoundCode, err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription, "NR"),
-		genSoap11ErrorResponseMapper(500, err.UaexCode, err.UaexMessage, err.UaexDecription, "UAEX"),
-		genSoap11ErrorResponseMapper(503, err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%", "UF"),
-		genSoap11ErrorResponseMapper(504, err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%", "UT"),
-		genSoap11ErrorResponseMapper(503, err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%", "UO"),
-		genSoap11ErrorResponseMapper(500, err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%", "URX"),
-		genSoap11ErrorResponseMapper(500, err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%", "NC"),
-		genSoap11ErrorResponseMapper(503, err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%", "UH"),
-		genSoap11ErrorResponseMapper(503, err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%", "UR"),
-		genSoap11ErrorResponseMapper(503, err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%", "UC"),
-		genSoap11ErrorResponseMapper(503, err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%", "LR"),
-		genSoap11ErrorResponseMapper(400, err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%", "IH"),
-		genSoap11ErrorResponseMapper(500, err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%", "SI"),
-		genSoap11ErrorResponseMapper(500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
-		genSoap11ErrorResponseMapper(500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
-		genSoap11ErrorResponseMapper(500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
-	}
-}
-
-func genErrorResponseMapperJSON(statusCode uint32, errorCode int32, message string, description string, flag string) *hcmv3.ResponseMapper {
+func genErrorResponseMapperJSON(flag string, statusCode uint32, errorCode int32, message string, description string) *hcmv3.ResponseMapper {
 	errorMsgMap := make(map[string]*structpb.Value)
 	errorMsgMap["code"] = structpb.NewStringValue(strconv.FormatInt(int64(errorCode), 10))
 	errorMsgMap["message"] = structpb.NewStringValue(message)
@@ -105,7 +90,6 @@ func genErrorResponseMapperJSON(statusCode uint32, errorCode int32, message stri
 
 	mapper := &hcmv3.ResponseMapper{
 		Filter: &access_logv3.AccessLogFilter{
-			// TODO: (VirajSalaka) Decide if the status code needs to be checked in addition to flags
 			FilterSpecifier: &access_logv3.AccessLogFilter_ResponseFlagFilter{
 				ResponseFlagFilter: &access_logv3.ResponseFlagFilter{
 					Flags: []string{flag},
@@ -124,8 +108,8 @@ func genErrorResponseMapperJSON(statusCode uint32, errorCode int32, message stri
 	return mapper
 }
 
-func genSoap12ErrorResponseMapper(statusCode uint32, errorCode int32, message string, description string, flag string) *hcmv3.ResponseMapper {
-	msg, _ := soaputils.GenarateSoapFaultMessage(soap12ProtocolVersion, message, description, strconv.Itoa(int(errorCode)))
+func genSoap12ErrorResponseMapper(flag string, statusCode uint32, errorCode int32, message string, description string) *hcmv3.ResponseMapper {
+	msg, _ := soaputils.GenerateSoapFaultMessage(soap12ProtocolVersion, message, description, strconv.Itoa(int(errorCode)))
 
 	mapper := &hcmv3.ResponseMapper{
 		Filter: &access_logv3.AccessLogFilter{
@@ -138,7 +122,7 @@ func genSoap12ErrorResponseMapper(statusCode uint32, errorCode int32, message st
 									Header: &envoy_config_route_v3.HeaderMatcher{
 										Name: contentTypeHeaderName,
 										HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_ExactMatch{
-											ExactMatch: contenttypeHeaderSoap,
+											ExactMatch: contentTypeHeaderSoap,
 										},
 									},
 								},
@@ -164,14 +148,14 @@ func genSoap12ErrorResponseMapper(statusCode uint32, errorCode int32, message st
 					},
 				},
 			},
-			ContentType: contenttypeHeaderSoap,
+			ContentType: contentTypeHeaderSoap,
 		},
 	}
 	return mapper
 }
 
-func genSoap11ErrorResponseMapper(statusCode uint32, errorCode int32, message string, description string, flag string) *hcmv3.ResponseMapper {
-	msg, _ := soaputils.GenarateSoapFaultMessage(soap11ProtocolVersion, message, description, strconv.Itoa(int(errorCode)))
+func genSoap11ErrorResponseMapper(flag string, statusCode uint32, errorCode int32, message string, description string) *hcmv3.ResponseMapper {
+	msg, _ := soaputils.GenerateSoapFaultMessage(soap11ProtocolVersion, message, description, strconv.Itoa(int(errorCode)))
 
 	mapper := &hcmv3.ResponseMapper{
 		Filter: &access_logv3.AccessLogFilter{

@@ -16,19 +16,25 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.enforcer.config.dto;
+package org.wso2.choreo.connect.enforcer.deniedresponse;
+
+import io.envoyproxy.envoy.service.auth.v3.DeniedHttpResponse;
+import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 
 /**
- * Configuration for enabling SOAP error responses for SOAP APIs
+ * Abstract class for generating a denied responses
  */
-public class SoapErrorResponseConfigDto {
-    private boolean soapErrorInXMLEnabled;
+public abstract class DeniedResponse {
+    protected DeniedHttpResponse.Builder denyResponseBuilder;
 
-    public boolean isEnable() {
-        return soapErrorInXMLEnabled;
+    public DeniedResponse(DeniedHttpResponse.Builder denyResponseBuilder) {
+        this.denyResponseBuilder = denyResponseBuilder;
     }
 
-    public void setEnable(boolean enable) {
-        this.soapErrorInXMLEnabled = enable;
-    }
+    /**
+     * Sets the denied response to the deniedResponseBuilder
+     *
+     * @param responseObject
+     */
+    public abstract void setResponse(ResponseObject responseObject);
 }

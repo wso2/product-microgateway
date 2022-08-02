@@ -80,8 +80,8 @@ type Fault struct {
 	Detail      string `xml:"detail,omitempty"`
 }
 
-// GenarateSoapFaultMessage will generate and returns a SOAP fault message with given parameters
-func GenarateSoapFaultMessage(protocolVersion string, errorMessage string, errorDescription string, code string) (string, error) {
+// GenerateSoapFaultMessage will generate and returns a SOAP fault message with given parameters
+func GenerateSoapFaultMessage(protocolVersion string, errorMessage string, errorDescription string, code string) (string, error) {
 	var envelope *Envelope
 	switch protocolVersion {
 	case soap11ProtocolVersion:

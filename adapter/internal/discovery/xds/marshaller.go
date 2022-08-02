@@ -144,7 +144,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	soap := &enforcer.Soap{
-		SoapErrorXmlFormatEnabled: config.Adapter.SoapErrorXMLFormatEnabled,
+		SoapErrorInXMLEnabled: config.Adapter.SoapErrorInXMLEnabled,
 	}
 
 	filters := []*enforcer.Filter{}

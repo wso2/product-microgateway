@@ -19,7 +19,6 @@ package org.wso2.choreo.connect.tests.apim;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottlePolicyDTO;
@@ -28,8 +27,6 @@ import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDT
 import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;

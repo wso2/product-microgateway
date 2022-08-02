@@ -34,12 +34,10 @@ import io.grpc.stub.StreamObserver;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
-import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
-import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
-import org.wso2.choreo.connect.enforcer.constants.SoapConstants;
+import org.wso2.choreo.connect.enforcer.deniedresponse.DeniedResponsePreparer;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
@@ -48,7 +46,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingContextHolder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
-import org.wso2.choreo.connect.enforcer.util.SOAPUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -99,74 +96,38 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     }
 
     private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {
-        DeniedHttpResponse.Builder deniedResponseBuilder = DeniedHttpResponse.newBuilder();
         CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
         if (responseObject.isDirectResponse()) {
+            DeniedResponsePreparer deniedResponsePreparer = new DeniedResponsePreparer(DeniedHttpResponse.newBuilder());
             // set headers
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();
-                            deniedResponseBuilder.addHeaders(headerValueOption);
+                            deniedResponsePreparer.addHeaders(headerValueOption);
                         }
                 );
             }
-            deniedResponseBuilder.addHeaders(HeaderValueOption.newBuilder().setHeader(HeaderValue.newBuilder()
+            deniedResponsePreparer.addHeaders(HeaderValueOption.newBuilder().setHeader(HeaderValue.newBuilder()
                     .setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build()));
 
             // set status code
             HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
-            deniedResponseBuilder.setStatus(status);
+            deniedResponsePreparer.setStatus(status);
 
             // set body content
             if (responseObject.getResponsePayload() != null) {
-                deniedResponseBuilder.setBody(responseObject.getResponsePayload());
+                deniedResponsePreparer.setBody(responseObject.getResponsePayload());
             }
 
             // set error response body content and headers
             if (responseObject.getErrorCode() != null) {
-                // Error handling create an application/json error payload
-                if (ConfigHolder.getInstance().getConfig().getSoapErrorResponseConfigDto().isEnable() &&
-                        request.getAttributes().getRequest().getHttp().getHeadersMap()
-                                .containsKey(SoapConstants.SOAP_ACTION_HEADER_NAME) &&
-                        request.getAttributes().getRequest().getHttp().getHeadersMap()
-                                .get(SoapConstants.CONTENT_TYPE_HEADER_NAME)
-                                .equals(SoapConstants.CONTENT_TYPE_TEXT_XML)) {
-                    deniedResponseBuilder.setBody(SOAPUtils.getSoapFaultMessage(SoapConstants.SOAP11_PROTOCOL,
-                            responseObject.getErrorMessage(),
-                            responseObject.getErrorDescription(), responseObject.getErrorCode()));
-                    HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                            .setHeader(HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
-                                    .setValue(SoapConstants.CONTENT_TYPE_TEXT_XML).build()).build();
-                    deniedResponseBuilder.addHeaders(headerValueOption);
-                } else if (ConfigHolder.getInstance().getConfig().getSoapErrorResponseConfigDto().isEnable() &&
-                        request.getAttributes().getRequest().getHttp().getHeadersMap()
-                                .get(SoapConstants.CONTENT_TYPE_HEADER_NAME)
-                                .equals(SoapConstants.CONTENT_TYPE_SOAP_XML)) {
-                    deniedResponseBuilder.setBody(SOAPUtils.getSoapFaultMessage(SoapConstants.SOAP12_PROTOCOL,
-                            responseObject.getErrorMessage(),
-                            responseObject.getErrorDescription(), responseObject.getErrorCode()));
-                    HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                            .setHeader(HeaderValue.newBuilder()
-                                    .setKey(APIConstants.CONTENT_TYPE_HEADER)
-                                    .setValue(SoapConstants.CONTENT_TYPE_SOAP_XML).build()).build();
-                    deniedResponseBuilder.addHeaders(headerValueOption);
-                } else {
-                    JSONObject responseJson = new JSONObject();
-                    responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
-                    responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
-                    responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
-                            responseObject.getErrorDescription());
-                    deniedResponseBuilder.setBody(responseJson.toString());
-
-                    HeaderValueOption headerValueOption = HeaderValueOption.newBuilder().setHeader(
-                                    HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
-                                            .setValue(APIConstants.APPLICATION_JSON).build())
-                            .build();
-                    deniedResponseBuilder.addHeaders(headerValueOption);
-                }
+                // Error handling create an XML(text/xml or application/soap+xml based on SOAP protocol version)
+                // payload if SoapErrorInXMLEnabled is true
+                // otherwise it will create an application/json error payload
+                deniedResponsePreparer.setErrorMessage(request, responseObject);
             }
 
             // set meta data
@@ -180,7 +141,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
             return checkResponseBuilder
                     .setDynamicMetadata(metadataStructBuilder.build())
-                    .setDeniedResponse(deniedResponseBuilder.build())
+                    .setDeniedResponse(deniedResponsePreparer.build())
                     .setStatus(Status.newBuilder().setCode(getDirectResponseCode(responseObject.getStatusCode())))
                     .build();
         } else {

@@ -22,7 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
-import org.wso2.choreo.connect.enforcer.constants.SoapConstants;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPEnvelope;
@@ -44,9 +44,9 @@ public class SOAPUtils {
             SOAPPart part = soapMsg.getSOAPPart();
             SOAPEnvelope envelope = part.getEnvelope();
             SOAPFault soapFault = envelope.getBody().addFault();
-            if (soapProtocolVersion.equals(SoapConstants.SOAP11_PROTOCOL)) {
+            if (soapProtocolVersion.equals(APIConstants.SOAP11_PROTOCOL)) {
                 soapFault.setFaultCode("soapenv:Server");
-            } else if (soapProtocolVersion.equals(SoapConstants.SOAP12_PROTOCOL)) {
+            } else if (soapProtocolVersion.equals(APIConstants.SOAP12_PROTOCOL)) {
                 soapFault.setFaultCode("soapenv:Receiver");
             }
             soapFault.setFaultString(message);

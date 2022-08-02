@@ -304,6 +304,13 @@ public class ApictlUtils {
         log.info("Logged out from apictl microgateway environment: " + mgwEnv);
     }
 
+    /**
+     * Deploys a sample apictl project located in samples/apiProjects
+     *
+     * @param projectName Project folder name
+     * @param mgwEnv      environment name used in apictl
+     * @throws CCTestException
+     */
     public static void deploySampleProject(String projectName, String mgwEnv) throws CCTestException{
         String samplesDirPath = Utils.getCCSamplesDirPath();
         String projectPath = samplesDirPath + API_PROJECTS_PATH + projectName;

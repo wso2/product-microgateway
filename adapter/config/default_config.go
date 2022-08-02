@@ -57,8 +57,8 @@ var defaultConfig = &Config{
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
-		ArtifactsDirectory:        "/home/wso2/artifacts",
-		SoapErrorXMLFormatEnabled: false,
+		ArtifactsDirectory:    "/home/wso2/artifacts",
+		SoapErrorInXMLEnabled: false,
 		SourceControl: sourceControl{
 			Enabled:            false,
 			PollInterval:       30,

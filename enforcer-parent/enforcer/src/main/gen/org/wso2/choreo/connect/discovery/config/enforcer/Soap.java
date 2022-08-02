@@ -50,7 +50,7 @@ private static final long serialVersionUID = 0L;
             break;
           case 8: {
 
-            soapErrorXmlFormatEnabled_ = input.readBool();
+            soapErrorInXMLEnabled_ = input.readBool();
             break;
           }
           default: {
@@ -85,15 +85,15 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.config.enforcer.Soap.class, org.wso2.choreo.connect.discovery.config.enforcer.Soap.Builder.class);
   }
 
-  public static final int SOAPERRORXMLFORMATENABLED_FIELD_NUMBER = 1;
-  private boolean soapErrorXmlFormatEnabled_;
+  public static final int SOAPERRORINXMLENABLED_FIELD_NUMBER = 1;
+  private boolean soapErrorInXMLEnabled_;
   /**
-   * <code>bool soapErrorXmlFormatEnabled = 1;</code>
-   * @return The soapErrorXmlFormatEnabled.
+   * <code>bool soapErrorInXMLEnabled = 1;</code>
+   * @return The soapErrorInXMLEnabled.
    */
   @java.lang.Override
-  public boolean getSoapErrorXmlFormatEnabled() {
-    return soapErrorXmlFormatEnabled_;
+  public boolean getSoapErrorInXMLEnabled() {
+    return soapErrorInXMLEnabled_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -110,8 +110,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (soapErrorXmlFormatEnabled_ != false) {
-      output.writeBool(1, soapErrorXmlFormatEnabled_);
+    if (soapErrorInXMLEnabled_ != false) {
+      output.writeBool(1, soapErrorInXMLEnabled_);
     }
     unknownFields.writeTo(output);
   }
@@ -122,9 +122,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (soapErrorXmlFormatEnabled_ != false) {
+    if (soapErrorInXMLEnabled_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(1, soapErrorXmlFormatEnabled_);
+        .computeBoolSize(1, soapErrorInXMLEnabled_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -141,8 +141,8 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.config.enforcer.Soap other = (org.wso2.choreo.connect.discovery.config.enforcer.Soap) obj;
 
-    if (getSoapErrorXmlFormatEnabled()
-        != other.getSoapErrorXmlFormatEnabled()) return false;
+    if (getSoapErrorInXMLEnabled()
+        != other.getSoapErrorInXMLEnabled()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -154,9 +154,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + SOAPERRORXMLFORMATENABLED_FIELD_NUMBER;
+    hash = (37 * hash) + SOAPERRORINXMLENABLED_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getSoapErrorXmlFormatEnabled());
+        getSoapErrorInXMLEnabled());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -290,7 +290,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      soapErrorXmlFormatEnabled_ = false;
+      soapErrorInXMLEnabled_ = false;
 
       return this;
     }
@@ -318,7 +318,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.config.enforcer.Soap buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.Soap result = new org.wso2.choreo.connect.discovery.config.enforcer.Soap(this);
-      result.soapErrorXmlFormatEnabled_ = soapErrorXmlFormatEnabled_;
+      result.soapErrorInXMLEnabled_ = soapErrorInXMLEnabled_;
       onBuilt();
       return result;
     }
@@ -367,8 +367,8 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.config.enforcer.Soap other) {
       if (other == org.wso2.choreo.connect.discovery.config.enforcer.Soap.getDefaultInstance()) return this;
-      if (other.getSoapErrorXmlFormatEnabled() != false) {
-        setSoapErrorXmlFormatEnabled(other.getSoapErrorXmlFormatEnabled());
+      if (other.getSoapErrorInXMLEnabled() != false) {
+        setSoapErrorInXMLEnabled(other.getSoapErrorInXMLEnabled());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -399,33 +399,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private boolean soapErrorXmlFormatEnabled_ ;
+    private boolean soapErrorInXMLEnabled_ ;
     /**
-     * <code>bool soapErrorXmlFormatEnabled = 1;</code>
-     * @return The soapErrorXmlFormatEnabled.
+     * <code>bool soapErrorInXMLEnabled = 1;</code>
+     * @return The soapErrorInXMLEnabled.
      */
     @java.lang.Override
-    public boolean getSoapErrorXmlFormatEnabled() {
-      return soapErrorXmlFormatEnabled_;
+    public boolean getSoapErrorInXMLEnabled() {
+      return soapErrorInXMLEnabled_;
     }
     /**
-     * <code>bool soapErrorXmlFormatEnabled = 1;</code>
-     * @param value The soapErrorXmlFormatEnabled to set.
+     * <code>bool soapErrorInXMLEnabled = 1;</code>
+     * @param value The soapErrorInXMLEnabled to set.
      * @return This builder for chaining.
      */
-    public Builder setSoapErrorXmlFormatEnabled(boolean value) {
+    public Builder setSoapErrorInXMLEnabled(boolean value) {
       
-      soapErrorXmlFormatEnabled_ = value;
+      soapErrorInXMLEnabled_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>bool soapErrorXmlFormatEnabled = 1;</code>
+     * <code>bool soapErrorInXMLEnabled = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearSoapErrorXmlFormatEnabled() {
+    public Builder clearSoapErrorInXMLEnabled() {
       
-      soapErrorXmlFormatEnabled_ = false;
+      soapErrorInXMLEnabled_ = false;
       onChanged();
       return this;
     }

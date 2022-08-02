@@ -170,6 +170,7 @@ public class ConfigHolder {
 
         populateRestServer(config.getRestServer());
 
+        // Populates the SOAP error response related configs (SoapErrorXMLFormatEnabled)
         populateSoapErrorResponseConfigs(config.getSoap());
 
         // Populates the custom filter configurations applied along with enforcer filters.
@@ -181,7 +182,7 @@ public class ConfigHolder {
 
     private void populateSoapErrorResponseConfigs(Soap soap) {
         SoapErrorResponseConfigDto soapErrorResponseConfigDto = new SoapErrorResponseConfigDto();
-        soapErrorResponseConfigDto.setEnable(soap.getSoapErrorXmlFormatEnabled());
+        soapErrorResponseConfigDto.setEnable(soap.getSoapErrorInXMLEnabled());
         config.setSoapErrorResponseConfigDto(soapErrorResponseConfigDto);
     }
 

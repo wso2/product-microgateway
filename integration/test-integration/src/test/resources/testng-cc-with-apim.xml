@@ -63,6 +63,12 @@
         </classes>
     </test>
 
+    <test name="Test SOAP API invocation" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
+        </classes>
+    </test>
+
     <test name="Restart API-M" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
@@ -88,11 +94,6 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketSubscriptionThrottleTestCase"/>
        </classes>
    </test>
-    <test name="Test SOAP API invocation" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
-        </classes>
-    </test>
 
     <test name="Clean and Re-deploy the same set of APIs apps subscriptions" parallel="false">
         <parameter name = "apimArtifactsIndex" value="1"/>

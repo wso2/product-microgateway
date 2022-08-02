@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SOAPApisTestCase extends ApimBaseTest {
-    private static final String API_NAME = "SOAPApi";
+    private static final String API_NAME = "SoapAPI";
     private static final String API_CONTEXT = "soap";
     private static final String APPLICATION_NAME = "DefaultAPIApp";
     private static final String API_VERSION = "1.0.0";
@@ -79,10 +79,10 @@ public class SOAPApisTestCase extends ApimBaseTest {
     }
 
     @Test(description = "Send a request to the subscribed SOAP API using SOAP 1.1")
-    public void testInvokeSoapAPIv11() throws CCTestException, InterruptedException {
+    public void testInvokeSoapAPIv11() throws CCTestException {
         HttpResponse response = HttpsClientRequest.doPost(endpointURL11,
                 TestConstant.SOAP_ENVELOPES.SOAP11_SAMPLE_REQ_PAYLOAD, requestHeaders_11);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL11 + ". HttpResponse");
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL11);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
         Assert.assertTrue(response.getData().contains("<Valid>true</Valid>"), "Response body mismatched");
@@ -97,10 +97,10 @@ public class SOAPApisTestCase extends ApimBaseTest {
     }
 
     @Test(description = "Send a request to the subscribed SOAP API using SOAP 1.2")
-    public void testInvokeSoapAPIv12() throws CCTestException, InterruptedException {
+    public void testInvokeSoapAPIv12() throws CCTestException {
         HttpResponse response = HttpsClientRequest.doPost(endpointURL12,
                 TestConstant.SOAP_ENVELOPES.SOAP12_SAMPLE_REQ_PAYLOAD, requestHeaders_12);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL12 + ". HttpResponse");
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL12);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Valid subscription should be able to invoke the associated API");
         Assert.assertTrue(response.getData().contains("<Valid>true</Valid>"), "Response body mismatched");

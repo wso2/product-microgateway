@@ -8,8 +8,8 @@ public interface SoapOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>bool soapErrorXmlFormatEnabled = 1;</code>
-   * @return The soapErrorXmlFormatEnabled.
+   * <code>bool soapErrorInXMLEnabled = 1;</code>
+   * @return The soapErrorInXMLEnabled.
    */
-  boolean getSoapErrorXmlFormatEnabled();
+  boolean getSoapErrorInXMLEnabled();
 }

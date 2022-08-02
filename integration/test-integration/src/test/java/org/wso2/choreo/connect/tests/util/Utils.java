@@ -493,6 +493,11 @@ public class Utils {
         return targetClassesDir.getParentFile().toString();
     }
 
+    /**
+     * Retrieves the path for cc sample API projects
+     *
+     * @return String - samples directory path
+     */
     public static String getCCSamplesDirPath(){
         File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());

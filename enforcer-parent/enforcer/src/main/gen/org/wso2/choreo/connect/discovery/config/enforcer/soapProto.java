@@ -29,12 +29,12 @@ public final class soapProto {
   static {
     java.lang.String[] descriptorData = {
       "\n)wso2/discovery/config/enforcer/soap.pr" +
-      "oto\022\036wso2.discovery.config.enforcer\")\n\004S" +
-      "oap\022!\n\031soapErrorXmlFormatEnabled\030\001 \001(\010B\220" +
-      "\001\n1org.wso2.choreo.connect.discovery.con" +
-      "fig.enforcerB\tsoapProtoP\001ZNgithub.com/en" +
-      "voyproxy/go-control-plane/wso2/discovery" +
-      "/config/enforcer;enforcerb\006proto3"
+      "oto\022\036wso2.discovery.config.enforcer\"%\n\004S" +
+      "oap\022\035\n\025soapErrorInXMLEnabled\030\001 \001(\010B\220\001\n1o" +
+      "rg.wso2.choreo.connect.discovery.config." +
+      "enforcerB\tsoapProtoP\001ZNgithub.com/envoyp" +
+      "roxy/go-control-plane/wso2/discovery/con" +
+      "fig/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -45,7 +45,7 @@ public final class soapProto {
     internal_static_wso2_discovery_config_enforcer_Soap_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Soap_descriptor,
-        new java.lang.String[] { "SoapErrorXmlFormatEnabled", });
+        new java.lang.String[] { "SoapErrorInXMLEnabled", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

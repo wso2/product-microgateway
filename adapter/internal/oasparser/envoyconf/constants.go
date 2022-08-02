@@ -121,10 +121,11 @@ const (
 	TracerTypeAzure = "azure"
 )
 
+// Constants used for SOAP APIs
 const (
 	contentTypeHeaderName = "content-type"
 	contentTypeHeaderXML  = "text/xml"
-	contenttypeHeaderSoap = "application/soap+xml"
+	contentTypeHeaderSoap = "application/soap+xml"
 	soap11ProtocolVersion = "SOAP 1.1 Protocol"
 	soap12ProtocolVersion = "SOAP 1.2 Protocol"
 	soapActionHeaderName  = "SOAPAction"
