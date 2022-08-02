@@ -265,9 +265,8 @@ func TestGenerateRegex(t *testing.T) {
 			isMatched:     true,
 		},
 		{
-			// slash escaped to make the test pass. envoyproxy does not expect escaping slash.
-			basePath:      `\/v2`,
-			resourcePath:  `\/pet\/{petId}`,
+			basePath:      `/v2`,
+			resourcePath:  `/pet/{petId}`,
 			userInputPath: "/v2/pet/5/",
 			message:       "when the input path does not have tailing slash and user input path has trailing slash",
 			isMatched:     true,

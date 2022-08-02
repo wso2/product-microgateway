@@ -85,7 +85,6 @@ public class APIPolicyPerOperationTestCase {
         HttpResponse httpResponse = HttpsClientRequest.doPost(
                 Utils.getServiceURLHttps(endpoint + queryParams), "Hello World!", headers);
         EchoResponse echoResponse = Utils.extractToEchoResponse(httpResponse);
-        System.out.println(httpResponse.getHeaders().entrySet());
 
         Assert.assertFalse(echoResponse.getHeaders().containsKey(REQUEST_HEADER),
                 "Request Header has not been removed");
