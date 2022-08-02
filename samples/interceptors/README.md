@@ -10,6 +10,7 @@ To learn about interceptors and for instructions on how to run it please head ov
   - [Java](java)
   - [NodeJS](nodejs)
   - [Go](golang)
+  - [WSO2 Micro Integrator](wso2-micro-integrator)
 - [Sample Backend](sample-backend)
 
 ## Sample Certs and Resources for Interceptors

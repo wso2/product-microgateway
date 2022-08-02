@@ -18,8 +18,8 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.apipolicy;
 
-import org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestcase;
+import org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestCase;
 
-public class InterceptorResponseFlowAPIPolicyTestcase extends InterceptorResponseFlowTestcase {
+public class InterceptorResponseFlowAPIPolicyTestCase extends InterceptorResponseFlowTestCase {
     // TestNG runs same test cases twice when we have test classes that extends the first test class.
 }

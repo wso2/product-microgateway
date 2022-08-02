@@ -72,8 +72,10 @@ var defaultConfig = &Config{
 		ListenerPort:                     9090,
 		SecuredListenerHost:              "0.0.0.0",
 		SecuredListenerPort:              9095,
+		ListenerCodecType:                "AUTO",
 		ClusterTimeoutInSeconds:          20,
 		EnforcerResponseTimeoutInSeconds: 20,
+		UseRemoteAddress:                 false,
 		KeyStore: keystore{
 			KeyPath:  "/home/wso2/security/keystore/mg.key",
 			CertPath: "/home/wso2/security/keystore/mg.pem",
@@ -118,6 +120,16 @@ var defaultConfig = &Config{
 			DNS: upstreamDNS{
 				DNSRefreshRate: 5000,
 				RespectDNSTtl:  false,
+			},
+			HTTP2: upstreamHTTP2Options{
+				HpackTableSize:       4096,
+				MaxConcurrentStreams: 2147483647,
+			},
+		},
+		Downstream: envoyDownstream{
+			TLS: downstreamTLS{
+				TrustedCertPath: "/etc/ssl/certs/ca-certificates.crt",
+				MTLSAPIsEnabled: false,
 			},
 		},
 		Connection: connection{
@@ -176,6 +188,12 @@ var defaultConfig = &Config{
 				EnableOutboundAuthHeader: false,
 				AuthorizationHeader:      "authorization",
 				TestConsoleHeaderName:    "Internal-Key",
+			},
+			MutualSSL: mutualSSL{
+				CertificateHeader:               "X-WSO2-CLIENT-CERTIFICATE",
+				EnableClientValidation:          true,
+				ClientCertificateEncode:         false,
+				EnableOutboundCertificateHeader: false,
 			},
 		},
 		AuthService: authService{

@@ -58,6 +58,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.extensions.DisableSecurityTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mockEndpoint.MockApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.DefaultVersionApiTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProdSandDiffBasePathTestCase"/>
         </classes>
     </test>
     <test name="cc-with-backend-tls-with-opa-server" preserve-order="true" parallel="false">
@@ -66,14 +67,16 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestcase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.soap.SOAPApisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2ClearTextApiTestCase2"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2SecuredApiTestCase2"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
@@ -91,6 +94,24 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.BodyPassDisabledTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-mtls-default" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithMtlsDefault"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromClientToGatewayDefaultTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-client-cert-not-encode" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithClientCertEncodeDisabled"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromClientToGatewayNotEncodeTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-client-cert-encode" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithClientCertEncodeEnabled"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromClientToGatewayEncodeTestCase"/>
         </classes>
     </test>
     <test name="cc-with-multiple-env" preserve-order="true" parallel="false">

@@ -1,0 +1,63 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2022, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: schedules
+  name: schedules
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schedules
+  template:
+    metadata:
+      labels:
+        app: schedules
+    spec:
+      containers:
+      - image: wso2am/cc-schedules-service:1.0.0
+        imagePullPolicy: IfNotPresent
+        name: schedules
+        ports:
+          - containerPort: 8081
+        env:
+          - name: TRAINS_SERVICE_URL
+            value: http://choreo-connect-internal/trains/1.0.0
+          - name: TRAINS_SERVICE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "schedules-creds"
+                key: "trains_service_api_key"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: schedules
+  name: schedules
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8081
+  selector:
+    app: schedules
+  type: ClusterIP

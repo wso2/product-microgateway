@@ -124,6 +124,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 	securitySchemes := []*api.SecurityScheme{}
 	securityList := []*api.SecurityList{}
 	isMockedAPI := mgwSwagger.EndpointImplementationType == constants.MockedOASEndpointType
+	clientCertificates := []*api.Certificate{}
 
 	logger.LoggerOasparser.Debugf("Security schemes in GetEnforcerAPI method %v:", mgwSwagger.GetSecurityScheme())
 	for _, securityScheme := range mgwSwagger.GetSecurityScheme() {
@@ -190,6 +191,15 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 		}
 	}
 
+	for _, cert := range mgwSwagger.GetClientCerts() {
+		certificate := &api.Certificate{
+			Alias:   cert.Alias,
+			Tier:    cert.Tier,
+			Content: cert.Content,
+		}
+		clientCertificates = append(clientCertificates, certificate)
+	}
+
 	return &api.Api{
 		Id:                  mgwSwagger.GetID(),
 		Title:               mgwSwagger.GetTitle(),
@@ -210,6 +220,9 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 		OrganizationId:      mgwSwagger.OrganizationID,
 		Vhost:               vhost,
 		IsMockedApi:         isMockedAPI,
+		ClientCertificates:  clientCertificates,
+		MutualSSL:           mgwSwagger.GetXWSO2MutualSSL(),
+		ApplicationSecurity: mgwSwagger.GetXWSO2ApplicationSecurity(),
 	}
 }
 

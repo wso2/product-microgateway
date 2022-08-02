@@ -57,6 +57,7 @@ type MgwSwagger struct {
 	xWso2Endpoints             map[string]*EndpointCluster
 	resources                  []*Resource
 	xWso2Basepath              string
+	xWso2HTTP2BackendEnabled   bool
 	xWso2Cors                  *CorsConfig
 	securityScheme             []SecurityScheme
 	security                   []map[string][]string
@@ -70,6 +71,9 @@ type MgwSwagger struct {
 	LifecycleStatus            string
 	xWso2RequestBodyPass       bool
 	IsDefaultVersion           bool
+	clientCertificates         []Certificate
+	xWso2MutualSSL             string
+	xWso2ApplicationSecurity   bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -80,6 +84,8 @@ type EndpointCluster struct {
 	EndpointType   string
 	Config         *EndpointConfig
 	SecurityConfig EndpointSecurity
+	// Is http2 protocol enabled
+	HTTP2BackendEnabled bool
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -160,6 +166,13 @@ type InterceptEndpoint struct {
 	Includes *interceptor.RequestInclusions
 }
 
+// Certificate contains information of a client certificate
+type Certificate struct {
+	Alias   string
+	Tier    string
+	Content []byte
+}
+
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
 	return swagger.xWso2Cors
@@ -183,6 +196,11 @@ func (swagger *MgwSwagger) GetTitle() string {
 // GetXWso2Basepath returns the basepath set via the vendor extension.
 func (swagger *MgwSwagger) GetXWso2Basepath() string {
 	return swagger.xWso2Basepath
+}
+
+// GetXWso2HTTP2BackendEnabled returns the http2 backend enabled set via the vendor extension.
+func (swagger *MgwSwagger) GetXWso2HTTP2BackendEnabled() bool {
+	return swagger.xWso2HTTP2BackendEnabled
 }
 
 // GetVendorExtensions returns the map of vendor extensions which are defined
@@ -235,6 +253,16 @@ func (swagger *MgwSwagger) GetID() string {
 // whether it is allowed to pass request body to the enforcer or not.
 func (swagger *MgwSwagger) GetXWso2RequestBodyPass() bool {
 	return swagger.xWso2RequestBodyPass
+}
+
+// GetClientCerts returns the client certificates of the API
+func (swagger *MgwSwagger) GetClientCerts() []Certificate {
+	return swagger.clientCertificates
+}
+
+// SetClientCerts set the client certificates of the API
+func (swagger *MgwSwagger) SetClientCerts(certs []Certificate) {
+	swagger.clientCertificates = certs
 }
 
 // SetID set the Id of the API
@@ -292,6 +320,26 @@ func (swagger *MgwSwagger) GetSecurity() []map[string][]string {
 	return swagger.security
 }
 
+// SetXWSO2MutualSSL sets the optional or mandatory mTLS
+func (swagger *MgwSwagger) SetXWSO2MutualSSL(mutualSSl string) {
+	swagger.xWso2MutualSSL = mutualSSl
+}
+
+// GetXWSO2MutualSSL returns the optional or mandatory mTLS
+func (swagger *MgwSwagger) GetXWSO2MutualSSL() string {
+	return swagger.xWso2MutualSSL
+}
+
+// SetXWSO2ApplicationSecurity sets the optional or mandatory application security
+func (swagger *MgwSwagger) SetXWSO2ApplicationSecurity(applicationSecurity bool) {
+	swagger.xWso2ApplicationSecurity = applicationSecurity
+}
+
+// GetXWSO2ApplicationSecurity returns the optional or mandatory application security
+func (swagger *MgwSwagger) GetXWSO2ApplicationSecurity() bool {
+	return swagger.xWso2ApplicationSecurity
+}
+
 // SetOperationPolicies this will merge operation level policies provided in api yaml
 func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 	for _, resource := range swagger.resources {
@@ -310,7 +358,7 @@ func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) {
 
 // SanitizeAPISecurity this will validate api level and operation level swagger security
 // if apiyaml security is provided swagger security will be removed accordingly
-func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool) {
+func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bool, isYamlMutualssl bool, isYamlMutualsslMandatory bool, isYamlOauthBasicAuthAPIKeyMandatory bool) {
 	isOverrideSecurityByYaml := isYamlAPIKey || isYamlOauth
 	apiSecurityDefinitionNames := []string{}
 	overridenAPISecurityDefinitions := []SecurityScheme{}
@@ -326,6 +374,7 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			SecurityScheme{DefinitionName: constants.APIMAPIKeyInQuery, Type: constants.APIKeyTypeInOAS,
 				Name: constants.APIKeyNameWithApim, In: constants.APIKeyInQueryOAS})
 	}
+
 	for _, securityDef := range swagger.securityScheme {
 		//read default oauth2 security with scopes when oauth2 enabled
 		if isYamlOauth && securityDef.DefinitionName == constants.APIMDefaultOauth2Security {
@@ -384,6 +433,27 @@ func (swagger *MgwSwagger) SanitizeAPISecurity(isYamlAPIKey bool, isYamlOauth bo
 			operation.SetSecurity(sanitizedOperationSecurity)
 		}
 	}
+
+	// Adding api level application and transport securities optional or mandatory
+	var mutualSSL string
+	var applicationSecurity bool
+
+	if isYamlMutualssl && isYamlMutualsslMandatory {
+		mutualSSL = constants.Mandatory
+	} else if isYamlMutualssl && !isYamlMutualsslMandatory {
+		mutualSSL = constants.Optional
+	} else {
+		mutualSSL = constants.NotDefined
+	}
+
+	if isYamlOauthBasicAuthAPIKeyMandatory {
+		applicationSecurity = true
+	} else {
+		applicationSecurity = false
+	}
+
+	swagger.SetXWSO2MutualSSL(mutualSSL)
+	swagger.SetXWSO2ApplicationSecurity(applicationSecurity)
 }
 
 // SetXWso2Extensions set the MgwSwagger object with the properties
@@ -424,6 +494,7 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
+	swagger.setXWso2HTTP2BackendEnabled()
 
 	// Error nil for successful execution
 	return nil
@@ -713,6 +784,11 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	return err
 }
 
+// GetAuthorityHeader creates the authority header using Host and Port in the form of Host [ ":" Port ]
+func (endpoint *Endpoint) GetAuthorityHeader() string {
+	return strings.Join([]string{endpoint.Host, strconv.FormatUint(uint64(endpoint.Port), 10)}, ":")
+}
+
 func (retryConfig *RetryConfig) validateRetryConfig() {
 	conf, _ := config.ReadConfigs()
 	maxConfigurableCount := conf.Envoy.Upstream.Retry.MaxRetryCount
@@ -894,6 +970,11 @@ func (swagger *MgwSwagger) setXWso2Basepath() {
 	if extBasepath != "" {
 		swagger.xWso2Basepath = extBasepath
 	}
+}
+
+func (swagger *MgwSwagger) setXWso2HTTP2BackendEnabled() {
+	extHTTP2BackendEnabled := getXWso2HTTP2BackendEnabled(swagger.vendorExtensions)
+	swagger.xWso2HTTP2BackendEnabled = extHTTP2BackendEnabled
 }
 
 func (swagger *MgwSwagger) setXWso2Cors() {

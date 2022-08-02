@@ -105,14 +105,17 @@ type envoy struct {
 	ListenerPort                     uint32
 	SecuredListenerHost              string
 	SecuredListenerPort              uint32
+	ListenerCodecType                string
 	ClusterTimeoutInSeconds          time.Duration
 	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
 	KeyStore                         keystore
 	SystemHost                       string `default:"localhost"`
 	Cors                             globalCors
 	Upstream                         envoyUpstream
+	Downstream                       envoyDownstream
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
+	UseRemoteAddress                 bool
 }
 
 type connectionTimeouts struct {
@@ -225,6 +228,18 @@ type envoyUpstream struct {
 	Health   upstreamHealth
 	DNS      upstreamDNS
 	Retry    upstreamRetry
+	HTTP2    upstreamHTTP2Options
+}
+
+// Envoy Downstream Related Configurations
+type envoyDownstream struct {
+	// DownstreamTLS related Configuration
+	TLS downstreamTLS
+}
+
+type downstreamTLS struct {
+	TrustedCertPath string
+	MTLSAPIsEnabled bool
 }
 
 type upstreamTLS struct {
@@ -254,6 +269,11 @@ type upstreamDNS struct {
 	RespectDNSTtl  bool
 }
 
+type upstreamHTTP2Options struct {
+	HpackTableSize       uint32
+	MaxConcurrentStreams uint32
+}
+
 type upstreamRetry struct {
 	MaxRetryCount        uint32
 	BaseIntervalInMillis uint32
@@ -263,6 +283,7 @@ type upstreamRetry struct {
 type security struct {
 	TokenService []tokenService
 	AuthHeader   authHeader
+	MutualSSL    mutualSSL
 }
 
 type authService struct {
@@ -514,4 +535,11 @@ type filter struct {
 
 type httpClient struct {
 	RequestTimeOut time.Duration
+}
+
+type mutualSSL struct {
+	CertificateHeader               string
+	EnableClientValidation          bool
+	ClientCertificateEncode         bool
+	EnableOutboundCertificateHeader bool
 }

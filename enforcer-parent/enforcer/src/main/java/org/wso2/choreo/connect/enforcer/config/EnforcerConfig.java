@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.SoapErrorResponseConfigDto;
+import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 
@@ -58,6 +59,7 @@ public class EnforcerConfig {
     private AnalyticsDTO analyticsConfig;
     private final Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
     private AuthHeaderDto authHeader;
+    private MutualSSLDto mtlsInfo;
     private ManagementCredentialsDto management;
     private AdminRestServerDto restServer;
     private FilterDTO[] customFilters;
@@ -186,6 +188,14 @@ public class EnforcerConfig {
 
     public void setAuthHeader(AuthHeaderDto authHeader) {
         this.authHeader = authHeader;
+    }
+
+    public MutualSSLDto getMtlsInfo() {
+        return mtlsInfo;
+    }
+
+    public void setMtlsInfo(MutualSSLDto mtlsInfo) {
+        this.mtlsInfo = mtlsInfo;
     }
 
     public ManagementCredentialsDto getManagement() {

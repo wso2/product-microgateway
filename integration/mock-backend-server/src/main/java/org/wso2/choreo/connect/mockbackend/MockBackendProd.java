@@ -94,6 +94,19 @@ public class MockBackendProd extends Thread {
                 byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+            httpServer.createContext(context + "/v2/pet/findByStatus", exchange -> {
+
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/pets/findByStatus", exchange -> {
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/v2/pets/findByStatus", exchange -> {
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
             httpServer.createContext(context + "/pet/", exchange -> {
 
                 byte[] response = ResponseConstants.GET_PET_RESPONSE.getBytes();
@@ -105,6 +118,11 @@ public class MockBackendProd extends Thread {
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
             httpServer.createContext(context + "/pets/findByTags", exchange -> {
+
+                byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/v2/pets/findByTags", exchange -> {
 
                 byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);

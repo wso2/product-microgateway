@@ -66,6 +66,18 @@ func getXWso2Basepath(vendorExtensions map[string]interface{}) string {
 	return xWso2basepath
 }
 
+// getXWso2HTTP2BackendEnabled extracts the value of XWso2HTTP2BackendEnabled extension.
+// if the property is not available, false is returned.
+func getXWso2HTTP2BackendEnabled(vendorExtensions map[string]interface{}) bool {
+	xWso2HTTP2BackendEnabled := false
+	if y, found := vendorExtensions[constants.XWso2HTTP2BackendEnabled]; found {
+		if val, ok := y.(bool); ok {
+			xWso2HTTP2BackendEnabled = val
+		}
+	}
+	return xWso2HTTP2BackendEnabled
+}
+
 // ResolveThrottlingTier extracts the value of x-wso2-throttling-tier and
 // x-throttling-tier extension. if x-wso2-throttling-tier is available it
 // will be prioritized.

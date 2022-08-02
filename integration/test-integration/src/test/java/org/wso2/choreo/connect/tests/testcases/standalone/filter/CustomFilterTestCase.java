@@ -51,6 +51,7 @@ public class CustomFilterTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER,TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/standard/headers"), headers);
         Assert.assertNotNull(response);
@@ -67,6 +68,7 @@ public class CustomFilterTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER,TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/standard/headers/23.api"), headers);
         Assert.assertNotNull(response);
@@ -83,6 +85,7 @@ public class CustomFilterTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER,TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/standard/headers?queryParam=abc"), headers);
         Assert.assertNotNull(response);
@@ -100,6 +103,7 @@ public class CustomFilterTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         headers.put("Custom-remove-header", "Bar");
+        headers.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER,TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/standard/headers"), headers);
         Assert.assertNotNull(response);
@@ -114,6 +118,7 @@ public class CustomFilterTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER,TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/standard/headers"), headers);
         Assert.assertNotNull(response);
@@ -131,6 +136,7 @@ public class CustomFilterTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER,TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
         // template: <organizationID>_<EndpointName>_xwso2cluster_<vHost>_<API name><API version>
         headers.put("Custom-dynamic-endpoint", "carbon.super_myDynamicEndpoint_xwso2cluster_localhost_SwaggerPetstore1.0.5");
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
@@ -147,6 +153,7 @@ public class CustomFilterTestCase {
         String customHeaderValue = "validated";
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER,TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doPost(Utils.getServiceURLHttps("/v2/standard/echo"), requestBody,headers);
         Assert.assertNotNull(response);

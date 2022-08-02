@@ -44,8 +44,9 @@ type Config struct {
 
 //HTTPCallConfig hold values used for external interceptor engine
 type HTTPCallConfig struct {
-	ClusterName string
-	Timeout     string // in milli seconds
+	ClusterName     string
+	Timeout         string // in milli seconds
+	AuthorityHeader string
 }
 
 // RequestInclusions represents which should be included in the request payload to the interceptor service
@@ -109,7 +110,7 @@ local req_flow_list = {
 	{{- end -}}}
 local req_call_config = {  
 	{{- range $key, $value := .RequestFlow -}} 
-		{{- $key }} = {cluster_name = "{{$value.ExternalCall.ClusterName}}", timeout = {{$value.ExternalCall.Timeout}}}, 
+		{{- $key }} = {cluster_name = "{{$value.ExternalCall.ClusterName}}", timeout = {{$value.ExternalCall.Timeout}}, authority_header = "{{$value.ExternalCall.AuthorityHeader}}"}, 
 	{{- end -}}}
 function envoy_on_request(request_handle)
 	interceptor.handle_request_interceptor(
@@ -121,7 +122,7 @@ end
 	responseInterceptorTemplate = `
 local res_call_config = {  
 	{{- range $key, $value := .ResponseFlow -}} 
-		{{- $key }} = {cluster_name="{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}}, 
+		{{- $key }} = {cluster_name = "{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}, authority_header = "{{$value.ExternalCall.AuthorityHeader}}"}, 
 	{{- end -}}}
 function envoy_on_response(response_handle)
 	interceptor.handle_response_interceptor(

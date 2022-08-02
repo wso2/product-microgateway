@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.Management;
 import org.wso2.choreo.connect.discovery.config.enforcer.Metrics;
+import org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
 import org.wso2.choreo.connect.discovery.config.enforcer.RestServer;
 import org.wso2.choreo.connect.discovery.config.enforcer.Service;
@@ -58,6 +59,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.SoapErrorResponseConfigDto;
+import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -166,6 +168,8 @@ public class ConfigHolder {
 
         populateAuthHeaderConfigurations(config.getSecurity().getAuthHeader());
 
+        populateMTLSConfigurations(config.getSecurity().getMutualSSL());
+
         populateManagementCredentials(config.getManagement());
 
         populateRestServer(config.getRestServer());
@@ -205,6 +209,15 @@ public class ConfigHolder {
         authHeaderDto.setEnableOutboundAuthHeader(authHeader.getEnableOutboundAuthHeader());
         authHeaderDto.setTestConsoleHeaderName(authHeader.getTestConsoleHeaderName());
         config.setAuthHeader(authHeaderDto);
+    }
+
+    private void populateMTLSConfigurations(MutualSSL mtlsInfo) {
+        MutualSSLDto mutualSSLDto = new MutualSSLDto();
+        mutualSSLDto.setCertificateHeader(mtlsInfo.getCertificateHeader());
+        mutualSSLDto.setEnableClientValidation(mtlsInfo.getEnableClientValidation());
+        mutualSSLDto.setClientCertificateEncode(mtlsInfo.getClientCertificateEncode());
+        mutualSSLDto.setEnableOutboundCertificateHeader(mtlsInfo.getEnableOutboundCertificateHeader());
+        config.setMtlsInfo(mutualSSLDto);
     }
 
     private void populateAuthService(Service cdsAuth) {

@@ -22,6 +22,7 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.JSONValue;
@@ -358,6 +359,12 @@ public class Utils {
         return new Gson().fromJson(response.getData(), EchoResponse.class);
     }
 
+    public static EchoResponse extractToEchoResponse(org.apache.http.HttpResponse response) throws IOException {
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK, "Response code mismatched");
+        return new Gson().fromJson(EntityUtils.toString(response.getEntity()), EchoResponse.class);
+    }
+
     public static EchoResponse extractToEchoResponse(java.net.http.HttpResponse<String> response) {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.statusCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -547,5 +554,13 @@ public class Utils {
 
     public static String getAPIMServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.APIM_SERVLET_TRP_HTTP_PORT), servicePath).toString();
+    }
+
+    public static String getDockerMockServiceURLHttp2ClearText(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://mockBackend2:" + TestConstant.MOCK_BACKEND_HTTP2_CLEAR_TEXT_SERVER_PORT), servicePath).toString();
+    }
+
+    public static String getDockerMockServiceURLHttp2Secured(String servicePath) throws MalformedURLException {
+        return new URL(new URL("https://mockBackend:" + TestConstant.MOCK_BACKEND_HTTP2_SECURED_SERVER_PORT), servicePath).toString();
     }
 }

@@ -267,4 +267,46 @@ public interface ApiOrBuilder extends
    * @return The isMockedApi.
    */
   boolean getIsMockedApi();
+
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> 
+      getClientCertificatesList();
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.Certificate getClientCertificates(int index);
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  int getClientCertificatesCount();
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> 
+      getClientCertificatesOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.CertificateOrBuilder getClientCertificatesOrBuilder(
+      int index);
+
+  /**
+   * <code>string mutualSSL = 21;</code>
+   * @return The mutualSSL.
+   */
+  java.lang.String getMutualSSL();
+  /**
+   * <code>string mutualSSL = 21;</code>
+   * @return The bytes for mutualSSL.
+   */
+  com.google.protobuf.ByteString
+      getMutualSSLBytes();
+
+  /**
+   * <code>bool applicationSecurity = 22;</code>
+   * @return The applicationSecurity.
+   */
+  boolean getApplicationSecurity();
 }

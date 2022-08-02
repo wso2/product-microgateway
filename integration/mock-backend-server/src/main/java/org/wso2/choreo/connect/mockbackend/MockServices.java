@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import org.wso2.choreo.connect.mockbackend.async.MockAsyncServer;
+import org.wso2.choreo.connect.mockbackend.http2.Http2MockBackend;
 
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +57,18 @@ public class MockServices {
         if (argList.contains("-async-enabled")) {
             MockAsyncServer mockAsyncServer = new MockAsyncServer(Constants.WEBSOCKET_SERVER_PORT);
             mockAsyncServer.start();
+        }
+
+        if(argList.contains("-http2-server-enabled")){
+            // clear text server
+            Http2MockBackend http2BackendProdClearText = new Http2MockBackend(Constants.MOCK_BACKEND_HTTP2_SERVER_CLEAR_TEXT_PORT, false, false);
+            http2BackendProdClearText.startServer();
+        }
+
+        if(argList.contains("-http2-tls-server-enabled")){
+            // secured server
+            Http2MockBackend http2BackendProdTLS = new Http2MockBackend(Constants.MOCK_BACKEND_HTTP2_SERVER_SECURED_PORT, true, false);
+            http2BackendProdTLS.startServer();
         }
     }
 }
