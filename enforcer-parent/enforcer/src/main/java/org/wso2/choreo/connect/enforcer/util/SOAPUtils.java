@@ -31,11 +31,21 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 
 /**
- * sample soap message
+ * SOAPUtils class provides methods required for generating soap1.1 & soap1.2 messages.
+ * Currently, this only provides methods for generating fault messages.
  */
 public class SOAPUtils {
     private static final Logger log = LogManager.getLogger(SOAPUtils.class);
 
+    /**
+     * Returns a soap fault response message
+     *
+     * @param soapProtocolVersion 'SOAP 1.1 Protocol' or 'SOAP 1.2 Protocol'
+     * @param message             message text
+     * @param description         description of the fault
+     * @param code                response code
+     * @return xml formatted SOAP fault message as a String
+     */
     public static String getSoapFaultMessage(String soapProtocolVersion,
                                              String message, String description, String code) {
         try {
