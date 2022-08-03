@@ -15,7 +15,7 @@
  *
  */
 
-package model
+package envoyconf
 
 import (
 	"testing"

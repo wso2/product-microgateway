@@ -18,6 +18,7 @@
 package oasparser
 
 import (
+	"fmt"
 	"strconv"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -36,18 +37,16 @@ import (
 )
 
 // GetRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
-// when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
+// when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considered.
 func GetRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts map[string][]byte, interceptorCerts map[string][]byte,
-	vHost string, organizationID string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
-	var routes []*routev3.Route
-	var clusters []*clusterv3.Cluster
-	var endpoints []*corev3.Address
+	vHost string, organizationID string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address, error) {
 
-	routes, clusters, endpoints = envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts, interceptorCerts,
+	routes, clusters, endpoints, err := envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts, interceptorCerts,
 		vHost, organizationID)
-	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
-
-	return routes, clusters, endpoints
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("Error while creating routes, clusters and endpoints. %v", err)
+	}
+	return routes, clusters, endpoints, nil
 }
 
 // GetGlobalClusters generates initial internal clusters for given environment.

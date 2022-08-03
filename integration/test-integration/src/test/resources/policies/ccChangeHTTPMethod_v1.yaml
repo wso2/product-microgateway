@@ -27,7 +27,7 @@ data:
      - DELETE
      - HEAD
      - OPTIONS
-    required: true
+    required: false
    -
     name: updatedMethod
     displayName: Updated HTTP Method

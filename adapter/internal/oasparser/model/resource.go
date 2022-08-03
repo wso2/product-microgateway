@@ -20,15 +20,10 @@
 package model
 
 import (
-	"fmt"
 	"regexp"
 	"sort"
 
-	"strings"
-
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
-	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // Resource represents the object structure holding the information related to the
@@ -48,6 +43,7 @@ type Resource struct {
 	productionEndpoints *EndpointCluster
 	sandboxEndpoints    *EndpointCluster
 	vendorExtensions    map[string]interface{}
+	hasPolicies         bool
 }
 
 // GetProdEndpoints returns the production endpoints object of a given resource.
@@ -93,44 +89,14 @@ func (resource *Resource) GetMethodList() []string {
 	return methodList
 }
 
-// GetRewriteResource returns the rewrite upstream path for a given resource.
-func (resource *Resource) GetRewriteResource() (string, bool) {
-	rewritePath := ""
-	rewriteMethod := false
-	for _, method := range resource.methods {
-		for _, policy := range method.policies.Request {
-			if strings.EqualFold(constants.RewritePathAction, policy.Action) {
-				if rewritePath != "" {
-					// get the first success rewrite path and ignore other rewrite paths in the same resource path
-					continue
-				}
-				if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
-					if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
-						rewritePath, found = paramValue.(string)
-						if found {
-							if regexPath, err := getRewriteRegexFromPathTemplate(resource.path, rewritePath); err != nil {
-								logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
-									Message:   fmt.Sprintf("Invalid rewrite path %q: %v", rewritePath, err),
-									Severity:  logging.MINOR,
-									ErrorCode: 2212,
-								})
-								rewritePath = ""
-							} else {
-								rewritePath = regexPath
-							}
-						}
-					}
-				}
-			} else if strings.EqualFold(constants.RewriteMethodAction, policy.Action) {
-				rewriteMethod = true
-			}
-		}
-		if rewritePath != "" && rewriteMethod {
-			// both rewrite path and rewrite methods are set, ignore others
-			break
-		}
-	}
-	return rewritePath, rewriteMethod
+// GetOperations returns the array of operations of the resource.
+func (resource *Resource) GetOperations() []*Operation {
+	return resource.methods
+}
+
+// HasPolicies returns whether the resource has operations that includes policies.
+func (resource *Resource) HasPolicies() bool {
+	return resource.hasPolicies
 }
 
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values

@@ -156,6 +156,7 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 		// we ignore other topic vendor extensions except x-auth-type and x-wso2-disable-security
 		channelVendorExtensions := map[string]interface{}{}
 		resource := unmarshalSwaggerResources(channel, methodsArray, channelVendorExtensions)
+		resource.hasPolicies = true // to rewrite path depending on x-uri-mapping
 		resources = append(resources, &resource)
 	}
 
@@ -178,9 +179,9 @@ func populatePoliciesFromVendorExtensions(operation *Operation, vendorExtensions
 	policyParameters[constants.RewritePathResourcePath] = newResourcePath
 	policyParameters[constants.IncludeQueryParams] = true
 	policy := Policy{
-		Action:           constants.RewritePathAction,
+		Action:           constants.ActionRewritePath,
 		Parameters:       policyParameters,
-		IsPassToEnforcer: supportedPoliciesMap[constants.RewritePathAction].IsPassToEnforcer,
+		IsPassToEnforcer: supportedPoliciesMap[constants.ActionRewritePath].IsPassToEnforcer,
 	}
 	operation.policies = OperationPolicies{
 		Request: []Policy{policy},

@@ -151,7 +151,7 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 				PolicyName:       "fooAddRequestHeader",
 				PolicyVersion:    "v1",
 				Action:           "SET_HEADER",
-				IsPassToEnforcer: true,
+				IsPassToEnforcer: false,
 				Parameters: map[string]interface{}{
 					"headerName":  "fooHeaderName",
 					"headerValue": "fooHeaderValue",
@@ -159,7 +159,8 @@ func TestAPIProjectGetFormattedPolicyFromTemplated(t *testing.T) {
 			},
 		},
 	}
-	actualFormattedP := proj.Policies.GetFormattedOperationalPolicies(apiYaml.Data.Operations[0].OperationPolicies, &MgwSwagger{})
+	actualFormattedP, err := proj.Policies.GetFormattedOperationalPolicies(apiYaml.Data.Operations[0].OperationPolicies, &MgwSwagger{})
+	assert.Nil(t, err)
 	assert.Equal(t, expFormattedP, actualFormattedP, "Converting operational policies to Choreo Connect format failed")
 }
 

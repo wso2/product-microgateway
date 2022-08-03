@@ -76,7 +76,8 @@ public class OPAClient {
         String requestGeneratorClassName = policyAttrib.get("requestGenerator");
         OPARequestGenerator requestGenerator = requestGeneratorMap.get(requestGeneratorClassName);
         if (requestGenerator == null) {
-            log.error("OPA Request Generator Implementation is not found in the classPath under the provided name: {}",
+            log.error("OPA Request Generator Implementation is not found in the " +
+                            "classPath under the provided name: {} {}",
                     requestGeneratorClassName, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6103));
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.OPA_REQUEST_FAILURE);
@@ -156,7 +157,7 @@ public class OPAClient {
                             return IOUtils.toString(content, Charset.defaultCharset());
                         }
                     } else {
-                        log.error("Unexpected HTTP response code responded by the OPA server, HTTP code: {}",
+                        log.error("Unexpected HTTP response code responded by the OPA server, HTTP code: {} {}",
                                 statusCode, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6106));
                         throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                                 APISecurityConstants.OPA_REQUEST_FAILURE);
@@ -164,8 +165,8 @@ public class OPAClient {
                 }
             }
         } catch (IOException e) {
-            log.error("Error calling the OPA server with server endpoint: {}", serverEp,
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
+            log.error("Error calling the OPA server with server endpoint: {} {} {}", serverEp,
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e.getMessage());
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.OPA_REQUEST_FAILURE, e);
         }

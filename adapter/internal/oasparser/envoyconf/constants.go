@@ -120,3 +120,8 @@ const (
 	// Azure tracer's name
 	TracerTypeAzure = "azure"
 )
+
+// metadata keys
+const (
+	methodRewrite = "method-rewrite"
+)

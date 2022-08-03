@@ -47,6 +47,27 @@ data:
         response: []
         fault: []
     -
+      target: /echo-full/headers-policy-response-flow/{id}
+      verb: POST
+      operationPolicies:
+        request: [ ]
+        response:
+          - policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey1
+              headerValue: newHeaderVal1
+          - policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: RemOveThisHeaDer # this should be case-insensitive
+          - policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: newHeaderKey2
+              headerValue: newHeaderVal2
+        fault: [ ]
+    -
       target: /echo-full/unsupported-policy/{id}
       verb: POST
       operationPolicies:
@@ -58,22 +79,10 @@ data:
               headerName: newHeaderKey1
               headerValue: newHeaderVal1
           -
-            policyName: ccAddHeaderNotSupportedAction
-            policyVersion: v1
-            parameters:
-              headerName: newHeaderKeyFromUnsupportedAction
-              headerValue: newHeaderValueFromUnsupportedAction
-          -
             policyName: ccRemoveHeader
             policyVersion: v1
             parameters:
               headerName: RemOveThisHeaDer # this should be case-insensitive
-          -
-            policyName: ccAddHeaderNotSupportedParam
-            policyVersion: v1
-            parameters:
-              headerName: newHeaderKeyFromUnsupportedParam
-              headerValue: newHeaderValueFromUnsupportedParam
           -
             policyName: ccAddHeader
             policyVersion: v1
@@ -174,44 +183,6 @@ data:
             policyVersion: v1
             parameters:
               newResourcePath: /echo-full/pets/{uri.var.petId}.pets/hello-shops/abcd-shops/{uri.var.shopId}
-              includeQueryParams: true
-        response: []
-        fault: []
-    -
-      target: /echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/{shopId}/pets/{petId}/orders
-      verb: GET
-      operationPolicies:
-        request:
-          -
-            policyName: ccChangeHTTPMethod
-            policyVersion: v1
-            parameters:
-              currentMethod: GET
-              updatedMethod: PUT
-          -
-            policyName: rewriteResourcePath
-            policyVersion: v1
-            parameters:
-              newResourcePath: /echo-full/pets/{uri.var.invalidParamId}/hello-shops
-              includeQueryParams: true
-        response: []
-        fault: []
-    -
-      target: /echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/{shopId}/pets/{petId}/orders
-      verb: GET
-      operationPolicies:
-        request:
-          -
-            policyName: ccChangeHTTPMethod
-            policyVersion: v1
-            parameters:
-              currentMethod: GET
-              updatedMethod: PUT
-          -
-            policyName: rewriteResourcePath
-            policyVersion: v1
-            parameters:
-              newResourcePath: /echo-full/pets/{invalidChars}/hello-shops
               includeQueryParams: true
         response: []
         fault: []

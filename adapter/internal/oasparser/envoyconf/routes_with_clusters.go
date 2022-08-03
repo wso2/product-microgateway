@@ -38,22 +38,21 @@ import (
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
-
+	upstreams_http_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
-	upstreams_http_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	interceptor "github.com/wso2/product-microgateway/adapter/internal/interceptor"
 )
 
 // WireLogValues holds debug logging related template values
@@ -77,7 +76,7 @@ type CombinedTemplateValues struct {
 // First set of routes, clusters, addresses represents the production endpoints related
 // configurations. Next set represents the sandbox endpoints related configurations.
 func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[string][]byte, interceptorCerts map[string][]byte, vHost string, organizationID string) (routesP []*routev3.Route,
-	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
+	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address, err error) {
 	var (
 		routes    []*routev3.Route
 		clusters  []*clusterv3.Cluster
@@ -224,11 +223,20 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// No topic level endpoints.
 	if mgwSwagger.GetAPIType() == constants.WS {
 		for _, resource := range mgwSwagger.GetResources() {
-			routesP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
+			routesP, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
 				apiLevelClusterNameSand, nil, nil, organizationID, false))
-			routes = append(routes, routesP)
+			if err != nil {
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error while creating routes for Websocket API. For path: %s Error: %s",
+						resource.GetPath(), err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 2230,
+				})
+				return nil, nil, nil, fmt.Errorf("Error while creating routes for Websocket API. %v", err)
+			}
+			routes = append(routes, routesP...)
 		}
-		return routes, clusters, endpoints
+		return routes, clusters, endpoints, nil
 	}
 
 	for _, resource := range mgwSwagger.GetResources() {
@@ -426,18 +434,37 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			}
 		}
 
-		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
+		routeP, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
 			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, false))
+		if err != nil {
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while creating routes for API %s %s for path: %s Error: %s",
+					mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), resource.GetPath(), err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 2231,
+			})
+			return nil, nil, nil, fmt.Errorf("Error while creating routes. %v", err)
+		}
 		if apiLevelBasePathSand != "" || isResourceBasePathSandAvailable {
 			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
-			routeS := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
+			routeS, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
 				clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, true))
+			if err != nil {
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error while creating sandbox cluster routes for API %s %s for path: %s Error: %s",
+						mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), resource.GetPath(), err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 2232,
+				})
+				return nil, nil, nil, fmt.Errorf("Error while creating sandbox routes. %v", err)
+			}
 			// Sandbox route should be appended before to prod route to have the expected header based sandbox routing.
-			routes = append(routes, routeS)
+			routes = append(routes, routeS...)
 		}
-		routes = append(routes, routeP)
+		routes = append(routes, routeP...)
 	}
-	return routes, clusters, endpoints
+
+	return routes, clusters, endpoints, nil
 }
 
 func getClusterName(epPrefix string, organizationID string, vHost string, swaggerTitle string, swaggerVersion string,
@@ -782,18 +809,19 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 	}
 }
 
-// createRoute creates route elements for the route configurations. API title, VHost, xWso2Basepath, API version,
+// createRoutes creates route elements for the route configurations. API title, VHost, xWso2Basepath, API version,
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
-func createRoute(params *routeCreateParams) *routev3.Route {
+func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error) {
 	title := params.title
 	version := params.version
 	vHost := params.vHost
 	xWso2Basepath := params.xWSO2BasePath
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
-	resourcePath := params.resourcePathParam
-	resourceMethods := params.resourceMethods
+	resource := params.resource
+	resourcePath := resource.GetPath()
+	resourceMethods := resource.GetMethodList()
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	prodRouteConfig := params.prodRouteConfig
@@ -802,85 +830,19 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
-	adapterConfig, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
-		router                  routev3.Route
-		action                  *routev3.Route_Route
-		match                   *routev3.RouteMatch
-		decorator               *routev3.Decorator
-		requestHeadersToRemove  []string
-		responseHeadersToRemove []string
+		// The following are common to all routes and does not get updated per operation
+		decorator *routev3.Decorator
 	)
 
-	basePath := getFilteredBasePath(xWso2Basepath, endpointBasepath)
+	basePath := strings.TrimSuffix(xWso2Basepath, "/")
 	if isDefaultVersion {
 		basePath = getDefaultVersionBasepath(basePath, version)
 	}
 	routePath := generateRoutePath(basePath, resourcePath)
 
-	match = &routev3.RouteMatch{
-		PathSpecifier: &routev3.RouteMatch_SafeRegex{
-			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-						MaxProgramSize: nil,
-					},
-				},
-				Regex: routePath,
-			},
-		},
-	}
-
-	// if any of the operations on the route path has a method rewrite policy,
-	// we remove the :method header matching,
-	// because envoy does not allow method rewrting later if the following method regex does not have the new method.
-	// hence when method rewriting is enabled for the resource, the method validation will be handled by the enforcer instead of the router.
-	if !params.rewriteMethod {
-		// OPTIONS is always added even if it is not listed under resources
-		// This is required to handle CORS preflight request fail scenario
-		methodRegex := strings.Join(resourceMethods, "|")
-		if !strings.Contains(methodRegex, "OPTIONS") {
-			methodRegex = methodRegex + "|OPTIONS"
-		}
-		headerMatcherArray := routev3.HeaderMatcher{
-			Name: httpMethodHeader,
-			HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
-				StringMatch: &envoy_type_matcherv3.StringMatcher{
-					MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
-						SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-							EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-								GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-									MaxProgramSize: nil,
-								},
-							},
-							Regex: "^(" + methodRegex + ")$",
-						},
-					},
-				},
-			},
-		}
-		match.Headers = []*routev3.HeaderMatcher{&headerMatcherArray}
-		// if sandbox route, add additional header match based on cluster name header
-		if params.isSandbox {
-			clusterHeaderMatcher := routev3.HeaderMatcher{
-				Name: clusterHeaderName,
-				HeaderMatchSpecifier: &routev3.HeaderMatcher_StringMatch{
-					StringMatch: &envoy_type_matcherv3.StringMatcher{
-						MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{Exact: params.sandClusterName},
-					},
-				},
-			}
-			match.Headers = append(match.Headers, &clusterHeaderMatcher)
-		}
-	}
-
-	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
-		AutoHostRewrite: &wrapperspb.BoolValue{
-			Value: true,
-		},
-	}
 	// route path could be empty only if there is no basePath for API or the endpoint available,
 	// and resourcePath is also an empty string.
 	// Empty check is added to run the gateway in failsafe mode, as if the decorator string is
@@ -996,108 +958,186 @@ end`
 		Value:   luaMarshelled.Bytes(),
 	}
 
-	pathRegex := basePath
-	substitutionString := endpointBasepath
-	if params.rewritePath != "" {
-		pathRegex = routePath
-		if params.rewritePath != "/" {
-			substitutionString = endpointBasepath + params.rewritePath
-		}
-	} else {
-		if strings.Contains(resourcePath, "?") {
-			resourcePath = strings.Split(resourcePath, "?")[0]
-		}
-		resourceRegex := generatePathRegexSegment(resourcePath)
-		substitutionString = generateSubstitutionString(resourcePath, endpointBasepath)
-		if strings.HasSuffix(resourcePath, "/*") {
-			resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
-		}
-		pathRegex = "^" + basePath + resourceRegex
+	perRouteFilterConfigs := map[string]*any.Any{
+		wellknown.HTTPExternalAuthorization: extAuthzFilter,
+		wellknown.Lua:                       luaFilter,
 	}
-	if xWso2Basepath != "" {
-		action = &routev3.Route_Route{
-			Route: &routev3.RouteAction{
-				HostRewriteSpecifier: hostRewriteSpecifier,
-				// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
-				RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
-					Pattern: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
-						Regex: pathRegex,
-					},
-					Substitution: substitutionString,
-				},
-				UpgradeConfigs:    getUpgradeConfig(apiType),
-				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout:           durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
-				IdleTimeout:       durationpb.New(time.Duration(adapterConfig.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
-			},
-		}
-	} else {
-		action = &routev3.Route_Route{
-			Route: &routev3.RouteAction{
-				HostRewriteSpecifier: hostRewriteSpecifier,
-			},
-		}
-	}
-
-	headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
-		ClusterHeader: clusterHeaderName,
-	}
-	action.Route.ClusterSpecifier = headerBasedClusterSpecifier
-	logger.LoggerOasparser.Debug("added header based cluster")
-
-	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
-		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
-		// Retry configs are always added via headers. This is to update the
-		// default retry back-off base interval, which cannot be updated via headers.
-		retryConfig := adapterConfig.Envoy.Upstream.Retry
-		commonRetryPolicy := &routev3.RetryPolicy{
-			RetryOn: retryPolicyRetriableStatusCodes,
-			NumRetries: &wrapperspb.UInt32Value{
-				Value: 0,
-				// If not set to 0, default value 1 will be
-				// applied to both prod and sandbox even if they are not set.
-			},
-			RetriableStatusCodes: retryConfig.StatusCodes,
-			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
-				BaseInterval: &durationpb.Duration{
-					Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000,
-				},
-			},
-		}
-		action.Route.RetryPolicy = commonRetryPolicy
-	}
-
-	if corsPolicy != nil {
-		action.Route.Cors = corsPolicy
-	}
-
-	// remove 'x-wso2-cluster-header' and `x-envoy-expected-rq-timeout-ms` headers from the request from router to backend
-	requestHeadersToRemove = append(requestHeadersToRemove, clusterHeaderName)
-	requestHeadersToRemove = append(requestHeadersToRemove, "x-envoy-expected-rq-timeout-ms")
-
-	// remove the 'x-envoy-upstream-service-time' from the response.
-	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
-	router = routev3.Route{
-		Name:      xWso2Basepath, //Categorize routes with same base path
-		Match:     match,
-		Action:    action,
-		Metadata:  nil,
-		Decorator: decorator,
-		TypedPerFilterConfig: map[string]*any.Any{
-			wellknown.HTTPExternalAuthorization: extAuthzFilter,
-			wellknown.Lua:                       luaFilter,
-		},
-		ResponseHeadersToRemove: responseHeadersToRemove,
-		RequestHeadersToRemove:  requestHeadersToRemove,
+
+	if resource.HasPolicies() {
+		logger.LoggerOasparser.Debug("Start creating routes for resource with policies")
+
+		// Policies are per operation (HTTP method). Therefore, create route per HTTP method.
+		for _, operation := range resource.GetOperations() {
+			var requestHeadersToAdd []*corev3.HeaderValueOption
+			var requestHeadersToRemove []string
+			var responseHeadersToAdd []*corev3.HeaderValueOption
+			var responseHeadersToRemove []string
+			var pathRewriteConfig *envoy_type_matcherv3.RegexMatchAndSubstitute
+
+			hasMethodRewritePolicy := false
+			var newMethod string
+
+			// Policies - for request flow
+			for _, requestPolicy := range operation.GetPolicies().Request {
+				logger.LoggerOasparser.Debug("Adding request flow policies for ", resourcePath, operation.GetMethod())
+				switch requestPolicy.Action {
+
+				case constants.ActionHeaderAdd:
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
+					requestHeaderToAdd, err := generateHeaderToAddRouteConfig(requestPolicy.Parameters)
+					if err != nil {
+						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
+					}
+					requestHeadersToAdd = append(requestHeadersToAdd, requestHeaderToAdd)
+
+				case constants.ActionHeaderRemove:
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
+					requestHeaderToRemove, err := generateHeaderToRemoveString(requestPolicy.Parameters)
+					if err != nil {
+						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
+					}
+					requestHeadersToRemove = append(requestHeadersToRemove, requestHeaderToRemove)
+
+				case constants.ActionRewritePath:
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionRewritePath, resourcePath, operation.GetMethod())
+					regexRewrite, err := generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath,
+						requestPolicy.Parameters)
+					if err != nil {
+						errMsg := fmt.Sprintf("Error adding request policy %s to operation %s of resource %s. %v",
+							constants.ActionRewritePath, operation.GetMethod(), resourcePath, err)
+						logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+							Message:   errMsg,
+							Severity:  logging.MINOR,
+							ErrorCode: 2212,
+						})
+						return nil, errors.New(errMsg)
+					}
+					pathRewriteConfig = regexRewrite
+
+				case constants.ActionRewriteMethod:
+					logger.LoggerOasparser.Debug("Adding %s policy to request flow for %s %s",
+						constants.ActionRewriteMethod, resourcePath, operation.GetMethod())
+					hasMethodRewritePolicy, err = isMethodRewrite(resourcePath, operation.GetMethod(), requestPolicy.Parameters)
+					if err != nil {
+						return nil, err
+					}
+					if !hasMethodRewritePolicy {
+						continue
+					}
+					newMethod, err = getRewriteMethod(resourcePath, operation.GetMethod(), requestPolicy.Parameters)
+					if err != nil {
+						return nil, err
+					}
+				}
+			}
+
+			// Policies - for response flow
+			for _, responsePolicy := range operation.GetPolicies().Response {
+				logger.LoggerOasparser.Debug("Adding response flow policies for ", resourcePath, operation.GetMethod())
+				switch responsePolicy.Action {
+
+				case constants.ActionHeaderAdd:
+					logger.LoggerOasparser.Debug("Adding %s policy to response flow for %s %s",
+						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
+					responseHeaderToAdd, err := generateHeaderToAddRouteConfig(responsePolicy.Parameters)
+					if err != nil {
+						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
+					}
+					responseHeadersToAdd = append(responseHeadersToAdd, responseHeaderToAdd)
+
+				case constants.ActionHeaderRemove:
+					logger.LoggerOasparser.Debug("Adding %s policy to response flow for %s %s",
+						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
+					responseHeaderToRemove, err := generateHeaderToRemoveString(responsePolicy.Parameters)
+					if err != nil {
+						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
+					}
+					responseHeadersToRemove = append(responseHeadersToRemove, responseHeaderToRemove)
+				}
+			}
+
+			// TODO: (suksw) preserve header key case?
+			if hasMethodRewritePolicy {
+				logger.LoggerOasparser.Debug("Creating two routes to support method rewrite for %s %s. New method: %s",
+					resourcePath, operation.GetMethod(), newMethod)
+				match1 := generateRouteMatch(routePath)
+				match1.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
+				match2 := generateRouteMatch(routePath)
+				match2.Headers = generateHTTPMethodMatcher(newMethod, params.isSandbox, sandClusterName)
+
+				//- external routes only accept requests if metadata "method-rewrite" is null
+				//- external routes adds the metadata "method-rewrite"
+				//- internal routes only accept requests if metadata "method-rewrite" matches
+				//  metadataValue <old_method>_to_<new_method>
+				match1.DynamicMetadata = generateMetadataMatcherForExternalRoutes()
+				metadataValue := operation.GetMethod() + "_to_" + newMethod
+				match2.DynamicMetadata = generateMetadataMatcherForInternalRoutes(metadataValue)
+
+				action1 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
+				action2 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
+
+				// Create route1 for current method.
+				// Do not add policies to route config. Send via enforcer
+				route1 := generateRouteConfig(xWso2Basepath+operation.GetMethod(), match1, action1, nil, decorator, perRouteFilterConfigs,
+					nil, nil, nil, nil)
+
+				// Create route2 for new method.
+				// Add all policies to route config. Do not send via enforcer.
+				if pathRewriteConfig != nil {
+					action2.Route.RegexRewrite = pathRewriteConfig
+				} else {
+					action2.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
+				}
+				configToSkipEnforcer := generateFilterConfigToSkipEnforcer()
+				route2 := generateRouteConfig(xWso2Basepath, match2, action2, nil, decorator, configToSkipEnforcer,
+					requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd, responseHeadersToRemove)
+
+				routes = append(routes, route1)
+				routes = append(routes, route2)
+			} else {
+				logger.LoggerOasparser.Debug("Creating routes for resource with policies", resourcePath, operation.GetMethod())
+				// create route for current method. Add policies to route config. Send via enforcer
+				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
+				match := generateRouteMatch(routePath)
+				match.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
+				match.DynamicMetadata = generateMetadataMatcherForExternalRoutes()
+				if pathRewriteConfig != nil {
+					action.Route.RegexRewrite = pathRewriteConfig
+				} else {
+					action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
+				}
+				route := generateRouteConfig(xWso2Basepath, match, action, nil, decorator, perRouteFilterConfigs,
+					requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd, responseHeadersToRemove)
+				routes = append(routes, route)
+			}
+
+		}
+	} else {
+		logger.LoggerOasparser.Debug("Creating routes for resource that has no policies")
+		// No policies defined for the resource. Therefore, create one route for all operations.
+		methodRegex := strings.Join(resourceMethods, "|")
+		if !strings.Contains(methodRegex, "OPTIONS") {
+			methodRegex = methodRegex + "|OPTIONS"
+		}
+		match := generateRouteMatch(routePath)
+		match.Headers = generateHTTPMethodMatcher(methodRegex, params.isSandbox, sandClusterName)
+		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
+		action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
+
+		route := generateRouteConfig(xWso2Basepath, match, action, nil, decorator, perRouteFilterConfigs,
+			nil, nil, nil, nil) // general headers to add and remove are included in this methods
+		routes = append(routes, route)
 	}
-	return &router
+	return routes, nil
 }
 
 func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, responseInterceptor map[string]model.InterceptEndpoint,
@@ -1336,37 +1376,34 @@ func CreateReadyEndpoint() *routev3.Route {
 }
 
 // generateRoutePath generates route paths for the api resources.
+// TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
 func generateRoutePath(basePath, resourcePath string) string {
-	newPath := ""
+	trailingSlashRegex := "[/]{0,1}"
 	if strings.Contains(resourcePath, "?") {
 		resourcePath = strings.Split(resourcePath, "?")[0]
 	}
-	fullpath := basePath + resourcePath
-	newPath = generateRegex(fullpath)
-	return newPath
+	newPath := replacePathParamsWithCaptureGroups(basePath + resourcePath)
+	if strings.HasSuffix(newPath, "/*") {
+		newPath = strings.TrimSuffix(newPath, "/*") + "(/.*)*"
+	} else {
+		newPath = strings.TrimSuffix(newPath, "/") + trailingSlashRegex
+	}
+	return "^" + newPath
 }
 
-func generatePathRegexSegment(resourcePath string) string {
+// replacePathParamsWithCaptureGroups updates paths like /pet/{petId} to /pet/([^/]+)
+func replacePathParamsWithCaptureGroups(resourcePath string) string {
 	pathParaRegex := "([^/]+)"
-	wildCardRegex := "((/(.*))*)"
-	trailingSlashRegex := "(/{0,1})"
-	resourceRegex := ""
 	matcher := regexp.MustCompile(`{([^}]+)}`)
-	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
-	if strings.HasSuffix(resourceRegex, "/*") {
-		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + wildCardRegex
-	} else {
-		resourceRegex = strings.TrimSuffix(resourceRegex, "/") + trailingSlashRegex
-	}
+	resourceRegex := matcher.ReplaceAllString(resourcePath, pathParaRegex)
 	return resourceRegex
 }
 
-func generateSubstitutionString(resourcePath string, endpointBasepath string) string {
+// generateSubstitutionString returns a regex that has indexes to place the path variables extracted by capture groups
+func generateSubstitutionString(endpointBasepath string, resourcePath string) string {
 	pathParaRegex := "([^/]+)"
-	trailingSlashRegex := "(/{0,1})"
-	wildCardRegex := "((/(.*))*)"
 	pathParamIndex := 0
-	resourceRegex := generatePathRegexSegment(resourcePath)
+	resourceRegex := replacePathParamsWithCaptureGroups(resourcePath)
 	for {
 		pathParaRemains := strings.Contains(resourceRegex, pathParaRegex)
 		if !pathParaRemains {
@@ -1375,43 +1412,60 @@ func generateSubstitutionString(resourcePath string, endpointBasepath string) st
 		pathParamIndex++
 		resourceRegex = strings.Replace(resourceRegex, pathParaRegex, fmt.Sprintf("\\%d", pathParamIndex), 1)
 	}
-	if strings.HasSuffix(resourceRegex, wildCardRegex) {
-		resourceRegex = strings.TrimSuffix(resourceRegex, wildCardRegex)
-	} else if strings.HasSuffix(resourcePath, "/") {
-		resourceRegex = strings.TrimSuffix(resourceRegex, trailingSlashRegex) + "/"
-	} else {
-		resourceRegex = strings.TrimSuffix(resourceRegex, trailingSlashRegex)
+	if strings.HasSuffix(resourceRegex, "/*") {
+		pathParamIndex++
+		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + fmt.Sprintf("\\%d", pathParamIndex)
 	}
 	return endpointBasepath + resourceRegex
 }
 
-func getFilteredBasePath(xWso2Basepath string, basePath string) string {
-	var modifiedBasePath string
-
-	if strings.TrimSpace(xWso2Basepath) != "" {
-		modifiedBasePath = xWso2Basepath
-	} else {
-		modifiedBasePath = basePath
-		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
+func isMethodRewrite(resourcePath, method string, policyParams interface{}) (isMethodRewrite bool, err error) {
+	var paramsToRewriteMethod map[string]interface{}
+	var ok bool
+	if paramsToRewriteMethod, ok = policyParams.(map[string]interface{}); !ok {
+		return false, fmt.Errorf("Error while processing policy parameter map for "+
+			"request policy %s to operation %s of resource %s. Map: %v",
+			constants.ActionRewriteMethod, method, resourcePath, policyParams)
 	}
 
-	if !strings.HasPrefix(modifiedBasePath, "/") {
-		modifiedBasePath = "/" + modifiedBasePath
+	currentMethod, exists := paramsToRewriteMethod[constants.CurrentMethod]
+	if !exists {
+		return true, nil
 	}
-	modifiedBasePath = strings.TrimSuffix(modifiedBasePath, "/")
-	return modifiedBasePath
+	currentMethodString, _ := currentMethod.(string)
+
+	if currentMethodString == "<no value>" { // the package text/template return this for keys that does not exist
+		return true, nil
+	}
+
+	if currentMethodString != method {
+		return false, nil
+	}
+	return true, nil // currentMethodString == method
 }
 
-// generateRegex generates regex for the resources which have path paramaters
-// such that the envoy configuration can use it as a route.
-// If path has path parameters ({id}), append a regex pattern (pathParaRegex).
-// To avoid query parameter issues, add a regex pattern ( endRegex) for end of all routes.
-// It takes the path value as an input and then returns the regex value.
-// TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
-func generateRegex(fullpath string) string {
-	endRegex := "(\\?([^/]+))?"
-	newPath := generatePathRegexSegment(fullpath)
-	return "^" + newPath + endRegex + "$"
+func getRewriteMethod(resourcePath, method string, policyParams interface{}) (rewriteMethod string, err error) {
+	var paramsToRewriteMethod map[string]interface{}
+	var ok bool
+	if paramsToRewriteMethod, ok = policyParams.(map[string]interface{}); !ok {
+		return "", fmt.Errorf("Error while processing policy parameter map for "+
+			"request policy %s to operation %s of resource %s. Map: %v",
+			constants.ActionRewriteMethod, method, resourcePath, policyParams)
+	}
+
+	updatedMethod, exists := paramsToRewriteMethod[constants.UpdatedMethod]
+	if !exists {
+		return "", fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+			" Policy parameter updatedMethod not found",
+			constants.ActionRewriteMethod, method, resourcePath)
+	}
+	updatedMethodString, isString := updatedMethod.(string)
+	if !isString {
+		return "", fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+			" Policy parameter updatedMethod is in incorrect format", constants.ActionRewriteMethod,
+			method, resourcePath)
+	}
+	return updatedMethodString, nil
 }
 
 func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
@@ -1490,21 +1544,12 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		sandClusterName:              sandClusterName,
 		endpointBasePath:             endpointBasePath,
 		corsPolicy:                   swagger.GetCorsConfig(),
-		resourcePathParam:            "",
-		resourceMethods:              getDefaultResourceMethods(swagger.GetAPIType()),
+		resource:                     resource,
 		requestInterceptor:           requestInterceptor,
 		responseInterceptor:          responseInterceptor,
-		rewritePath:                  "",
-		rewriteMethod:                false,
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 		isDefaultVersion:             swagger.IsDefaultVersion,
 		isSandbox:                    isSandbox,
-	}
-
-	if resource != nil {
-		params.resourceMethods = resource.GetMethodList()
-		params.resourcePathParam = resource.GetPath()
-		params.rewritePath, params.rewriteMethod = resource.GetRewriteResource()
 	}
 
 	if swagger.GetProdEndpoints() != nil {
@@ -1541,14 +1586,6 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 		}
 	}
 	return maxStreamDuration
-}
-
-func getDefaultResourceMethods(apiType string) []string {
-	var defaultResourceMethods []string = nil
-	if apiType == constants.WS {
-		defaultResourceMethods = []string{"GET"}
-	}
-	return defaultResourceMethods
 }
 
 func getDefaultVersionBasepath(basePath string, version string) string {

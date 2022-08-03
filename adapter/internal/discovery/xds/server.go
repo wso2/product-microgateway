@@ -323,7 +323,16 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 			}
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth, isYamlMutualssl, isYamlMutualsslMandatory, isYamlOauthBasicAuthAPIKeyMandatory)
-		mgwSwagger.SetOperationPolicies(apiProject)
+		err = mgwSwagger.SetOperationPolicies(apiProject)
+		if err != nil {
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while populating operational policies for the API %s:%s of Organization %s. %s",
+					apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID, err),
+				Severity:  logging.MINOR,
+				ErrorCode: 1416,
+			})
+			return nil, err
+		}
 	}
 	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
@@ -457,8 +466,12 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	}
 	interceptCertMap["default"] = apiProject.InterceptorCerts
 
-	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
+	routes, clusters, endpoints, err := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
 		interceptCertMap, vHost, organizationID)
+	if err != nil {
+		return nil, fmt.Errorf("Error while deploying API. Name: %s Version: %s, OrgID: %s, Error: %s",
+			mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID, err.Error())
+	}
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes

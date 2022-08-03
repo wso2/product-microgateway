@@ -42,23 +42,13 @@ import (
 func TestGenerateRoutePaths(t *testing.T) {
 	// Tested features
 	// 1. Route regex when xWso2BasePath is provided
-	// 2. Route regex when xWso2BasePath is empty
 	xWso2BasePath := "/xWso2BasePath"
-	basePath := "/basePath"
 	resourcePath := "/resource"
 
-	filteredBasePath := getFilteredBasePath(xWso2BasePath, basePath)
-	completeRoutePath := generateRoutePath(filteredBasePath, resourcePath)
+	completeRoutePath := generateRoutePath(xWso2BasePath, resourcePath)
 	// TODO: (VirajSalaka) check if it is possible to perform an equals operation instead of prefix
 	if !strings.HasPrefix(completeRoutePath, "^/xWso2BasePath/resource") {
 		t.Error("The generated path should contain xWso2BasePath as a prefix if xWso2Basepath is available.")
-	}
-
-	xWso2BasePath = ""
-	filteredBasePath = getFilteredBasePath(xWso2BasePath, basePath)
-	completeRoutePath = generateRoutePath(filteredBasePath, resourcePath)
-	if !strings.HasPrefix(completeRoutePath, "^/basePath/resource") {
-		t.Error("The generated path should contain basePath as a prefix if xWso2Basepath is unavailable.")
 	}
 }
 
@@ -101,7 +91,7 @@ func TestCreateRoute(t *testing.T) {
 					MaxProgramSize: nil,
 				},
 			},
-			Regex: "^/xWso2BasePath/resourcePath(/{0,1})",
+			Regex: "^/xWso2BasePath/resourcePath[/]{0,1}",
 		},
 		Substitution: "/basepath/resourcePath",
 	}
@@ -126,37 +116,32 @@ func TestCreateRoute(t *testing.T) {
 		},
 	}
 
-	expectedRouteActionWithoutXWso2BasePath := &routev3.Route_Route{
-		Route: &routev3.RouteAction{
-			HostRewriteSpecifier: hostRewriteSpecifier,
-			ClusterSpecifier:     clusterSpecifier,
-		},
-	}
-
-	generatedRouteWithXWso2BasePath := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
-		endpoint.Basepath, resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), clusterName, "", nil, false))
+	generatedRouteArrayWithXWso2BasePath, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
+		endpoint.Basepath, &resourceWithGet, clusterName, "", nil, false))
+	assert.Nil(t, err, "Error while creating routes WithXWso2BasePath")
+	generatedRouteWithXWso2BasePath := generatedRouteArrayWithXWso2BasePath[0]
 	assert.NotNil(t, generatedRouteWithXWso2BasePath, "Route should not be null.")
 	assert.Equal(t, expectedRouteActionWithXWso2BasePath, generatedRouteWithXWso2BasePath.Action,
 		"Route generation mismatch when xWso2BasePath option is provided.")
 	assert.NotNil(t, generatedRouteWithXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
-	assert.Equal(t, "^(GET|OPTIONS)$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
+	assert.Equal(t, "^GET|OPTIONS$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
 		"Assigned HTTP Method Regex is incorrect when single method is available.")
 
-	generatedRouteWithoutXWso2BasePath := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, "", version,
-		endpoint.Basepath, resourceWithGetPost.GetPath(), resourceWithGetPost.GetMethodList(), clusterName, "", nil, false))
+	generatedRouteArrayWithoutXWso2BasePath, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, "", version,
+		endpoint.Basepath, &resourceWithGetPost, clusterName, "", nil, false))
+	assert.Nil(t, err, "Error while creating routes WithoutXWso2BasePath")
+	generatedRouteWithoutXWso2BasePath := generatedRouteArrayWithoutXWso2BasePath[0]
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath, "Route should not be null")
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
-	assert.Equal(t, "^(GET|POST|OPTIONS)$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
+	assert.Equal(t, "^GET|POST|OPTIONS$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetStringMatch().GetSafeRegex().Regex,
 		"Assigned HTTP Method Regex is incorrect when multiple methods are available.")
 
-	assert.Equal(t, expectedRouteActionWithoutXWso2BasePath, generatedRouteWithoutXWso2BasePath.Action,
-		"Route generation mismatch when xWso2BasePath option is provided")
-
 	context := fmt.Sprintf("%s/%s", xWso2BasePath, version)
-	generatedRouteWithDefaultVersion := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, context, version,
-		endpoint.Basepath, resourceWithGetPost.GetPath(), resourceWithGetPost.GetMethodList(), clusterName, "", nil, true))
+	generatedRouteWithDefaultVersion, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, context, version,
+		endpoint.Basepath, &resourceWithGetPost, clusterName, "", nil, true))
+	assert.Nil(t, err, "Error while creating routes WithDefaultVersion")
 	assert.NotNil(t, generatedRouteWithDefaultVersion, "Route should not be null")
-	assert.True(t, strings.HasPrefix(generatedRouteWithDefaultVersion.GetMatch().GetSafeRegex().Regex, fmt.Sprintf("^(?:%s|%s)", context, xWso2BasePath)),
+	assert.True(t, strings.HasPrefix(generatedRouteWithDefaultVersion[0].GetMatch().GetSafeRegex().Regex, fmt.Sprintf("^(?:%s|%s)", context, xWso2BasePath)),
 		"Default version basepath is not generated correctly")
 }
 
@@ -178,26 +163,29 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routeWithProdEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
-		resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), prodClusterName, "", nil, false))
-	assert.NotNil(t, routeWithProdEp, "Route should not be null")
-	assert.NotNil(t, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
-	assert.Empty(t, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
-	assert.Equal(t, clusterHeaderName, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+	routeWithProdEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
+		&resourceWithGet, prodClusterName, "", nil, false))
+	assert.Nil(t, err, "Error while creating routeWithProdEp")
+	assert.NotNil(t, routeWithProdEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithProdEp[0].GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithProdEp[0].GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithProdEp[0].GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 
-	routeWithSandEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
-		resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), "", sandClusterName, nil, false))
-	assert.NotNil(t, routeWithSandEp, "Route should not be null")
-	assert.NotNil(t, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
-	assert.Empty(t, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
-	assert.Equal(t, clusterHeaderName, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+	routeWithSandEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
+		&resourceWithGet, "", sandClusterName, nil, false))
+	assert.Nil(t, err, "Error while creating routeWithSandEp")
+	assert.NotNil(t, routeWithSandEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithSandEp[0].GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 
-	routeWithProdSandEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
-		resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), prodClusterName, sandClusterName, nil, false))
-	assert.NotNil(t, routeWithProdSandEp, "Route should not be null")
-	assert.NotNil(t, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
-	assert.Empty(t, routeWithProdSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
-	assert.Equal(t, clusterHeaderName, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+	routeWithProdSandEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version, endpointBasePath,
+		&resourceWithGet, prodClusterName, sandClusterName, nil, false))
+	assert.Nil(t, err, "Error while creating routeWithProdSandEp")
+	assert.NotNil(t, routeWithProdSandEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithProdSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithProdSandEp[0].GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithProdSandEp[0].GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
 }
 
 func TestCreateRouteExtAuthzContext(t *testing.T) {
@@ -217,15 +205,16 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routeWithProdEp := createRoute(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
-		endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethodList(), prodClusterName, sandClusterName, nil, false))
-	assert.NotNil(t, routeWithProdEp, "Route should not be null")
-	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
-	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig()[wellknown.HTTPExternalAuthorization],
+	routeWithProdEp, err := createRoutes(generateRouteCreateParamsForUnitTests(title, apiType, vHost, xWso2BasePath, version,
+		endpointBasePath, &resourceWithGet, prodClusterName, sandClusterName, nil, false))
+	assert.Nil(t, err, "Error while creating routeWithProdEp")
+	assert.NotNil(t, routeWithProdEp[0], "Route should not be null")
+	assert.NotNil(t, routeWithProdEp[0].GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
+	assert.NotNil(t, routeWithProdEp[0].GetTypedPerFilterConfig()[wellknown.HTTPExternalAuthorization],
 		"ExtAuthzPerRouteConfig should not be empty")
 
 	extAuthPerRouteConfig := &extAuthService.ExtAuthzPerRoute{}
-	err := ptypes.UnmarshalAny(routeWithProdEp.TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
+	err = ptypes.UnmarshalAny(routeWithProdEp[0].TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
 		extAuthPerRouteConfig)
 	assert.Nilf(t, err, "Error while parsing ExtAuthzPerRouteConfig %v", extAuthPerRouteConfig)
 	assert.NotEmpty(t, extAuthPerRouteConfig.GetCheckSettings(), "Check Settings per ext authz route should not be empty")
@@ -261,145 +250,143 @@ func TestGenerateTLSCert(t *testing.T) {
 func TestGenerateRegex(t *testing.T) {
 
 	type generateRegexTestItem struct {
-		inputpath     string
+		basePath      string
+		resourcePath  string
 		userInputPath string
 		message       string
 		isMatched     bool
 	}
 	dataItems := []generateRegexTestItem{
 		{
-			inputpath:     "/v2/pet/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}",
 			userInputPath: "/v2/pet/5",
 			message:       "when path parameter is provided end of the path",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}",
+			basePath:      `/v2`,
+			resourcePath:  `/pet/{petId}`,
 			userInputPath: "/v2/pet/5/",
 			message:       "when the input path does not have tailing slash and user input path has trailing slash",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/",
 			userInputPath: "/v2/pet/5",
 			message:       "when the input path has tailing slash and user input path does not have trailing slash",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/",
 			userInputPath: "/v2/pet/5/",
 			message:       "when both the input path and user input path has trailing slash",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/info",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/info",
 			userInputPath: "/v2/pet/5/info",
 			message:       "when path parameter is provided in the middle of the path",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}",
 			userInputPath: "/v2/pet/5",
 			message:       "when path parameter is provided end of the path",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}/tst/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}/tst/{petId}",
 			userInputPath: "/v2/pet/5/tst/3",
 			message:       "when multiple path parameter are provided",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}",
 			userInputPath: "/v2/pet/5/test",
 			message:       "when path parameter is provided end of the path and provide incorrect path",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/5",
+			basePath:      "/v2",
+			resourcePath:  "/pet/5",
 			userInputPath: "/v2/pett/5",
 			message:       "when provide a incorrect path",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/findById",
-			userInputPath: "/v2/pet/findById?status=availabe",
-			message:       "when query parameter is provided",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/findById",
-			userInputPath: "/v2/pet/findByIdstatus=availabe",
-			message:       "when query parameter is provided without ?",
-			isMatched:     false,
-		},
-		{
-			inputpath:     "/v2/pet/*",
-			userInputPath: "/v2/pet/findByIdstatus=availabe",
-			message:       "when the resource ends with *",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/*",
+			basePath:      "/v2",
+			resourcePath:  "/pet/*",
 			userInputPath: "/v2/pet/",
 			message:       "when the resource ends with *, empty string with / substitution fails.",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/*",
+			basePath:      "/v2",
+			resourcePath:  "/pet/*",
 			userInputPath: "/v2/pet",
 			message:       "when the resource ends with *, empty string substitution fails.",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/*",
+			basePath:      "/v2",
+			resourcePath:  "/pet/*",
 			userInputPath: "/v2/pet/foo/bar",
 			message:       "when the resource ends with *, multiple trailing slashes substitution fails.",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/*",
+			basePath:      "/v2",
+			resourcePath:  "/pet/*",
 			userInputPath: "/v2/pet123",
 			message:       "when the resource ends with *, trailing characters substitution passes",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}.api",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}.api",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource path param suffixed",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/{petId}.api",
+			basePath:      "/v2",
+			resourcePath:  "/pet/{petId}.api",
 			userInputPath: "/v2/pet/pet1.api",
 			message:       "when the resource path param suffixed",
 			isMatched:     true,
 		},
 		{
-			inputpath:     "/v2/pet/pet{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/pet{petId}",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource ends with *",
 			isMatched:     false,
 		},
 		{
-			inputpath:     "/v2/pet/pet{petId}",
+			basePath:      "/v2",
+			resourcePath:  "/pet/pet{petId}",
 			userInputPath: "/v2/pet/pet1",
 			message:       "when the resource ends with *",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/pet",
-			userInputPath: "/v2/pet/pet?petId=12343",
-			message:       "when the resource has query params",
 			isMatched:     true,
 		},
 	}
 
 	for _, item := range dataItems {
-		resultPattern := generateRegex(item.inputpath)
-		resultIsMatching, err := regexp.MatchString(resultPattern, item.userInputPath)
-
-		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
+		resultPattern := generateRoutePath(item.basePath, item.resourcePath)
+		// regexp.MatchString also returns true for partial matches. Therefore, an additional $ is added
+		// below to replicate the behavior of envoy proxy. As per the doc,
+		// "The entire path (without the query string) must match the regex.
+		// The rule will not match if only a subsequence of the :path header matches the regex."
+		// https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-safe-regex
+		resultIsMatching, err := regexp.MatchString(resultPattern+"$", item.userInputPath)
+		assert.Equal(t, item.isMatched, resultIsMatching, resultPattern)
 		assert.Nil(t, err)
 	}
 }
@@ -456,21 +443,24 @@ func TestGenerateSubstitutionString(t *testing.T) {
 		},
 		{
 			"/v2/*",
-			"/basepath/v2",
+			"/basepath/v2\\1",
 			"when input path has a wildcard at the end",
 			true,
 		},
 		{
 			"/v2/{petId}/*",
-			"/basepath/v2/\\1",
+			"/basepath/v2/\\1\\2",
 			"when input path has a path param and a wildcard at the end",
 			true,
 		},
 	}
 	for _, item := range dataItems {
-		generatedSubstitutionString := generateSubstitutionString(item.inputPath, "/basepath")
-		isEqual := generatedSubstitutionString == item.expectedSubsString
-		assert.Equal(t, item.shouldEqual, isEqual, item.message)
+		generatedSubstitutionString := generateSubstitutionString("/basepath", item.inputPath)
+		if item.shouldEqual {
+			assert.Equal(t, item.expectedSubsString, generatedSubstitutionString, item.message)
+		} else {
+			assert.NotEqual(t, item.expectedSubsString, generatedSubstitutionString, item.message)
+		}
 	}
 }
 
@@ -485,44 +475,44 @@ func TestGenerateRegexSegment(t *testing.T) {
 	dataItems := []generateRegexSegmentTestItem{
 		{
 			inputPath:    "/v2/pet/",
-			regexSegment: "/v2/pet(/{0,1})",
+			regexSegment: "/v2/pet/",
 			message:      "when the input path has a trailing slash",
 			shouldEqual:  true,
 		},
 		{
 			inputPath:    "/v2/pet",
-			regexSegment: "/v2/pet(/{0,1})",
+			regexSegment: "/v2/pet",
 			message:      "when the input path does not have a trailing slash",
 			shouldEqual:  true,
 		},
 		{
 			inputPath:    "/v2/pet/{petId}",
-			regexSegment: "/v2/pet/([^/]+)(/{0,1})",
+			regexSegment: "/v2/pet/([^/]+)",
 			message:      "when the input path has a path param and does not have a trailing slash",
 			shouldEqual:  true,
 		},
 		{
 			inputPath:    "/v2/pet/{petId}/",
-			regexSegment: "/v2/pet/([^/]+)(/{0,1})",
+			regexSegment: "/v2/pet/([^/]+)/",
 			message:      "when the input path has a path param and a trailing slash",
 			shouldEqual:  true,
 		},
 		{
 			inputPath:    "/v2/pet/{petId}/test/{petId}",
-			regexSegment: "/v2/pet/([^/]+)/test/([^/]+)(/{0,1})",
+			regexSegment: "/v2/pet/([^/]+)/test/([^/]+)",
 			message:      "when the input path has two path params",
 			shouldEqual:  true,
 		},
 		{
 			inputPath:    "/v2/pet/*",
-			regexSegment: "/v2/pet((/(.*))*)",
+			regexSegment: "/v2/pet/*",
 			message:      "when the input path ends with *",
 			shouldEqual:  true,
 		},
 	}
 
 	for _, item := range dataItems {
-		generatedPathRegexSegment := generatePathRegexSegment(item.inputPath)
+		generatedPathRegexSegment := replacePathParamsWithCaptureGroups(item.inputPath)
 		isEqual := generatedPathRegexSegment == item.regexSegment
 		assert.Equal(t, item.shouldEqual, isEqual, item.message)
 	}
@@ -651,32 +641,36 @@ func TestGetCorsPolicy(t *testing.T) {
 		"Cors Allowed Origin Header mismatch")
 	assert.Empty(t, corsPolicy3.GetAllowCredentials(), "Allow Credential property should not be assigned.")
 
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{model.NewOperation("GET", nil, nil)},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
+
 	// Route without CORS configuration
-	routeWithoutCors := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"GET"}, "test-cluster", "", nil, false))
-	assert.Nil(t, routeWithoutCors.GetRoute().Cors, "Cors Configuration should be null.")
+	routeWithoutCors, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+		&resourceWithGet, "test-cluster", "", nil, false))
+	assert.Nil(t, err, "Error while creating routeWithoutCors")
+	assert.Nil(t, routeWithoutCors[0].GetRoute().Cors, "Cors Configuration should be null.")
 
 	// Route with CORS configuration
-	routeWithCors := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"GET"}, "test-cluster", "", corsConfigModel3, false))
-	assert.NotNil(t, routeWithCors.GetRoute().Cors, "Cors Configuration should not be null.")
+	routeWithCors, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+		&resourceWithGet, "test-cluster", "", corsConfigModel3, false))
+	assert.Nil(t, err, "Error while creating routeWithCors")
+	assert.NotNil(t, routeWithCors[0].GetRoute().Cors, "Cors Configuration should not be null.")
 }
 
 func generateRouteCreateParamsForUnitTests(title string, apiType string, vhost string, xWso2Basepath string, version string, endpointBasepath string,
-	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string,
+	resource *model.Resource, prodClusterName string, sandClusterName string,
 	corsConfig *model.CorsConfig, isDefaultVersion bool) *routeCreateParams {
 	return &routeCreateParams{
-		title:             title,
-		apiType:           apiType,
-		version:           version,
-		vHost:             vhost,
-		xWSO2BasePath:     xWso2Basepath,
-		prodClusterName:   prodClusterName,
-		sandClusterName:   sandClusterName,
-		endpointBasePath:  endpointBasepath,
-		corsPolicy:        corsConfig,
-		resourcePathParam: resourcePathParam,
-		resourceMethods:   resourceMethods,
-		isDefaultVersion:  isDefaultVersion,
+		title:            title,
+		apiType:          apiType,
+		version:          version,
+		vHost:            vhost,
+		xWSO2BasePath:    xWso2Basepath,
+		resource:         resource,
+		prodClusterName:  prodClusterName,
+		sandClusterName:  sandClusterName,
+		endpointBasePath: endpointBasepath,
+		corsPolicy:       corsConfig,
+		isDefaultVersion: isDefaultVersion,
 	}
 }

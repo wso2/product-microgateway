@@ -30,8 +30,7 @@ type routeCreateParams struct {
 	xWSO2BasePath                string
 	vHost                        string
 	endpointBasePath             string
-	resourcePathParam            string
-	resourceMethods              []string
+	resource                     *model.Resource
 	prodClusterName              string
 	sandClusterName              string
 	prodRouteConfig              *model.EndpointConfig
@@ -40,8 +39,6 @@ type routeCreateParams struct {
 	requestInterceptor           map[string]model.InterceptEndpoint
 	responseInterceptor          map[string]model.InterceptEndpoint
 	corsPolicy                   *model.CorsConfig
-	rewritePath                  string
-	rewriteMethod                bool
 	passRequestPayloadToEnforcer bool
 	isDefaultVersion             bool
 	isSandbox                    bool

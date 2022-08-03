@@ -232,7 +232,7 @@ func (operation *Operation) GetCallInterceptorService(isIn bool) InterceptEndpoi
 	}
 	if len(policies) > 0 {
 		for _, policy := range policies {
-			if strings.EqualFold(constants.InterceptorServiceAction, policy.Action) {
+			if strings.EqualFold(constants.ActionInterceptorService, policy.Action) {
 				if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 					urlValue, urlFound := paramMap[constants.InterceptorServiceURL]
 					includesValue, includesFound := paramMap[constants.InterceptorServiceIncludes]
