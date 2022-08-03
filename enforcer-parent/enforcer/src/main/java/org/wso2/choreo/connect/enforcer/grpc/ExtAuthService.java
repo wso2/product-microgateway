@@ -189,12 +189,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         }
     }
 
-    private String getDirectResponseSoapBody() {
-        return "<envsoap11:Detail>\n" +
-                "<m:MaxTime>P5M</m:MaxTime>\n" +
-                "</envsoap11:Detail>";
-    }
-
     private int getDirectResponseCode(int statusCode) {
         switch (statusCode) {
             // removed ok value from here since this method is used strictly for direct response,

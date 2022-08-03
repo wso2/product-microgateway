@@ -1,5 +1,4 @@
 [adapter]
-soapErrorXMLFormatEnabled = false
 [adapter.server]
   enabled = true
   port = "9843"

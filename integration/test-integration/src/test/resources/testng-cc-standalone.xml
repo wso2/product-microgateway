@@ -71,6 +71,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyPerOperationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>

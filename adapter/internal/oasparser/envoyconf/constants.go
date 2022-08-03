@@ -130,3 +130,8 @@ const (
 	soap12ProtocolVersion = "SOAP 1.2 Protocol"
 	soapActionHeaderName  = "SOAPAction"
 )
+
+// metadata keys
+const (
+	methodRewrite = "method-rewrite"
+)
