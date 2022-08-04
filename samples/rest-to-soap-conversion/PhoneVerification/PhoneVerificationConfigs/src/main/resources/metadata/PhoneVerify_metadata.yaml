@@ -1,0 +1,11 @@
+---
+key: "PhoneVerify-1.0.0"
+name: "PhoneVerify"
+displayName: "PhoneVerify"
+description: "Sample API"
+version: "1.0.0"
+serviceUrl: "http://172.17.0.1:8290/phoneverify"
+definitionType: "OAS3"
+securityType: "BASIC"
+mutualSSLEnabled: false
+apiId: "null"
