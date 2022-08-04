@@ -482,6 +482,10 @@
             <artifactId>opentelemetry-extension-trace-propagators</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer.commons</artifactId>
             <version>${project.parent.version}</version>
