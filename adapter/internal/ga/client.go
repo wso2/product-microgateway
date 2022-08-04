@@ -21,6 +21,8 @@ import (
 	"context"
 	"crypto/tls"
 	"io"
+	"strconv"
+	"strings"
 	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -238,6 +240,23 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 			delete(removedAPIMap, api.ApiUUID)
 			if currentGAAPI.RevisionUUID == api.RevisionUUID {
 				continue
+			}
+			// Related to issue: https://github.com/wso2-enterprise/choreo/issues/14460
+			// This temporary if condition is added to prevent redeploying of all the existing APIs due to change done
+			// in API revision ID to handle environment specific properties. New API revision ID will be in the format
+			// of revisionId_timestamp and the currentGAAPI.RevisionUUID == api.RevisionUUID returns fails for all the
+			// existing APIs. This additional if block is added to prevent redeploying of APIs until a specific timestamp.
+			// Remove this if block after GA is updated with revisionId_timestamp related changes.
+			if len(strings.Split(api.RevisionUUID, "_")) == 2 {
+				timestamp, err := strconv.Atoi(strings.Split(api.RevisionUUID, "_")[1])
+				if err != nil {
+					logger.LoggerGA.Debugf("Revision Id associated timestamp conversion to integer failed: %v\n", err)
+					continue
+				}
+				// Timestamp is set to 2022/08/05 23:59:59 IST
+				if timestamp < 1659724199 {
+					continue
+				}
 			}
 		}
 		event := APIEvent{
