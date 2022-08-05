@@ -58,7 +58,8 @@ type APIDeployment struct {
 	Version        string `json:"version"`
 }
 
-// GatewayLabel represents gateway environment name, vhost and deployedTimeStamp of an API project
+// GatewayLabel represents gateway environment name, vhost and deployedTimeStamp of an API project.
+// DeployedTimeStamp is only used for GA use case where the timestamp is appended as a suffix to the Revision ID.
 type GatewayLabel struct {
 	Name              string `json:"name"`
 	Vhost             string `json:"vhost"`
