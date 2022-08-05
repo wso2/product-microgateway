@@ -247,9 +247,9 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 			// of revisionId_timestamp and the currentGAAPI.RevisionUUID == api.RevisionUUID returns fails for all the
 			// existing APIs. This additional if block is added to prevent redeploying of APIs until a specific timestamp.
 			// Remove this if block after GA is updated with revisionId_timestamp related changes.
-			revisionIdSplitted := strings.Split(api.RevisionUUID, "_")
-			if len(revisionIdSplitted) == 2 {
-				timestamp, err := strconv.Atoi(revisionIdSplitted[1])
+			revisionIDSplitted := strings.Split(api.RevisionUUID, "_")
+			if len(revisionIDSplitted) == 2 {
+				timestamp, err := strconv.Atoi(revisionIDSplitted[1])
 				if err != nil {
 					logger.LoggerGA.Debugf("Revision Id associated timestamp conversion to integer failed: %v\n", err)
 					continue
