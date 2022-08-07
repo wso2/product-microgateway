@@ -238,26 +238,13 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		currentGAAPI, apiFound := apiRevisionMap[api.ApiUUID]
 		if apiFound {
 			delete(removedAPIMap, api.ApiUUID)
+			// TODO: Remove this temporary preprocessing of revisionId after GA changes are deployed.
+			// 1. X -> return X
+			// 2. X_t where t < T -> return X
+			// 3. X_t where t >= T -> return X_t
+			api.RevisionUUID = preprocessRevisionID(api.RevisionUUID)
 			if currentGAAPI.RevisionUUID == api.RevisionUUID {
 				continue
-			}
-			// Related to issue: https://github.com/wso2-enterprise/choreo/issues/14460
-			// This temporary if condition is added to prevent redeploying of all the existing APIs due to change done
-			// in API revision ID to handle environment specific properties. New API revision ID will be in the format
-			// of revisionId_timestamp and the currentGAAPI.RevisionUUID == api.RevisionUUID returns fails for all the
-			// existing APIs. This additional if block is added to prevent redeploying of APIs until a specific timestamp.
-			// Remove this if block after GA is updated with revisionId_timestamp related changes.
-			revisionIDSplitted := strings.Split(api.RevisionUUID, "_")
-			if len(revisionIDSplitted) == 2 {
-				timestamp, err := strconv.Atoi(revisionIDSplitted[1])
-				if err != nil {
-					logger.LoggerGA.Debugf("Revision Id associated timestamp conversion to integer failed: %v\n", err)
-					continue
-				}
-				// Timestamp is set to 2022/08/05 23:59:59 IST
-				if timestamp < 1659724199 {
-					continue
-				}
 			}
 		}
 		event := APIEvent{
@@ -342,4 +329,28 @@ func FetchAPIsFromGA() []*APIEvent {
 		}
 		time.Sleep(1 * time.Second)
 	}
+}
+
+// Related to issue: https://github.com/wso2-enterprise/choreo/issues/14460
+// This temporary function is added to prevent redeploying of all the existing APIs due to change done
+// in API revision ID to handle environment specific properties. New API revision ID will be in the format
+// of revisionId_timestamp and the currentGAAPI.RevisionUUID == api.RevisionUUID returns fails for all the
+// existing APIs. This function is added to prevent redeploying of APIs until a specific timestamp.
+// Remove this function after the GA is updated with revisionId_timestamp related changes.
+// 1. X -> return X
+// 2. X_t where t < T -> return X
+// 3. X_t where t >= T -> return X_t
+func preprocessRevisionID(revisionID string) string {
+	revisionIDSplitted := strings.Split(revisionID, "_")
+	if len(revisionIDSplitted) == 2 {
+		timestamp, err := strconv.Atoi(revisionIDSplitted[1])
+		if err != nil {
+			logger.LoggerGA.Debugf("Revision Id associated timestamp conversion to integer failed: %v\n", err)
+		}
+		// Timestamp is set to 2022/08/05 23:59:59 IST. Add related timestamp based on deployment date and time.
+		if timestamp < 1659724199 {
+			return revisionIDSplitted[0]
+		}
+	}
+	return revisionID
 }
