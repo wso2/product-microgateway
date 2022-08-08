@@ -345,7 +345,8 @@ func preprocessRevisionID(revisionID string) string {
 	if len(revisionIDSplitted) == 2 {
 		timestamp, err := strconv.Atoi(revisionIDSplitted[1])
 		if err != nil {
-			logger.LoggerGA.Debugf("Revision Id associated timestamp conversion to integer failed: %v\n", err)
+			// Unreachable
+			logger.LoggerGA.Infof("Revision Id associated timestamp conversion to integer failed: %v\n", err)
 		}
 		// Timestamp is set to 2022/08/05 23:59:59 IST. Add related timestamp based on deployment date and time.
 		if timestamp < 1659724199 {
