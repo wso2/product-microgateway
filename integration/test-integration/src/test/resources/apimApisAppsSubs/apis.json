@@ -102,5 +102,17 @@
         "throttlingPolicy": "Unlimited"
       }
     ]
+  },
+  {
+    "name": "EnvoyHttpFilterAPI",
+    "version": "1.0.0",
+    "context": "envoy_http_filter_api",
+    "operationsDTOS": [
+      {
+        "verb": "GET",
+        "target": "/headers",
+        "throttlingPolicy": "Unlimited"
+      }
+    ]
   }
 ]
