@@ -389,6 +389,7 @@ type jwtGenerator struct {
 	ClaimsExtractorImpl   string
 	PublicCertificatePath string
 	PrivateKeyPath        string
+	TokenTTL              int32
 }
 
 type claimMapping struct {

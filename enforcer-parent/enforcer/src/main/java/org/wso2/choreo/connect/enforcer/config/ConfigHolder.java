@@ -430,6 +430,7 @@ public class ConfigHolder {
         jwtConfigurationDto.setSignatureAlgorithm(jwtGenerator.getSigningAlgorithm());
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
+        jwtConfigurationDto.setTtl(jwtGenerator.getTokenTtl());
         try {
             jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
             jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(jwtGenerator.getPrivateKeyPath()));

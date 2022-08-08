@@ -120,4 +120,10 @@ public interface JWTGeneratorOrBuilder extends
    */
   com.google.protobuf.ByteString
       getPrivateKeyPathBytes();
+
+  /**
+   * <code>int32 token_ttl = 12;</code>
+   * @return The tokenTtl.
+   */
+  int getTokenTtl();
 }

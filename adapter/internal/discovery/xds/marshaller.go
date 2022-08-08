@@ -167,6 +167,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			ClaimsExtractorImpl:   config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
 			PublicCertificatePath: config.Enforcer.JwtGenerator.PublicCertificatePath,
 			PrivateKeyPath:        config.Enforcer.JwtGenerator.PrivateKeyPath,
+			TokenTtl:              config.Enforcer.JwtGenerator.TokenTTL,
 		},
 		JwtIssuer: &enforcer.JWTIssuer{
 			Enabled:               config.Enforcer.JwtIssuer.Enabled,
