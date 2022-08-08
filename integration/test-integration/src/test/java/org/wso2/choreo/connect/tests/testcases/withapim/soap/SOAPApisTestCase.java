@@ -55,8 +55,6 @@ public class SOAPApisTestCase extends ApimBaseTest {
         super.initWithSuperTenant();
         // Get App ID and API ID
         String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
-        String apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
-
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
         requestHeaders_11.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
@@ -65,13 +63,11 @@ public class SOAPApisTestCase extends ApimBaseTest {
         requestHeaders_12.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders_12.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.SOAP_XML);
         API api = new API();
-        api.setContext(API_CONTEXT + TestConstant.URL_SEPARATOR + "1.0.0");
+        api.setContext(API_CONTEXT + TestConstant.URL_SEPARATOR + API_VERSION);
         api.setName(API_NAME);
-        api.setVersion("1.0.0");
+        api.setVersion(API_VERSION);
         api.setProvider("admin");
 
-        internalKey = TokenUtil.getJWT(api, null, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
-                3600, null, true);
         endpointURL11 = Utils.getServiceURLHttps(API_CONTEXT + TestConstant.URL_SEPARATOR +
                 API_VERSION + "/phoneverify11");
         endpointURL12 = Utils.getServiceURLHttps(API_CONTEXT + TestConstant.URL_SEPARATOR +

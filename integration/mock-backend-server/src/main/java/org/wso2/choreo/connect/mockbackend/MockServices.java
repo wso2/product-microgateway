@@ -32,12 +32,10 @@ public class MockServices {
         MockBackend2 mockBackend2 = new MockBackend2(Constants.MOCK_BACKEND2_SERVER_PORT);
         // TODO: (VirajSalaka) start analytics server only when it requires
         MockAnalyticsServer mockAnalyticsServer = new MockAnalyticsServer(Constants.MOCK_ANALYTICS_SERVER_PORT);
-        MockBackendSOAP mockBackendSOAP = new MockBackendSOAP();
         mockBackendProd.start();
         mockBackendSandbox.start();
         mockBackend2.start();
         mockAnalyticsServer.start();
-        mockBackendSOAP.start();
         List<String> argList = Arrays.asList(args);
         if (argList.contains("-tls-enabled")) {
             MockBackendProd securedMockBackendProd = new MockBackendProd(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
@@ -57,6 +55,11 @@ public class MockServices {
         if (argList.contains("-async-enabled")) {
             MockAsyncServer mockAsyncServer = new MockAsyncServer(Constants.WEBSOCKET_SERVER_PORT);
             mockAsyncServer.start();
+        }
+
+        if (argList.contains("-soap-enabled")) {
+            MockBackendSOAP mockBackendSoap = new MockBackendSOAP(Constants.MOCK_BACKEND_SOAP_SERVER_PORT);
+            mockBackendSoap.start();
         }
 
         if(argList.contains("-http2-server-enabled")){

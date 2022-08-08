@@ -236,19 +236,19 @@ public class PublisherUtils {
                     publisherRestClient.validateWsdlDefinition(null, file);
             if (wsdlValidationResponseDTO.isIsValid()) {
                 apiRequest.setWsdl(Files.readString(wsdlFilePath));
-                JSONObject additionalPropertiesObj = new JSONObject();
-                additionalPropertiesObj.put("name", apiRequest.getName());
-                additionalPropertiesObj.put("context", apiRequest.getContext());
-                additionalPropertiesObj.put("version", apiRequest.getVersion());
+                JSONObject apiPropertiesObj = new JSONObject();
+                apiPropertiesObj.put("name", apiRequest.getName());
+                apiPropertiesObj.put("context", apiRequest.getContext());
+                apiPropertiesObj.put("version", apiRequest.getVersion());
 
-                additionalPropertiesObj.put("endpointConfig", apiRequest.getEndpointConfig());
+                apiPropertiesObj.put("endpointConfig", apiRequest.getEndpointConfig());
 
                 ArrayList<String> policies = new ArrayList<>();
                 policies.add(apiRequest.getTiersCollection());
-                additionalPropertiesObj.put("policies", policies);
+                apiPropertiesObj.put("policies", policies);
 
                 APIDTO apidto = publisherRestClient.importWSDLSchemaDefinition(file, null,
-                        additionalPropertiesObj.toString(), "SOAP");
+                        apiPropertiesObj.toString(), "SOAP");
                 apiId = apidto.getId();
             }
         }

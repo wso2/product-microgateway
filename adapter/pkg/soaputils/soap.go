@@ -26,20 +26,20 @@ import (
 )
 
 const (
-	// xmlHeader Header A generic XML header suitable for use with the output of Marshal.\
+	// xmlHeader Header A generic XML header suitable for use with the output of marshalled envelope.
 	xmlHeader = `<?xml version="1.0" encoding="UTF-8"?>`
 
-	// soap11Namespace is the xml namespace used for SOAP 1.1
+	// soap11Namespace is the xml namespace used for SOAP 1.1.
 	soap11Namespace = "http://schemas.xmlsoap.org/soap/envelope/"
 
-	// soap12Namespace is the xml namespace used for SOAP 1.2
+	// soap12Namespace is the xml namespace used for SOAP 1.2.
 	soap12Namespace = "http://www.w3.org/2003/05/soap-envelope/"
 
 	soap11ProtocolVersion = "SOAP 1.1 Protocol"
 	soap12ProtocolVersion = "SOAP 1.2 Protocol"
 )
 
-// Envelope is the data structure used to keep the SOAP envelope
+// Envelope is the data structure used to keep the SOAP envelope.
 type Envelope struct {
 	// XMLName is the serialized name of the soap Envelope object.
 	XMLName xml.Name `xml:"soapenv:Envelope"`
@@ -50,13 +50,13 @@ type Envelope struct {
 	XMLNSXsd string `xml:"xmlns:xsd,attr,omitempty"`
 	XMLNSXsi string `xml:"xmlns:xsi,attr,omitempty"`
 
-	// Header is used to define headers in soap Envelope
+	// Header is used to define headers in soap Envelope.
 	Header *Header
-	// Body is the soap Envelop body
+	// Body is the soap Envelop body.
 	Body *Body
 }
 
-// Header is used to hold SOAP header inside Envelope
+// Header is used to hold SOAP header inside Envelope.
 type Header struct {
 	// XMLName is the serialized name of the Header object.
 	XMLName xml.Name `xml:"soapenv:Header"`
@@ -80,7 +80,7 @@ type Fault struct {
 	Detail      string `xml:"detail,omitempty"`
 }
 
-// GenerateSoapFaultMessage will generate and returns a SOAP fault message with given parameters
+// GenerateSoapFaultMessage generates and returns a SOAP fault message with given parameters.
 func GenerateSoapFaultMessage(protocolVersion string, errorMessage string, errorDescription string, code string) (string, error) {
 	var envelope *Envelope
 	switch protocolVersion {

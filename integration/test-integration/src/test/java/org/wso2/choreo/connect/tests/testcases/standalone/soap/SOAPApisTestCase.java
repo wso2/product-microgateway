@@ -48,10 +48,6 @@ public class SOAPApisTestCase {
 
     @BeforeClass
     public void deployApi() throws Exception {
-        ApictlUtils.login("test");
-        ApictlUtils.deploySampleProject("SampleSOAPApi", "test");
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Couldn't wait till deployment completion.");
-
         API api = new API();
         api.setName("DefaultVersion");
         api.setContext(context);

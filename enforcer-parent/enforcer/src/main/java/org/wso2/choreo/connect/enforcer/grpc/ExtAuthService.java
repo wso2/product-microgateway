@@ -125,8 +125,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             // set error response body content and headers
             if (responseObject.getErrorCode() != null) {
                 // Error handling create an XML(text/xml or application/soap+xml based on SOAP protocol version)
-                // payload if SoapErrorInXMLEnabled is true
-                // otherwise it will create an application/json error payload
+                // payload if SoapErrorInXMLEnabled is true.
+                // Otherwise, it will create an application/json error payload.
                 deniedResponsePreparer.setErrorMessage(request, responseObject);
             }
 

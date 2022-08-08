@@ -38,7 +38,7 @@ public class SOAPUtils {
     private static final Logger log = LogManager.getLogger(SOAPUtils.class);
 
     /**
-     * Returns a soap fault response message
+     * Returns a soap fault response message.
      *
      * @param soapProtocolVersion 'SOAP 1.1 Protocol' or 'SOAP 1.2 Protocol'
      * @param message             message text
@@ -63,8 +63,8 @@ public class SOAPUtils {
             soapFault.addDetail().addTextNode(code + ":" + description);
             return envelope.toString();
         } catch (Exception e) {
-            log.error("Error while creating the SOAP fault message.",
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7101), e);
+            log.error("Error while creating the SOAP fault message. {}", e.getMessage(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7101));
             return "";
         }
     }

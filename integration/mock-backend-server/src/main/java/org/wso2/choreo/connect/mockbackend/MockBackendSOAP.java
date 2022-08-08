@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.mockbackend;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -29,7 +30,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 public class MockBackendSOAP extends Thread{
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(MockBackendSOAP.class);
+    private static final Logger log = LoggerFactory.getLogger(MockBackendSOAP.class);
+    private final int serverPort;
     private WireMockServer wireMockServer;
     private String wsdlDefinition;
     private String responseBodySoap11;
@@ -62,7 +64,8 @@ public class MockBackendSOAP extends Thread{
             "\t</soap12:Body>\n" +
             "</soap12:Envelope>";
 
-    public MockBackendSOAP(){
+    public MockBackendSOAP(int serverPort) {
+        this.serverPort = serverPort;
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         try {
             wsdlDefinition = Utils.readFileFromInputStream(
@@ -77,12 +80,12 @@ public class MockBackendSOAP extends Thread{
     }
 
     public void run(){
-        startWiremockServer(Constants.MOCK_BACKEND_SOAP_SERVER_PORT);
+        startWiremockServer();
     }
 
-    private void startWiremockServer(int port) {
-        log.info("Starting mock backend for SOAP service...");
-        wireMockServer = new WireMockServer(options().port(port));
+    private void startWiremockServer() {
+        log.info("Starting mock backend for SOAP service on port:{}", serverPort);
+        wireMockServer = new WireMockServer(options().port(serverPort));
         wireMockServer.stubFor(WireMock
                 .get(urlEqualTo("/phoneverify/wsdl"))
                 .willReturn(

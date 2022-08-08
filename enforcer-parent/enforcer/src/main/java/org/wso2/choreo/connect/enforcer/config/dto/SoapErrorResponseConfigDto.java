@@ -19,7 +19,7 @@
 package org.wso2.choreo.connect.enforcer.config.dto;
 
 /**
- * Configuration for enabling SOAP error responses for SOAP APIs
+ * Configuration for enabling SOAP error responses for SOAP APIs.
  */
 public class SoapErrorResponseConfigDto {
     private boolean soapErrorInXMLEnabled;

@@ -89,13 +89,7 @@ func genErrorResponseMapperJSON(flag string, statusCode uint32, errorCode int32,
 	errorMsgMap["description"] = structpb.NewStringValue(description)
 
 	mapper := &hcmv3.ResponseMapper{
-		Filter: &access_logv3.AccessLogFilter{
-			FilterSpecifier: &access_logv3.AccessLogFilter_ResponseFlagFilter{
-				ResponseFlagFilter: &access_logv3.ResponseFlagFilter{
-					Flags: []string{flag},
-				},
-			},
-		},
+		Filter:     getResponseFlagFilter(flag),
 		StatusCode: wrapperspb.UInt32(statusCode),
 		BodyFormatOverride: &corev3.SubstitutionFormatString{
 			Format: &corev3.SubstitutionFormatString_JsonFormat{
@@ -117,24 +111,9 @@ func genSoap12ErrorResponseMapper(flag string, statusCode uint32, errorCode int3
 				AndFilter: &access_logv3.AndFilter{
 					Filters: []*access_logv3.AccessLogFilter{
 						{
-							FilterSpecifier: &access_logv3.AccessLogFilter_HeaderFilter{
-								HeaderFilter: &access_logv3.HeaderFilter{
-									Header: &envoy_config_route_v3.HeaderMatcher{
-										Name: contentTypeHeaderName,
-										HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_ExactMatch{
-											ExactMatch: contentTypeHeaderSoap,
-										},
-									},
-								},
-							},
+							FilterSpecifier: getExactMatchHeaderFilter(contentTypeHeaderName, contentTypeHeaderSoap),
 						},
-						{
-							FilterSpecifier: &access_logv3.AccessLogFilter_ResponseFlagFilter{
-								ResponseFlagFilter: &access_logv3.ResponseFlagFilter{
-									Flags: []string{flag},
-								},
-							},
-						},
+						getResponseFlagFilter(flag),
 					},
 				},
 			},
@@ -163,36 +142,12 @@ func genSoap11ErrorResponseMapper(flag string, statusCode uint32, errorCode int3
 				AndFilter: &access_logv3.AndFilter{
 					Filters: []*access_logv3.AccessLogFilter{
 						{
-							FilterSpecifier: &access_logv3.AccessLogFilter_HeaderFilter{
-								HeaderFilter: &access_logv3.HeaderFilter{
-									Header: &envoy_config_route_v3.HeaderMatcher{
-										Name: contentTypeHeaderName,
-										HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_ExactMatch{
-											ExactMatch: contentTypeHeaderXML,
-										},
-									},
-								},
-							},
+							FilterSpecifier: getExactMatchHeaderFilter(contentTypeHeaderName, contentTypeHeaderXML),
 						},
 						{
-							FilterSpecifier: &access_logv3.AccessLogFilter_HeaderFilter{
-								HeaderFilter: &access_logv3.HeaderFilter{
-									Header: &envoy_config_route_v3.HeaderMatcher{
-										Name: soapActionHeaderName,
-										HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_PresentMatch{
-											PresentMatch: true,
-										},
-									},
-								},
-							},
+							FilterSpecifier: getPresentMatchHeaderFilter(true),
 						},
-						{
-							FilterSpecifier: &access_logv3.AccessLogFilter_ResponseFlagFilter{
-								ResponseFlagFilter: &access_logv3.ResponseFlagFilter{
-									Flags: []string{flag},
-								},
-							},
-						},
+						getResponseFlagFilter(flag),
 					},
 				},
 			},
@@ -210,4 +165,46 @@ func genSoap11ErrorResponseMapper(flag string, statusCode uint32, errorCode int3
 		},
 	}
 	return mapper
+}
+
+// getResponseFlagFilter returns a filter, which can be used to filter responses using response flag.
+func getResponseFlagFilter(flag string) *access_logv3.AccessLogFilter {
+	filter := &access_logv3.AccessLogFilter{
+		FilterSpecifier: &access_logv3.AccessLogFilter_ResponseFlagFilter{
+			ResponseFlagFilter: &access_logv3.ResponseFlagFilter{
+				Flags: []string{flag},
+			},
+		},
+	}
+	return filter
+}
+
+// getPresentMatchHeaderFilter returns a header filter, which can be used to check whether the header is present or not.
+func getPresentMatchHeaderFilter(present bool) *access_logv3.AccessLogFilter_HeaderFilter {
+	filter := &access_logv3.AccessLogFilter_HeaderFilter{
+		HeaderFilter: &access_logv3.HeaderFilter{
+			Header: &envoy_config_route_v3.HeaderMatcher{
+				Name: soapActionHeaderName,
+				HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_PresentMatch{
+					PresentMatch: present,
+				},
+			},
+		},
+	}
+	return filter
+}
+
+// getExactMatchHeaderFilter returns a header filter which can be used to check the headers with exact value.
+func getExactMatchHeaderFilter(headerName string, headerValue string) *access_logv3.AccessLogFilter_HeaderFilter {
+	filter := &access_logv3.AccessLogFilter_HeaderFilter{
+		HeaderFilter: &access_logv3.HeaderFilter{
+			Header: &envoy_config_route_v3.HeaderMatcher{
+				Name: headerName,
+				HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_ExactMatch{
+					ExactMatch: headerValue,
+				},
+			},
+		},
+	}
+	return filter
 }
