@@ -1,0 +1,23 @@
+{
+  "name": "EnvoyHttpFilterAPI",
+  "version": "1.0.0",
+  "context": "envoy_http_filter_api",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/headers",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2383/v2"
+    },
+    "sandbox_endpoints": {
+      "url": "http://mockBackend:2383/v2"
+    }
+  }
+}

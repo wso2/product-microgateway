@@ -17,17 +17,14 @@
  */
 package org.wso2.choreo.connect.tests.testcases.withapim;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.json.JSONObject;
+import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -60,7 +57,7 @@ public class ExistingApiTestCase extends ApimBaseTest {
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
         HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
     }
 
@@ -76,7 +73,7 @@ public class ExistingApiTestCase extends ApimBaseTest {
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
         HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
     }
 
@@ -88,34 +85,7 @@ public class ExistingApiTestCase extends ApimBaseTest {
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/headers");
         HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
-
-        // Request headers received by the backend
-        JSONObject headersToBackend = new JSONObject(response.getData());
-        Assert.assertEquals(headersToBackend.length(), 10, "Unexpected number of headers received by the backend");
-
-        Assert.assertNotNull(headersToBackend.get("X-trace-key"));
-        Assert.assertNotNull(headersToBackend.get("Accept"));
-        Assert.assertNotNull(headersToBackend.get("X-request-id"));
-        Assert.assertNotNull(headersToBackend.get("X-jwt-assertion"));
-        Assert.assertNotNull(headersToBackend.get("X-forwarded-proto"));
-        Assert.assertNotNull(headersToBackend.get("Host"));
-        Assert.assertNotNull(headersToBackend.get("Pragma"));
-        Assert.assertNotNull(headersToBackend.get("X-envoy-original-path"));
-        Assert.assertNotNull(headersToBackend.get("User-agent"));
-        Assert.assertNotNull(headersToBackend.get("Cache-control"));
-
-        Assert.assertFalse(headersToBackend.has("x-wso2-cluster-header"));
-        Assert.assertFalse(headersToBackend.has("x-envoy-expected-rq-timeout-ms"));
-
-        // Response headers received by the client
-        Map<String, String> headersToClient = response.getHeaders();
-        Assert.assertEquals(headersToClient.size(), 4, "Unexpected number of headers received by the client");
-
-        Assert.assertNotNull(headersToClient.get("date"));      // = Fri, 15 Apr 2022 05:10:41 GMT
-        Assert.assertNotNull(headersToClient.get("server"));    // = envoy
-        Assert.assertNotNull(headersToClient.get("content-length"));
-        Assert.assertNotNull(headersToClient.get("content-type"));
     }
 }
