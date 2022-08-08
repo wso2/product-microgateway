@@ -683,6 +683,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		match                   *routev3.RouteMatch
 		decorator               *routev3.Decorator
 		resourcePath            string
+		requestHeadersToRemove  []string
 		responseHeadersToRemove []string
 	)
 	basePath := getFilteredBasePath(xWso2Basepath, endpointBasepath)
@@ -886,6 +887,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if corsPolicy != nil {
 		action.Route.Cors = corsPolicy
 	}
+	requestHeadersToRemove = append(requestHeadersToRemove, clusterHeaderName)
 	// remove the 'x-envoy-upstream-service-time' from the response.
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
 
@@ -900,6 +902,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			wellknown.HTTPExternalAuthorization: extAuthzFilter,
 			wellknown.Lua:                       luaFilter,
 		},
+		RequestHeadersToRemove:  requestHeadersToRemove,
 		ResponseHeadersToRemove: responseHeadersToRemove,
 	}
 	return &router
