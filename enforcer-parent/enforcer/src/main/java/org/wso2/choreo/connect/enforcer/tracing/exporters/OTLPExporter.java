@@ -10,6 +10,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -18,6 +19,7 @@ import org.wso2.choreo.connect.enforcer.tracing.TracerBuilder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -43,24 +45,22 @@ public class OTLPExporter implements TracerBuilder {
     @Override
     public OpenTelemetrySdk initSdk(Map<String, String> properties) throws TracingException {
         String host = properties.get(TracingConstants.CONF_HOST);
-        // String path = properties.get(TracingConstants.CONF_ENDPOINT);
-        String endpoint;
         ConfigHolder conf = ConfigHolder.getInstance();
-//        try {
-//            int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
-//            endpoint = new URL("http", host, port).toString();
-//        } catch (MalformedURLException e) {
-//            throw new TracingException("Couldn't initialize the OTLP exporter. Invalid endpoint definition", e);
-//        }
+        String endpoint;
+        try {
+            int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
+            endpoint = new URIBuilder().setHost(host).setPort(port).setScheme("http").build().toString();
+        } catch (URISyntaxException e) {
+            throw new TracingException("Couldn't initialize the OTLP exporter. Invalid endpoint definition", e);
+        }
 
-        OtlpGrpcSpanExporter otlpGrpcSpanExporter = OtlpGrpcSpanExporter.builder().setEndpoint("http://jaeger:4317")
+        OtlpGrpcSpanExporter otlpGrpcSpanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint)
                 .build();
         String serviceName = TracingConstants.SERVICE_NAME_PREFIX + '-' + conf.getEnvVarConfig().getEnforcerLabel();
         Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
         String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
                 TracingConstants.DEFAULT_MAX_TRACES_PER_SEC : Integer.parseInt(maxTracesPerSecondString);
-        String instrumentName = properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
 
         SdkTracerProvider provider = SdkTracerProvider.builder().addSpanProcessor(SimpleSpanProcessor
                         .create(otlpGrpcSpanExporter)).setSampler(new RateLimitingSampler(maxTracesPerSecond))
