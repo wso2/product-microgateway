@@ -4,6 +4,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -45,17 +46,31 @@ public class OTLPExporter implements TracerBuilder {
     @Override
     public OpenTelemetrySdk initSdk(Map<String, String> properties) throws TracingException {
         String host = properties.get(TracingConstants.CONF_HOST);
+        String authHeaderName = properties.get(TracingConstants.CONF_AUTH_HEADER_NAME);
+        String authHeaderValue = properties.get(TracingConstants.CONF_AUTH_HEADER_VALUE);
+        String remoteUrl = properties.get(TracingConstants.CONF_REMOTE_URL);
         ConfigHolder conf = ConfigHolder.getInstance();
-        String endpoint;
-        try {
-            int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
-            endpoint = new URIBuilder().setHost(host).setPort(port).setScheme("http").build().toString();
-        } catch (URISyntaxException e) {
-            throw new TracingException("Couldn't initialize the OTLP exporter. Invalid endpoint definition", e);
+        OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder();
+
+        if (remoteUrl != null) {
+            otlpGrpcSpanExporterBuilder.setEndpoint(remoteUrl);
+        } else {
+            try {
+                int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
+                String endpoint = new URIBuilder().setHost(host).setPort(port)
+                        .setScheme(host.contains("https") ? "https" : "http")
+                        .build().toString();
+                otlpGrpcSpanExporterBuilder.setEndpoint(endpoint);
+            } catch (URISyntaxException | NumberFormatException e) {
+                throw new TracingException("Couldn't initialize the OTLP exporter. Invalid endpoint definition", e);
+            }
         }
 
-        OtlpGrpcSpanExporter otlpGrpcSpanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint)
-                .build();
+        if (authHeaderName != null && authHeaderValue != null) {
+            otlpGrpcSpanExporterBuilder.addHeader(authHeaderName, authHeaderValue);
+        }
+
+        OtlpGrpcSpanExporter otlpGrpcSpanExporter = otlpGrpcSpanExporterBuilder.build();
         String serviceName = TracingConstants.SERVICE_NAME_PREFIX + '-' + conf.getEnvVarConfig().getEnforcerLabel();
         Resource serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName));
         String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
