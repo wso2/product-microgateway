@@ -1,2 +1,0 @@
-# vulnerability related golang.org/x/sys dependency in gRPC health probe.
-CVE-2022-29526
