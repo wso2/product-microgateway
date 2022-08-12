@@ -46,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -492,6 +493,18 @@ public class Utils {
         Yaml yaml= new Yaml();
         Object obj = yaml.load(yamlString);
         return JSONValue.toJSONString(obj);
+    }
+
+    public static JSONObject changeHeadersToLowerCase(JSONObject headers) {
+        JSONObject headersCaseInsensitive = new JSONObject();
+        Iterator it = headers.keys();
+
+        while (it.hasNext()) {
+            String keyRaw = (String) it.next();
+            String key = keyRaw.toLowerCase();
+            headersCaseInsensitive.put(key, headers.get(keyRaw));
+        }
+        return headersCaseInsensitive;
     }
 
     public static String getTargetDirPath() {

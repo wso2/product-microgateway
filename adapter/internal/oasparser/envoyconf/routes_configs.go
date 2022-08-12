@@ -45,20 +45,16 @@ func generateRouteConfig(routeName string, match *routev3.RouteMatch, action *ro
 	requestHeadersToAdd []*corev3.HeaderValueOption, requestHeadersToRemove []string,
 	responseHeadersToAdd []*corev3.HeaderValueOption, responseHeadersToRemove []string) *routev3.Route {
 
-	// headers removed from the request (from router to backend)
-	requestHeadersToRemove = append(requestHeadersToRemove,
-		clusterHeaderName, "x-envoy-expected-rq-timeout-ms", "X-envoy-original-path")
-
-	// headers removed from the response (from router to client).
-	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
-
 	route := &routev3.Route{
-		Name:                    routeName,
-		Match:                   match,
-		Action:                  action,
-		Metadata:                metadata,
-		Decorator:               decorator,
-		TypedPerFilterConfig:    typedPerFilterConfig,
+		Name:                 routeName,
+		Match:                match,
+		Action:               action,
+		Metadata:             metadata,
+		Decorator:            decorator,
+		TypedPerFilterConfig: typedPerFilterConfig,
+
+		// headers common to all routes are removed at the Route Configuration level in listener.go
+		// x-envoy headers are removed using the SuppressEnvoyHeaders param in http_filters.go
 		RequestHeadersToAdd:     requestHeadersToAdd,
 		RequestHeadersToRemove:  requestHeadersToRemove,
 		ResponseHeadersToAdd:    responseHeadersToAdd,
