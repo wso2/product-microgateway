@@ -71,7 +71,6 @@ public class TracingConstants {
     public static final String CONF_PORT = "port";
     public static final String CONF_AUTH_HEADER_NAME = "authHeaderName";
     public static final String CONF_AUTH_HEADER_VALUE = "authHeaderValue";
-    public static final String CONF_REMOTE_URL = "remoteUrl";
     public static final int DEFAULT_MAX_TRACES_PER_SEC = 2;
     public static final String DEFAULT_INSTRUMENTATION_NAME = "CHOREO-CONNECT";
     public static final long DEFAULT_TRACING_READ_TIMEOUT = 15;

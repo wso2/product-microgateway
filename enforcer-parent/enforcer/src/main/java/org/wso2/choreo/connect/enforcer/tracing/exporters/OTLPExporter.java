@@ -66,12 +66,12 @@ public class OTLPExporter implements TracerBuilder {
         String host = properties.get(TracingConstants.CONF_HOST);
         String authHeaderName = properties.get(TracingConstants.CONF_AUTH_HEADER_NAME);
         String authHeaderValue = properties.get(TracingConstants.CONF_AUTH_HEADER_VALUE);
-        String remoteUrl = properties.get(TracingConstants.CONF_REMOTE_URL);
+        String connectionString = properties.get(TracingConstants.CONF_CONNECTION_STRING);
         ConfigHolder conf = ConfigHolder.getInstance();
         OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder();
 
-        if (remoteUrl != null) {
-            otlpGrpcSpanExporterBuilder.setEndpoint(remoteUrl);
+        if (connectionString != null) {
+            otlpGrpcSpanExporterBuilder.setEndpoint(connectionString);
         } else {
             try {
                 int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
