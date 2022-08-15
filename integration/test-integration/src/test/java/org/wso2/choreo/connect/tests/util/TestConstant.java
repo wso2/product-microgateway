@@ -201,8 +201,10 @@ public class TestConstant {
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9764;
     public static final int MOCK_BACKEND_HTTP2_CLEAR_TEXT_SERVER_PORT = 2350;
     public static final int MOCK_BACKEND_HTTP2_SECURED_SERVER_PORT = 2351;
+    public final static int MOCK_GRAPHQL_SERVER_PORT = 2320;
 
     public static final String MOCK_BACKEND_BASEPATH = "/v2";
+    public static final String MOCK_GRAPHQL_BASEPATH = "/gql";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
@@ -245,6 +247,7 @@ public class TestConstant {
     public static final String ADMIN_PASSWORD = "admin";
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String CONTENT_TYPE_HEADER = "content-type";
 
     //apim instances names
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
@@ -313,4 +316,7 @@ public class TestConstant {
     }
 
     public static final String ENABLE_ENFORCER_CUSTOM_FILTER = "enable-custom-filter";
+    public static final class API_TYPES {
+        public static final String GRAPHQL = "GRAPHQL";
+    }
 }

@@ -54,10 +54,12 @@ public class MediationPolicyFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-        // get operation policies
-        PolicyConfig policyConfig = requestContext.getMatchedResourcePath().getPolicyConfig();
+
+        // only getting first operation is enough as only one resource config will be present for non graphQL APIs.
+        // Mediation policy filter is not applied to graphQL apis
+        PolicyConfig policyConfig = requestContext.getMatchedResourcePaths().get(0).getPolicyConfig();
         // apply in policies
-        if (policyConfig.getRequest() != null && policyConfig.getRequest().size() > 0) {
+        if (policyConfig != null && policyConfig.getRequest() != null && policyConfig.getRequest().size() > 0) {
             for (Policy policy : policyConfig.getRequest()) {
                 if (!applyPolicy(requestContext, policy)) {
                     return false;

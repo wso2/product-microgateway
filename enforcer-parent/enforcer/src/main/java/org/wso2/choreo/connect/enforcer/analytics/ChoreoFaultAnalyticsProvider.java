@@ -36,11 +36,14 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCate
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+
+import java.util.ArrayList;
 
 /**
  * Generate FaultDTO for the errors generated from enforcer.
@@ -142,16 +145,20 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Operation getOperation() {
         // This could be null if  OPTIONS request comes
-        if (requestContext.getMatchedResourcePath() != null) {
+        if (requestContext.getMatchedResourcePaths() != null) {
             Operation operation = new Operation();
             if (isWebsocketUpgradeRequest) {
                 operation.setApiMethod(WebSocketFrameRequest.MessageDirection.HANDSHAKE.name());
                 operation.setApiResourceTemplate(AnalyticsConstants.WEBSOCKET_HANDSHAKE_RESOURCE_PREFIX +
-                        requestContext.getMatchedResourcePath().getPath());
+                        requestContext.getMatchedResourcePaths().get(0).getPath());
                 return operation;
             }
-            operation.setApiMethod(requestContext.getMatchedResourcePath().getMethod().name());
-            operation.setApiResourceTemplate(requestContext.getMatchedResourcePath().getPath());
+            operation.setApiMethod(requestContext.getMatchedResourcePaths().get(0).getMethod().name());
+            ArrayList<String> resourceTemplate = new ArrayList<>();
+            for (ResourceConfig resourceConfig: requestContext.getMatchedResourcePaths()) {
+                resourceTemplate.add(resourceConfig.getPath());
+            }
+            operation.setApiResourceTemplate(String.join(",", resourceTemplate));
             return operation;
         }
         return null;

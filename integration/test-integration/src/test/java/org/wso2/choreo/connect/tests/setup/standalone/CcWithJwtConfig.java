@@ -44,6 +44,7 @@ public class CcWithJwtConfig {
         ApictlUtils.deployAPI("global_cors_petstore", "test");
         ApictlUtils.deployAPI("timeout_global", "test");
         ApictlUtils.deployAPI("timeout_endpoint", "test");
+        ApictlUtils.deployAPI("SampleGraphQLApi", "test");
 
         TimeUnit.SECONDS.sleep(5);
     }

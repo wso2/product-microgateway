@@ -89,13 +89,14 @@ public class APIConstants {
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal Server Error";
 
     //headers and values
-    public static final String CONTENT_TYPE_HEADER = "Content-type";
+    public static final String CONTENT_TYPE_HEADER = "content-type";
     public static final String ACCEPT_HEADER = "accept";
     public static final String PREFER_HEADER = "prefer";
     public static final String PREFER_CODE = "code";
     public static final String PREFER_EXAMPLE = "example";
     public static final List<String> PREFER_KEYS = List.of(PREFER_CODE, PREFER_EXAMPLE);
     public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_GRAPHQL = "application/graphql";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
@@ -186,8 +187,6 @@ public class APIConstants {
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
         public static final String PERMITTED_IP = "permittedIP";
         public static final String PERMITTED_REFERER = "permittedReferer";
-        public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
-        public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String PARAM_SEPARATOR = "&";
         public static final String PARAM_VALUE_SEPARATOR = "=";
@@ -369,7 +368,8 @@ public class APIConstants {
 
         private String value;
         private int code;
-        private  StatusCodes(String value, int code) {
+
+        private StatusCodes(String value, int code) {
             this.value = value;
             this.code = code;
         }
@@ -384,19 +384,39 @@ public class APIConstants {
     }
 
     /**
-     *  Holds the values for API types
+     * Holds the values for API types
      */
     public static class ApiType {
         public static final String WEB_SOCKET = "WS";
+        public static final String GRAPHQL = "GRAPHQL";
         public static final String REST = "HTTP";
     }
 
     /**
-     * Holds values for mocked APIs
+     * Holds values for mocked APIs.
      */
     public static class MockApiConstants {
         public static final String HEADER = "header";
         public static final String QUERY = "query";
+    }
+
+    /**
+     * GraphQL related constants.
+     */
+    public static class GraphQL {
+        public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+        public static final String GRAPHQL_QUERY = "Query";
+        public static final String GRAPHQL_QUERY_BODY = "query";
+        public static final String GRAPHQL_MUTATION = "Mutation";
+        public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
+        public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
+        public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
+        public static final int GRAPHQL_INVALID_QUERY = 900422;
+        public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
+        public static final int GRAPHQL_QUERY_TOO_DEEP = 900820;
+        public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
+        public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
+        public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
     }
 
     /**

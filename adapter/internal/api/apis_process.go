@@ -23,6 +23,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/vektah/gqlparser/v2"
+	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
@@ -33,9 +35,11 @@ import (
 )
 
 const (
-	openAPIDir                 string = "Definitions"
+	apiDefinitionDir           string = "Definitions"
 	openAPIFilename            string = "swagger."
 	asyncAPIFilename           string = "asyncapi."
+	graphQLAPIFilename         string = "schema."
+	graphQLComplexityFileName  string = "graphql-complexity"
 	apiYAMLFile                string = "api.yaml"
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	endpointCertFile           string = "endpoint_certificates."
@@ -82,8 +86,8 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 	}
 
 	// API definition file
-	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) ||
-		strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+asyncAPIFilename) {
+	if strings.Contains(fileName, apiDefinitionDir+string(os.PathSeparator)+openAPIFilename) ||
+		strings.Contains(fileName, apiDefinitionDir+string(os.PathSeparator)+asyncAPIFilename) {
 
 		loggers.LoggerAPI.Debugf("API definition file : %v", fileName)
 		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
@@ -96,7 +100,6 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			return conversionErr
 		}
 		apiProject.APIDefinition = swaggerJsn
-
 		// Interceptor certs
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
@@ -110,7 +113,6 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 		}
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, fileContent...)
 		apiProject.InterceptorCerts = append(apiProject.InterceptorCerts, newLineByteArray...)
-
 		// Endpoint certs
 	} else if strings.Contains(fileName, endpointCertDir+string(os.PathSeparator)) {
 		if strings.Contains(fileName, endpointCertFile) {
@@ -203,7 +205,7 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 
 		// api.yaml or api.json
 	} else if (strings.Contains(fileName, apiYAMLFile) || strings.Contains(fileName, apiJSONFile)) &&
-		!strings.Contains(fileName, openAPIDir) {
+		!strings.Contains(fileName, apiDefinitionDir) {
 		apiYaml, err := model.NewAPIYaml(fileContent)
 		if err != nil {
 			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
@@ -249,7 +251,56 @@ func processFileInsideProject(apiProject *model.ProjectAPI, fileContent []byte, 
 			policy.Definition = model.PolicyDefinition{RawData: fileContent}
 			apiProject.Policies[policyFullName] = policy
 		}
+
+		// GraphQL API SDL
+	} else if strings.Contains(fileName, apiDefinitionDir+string(os.PathSeparator)+graphQLAPIFilename) {
+		loggers.LoggerAPI.Debugf("GraphQL API SDL file found in %v.", fileName)
+		if len(fileContent) == 0 {
+			gqlErr := errors.New("No content found in the schema.graphql file")
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while validating GraphQL schema file %v: %v", fileName, gqlErr),
+				Severity:  logging.MINOR,
+				ErrorCode: 1225,
+			})
+			return gqlErr
+		}
+		var sources = []*ast.Source{{Name: fileName, Input: string(fileContent), BuiltIn: false}}
+		_, gqlParseErr := gqlparser.LoadSchema(sources...)
+		if gqlParseErr != nil {
+			err = fmt.Errorf("Cannot parse SDL file %v provided for the GraphQL API. Error: %v", fileName, gqlParseErr)
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while processing GraphQL schema file %v. %v", fileName, err),
+				Severity:  logging.MINOR,
+				ErrorCode: 1226,
+			})
+			return gqlParseErr
+		}
+		apiProject.APIDefinition = fileContent
+	} else if strings.Contains(fileName, apiDefinitionDir+string(os.PathSeparator)+graphQLComplexityFileName) {
+		var gqlComplexityYaml model.GraphQLComplexityYaml
+		gQLComplexityJsn, conversionErr := utills.ToJSON(fileContent)
+		if conversionErr != nil {
+			err = fmt.Errorf("Cannot convert graphql complexity file to json: %v", conversionErr.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while parsing GraphQL complexities. %v", err),
+				Severity:  logging.MINOR,
+				ErrorCode: 1227,
+			})
+			return conversionErr
+		}
+		unmarshalErr := json.Unmarshal(gQLComplexityJsn, &gqlComplexityYaml)
+		if unmarshalErr != nil {
+			err = fmt.Errorf("Invalid format of %v : %v", graphQLComplexityFileName, unmarshalErr.Error())
+			loggers.LoggerAPI.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error while processing GraphQL complexities. %v", err),
+				Severity:  logging.MINOR,
+				ErrorCode: 1228,
+			})
+			return unmarshalErr
+		}
+		apiProject.GraphQLComplexities = gqlComplexityYaml
 	}
+
 	return nil
 }
 

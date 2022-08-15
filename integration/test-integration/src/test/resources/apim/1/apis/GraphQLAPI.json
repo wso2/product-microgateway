@@ -1,0 +1,19 @@
+{
+  "name": "GraphQLBasicAPI",
+  "version": "1.0.0",
+  "context": "gql",
+  "type": "GRAPHQL",
+  "description": "This GraphQL API is used to cover basic test cases relevant to the GraphQL.",
+  "tiersCollection": "Unlimited",
+  "securityScheme": ["oauth2", "oauth_basic_auth_api_key_mandatory", "api_key"],
+  "operationsDTOS": [],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2320/gql"
+    },
+    "sandbox_endpoints": {
+      "url": "http://mockBackend:2320/gql"
+    }
+  }
+}

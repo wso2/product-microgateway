@@ -111,6 +111,7 @@ const (
 const (
 	HTTP                  string = "HTTP"
 	WS                    string = "WS"
+	GRAPHQL               string = "GRAPHQL"
 	WEBHOOK               string = "WEBHOOK"
 	SSE                   string = "SSE"
 	Prototyped            string = "prototyped"

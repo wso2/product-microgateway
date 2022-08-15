@@ -1,4 +1,4 @@
-<!--
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
   ~ Copyright (c) WSO2 Inc. (http://www.wso2.org).
   ~
   ~ WSO2 Inc. licenses this file to you under the Apache License,
@@ -136,6 +136,10 @@
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
         </dependency>
     </dependencies>
 </project>

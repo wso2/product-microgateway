@@ -306,7 +306,14 @@ public class AuthFilter implements Filter {
             addAPILevelTimeoutHeaders(requestContext, keyType);
         }
 
-        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
+        //GraphQL APIs does not have following per resource config, hence skipping.
+        if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI().getApiType())) {
+            return;
+        }
+
+        // From this line onwards graphQL apis won't be present, hence only one matched resource config will be present.
+        // Therefore, requestContext.getMatchedResourcePaths() will only have one element here onwards.
+        ResourceConfig resourceConfig = requestContext.getMatchedResourcePaths().get(0);
         // In websockets case, the endpoints object becomes null. Hence it would result
         // in a NPE, if it is not checked.
         if (resourceConfig.getEndpoints() != null &&
