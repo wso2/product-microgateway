@@ -64,6 +64,7 @@ public class OTLPExporter implements TracerBuilder {
     @Override
     public OpenTelemetrySdk initSdk(Map<String, String> properties) throws TracingException {
         String host = properties.get(TracingConstants.CONF_HOST);
+        String portString = properties.get(TracingConstants.CONF_PORT);
         String authHeaderName = properties.get(TracingConstants.CONF_AUTH_HEADER_NAME);
         String authHeaderValue = properties.get(TracingConstants.CONF_AUTH_HEADER_VALUE);
         String connectionString = properties.get(TracingConstants.CONF_CONNECTION_STRING);
@@ -72,9 +73,9 @@ public class OTLPExporter implements TracerBuilder {
 
         if (connectionString != null) {
             otlpGrpcSpanExporterBuilder.setEndpoint(connectionString);
-        } else {
+        } else if (host != null && portString != null) {
             try {
-                int port = Integer.parseInt(properties.get(TracingConstants.CONF_PORT));
+                int port = Integer.parseInt(portString);
                 String endpoint = new URIBuilder().setHost(host).setPort(port)
                         .setScheme(host.contains("https") ? "https" : "http")
                         .build().toString();
@@ -82,8 +83,13 @@ public class OTLPExporter implements TracerBuilder {
             } catch (URISyntaxException | NumberFormatException e) {
                 throw new TracingException("Couldn't initialize the OTLP exporter. Invalid endpoint definition", e);
             }
+        } else {
+            throw new TracingException("Invalid endpoint configuration for OTLP gRPC collector endpoint. " +
+                    "Please provide host, port or connectionString");
         }
 
+        // Optional auth header for Saas providers and other telemetry backends that supports token/key based
+        // authentication.
         if (authHeaderName != null && authHeaderValue != null) {
             otlpGrpcSpanExporterBuilder.addHeader(authHeaderName, authHeaderValue);
         }
