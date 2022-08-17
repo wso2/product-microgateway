@@ -213,15 +213,15 @@ public class PublisherUtils {
     }
 
     /**
-     * creates a SOAP API with given WSDL definition
+     * Creates a SOAP API with given WSDL definition.
      *
      * @param apiRequest          An APIRequest object
      * @param apimArtifactsIndex  APIM artifacts categorization index
      * @param apiFileContent      API definition file content
      * @param publisherRestClient Instance of RestAPIPublisherImpl
-     * @return ID of the created API
-     * @throws ApiException If importWSDLSchemaDefinition fails
-     * @throws IOException  If WSDL definition file read fails
+     * @return ID of the created API.
+     * @throws ApiException If importWSDLSchemaDefinition fails.
+     * @throws IOException  If WSDL definition file read fails.
      */
     public static String createSoapApiFromWsdl(APIRequest apiRequest, String apimArtifactsIndex,
                                                String apiFileContent, RestAPIPublisherImpl publisherRestClient)

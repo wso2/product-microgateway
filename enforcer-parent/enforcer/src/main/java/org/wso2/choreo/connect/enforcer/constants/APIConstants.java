@@ -112,7 +112,7 @@ public class APIConstants {
     public static final String SOAP12_PROTOCOL = "SOAP 1.2 Protocol";
 
     /**
-     * Holds the constants related to denied response types
+     * Holds the constants related to denied response types.
      */
     public static class ErrorResponseTypes {
         public static final String SOAP11 = "SOAP11";

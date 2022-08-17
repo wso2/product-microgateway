@@ -63,12 +63,6 @@
         </classes>
     </test>
 
-    <test name="Test SOAP API invocation" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
-        </classes>
-    </test>
-
     <test name="Restart API-M" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
@@ -86,6 +80,7 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyAppLevelThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeySubLevelThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RetryAndTimeoutTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketBasicTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketSecurityDisabledTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketTopicTestCase"/>

@@ -346,7 +346,7 @@ public class ApictlUtils {
     }
 
     /**
-     * Deploys a sample apictl project located in samples/apiProjects
+     * Deploys a sample apictl project located in samples/apiProjects.
      *
      * @param projectName Project folder name
      * @param mgwEnv      environment name used in apictl

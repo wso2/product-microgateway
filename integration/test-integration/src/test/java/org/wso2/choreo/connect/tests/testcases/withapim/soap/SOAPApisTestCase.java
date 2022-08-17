@@ -57,11 +57,14 @@ public class SOAPApisTestCase extends ApimBaseTest {
         String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
+
         requestHeaders_11.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders_11.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.TEXT_XML);
         requestHeaders_11.put(TestConstant.SOAP_ACTION_HEADER, SOAP_ACTION);
+
         requestHeaders_12.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders_12.put(TestConstant.CONTENT_TYPE_HEADER, TestConstant.CONTENT_TYPES.SOAP_XML);
+
         API api = new API();
         api.setContext(API_CONTEXT + TestConstant.URL_SEPARATOR + API_VERSION);
         api.setName(API_NAME);

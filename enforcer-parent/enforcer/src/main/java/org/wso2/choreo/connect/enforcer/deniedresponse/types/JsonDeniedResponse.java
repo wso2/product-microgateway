@@ -27,7 +27,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.deniedresponse.DeniedResponse;
 
 /**
- * generates JSON formatted denied responses
+ * generates JSON formatted denied responses.
  */
 public class JsonDeniedResponse extends DeniedResponse {
 

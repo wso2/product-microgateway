@@ -27,7 +27,7 @@ import org.wso2.choreo.connect.enforcer.deniedresponse.DeniedResponse;
 import org.wso2.choreo.connect.enforcer.util.SOAPUtils;
 
 /**
- * generates SOAP 1.2 formatted denied responses
+ * generates SOAP 1.2 formatted denied responses.
  */
 public class Soap12DeniedResponse extends DeniedResponse {
     public Soap12DeniedResponse(DeniedHttpResponse.Builder denyResponseBuilder) {

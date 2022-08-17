@@ -30,7 +30,7 @@ import org.wso2.choreo.connect.enforcer.deniedresponse.types.Soap11DeniedRespons
 import org.wso2.choreo.connect.enforcer.deniedresponse.types.Soap12DeniedResponse;
 
 /**
- * DeniedResponsePreparer will prepare the DeniedHttpResponse.Builder accordingly to the appropriate response format
+ * DeniedResponsePreparer will prepare the DeniedHttpResponse.Builder accordingly to the appropriate response format.
  */
 public class DeniedResponsePreparer {
     private DeniedResponse deniedResponse;
@@ -51,7 +51,7 @@ public class DeniedResponsePreparer {
 
     /**
      * This function will set the error message according to the format that needs to be sent.
-     * Currently, supported formats are JSON, SOAP1.1, SOAP1.2
+     * Currently, supported formats are JSON, SOAP1.1, SOAP1.2.
      *
      * @param request        CheckRequest object containing request details
      * @param responseObject ResponseObject containing the response details
@@ -90,7 +90,7 @@ public class DeniedResponsePreparer {
     }
 
     /**
-     * Decides the response type
+     * Decides the response type.
      *
      * @param request CheckRequest object containing request details
      */

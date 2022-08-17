@@ -71,7 +71,7 @@ type Body struct {
 	Fault   *Fault   `xml:",omitempty"`
 }
 
-// Fault represents the SOAP fault inside Body
+// Fault represents the SOAP fault inside Body.
 type Fault struct {
 	XMLName xml.Name `xml:"soapenv:Fault"`
 

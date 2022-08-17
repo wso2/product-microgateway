@@ -22,7 +22,7 @@ import io.envoyproxy.envoy.service.auth.v3.DeniedHttpResponse;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 
 /**
- * Abstract class for generating a denied responses
+ * Abstract class for generating a denied responses.
  */
 public abstract class DeniedResponse {
     protected DeniedHttpResponse.Builder denyResponseBuilder;
@@ -32,7 +32,7 @@ public abstract class DeniedResponse {
     }
 
     /**
-     * Sets the denied response to the deniedResponseBuilder
+     * Sets the denied response to the deniedResponseBuilder.
      *
      * @param responseObject
      */

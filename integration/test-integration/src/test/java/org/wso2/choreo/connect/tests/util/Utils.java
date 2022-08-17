@@ -501,7 +501,7 @@ public class Utils {
     }
 
     /**
-     * Retrieves the path for cc sample API projects
+     * Retrieves the path for cc sample API projects.
      *
      * @return String - samples directory path
      */

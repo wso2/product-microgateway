@@ -19,7 +19,7 @@
 package org.wso2.choreo.connect.enforcer.constants;
 
 /**
- * Constants related to SOAP apis
+ * Constants related to SOAP apis.
  */
 public class SoapConstants {
     public static final String CONTENT_TYPE_HEADER_NAME = "content-type";
