@@ -104,11 +104,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	apiLevelSandEndpoints := mgwSwagger.GetSandEndpoints()
 
 	// check API level production endpoints available
-	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
-		apiLevelEndpointProd := mgwSwagger.GetProdEndpoints()
-		apiLevelEndpointProd.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
-		apiLevelBasePathProd = strings.TrimSuffix(apiLevelEndpointProd.Endpoints[0].Basepath, "/")
-		apiLevelClusterNameProd = getClusterName(apiLevelEndpointProd.EndpointPrefix, organizationID, vHost, apiTitle,
+	if apiLevelProdEndpoints != nil && len(apiLevelProdEndpoints.Endpoints) > 0 {
+		apiLevelProdEndpoints.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
+		apiLevelBasePathProd = strings.TrimSuffix(apiLevelProdEndpoints.Endpoints[0].Basepath, "/")
+		apiLevelClusterNameProd = getClusterName(apiLevelProdEndpoints.EndpointPrefix, organizationID, vHost, apiTitle,
 			apiVersion, "")
 		if !strings.Contains(apiLevelProdEndpoints.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
 			cluster, address, err := processEndpoints(apiLevelClusterNameProd, apiLevelProdEndpoints,
@@ -117,7 +116,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				apiLevelClusterNameProd = ""
 				logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
 					Message:   fmt.Sprintf("Error while adding api level production endpoints for %s. %v", apiTitle, err.Error()),
-					Severity:  logging.CRITICAL,
+					Severity:  logging.MAJOR,
 					ErrorCode: 2202,
 				})
 			} else {
@@ -131,31 +130,30 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 	// check API level sandbox endpoints available
 	if apiLevelSandEndpoints != nil && len(apiLevelSandEndpoints.Endpoints) > 0 {
 		selectedBasePathSand := apiLevelBasePathProd
-		apiLevelEndpointSand := mgwSwagger.GetSandEndpoints()
-		apiLevelEndpointSand.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
+		apiLevelSandEndpoints.HTTP2BackendEnabled = mgwSwagger.GetXWso2HTTP2BackendEnabled()
 		if apiLevelBasePathProd == "" && apiLevelClusterNameProd == "" {
 			// no production endpoint, assign sandbox endpoint basepath as apiLevelbasePath
-			apiLevelBasePathProd = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
+			apiLevelBasePathProd = strings.TrimSuffix(apiLevelSandEndpoints.Endpoints[0].Basepath, "/")
 			selectedBasePathSand = apiLevelBasePathProd
-		} else if strings.TrimSuffix(mgwSwagger.GetProdEndpoints().Endpoints[0].Basepath, "/") !=
-			strings.TrimSuffix(mgwSwagger.GetSandEndpoints().Endpoints[0].Basepath, "/") {
+		} else if strings.TrimSuffix(apiLevelProdEndpoints.Endpoints[0].Basepath, "/") !=
+			strings.TrimSuffix(apiLevelSandEndpoints.Endpoints[0].Basepath, "/") {
 			// production and sandbox endpoint basepaths are different, assign sandbox endpoint basepath to
 			// apiLevelbasePathSand
-			apiLevelBasePathSand = strings.TrimSuffix(apiLevelEndpointSand.Endpoints[0].Basepath, "/")
+			apiLevelBasePathSand = strings.TrimSuffix(apiLevelSandEndpoints.Endpoints[0].Basepath, "/")
 			selectedBasePathSand = apiLevelBasePathSand
 		}
 		apiLevelClusterNameSand = apiLevelClusterNameProd
-		if isSandboxClusterRequired(mgwSwagger.GetProdEndpoints(), mgwSwagger.GetSandEndpoints()) {
-			apiLevelClusterNameSand = getClusterName(apiLevelEndpointSand.EndpointPrefix, organizationID, vHost,
+		if isSandboxClusterRequired(apiLevelProdEndpoints, apiLevelSandEndpoints) {
+			apiLevelClusterNameSand = getClusterName(apiLevelSandEndpoints.EndpointPrefix, organizationID, vHost,
 				apiTitle, apiVersion, "")
-			if !strings.Contains(apiLevelEndpointSand.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
-				cluster, address, err := processEndpoints(apiLevelClusterNameSand, apiLevelEndpointSand,
+			if !strings.Contains(apiLevelSandEndpoints.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
+				cluster, address, err := processEndpoints(apiLevelClusterNameSand, apiLevelSandEndpoints,
 					upstreamCerts, timeout, selectedBasePathSand)
 				if err != nil {
 					apiLevelClusterNameSand = ""
 					logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
 						Message:   fmt.Sprintf("Error while adding api level sandbox endpoints for %s. %v", apiTitle, err.Error()),
-						Severity:  logging.CRITICAL,
+						Severity:  logging.MAJOR,
 						ErrorCode: 2203,
 					})
 				} else {
@@ -338,8 +336,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		clusters = append(clusters, clustersI...)
 		endpoints = append(endpoints, endpointsI...)
 
-		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
-			clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, false))
+		routeP, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd,
+			clusterNameSand, *operationalReqInterceptors, *operationalRespInterceptorVal, organizationID, false))
 		if err != nil {
 			logger.LoggerXds.ErrorC(logging.ErrorDetails{
 				Message: fmt.Sprintf("Error while creating routes for API %s %s for path: %s Error: %s",
@@ -352,7 +350,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		if apiLevelBasePathSand != "" || isResourceBasePathSandAvailable {
 			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
 			routeS, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePathSand, clusterNameProd,
-				clusterNameSand, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, true))
+				clusterNameSand, *operationalReqInterceptors, *operationalRespInterceptorVal, organizationID, true))
 			if err != nil {
 				logger.LoggerXds.ErrorC(logging.ErrorDetails{
 					Message: fmt.Sprintf("Error while creating sandbox cluster routes for API %s %s for path: %s Error: %s",
@@ -1512,14 +1510,11 @@ func isSandboxClusterRequired(productionEndpoint *model.EndpointCluster, sandbox
 	}
 	if sandboxEndpoint != nil && len(sandboxEndpoint.Endpoints) > 0 {
 		// For general host and port based endpoint, check whether host or port are different.
-		if productionEndpoint.Endpoints[0].Host != sandboxEndpoint.Endpoints[0].Host {
-			return true
-		}
-		if productionEndpoint.Endpoints[0].Port != sandboxEndpoint.Endpoints[0].Port {
-			return true
-		}
 		// For Consul endpoints, check whether the service discovery strings are different.
-		if productionEndpoint.Endpoints[0].ServiceDiscoveryString != sandboxEndpoint.Endpoints[0].ServiceDiscoveryString {
+		if (productionEndpoint.Endpoints[0].Host != sandboxEndpoint.Endpoints[0].Host) ||
+			(productionEndpoint.Endpoints[0].Port != sandboxEndpoint.Endpoints[0].Port) ||
+			(productionEndpoint.Endpoints[0].ServiceDiscoveryString !=
+				sandboxEndpoint.Endpoints[0].ServiceDiscoveryString) {
 			return true
 		}
 	}
@@ -1573,7 +1568,7 @@ func createInterceptorAPIClusters(mgwSwagger model.MgwSwagger, interceptorCerts 
 
 func createInterceptorResourceClusters(mgwSwagger model.MgwSwagger, interceptorCerts map[string][]byte, vHost string, organizationID string,
 	apiRequestInterceptor *model.InterceptEndpoint, apiResponseInterceptor *model.InterceptEndpoint, resource *model.Resource) (clustersP []*clusterv3.Cluster, addressesP []*corev3.Address,
-	operationalReqInterceptorsEndpoint map[string]model.InterceptEndpoint, operationalRespInterceptorValEndpoint map[string]model.InterceptEndpoint) {
+	operationalReqInterceptorsEndpoint *map[string]model.InterceptEndpoint, operationalRespInterceptorValEndpoint *map[string]model.InterceptEndpoint) {
 	var (
 		clusters  []*clusterv3.Cluster
 		endpoints []*corev3.Address
@@ -1659,5 +1654,5 @@ func createInterceptorResourceClusters(mgwSwagger model.MgwSwagger, interceptorC
 			}
 		}
 	}
-	return clusters, endpoints, operationalReqInterceptors, operationalRespInterceptorVal
+	return clusters, endpoints, &operationalReqInterceptors, &operationalRespInterceptorVal
 }
