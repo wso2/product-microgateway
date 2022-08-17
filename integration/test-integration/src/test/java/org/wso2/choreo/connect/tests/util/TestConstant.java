@@ -39,6 +39,8 @@ public class TestConstant {
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
     public static final int DEPLOYMENT_WAIT_TIME = 15000;
 
+    public static final String INTERNAL_KEY_HEADER = "Internal-Key";
+
     public static final String INVALID_JWT_TOKEN = "eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNN" +
             "V0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XST" +
             "BaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTM" +

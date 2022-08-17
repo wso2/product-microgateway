@@ -24,12 +24,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.WorkflowResponseDTO;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
@@ -466,4 +469,51 @@ public class PublisherUtils {
                 " Provider:" + apiRequest.getProvider() + " Context:" + apiRequest.getContext();
     }
 
+    /**
+     * creates a GraphQL API using a given GraphQL schema definition file.
+     *
+     * @param apiRequest          An APIRequest object
+     * @param publisherRestClient Instance of RestAPIPublisherImpl
+     * @return ID of the created API
+     * @throws ApiException If importWSDLSchemaDefinition fails
+     * @throws IOException  If WSDL definition file read fails
+     */
+    public static String createGraphQLApiFromSchema(APIRequest apiRequest, RestAPIPublisherImpl publisherRestClient,
+                                                    String policyName) throws ApiException, IOException {
+        File file = new File(Utils.getGraphQLSchemaPath());
+        GraphQLValidationResponseDTO responseApiDto = publisherRestClient.validateGraphqlSchemaDefinition(file);
+        GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = responseApiDto.getGraphQLInfo();
+        String arrayToJson = new ObjectMapper().writeValueAsString(graphQLInfo.getOperations());
+        JSONArray operations = new JSONArray(arrayToJson);
+
+        JSONObject apiJson = new JSONObject();
+        apiJson.put("name", apiRequest.getName());
+        apiJson.put("context", apiRequest.getContext());
+        apiJson.put("version", apiRequest.getVersion());
+        apiJson.put("operations", operations);
+        apiJson.put("provider", "");
+        apiJson.put("type", "GRAPHQL");
+        ArrayList<String> policies = new ArrayList<String>();
+        policies.add(policyName);
+        JSONObject endpoints = new JSONObject();
+        endpoints.put("url", new URL(Utils.getDockerMockGraphQLServiceURLHttp(TestConstant.MOCK_GRAPHQL_BASEPATH))
+                .toString());
+        JSONObject endpointConfig = new JSONObject();
+        endpointConfig.put("endpoint_type", "http");
+        endpointConfig.put("production_endpoints", endpoints);
+        endpointConfig.put("sandbox_endpoints", endpoints);
+        apiJson.put("endpointConfig", endpointConfig);
+        apiJson.put("policies", policies);
+
+        if(apiRequest.getSecurityScheme() != null && apiRequest.getSecurityScheme().size() > 0) {
+            ArrayList<String> securitySchemes = new ArrayList<>();
+            for (String securityScheme : apiRequest.getSecurityScheme()){
+                securitySchemes.add(securityScheme);
+            }
+            apiJson.put("securityScheme", securitySchemes);
+        }
+        APIDTO apidto = publisherRestClient.importGraphqlSchemaDefinition(file, apiJson.toString());
+        log.info("API Created. " + getAPIIdentifierStringFromAPIRequest(apiRequest));
+        return apidto.getId();
+    }
 }

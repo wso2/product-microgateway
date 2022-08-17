@@ -18,9 +18,13 @@
 
 package org.wso2.choreo.connect.tests.util;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpHeaders;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -29,6 +33,14 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.wso2.am.integration.clients.admin.api.dto.ConditionalGroupDTO;
+import org.wso2.am.integration.clients.admin.api.dto.HeaderConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.IPConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.JWTClaimsConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.QueryParameterConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
+import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.choreo.connect.mockbackend.Constants;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -50,6 +62,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import static org.wso2.choreo.connect.tests.util.ApictlUtils.API_PROJECTS_PATH;
 
 /**
  * Utility class for test integration common functions.
@@ -564,4 +578,80 @@ public class Utils {
     public static String getDockerMockServiceURLHttp2Secured(String servicePath) throws MalformedURLException {
         return new URL(new URL("https://mockBackend:" + TestConstant.MOCK_BACKEND_HTTP2_SECURED_SERVER_PORT), servicePath).toString();
     }
+
+    /**
+     * Creates a set of conditional groups with a list of conditions
+     *
+     * @param limit Throttle limit of the conditional group.
+     * @return Created list of conditional group DTO
+     */
+    public static List<ConditionalGroupDTO> createConditionalGroups(ThrottleLimitDTO limit, String throttledIP,
+                                                                    String throttledHeader, String throttledQueryParam,
+                                                                    String throttledQueryParamValue,
+                                                                    String throttledClaim) {
+        List<ConditionalGroupDTO> conditionalGroups = new ArrayList<>();
+
+        // create an IP condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> ipGrp = new ArrayList<>();
+        IPConditionDTO ipConditionDTO = DtoFactory.createIPConditionDTO(IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC,
+                throttledIP, null, null);
+        ThrottleConditionDTO ipCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.IPCONDITION, false, null, ipConditionDTO,
+                        null, null);
+        ipGrp.add(ipCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "IP conditional group", ipGrp, limit));
+
+        // create a header condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> headerGrp = new ArrayList<>();
+        HeaderConditionDTO headerConditionDTO =
+                DtoFactory.createHeaderConditionDTO(HttpHeaders.USER_AGENT.toLowerCase(Locale.ROOT), throttledHeader);
+        ThrottleConditionDTO headerCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.HEADERCONDITION, false, headerConditionDTO,
+                        null, null, null);
+        headerGrp.add(headerCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "Header conditional group", headerGrp, limit));
+
+        // create a query parameter condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> queryGrp = new ArrayList<>();
+        QueryParameterConditionDTO queryParameterConditionDTO =
+                DtoFactory.createQueryParameterConditionDTO(throttledQueryParam, throttledQueryParamValue);
+        ThrottleConditionDTO queryParameterCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION, false, null, null,
+                        null, queryParameterConditionDTO);
+        queryGrp.add(queryParameterCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "Query param conditional group", queryGrp, limit));
+
+        // create a JWT claims condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> claimGrp = new ArrayList<>();
+        String claimUrl = "http://wso2.org/claims/applicationname";
+        JWTClaimsConditionDTO jwtClaimsConditionDTO =
+                DtoFactory.createJWTClaimsConditionDTO(claimUrl, throttledClaim);
+        ThrottleConditionDTO jwtClaimsCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION, false, null, null,
+                        jwtClaimsConditionDTO, null);
+        claimGrp.add(jwtClaimsCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "JWT Claim conditional group", claimGrp, limit));
+
+        return conditionalGroups;
+    }
+
+    /**
+     * Gives the GraphQL schema path used in the sample GraphQL project
+     *
+     * @return File path of the GraphQL schema file
+     */
+    public static String getGraphQLSchemaPath() {
+        String samplesDirPath = Utils.getTargetDirPath();
+        return samplesDirPath + API_PROJECTS_PATH + "SampleGraphQLApi" + File.separator +
+                "Definitions" + File.separator + "schema.graphql";
+    }
+
+    public static String getDockerMockGraphQLServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://mockBackend:" + TestConstant.MOCK_GRAPHQL_SERVER_PORT), servicePath).toString();
+    }
+
 }

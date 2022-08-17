@@ -145,7 +145,12 @@ public class ApimResourceProcessor {
                 apiRequest.setTags("tags"); // otherwise, throws a NPE
 
                 // Create API
-                String apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                String apiId;
+                if (apiRequest.getType().equals(TestConstant.API_TYPES.GRAPHQL)){
+                    apiId = PublisherUtils.createGraphQLApiFromSchema(apiRequest, publisherRestClient, "Unlimited");
+                } else {
+                    apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                }
                 if(apiToOpenAPI.containsKey(apiRequest.getName())) {
                     String openAPIFileName = apiToOpenAPI.get(apiRequest.getName());
                     PublisherUtils.updateOpenAPIDefinition(apiId, openAPIFileName, publisherRestClient);
