@@ -18,7 +18,7 @@ data:
   transport: []
   tags: []
   policies:
-   - AsyncUnlimited               // policies attached to the Async API deploymeny
+   - AsyncUnlimited               // policies attached to the Async API deployment
   apiThrottlingPolicy: 50KPerMin  // applies API level rate limiting for the Async API
   authorizationHeader: Authorization
   securityScheme:
