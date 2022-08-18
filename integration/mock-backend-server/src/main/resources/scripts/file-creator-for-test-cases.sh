@@ -15,5 +15,5 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 echo "Copying GraphQL schema file for mock GraphQL server.."
-cp ../samples/apiProjects/SampleGraphQLApi/Definitions/schema.graphql ./mock-backend-server/src/main/resources
+cp ../../samples/apiProjects/SampleGraphQLApi/Definitions/schema.graphql ./mock-backend-server/src/main/resources
 echo "GraphQL schema copied successfully"
