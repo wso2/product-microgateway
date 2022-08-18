@@ -639,13 +639,20 @@ public class Utils {
         return conditionalGroups;
     }
 
+    public static String getCCSamplesDirPath(){
+        File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
+                getLocation().getPath());
+        return targetClassesDir.getParentFile().getParentFile().getParentFile().getParentFile().toString()
+                + File.separator + "samples";
+    }
+
     /**
      * Gives the GraphQL schema path used in the sample GraphQL project
      *
      * @return File path of the GraphQL schema file
      */
     public static String getGraphQLSchemaPath() {
-        String samplesDirPath = Utils.getTargetDirPath();
+        String samplesDirPath = Utils.getCCSamplesDirPath();
         return samplesDirPath + API_PROJECTS_PATH + "SampleGraphQLApi" + File.separator +
                 "Definitions" + File.separator + "schema.graphql";
     }

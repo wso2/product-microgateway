@@ -249,7 +249,6 @@ public class TestConstant {
     public static final String ADMIN_PASSWORD = "admin";
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String CONTENT_TYPE_HEADER = "content-type";
 
     //apim instances names
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
