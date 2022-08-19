@@ -1,6 +1,6 @@
 [router]
 [router.cors]
-  allowOrigins = ["http://test1.com", "http://test2.com"]
+  allowOrigins = ["http://test1.com", "http://test2.com", "http://*.wildcard.com"]
   allowMethods = ["GET","PUT","POST"]
   allowHeaders = ["Authorization","X-PINGOTHER"]
   exposeHeaders = ["X-Custom-Header"]

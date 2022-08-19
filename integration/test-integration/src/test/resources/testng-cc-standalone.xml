@@ -37,11 +37,13 @@
     <test name="cc-with-default-config" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithDefaultConf"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.MountedAPIsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.TrailingSlashTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.AllHttpMethodsForWildcardTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.router.EnvoyHttpFilterTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.BackendSecurityTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
@@ -64,6 +66,7 @@
     <test name="cc-with-backend-tls-with-opa-server" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabledWithOPA"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
@@ -83,6 +86,7 @@
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>
@@ -92,6 +96,7 @@
     <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.BodyPassDisabledTestCase"/>

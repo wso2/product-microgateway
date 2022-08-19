@@ -25,13 +25,13 @@
     "tier": "Unlimited"
   },
   {
-    "apiName": "Http2ClearTextAPI",
-    "appName": "Http2ClearTextAPIApp",
+    "apiName": "EnvoyHttpFilterAPI",
+    "appName": "EnvoyHttpFilterApp",
     "tier": "Unlimited"
   },
   {
-    "apiName": "Http2SecuredAPI",
-    "appName": "Http2SecuredAPIApp",
+    "apiName": "ExistingAPI",
+    "appName": "ExistingApiApp",
     "tier": "Unlimited"
   },
   {
@@ -40,8 +40,13 @@
     "tier": "Unlimited"
   },
   {
-    "apiName": "ExistingAPI",
-    "appName": "ExistingApiApp",
+    "apiName": "Http2ClearTextAPI",
+    "appName": "Http2ClearTextAPIApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "Http2SecuredAPI",
+    "appName": "Http2SecuredAPIApp",
     "tier": "Unlimited"
   },
   {

@@ -310,6 +310,8 @@ enabled = true
   publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
   # Private key path used for JWT generation
   privateKeyPath = "/home/wso2/security/keystore/mg.key"
+  # Token expiry time in seconds
+  tokenTTL = 3600
 
 # The issuer configuration required to generate token at Choreo Connect
 [enforcer.jwtIssuer]

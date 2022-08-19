@@ -1492,6 +1492,11 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 
 	stringMatcherArray := []*envoy_type_matcherv3.StringMatcher{}
 	for _, origin := range corsConfig.AccessControlAllowOrigins {
+
+		// * is considered to be the wild card
+		formattedString := regexp.QuoteMeta(origin)
+		formattedString = strings.ReplaceAll(formattedString, regexp.QuoteMeta("*"), ".*")
+
 		regexMatcher := &envoy_type_matcherv3.StringMatcher{
 			MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
 				SafeRegex: &envoy_type_matcherv3.RegexMatcher{
@@ -1500,8 +1505,7 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 							MaxProgramSize: nil,
 						},
 					},
-					// adds escape character when necessary
-					Regex: regexp.QuoteMeta(origin),
+					Regex: formattedString,
 				},
 			},
 		}

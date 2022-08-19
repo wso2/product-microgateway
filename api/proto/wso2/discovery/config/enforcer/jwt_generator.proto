@@ -33,4 +33,6 @@ message JWTGenerator {
     string public_certificate_path = 10;
 
     string private_key_path = 11;
+
+    int32 token_ttl = 12;
 }

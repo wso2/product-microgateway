@@ -20,6 +20,18 @@
     "throttleTier": "Unlimited"
   },
   {
+    "appName": "EndpointWithTrailingSlashApiApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "EnvoyHttpFilterApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "ExistingApiApp",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "Http2SecuredAPIApp",
     "throttleTier": "Unlimited"
   },
@@ -29,14 +41,6 @@
   },
   {
     "appName": "Http1APIApp",
-    "throttleTier": "Unlimited"
-  },
-  {
-    "appName": "EndpointWithTrailingSlashApiApp",
-    "throttleTier": "Unlimited"
-  },
-  {
-    "appName": "ExistingApiApp",
     "throttleTier": "Unlimited"
   },
   {

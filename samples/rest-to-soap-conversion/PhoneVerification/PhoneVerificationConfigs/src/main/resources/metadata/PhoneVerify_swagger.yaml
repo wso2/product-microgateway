@@ -1,0 +1,28 @@
+openapi: 3.0.1
+info:
+  title: PhoneVerify
+  description: API Definition of PhoneVerify
+  version: 1.0.0
+servers:
+  - url: http://172.17.0.1:8290/phoneverify
+paths:
+  /checkphonenumber:
+    get:
+      parameters:
+        - name: PhoneNumber
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: LicenseKey
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Default response

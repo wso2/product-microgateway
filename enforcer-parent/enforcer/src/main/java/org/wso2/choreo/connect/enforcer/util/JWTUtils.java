@@ -57,6 +57,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility functions used for jwt authentication.
@@ -214,7 +215,7 @@ public class JWTUtils {
         org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().
                 decode(splitToken[1])));
         long exp = payload.getLong(JwtConstants.EXP);
-        long timestampSkew = FilterUtils.getTimeStampSkewInSeconds() * 1000;
-        return (exp - System.currentTimeMillis() < timestampSkew);
+        long timestampSkew = FilterUtils.getTimeStampSkewInSeconds();
+        return (exp - TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) < timestampSkew);
     }
 }

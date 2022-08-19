@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/phoneverify" name="PhoneVerify" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="GET" uri-template="/checkphonenumber">
+        <inSequence>
+            <payloadFactory media-type="xml">
+                <format>
+                    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <soap:Body>
+                            <CheckPhoneNumber xmlns="http://ws.cdyne.com/PhoneVerify/query">
+                                <PhoneNumber>$1</PhoneNumber>
+                                <LicenseKey>$2</LicenseKey>
+                            </CheckPhoneNumber>
+                        </soap:Body>
+                    </soap:Envelope>
+                </format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('query.param.PhoneNumber')"/>
+                    <arg evaluator="xml" expression="get-property('query.param.LicenseKey')"/>
+                </args>
+            </payloadFactory>
+            <property name="SOAPAction" scope="transport" type="STRING"
+                      value="http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber"/>
+            <send>
+                <endpoint>
+                    <address format="soap11" uri="http://ws.cdyne.com/phoneverify/phoneverify.asmx">
+                        <suspendOnFailure>
+                            <initialDuration>-1</initialDuration>
+                            <progressionFactor>1</progressionFactor>
+                        </suspendOnFailure>
+                        <markForSuspension>
+                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                        </markForSuspension>
+                    </address>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <log level="full"/>
+            <payloadFactory media-type="json">
+                <format>
+                    {"CheckPhoneNumberResult":{"Company":"$1","Valid":$2,"Use":"$3","State":"$4","RC":"$5","OCN":"$6","OriginalNumber":"$7","CleanNumber":"$8","SwitchName":"$9","SwitchType":"$10","Country":"$11","CLLI":"$12","PrefixType":"$13","LATA":"$14","sms":"$15","Email":"$16","AssignDate":"$17","TelecomCity":"$18","TelecomCounty":"$19","TelecomState":"$20","TelecomZip":"$21","TimeZone":"$22","Lat":"$23","Long":"$24","Wireless":$25,"LRN":"$26"}}
+                </format>
+                <args>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Company/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Valid"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Use/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:State/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:RC/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:OCN/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:OriginalNumber/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:CleanNumber/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:SwitchName/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:SwitchType/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Country/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:CLLI/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:PrefixType/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:LATA/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:sms/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Email/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:AssignDate/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:TelecomCity/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:TelecomCountry/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:TelecomState/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:TelecomZip/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:TimeZone/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Lat/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Long/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:Wireless"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                    <arg evaluator="xml"
+                         expression="$body/cdy:CheckPhoneNumberResponse/cdy:CheckPhoneNumberResult/cdy:LRN/text()"
+                         xmlns:cdy="http://ws.cdyne.com/PhoneVerify/query"/>
+                </args>
+            </payloadFactory>
+            <send/>
+        </outSequence>
+        <faultSequence/>
+    </resource>
+</api>
