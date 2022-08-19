@@ -24,6 +24,8 @@ import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 
+import java.io.ByteArrayOutputStream;
+
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPFault;
@@ -55,16 +57,18 @@ public class SOAPUtils {
             SOAPEnvelope envelope = part.getEnvelope();
             SOAPFault soapFault = envelope.getBody().addFault();
             if (soapProtocolVersion.equals(APIConstants.SOAP11_PROTOCOL)) {
-                soapFault.setFaultCode("soapenv:Server");
+                soapFault.setFaultCode("Server");
             } else if (soapProtocolVersion.equals(APIConstants.SOAP12_PROTOCOL)) {
-                soapFault.setFaultCode("soapenv:Receiver");
+                soapFault.setFaultCode("env:Receiver");
             }
             soapFault.setFaultString(message);
             soapFault.addDetail().addTextNode(code + ":" + description);
-            return envelope.toString();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            soapMsg.writeTo(out);
+            return out.toString();
         } catch (Exception e) {
-            log.error("Error while creating the SOAP fault message. {}", e.getMessage(),
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7101));
+            log.error("Error while creating the SOAP fault message.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7101), e);
             return "";
         }
     }

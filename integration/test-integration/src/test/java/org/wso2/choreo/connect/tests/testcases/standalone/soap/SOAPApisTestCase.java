@@ -47,7 +47,7 @@ public class SOAPApisTestCase {
     private String testKey;
 
     @BeforeClass
-    public void deployApi() throws Exception {
+    public void start() throws Exception {
         API api = new API();
         api.setName("DefaultVersion");
         api.setContext(context);
@@ -118,9 +118,9 @@ public class SOAPApisTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("http://schemas.xmlsoap.org/soap/envelope/"),
                 "Response soap version mismatched");
-        Assert.assertTrue(response.getData().contains("<soapenv:Fault><faultcode>soapenv:Server</faultcode>" +
+        Assert.assertTrue(response.getData().contains("<SOAP-ENV:Fault><faultcode>Server</faultcode>" +
                         "<faultstring>Invalid Credentials</faultstring><detail>" +
-                        "900901:Make sure you have provided the correct security credentials</detail></soapenv:Fault>"),
+                        "900901:Make sure you have provided the correct security credentials</detail></SOAP-ENV:Fault>"),
                 "Response body mismatched");
         Map<String, String> responseHeaders = response.getHeaders().entrySet().stream().collect(
                 Collectors.toMap(
@@ -143,10 +143,9 @@ public class SOAPApisTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("http://www.w3.org/2003/05/soap-envelope"),
                 "Response soap version mismatched");
-        Assert.assertTrue(response.getData().contains("<soapenv:Fault><soapenv:Code><soapenv:Value>soapenv:Receiver" +
-                        "</soapenv:Value></soapenv:Code><soapenv:Reason><soapenv:Text xml:lang=\"en_US\">" +
-                        "Invalid Credentials</soapenv:Text></soapenv:Reason><soapenv:Detail>900901:Make sure you have " +
-                        "provided the correct security credentials</soapenv:Detail></soapenv:Fault>"),
+        Assert.assertTrue(response.getData().contains("<env:Fault><env:Code><env:Value>env:Receiver</env:Value></env:Code>" +
+                        "<env:Reason><env:Text xml:lang=\"en-US\">Invalid Credentials</env:Text></env:Reason>" +
+                        "<env:Detail>900901:Make sure you have provided the correct security credentials</env:Detail></env:Fault>"),
                 "Response body mismatched");
         Map<String, String> responseHeaders = response.getHeaders().entrySet().stream().collect(
                 Collectors.toMap(
