@@ -89,7 +89,15 @@ public class JWTAuthenticator implements Authenticator {
     public boolean canAuthenticate(RequestContext requestContext) {
         if (isJWTEnabled(requestContext)) {
             String authHeaderValue = retrieveAuthHeaderValue(requestContext);
-            return authHeaderValue != null &&
+
+            // Check keyword bearer in header to prevent conflicts with custom authentication
+            // (that maybe added with custom filters / interceptors / opa)
+            // which also includes a jwt in the auth header yet with a scheme other than 'bearer'.
+            //
+            // StringUtils.startsWithIgnoreCase(null, "bearer")         = false
+            // StringUtils.startsWithIgnoreCase("abc", "bearer")        = false
+            // StringUtils.startsWithIgnoreCase("Bearer abc", "bearer") = true
+            return StringUtils.startsWithIgnoreCase(authHeaderValue, JWTConstants.BEARER) &&
                     authHeaderValue.trim().split("\\s+").length == 2 &&
                     authHeaderValue.split("\\.").length == 3;
         }
@@ -134,10 +142,6 @@ public class JWTAuthenticator implements Authenticator {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
-            if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
-            }
             String[] splitToken = jwtToken.split("\\s");
             // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
             if (splitToken.length > 1) {
