@@ -67,8 +67,8 @@ public class SOAPUtils {
             soapMsg.writeTo(out);
             return out.toString();
         } catch (Exception e) {
-            log.error("Error while creating the SOAP fault message.",
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7101), e);
+            log.error("Error while creating the SOAP fault message. {}", e.getMessage(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7101));
             return "";
         }
     }

@@ -205,8 +205,13 @@ public class PublisherUtils {
             log.info("API Created. " + getAPIIdentifierStringFromAPIRequest(apiRequest));
             return createAPIResponse.getData();
         } else {
-            String errorMsg = "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
-                            + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData();
+            String errorMsg;
+            if (createAPIResponse == null){
+                errorMsg = "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest);
+            } else {
+                errorMsg = "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
+                        + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData();
+            }
             log.error(errorMsg);
             throw new CCTestException(errorMsg);
         }

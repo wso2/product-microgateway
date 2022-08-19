@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class SOAPApisTestCase extends ApimBaseTest {
     private static final String API_NAME = "SoapAPI";
     private static final String API_CONTEXT = "soap";
-    private static final String APPLICATION_NAME = "DefaultAPIApp";
+    private static final String APPLICATION_NAME = "SoapBasicApp";
     private static final String API_VERSION = "1.0.0";
     private static final String SOAP_ACTION = "http://mockbackend:2340/phoneverify/query/CheckPhoneNumber";
     private final Map<String, String> requestHeaders_11 = new HashMap<>();

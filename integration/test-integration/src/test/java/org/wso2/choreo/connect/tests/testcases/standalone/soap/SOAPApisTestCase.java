@@ -49,13 +49,13 @@ public class SOAPApisTestCase {
     @BeforeClass
     public void start() throws Exception {
         API api = new API();
-        api.setName("DefaultVersion");
+        api.setName("SoapAPI");
         api.setContext(context);
         api.setVersion(version);
         api.setProvider("admin");
 
         ApplicationDTO app = new ApplicationDTO();
-        app.setName("DefaultAPIApp");
+        app.setName("SoapBasicApp");
         app.setTier("Unlimited");
         app.setId((int) (Math.random() * 1000));
 
