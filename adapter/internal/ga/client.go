@@ -348,8 +348,8 @@ func preprocessRevisionID(revisionID string) string {
 			// Unreachable
 			logger.LoggerGA.Infof("Revision Id associated timestamp conversion to integer failed: %v\n", err)
 		}
-		// Timestamp is set to 2022/08/05 23:59:59 IST. Add related timestamp based on deployment date and time.
-		if timestamp < 1659724199 {
+		// Timestamp is set to 2022/09/22 23:59:59 IST. Add related timestamp based on deployment date and time.
+		if timestamp < 1663871399 {
 			return revisionIDSplitted[0]
 		}
 	}
