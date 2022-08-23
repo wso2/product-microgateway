@@ -68,7 +68,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 		DynamicStats:             nil,
 		StartChildSpan:           false,
 		UpstreamLog:              nil,
-		SuppressEnvoyHeaders:     false,
+		SuppressEnvoyHeaders:     true,
 		StrictCheckHeaders:       nil,
 		RespectExpectedRqTimeout: false,
 	}

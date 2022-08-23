@@ -41,6 +41,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -501,5 +502,17 @@ public class Utils {
 
     public static String getAPIMServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.APIM_SERVLET_TRP_HTTP_PORT), servicePath).toString();
+    }
+
+    public static JSONObject changeHeadersToLowerCase(JSONObject headers) {
+        JSONObject headersCaseInsensitive = new JSONObject();
+        Iterator it = headers.keys();
+
+        while (it.hasNext()) {
+            String keyRaw = (String) it.next();
+            String key = keyRaw.toLowerCase();
+            headersCaseInsensitive.put(key, headers.get(keyRaw));
+        }
+        return headersCaseInsensitive;
     }
 }
