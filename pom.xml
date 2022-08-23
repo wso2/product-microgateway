@@ -273,6 +273,12 @@
                 <groupId>org.wso2.andes.wso2</groupId>
                 <artifactId>andes-client</artifactId>
                 <version>${andes.client.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.woodstox</groupId>
+                        <artifactId>wstx-asl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>
@@ -423,6 +429,10 @@
                         <groupId>org.wso2.orbit.commons-fileupload</groupId>
                         <artifactId>commons-fileupload</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.woodstox</groupId>
+                        <artifactId>wstx-asl</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -543,13 +553,19 @@
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-annotations-api</artifactId>
-                <version>${apache.tomcat.annotations.version}</version>
+                <version>${apache.tomcat.dependency.version}</version>
             </dependency>
             <!-- upgrades apache tomcat embed core version used for jaeger tracing -->
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
-                <version>${apache.tomcat.embed.version}</version>
+                <version>${apache.tomcat.dependency.version}</version>
+            </dependency>
+            <!-- upgrades slf4j api version used in java-WebSocket dependency -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -557,7 +573,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <andes.client.version>3.3.12</andes.client.version>
+        <andes.client.version>3.3.23</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
         <carbon.apimgt.version>9.20.74</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
@@ -573,9 +589,9 @@
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
         <io.netty.version>4.1.77.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
-        <apache.tomcat.annotations.version>10.0.20</apache.tomcat.annotations.version>
-        <apache.tomcat.embed.version>10.0.23</apache.tomcat.embed.version>
-        <java.websocket.version>1.5.1</java.websocket.version>
+        <apache.tomcat.dependency.version>10.0.23</apache.tomcat.dependency.version>
+        <java.websocket.version>1.5.3</java.websocket.version>
+        <slf4j.api.version>1.7.30</slf4j.api.version>
         <json.smart.version>2.4.7</json.smart.version>
         <junit.version>4.13.2</junit.version>
         <log4j.version>2.17.1</log4j.version>
