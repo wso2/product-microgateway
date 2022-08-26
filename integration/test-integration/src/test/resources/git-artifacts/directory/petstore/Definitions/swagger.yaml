@@ -122,7 +122,7 @@ definitions:
 externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
-host: petstore.swagger.io
+host: mockBackend:2383
 info:
   contact:
     email: apiteam@swagger.io
@@ -172,7 +172,6 @@ paths:
       tags:
       - pet
 schemes:
-- https
 - http
 securityDefinitions:
   api_key:
