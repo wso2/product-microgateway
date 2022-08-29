@@ -242,7 +242,7 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 			// 1. X -> return X
 			// 2. X_t where t < T -> return X
 			// 3. X_t where t >= T -> return X_t
-			api.RevisionUUID = preprocessRevisionID(api.RevisionUUID)
+			api.RevisionUUID = preprocessRevisionID(api.RevisionUUID, currentGAAPI.RevisionUUID)
 			if currentGAAPI.RevisionUUID == api.RevisionUUID {
 				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID is equal: %v\n", currentGAAPI.RevisionUUID)
 				continue
@@ -332,7 +332,11 @@ func FetchAPIsFromGA() []*APIEvent {
 	}
 }
 
-func preprocessRevisionID(revisionID string) string {
+func preprocessRevisionID(revisionID string, currentRevisionID string) string {
+	if revisionID == currentRevisionID {
+		logger.LoggerGA.Debugf("Current revision id and received revision id are equal. Skipping preprocessRevisionID: %v\n", revisionID)
+		return revisionID
+	}
 	revisionIDSplitted := strings.Split(revisionID, "_")
 	if len(revisionIDSplitted) == 2 {
 		timestamp, err := strconv.Atoi(revisionIDSplitted[1])
