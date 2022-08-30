@@ -333,8 +333,9 @@ func FetchAPIsFromGA() []*APIEvent {
 }
 
 func preprocessRevisionID(revisionID string, currentRevisionID string) string {
-	if revisionID == currentRevisionID {
-		logger.LoggerGA.Debugf("Current revision id and received revision id are equal. Skipping preprocessRevisionID: %v\n", revisionID)
+	currentRevisionIDSplitted := strings.Split(currentRevisionID, "_")
+	if len(currentRevisionIDSplitted) == 2 {
+		logger.LoggerGA.Debugf("Current revision id contains a timestamp. Skipping preprocessing for current revision id: revision id: %v:%v\n", currentRevisionID, revisionID)
 		return revisionID
 	}
 	revisionIDSplitted := strings.Split(revisionID, "_")
