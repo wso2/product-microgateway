@@ -40,6 +40,7 @@ import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
 import org.wso2.choreo.connect.enforcer.util.EndpointSecurityUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.RequestUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -296,7 +297,12 @@ public class AuthFilter implements Filter {
     }
 
     private void setAccessLogMetadata(RequestContext requestContext) {
+        String processedPath = RequestUtils.constructQueryParamString(false,
+                requestContext.getRequestPath(), requestContext.getQueryParameters(),
+                RouterAccessLogConstants.QUERY_PARAMS_TO_REMOVE_FROM_PATH,
+                null);
+
         requestContext.addMetadataToMap(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
-                Objects.toString(requestContext.getRequestPath(), ""));
+                Objects.toString(processedPath, ""));
     }
 }

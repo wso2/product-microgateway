@@ -18,10 +18,14 @@
 
 package org.wso2.choreo.connect.enforcer.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * RouterAccessLogConstants class holds the dynamic metadata field names
- * used in Router access logs
+ * RouterAccessLogConstants class holds the constants used in Router access logs
  */
 public class RouterAccessLogConstants {
     public static final String ORIGINAL_PATH_DATA_NAME = "originalPath";
+
+    public static final List<String> QUERY_PARAMS_TO_REMOVE_FROM_PATH = Arrays.asList("apikey");
 }
