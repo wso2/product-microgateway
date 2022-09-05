@@ -40,6 +40,8 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.MountedAPIsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.TrailingSlashTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.AllHttpMethodsForWildcardTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.BackendSecurityTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
@@ -54,6 +56,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.circuitBreakers.CircuitBreakersTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceNotAvailableTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.extensions.DisableSecurityTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.router.EnvoyHttpFilterTestCase"/>
         </classes>
     </test>
     <test name="cc-with-backend-tls" preserve-order="true" parallel="false">

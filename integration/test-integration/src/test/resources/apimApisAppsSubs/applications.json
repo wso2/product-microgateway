@@ -26,5 +26,9 @@
   {
     "appName": "EndpointWithTrailingSlashApiApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "CommonApp",
+    "throttleTier": "Unlimited"
   }
 ]

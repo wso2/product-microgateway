@@ -43,8 +43,9 @@ import (
 func CreateRoutesConfigForRds(vHosts []*routev3.VirtualHost) *routev3.RouteConfiguration {
 	rdsConfigName := defaultRdsConfigName
 	routeConfiguration := routev3.RouteConfiguration{
-		Name:         rdsConfigName,
-		VirtualHosts: vHosts,
+		Name:                   rdsConfigName,
+		VirtualHosts:           vHosts,
+		RequestHeadersToRemove: []string{clusterHeaderName},
 	}
 	return &routeConfiguration
 }

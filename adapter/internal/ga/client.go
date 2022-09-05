@@ -21,6 +21,8 @@ import (
 	"context"
 	"crypto/tls"
 	"io"
+	"strconv"
+	"strings"
 	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -236,7 +238,13 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		currentGAAPI, apiFound := apiRevisionMap[api.ApiUUID]
 		if apiFound {
 			delete(removedAPIMap, api.ApiUUID)
+			// TODO: Remove this temporary preprocessing of revisionId after GA changes are deployed.
+			// 1. X -> return X
+			// 2. X_t where t < T -> return X
+			// 3. X_t where t >= T -> return X_t
+			api.RevisionUUID = preprocessRevisionID(api.RevisionUUID, currentGAAPI.RevisionUUID)
 			if currentGAAPI.RevisionUUID == api.RevisionUUID {
+				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID is equal: %v\n", currentGAAPI.RevisionUUID)
 				continue
 			}
 		}
@@ -322,4 +330,25 @@ func FetchAPIsFromGA() []*APIEvent {
 		}
 		time.Sleep(1 * time.Second)
 	}
+}
+
+func preprocessRevisionID(revisionID string, currentRevisionID string) string {
+	currentRevisionIDSplitted := strings.Split(currentRevisionID, "_")
+	if len(currentRevisionIDSplitted) == 2 {
+		logger.LoggerGA.Debugf("Current revision id contains a timestamp. Skipping preprocessing for current revision id: revision id: %v:%v\n", currentRevisionID, revisionID)
+		return revisionID
+	}
+	revisionIDSplitted := strings.Split(revisionID, "_")
+	if len(revisionIDSplitted) == 2 {
+		timestamp, err := strconv.Atoi(revisionIDSplitted[1])
+		if err != nil {
+			logger.LoggerGA.Debugf("Revision Id associated timestamp conversion to integer failed: %v\n", err)
+		}
+		// Timestamp is set to 2022/09/29 23:59:59 IST. Add related timestamp based on deployment date and time.
+		if timestamp < 1664476199000 {
+			logger.LoggerGA.Debugf("Revision timestamp less than the hard coded timestamp for revision id: %v\n", revisionIDSplitted[0])
+			return revisionIDSplitted[0]
+		}
+	}
+	return revisionID
 }

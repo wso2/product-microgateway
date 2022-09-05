@@ -28,5 +28,10 @@
     "apiName": "EndpointWithTrailingSlashAPI",
     "appName": "EndpointWithTrailingSlashApiApp",
     "tier": "Unlimited"
+  },
+  {
+    "apiName": "EnvoyHttpFilterAPI",
+    "appName": "CommonApp",
+    "tier": "Unlimited"
   }
 ]

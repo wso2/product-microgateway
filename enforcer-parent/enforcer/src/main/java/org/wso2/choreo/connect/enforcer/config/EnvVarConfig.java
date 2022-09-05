@@ -36,6 +36,7 @@ public class EnvVarConfig {
     public static final String XDS_MAX_MSG_SIZE = "XDS_MAX_MSG_SIZE";
     public static final String XDS_MAX_RETRIES = "XDS_MAX_RETRIES";
     public static final String XDS_RETRY_PERIOD = "XDS_RETRY_PERIOD";
+    public static final String HOSTNAME = "HOSTNAME";
 
     // Since the container is running in linux container, path separator is not needed.
     private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
@@ -49,6 +50,7 @@ public class EnvVarConfig {
     public static final String DEFAULT_XDS_MAX_MSG_SIZE = "4194304";
     public static final String DEFAULT_XDS_MAX_RETRIES = Integer.toString(Constants.MAX_XDS_RETRIES);
     public static final String DEFAULT_XDS_RETRY_PERIOD = Integer.toString(Constants.XDS_DEFAULT_RETRY);
+    public static final String DEFAULT_HOSTNAME = "Unassigned";
 
     private static EnvVarConfig instance;
     private final String trustedAdapterCertsPath;
@@ -64,6 +66,7 @@ public class EnvVarConfig {
     private final String xdsMaxMsgSize;
     private final String xdsMaxRetries;
     private final String xdsRetryPeriod;
+    private final String instanceIdentifier;
 
     private EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
@@ -79,7 +82,10 @@ public class EnvVarConfig {
         xdsMaxMsgSize = retrieveEnvVarOrDefault(XDS_MAX_MSG_SIZE, DEFAULT_XDS_MAX_MSG_SIZE);
         enforcerRegionId = retrieveEnvVarOrDefault(ENFORCER_REGION_ID, DEFAULT_ENFORCER_REGION_ID);
         xdsMaxRetries = retrieveEnvVarOrDefault(XDS_MAX_RETRIES, DEFAULT_XDS_MAX_RETRIES);
-        xdsRetryPeriod = retrieveEnvVarOrDefault(XDS_RETRY_PERIOD, DEFAULT_XDS_MAX_RETRIES);
+        xdsRetryPeriod = retrieveEnvVarOrDefault(XDS_RETRY_PERIOD, DEFAULT_XDS_RETRY_PERIOD);
+        // HOSTNAME environment property is readily available in docker and kubernetes, and it represents the Pod
+        // name in Kubernetes context, containerID in docker context.
+        instanceIdentifier = retrieveEnvVarOrDefault(HOSTNAME, DEFAULT_HOSTNAME);
     }
 
     public static EnvVarConfig getInstance() {
@@ -144,5 +150,9 @@ public class EnvVarConfig {
 
     public String getXdsRetryPeriod() {
         return xdsRetryPeriod;
+    }
+
+    public String getInstanceIdentifier() {
+        return instanceIdentifier;
     }
 }

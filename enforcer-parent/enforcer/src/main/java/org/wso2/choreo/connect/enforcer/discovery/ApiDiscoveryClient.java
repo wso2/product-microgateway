@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.discovery.service.api.ApiDiscoveryServiceGrpc;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
@@ -71,15 +72,15 @@ public class ApiDiscoveryClient implements Runnable {
      */
     private DiscoveryResponse latestACKed;
     /**
-     * Label of this node.
+     * Node struct for the discovery client
      */
-    private final String nodeId;
+    private final Node node;
 
     private ApiDiscoveryClient(String host, int port) {
         this.host = host;
         this.port = port;
         this.apiFactory = APIFactory.getInstance();
-        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
+        this.node = XDSCommonUtils.generateXDSNode(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel());
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
         initConnection();
     }
@@ -119,7 +120,7 @@ public class ApiDiscoveryClient implements Runnable {
 
     public void watchApis() {
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
-        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApis(new StreamObserver<DiscoveryResponse>() {
+        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApis(new StreamObserver<>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.info("API event received with version : " + response.getVersionInfo());
@@ -153,7 +154,7 @@ public class ApiDiscoveryClient implements Runnable {
 
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                    .setNode(Node.newBuilder().setId(nodeId).build())
+                    .setNode(node)
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.API_TYPE_URL).build();
             reqObserver.onNext(req);
@@ -169,7 +170,7 @@ public class ApiDiscoveryClient implements Runnable {
      */
     private void ack() {
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.API_TYPE_URL).build();
@@ -182,7 +183,7 @@ public class ApiDiscoveryClient implements Runnable {
             return;
         }
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestACKed.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.API_TYPE_URL)
