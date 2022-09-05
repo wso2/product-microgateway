@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
 import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
+import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
