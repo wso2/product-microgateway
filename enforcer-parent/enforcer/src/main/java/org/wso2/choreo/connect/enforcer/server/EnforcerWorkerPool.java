@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.enforcer.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.jmx.MBeanRegistrator;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,7 +28,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Class that holds the  thread pool that serves the external auth requests coming from the router component.
+ * Class that holds the thread pool that serves the external auth requests
+ * coming from the router component.
  */
 public class EnforcerWorkerPool {
     private final BlockingQueue<Runnable> blockingQueue;
@@ -37,8 +39,12 @@ public class EnforcerWorkerPool {
     public EnforcerWorkerPool(int core, int max, int keepAlive, int queueLength, String threadGroupName,
             String threadGroupId) {
         this.blockingQueue = queueLength == -1 ? new LinkedBlockingQueue() : new LinkedBlockingQueue(queueLength);
+        NativeThreadFactory workerThreadFactory = new NativeThreadFactory(new ThreadGroup(threadGroupName),
+                threadGroupId);
         this.executor = new EnforcerThreadPoolExecutor(core, max, (long) keepAlive, TimeUnit.SECONDS,
-                this.blockingQueue, new NativeThreadFactory(new ThreadGroup(threadGroupName), threadGroupId));
+                this.blockingQueue, workerThreadFactory);
+        MBeanRegistrator.registerMBean(workerThreadFactory);
+
     }
 
     public ThreadPoolExecutor getExecutor() {
