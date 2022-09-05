@@ -298,10 +298,9 @@ public class AuthFilter implements Filter {
     }
 
     private void setAccessLogMetadata(RequestContext requestContext) {
-        String processedPath = RequestUtils.constructQueryParamString(false,
+        String processedPath = RequestUtils.constructQueryParamString(
                 requestContext.getRequestPath(), requestContext.getQueryParameters(),
-                RouterAccessLogConstants.QUERY_PARAMS_TO_REMOVE_FROM_PATH,
-                null);
+                RouterAccessLogConstants.QUERY_PARAMS_TO_REMOVE_FROM_PATH);
 
         requestContext.addMetadataToMap(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
                 Objects.toString(processedPath, ""));

@@ -18,7 +18,6 @@
 
 package org.wso2.choreo.connect.enforcer.util;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,28 +26,18 @@ import java.util.Map;
  */
 public class RequestUtils {
 
-    public static String constructQueryParamString(boolean removeAllQueryParams, String requestPath,
-            Map<String, String> currentQueryParamMap, List<String> queryParamsToRemove,
-            Map<String, String> queryParamsToAdd) {
-        // If no query parameters needs to be removed/added, then the request path can
-        // be applied as it is.
-        if (!removeAllQueryParams && queryParamsToRemove.size() == 0 && queryParamsToAdd.size() == 0) {
+    public static String constructQueryParamString(String requestPath, Map<String, String> queryParamMap,
+            List<String> queryParamsToRemove) {
+        // If no query parameters needs to be removed, then the request path can be
+        // applied as it is.
+        if (queryParamsToRemove.size() == 0) {
             return requestPath;
-        }
-
-        Map<String, String> queryParamMap = new HashMap<>();
-        if (currentQueryParamMap != null) {
-            queryParamMap.putAll(currentQueryParamMap);
-        }
-
-        if (queryParamsToAdd != null) {
-            queryParamMap.putAll(queryParamsToAdd);
         }
 
         String pathWithoutQueryParams = requestPath.split("\\?")[0];
         StringBuilder requestPathBuilder = new StringBuilder(pathWithoutQueryParams);
         int count = 0;
-        if (!removeAllQueryParams && queryParamMap.size() > 0) {
+        if (queryParamMap.size() > 0) {
             for (String queryParam : queryParamMap.keySet()) {
                 if (queryParamsToRemove.contains(queryParam)) {
                     continue;
