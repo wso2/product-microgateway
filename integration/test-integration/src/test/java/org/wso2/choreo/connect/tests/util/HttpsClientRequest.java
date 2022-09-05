@@ -185,6 +185,24 @@ public class HttpsClientRequest {
         return response;
     }
 
+    /**
+     * @param requestUrl Request URL as a string
+     * @param data       Request data sent with the request
+     * @param headers    Request headers
+     * @return
+     * @throws CCTestException If an error occurs while sending the POST request
+     */
+    public static HttpResponse retryPostUntil200(String requestUrl, String data, Map<String, String> headers)
+            throws CCTestException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            response = HttpsClientRequest.doPost(requestUrl, data, headers);
+            retryCount++;
+        } while (response.getResponseCode() != HttpStatus.SC_OK && shouldRetry(retryCount));
+        return response;
+    }
+
     private static boolean shouldRetry(int retryCount) {
         if(retryCount >= maxRetryCount) {
             log.info("Retrying of the request is finished");
@@ -390,7 +408,7 @@ public class HttpsClientRequest {
     /**
      * Helper method to set the SSL context.
      */
-    static void setSSlSystemProperties() {
+    public static void setSSlSystemProperties() {
         String certificatesTrustStorePath = Objects.requireNonNull(HttpsClientRequest.class.getClassLoader()
                 .getResource("keystore/client-truststore.jks")).getPath();
         System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);

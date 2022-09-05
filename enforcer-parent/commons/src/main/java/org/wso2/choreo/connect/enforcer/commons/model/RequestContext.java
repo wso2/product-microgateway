@@ -40,7 +40,11 @@ public class RequestContext {
     private APIConfig matchedAPI;
     private String requestPath;
     private String requestMethod;
+    /**
+     * @deprecated Use {@link #matchedResourcePaths} instead.
+     */
     private ResourceConfig matchedResourcePath;
+    private ArrayList<ResourceConfig> matchedResourcePaths;
     private Map<String, String> headers;
     private Map<String, Object> properties = new HashMap<>();
     private AuthenticationContext authenticationContext;
@@ -73,6 +77,7 @@ public class RequestContext {
 
     /**
      * The dynamic metadata sent from enforcer are stored in this metadata map.
+     *
      * @return dynamic metadata map
      */
     public Map<String, String> getMetadataMap() {
@@ -83,7 +88,7 @@ public class RequestContext {
      * If the dynamic metadata sent from enforcer needs to be updated/ new keys needs to be added,
      * the key, value pairs should be updated in this map.
      *
-     * @param key metadata key
+     * @param key   metadata key
      * @param value metadata value
      */
     public void addMetadataToMap(String key, String value) {
@@ -92,7 +97,7 @@ public class RequestContext {
 
     /**
      * Authentication Context for the request. This is populated after auth Filter.
-     *
+     * <p>
      * Note:
      * Depending on the authenticator being used, some properties may remain un-initialized.
      * Example: Internal-Key authenticator would not populate application details.
@@ -105,7 +110,7 @@ public class RequestContext {
 
     /**
      * Set Authentication Context for the request.
-     *
+     * <p>
      * Note:
      * The content inside this object is used for throttling and analytics. In addition,
      * this object is populated within Authentication Filter. Hence adding a filter prior to
@@ -133,17 +138,18 @@ public class RequestContext {
         return requestTimeStamp;
     }
 
-    private RequestContext() {}
+    private RequestContext() {
+    }
 
     /**
      * Get the path parameters and the assigned values as a map.
-     *
+     * <p>
      * Ex: /pet/{petID} -> /pet/1
-     *  then, under 'petId' value would be marked as '1' (string format)
-     *
+     * then, under 'petId' value would be marked as '1' (string format)
+     * <p>
      * Note:
-     *  Modifying this map does not result in change of path parameter values. This is
-     *  only for read purposes.
+     * Modifying this map does not result in change of path parameter values. This is
+     * only for read purposes.
      *
      * @return Map contains path parameter name and assigned path param value in the request.
      */
@@ -153,7 +159,6 @@ public class RequestContext {
 
     /**
      * Request ID for the request.
-     *
      * This can be used to correlate the router access log entries and the enforcer logs.
      *
      * @return request id.
@@ -202,7 +207,9 @@ public class RequestContext {
 
     /**
      * Original Request Path where path parameters are provided with parameter values.
+     * <p>
      * ex: /pet/1?status=available
+     *
      * @return request path
      */
     public String getRequestPath() {
@@ -220,20 +227,34 @@ public class RequestContext {
 
     /**
      * Get the complete resource configuration for matched resource path.
-     *
+     * <p>
      * Note:
-     *  ResourceConfig can be null if the request has the method OPTIONS but there is no such method listed
-     *  in the OpenAPI definition.
+     * ResourceConfig can be null if the request has the method OPTIONS but there is no such method listed
+     * in the OpenAPI definition.
      *
      * @return {@code ResourceConfig} object
+     * @deprecated Use {@link #getMatchedResourcePaths()} instead.
      */
     public ResourceConfig getMatchedResourcePath() {
         return matchedResourcePath;
     }
 
     /**
-     * Get the set of request headers.
+     * Get the complete resource configurations for matched graphQL operations.
+     * <p>
+     * Note:
+     * * ResourceConfig can be null if the request has the method OPTIONS but there is no such method listed
+     * * in the OpenAPI definition.
      *
+     * @return {@code ArrayList<ResourceConfig>} object
+     */
+    public ArrayList<ResourceConfig> getMatchedResourcePaths() {
+        return matchedResourcePaths;
+    }
+
+    /**
+     * Get the set of request headers.
+     * <p>
      * Note: Modifying the headers map here does not result in changing the headers.
      * It is for reading the headers.
      * If you need to add/modify headers, use addHeaders() method and for removing use
@@ -322,13 +343,13 @@ public class RequestContext {
 
     /**
      * This is used for websocket specific implementation.
-     *
      * When the websocket communication happens, there is a specific filter which sends some metadata
      * related to the websocket frames for throttling and analytics purposes. This publishing happens
      * asynchronously.
-     *
+     * <p>
      * Note:
-     *  This can't be used for modifying/reading websocket frame data.
+     * This can't be used for modifying/reading websocket frame data.
+     *
      * @return {@code WebSocketFrameContext} object
      */
     public WebSocketFrameContext getWebSocketFrameContext() {
@@ -374,8 +395,8 @@ public class RequestContext {
     /**
      * If there is a set of headers needs to be removed from the throttle publishing event, those headers should
      * be added to the arrayList here.
-     *
-     * Ex. Authorization Header
+     * <p>
+     * Ex: Authorization Header
      *
      * @return header names which are not supposed to be published to the traffic manager.
      */
@@ -398,7 +419,11 @@ public class RequestContext {
         private String requestPath;
         private String requestMethod;
         private String requestPathTemplate;
+        /**
+         * @deprecated Use {@link #matchedResourceConfigs} instead
+         */
         private ResourceConfig matchedResourceConfig;
+        private ArrayList<ResourceConfig> matchedResourceConfigs;
         private Map<String, String> headers;
         private String prodClusterHeader;
         private String sandClusterHeader;
@@ -427,6 +452,11 @@ public class RequestContext {
 
         public Builder matchedResourceConfig(ResourceConfig matchedResourcePath) {
             this.matchedResourceConfig = matchedResourcePath;
+            return this;
+        }
+
+        public Builder matchedResourceConfigs(ArrayList<ResourceConfig> matchedResourcePaths) {
+            this.matchedResourceConfigs = matchedResourcePaths;
             return this;
         }
 
@@ -487,6 +517,7 @@ public class RequestContext {
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
+            requestContext.matchedResourcePaths = this.matchedResourceConfigs;
             requestContext.matchedAPI = this.matchedAPI;
             requestContext.requestMethod = this.requestMethod;
             requestContext.requestPath = this.requestPath;

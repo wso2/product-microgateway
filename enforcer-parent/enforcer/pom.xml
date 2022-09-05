@@ -503,5 +503,9 @@
             <groupId>com.sun.xml.messaging.saaj</groupId>
             <artifactId>saaj-impl</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+        </dependency>
     </dependencies>
 </project>

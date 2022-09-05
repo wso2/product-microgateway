@@ -45,6 +45,8 @@ public class CcWithJwtConfig {
         ApictlUtils.deployAPI("timeout_global", "test");
         ApictlUtils.deployAPI("timeout_endpoint", "test");
 
+        ApictlUtils.deploySampleProject("SampleGraphQLApi", "test");
+
         TimeUnit.SECONDS.sleep(5);
     }
 

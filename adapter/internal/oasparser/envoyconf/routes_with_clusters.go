@@ -214,6 +214,22 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		return routes, clusters, endpoints, nil
 	}
 
+	if mgwSwagger.GetAPIType() == constants.GRAPHQL {
+		routesP, err := createRoutes(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
+			apiLevelClusterNameSand, nil, nil, organizationID, false))
+		if err != nil {
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while creating routes for GraphQL API : %s version : %s. Error: %s",
+					apiTitle, apiVersion, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 2233,
+			})
+			return nil, nil, nil, fmt.Errorf("Error while creating routes for GraphQL API : %s version : %s. %v", apiTitle, apiVersion, err)
+		}
+		routes = append(routes, routesP...)
+		return routes, clusters, endpoints, nil
+	}
+
 	for _, resource := range mgwSwagger.GetResources() {
 		clusterNameProd := apiLevelClusterNameProd
 		clusterNameSand := apiLevelClusterNameSand
@@ -722,8 +738,6 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
 	resource := params.resource
-	resourcePath := resource.GetPath()
-	resourceMethods := resource.GetMethodList()
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	prodRouteConfig := params.prodRouteConfig
@@ -742,6 +756,15 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	basePath := strings.TrimSuffix(xWso2Basepath, "/")
 	if isDefaultVersion {
 		basePath = getDefaultVersionBasepath(basePath, version)
+	}
+
+	resourcePath := ""
+	var resourceMethods []string
+	if params.apiType == constants.GRAPHQL {
+		resourceMethods = []string{"POST"}
+	} else {
+		resourcePath = resource.GetPath()
+		resourceMethods = resource.GetMethodList()
 	}
 	routePath := generateRoutePath(basePath, resourcePath)
 
@@ -867,7 +890,7 @@ end`
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 
-	if resource.HasPolicies() {
+	if resource != nil && resource.HasPolicies() {
 		logger.LoggerOasparser.Debug("Start creating routes for resource with policies")
 
 		// Policies are per operation (HTTP method). Therefore, create route per HTTP method.

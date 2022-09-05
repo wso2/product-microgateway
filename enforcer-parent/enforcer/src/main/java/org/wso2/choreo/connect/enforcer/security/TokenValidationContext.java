@@ -37,7 +37,7 @@ public class TokenValidationContext {
     private String requiredAuthenticationLevel;
     private String clientDomain;
     private String matchingResource;
-    private ResourceConfig matchingResourceConfig;
+    private ArrayList<ResourceConfig> matchingResourceConfigs;
     private String httpVerb;
     private Map<String, Object> attributeMap = new HashMap<String, Object>();
     private String cacheKey;
@@ -120,12 +120,12 @@ public class TokenValidationContext {
         this.matchingResource = matchingResource;
     }
 
-    public ResourceConfig getMatchingResourceConfig() {
-        return matchingResourceConfig;
+    public ArrayList<ResourceConfig> getMatchingResourceConfigs() {
+        return matchingResourceConfigs;
     }
 
-    public void setMatchingResourceConfig(ResourceConfig matchingResourceConfig) {
-        this.matchingResourceConfig = matchingResourceConfig;
+    public void setMatchingResourceConfigs(ArrayList<ResourceConfig> matchingResourceConfigs) {
+        this.matchingResourceConfigs = matchingResourceConfigs;
     }
 
     public String getHttpVerb() {

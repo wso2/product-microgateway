@@ -74,6 +74,8 @@ type MgwSwagger struct {
 	clientCertificates         []Certificate
 	xWso2MutualSSL             string
 	xWso2ApplicationSecurity   bool
+	GraphQLSchema              string
+	GraphQLComplexities        GraphQLComplexityYaml
 }
 
 // EndpointCluster represent an upstream cluster
@@ -1168,11 +1170,17 @@ func GenerateInterceptorIncludes(includes []string) *interceptor.RequestInclusio
 	return includesV
 }
 
-// GetMgwSwagger converts the openAPI v3, v2 and asyncAPI content
+// GetMgwSwagger converts/handles the openAPI v3, v2, asyncAPI and GraphQL content
 // To MgwSwagger objects
 func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
-
-	definitionJsn, err := utills.ToJSON(apiContent)
+	definitionJsn := make([]byte, 0)
+	var err error
+	if swagger.GetAPIType() == constants.GRAPHQL {
+		// sets API definition for GraphQL APIs. This will be passed to the enforcer
+		swagger.GraphQLSchema = string(apiContent)
+		return nil
+	}
+	definitionJsn, err = utills.ToJSON(apiContent)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error converting api file to json", err)
 		return err
@@ -1358,6 +1366,13 @@ func (swagger *MgwSwagger) PopulateFromAPIYaml(apiYaml APIYaml) error {
 			endpointConfig.APIEndpointSecurity.Sandbox.Enabled = false
 			logger.LoggerXds.Errorf("endpoint security type given in api.yaml : %v is not currently supported with WSO2 Choreo Connect",
 				endpointConfig.APIEndpointSecurity.Sandbox.Type)
+		}
+	}
+
+	if apiYaml.Data.APIType == constants.GRAPHQL {
+		err := swagger.SetInfoGraphQLAPI(apiYaml)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

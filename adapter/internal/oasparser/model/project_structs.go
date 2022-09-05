@@ -23,16 +23,17 @@ import "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIYaml          APIYaml
-	APIEnvProps      map[string]synchronizer.APIEnvProps
-	Deployments      []Deployment
-	APIDefinition    []byte
-	InterceptorCerts []byte
-	UpstreamCerts    map[string][]byte  // cert filename -> cert bytes
-	EndpointCerts    map[string]string  // url -> cert filename
-	Policies         PolicyContainerMap // read from policy dir, policyName -> {policy spec, policy definition}
-	DownstreamCerts  map[string][]byte  // cert filename -> cert bytes
-	ClientCerts      []CertificateDetails
+	APIYaml             APIYaml
+	APIEnvProps         map[string]synchronizer.APIEnvProps
+	Deployments         []Deployment
+	APIDefinition       []byte
+	InterceptorCerts    []byte
+	UpstreamCerts       map[string][]byte  // cert filename -> cert bytes
+	EndpointCerts       map[string]string  // url -> cert filename
+	Policies            PolicyContainerMap // read from policy dir, policyName -> {policy spec, policy definition}
+	DownstreamCerts     map[string][]byte  // cert filename -> cert bytes
+	ClientCerts         []CertificateDetails
+	GraphQLComplexities GraphQLComplexityYaml
 }
 
 // DeploymentEnvironments represents content of deployment_environments.yaml file

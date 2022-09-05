@@ -9,6 +9,7 @@
       - "2371:2371"
       - "2360:2360"
       - "2340:2340"
+      - "2320:2320"
     networks:
       - cc_internal
   mockBackend2:

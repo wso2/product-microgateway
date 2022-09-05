@@ -90,5 +90,21 @@
   {
     "appName": "WebSocketSubscriptionEventCountThrottleApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "DefaultAPIApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "GraphQLThrottlingApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "GraphQLScopeApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+  "appName": "GraphQLBasicApp",
+  "throttleTier": "Unlimited"
   }
 ]

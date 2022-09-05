@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.mockbackend;
 
 import org.wso2.choreo.connect.mockbackend.async.MockAsyncServer;
 import org.wso2.choreo.connect.mockbackend.http2.Http2MockBackend;
+import org.wso2.choreo.connect.mockbackend.graphql.MockGraphQLServer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,9 +33,11 @@ public class MockServices {
         MockBackend2 mockBackend2 = new MockBackend2(Constants.MOCK_BACKEND2_SERVER_PORT);
         // TODO: (VirajSalaka) start analytics server only when it requires
         MockAnalyticsServer mockAnalyticsServer = new MockAnalyticsServer(Constants.MOCK_ANALYTICS_SERVER_PORT);
+        MockGraphQLServer mockGraphQLServer = new MockGraphQLServer(Constants.MOCK_GRAPHQL_SERVER_PORT);
         mockBackendProd.start();
         mockBackendSandbox.start();
         mockBackend2.start();
+        mockGraphQLServer.start();
         mockAnalyticsServer.start();
         List<String> argList = Arrays.asList(args);
         if (argList.contains("-tls-enabled")) {

@@ -89,6 +89,7 @@
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>
 
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsGraphQLTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeoutTestCase"/>
