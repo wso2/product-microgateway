@@ -140,10 +140,10 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 resourceConfigs.add(resourceConfig);
             }
         }
-        return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig)
-                .matchedResourceConfigs(resourceConfigs).requestMethod(method).certificate(certificate)
-                .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
-                .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).requestPayload(requestPayload).build();
+        return new RequestContext.Builder(requestPath).matchedResourceConfigs(resourceConfigs).requestMethod(method)
+                .certificate(certificate).matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID)
+                .address(address).prodClusterHeader(prodCluster).sandClusterHeader(sandCluster)
+                .requestTimeStamp(requestTimeInMillis).pathTemplate(pathTemplate).requestPayload(requestPayload)
+                .build();
     }
 }

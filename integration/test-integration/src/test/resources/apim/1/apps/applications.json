@@ -92,10 +92,6 @@
     "throttleTier": "Unlimited"
   },
   {
-    "appName": "DefaultAPIApp",
-    "throttleTier": "Unlimited"
-  },
-  {
     "appName": "GraphQLThrottlingApp",
     "throttleTier": "Unlimited"
   },

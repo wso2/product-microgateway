@@ -35,6 +35,7 @@ import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyGenerateRe
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
+import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.common.model.API;
@@ -173,16 +174,14 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
         api.setVersion(API_VERSION);
         api.setProvider("admin");
 
-        org.wso2.choreo.connect.tests.common.model.ApplicationDTO application =
-                new org.wso2.choreo.connect.tests.common.model.ApplicationDTO();
-        application.setName("GraphQLScopeApp");
-        application.setTier("Unlimited");
-        application.setId(88);
+        // creating the application
+        Application app = new Application("GraphQLScopeApp", TestConstant.APPLICATION_TIER.UNLIMITED);
+        String applicationId = StoreUtils.createApplication(app, storeRestClient);
 
-        jwtToken = TokenUtil.getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
-                3600, "subscriber resolver", false);
-        tokenWithInvalidScopes = TokenUtil.getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
-                3600, "inValidScope", false);
+        jwtToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId, user,
+                new String[]{"subscriber", "resolver"}, storeRestClient);
+        tokenWithInvalidScopes = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId, user,
+                storeRestClient);
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put(APIMIntegrationConstants.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
         requestHeaders.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");

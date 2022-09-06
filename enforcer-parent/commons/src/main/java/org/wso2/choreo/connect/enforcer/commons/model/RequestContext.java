@@ -40,10 +40,6 @@ public class RequestContext {
     private APIConfig matchedAPI;
     private String requestPath;
     private String requestMethod;
-    /**
-     * @deprecated Use {@link #matchedResourcePaths} instead.
-     */
-    private ResourceConfig matchedResourcePath;
     private ArrayList<ResourceConfig> matchedResourcePaths;
     private Map<String, String> headers;
     private Map<String, Object> properties = new HashMap<>();
@@ -226,20 +222,6 @@ public class RequestContext {
     }
 
     /**
-     * Get the complete resource configuration for matched resource path.
-     * <p>
-     * Note:
-     * ResourceConfig can be null if the request has the method OPTIONS but there is no such method listed
-     * in the OpenAPI definition.
-     *
-     * @return {@code ResourceConfig} object
-     * @deprecated Use {@link #getMatchedResourcePaths()} instead.
-     */
-    public ResourceConfig getMatchedResourcePath() {
-        return matchedResourcePath;
-    }
-
-    /**
      * Get the complete resource configurations for matched graphQL operations.
      * <p>
      * Note:
@@ -419,10 +401,6 @@ public class RequestContext {
         private String requestPath;
         private String requestMethod;
         private String requestPathTemplate;
-        /**
-         * @deprecated Use {@link #matchedResourceConfigs} instead
-         */
-        private ResourceConfig matchedResourceConfig;
         private ArrayList<ResourceConfig> matchedResourceConfigs;
         private Map<String, String> headers;
         private String prodClusterHeader;
@@ -447,11 +425,6 @@ public class RequestContext {
 
         public Builder requestMethod(String requestMethod) {
             this.requestMethod = requestMethod;
-            return this;
-        }
-
-        public Builder matchedResourceConfig(ResourceConfig matchedResourcePath) {
-            this.matchedResourceConfig = matchedResourcePath;
             return this;
         }
 
@@ -516,7 +489,6 @@ public class RequestContext {
 
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
-            requestContext.matchedResourcePath = this.matchedResourceConfig;
             requestContext.matchedResourcePaths = this.matchedResourceConfigs;
             requestContext.matchedAPI = this.matchedAPI;
             requestContext.requestMethod = this.requestMethod;
