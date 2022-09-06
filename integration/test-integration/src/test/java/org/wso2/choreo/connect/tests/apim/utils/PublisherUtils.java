@@ -31,6 +31,7 @@ import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.WorkflowResponseDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
@@ -60,6 +61,8 @@ import static org.testng.Assert.assertEquals;
 
 public class PublisherUtils {
     private static final Logger log = LoggerFactory.getLogger(PublisherUtils.class);
+    private static final String APIM_ARTIFACTS_FOLDER = File.separator + "apim" + File.separator;
+    private static final String APIS_FOLDER = File.separator + "apis";
 
     /**
      * Create and publish an API
@@ -202,11 +205,59 @@ public class PublisherUtils {
             log.info("API Created. " + getAPIIdentifierStringFromAPIRequest(apiRequest));
             return createAPIResponse.getData();
         } else {
-            String errorMsg = "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
-                            + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData();
+            String errorMsg;
+            if (createAPIResponse == null){
+                errorMsg = "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest);
+            } else {
+                errorMsg = "Error in API Creation. " + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
+                        + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData();
+            }
             log.error(errorMsg);
             throw new CCTestException(errorMsg);
         }
+    }
+
+    /**
+     * Creates a SOAP API with given WSDL definition.
+     *
+     * @param apiRequest          An APIRequest object
+     * @param apimArtifactsIndex  APIM artifacts categorization index
+     * @param apiFileContent      API definition file content
+     * @param publisherRestClient Instance of RestAPIPublisherImpl
+     * @return ID of the created API.
+     * @throws ApiException If importWSDLSchemaDefinition fails.
+     * @throws IOException  If WSDL definition file read fails.
+     */
+    public static String createSoapApiFromWsdl(APIRequest apiRequest, String apimArtifactsIndex,
+                                               String apiFileContent, RestAPIPublisherImpl publisherRestClient)
+            throws ApiException, IOException {
+        String apiId = null;
+        Path apisLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
+                APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + APIS_FOLDER);
+        if (apiRequest.getType().equals(TestConstant.API_TYPES.SOAP)) {
+            Path wsdlFilePath = Paths.get(apisLocation + "/" + new JSONObject(apiFileContent).get("wsdlUrl"));
+            File file = new File(wsdlFilePath.toString());
+            WSDLValidationResponseDTO wsdlValidationResponseDTO =
+                    publisherRestClient.validateWsdlDefinition(null, file);
+            if (wsdlValidationResponseDTO.isIsValid()) {
+                apiRequest.setWsdl(Files.readString(wsdlFilePath));
+                JSONObject apiPropertiesObj = new JSONObject();
+                apiPropertiesObj.put("name", apiRequest.getName());
+                apiPropertiesObj.put("context", apiRequest.getContext());
+                apiPropertiesObj.put("version", apiRequest.getVersion());
+
+                apiPropertiesObj.put("endpointConfig", apiRequest.getEndpointConfig());
+
+                ArrayList<String> policies = new ArrayList<>();
+                policies.add(apiRequest.getTiersCollection());
+                apiPropertiesObj.put("policies", policies);
+
+                APIDTO apidto = publisherRestClient.importWSDLSchemaDefinition(file, null,
+                        apiPropertiesObj.toString(), "SOAP");
+                apiId = apidto.getId();
+            }
+        }
+        return apiId;
     }
 
     /**

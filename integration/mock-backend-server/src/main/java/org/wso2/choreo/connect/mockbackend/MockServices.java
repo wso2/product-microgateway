@@ -57,6 +57,11 @@ public class MockServices {
             mockAsyncServer.start();
         }
 
+        if (argList.contains("-soap-enabled")) {
+            MockBackendSOAP mockBackendSoap = new MockBackendSOAP(Constants.MOCK_BACKEND_SOAP_SERVER_PORT);
+            mockBackendSoap.start();
+        }
+
         if(argList.contains("-http2-server-enabled")){
             // clear text server
             Http2MockBackend http2BackendProdClearText = new Http2MockBackend(Constants.MOCK_BACKEND_HTTP2_SERVER_CLEAR_TEXT_PORT, false, false);
