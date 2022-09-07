@@ -18,7 +18,6 @@ package org.wso2.choreo.connect.enforcer.jmx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -57,8 +56,7 @@ public class MBeanRegistrator {
 
         String objectName = SERVER_PACKAGE + ":type=" + className;
         try {
-            // MBeanServer mBeanServer = MBeanManagementFactory.getMBeanServer();
-            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+            MBeanServer mBeanServer = MBeanManagementFactory.getMBeanServer();
             Set set = mBeanServer.queryNames(new ObjectName(objectName), null);
             if (set.isEmpty()) {
                 try {
