@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
@@ -46,7 +47,10 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingContextHolder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
-import org.wso2.choreo.connect.enforcer.util.RequestUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
@@ -151,20 +155,21 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
-
+            String originalPath = responseObject.getRequestPath();
             // If the user is sending the APIKey credentials within query parameters, those query parameters should
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
             // query parameter. In this scenario, apiKey query parameter is sent within the property called
             // 'queryParamsToRemove' so that the custom filters also can utilize the method.
             if (responseObject.getQueryParamsToRemove().size() > 0 || responseObject.getQueryParamsToAdd().size() > 0 ||
                     responseObject.isRemoveAllQueryParams()) {
-                String constructedPath = RequestUtils.constructQueryParamString(responseObject.isRemoveAllQueryParams(),
+                String constructedPath = constructQueryParamString(responseObject.isRemoveAllQueryParams(),
                         responseObject.getRequestPath(), responseObject.getQueryParamMap(),
                         responseObject.getQueryParamsToRemove(), responseObject.getQueryParamsToAdd());
                 HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                         .setHeader(HeaderValue.newBuilder().setKey(APIConstants.PATH_HEADER).setValue(constructedPath)
                                 .build()).build();
                 okResponseBuilder.addHeaders(headerValueOption);
+                originalPath = constructedPath;
             }
 
             if (responseObject.getHeaderMap() != null) {
@@ -183,6 +188,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
+            structBuilder.putFields(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
+                        Value.newBuilder().setStringValue(originalPath).build());
+
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
@@ -208,6 +216,47 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 return Code.RESOURCE_EXHAUSTED_VALUE;
         }
         return Code.INTERNAL_VALUE;
+    }
+
+    private String constructQueryParamString(boolean removeAllQueryParams, String requestPath,
+            Map<String, String> currentQueryParamMap, List<String> queryParamsToRemove,
+            Map<String, String> queryParamsToAdd) {
+        // If no query parameters needs to be removed/added, then the request path can
+        // be applied as it is.
+        if (!removeAllQueryParams && queryParamsToRemove.size() == 0 && queryParamsToAdd.size() == 0) {
+            return requestPath;
+        }
+
+        Map<String, String> queryParamMap = new HashMap<>();
+        if (currentQueryParamMap != null) {
+            queryParamMap.putAll(currentQueryParamMap);
+        }
+
+        if (queryParamsToAdd != null) {
+            queryParamMap.putAll(queryParamsToAdd);
+        }
+
+        String pathWithoutQueryParams = requestPath.split("\\?")[0];
+        StringBuilder requestPathBuilder = new StringBuilder(pathWithoutQueryParams);
+        int count = 0;
+        if (!removeAllQueryParams && queryParamMap.size() > 0) {
+            for (String queryParam : queryParamMap.keySet()) {
+                if (queryParamsToRemove.contains(queryParam)) {
+                    continue;
+                }
+                if (count == 0) {
+                    requestPathBuilder.append("?");
+                } else {
+                    requestPathBuilder.append("&");
+                }
+                requestPathBuilder.append(queryParam);
+                if (queryParamMap.get(queryParam) != null) {
+                    requestPathBuilder.append("=").append(queryParamMap.get(queryParam));
+                }
+                count++;
+            }
+        }
+        return requestPathBuilder.toString();
     }
 
 }
