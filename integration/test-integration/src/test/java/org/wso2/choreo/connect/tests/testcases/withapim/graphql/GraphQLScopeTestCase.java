@@ -54,7 +54,6 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
     private static final String API_CONTEXT = "/gqlScope";
     private static final String API_VERSION = "1.0.0";
     private static final String GQL_QUERY = "{\"variables\":null,\"query\":\"{hero{name}}\"}";
-
     private static String endpointURL;
     private static String oAuthAppId;
     private static String jwtAppId;
@@ -69,16 +68,22 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
         scopeAPIId = ApimResourceProcessor.apiNameToId.get(API_NAME);
         endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/" + API_VERSION);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
+        jwtAppId = createGraphqlAppAndSubscribeToAPI(scopeAPIId, "GraphQLJWTAPP", ApplicationDTO.TokenTypeEnum.JWT);
+        oAuthAppId = createGraphqlAppAndSubscribeToAPI(scopeAPIId, "GraphQLOauthAPP", ApplicationDTO.TokenTypeEnum.OAUTH);
+        scopeAppId = ApimResourceProcessor.applicationNameToId.get("GraphQLScopeApp");
+        ApplicationKeyDTO appWithConsumerKey = StoreUtils.generateKeysForApp(scopeAppId,
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
+
+        jwtToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
+                appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
+                new String[]{"subscriber", "resolver"}, user, storeRestClient);
+        tokenWithInvalidScopes = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
+                appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
+                new String[]{"inValidScope"}, user, storeRestClient);
     }
 
     @Test(description = "GraphQL API invocation using JWT App")
     public void testGraphqlAPIInvokeUsingJWTApplication() throws Exception {
-        String graphqlOAUTHAppName = "GraphQLJWTAPP";
-        jwtAppId = createGraphqlAppAndSubscribeToAPI(scopeAPIId, graphqlOAUTHAppName, ApplicationDTO.TokenTypeEnum.JWT);
-
-        // generate token
-        ArrayList<String> grantTypes = new ArrayList<>();
-        grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.CLIENT_CREDENTIAL);
         ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(jwtAppId,
                 ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
         String accessToken = applicationKeyDTO.getToken().getAccessToken();
@@ -97,12 +102,6 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
 
     @Test(description = "API invocation using Oauth App")
     public void testGraphqlAPIInvokeUsingOAuthApplication() throws Exception {
-        String graphqlOAUTHAppName = "GraphQLOauthAPP";
-        oAuthAppId = createGraphqlAppAndSubscribeToAPI(scopeAPIId, graphqlOAUTHAppName, ApplicationDTO.TokenTypeEnum.OAUTH);
-
-        // generate token
-        ArrayList<String> grantTypes = new ArrayList<>();
-        grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.CLIENT_CREDENTIAL);
         ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(oAuthAppId,
                 ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION, storeRestClient);
         String accessToken = applicationKeyDTO.getToken().getAccessToken();
@@ -119,9 +118,9 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
                 "query operation");
     }
 
-    @Test(description = "Test Oauth scopes with GraphQL API ",
-            dependsOnMethods = { "testGraphqlAPIInvokeUsingJWTApplication","testGraphqlAPIInvokeUsingOAuthApplication"})
-    public void testOperationalLevelOAuthScopesForGraphql() throws Exception {
+    @Test(description = "setup scopes for gql operations",
+            dependsOnMethods = {"testGraphqlAPIInvokeUsingJWTApplication", "testGraphqlAPIInvokeUsingOAuthApplication"})
+    public void setupScopes() throws Exception {
         ArrayList role = new ArrayList();
         role.add("admin");
 
@@ -164,24 +163,10 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
         publisherRestClient.updateAPI(apidto, scopeAPIId);
         PublisherUtils.createAPIRevisionAndDeploy(scopeAPIId, publisherRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till API deployment.");
+    }
 
-        String scopeTestApp = "GQLScopeTestApp";
-        scopeAppId = createGraphqlAppAndSubscribeToAPI(scopeAPIId, scopeTestApp, ApplicationDTO.TokenTypeEnum.OAUTH);
-
-        API api = new API();
-        api.setName(API_NAME);
-        api.setContext(API_CONTEXT);
-        api.setVersion(API_VERSION);
-        api.setProvider("admin");
-
-        // creating the application
-        Application app = new Application("GraphQLScopeApp", TestConstant.APPLICATION_TIER.UNLIMITED);
-        String applicationId = StoreUtils.createApplication(app, storeRestClient);
-
-        jwtToken = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId, user,
-                new String[]{"subscriber", "resolver"}, storeRestClient);
-        tokenWithInvalidScopes = StoreUtils.generateUserAccessTokenProduction(apimServiceURLHttps, applicationId, user,
-                storeRestClient);
+    @Test(description = "Test Oauth scopes with GraphQL API ", dependsOnMethods = "setupScopes")
+    public void testOperationalLevelOAuthScopesForGraphql() throws Exception {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put(APIMIntegrationConstants.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
         requestHeaders.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");
@@ -194,7 +179,7 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
                 "query operation");
     }
 
-    @Test (dependsOnMethods = "testOperationalLevelOAuthScopesForGraphql")
+    @Test(dependsOnMethods = "setupScopes")
     public void testGraphqlWithDifferentScopes() throws Exception {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put(APIMIntegrationConstants.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
@@ -207,27 +192,27 @@ public class GraphQLScopeTestCase extends GraphQLBaseTest {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertTrue(responseData.contains("{hero=[{name=hero-1, age=10}], address=[{planet=Earth, village=LA}]}"),
                 "Invalid GraphQL response received for " +
-                "query operation");
+                        "query operation");
     }
 
-    @Test (dependsOnMethods = "testGraphqlWithDifferentScopes")
+    @Test(dependsOnMethods = "setupScopes")
     public void testOperationalLevelWithInvalidOAuthScopesForGraphql() throws Exception {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put(APIMIntegrationConstants.AUTHORIZATION_HEADER, "Bearer " + tokenWithInvalidScopes);
         requestHeaders.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");
-        requestHeaders.put("Content-Type",  "application/json");
+        requestHeaders.put("Content-Type", "application/json");
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest.doPost(endpointURL,
                 GQL_QUERY, requestHeaders);
         Assert.assertNotNull(response, "Empty response received for GraphQL query operation");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
     }
 
-    @Test (dependsOnMethods = "testOperationalLevelWithInvalidOAuthScopesForGraphql")
+    @Test(dependsOnMethods = "setupScopes")
     public void testMultipleOperationsWithInvalidOAuthScopesForGraphql() throws Exception {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put(APIMIntegrationConstants.AUTHORIZATION_HEADER, "Bearer " + tokenWithInvalidScopes);
         requestHeaders.put(HttpHeaderNames.CONTENT_TYPE.toString(), "application/json");
-        requestHeaders.put("Content-Type",  "application/json");
+        requestHeaders.put("Content-Type", "application/json");
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest.doPost(endpointURL,
                 "{\"query\": \"query MyQuery {hero {name age}\\n  address {planet village}\\n}\\n\", " +
                         "\"variables\": null, \"operationName\": \"MyQuery\" }", requestHeaders);

@@ -113,20 +113,5 @@
     "apiName": "WebsocketSubscriptionThrottleAPI",
     "appName": "WebSocketSubscriptionEventCountThrottleApp",
     "tier": "5EventsPerMin"
-  },
-  {
-    "apiName": "GraphQLBasicAPI",
-    "appName": "GraphQLBasicApp",
-    "tier": "Unlimited"
-  },
-  {
-    "apiName": "GraphQLThrottlingAPI",
-    "appName": "GraphQLThrottlingApp",
-    "tier": "Unlimited"
-  },
-  {
-    "apiName": "GraphQLScopeAPI",
-    "appName": "GraphQLScopeApp",
-    "tier": "Unlimited"
   }
 ]

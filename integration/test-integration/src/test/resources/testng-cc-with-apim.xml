@@ -90,10 +90,6 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2ClearTextApiTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2SecuredApiTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2DownstreamToHttp1UpstreamTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLBasicTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLQueryAnalysisTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLThrottlingTestCase"/>
-           <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLScopeTestCase"/>
        </classes>
    </test>
 
@@ -131,6 +127,10 @@
         <classes>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketScopeTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLBasicTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLQueryAnalysisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLScopeTestCase"/>
         </classes>
     </test>
 
