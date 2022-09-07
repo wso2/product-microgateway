@@ -258,5 +258,4 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         }
         return requestPathBuilder.toString();
     }
-
 }

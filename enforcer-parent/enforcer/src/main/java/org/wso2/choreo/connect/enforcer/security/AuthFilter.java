@@ -366,5 +366,4 @@ public class AuthFilter implements Filter {
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,
                 Objects.toString(authContext.getKeyType(), ""));
     }
-
 }
