@@ -33,7 +33,6 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
-import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
@@ -41,7 +40,6 @@ import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
 import org.wso2.choreo.connect.enforcer.util.EndpointSecurityUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
-import org.wso2.choreo.connect.enforcer.util.RequestUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -122,9 +120,6 @@ public class AuthFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-
-        // Sets the Router access log metadata
-        setAccessLogMetadata(requestContext);
 
         // It is required to skip the auth Filter if the lifecycle status is prototype
         if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(
@@ -295,14 +290,5 @@ public class AuthFilter implements Filter {
                 Objects.toString(authContext.getRawToken(), ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,
                 Objects.toString(authContext.getKeyType(), ""));
-    }
-
-    private void setAccessLogMetadata(RequestContext requestContext) {
-        String processedPath = RequestUtils.constructQueryParamString(
-                requestContext.getRequestPath(), requestContext.getQueryParameters(),
-                RouterAccessLogConstants.QUERY_PARAMS_TO_REMOVE_FROM_PATH);
-
-        requestContext.addMetadataToMap(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
-                Objects.toString(processedPath, ""));
     }
 }
