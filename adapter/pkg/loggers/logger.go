@@ -32,22 +32,24 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAuth     = "github.com/wso2/product-microgateway/adapter/pkg/auth"
-	pkgMsg      = "github.com/wso2/product-microgateway/adapter/pkg/messaging"
-	pkgHealth   = "github.com/wso2/product-microgateway/adapter/pkg/health"
-	pkgTLSUtils = "github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
-	pkgAdapter  = "github.com/wso2/product-microgateway/adapter/pkg/adapter"
-	pkgSync     = "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
+	pkgAuth      = "github.com/wso2/product-microgateway/adapter/pkg/auth"
+	pkgMsg       = "github.com/wso2/product-microgateway/adapter/pkg/messaging"
+	pkgHealth    = "github.com/wso2/product-microgateway/adapter/pkg/health"
+	pkgTLSUtils  = "github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	pkgAdapter   = "github.com/wso2/product-microgateway/adapter/pkg/adapter"
+	pkgSync      = "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
+	pkgSoapUtils = "github.com/wso2/product-microgateway/adapter/pkg/soaputils"
 )
 
 // logger package references
 var (
-	LoggerAuth     logging.Log
-	LoggerMsg      logging.Log
-	LoggerHealth   logging.Log
-	LoggerTLSUtils logging.Log
-	LoggerAdapter  logging.Log
-	LoggerSync     logging.Log
+	LoggerAuth      logging.Log
+	LoggerMsg       logging.Log
+	LoggerHealth    logging.Log
+	LoggerTLSUtils  logging.Log
+	LoggerAdapter   logging.Log
+	LoggerSync      logging.Log
+	LoggerSoapUtils logging.Log
 )
 
 func init() {
@@ -62,5 +64,6 @@ func UpdateLoggers() {
 	LoggerTLSUtils = logging.InitPackageLogger(pkgTLSUtils)
 	LoggerAdapter = logging.InitPackageLogger(pkgAdapter)
 	LoggerSync = logging.InitPackageLogger(pkgSync)
+	LoggerSoapUtils = logging.InitPackageLogger(pkgSoapUtils)
 	logrus.Info("Updated loggers")
 }

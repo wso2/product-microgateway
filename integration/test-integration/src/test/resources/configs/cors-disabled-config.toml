@@ -1,4 +1,7 @@
-[router] 
+[adapter]
+soapErrorInXMLEnabled = true
+
+[router]
 [router.cors]
 enabled = false
 
