@@ -225,4 +225,19 @@ public interface ConfigOrBuilder extends
    */
   org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder getFiltersOrBuilder(
       int index);
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+   * @return Whether the soap field is set.
+   */
+  boolean hasSoap();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+   * @return The soap.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Soap getSoap();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.SoapOrBuilder getSoapOrBuilder();
 }

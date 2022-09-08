@@ -45,7 +45,7 @@
                         <jacoco-agent.destfile>**/jacoco.exec</jacoco-agent.destfile>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>
+<!--                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>-->
                         <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemProperties>

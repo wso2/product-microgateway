@@ -1,0 +1,28 @@
+asyncapi: 2.0.0
+info:
+  title: WebSocket
+  version: 1.0.0
+servers:
+  production:
+    url: ws://ws.ifelse.io:80
+    protocol: ws
+channels:
+  /notifications:
+    publish:
+      x-uri-mapping: /notifications
+    subscribe:
+      x-uri-mapping: /notifications
+      x-scopes:
+        "0": creator
+    x-auth-type: Any
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://localhost:9999
+          scopes:
+            creator: creator
+          x-scopes-bindings:
+            creator: admin

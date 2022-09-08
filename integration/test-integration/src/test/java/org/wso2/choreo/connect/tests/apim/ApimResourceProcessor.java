@@ -135,17 +135,23 @@ public class ApimResourceProcessor {
 
         Path apisLocation = Paths.get(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH +
                 APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + APIS_FOLDER);
-        try (Stream<Path> paths = Files.walk(apisLocation)) {
+        try (Stream<Path> paths = Files.walk(apisLocation, 1)) {
             for (Iterator<Path> apiFiles = paths.filter(Files::isRegularFile).iterator(); apiFiles.hasNext();) {
                 Path apiFilePath = apiFiles.next();
                 String apiFileContent = Files.readString(apiFilePath);
-
                 APIRequest apiRequest = new Gson().fromJson(apiFileContent, TYPE_API_REQUEST);
                 apiRequest.setProvider(apiProvider);
                 apiRequest.setTags("tags"); // otherwise, throws a NPE
 
-                // Create API
-                String apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                // create API
+                String apiId;
+                if (apiRequest.getType().equals(TestConstant.API_TYPES.SOAP)){
+                    apiId = PublisherUtils.createSoapApiFromWsdl(apiRequest, apimArtifactsIndex,
+                            apiFileContent, publisherRestClient);
+                } else {
+                    apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
+                }
+                
                 if(apiToOpenAPI.containsKey(apiRequest.getName())) {
                     String openAPIFileName = apiToOpenAPI.get(apiRequest.getName());
                     PublisherUtils.updateOpenAPIDefinition(apiId, openAPIFileName, publisherRestClient);

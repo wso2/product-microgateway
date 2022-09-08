@@ -1,0 +1,118 @@
+type: api
+version: v4.1.0
+data:
+  id: 9bc3dbd7-7635-406e-bfd2-2c71dcb05b98
+  name: WebSocket
+  context: /websocket               // context value for the Async API
+  version: 1.0.0                    // version of the Async API
+  provider: admin
+  lifeCycleStatus: PUBLISHED        // life cycle state
+  responseCachingEnabled: false
+  cacheTimeout: 300
+  hasThumbnail: false
+  isDefaultVersion: false
+  isRevision: false
+  revisionId: 0
+  enableSchemaValidation: false
+  type: WS                          // denotes the async API type
+  transport: []
+  tags: []
+  policies:
+   - AsyncUnlimited               // policies attached to the Async API deployment
+  apiThrottlingPolicy: 50KPerMin  // applies API level rate limiting for the Async API
+  authorizationHeader: Authorization
+  securityScheme:
+   - oauth2
+   - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  mediationPolicies: []
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalProperties: []
+  additionalPropertiesMap: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins:
+     - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+     - authorization
+     - Access-Control-Allow-Origin
+     - Content-Type
+     - SOAPAction
+     - apikey
+     - Internal-Key
+    accessControlAllowMethods:
+     - GET
+     - PUT
+     - POST
+     - DELETE
+     - PATCH
+     - OPTIONS
+  websubSubscriptionConfiguration:
+    enable: false
+    secret: ""
+    signingAlgorithm: SHA1
+    signatureHeader: x-hub-signature
+  createdTime: "1659513587230"
+  lastUpdatedTime: 2022-08-03 10:00:59.182
+  endpointConfig:
+    endpoint_type: ws
+    sandbox_endpoints:
+      url: ws://ws.ifelse.io:80
+    production_endpoints:
+      url: ws://ws.ifelse.io:80               // backend URL for the async API imlpementation
+  endpointImplementationType: ENDPOINT
+  scopes:
+   -
+    scope:
+      name: creator                         // defines scopes that are going to be applied for thr Async API
+      displayName: creator
+      description: creator
+      bindings:
+       - admin
+    shared: false
+  operations:
+   -
+    id: ""
+    target: /notifications
+    verb: SUBSCRIBE
+    authType: Application & Application User
+    throttlingPolicy: 50KPerMin           // applies operation level rate limiting policy
+    scopes:
+     - creator                            // applies operation level scope
+    usedProductIds: []
+    uriMapping: /notifications
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+   -
+    id: ""
+    target: /notifications
+    verb: PUBLISH
+    authType: Application & Application User
+    throttlingPolicy: 50KPerMin
+    scopes: []
+    usedProductIds: []
+    uriMapping: /notifications
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+  categories: []
+  keyManagers:
+   - all
+  advertiseInfo:
+    advertised: false
+    apiOwner: admin
+    vendor: WSO2
+  gatewayVendor: wso2
+  gatewayType: wso2/synapse
+  asyncTransportProtocols: []
+  organizationId: carbon.super

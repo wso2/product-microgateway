@@ -90,12 +90,15 @@ public class APIConstants {
 
     //headers and values
     public static final String CONTENT_TYPE_HEADER = "Content-type";
+    public static final String SOAP_ACTION_HEADER_NAME = "soapaction";
     public static final String ACCEPT_HEADER = "accept";
     public static final String PREFER_HEADER = "prefer";
     public static final String PREFER_CODE = "code";
     public static final String PREFER_EXAMPLE = "example";
     public static final List<String> PREFER_KEYS = List.of(PREFER_CODE, PREFER_EXAMPLE);
     public static final String APPLICATION_JSON = "application/json";
+    public static final String CONTENT_TYPE_TEXT_XML = "text/xml";
+    public static final String CONTENT_TYPE_SOAP_XML = "application/soap+xml";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
@@ -103,6 +106,19 @@ public class APIConstants {
     public static final String WEBSOCKET = "websocket";
 
     public static final String LOG_TRACE_ID = "traceId";
+
+    // SOAP protocol versions
+    public static final String SOAP11_PROTOCOL = "SOAP 1.1 Protocol";
+    public static final String SOAP12_PROTOCOL = "SOAP 1.2 Protocol";
+
+    /**
+     * Holds the constants related to denied response types.
+     */
+    public static class ErrorResponseTypes {
+        public static final String SOAP11 = "SOAP11";
+        public static final String SOAP12 = "SOAP12";
+        public static final String JSON = "JSON";
+    }
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
