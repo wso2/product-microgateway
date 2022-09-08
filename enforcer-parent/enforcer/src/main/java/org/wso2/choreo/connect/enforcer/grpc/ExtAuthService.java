@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.jmx.JMXUtils;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.metrics.jmx.impl.ExtAuthMetrics;
@@ -93,7 +94,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 MetricsExporter metricsExporter = MetricsManager.getInstance();
                 metricsExporter.trackMetric("enforcerLatency", System.currentTimeMillis() - starTimestamp);
             }
-            ExtAuthMetrics.getInstance().recordMetric(System.currentTimeMillis() - starTimestamp);
+            if (JMXUtils.isJMXMetricsEnabled()) {
+                ExtAuthMetrics.getInstance().recordMetric(System.currentTimeMillis() - starTimestamp);
+            }
         }
     }
 

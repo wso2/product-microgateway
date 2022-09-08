@@ -11,19 +11,19 @@ public class ExtAuthMetrics implements ExtAuthMetricsMXBean {
     private static ExtAuthMetrics extAuthMetricsMBean = null;
 
     private long totalRequestCount = 0;
-
-    private long totalResponseCount = 0;
-
     private long averageResponseTimeMillis = 0;
-
     private long maxResponseTimeMillis = Long.MIN_VALUE;
-
     private long minResponseTimeMillis = Long.MAX_VALUE;
 
     private ExtAuthMetrics() {
         MBeanRegistrator.registerMBean(this);
     }
 
+    /**
+     * Getter for the Singleton ExtAuthMetrics instance.
+     * 
+     * @return ExtAuthMetrics
+     */
     public static ExtAuthMetrics getInstance() {
         if (extAuthMetricsMBean == null) {
             extAuthMetricsMBean = new ExtAuthMetrics();
@@ -33,10 +33,6 @@ public class ExtAuthMetrics implements ExtAuthMetricsMXBean {
 
     public long getTotalRequestCount() {
         return totalRequestCount;
-    };
-
-    public long getTotalResponseCount() {
-        return totalResponseCount;
     };
 
     public long getAverageResponseTimeMillis() {
@@ -51,10 +47,17 @@ public class ExtAuthMetrics implements ExtAuthMetricsMXBean {
         return minResponseTimeMillis;
     };
 
-    public synchronized void recordMetric(long timeMillis) {
+    public synchronized void recordMetric(long responseTimeMillis) {
         this.totalRequestCount += 1;
-        this.averageResponseTimeMillis = (this.averageResponseTimeMillis + timeMillis) / totalRequestCount;
-        this.minResponseTimeMillis = Math.min(this.minResponseTimeMillis, timeMillis);
-        this.maxResponseTimeMillis = Math.max(this.maxResponseTimeMillis, timeMillis);
+        this.averageResponseTimeMillis = (this.averageResponseTimeMillis + responseTimeMillis) / totalRequestCount;
+        this.minResponseTimeMillis = Math.min(this.minResponseTimeMillis, responseTimeMillis);
+        this.maxResponseTimeMillis = Math.max(this.maxResponseTimeMillis, responseTimeMillis);
+    }
+
+    public synchronized void resetExtAuthMetrics() {
+        this.totalRequestCount = 0;
+        this.averageResponseTimeMillis = 0;
+        this.maxResponseTimeMillis = Long.MIN_VALUE;
+        this.minResponseTimeMillis = Long.MAX_VALUE;
     }
 }
