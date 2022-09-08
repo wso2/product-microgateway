@@ -34,6 +34,11 @@
         <url>https://wso2.org/</url>
     </organization>
 
+<!--    <property>-->
+<!--        <name>jacocoDependencyAllowedToAdd</name>-->
+<!--        <value>!${skip.code.coverage}</value>-->
+<!--    </property>-->
+
     <build>
         <extensions>
             <extension>
@@ -189,10 +194,27 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/</outputDirectory>
                             <includeGroupIds>
-                                org.apache.logging.log4j, org.json.wso2, org.jacoco
+                                org.apache.logging.log4j, org.json.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j-impl, org.jacoco.agent
+                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j-impl
+                            </includeArtifactIds>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-dependencies-for-code-coverage</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.code.coverage}</skip>
+                            <outputDirectory>${project.build.directory}/</outputDirectory>
+                            <includeGroupIds>
+                                org.jacoco
+                            </includeGroupIds>
+                            <includeArtifactIds>
+                                org.jacoco.agent
                             </includeArtifactIds>
                         </configuration>
                     </execution>
@@ -265,6 +287,9 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <skip>${skip.code.coverage}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -580,4 +605,5 @@
             <classifier>runtime</classifier>
         </dependency>
     </dependencies>
+
 </project>
