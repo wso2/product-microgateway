@@ -90,7 +90,8 @@ public class OTLPExporter implements TracerBuilder {
 
         // Optional auth header for Saas providers and other telemetry backends that supports token/key based
         // authentication.
-        if (authHeaderName != null && authHeaderValue != null) {
+        if (authHeaderName != null && authHeaderValue != null &&
+                (!"".equals(authHeaderName)) && (!"".equals(authHeaderValue))) {
             otlpGrpcSpanExporterBuilder.addHeader(authHeaderName, authHeaderValue);
         }
 
