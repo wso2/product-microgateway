@@ -22,34 +22,67 @@ import (
 
 	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	envoy_config_route_v3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/err"
+	"github.com/wso2/product-microgateway/adapter/pkg/soaputils"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func getErrorResponseMappers() []*hcmv3.ResponseMapper {
-	return []*hcmv3.ResponseMapper{
-		genErrorResponseMapper(err.NotFoundCode, err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription, "NR"),
-		genErrorResponseMapper(500, err.UaexCode, err.UaexMessage, err.UaexDecription, "UAEX"),
-		genErrorResponseMapper(503, err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%", "UF"),
-		genErrorResponseMapper(504, err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%", "UT"),
-		genErrorResponseMapper(503, err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%", "UO"),
-		genErrorResponseMapper(500, err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%", "URX"),
-		genErrorResponseMapper(500, err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%", "NC"),
-		genErrorResponseMapper(503, err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%", "UH"),
-		genErrorResponseMapper(503, err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%", "UR"),
-		genErrorResponseMapper(503, err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%", "UC"),
-		genErrorResponseMapper(503, err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%", "LR"),
-		genErrorResponseMapper(400, err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%", "IH"),
-		genErrorResponseMapper(500, err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%", "SI"),
-		genErrorResponseMapper(500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
-		genErrorResponseMapper(500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
-		genErrorResponseMapper(500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
+type errorResponseDetails struct {
+	statusCode  int
+	errorCode   int
+	message     string
+	description string
+}
+
+var errorResponseMap map[string]errorResponseDetails
+
+func init() {
+	errorResponseMap = map[string]errorResponseDetails{
+		"NR":    {404, err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription},
+		"UAEX":  {500, err.UaexCode, err.UaexMessage, err.UaexDecription},
+		"UF":    {503, err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%"},
+		"UT":    {504, err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%"},
+		"UO":    {503, err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%"},
+		"URX":   {500, err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%"},
+		"NC":    {500, err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%"},
+		"UH":    {503, err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%"},
+		"UR":    {503, err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%"},
+		"UC":    {503, err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%"},
+		"LR":    {503, err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%"},
+		"IH":    {400, err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%"},
+		"SI":    {500, err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%"},
+		"DPE":   {500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%"},
+		"UPE":   {500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%"},
+		"UMSDR": {500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%"},
 	}
 }
 
-func genErrorResponseMapper(statusCode uint32, errorCode int32, message string, description string, flag string) *hcmv3.ResponseMapper {
+func getErrorResponseMappers() []*hcmv3.ResponseMapper {
+	responseMappers := []*hcmv3.ResponseMapper{}
+	conf, _ := config.ReadConfigs()
+	if conf.Adapter.SoapErrorInXMLEnabled {
+		for flag, details := range errorResponseMap {
+			responseMappers = append(responseMappers,
+				genSoap12ErrorResponseMapper(flag, uint32(details.statusCode), int32(details.errorCode), details.message, details.description),
+				genSoap11ErrorResponseMapper(flag, uint32(details.statusCode), int32(details.errorCode), details.message, details.description),
+			)
+		}
+	}
+
+	for flag, details := range errorResponseMap {
+		responseMappers = append(responseMappers,
+			genErrorResponseMapperJSON(flag, uint32(details.statusCode), int32(details.errorCode), details.message, details.description),
+		)
+	}
+
+	return responseMappers
+}
+
+func genErrorResponseMapperJSON(flag string, statusCode uint32, errorCode int32, message string, description string) *hcmv3.ResponseMapper {
 	errorMsgMap := make(map[string]*structpb.Value)
 	errorMsgMap["code"] = structpb.NewStringValue(strconv.FormatInt(int64(errorCode), 10))
 	errorMsgMap["message"] = structpb.NewStringValue(message)
@@ -57,12 +90,7 @@ func genErrorResponseMapper(statusCode uint32, errorCode int32, message string, 
 
 	mapper := &hcmv3.ResponseMapper{
 		Filter: &access_logv3.AccessLogFilter{
-			// TODO: (VirajSalaka) Decide if the status code needs to be checked in addition to flags
-			FilterSpecifier: &access_logv3.AccessLogFilter_ResponseFlagFilter{
-				ResponseFlagFilter: &access_logv3.ResponseFlagFilter{
-					Flags: []string{flag},
-				},
-			},
+			FilterSpecifier: genResponseFlagFilter(flag),
 		},
 		StatusCode: wrapperspb.UInt32(statusCode),
 		BodyFormatOverride: &corev3.SubstitutionFormatString{
@@ -74,4 +102,97 @@ func genErrorResponseMapper(statusCode uint32, errorCode int32, message string, 
 		},
 	}
 	return mapper
+}
+
+func genSoap12ErrorResponseMapper(flag string, statusCode uint32, errorCode int32, message string, description string) *hcmv3.ResponseMapper {
+	msg, _ := soaputils.GenerateSoapFaultMessage(soap12ProtocolVersion, message, description, strconv.Itoa(int(errorCode)))
+	filters := []*access_logv3.AccessLogFilter{
+		{
+			FilterSpecifier: genExactMatchHeaderFilter(contentTypeHeaderName, contentTypeHeaderSoap),
+		},
+		{
+			FilterSpecifier: genResponseFlagFilter(flag),
+		},
+	}
+
+	return genSoapErrorResponseMapper(filters, statusCode, msg, contentTypeHeaderSoap)
+}
+
+func genSoap11ErrorResponseMapper(flag string, statusCode uint32, errorCode int32, message string, description string) *hcmv3.ResponseMapper {
+	msg, _ := soaputils.GenerateSoapFaultMessage(soap11ProtocolVersion, message, description, strconv.Itoa(int(errorCode)))
+	filters := []*access_logv3.AccessLogFilter{
+		{
+			FilterSpecifier: genExactMatchHeaderFilter(contentTypeHeaderName, contentTypeHeaderXML),
+		},
+		{
+			FilterSpecifier: genPresentMatchHeaderFilter(soapActionHeaderName),
+		},
+		{
+			FilterSpecifier: genResponseFlagFilter(flag),
+		},
+	}
+	return genSoapErrorResponseMapper(filters, statusCode, msg, contentTypeHeaderXML)
+}
+
+func genSoapErrorResponseMapper(filters []*access_logv3.AccessLogFilter,
+	statusCode uint32, msg, contentTypeHeader string) *hcmv3.ResponseMapper {
+
+	mapper := &hcmv3.ResponseMapper{
+		Filter: &access_logv3.AccessLogFilter{
+			FilterSpecifier: &access_logv3.AccessLogFilter_AndFilter{
+				AndFilter: &access_logv3.AndFilter{
+					Filters: filters,
+				},
+			},
+		},
+		StatusCode: wrapperspb.UInt32(statusCode),
+		BodyFormatOverride: &corev3.SubstitutionFormatString{
+			Format: &corev3.SubstitutionFormatString_TextFormatSource{
+				TextFormatSource: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: msg,
+					},
+				},
+			},
+			ContentType: contentTypeHeader,
+		},
+	}
+	return mapper
+}
+
+// genResponseFlagFilter returns a filter, which can be used to filter responses using response flag.
+func genResponseFlagFilter(flag string) *access_logv3.AccessLogFilter_ResponseFlagFilter {
+	return &access_logv3.AccessLogFilter_ResponseFlagFilter{
+		ResponseFlagFilter: &access_logv3.ResponseFlagFilter{
+			Flags: []string{flag},
+		},
+	}
+}
+
+// genPresentMatchHeaderFilter returns a header filter specifier, which can be used to check whether the header is present or not.
+func genPresentMatchHeaderFilter(headerName string) *access_logv3.AccessLogFilter_HeaderFilter {
+	return &access_logv3.AccessLogFilter_HeaderFilter{
+		HeaderFilter: &access_logv3.HeaderFilter{
+			Header: &envoy_config_route_v3.HeaderMatcher{
+				Name: soapActionHeaderName,
+				HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_PresentMatch{
+					PresentMatch: true,
+				},
+			},
+		},
+	}
+}
+
+// genExactMatchHeaderFilter returns a header filter specifer which can be used to check the headers with exact value.
+func genExactMatchHeaderFilter(headerName, headerValue string) *access_logv3.AccessLogFilter_HeaderFilter {
+	return &access_logv3.AccessLogFilter_HeaderFilter{
+		HeaderFilter: &access_logv3.HeaderFilter{
+			Header: &envoy_config_route_v3.HeaderMatcher{
+				Name: headerName,
+				HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_ExactMatch{
+					ExactMatch: headerValue,
+				},
+			},
+		},
+	}
 }

@@ -58,6 +58,7 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "all_http_methods_for_wildcard_openAPI.yaml", "all_http_methods_for_wildcard_openAPI");
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore");
         ApictlUtils.createProject("prod_sand_diff_endpoints_openAPI.yaml", "prod_sand_diff_endpoints");
+        ApictlUtils.createProject("prod_sand_clusters_openAPI.yaml", "prod_sand_clusters");
         //todo:(amali) enable this test once apictl side get fixed.
         // ApictlUtils.createProject( "endpoint_ref_openAPI.yaml", "ep_ref_petstore", null, null);
         ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore");
@@ -83,6 +84,7 @@ public class CcWithDefaultConf {
         ApictlUtils.deployAPI("all_http_methods_for_wildcard_openAPI", "test");
         ApictlUtils.deployAPI("prod_and_sand_petstore", "test");
         ApictlUtils.deployAPI("prod_sand_diff_endpoints", "test");
+        ApictlUtils.deployAPI("prod_sand_clusters", "test");
 //        ApictlUtils.deployAPI("ep_ref_petstore", "test");
         ApictlUtils.deployAPI("prod_petstore", "test");
         ApictlUtils.deployAPI("sand_petstore", "test");

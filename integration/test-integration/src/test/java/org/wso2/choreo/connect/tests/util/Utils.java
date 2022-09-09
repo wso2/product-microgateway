@@ -513,6 +513,18 @@ public class Utils {
         return targetClassesDir.getParentFile().toString();
     }
 
+    /**
+     * Retrieves the path for cc sample API projects.
+     *
+     * @return String - samples directory path
+     */
+    public static String getCCSamplesDirPath(){
+        File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
+                getLocation().getPath());
+        return targetClassesDir.getParentFile().getParentFile().getParentFile().getParentFile().toString()
+                + File.separator + "samples";
+    }
+
     public static String getAdapterServiceURLHttps(String servicePath) throws MalformedURLException {
         return new URL(new URL("https://localhost:" + TestConstant.ADAPTER_PORT), servicePath)
                 .toString();
