@@ -20,7 +20,6 @@ package org.wso2.choreo.connect.enforcer.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.jmx.MBeanRegistrator;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,12 +38,8 @@ public class EnforcerWorkerPool {
     public EnforcerWorkerPool(int core, int max, int keepAlive, int queueLength, String threadGroupName,
             String threadGroupId) {
         this.blockingQueue = queueLength == -1 ? new LinkedBlockingQueue() : new LinkedBlockingQueue(queueLength);
-        NativeThreadFactory workerThreadFactory = new NativeThreadFactory(new ThreadGroup(threadGroupName),
-                threadGroupId);
         this.executor = new EnforcerThreadPoolExecutor(core, max, (long) keepAlive, TimeUnit.SECONDS,
-                this.blockingQueue, workerThreadFactory);
-        MBeanRegistrator.registerMBean(workerThreadFactory);
-
+                this.blockingQueue, new NativeThreadFactory(new ThreadGroup(threadGroupName), threadGroupId));
     }
 
     public ThreadPoolExecutor getExecutor() {

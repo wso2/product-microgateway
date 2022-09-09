@@ -8,7 +8,7 @@ public class JMXUtils {
     private static final String CHOREO_CONNECT_JMX_METRICS_ENABLE = "choreo.connect.jmx.metrics.enable";
 
     /**
-     * Return true if jmx metrics enabled, otherwise false.
+     * Returns true if jmx metrics enabled as a system property, otherwise false.
      * 
      * @return boolean
      */

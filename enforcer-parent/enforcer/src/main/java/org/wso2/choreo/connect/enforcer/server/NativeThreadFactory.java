@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Creates thread with specific thread group and name prefix.
  */
-public class NativeThreadFactory implements ThreadFactory, NativeThreadFactoryMBean {
+public class NativeThreadFactory implements ThreadFactory {
 
     final ThreadGroup group;
     final AtomicInteger count;
@@ -46,10 +46,5 @@ public class NativeThreadFactory implements ThreadFactory, NativeThreadFactoryMB
         t.setDaemon(false);
         t.setPriority(Thread.NORM_PRIORITY);
         return t;
-    }
-
-    @Override
-    public int getActiveCount() {
-        return this.group.activeCount();
     }
 }

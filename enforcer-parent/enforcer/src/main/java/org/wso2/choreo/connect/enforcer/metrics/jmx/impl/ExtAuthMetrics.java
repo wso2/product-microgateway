@@ -1,12 +1,12 @@
 package org.wso2.choreo.connect.enforcer.metrics.jmx.impl;
 
 import org.wso2.choreo.connect.enforcer.jmx.MBeanRegistrator;
-import org.wso2.choreo.connect.enforcer.metrics.jmx.api.ExtAuthMetricsMXBean;
+import org.wso2.choreo.connect.enforcer.metrics.jmx.api.ExtAuthMetricsMBean;
 
 /**
  * Singleton MBean for ExtAuth Service metrics.
  */
-public class ExtAuthMetrics implements ExtAuthMetricsMXBean {
+public class ExtAuthMetrics implements ExtAuthMetricsMBean {
 
     private static ExtAuthMetrics extAuthMetricsMBean = null;
 

@@ -3,7 +3,7 @@ package org.wso2.choreo.connect.enforcer.metrics.jmx.api;
 /**
  * MBean API for ExtAuth Service metrics.
  */
-public interface ExtAuthMetricsMXBean {
+public interface ExtAuthMetricsMBean {
 
     /**
      * Getter for total request count.

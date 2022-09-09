@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -82,20 +81,5 @@ public class MBeanRegistrator {
             logger.error(msg);
             throw new RuntimeException(msg, e);
         }
-    }
-
-    /**
-     * Unregisters all MBeans from the MBean server.
-     *
-     */
-    public static void unregisterAllMBeans() {
-        MBeanServer mBeanServer = MBeanManagementFactory.getMBeanServer();
-        mBeans.forEach(mBean -> {
-            try {
-                mBeanServer.unregisterMBean(mBean);
-            } catch (InstanceNotFoundException | MBeanRegistrationException e) {
-                logger.error("Cannot unregister MBean " + mBean.getCanonicalName(), e);
-            }
-        });
     }
 }
