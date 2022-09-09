@@ -3,7 +3,7 @@ package org.wso2.choreo.connect.enforcer.metrics.jmx.api;
 /**
  * MBean API for ExtAuth Service metrics.
  */
-public interface ExtAuthMetricsMBean {
+public interface ExtAuthMetricsMXBean {
 
     /**
      * Getter for total request count.
@@ -32,13 +32,6 @@ public interface ExtAuthMetricsMBean {
      * @return long
      */
     public long getMinResponseTimeMillis();
-
-    /**
-     * Calculates the metrics for response time and records them.
-     * 
-     * @param responseTimeMillis
-     */
-    public void recordMetric(long responseTimeMillis);
 
     /**
      * Resets all the metrics to thier initial values.
