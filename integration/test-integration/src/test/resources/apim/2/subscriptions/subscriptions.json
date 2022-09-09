@@ -1,5 +1,10 @@
 [
   {
+    "apiName": "SoapAPI",
+    "appName": "SoapBasicApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "WebSocketScopeAPI",
     "appName": "WebSocketScopeApp",
     "tier": "AsyncUnlimited"

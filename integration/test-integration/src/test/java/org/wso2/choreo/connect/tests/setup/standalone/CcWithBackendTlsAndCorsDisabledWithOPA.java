@@ -63,6 +63,7 @@ public class CcWithBackendTlsAndCorsDisabledWithOPA {
         ApictlUtils.deployAPI("http2_clear_text", "test");
         ApictlUtils.deployAPI("http2_secured", "test");
         ApictlUtils.deployAPI("api_policy_per_operation", "test");
+        ApictlUtils.deploySampleProject("SampleSOAPApi", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

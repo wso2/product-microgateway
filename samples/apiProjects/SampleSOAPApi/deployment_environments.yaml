@@ -1,0 +1,6 @@
+type: deployment_environments
+version: v4.1.0
+data:
+ -
+   displayOnDevportal: true
+   deploymentEnvironment: Default

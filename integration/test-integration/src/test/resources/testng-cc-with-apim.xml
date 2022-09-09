@@ -126,6 +126,7 @@
     <test name="Test the 2nd set of APIs apps subscriptions" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketScopeTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
         </classes>
     </test>
 
