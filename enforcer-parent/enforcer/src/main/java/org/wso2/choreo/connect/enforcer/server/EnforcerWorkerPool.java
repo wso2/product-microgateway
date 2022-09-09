@@ -27,8 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Class that holds the thread pool that serves the external auth requests
- * coming from the router component.
+ * Class that holds the  thread pool that serves the external auth requests coming from the router component.
  */
 public class EnforcerWorkerPool {
     private final BlockingQueue<Runnable> blockingQueue;

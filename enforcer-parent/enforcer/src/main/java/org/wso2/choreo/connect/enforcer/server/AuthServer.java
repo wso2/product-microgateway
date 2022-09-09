@@ -108,9 +108,6 @@ public class AuthServer {
             // Create a new server to listen on port 8081
             Server server = initServer();
 
-            // Initialize JMX Agent
-            // JMXAgent.initJMXAgent();
-
             // Enable global filters
             if (enforcerConfig.getAnalyticsConfig().isEnabled() ||
                     enforcerConfig.getMetricsConfig().isMetricsEnabled()) {
