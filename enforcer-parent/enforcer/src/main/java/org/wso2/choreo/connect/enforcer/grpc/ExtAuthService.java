@@ -98,7 +98,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
     private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {
         CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder();
-        String traceKey = request.getAttributes().getRequest().getHttp().getId();
         if (responseObject.isDirectResponse()) {
             DeniedResponsePreparer deniedResponsePreparer = new DeniedResponsePreparer(DeniedHttpResponse.newBuilder());
             // set headers
@@ -111,8 +110,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         }
                 );
             }
-            deniedResponsePreparer.addHeaders(HeaderValueOption.newBuilder().setHeader(HeaderValue.newBuilder()
-                    .setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build()));
 
             // set status code
             HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
