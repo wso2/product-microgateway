@@ -16,8 +16,10 @@
 
 package org.wso2.choreo.connect.enforcer.jmx;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 
 import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
@@ -30,7 +32,7 @@ import javax.management.remote.JMXServiceURL;
  * JMX Connector Agent
  */
 public class JMXAgent {
-    private static final Logger logger = LoggerFactory.getLogger(JMXAgent.class);
+    private static final Logger logger = LogManager.getLogger(JMXAgent.class);
     private static JMXConnectorServer jmxConnectorServer;
     private static final String DEFAULT_RMI_SERVER_PORT = "1111";
     private static final String DEFAULT_RMI_REGISTRY_PORT = "9999";
@@ -55,7 +57,8 @@ public class JMXAgent {
                 jmxConnectorServer.start();
                 logger.info("JMXAgent JMX Service URL : " + jmxServiceURL.toString());
             } catch (Throwable throwable) {
-                logger.error("Failed to start JMX Agent", throwable);
+                logger.error("Failed to start JMX Agent", ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6805),
+                        throwable);
             }
         }
     }
