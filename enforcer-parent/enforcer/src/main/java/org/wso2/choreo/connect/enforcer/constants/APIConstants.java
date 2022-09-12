@@ -99,7 +99,6 @@ public class APIConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE_TEXT_XML = "text/xml";
     public static final String CONTENT_TYPE_SOAP_XML = "application/soap+xml";
-    public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
     public static final String UPGRADE_HEADER = "upgrade";
