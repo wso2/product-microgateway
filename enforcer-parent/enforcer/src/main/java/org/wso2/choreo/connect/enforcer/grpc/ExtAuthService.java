@@ -147,7 +147,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
-            
+
             // If the user is sending the APIKey credentials within query parameters, those query parameters should
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
             // query parameter. In this scenario, apiKey query parameter is sent within the property called
@@ -181,10 +181,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
             addAccessLogMetadata(structBuilder, responseObject.getRequestPath());
 
-            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
-                    .build();
-            okResponseBuilder.addHeaders(headerValueOption);
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build())
                     .setDynamicMetadata(structBuilder.build())
@@ -221,7 +217,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             queryParamMap.putAll(currentQueryParamMap);
         }
         queryParamMap.putAll(queryParamsToAdd);
-
 
         String pathWithoutQueryParams = requestPath.split("\\?")[0];
         StringBuilder requestPathBuilder = new StringBuilder(pathWithoutQueryParams);
