@@ -3,7 +3,7 @@ module github.com/wso2/product-microgateway/adapter
 go 1.18
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.0.1
+	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.1.0
 	github.com/envoyproxy/go-control-plane v0.10.0
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getkin/kin-openapi v0.8.0
