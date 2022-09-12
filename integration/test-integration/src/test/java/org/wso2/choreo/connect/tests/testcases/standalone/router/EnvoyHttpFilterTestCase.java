@@ -52,11 +52,10 @@ public class EnvoyHttpFilterTestCase {
 
         // Request headers received by the backend
         JSONObject headersSentToBackend = new JSONObject(response.getData());
-        Assert.assertEquals(headersSentToBackend.length(), 8, "Unexpected number of headers received by the backend");
+        Assert.assertEquals(headersSentToBackend.length(), 7, "Unexpected number of headers received by the backend");
 
         JSONObject headersToBackend = Utils.changeHeadersToLowerCase(headersSentToBackend);
 
-        Assert.assertNotNull(headersToBackend.get("x-trace-key"));
         Assert.assertNotNull(headersToBackend.get("accept"));
         Assert.assertNotNull(headersToBackend.get("x-request-id"));
         Assert.assertNotNull(headersToBackend.get("x-forwarded-proto"));

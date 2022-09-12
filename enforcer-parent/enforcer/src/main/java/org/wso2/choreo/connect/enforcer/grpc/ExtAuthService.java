@@ -97,7 +97,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
     private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {
         CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder();
-        String traceKey = request.getAttributes().getRequest().getHttp().getId();
         if (responseObject.isDirectResponse()) {
             DeniedResponsePreparer deniedResponsePreparer = new DeniedResponsePreparer(DeniedHttpResponse.newBuilder());
             // set headers
@@ -110,8 +109,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         }
                 );
             }
-            deniedResponsePreparer.addHeaders(HeaderValueOption.newBuilder().setHeader(HeaderValue.newBuilder()
-                    .setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build()));
 
             // set status code
             HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
@@ -178,10 +175,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
-            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
-                    .build();
-            okResponseBuilder.addHeaders(headerValueOption);
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build())
                     .setDynamicMetadata(structBuilder.build())
