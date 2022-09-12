@@ -68,8 +68,9 @@ public class GraphQLQueryAnalysisFilter implements Filter {
             return queryMutationAnalyzer.analyseQueryMutationDepth(requestContext, payload) &&
                     queryMutationAnalyzer.analyseQueryMutationComplexity(requestContext, payload);
         } catch (Exception e) {
-            logger.error("Policy definition parsing failed for API : {} version : {}",
-                    requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+            logger.error("Policy definition parsing failed for API UUID : {} API : {} version : {}",
+                    requestContext.getMatchedAPI().getUuid(), requestContext.getMatchedAPI().getName(),
+                    requestContext.getMatchedAPI().getVersion(),
                     ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7300), e);
             handleFailure(requestContext);
             return false;

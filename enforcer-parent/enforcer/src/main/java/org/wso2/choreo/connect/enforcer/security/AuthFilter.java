@@ -176,9 +176,10 @@ public class AuthFilter implements Filter {
                 if (isMutualSSLMandatory && authenticator.getName()
                         .contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
                     authenticated = false;
-                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} ",
+                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} APIUUID: {} ",
                             requestContext.getMatchedResourcePaths().get(0).getPath(),
-                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion());
+                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                            requestContext.getMatchedAPI().getUuid());
                     break;
                 }
                 // Check if the failed authentication is a mandatory application level security
@@ -214,20 +215,25 @@ public class AuthFilter implements Filter {
                     updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                     // set backend security
                     EndpointSecurityUtils.addEndpointSecurity(requestContext);
-                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{} ",
+                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{}, APIUUID: {} ",
                             requestContext.getMatchedResourcePaths().get(0).getPath(),
-                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion());
+                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                            requestContext.getMatchedAPI().getUuid());
                     return new AuthenticationResponse(true, isMutualSSLMandatory, true);
                 } else {
                     if (isMutualSSLMandatory) {
-                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{} ",
+                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{}, " +
+                                        "APIUUID: {} ",
                                 requestContext.getMatchedResourcePaths().get(0).getPath(),
-                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion());
+                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                                requestContext.getMatchedAPI().getUuid());
                         return new AuthenticationResponse(false, true, false);
                     } else {
-                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{} ",
+                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{}, " +
+                                        "APIUUID: {} ",
                                 requestContext.getMatchedResourcePaths().get(0).getPath(),
-                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion());
+                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                                requestContext.getMatchedAPI().getUuid());
                         return new AuthenticationResponse(false, false, true);
                     }
                 }

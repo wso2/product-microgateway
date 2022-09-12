@@ -56,10 +56,10 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(requestContext, APIConstants.GraphQL.GRAPHQL_QUERY_TOO_DEEP,
                     APIConstants.GraphQL.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, responseDTO.getErrorList().toString());
-            logger.error("Requested query's depth has exceeded. API : {}, version : {}, Error : {}",
-                    requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
-                    responseDTO.getErrorList().toString(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR,
-                            7301));
+            logger.error("Requested query's depth has exceeded. APIUUID : {} API : {}, version : {}, Error : {}",
+                    requestContext.getMatchedAPI().getUuid(), requestContext.getMatchedAPI().getName(),
+                    requestContext.getMatchedAPI().getVersion(), responseDTO.getErrorList().toString(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7301));
             return false;
         }
         return true;
@@ -113,10 +113,10 @@ public class QueryMutationAnalyzer extends QueryAnalyzer {
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(requestContext, APIConstants.GraphQL.GRAPHQL_QUERY_TOO_COMPLEX,
                     APIConstants.GraphQL.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, responseDTO.getErrorList().toString());
-            logger.error("Requested query's complexity has exceeded. API : {}, version : {}, Error: {}",
-                    requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
-                    responseDTO.getErrorList().toString(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR,
-                            7303));
+            logger.error("Requested query's complexity has exceeded. APIUUID : {} API : {}, version : {}, Error: {}",
+                    requestContext.getMatchedAPI().getUuid(), requestContext.getMatchedAPI().getName(),
+                    requestContext.getMatchedAPI().getVersion(), responseDTO.getErrorList().toString(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 7303));
             return false;
         }
         return true;

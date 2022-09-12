@@ -90,8 +90,9 @@ public class GraphQLPayloadUtils {
                     if (resourceConfig != null) {
                         resourceConfigs.add(resourceConfig);
                     } else {
-                        logger.error("No matching operations found for {} in API : {}, version : {}", op,
-                                api.getAPIConfig().getName(), api.getAPIConfig().getVersion(),
+                        logger.error("No matching operations found for {} in APIUUID : {} API : {}, version : {}", op,
+                                api.getAPIConfig().getName(), api.getAPIConfig().getUuid(),
+                                api.getAPIConfig().getVersion(),
                                 ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6705));
                         return new ArrayList<>();
                     }

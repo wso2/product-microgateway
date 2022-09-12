@@ -76,12 +76,10 @@ public class APIFactory {
                 String apiKey = getApiKey(webSocketAPI);
                 newApis.put(apiKey, webSocketAPI);
             } else if (APIConstants.ApiType.GRAPHQL.equals(api.getApiType())) {
-                if (isValidGraphQLAPI(api)) {
-                    GraphQLAPI graphQLAPI = new GraphQLAPI();
-                    graphQLAPI.init(api);
-                    String apiKey = getApiKey(graphQLAPI);
-                    newApis.put(apiKey, graphQLAPI);
-                }
+                GraphQLAPI graphQLAPI = new GraphQLAPI();
+                graphQLAPI.init(api);
+                String apiKey = getApiKey(graphQLAPI);
+                newApis.put(apiKey, graphQLAPI);
             } else {
                 RestAPI enforcerApi = new RestAPI();
                 enforcerApi.init(api);
@@ -99,31 +97,6 @@ public class APIFactory {
     public void removeApi(API api) {
         String apiKey = getApiKey(api);
         apis.remove(apiKey);
-    }
-
-    /**
-     * Validate the GraphQL schema before adding the API.
-     *
-     * @param api api details
-     * @return whether the api is an valid graphQL API.
-     */
-    private boolean isValidGraphQLAPI(Api api) {
-        if (!api.getGraphQLSchema().isEmpty()) {
-            String sdl = api.getGraphQLSchema();
-            SchemaParser schemaParser = new SchemaParser();
-            try {
-                schemaParser.parse(sdl);
-                return true;
-            } catch (SchemaProblem exception) {
-                logger.error("Error while parsing graphQL sdl for API : {} version : {}", api.getTitle(),
-                        api.getVersion(),
-                        ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5201), exception);
-            }
-        } else {
-            logger.error("GraphQL sdl for API : {} version : {} is empty", api.getTitle(), api.getVersion(),
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5202));
-        }
-        return false;
     }
 
     public API getMatchedAPI(CheckRequest request) {
