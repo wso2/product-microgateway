@@ -87,6 +87,7 @@ public class JWTAuthenticator implements Authenticator {
         }
     }
 
+    @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         // only getting first operation is enough as all matched resource configs have the same security schemes
         // i.e. graphQL apis do not support resource level security yet
@@ -373,7 +374,7 @@ public class JWTAuthenticator implements Authenticator {
      *
      * @param apiContext        API Context
      * @param apiVersion        API Version
-     * @param matchingResources Accessed API resource
+     * @param matchingResources Accessed API resources
      * @param jwtValidationInfo Validated JWT Information
      * @param jwtToken          JWT Token
      * @throws APISecurityException in case of scope validation failure

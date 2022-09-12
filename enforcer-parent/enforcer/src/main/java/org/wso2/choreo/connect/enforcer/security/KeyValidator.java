@@ -59,7 +59,8 @@ public class KeyValidator {
      *
      * @param validationContext the token validation context
      * @return true is the scopes are valid
-     * @throws EnforcerException this will indicate the message body for the error response
+     * @throws EnforcerException throws if token validation fails.
+     * this will indicate the message body for the error response
      */
     public static boolean validateScopes(TokenValidationContext validationContext) throws APISecurityException {
 
