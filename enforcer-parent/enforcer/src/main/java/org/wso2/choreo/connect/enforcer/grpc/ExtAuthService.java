@@ -145,7 +145,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
-            String originalPath = responseObject.getRequestPath();
+
             // If the user is sending the APIKey credentials within query parameters, those query parameters should
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
             // query parameter. In this scenario, apiKey query parameter is sent within the property called
@@ -158,7 +158,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                                 .build())
                         .build();
                 okResponseBuilder.addHeaders(headerValueOption);
-                originalPath = constructedPath;
             }
 
             if (responseObject.getHeaderMap() != null) {
@@ -177,8 +176,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
-            structBuilder.putFields(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
-                        Value.newBuilder().setStringValue(originalPath).build());
+            addAccessLogMetadata(structBuilder, responseObject.getRequestPath());
                         
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
@@ -205,10 +203,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         return Code.INTERNAL_VALUE;
     }
 
-    private static String constructQueryParamString(String requestPath, Map<String, String> queryParamMap,
-            List<String> queryParamsToRemove) {
-        // If no query parameters needs to be removed, then the request path can be
-        // applied as it is.
+    private String constructQueryParamString(String requestPath, Map<String, String> queryParamMap,
+                                             List<String> queryParamsToRemove) {
+        // If no query parameters needs to be removed, then the request path can be applied as it is.
         if (queryParamsToRemove.size() == 0) {
             return requestPath;
         }
@@ -234,5 +231,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
         }
         return requestPathBuilder.toString();
+    }
+
+    /**
+     * Adds original request path header without params as a metadata for access
+     * logging.
+     * 
+     * @param structBuilder
+     * @param requestPath
+     */
+    private void addAccessLogMetadata(Struct.Builder structBuilder, String requestPath) {
+        structBuilder.putFields(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
+                Value.newBuilder().setStringValue(requestPath.split("\\?")[0]).build());
     }
 }
