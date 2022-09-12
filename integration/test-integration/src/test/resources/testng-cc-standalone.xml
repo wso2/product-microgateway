@@ -61,6 +61,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.mockEndpoint.MockApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.DefaultVersionApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProdSandDiffBasePathTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxClusterTestCase"/>
         </classes>
     </test>
     <test name="cc-with-backend-tls-with-opa-server" preserve-order="true" parallel="false">
