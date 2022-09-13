@@ -50,38 +50,43 @@ public class MBeanRegistrator {
      */
     public static void registerMBean(Object mBeanInstance) throws RuntimeException {
 
-        String className = mBeanInstance.getClass().getName();
-        if (className.indexOf('.') != -1) {
-            className = className.substring(className.lastIndexOf('.') + 1);
-        }
-
-        String objectName = SERVER_PACKAGE + ":type=" + className;
-        try {
-            MBeanServer mBeanServer = MBeanManagementFactory.getMBeanServer();
-            Set set = mBeanServer.queryNames(new ObjectName(objectName), null);
-            if (set.isEmpty()) {
-                try {
-                    ObjectName name = new ObjectName(objectName);
-                    mBeanServer.registerMBean(mBeanInstance, name);
-                    mBeans.add(name);
-                } catch (InstanceAlreadyExistsException e) {
-                    String msg = "MBean " + objectName + " already exists";
-                    logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6801), e);
-                    throw new RuntimeException(msg, e);
-                } catch (MBeanRegistrationException | NotCompliantMBeanException e) {
-                    String msg = "Execption when registering MBean";
-                    logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6802), e);
-                    throw new RuntimeException(msg, e);
-                }
-            } else {
-                String msg = "MBean " + objectName + " already exists";
-                logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6803));
-                throw new RuntimeException(msg);
+        if (JMXUtils.isJMXMetricsEnabled()) {
+            String className = mBeanInstance.getClass().getName();
+            if (className.indexOf('.') != -1) {
+                className = className.substring(className.lastIndexOf('.') + 1);
             }
-        } catch (MalformedObjectNameException e) {
-            String msg = "Could not register " + mBeanInstance.getClass() + " MBean";
-            logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6804), e);
-            throw new RuntimeException(msg, e);
+
+            String objectName = SERVER_PACKAGE + ":type=" + className;
+            try {
+                MBeanServer mBeanServer = MBeanManagementFactory.getMBeanServer();
+                Set set = mBeanServer.queryNames(new ObjectName(objectName), null);
+                if (set.isEmpty()) {
+                    try {
+                        ObjectName name = new ObjectName(objectName);
+                        mBeanServer.registerMBean(mBeanInstance, name);
+                        mBeans.add(name);
+                    } catch (InstanceAlreadyExistsException e) {
+                        String msg = "MBean " + objectName + " already exists";
+                        logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6801), e);
+                        throw new RuntimeException(msg, e);
+                    } catch (MBeanRegistrationException | NotCompliantMBeanException e) {
+                        String msg = "Execption when registering MBean";
+                        logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6802), e);
+                        throw new RuntimeException(msg, e);
+                    }
+                } else {
+                    String msg = "MBean " + objectName + " already exists";
+                    logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6803));
+                    throw new RuntimeException(msg);
+                }
+            } catch (MalformedObjectNameException e) {
+                String msg = "Could not register " + mBeanInstance.getClass() + " MBean";
+                logger.error(msg, ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6804), e);
+                throw new RuntimeException(msg, e);
+            }
+        } else {
+            logger.debug("JMX Metrics should be enabled to register MBean instance: {}",
+                    mBeanInstance.getClass().getName());
         }
     }
 }
