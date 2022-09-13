@@ -19,13 +19,18 @@ package org.wso2.choreo.connect.enforcer.metrics.jmx.impl;
 import org.wso2.choreo.connect.enforcer.jmx.MBeanRegistrator;
 import org.wso2.choreo.connect.enforcer.metrics.jmx.api.ExtAuthMetricsMXBean;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Singleton MBean for ExtAuth Service metrics.
  */
-public class ExtAuthMetrics implements ExtAuthMetricsMXBean {
+public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
 
+    private static final long REQUEST_COUNT_INTERVAL_MILLIS = 5 * 60 * 1000;
     private static ExtAuthMetrics extAuthMetricsMBean = null;
 
+    private long requestCountInLastFiveMinutes = 0;
     private long totalRequestCount = 0;
     private long averageResponseTimeMillis = 0;
     private long maxResponseTimeMillis = Long.MIN_VALUE;
@@ -42,38 +47,56 @@ public class ExtAuthMetrics implements ExtAuthMetricsMXBean {
      */
     public static ExtAuthMetrics getInstance() {
         if (extAuthMetricsMBean == null) {
+            Timer timer = new Timer();
             extAuthMetricsMBean = new ExtAuthMetrics();
+            timer.schedule(extAuthMetricsMBean, 0, REQUEST_COUNT_INTERVAL_MILLIS);
         }
         return extAuthMetricsMBean;
     }
 
+    @Override
     public long getTotalRequestCount() {
         return totalRequestCount;
     };
 
+    @Override
     public long getAverageResponseTimeMillis() {
         return averageResponseTimeMillis;
     };
 
+    @Override
     public long getMaxResponseTimeMillis() {
         return maxResponseTimeMillis;
     };
 
+    @Override
     public long getMinResponseTimeMillis() {
         return minResponseTimeMillis;
     };
 
     public synchronized void recordMetric(long responseTimeMillis) {
+        this.requestCountInLastFiveMinutes += 1;
         this.totalRequestCount += 1;
         this.averageResponseTimeMillis = (this.averageResponseTimeMillis + responseTimeMillis) / totalRequestCount;
         this.minResponseTimeMillis = Math.min(this.minResponseTimeMillis, responseTimeMillis);
         this.maxResponseTimeMillis = Math.max(this.maxResponseTimeMillis, responseTimeMillis);
     }
 
+    @Override
     public synchronized void resetExtAuthMetrics() {
         this.totalRequestCount = 0;
         this.averageResponseTimeMillis = 0;
         this.maxResponseTimeMillis = Long.MIN_VALUE;
         this.minResponseTimeMillis = Long.MAX_VALUE;
+    }
+
+    @Override
+    public synchronized void run() {
+        requestCountInLastFiveMinutes = 0;
+    }
+
+    @Override
+    public long getRequestCountInLastFiveMinutes() {
+        return requestCountInLastFiveMinutes;
     }
 }

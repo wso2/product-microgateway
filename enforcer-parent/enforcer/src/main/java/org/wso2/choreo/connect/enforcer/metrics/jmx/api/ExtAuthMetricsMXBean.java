@@ -54,4 +54,9 @@ public interface ExtAuthMetricsMXBean {
      */
     public void resetExtAuthMetrics();
 
+    /**
+     * Resets all the metrics to thier initial values.
+     */
+    public long getRequestCountInLastFiveMinutes();
+
 }

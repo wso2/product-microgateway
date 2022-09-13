@@ -34,7 +34,7 @@ import javax.management.remote.JMXServiceURL;
 public class JMXAgent {
     private static final Logger logger = LogManager.getLogger(JMXAgent.class);
     private static JMXConnectorServer jmxConnectorServer;
-    private static final String DEFAULT_RMI_SERVER_PORT = "1111";
+    private static final String DEFAULT_RMI_SERVER_PORT = "11111";
     private static final String DEFAULT_RMI_REGISTRY_PORT = "9999";
     private static final String JAVA_JMX_RMI_SERVICE_PORT = "com.sun.management.jmxremote.port";
     private static final String JAVA_JMX_RMI_REGISTRY_PORT = "com.sun.management.jmxremote.rmi.port";
