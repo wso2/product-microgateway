@@ -34,7 +34,8 @@ public class CcWithJwtConfig {
         ApictlUtils.createProject( "timeout_global_openAPI.yaml", "timeout_global");
         ApictlUtils.createProject( "timeout_endpoint_openAPI.yaml", "timeout_endpoint");
 
-        ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").build();
+        ccInstance = new CcInstance.Builder().withBackendServiceFile("backend-service-gql.yaml")
+                .withNewConfig("jwt-generator-config.toml").build();
         ccInstance.start();
 
         ApictlUtils.addEnv("test");

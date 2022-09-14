@@ -44,7 +44,7 @@
                         <sun.net.http.allowRestrictedHeaders>true</sun.net.http.allowRestrictedHeaders>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
-<!--                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>-->
+                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>
                         <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemProperties>
@@ -74,7 +74,7 @@
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
-                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-gql.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-with-tls-and-network.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls-with-opa-server.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                             </target>

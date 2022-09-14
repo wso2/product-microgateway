@@ -70,7 +70,7 @@ public class KeyValidator {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
         if (apiKeyValidationInfoDTO == null) {
-            log.error("Error while accessing backend services for token scope validation",
+            log.error("Error while validating scopes. Key validation information has not been set.",
                     ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6603));
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_GENERAL_ERROR,
