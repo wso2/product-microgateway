@@ -48,6 +48,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.BackendSecurityTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopeTest"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopesAsArrayTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.InternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.CustomAuthHeaderTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.QSGAndSwaggerTestCase"/>
