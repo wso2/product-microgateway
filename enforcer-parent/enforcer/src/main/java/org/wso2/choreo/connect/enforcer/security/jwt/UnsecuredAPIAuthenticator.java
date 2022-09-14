@@ -44,12 +44,14 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        // Retrieve the disable security value. If security is disabled, then you can proceed directly with the
-        // authentication.
-        if (isDisableSecurity(requestContext.getMatchedResourcePath())) {
-            return true;
+        // Retrieve the disable security value. If security is disabled for all matching resources,
+        // then you can proceed directly with the authentication.
+        for (ResourceConfig resourceConfig : requestContext.getMatchedResourcePaths()) {
+            if (!isDisableSecurity(resourceConfig)) {
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -99,7 +101,8 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
         return "Unsecured";
     }
 
-    @Override public int getPriority() {
+    @Override
+    public int getPriority() {
         return -20;
     }
 
@@ -108,6 +111,7 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
      * AuthType can be deduced from API level and resource level. If both are defined,
      * resource level gets the precedence.
      * If nothing declared, it will return the authType as "default".
+     *
      * @param matchingResource matching resource related configurations
      * @return value of the authType from API definition. If not present "default"
      */

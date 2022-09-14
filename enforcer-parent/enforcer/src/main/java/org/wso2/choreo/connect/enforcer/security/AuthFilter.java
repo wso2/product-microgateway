@@ -112,7 +112,7 @@ public class AuthFilter implements Filter {
             Authenticator mtlsAuthenticator = new MTLSAuthenticator();
             authenticators.add(mtlsAuthenticator);
         }
-        
+
         if (isOAuthProtected) {
             Authenticator jwtAuthenticator = new JWTAuthenticator();
             authenticators.add(jwtAuthenticator);
@@ -126,7 +126,7 @@ public class AuthFilter implements Filter {
         Authenticator authenticator = new InternalAPIKeyAuthenticator(
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         authenticators.add(authenticator);
-    
+
         Authenticator unsecuredAPIAuthenticator = new UnsecuredAPIAuthenticator();
         authenticators.add(unsecuredAPIAuthenticator);
 
@@ -176,9 +176,10 @@ public class AuthFilter implements Filter {
                 if (isMutualSSLMandatory && authenticator.getName()
                         .contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
                     authenticated = false;
-                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} ",
-                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
-                            requestContext.getMatchedAPI().getVersion());
+                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} APIUUID: {} ",
+                            requestContext.getMatchedResourcePaths().get(0).getPath(),
+                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                            requestContext.getMatchedAPI().getUuid());
                     break;
                 }
                 // Check if the failed authentication is a mandatory application level security
@@ -206,7 +207,7 @@ public class AuthFilter implements Filter {
 
     private AuthenticationResponse authenticate(Authenticator authenticator, RequestContext requestContext) {
         try {
-            AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
+            AuthenticationContext authenticate = authenticator.authenticate(requestContext);
             requestContext.setAuthenticationContext(authenticate);
             if (authenticator.getName().contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
                 // This section is for mTLS authentication
@@ -214,20 +215,25 @@ public class AuthFilter implements Filter {
                     updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                     // set backend security
                     EndpointSecurityUtils.addEndpointSecurity(requestContext);
-                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{} ",
-                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
-                            requestContext.getMatchedAPI().getVersion());
+                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{}, APIUUID: {} ",
+                            requestContext.getMatchedResourcePaths().get(0).getPath(),
+                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                            requestContext.getMatchedAPI().getUuid());
                     return new AuthenticationResponse(true, isMutualSSLMandatory, true);
                 } else {
                     if (isMutualSSLMandatory) {
-                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{} ",
-                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
-                                        .getName(), requestContext.getMatchedAPI().getVersion());
+                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{}, " +
+                                        "APIUUID: {} ",
+                                requestContext.getMatchedResourcePaths().get(0).getPath(),
+                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                                requestContext.getMatchedAPI().getUuid());
                         return new AuthenticationResponse(false, true, false);
                     } else {
-                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{} ",
-                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
-                                        .getName(), requestContext.getMatchedAPI().getVersion());
+                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{}, " +
+                                        "APIUUID: {} ",
+                                requestContext.getMatchedResourcePaths().get(0).getPath(),
+                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                                requestContext.getMatchedAPI().getUuid());
                         return new AuthenticationResponse(false, false, true);
                     }
                 }
@@ -250,10 +256,10 @@ public class AuthFilter implements Filter {
     /**
      * Update the cluster header based on the keyType and authenticate the token against its respective endpoint
      * environment.
-     * 
-     * @param requestContext request Context 
-     * @param authContext authentication context
-     * @throws APISecurityException if the environment and 
+     *
+     * @param requestContext request Context
+     * @param authContext    authentication context
+     * @throws APISecurityException if the environment and
      */
     private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
             throws APISecurityException {
@@ -306,7 +312,14 @@ public class AuthFilter implements Filter {
             addAPILevelTimeoutHeaders(requestContext, keyType);
         }
 
-        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
+        //GraphQL APIs does not have following per resource config, hence skipping.
+        if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI().getApiType())) {
+            return;
+        }
+
+        // From this line onwards graphQL apis won't be present, hence only one matched resource config will be present.
+        // Therefore, requestContext.getMatchedResourcePaths() will only have one element here onwards.
+        ResourceConfig resourceConfig = requestContext.getMatchedResourcePaths().get(0);
         // In websockets case, the endpoints object becomes null. Hence it would result
         // in a NPE, if it is not checked.
         if (resourceConfig.getEndpoints() != null &&

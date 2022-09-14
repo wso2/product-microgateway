@@ -22,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Certificate;
 import org.wso2.choreo.connect.discovery.api.Operation;
-import org.wso2.choreo.connect.discovery.api.OperationPolicies;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
@@ -36,8 +35,6 @@ import org.wso2.choreo.connect.enforcer.commons.model.MockedApiConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedContentExamples;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.Policy;
-import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -145,7 +142,8 @@ public class RestAPI implements API {
 
 
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
+                ResourceConfig resConfig = Utils.buildResource(operation, res.getPath(), securityScopesMap);
+                resConfig.setPolicyConfig(Utils.genPolicyConfig(operation.getPolicies()));
                 resConfig.setEndpoints(endpointClusterMap);
                 resConfig.setMockApiConfig(getMockedApiOperationConfig(operation.getMockedApiConfig(),
                         operation.getMethod()));
@@ -196,7 +194,8 @@ public class RestAPI implements API {
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         populateRemoveAndProtectedHeaders(requestContext);
-        boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePath() != null;
+        boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePaths() != null &&
+                requestContext.getMatchedResourcePaths().size() > 0;
         // This flag is used to apply cors filter
         boolean isOptionCall = requestContext.getRequestMethod().contains(HttpConstants.OPTIONS);
         if (!isExistsMatchedResourcePath && !isOptionCall) {
@@ -261,60 +260,6 @@ public class RestAPI implements API {
     @Override
     public APIConfig getAPIConfig() {
         return this.apiConfig;
-    }
-
-    public static ResourceConfig buildResource(Operation operation, String resPath, Map<String,
-            List<String>> apiLevelSecurityList) {
-        ResourceConfig resource = new ResourceConfig();
-        resource.setPath(resPath);
-        resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
-        resource.setTier(operation.getTier());
-        resource.setDisableSecurity(operation.getDisableSecurity());
-        resource.setPolicyConfig(genPolicyConfig(operation.getPolicies()));
-        Map<String, List<String>> securityMap = new HashMap<>();
-        if (operation.getSecurityList().size() > 0) {
-            for (SecurityList securityList : operation.getSecurityList()) {
-                for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
-                    securityMap.put(entry.getKey(), new ArrayList<>());
-                    if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
-                        List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
-                        securityMap.replace(entry.getKey(), scopeList);
-                    }
-                    // only supports security scheme OR combinations. Example -
-                    // Security:
-                    // - api_key: []
-                    //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
-                    break;
-                }
-            }
-            resource.setSecuritySchemas(securityMap);
-        } else {
-            resource.setSecuritySchemas(apiLevelSecurityList);
-        }
-        return resource;
-    }
-
-    private static PolicyConfig genPolicyConfig(OperationPolicies operationPolicies) {
-        PolicyConfig policyConfig = new PolicyConfig();
-        if (operationPolicies.getRequestCount() > 0) {
-            policyConfig.setRequest(genPolicyList(operationPolicies.getRequestList()));
-        }
-        if (operationPolicies.getResponseCount() > 0) {
-            policyConfig.setResponse(genPolicyList(operationPolicies.getResponseList()));
-        }
-        if (operationPolicies.getFaultCount() > 0) {
-            policyConfig.setFault(genPolicyList(operationPolicies.getFaultList()));
-        }
-        return policyConfig;
-    }
-
-    private static ArrayList<Policy> genPolicyList
-            (List<org.wso2.choreo.connect.discovery.api.Policy> operationPoliciesList) {
-        ArrayList<Policy> policyList = new ArrayList<>();
-        for (org.wso2.choreo.connect.discovery.api.Policy policy : operationPoliciesList) {
-            policyList.add(new Policy(policy.getAction(), policy.getParametersMap()));
-        }
-        return policyList;
     }
 
     private MockedApiConfig getMockedApiOperationConfig(

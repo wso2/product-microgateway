@@ -47,6 +47,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,15 +110,20 @@ public class ThrottleFilter implements Filter {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             // publish throttle event and continue the filter chain
-            ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
+            handleEventPublish(requestContext);
         } finally {
             if (Utils.tracingEnabled()) {
                 publishThrottleEventSpanScope.close();
                 Utils.finishSpan(publishThrottleEventSpan);
             }
         }
-
         return true;
+    }
+
+    private void handleEventPublish(RequestContext requestContext) {
+        for (Map<String, String> event : getThrottleEventMap(requestContext)) {
+            ThrottleAgent.publishNonThrottledEvent(event);
+        }
     }
 
     /**
@@ -125,8 +131,8 @@ public class ThrottleFilter implements Filter {
      *
      * @param reqContext request context with all request related details,
      *                   including the authentication details
-     * @return {@code Decision} with true for isThorttled property if the request is throttled, otherwise
-     * false for isThorttled property with the reset timestamp.
+     * @return {@code Decision} with true for isThrottled property if the request is throttled, otherwise
+     * false for isThrottled property with the reset timestamp.
      */
     private Decision doThrottle(RequestContext reqContext) {
         TracingSpan doThrottleSpan = null;
@@ -149,8 +155,6 @@ public class ThrottleFilter implements Filter {
                 int appId = authContext.getApplicationId();
                 String apiTier = getApiTier(api);
                 String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
-                String resourceTier = getResourceTier(reqContext.getMatchedResourcePath());
-                String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
                 String subTier = authContext.getTier();
                 String appTier = authContext.getApplicationTier();
                 String appTenant = authContext.getSubscriberTenantDomain();
@@ -164,11 +168,6 @@ public class ThrottleFilter implements Filter {
                         .get(ThrottleConstants.CUSTOM_THROTTLE_PROPERTIES));
                 boolean isApiLevelTriggered = false;
 
-                if (!StringUtils.isEmpty(api.getTier())) {
-                    resourceThrottleKey = apiThrottleKey;
-                    resourceTier = apiTier;
-                    isApiLevelTriggered = true;
-                }
                 if (apiTenantDomain == null) {
                     apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
                 }
@@ -195,10 +194,30 @@ public class ThrottleFilter implements Filter {
                     }
                 }
 
-                // Checking API and Resource level throttling. If API tier is defined,
+                ArrayList<Decision> apiDecisions = new ArrayList<>();
+                // Checking API and Resource level throttling.
+                // If API tier is defined,
                 // we ignore the resource level tier definition.
-                Decision apiDecision = checkResourceThrottled(resourceThrottleKey, resourceTier, reqContext);
-                if (apiDecision.isThrottled()) {
+                if (!StringUtils.isEmpty(api.getTier())) {
+                    isApiLevelTriggered = true;
+                    apiDecisions.add(checkResourceThrottled(apiThrottleKey, apiTier, reqContext));
+                } else {
+                    for (ResourceConfig resourceConfig : reqContext.getMatchedResourcePaths()) {
+                        String resourceTier = getResourceTier(resourceConfig);
+                        String resourceThrottleKey = getResourceThrottleKey(resourceConfig, apiContext, apiVersion);
+                        apiDecisions.add(checkResourceThrottled(resourceThrottleKey, resourceTier, reqContext));
+                    }
+                }
+
+                long apiThrottleResetAT = 0;
+                Decision throttledAPIDecision = null;
+                for (Decision apiDecision : apiDecisions) {
+                    if (apiDecision.isThrottled() && apiDecision.getResetAt() > apiThrottleResetAT) {
+                        apiThrottleResetAT = apiDecision.getResetAt();
+                        throttledAPIDecision = apiDecision;
+                    }
+                }
+                if (throttledAPIDecision != null) {
                     int errorCode;
                     String reason;
                     if (isApiLevelTriggered) {
@@ -208,11 +227,11 @@ public class ThrottleFilter implements Filter {
                         errorCode = ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
                         reason = ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
                     }
-                    FilterUtils.setThrottleErrorToContext(reqContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
-                            ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                    FilterUtils.setThrottleErrorToContext(reqContext, errorCode,
+                            ThrottleConstants.THROTTLE_OUT_MESSAGE, ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
-                    ThrottleUtils.setRetryAfterHeader(reqContext, apiDecision.getResetAt());
-                    return apiDecision;
+                    ThrottleUtils.setRetryAfterHeader(reqContext, apiThrottleResetAT);
+                    return throttledAPIDecision;
                 }
 
                 // Checking subscription level throttling
@@ -249,19 +268,33 @@ public class ThrottleFilter implements Filter {
                 }
 
                 // Checking Custom policy throttling
-                Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
-                        apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp, customPropertyString);
-                log.debug("Custom policy throttle decision is {}", customDecision.isThrottled());
-                if (customDecision.isThrottled()) {
-                    log.debug("Setting custom policy throttle out response");
+                ArrayList<Decision> customDecisions = new ArrayList<>();
+                for (ResourceConfig resourceConfig : reqContext.getMatchedResourcePaths()) {
+                    String resourceThrottleKey = getResourceThrottleKey(resourceConfig, apiContext, apiVersion);
+                    Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser,
+                            resourceThrottleKey, apiContext, apiVersion, appTenant, apiTenantDomain, appId,
+                            clientIp, customPropertyString);
+                    log.debug("Custom policy throttle decision is {}", customDecision.isThrottled());
+                    customDecisions.add(customDecision);
+                }
+                Decision throttledCustomDecision = null;
+                long customThrottleResetAT = 0;
+                for (Decision customDecision : customDecisions) {
+                    if (customDecision.isThrottled() && customThrottleResetAT < customDecision.getResetAt()) {
+                        log.debug("Setting custom policy throttle out response");
+                        throttledCustomDecision = customDecision;
+                        customThrottleResetAT = customDecision.getResetAt();
+                    }
+                }
+                if (throttledCustomDecision != null) {
                     FilterUtils.setThrottleErrorToContext(reqContext,
                             ThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE,
                             ThrottleConstants.THROTTLE_OUT_MESSAGE,
                             ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                             ThrottleConstants.THROTTLE_OUT_REASON_CUSTOM_LIMIT_EXCEED);
-                    ThrottleUtils.setRetryAfterHeader(reqContext, customDecision.getResetAt());
-                    return customDecision;
+                    ThrottleUtils.setRetryAfterHeader(reqContext, customThrottleResetAT);
+                    return throttledCustomDecision;
                 }
             }
             return new Decision();
@@ -306,12 +339,16 @@ public class ThrottleFilter implements Filter {
 
     /**
      * This will generate the throttling event map to be publish to the traffic manager.
+     * <p>
+     * Note: since there could be multiple matching resources for a request (ex: graphQL API request),
+     * there could be multiple throttle events
      *
      * @param requestContext request context
-     * @return Map of throttle event data
+     * @return List of Map of throttle event data
      */
-    private Map<String, String> getThrottleEventMap(RequestContext requestContext) {
+    private ArrayList<Map<String, String>> getThrottleEventMap(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        ArrayList<Map<String, String>> throttleEvents = new ArrayList<>();
         Map<String, String> throttleEvent = new HashMap<>();
         APIConfig api = requestContext.getMatchedAPI();
 
@@ -321,25 +358,13 @@ public class ThrottleFilter implements Filter {
         String apiName = api.getName();
         String apiTier = getApiTier(api);
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
-        String appTenant = authContext.getSubscriberTenantDomain();
         // API Tenant Domain is required to be taken in order to support internal Key scenario.
         // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
         String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), tenantDomain);
-        String resourceTier;
-        String resourceKey;
+
 
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
-        // apiConfig instance will have the tier assigned only if openapi definition contains the
-        // extension
-        if (!StringUtils.isEmpty(api.getTier())) {
-            resourceTier = apiTier;
-            resourceKey = apiContext;
-        } else {
-            resourceTier = getResourceTier(requestContext.getMatchedResourcePath());
-            resourceKey = getResourceThrottleKey(requestContext, basePath, apiVersion);
         }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
@@ -350,8 +375,6 @@ public class ThrottleFilter implements Filter {
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ":" +
                 apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authContext.getTier());
-        throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, resourceKey);
-        throttleEvent.put(ThrottleEventConstants.RESOURCE_TIER, resourceTier);
         // TODO: (Praminda) should publish with tenant domain?
         throttleEvent.put(ThrottleEventConstants.USER_ID, authorizedUser);
         throttleEvent.put(ThrottleEventConstants.API_CONTEXT, basePath);
@@ -361,16 +384,32 @@ public class ThrottleFilter implements Filter {
         throttleEvent.put(ThrottleEventConstants.APP_ID, String.valueOf(authContext.getApplicationId()));
         throttleEvent.put(ThrottleEventConstants.API_NAME, apiName);
         throttleEvent.put(ThrottleEventConstants.PROPERTIES, getProperties(requestContext).toString());
-        return throttleEvent;
+
+        // apiConfig instance will have the tier assigned only if openapi definition contains the
+        // extension
+        if (!StringUtils.isEmpty(api.getTier())) {
+            throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, apiContext);
+            throttleEvent.put(ThrottleEventConstants.RESOURCE_TIER, apiTier);
+            throttleEvents.add(throttleEvent);
+        } else {
+            for (ResourceConfig resourceConfig : requestContext.getMatchedResourcePaths()) {
+                Map<String, String> throttleEventClone = new HashMap<>(throttleEvent);
+                String resourceTier = getResourceTier(resourceConfig);
+                String resourceKey = getResourceThrottleKey(resourceConfig, basePath, apiVersion);
+                throttleEventClone.put(ThrottleEventConstants.RESOURCE_KEY, resourceKey);
+                throttleEventClone.put(ThrottleEventConstants.RESOURCE_TIER, resourceTier);
+                throttleEvents.add(throttleEventClone);
+            }
+        }
+        return throttleEvents;
     }
 
-    private String getResourceThrottleKey(RequestContext requestContext, String apiContext, String apiVersion) {
+    private String getResourceThrottleKey(ResourceConfig resourceConfig, String apiContext, String apiVersion) {
         String resourceThrottleKey = apiContext;
         if (!apiVersion.isBlank()) {
             resourceThrottleKey += "/" + apiVersion;
         }
-        resourceThrottleKey += requestContext.getMatchedResourcePath().getPath() + ':' +
-                requestContext.getRequestMethod();
+        resourceThrottleKey += resourceConfig.getPath() + ':' + resourceConfig.getMethod();
         return resourceThrottleKey;
     }
 

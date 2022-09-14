@@ -71,13 +71,17 @@ public class APIFactory {
                 webSocketAPI.init(api);
                 String apiKey = getApiKey(webSocketAPI);
                 newApis.put(apiKey, webSocketAPI);
+            } else if (APIConstants.ApiType.GRAPHQL.equals(api.getApiType())) {
+                GraphQLAPI graphQLAPI = new GraphQLAPI();
+                graphQLAPI.init(api);
+                String apiKey = getApiKey(graphQLAPI);
+                newApis.put(apiKey, graphQLAPI);
             } else {
                 RestAPI enforcerApi = new RestAPI();
                 enforcerApi.init(api);
                 String apiKey = getApiKey(enforcerApi);
                 newApis.put(apiKey, enforcerApi);
             }
-
         }
 
         if (logger.isDebugEnabled()) {
@@ -92,7 +96,6 @@ public class APIFactory {
     }
 
     public API getMatchedAPI(CheckRequest request) {
-        // TODO: (Praminda) Change the init type depending on the api type param from gw
         String vHost = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VHOST_PARAM);
         String basePath = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM);
         String version = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VERSION_PARAM);

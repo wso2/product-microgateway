@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * MockImplUtils contains mock response generation related methods
+ * MockImplUtils contains mock response generation related methods.
  */
 public class MockImplUtils {
 
@@ -49,7 +49,8 @@ public class MockImplUtils {
     public static void processMockedApiCall(RequestContext requestContext, ResponseObject responseObject) {
         responseObject.setDirectResponse(true);
         Map<String, String> preferences = new HashMap<>();
-        MockedApiConfig mockedApiConfig = requestContext.getMatchedResourcePath().getMockedApiConfig();
+        // only getting first operation is enough as only one resource config will be present for mock APIs.
+        MockedApiConfig mockedApiConfig = requestContext.getMatchedResourcePaths().get(0).getMockedApiConfig();
         Map<String, String> headersMap = requestContext.getHeaders();
         String[] acceptType = new String[]{};
         if (headersMap.containsKey(APIConstants.ACCEPT_HEADER)) {
