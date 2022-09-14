@@ -46,7 +46,7 @@
                     </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>
-                        <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>
+<!--                        <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>-->
                     </suiteXmlFiles>
                     <systemProperties>
                         <property>
@@ -194,16 +194,16 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skip.code.coverage}</skip>
-                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-before-int-tests.sh</executable>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <phase>compile</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>exec</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <skip>${skip.code.coverage}</skip>-->
+<!--                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-before-int-tests.sh</executable>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <execution>
                         <id>after-integration-tests</id>
                         <phase>verify</phase>

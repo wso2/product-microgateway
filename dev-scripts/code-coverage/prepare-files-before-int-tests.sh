@@ -17,6 +17,7 @@
 
 # Sets the Choreo Connect version
 echo "Preparing code coverage files before integration tests..."
+pwd
 mkdir ../../resources/enforcer/dropins/
 cp ../../enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec ../../resources/enforcer/dropins/
 chmod 777 ../../resources/enforcer/dropins/aggregate.exec
