@@ -122,8 +122,9 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         JSONObject jwtTokenInfo = new JSONObject();
         // In apim mode, we use the port 9444 since 9443 is already used by Rancher
         jwtTokenInfo.put("iss", "https://localhost:9444/oauth2/token");
+        jwtTokenInfo.put("scope", "write:pets");
         String jwtToken = TokenUtil.getJWT(api, application, "15PerMin", TestConstant.KEY_TYPE_PRODUCTION,
-                3600, "write:pets", false, jwtTokenInfo);
+                3600, jwtTokenInfo);
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
