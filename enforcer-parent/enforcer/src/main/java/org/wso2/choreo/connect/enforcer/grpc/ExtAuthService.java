@@ -37,6 +37,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
 import org.wso2.choreo.connect.enforcer.deniedresponse.DeniedResponsePreparer;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
@@ -175,6 +176,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
+            addAccessLogMetadata(structBuilder, responseObject.getRequestPath());
+
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build())
                     .setDynamicMetadata(structBuilder.build())
@@ -233,5 +236,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
         }
         return requestPathBuilder.toString();
+    }
+
+    /**
+     * Adds original request path header without params as a metadata for access
+     * logging.
+     * 
+     * @param structBuilder
+     * @param requestPath
+     */
+    private void addAccessLogMetadata(Struct.Builder structBuilder, String requestPath) {
+        structBuilder.putFields(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
+                Value.newBuilder().setStringValue(requestPath.split("\\?")[0]).build());
     }
 }
