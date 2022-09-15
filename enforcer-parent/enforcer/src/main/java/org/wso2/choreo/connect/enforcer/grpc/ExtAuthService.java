@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
@@ -51,7 +52,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
+ * This is the gRPC server written to match with the envoy ext-authz filter
+ * proto file. Envoy proxy call this service.
  * This is the entry point to the filter chain process for a request.
  */
 public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
@@ -174,6 +176,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
+            addAccessLogMetadata(structBuilder, responseObject.getRequestPath());
+                        
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
@@ -227,5 +231,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
         }
         return requestPathBuilder.toString();
+    }
+
+    /**
+     * Adds original request path header without params as a metadata for access
+     * logging.
+     * 
+     * @param structBuilder
+     * @param requestPath
+     */
+    private void addAccessLogMetadata(Struct.Builder structBuilder, String requestPath) {
+        structBuilder.putFields(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
+                Value.newBuilder().setStringValue(requestPath.split("\\?")[0]).build());
     }
 }
