@@ -49,6 +49,7 @@ public class APIConfig {
     private Map<String, String> mtlsCertificateTiers = new HashMap<>();
     private String mutualSSL;
     private boolean applicationSecurity;
+    private GraphQLSchemaDTO graphQLSchemaDTO;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -237,6 +238,15 @@ public class APIConfig {
     }
 
     /**
+     * Returns graphQL definitions and schemes.
+     *
+     * @return GraphQLSchemaDTO.
+     */
+    public GraphQLSchemaDTO getGraphQLSchemaDTO() {
+        return graphQLSchemaDTO;
+    }
+
+    /**
      * Implements builder pattern to build an API Config object.
      */
     public static class Builder {
@@ -262,6 +272,7 @@ public class APIConfig {
         private Map<String, String> mtlsCertificateTiers;
         private String mutualSSL;
         private boolean applicationSecurity;
+        private GraphQLSchemaDTO graphQLSchemaDTO;
 
         public Builder(String name) {
             this.name = name;
@@ -341,6 +352,10 @@ public class APIConfig {
             this.securitySchemeDefinitions = securitySchemeDefinitions;
             return this;
         }
+        public Builder graphQLSchemaDTO(GraphQLSchemaDTO graphQLSchemaDTO) {
+            this.graphQLSchemaDTO = graphQLSchemaDTO;
+            return this;
+        }
 
         public Builder mockedApi(boolean isMockedApi) {
             this.isMockedApi = isMockedApi;
@@ -390,6 +405,7 @@ public class APIConfig {
             apiConfig.mtlsCertificateTiers = this.mtlsCertificateTiers;
             apiConfig.mutualSSL = this.mutualSSL;
             apiConfig.applicationSecurity = this.applicationSecurity;
+            apiConfig.graphQLSchemaDTO = this.graphQLSchemaDTO;
             return apiConfig;
         }
     }

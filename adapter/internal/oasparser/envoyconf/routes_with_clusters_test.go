@@ -74,6 +74,11 @@ func TestCreateRoutesWithClustersProdSand(t *testing.T) {
 	testCreateRoutesWithClustersAPIClusters(t)
 }
 
+func TestCreateRouteswithClustersGraphQLProdSand(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/graphql_api.yaml"
+	testCreateRouteWithClustersGraphQL(t, apiYamlFilePath)
+}
+
 // commonTestForCreateRoutesWithClusters
 // withExtensions - if definition has endpoints x-wso2 extension
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string, withExtensions bool) {
@@ -243,6 +248,36 @@ func TestCreateRoutesWithClustersForEndpointRef(t *testing.T) {
 
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
+}
+
+func testCreateRouteWithClustersGraphQL(t *testing.T, apiYamlFilePath string) {
+	var vHost string = "localhost"
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+	assert.Nil(t, err, "Error occurred while processing api.yaml")
+
+	graphQLFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/schema.graphql"
+	graphQLByteArr, err := ioutil.ReadFile(graphQLFilePath)
+	assert.Nil(t, err, "Error while reading the schema.graphql file : %v"+graphQLFilePath)
+	assert.NotEmpty(t, graphQLByteArr, "Cannot process empty schma.grapghql file.")
+
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
+	mgwSwagger.GraphQLSchema = string(graphQLByteArr)
+	assert.Nil(t, err, "Error while populating api.yaml file : %v")
+
+	err = mgwSwagger.SetInfoGraphQLAPI(apiYaml)
+	assert.Nil(t, err, "Error while populating GraphQL attributes from api.yaml : %v")
+
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, vHost, "carbon.super")
+	assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+	assert.Equal(t, 2, len(clusters), "Number of clusters created incorrect")
+
+	productionCluster := clusters[0]
+	sandBoxCluster := clusters[1]
+	assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_GraphQLAPI1.0.0", "Production cluster name mismatch")
+	assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_GraphQLAPI1.0.0", "Sandbox cluster name mismatch")
 }
 
 func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string) {

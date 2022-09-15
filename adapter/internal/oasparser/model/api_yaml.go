@@ -49,7 +49,14 @@ type APIYaml struct {
 		OrganizationID             string   `json:"organizationId,omitempty"`
 		APIThrottlingPolicy        string   `json:"apiThrottlingPolicy,omitempty"`
 		IsDefaultVersion           bool     `json:"isDefaultVersion,omitempty"`
-		EndpointConfig             struct {
+		CorsConfiguration          struct {
+			CorsConfigurationEnabled      bool     `json:"corsConfigurationEnabled,omitempty"`
+			AccessControlAllowOrigins     []string `json:"accessControlAllowOrigins,omitempty"`
+			AccessControlAllowCredentials bool     `json:"accessControlAllowCredentials,omitempty"`
+			AccessControlAllowHeaders     []string `json:"accessControlAllowHeaders,omitempty"`
+			AccessControlAllowMethods     []string `json:"accessControlAllowMethods,omitempty"`
+		} `json:"corsConfiguration,omitempty"`
+		EndpointConfig struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
 			LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
@@ -93,8 +100,12 @@ type EndpointInfo struct {
 
 // OperationYaml holds attributes of APIM operations
 type OperationYaml struct {
+	ID                string            `json:"id,omitempty"`
 	Target            string            `json:"target,omitempty"`
 	Verb              string            `json:"verb,omitempty"`
+	AuthType          string            `json:"authType,omitempty"`
+	ThrottlingPolicy  string            `json:"throttlingPolicy,omitempty"`
+	Scopes            []string          `json:"scopes,omitempty"`
 	OperationPolicies OperationPolicies `json:"operationPolicies,omitempty"`
 }
 
@@ -257,7 +268,7 @@ func (apiYaml APIYaml) ValidateAPIType() (err error) {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.SOAP {
+	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.SOAP && apiType != constants.GRAPHQL {
 		errMsg := "The given API type is currently not supported in Choreo Connect. API type: " + apiType
 		err = errors.New(errMsg)
 		return err

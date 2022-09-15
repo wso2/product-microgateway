@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
@@ -43,6 +44,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -168,8 +170,12 @@ public class AnalyticsFilter {
                     ConfigHolder.getInstance().getEnvVarConfig().getEnforcerRegionId());
 
             // As in the matched API, only the resources under the matched resource template are selected.
+            ArrayList<String> resourceTemplate = new ArrayList<>();
+            for (ResourceConfig resourceConfig : requestContext.getMatchedResourcePaths()) {
+                resourceTemplate.add(resourceConfig.getPath());
+            }
             requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
-                    requestContext.getMatchedResourcePath().getPath());
+                    String.join(",", resourceTemplate));
 
             requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
 
@@ -268,7 +274,7 @@ public class AnalyticsFilter {
             logger.error("Error while loading the custom analytics publisher class.",
                     ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5105), e);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                | NoSuchMethodException e) {
+                 | NoSuchMethodException e) {
             logger.error("Error while generating AnalyticsEventPublisherInstance from the class",
                     ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5106), e);
         }
