@@ -49,4 +49,3 @@ spec:
          host: httpbin
          port:
            number: 80
-

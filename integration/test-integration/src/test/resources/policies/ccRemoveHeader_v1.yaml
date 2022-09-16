@@ -8,6 +8,7 @@ data:
   description: This policy allows you to remove a header from the request
   applicableFlows:
    - request
+   - response
   supportedGateways:
    - ChoreoConnect
   supportedApiTypes:

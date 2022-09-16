@@ -22,9 +22,16 @@ import (
 	"fmt"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds/common"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
+
+var nodeQueueInstance *common.NodeQueue
+
+func init() {
+	nodeQueueInstance = common.GenerateNodeQueue()
+}
 
 // Callbacks is used to debug the xds server related communication.
 type Callbacks struct {
@@ -46,11 +53,17 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
+	nodeIdentifier := common.GetNodeIdentifier(request)
+	if nodeQueueInstance.IsNewNode(nodeIdentifier) {
+		logger.LoggerRouterXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s",
+			id, nodeIdentifier, request.VersionInfo)
+	}
 	logger.LoggerRouterXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
-		id, request.Node.Id, request.VersionInfo, request.TypeUrl)
+		id, nodeIdentifier, request.VersionInfo, request.TypeUrl)
 	if request.ErrorDetail != nil {
 		logger.LoggerRouterXdsCallbacks.ErrorC(logging.ErrorDetails{
-			Message:   fmt.Sprintf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(), id, request.ErrorDetail.Message),
+			Message: fmt.Sprintf("Stream request for type %s on stream id: %d, from node: %s, Error: %s", request.GetTypeUrl(),
+				id, nodeIdentifier, request.ErrorDetail.Message),
 			Severity:  logging.CRITICAL,
 			ErrorCode: 1401,
 		})
@@ -59,20 +72,24 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 }
 
 // OnStreamResponse prints debug logs
-func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
+func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest,
+	response *discovery.DiscoveryResponse) {
+	nodeIdentifier := common.GetNodeIdentifier(request)
 	logger.LoggerRouterXdsCallbacks.Debugf("stream response on stream id: %d, to node: %s, version: %s, for type: %v", id,
-		request.Node.Id, response.VersionInfo, response.TypeUrl)
+		nodeIdentifier, response.VersionInfo, response.TypeUrl)
 }
 
 // OnFetchRequest prints debug logs
 func (cb *Callbacks) OnFetchRequest(_ context.Context, req *discovery.DiscoveryRequest) error {
-	logger.LoggerRouterXdsCallbacks.Debugf("fetch request from node %s, version: %s, for type %s", req.Node.Id, req.VersionInfo, req.TypeUrl)
+	logger.LoggerRouterXdsCallbacks.Debugf("fetch request from node %s, version: %s, for type %s", common.GetNodeIdentifier(req),
+		req.VersionInfo, req.TypeUrl)
 	return nil
 }
 
 // OnFetchResponse prints debug logs
 func (cb *Callbacks) OnFetchResponse(req *discovery.DiscoveryRequest, res *discovery.DiscoveryResponse) {
-	logger.LoggerRouterXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type %s", req.Node.Id, req.VersionInfo, res.TypeUrl)
+	logger.LoggerRouterXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type %s", common.GetNodeIdentifier(req),
+		req.VersionInfo, res.TypeUrl)
 }
 
 // OnDeltaStreamOpen is unused.

@@ -48,7 +48,8 @@ public class CcInstance extends ChoreoConnectImpl {
      */
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, String gitServiceFile,
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
-                       boolean isInterceptorCertRequired, String enforcerTrustCertsDir, String volumeMountDir
+                       boolean isInterceptorCertRequired, String enforcerTrustCertsDir, String volumeMountDir,
+                       boolean isClientCertValidationRequired
                        )
             throws IOException, CCTestException {
         createTmpMgwSetup();
@@ -83,6 +84,10 @@ public class CcInstance extends ChoreoConnectImpl {
 
         if (isInterceptorCertRequired) {
             addInterceptorCertToRouterTruststore();
+        }
+
+        if (isClientCertValidationRequired) {
+            addCaCertToRouterTruststore();
         }
 
         if (StringUtils.isNotEmpty(enforcerTrustCertsDir)) {
@@ -120,6 +125,7 @@ public class CcInstance extends ChoreoConnectImpl {
         boolean withCustomJwtTransformer = false;
         boolean withAnalyticsMetricImpl = false;
         boolean isInterceptorCertRequired = false;
+        boolean isClientCertValidationRequired = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -168,11 +174,16 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
+        public Builder withClientCertValidation() {
+            this.isClientCertValidationRequired = true;
+            return this;
+        }
+
         public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
                     this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.enforcerTrustCertsDir,
-                    this.volumeMountDir
+                    this.volumeMountDir, this.isClientCertValidationRequired
             );
             return instance;
         }

@@ -74,7 +74,7 @@
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
-                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-gql.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-with-tls-and-network.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls-with-opa-server.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                             </target>
@@ -99,34 +99,6 @@
                     <execution>
                         <id>default-jar</id>
                         <phase>compile</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <configuration>
-                    <images>
-                        <image>
-                            <alias>choreo-connect-backend</alias>
-                            <name>testcontainers/ryuk:${ryuk.image.version}</name>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>docker-test-container-pull</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>docker-test-container-remove</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -250,6 +222,10 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
     </dependencies>
 

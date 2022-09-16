@@ -73,6 +73,7 @@
        <classes>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.EnvoyHttpFilterTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BackendSecurityTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.jwtValidator.JwtAndScopeTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.APIKeyTestCase"/>
@@ -86,6 +87,9 @@
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApiLevelThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketApplicationThrottleTestCase"/>
            <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.throttle.WebsocketSubscriptionThrottleTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2ClearTextApiTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2SecuredApiTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.Http2DownstreamToHttp1UpstreamTestCase"/>
        </classes>
    </test>
 
@@ -122,6 +126,11 @@
     <test name="Test the 2nd set of APIs apps subscriptions" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketScopeTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLBasicTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLQueryAnalysisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLScopeTestCase"/>
         </classes>
     </test>
 
@@ -134,6 +143,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.InterceptorWithMtlsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.CreateStateInternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketTimeoutTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.KeyTemplateThrottlingTestCase"/>
         </classes>
     </test>
 

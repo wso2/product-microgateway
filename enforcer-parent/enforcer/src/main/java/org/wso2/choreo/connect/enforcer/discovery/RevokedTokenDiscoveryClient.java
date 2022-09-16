@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.discovery.service.keymgt.RevokedTokenDiscoverySer
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.common.XDSCommonUtils;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
@@ -41,6 +42,7 @@ import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 /**
  * Client to communicate with API discovery service at the adapter.
  */
@@ -53,29 +55,29 @@ public class RevokedTokenDiscoveryClient implements Runnable {
     private final RevokedJWTDataHolder revokedJWTDataHolder;
     private StreamObserver<DiscoveryRequest> reqObserver;
     private static final Logger log = LogManager.getLogger(RevokedTokenDiscoveryClient.class);
-    private String host;
-    private int port;
+    private final String host;
+    private final int port;
     /**
      * This is a reference to the latest received response from the ADS.
      * <p>
-     *     Usage: When ack/nack a DiscoveryResponse this value is used to identify the
-     *     latest received DiscoveryResponse which may not have been acked/nacked so far.
+     * Usage: When ack/nack a DiscoveryResponse this value is used to identify the
+     * latest received DiscoveryResponse which may not have been acked/nacked so far.
      * </p>
      */
     private DiscoveryResponse latestReceived;
     /**
      * This is a reference to the latest acked response from the ADS.
      * <p>
-     *     Usage: When nack a DiscoveryResponse this value is used to find the latest
-     *     successfully processed DiscoveryResponse. Information sent in the nack request
-     *     will contain information about this response value.
+     * Usage: When nack a DiscoveryResponse this value is used to find the latest
+     * successfully processed DiscoveryResponse. Information sent in the nack request
+     * will contain information about this response value.
      * </p>
      */
     private DiscoveryResponse latestACKed;
     /**
-     * Label of this node.
+     * Node struct for the discovery client
      */
-    private final String nodeId;
+    private final Node node;
 
     private RevokedTokenDiscoveryClient(String host, int port) {
         this.host = host;
@@ -85,7 +87,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
         // Since revoked tokens should be received by every enforcer, adapter creates a
         // common snapshot for revoked tokens. Hence each enforces requests data using the
         // common enforcer label to avoid redundent snapshots
-        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
+        this.node = XDSCommonUtils.generateXDSNode(AdapterConstants.COMMON_ENFORCER_LABEL);
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
@@ -125,44 +127,44 @@ public class RevokedTokenDiscoveryClient implements Runnable {
     public void watchRevokedTokens() {
         // TODO: (Praminda) implement a deadline with retries
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
-        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamTokens(new StreamObserver<DiscoveryResponse>() {
-                    @Override
-                    public void onNext(DiscoveryResponse response) {
-                        logger.info("Revoked  token event received with version : " + response.getVersionInfo());
-                        XdsSchedulerManager.getInstance().stopRevokedTokenDiscoveryScheduling();
-                        latestReceived = response;
-                        try {
-                            List<RevokedToken> tokens = handleResponse(response);
-                            handleRevokedTokens(tokens);
-                            // TODO: (Praminda) fix recursive ack on ack failure
-                            ack();
-                        } catch (Exception e) {
-                            logger.info(e);
-                            // catching generic error here to wrap any grpc communication errors in the runtime
-                            onError(e);
-                        }
-                    }
+        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamTokens(new StreamObserver<>() {
+            @Override
+            public void onNext(DiscoveryResponse response) {
+                logger.info("Revoked  token event received with version : " + response.getVersionInfo());
+                XdsSchedulerManager.getInstance().stopRevokedTokenDiscoveryScheduling();
+                latestReceived = response;
+                try {
+                    List<RevokedToken> tokens = handleResponse(response);
+                    handleRevokedTokens(tokens);
+                    // TODO: (Praminda) fix recursive ack on ack failure
+                    ack();
+                } catch (Exception e) {
+                    logger.info(e);
+                    // catching generic error here to wrap any grpc communication errors in the runtime
+                    onError(e);
+                }
+            }
 
-                    @Override
-                    public void onError(Throwable throwable) {
-                        logger.error("Error occurred during revoked token discovery", throwable);
-                        XdsSchedulerManager.getInstance().startRevokedTokenDiscoveryScheduling();
-                        nack(throwable);
-                    }
+            @Override
+            public void onError(Throwable throwable) {
+                logger.error("Error occurred during revoked token discovery", throwable);
+                XdsSchedulerManager.getInstance().startRevokedTokenDiscoveryScheduling();
+                nack(throwable);
+            }
 
-                    @Override
-                    public void onCompleted() {
-                        logger.info("Completed receiving revoke tokens");
-                    }
-                });
+            @Override
+            public void onCompleted() {
+                logger.info("Completed receiving revoke tokens");
+            }
+        });
 
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                    .setNode(Node.newBuilder().setId(nodeId).build())
+                    .setNode(node)
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.REVOKED_TOKEN_TYPE_URL).build();
             reqObserver.onNext(req);
-           logger.debug("Sent Discovery request for type url: " + Constants.REVOKED_TOKEN_TYPE_URL);
+            logger.debug("Sent Discovery request for type url: " + Constants.REVOKED_TOKEN_TYPE_URL);
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred in revoked token discovery service", e);
@@ -176,7 +178,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
      */
     private void ack() {
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestReceived.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.REVOKED_TOKEN_TYPE_URL).build();
@@ -189,7 +191,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
             return;
         }
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
+                .setNode(node)
                 .setVersionInfo(latestACKed.getVersionInfo())
                 .setResponseNonce(latestReceived.getNonce())
                 .setTypeUrl(Constants.REVOKED_TOKEN_TYPE_URL)
@@ -200,7 +202,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
 
     private void handleRevokedTokens(List<RevokedToken> tokens) {
         for (RevokedToken revokedToken : tokens) {
-            revokedJWTDataHolder.addRevokedJWTToMap(revokedToken.getJti(), Long.valueOf(revokedToken.getExpirytime()));
+            revokedJWTDataHolder.addRevokedJWTToMap(revokedToken.getJti(), revokedToken.getExpirytime());
         }
     }
 

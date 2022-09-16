@@ -106,14 +106,32 @@ func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 		AccessControlAllowOrigins: []string{"http://test1.com", "http://test2.com"},
 	}
 
-	route1 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"GET"}, "test-cluster", "", corsConfigModel3, false))
-	route2 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"POST"}, "test-cluster", "", corsConfigModel3, false))
-	route3 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"PUT"}, "test-cluster", "", corsConfigModel3, false))
+	operationGet := model.NewOperation("GET", nil, nil)
+	operationPost := model.NewOperation("POST", nil, nil)
+	operationPut := model.NewOperation("PUT", nil, nil)
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{operationGet},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
+	resourceWithPost := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{operationPost},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
+	resourceWithPut := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{operationPut},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
+	resourceWithMultipleOperations := model.CreateMinimalDummyResourceForTests("/resourcePath", []*model.Operation{operationGet, operationPut},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routes := []*routev3.Route{route1, route2, route3}
+	route1, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+		&resourceWithGet, "test-cluster", "", corsConfigModel3, false))
+	assert.Nil(t, err, "Error while creating routes for resourceWithGet")
+	route2, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+		&resourceWithPost, "test-cluster", "", corsConfigModel3, false))
+	assert.Nil(t, err, "Error while creating routes for resourceWithPost")
+	route3, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+		&resourceWithPut, "test-cluster", "", corsConfigModel3, false))
+	assert.Nil(t, err, "Error while creating routes for resourceWithPut")
+	route4, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
+		&resourceWithMultipleOperations, "test-cluster", "", corsConfigModel3, false))
+	assert.Nil(t, err, "Error while creating routes for resourceWithMultipleOperations")
+
+	routes := []*routev3.Route{route1[0], route2[0], route3[0], route4[0]}
 
 	// check cors after creating routes
 	for _, r := range routes {

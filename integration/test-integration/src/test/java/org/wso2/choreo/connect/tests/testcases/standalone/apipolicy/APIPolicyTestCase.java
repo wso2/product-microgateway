@@ -19,8 +19,6 @@
 package org.wso2.choreo.connect.tests.testcases.standalone.apipolicy;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import com.google.gson.Gson;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import org.awaitility.Awaitility;
 import org.testng.Assert;
@@ -29,6 +27,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -59,10 +58,11 @@ public class APIPolicyTestCase {
         headers.put("Sample2", "Sample Value");
     }
 
-    @Test(description = "Test header based API Policies")
-    public void testSetHeaderRemoveHeaderAPIPolicies() throws Exception {
+    @Test(description = "Test header based API Policies for request flow")
+    public void testSetHeaderRemoveHeaderAPIPoliciesForRequestFlow() throws Exception {
         headers.put("RemoveThisHeader", "Unnecessary Header");
-        EchoResponse echoResponse = invokeEchoPost("/echo-full/headers-policy/123" + queryParams, "Hello World!", headers);
+        EchoResponse echoResponse = Utils.invokeEchoPost(basePath,
+                "/echo-full/headers-policy/123" + queryParams, "Hello World!", headers, jwtTokenProd);
         
         Assert.assertFalse(echoResponse.getHeaders().containsKey("RemoveThisHeader"),
                 getPolicyFailAssertMessage("Remove Header"));
@@ -73,10 +73,33 @@ public class APIPolicyTestCase {
         assertOriginalClientRequestInfo(echoResponse);
     }
 
+    @Test(description = "Test header based API Policies for response flow")
+    public void testSetHeaderRemoveHeaderAPIPoliciesForResponseFlow() throws Exception {
+        // backend will set the headers "header_1_from_backend, header_2_from_backend" by reading "set_headers"
+        headers.put("Set-headers", "KeepThisHeader, RemoveThisHeader");
+        HttpResponse httpResponse = Utils.invokePost(basePath,
+                "/echo-full/headers-policy-response-flow/123" + queryParams,
+                "Hello World!", headers, jwtTokenProd);
+        EchoResponse echoResponse = Utils.extractToEchoResponse(httpResponse);
+
+        // Envoy changes the case of the headers.
+        // https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/header_casing
+        Assert.assertTrue(httpResponse.getHeaders().containsKey("keepthisheader"),
+                "The backend has not added the specifies headers");
+        Assert.assertFalse(httpResponse.getHeaders().containsKey("removethisheader"),
+                getPolicyFailAssertMessage("Remove Header"));
+        Assert.assertEquals(httpResponse.getHeaders().get("newheaderkey1"), "newHeaderVal1",
+                getPolicyFailAssertMessage("Add Header"));
+        Assert.assertEquals(httpResponse.getHeaders().get("newheaderkey2"), "newHeaderVal2",
+                getPolicyFailAssertMessage("Add Header"));
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
     @Test(description = "Test header based unsupported API Policies")
     public void testUnsupportedAPIPolicies() throws Exception {
         headers.put("RemoveThisHeader", "Unnecessary Header");
-        EchoResponse echoResponse = invokeEchoPost("/echo-full/unsupported-policy/123" + queryParams, "Hello World!", headers);
+        EchoResponse echoResponse = Utils.invokeEchoPost(basePath,
+                "/echo-full/unsupported-policy/123" + queryParams, "Hello World!", headers, jwtTokenProd);
 
         // check supported policies
         Assert.assertFalse(echoResponse.getHeaders().containsKey("RemoveThisHeader"),
@@ -96,7 +119,8 @@ public class APIPolicyTestCase {
 
     @Test(description = "Test custom API Policies and Policy Versions")
     public void testCustomAPIPoliciesAndPolicyVersions() throws Exception {
-        EchoResponse echoResponse = invokeEchoPost("/echo-full/custom-policy/123" + queryParams, "Hello World!", headers);
+        EchoResponse echoResponse = Utils.invokeEchoPost(basePath,
+                "/echo-full/custom-policy/123" + queryParams, "Hello World!", headers, jwtTokenProd);
 
         Assert.assertEquals(echoResponse.getHeaders().getFirst("customV1NewHeaderKey"), "customV1NewHeaderVal",
                 getPolicyFailAssertMessage("Custom Add Header V1"));
@@ -107,7 +131,8 @@ public class APIPolicyTestCase {
 
     @Test(description = "Test query based API Policies")
     public void testQueryAPIPolicy() throws Exception {
-        EchoResponse echoResponse = invokeEchoGet("/echo-full/query-policy" + queryParams, headers);
+        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
+                "/echo-full/query-policy" + queryParams, headers, jwtTokenProd);
         
         Assert.assertEquals(echoResponse.getQuery().get("helloQ1"), "worldQ1",
                 getPolicyFailAssertMessage("Add Query Param"));
@@ -119,25 +144,38 @@ public class APIPolicyTestCase {
     @Test(description = "Test rewrite method and rewrite path API Policies")
     public void testRewriteMethodAndPathAPIPolicy() throws Exception {
         // HTTP method: GET
-        EchoResponse echoResponse = invokeEchoGet("/echo-full/rewrite-policy/345" + queryParams, headers);
+        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
+                "/echo-full/rewrite-policy/345" + queryParams, headers, jwtTokenProd);
         
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path");
         assertOriginalClientRequestInfo(echoResponse);
 
-        // HTTP method: POST
-        echoResponse = invokeEchoPost("/echo-full/rewrite-policy/345" + queryParams, "Hello World", headers);
+        // HTTP method: POST but "currentMethod" provided as GET
+        HttpResponse httpResponse = Utils.invokePost(basePath,
+                "/echo-full/rewrite-policy/345" + queryParams, "Hello World", headers, jwtTokenProd);
 
-        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.POST.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path");
-        assertOriginalClientRequestInfo(echoResponse);
+        Assert.assertEquals(httpResponse.getResponseCode(), HttpStatus.SC_NOT_FOUND, "Response code mismatched");
     }
 
     @Test(description = "Test rewrite path API Policy with capture groups")
     public void testRewritePathAPIPolicyWithCaptureGroups() throws Exception {
         // HTTP method: GET
-        EchoResponse echoResponse = invokeEchoGet(
-                "/echo-full/rewrite-policy-with-capture-groups/shops/shop1234.xyz/pets/pet890/orders" + queryParams, headers);
+        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
+                "/echo-full/rewrite-policy-with-capture-groups/shops/shop1234.xyz/pets/pet890/orders"
+                        + queryParams, headers, jwtTokenProd);
+
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/pets/pet890.pets/hello-shops/abcd-shops/shop1234");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test rewrite path API Policy with capture groups with trailing slash in path")
+    public void testRewritePathAPIPolicyWithCaptureGroupsWithTrailingSlashInPath() throws Exception {
+        // HTTP method: GET with trailing slash
+        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
+                "/echo-full/rewrite-policy-with-capture-groups/shops/shop1234.xyz/pets/pet890/orders/"
+                        + queryParams, headers, jwtTokenProd);
 
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/pets/pet890.pets/hello-shops/abcd-shops/shop1234");
@@ -146,40 +184,44 @@ public class APIPolicyTestCase {
 
     @Test(description = "Test rewrite path API Policy with capture groups with invalid param")
     public void testRewritePathAPIPolicyWithCaptureGroupsInvalidParam() throws Exception {
-        // HTTP method: GET
-        EchoResponse echoResponse = invokeEchoGet(
-                "/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders" + queryParams, headers);
+        boolean errorWhenDeploying = false;
+        ApictlUtils.createProject( "api_policy_invalid_param_id_openAPI.yaml", "api_policy_invalid_param_id", null, null, null, "api_policies_invalid_param_id.yaml", true);
 
-        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders");
-        assertOriginalClientRequestInfo(echoResponse);
-    }
-
-    @Test(description = "Test rewrite path API Policy with capture groups with invalid chars")
-    public void testRewritePathAPIPolicyWithCaptureGroupsInvalidChars() throws Exception {
-        // HTTP method: GET
-        EchoResponse echoResponse = invokeEchoGet(
-                "/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders" + queryParams, headers);
-
-        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders");
-        assertOriginalClientRequestInfo(echoResponse);
+        try {
+            ApictlUtils.deployAPI("api_policy_invalid_param_id", "test");
+        } catch (CCTestException e) {
+            errorWhenDeploying = true;
+        }
+        Assert.assertTrue(errorWhenDeploying, "An error must occur while deploying if an invalid param is provided.");
     }
 
     @Test(description = "Test rewrite path and discard queries in rewrite path API Policies")
     public void testRewritePathAndDiscardQueriesAPIPolicy() throws Exception {
         // HTTP method: GET
-        EchoResponse echoResponse = invokeEchoGet("/echo-full/rewrite-policy/discard-query-params" + queryParams, headers);
+        EchoResponse echoResponse = Utils.invokeEchoGet(basePath,
+                "/echo-full/rewrite-policy/discard-query-params" + queryParams, headers, jwtTokenProd);
 
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.DELETE.name());
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path2");
         Assert.assertTrue(echoResponse.getQuery().isEmpty(), "Query params has not been discarded");
     }
 
+    @Test(description = "Test rewrite path and discard queries in rewrite path API Policies with trailing slash in path")
+    public void testRewritePathAndDiscardQueriesAPIPolicyWithTrailingSlashInPath() throws Exception {
+        // HTTP method: GET with trailing slash
+        EchoResponse echoResponse1 = Utils.invokeEchoGet(basePath, "/echo-full/rewrite-policy/discard-query-params/"
+                + queryParams, headers, jwtTokenProd);
+
+        Assert.assertEquals(echoResponse1.getMethod(), HttpMethod.DELETE.name());
+        Assert.assertEquals(echoResponse1.getPath(), "/v2/echo-full/new-path2");
+        Assert.assertTrue(echoResponse1.getQuery().isEmpty(), "Query params has not been discarded");
+    }
+
     @Test(description = "Test OPA API policy - Success Validation")
     public void testOPAAPIPolicySuccessValidation() throws Exception {
         headers.put("foo", "bar"); // this header is validated in OPA policy
-        EchoResponse echoResponse = invokeEchoPost("/echo-full/opa-policy" + queryParams, "Hello", headers);
+        EchoResponse echoResponse = Utils.invokeEchoPost(basePath, "/echo-full/opa-policy" + queryParams,
+                "Hello", headers, jwtTokenProd);
 
         Assert.assertEquals(echoResponse.getData(), "Hello");
         Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey1"), "newHeaderVal1");
@@ -189,7 +231,8 @@ public class APIPolicyTestCase {
     @Test(description = "Test Custom OPA API policy - Success Validation")
     public void testCustomOPAAPIPolicySuccessValidation() throws Exception {
         headers.put("custom-foo", "custom-bar"); // this header is validated in OPA policy
-        EchoResponse echoResponse = invokeEchoPost("/echo-full/custom-opa-policy" + queryParams, "Hello", headers);
+        EchoResponse echoResponse = Utils.invokeEchoPost(basePath, "/echo-full/custom-opa-policy" + queryParams,
+                "Hello", headers, jwtTokenProd);
 
         Assert.assertEquals(echoResponse.getData(), "Hello");
         Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey1"), "newHeaderVal1");
@@ -199,21 +242,24 @@ public class APIPolicyTestCase {
     @Test(description = "Test OPA API policy - Failed Validation")
     public void testOPAAPIPolicyFailedValidation() throws Exception {
         // missing the header "foo"
-        HttpResponse response = invokePost("/echo-full/opa-policy" + queryParams, "Hello", headers);
+        HttpResponse response = Utils.invokePost(basePath, "/echo-full/opa-policy" + queryParams,
+                "Hello", headers, jwtTokenProd);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
     }
 
     @Test(description = "Test Custom OPA API policy - Failed Validation")
     public void testCustomOPAAPIPolicyFailedValidation() throws Exception {
         // missing the header "custom-foo"
-        HttpResponse response = invokePost("/echo-full/custom-opa-policy" + queryParams, "Hello", headers);
+        HttpResponse response = Utils.invokePost(basePath, "/echo-full/custom-opa-policy" + queryParams,
+                "Hello", headers, jwtTokenProd);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
     }
 
     @Test(description = "Test Custom OPA API policy - Not found Impl of Request Generator")
     public void testCustomOPAAPIPolicyNotFoundImpl() throws Exception {
         // missing the header "custom-foo"
-        HttpResponse response = invokePost("/echo-full/custom-opa-policy-not-found" + queryParams, "Hello", headers);
+        HttpResponse response = Utils.invokePost(basePath, "/echo-full/custom-opa-policy-not-found" + queryParams,
+                "Hello", headers, jwtTokenProd);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
     }
 
@@ -221,14 +267,16 @@ public class APIPolicyTestCase {
     public void testOPAAPIPolicyNoTokenFailedValidation() throws Exception {
         headers.put("foo", "bar"); // this header is validated in OPA policy
         // auth key type is validated in OPA policy, since it is missing, validation failed
-        HttpResponse response = invokePost("/echo-full/opa-policy-no-access-token" + queryParams, "Hello", headers);
+        HttpResponse response = Utils.invokePost(basePath, "/echo-full/opa-policy-no-access-token" + queryParams,
+                "Hello", headers, jwtTokenProd);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
     }
 
 
     @Test(description = "Test OPA API policy - Invalid Response from OPA server")
     public void testOPAAPIPolicyInvalidResponse() throws Exception {
-        HttpResponse response = invokePost("/echo-full/opa-policy-invalid-response" + queryParams, "Hello", headers);
+        HttpResponse response = Utils.invokePost(basePath, "/echo-full/opa-policy-invalid-response" + queryParams,
+                "Hello", headers, jwtTokenProd);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_INTERNAL_SERVER_ERROR, "Response code mismatched");
     }
 
@@ -236,7 +284,8 @@ public class APIPolicyTestCase {
     public void testAllPoliciesTogether() throws Exception {
         headers.put("RemoveThisHeader", "Unnecessary Header");
         headers.put("foo", "bar"); // this header is validated in OPA policy
-        EchoResponse echoResponse = invokeEchoPost("/echo-full/all-policies/123-abc" + queryParams, "Hello World!", headers);
+        EchoResponse echoResponse = Utils.invokeEchoPost(basePath,
+                "/echo-full/all-policies/123-abc" + queryParams, "Hello World!", headers, jwtTokenProd);
 
         Assert.assertFalse(echoResponse.getHeaders().containsKey("RemoveThisHeader"),
                 getPolicyFailAssertMessage("Remove Header"));
@@ -248,30 +297,6 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies");
         Assert.assertEquals(echoResponse.getData(), "Hello World!");
         assertOriginalClientRequestInfo(echoResponse);
-    }
-
-    private EchoResponse invokeEchoGet(String resourcePath, Map<String, String> headers) throws Exception {
-        HttpResponse response = invokeGet(resourcePath, headers);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertNotNull(response);
-        return new Gson().fromJson(response.getData(), EchoResponse.class);
-    }
-
-    private EchoResponse invokeEchoPost(String resourcePath, String payload, Map<String, String> headers) throws Exception {
-        HttpResponse response = invokePost(resourcePath, payload, headers);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertNotNull(response);
-        return new Gson().fromJson(response.getData(), EchoResponse.class);
-    }
-
-    private HttpResponse invokeGet(String resourcePath, Map<String, String> headers) throws Exception {
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        return HttpsClientRequest.doGet(Utils.getServiceURLHttps(basePath + resourcePath), headers);
-    }
-
-    private HttpResponse invokePost(String resourcePath, String payload, Map<String, String> headers) throws Exception {
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        return HttpsClientRequest.doPost(Utils.getServiceURLHttps(basePath + resourcePath), payload, headers);
     }
 
     private void assertOriginalClientRequestInfo(EchoResponse echoResponse) {

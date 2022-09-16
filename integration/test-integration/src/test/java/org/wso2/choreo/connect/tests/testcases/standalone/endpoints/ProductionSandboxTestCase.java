@@ -44,7 +44,8 @@ public class ProductionSandboxTestCase {
         jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
-    @Test(description = "Invoke Production and Sandbox endpoint when both endpoints provided")
+    @Test(description = "Invoke Production and Sandbox endpoint when both API level endpoints provided " +
+            "and have same basepaths")
     public void invokeProdSandEndpoints() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -67,8 +68,8 @@ public class ProductionSandboxTestCase {
                 "Response message mismatch.");
     }
 
-    @Test(description = "Invoke Production and Sandbox endpoint when both endpoints provided " +
-            "and has different endpoint basepath than api level")
+    @Test(description = "Invoke Production and Sandbox endpoint when both API endpoints provided " +
+            "and has different resource endpoints")
     public void invokeProdSandEndpointsDiffBasePath() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -124,7 +125,7 @@ public class ProductionSandboxTestCase {
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
                 "Response message mismatch.");
 
         // api level prod endpoint should not be added to resource if basepath is different
@@ -134,9 +135,8 @@ public class ProductionSandboxTestCase {
                 "/v2/general/v2/pets/findByStatus"), prodHeaders);
 
         Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
-        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
-        Assert.assertTrue(
-                prodResponse.getData().contains("Production key offered to an API with no production endpoint"));
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY);
     }
 
     @Test(description = "Invoke Production endpoint when production endpoints provided alone")
@@ -172,7 +172,7 @@ public class ProductionSandboxTestCase {
 
         Assert.assertNotNull(response, "Production endpoint response should not be null");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
+        Assert.assertEquals(response.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
                 "Response message mismatch.");
 
         // api level sand endpoint should not be added if basepath is different
@@ -182,8 +182,8 @@ public class ProductionSandboxTestCase {
                 "/v2/general/v2/pets/findByTags"), sandHeaders);
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
-        Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to an API with no sandbox endpoint"));
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE);
     }
 
     @Test(description = "x-wso2-cluster-header should be omitted from client request")
@@ -210,6 +210,54 @@ public class ProductionSandboxTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
                 "The returned payload does not match with the expected payload");
+    }
+
+    @Test(description = "Invoke Production and Sandbox resource level endpoints when both endpoints are provided " +
+            "and has different endpoint basepath than api level but same basepath at resource level")
+    public void invokeProdSandResourceLevelSameBasePath() throws Exception {
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/general/pet/patch/same/findByStatus"), prodHeaders);
+
+        Assert.assertNotNull(prodResponse);
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
+                "Response message mismatch.");
+
+        Map<String, String> sandHeaders = new HashMap<String, String>();
+        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/general/pet/patch/same/findByStatus"), sandHeaders);
+
+        Assert.assertNotNull(sandResponse);
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "Invoke Production and Sandbox resource level endpoints when both endpoints are provided " +
+            "and has different endpoint basepath than api level and also different basepath at resource level")
+    public void invokeProdSandResourceLevelDiffBasePath() throws Exception {
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/general/pet/patch/diff/findByStatus"), prodHeaders);
+
+        Assert.assertNotNull(prodResponse);
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
+                "Response message mismatch.");
+
+        Map<String, String> sandHeaders = new HashMap<String, String>();
+        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/general/pet/patch/diff/findByStatus"), sandHeaders);
+
+        Assert.assertNotNull(sandResponse);
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE_2,
+                "Response message mismatch.");
     }
 
     //todo:(amali) enable this test once apictl side get fixed.

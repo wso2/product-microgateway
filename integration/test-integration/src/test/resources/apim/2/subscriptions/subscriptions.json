@@ -1,5 +1,10 @@
 [
   {
+    "apiName": "SoapAPI",
+    "appName": "SoapBasicApp",
+    "tier": "Unlimited"
+  },
+  {
     "apiName": "WebSocketScopeAPI",
     "appName": "WebSocketScopeApp",
     "tier": "AsyncUnlimited"
@@ -8,5 +13,25 @@
     "apiName": "WebSocketTimeoutAPI",
     "appName": "WebSocketTimeoutApp",
     "tier": "AsyncUnlimited"
+  },
+  {
+    "apiName": "KeyTemplateThrottlingAPI",
+    "appName": "KeyTemplateThrottlingApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "GraphQLBasicAPI",
+    "appName": "GraphQLBasicApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "GraphQLThrottlingAPI",
+    "appName": "GraphQLThrottlingApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "GraphQLScopeAPI",
+    "appName": "GraphQLScopeApp",
+    "tier": "Unlimited"
   }
 ]

@@ -25,14 +25,19 @@ import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
+import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.graphql.utils.GraphQLPayloadUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -69,9 +74,9 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
-        String requestPayload = null;
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
+        String certificate = request.getAttributes().getSource().getCertificate();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
         String pathTemplate = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
         String prodCluster = request.getAttributes().getContextExtensionsMap()
@@ -80,14 +85,16 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 .get(AdapterConstants.SAND_CLUSTER_HEADER_KEY);
         long requestTimeInMillis = request.getAttributes().getRequest().getTime().getSeconds() * 1000 +
                 request.getAttributes().getRequest().getTime().getNanos() / 1000000;
-        String requestID =  request.getAttributes().getRequest().getHttp().
+        String requestID = request.getAttributes().getRequest().getHttp().
                 getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
-                request.getAttributes().getRequest().getHttp().getId());
+                        request.getAttributes().getRequest().getHttp().getId());
         String address = "";
         if (request.getAttributes().getSource().hasAddress() &&
                 request.getAttributes().getSource().getAddress().hasSocketAddress()) {
             address = request.getAttributes().getSource().getAddress().getSocketAddress().getAddress();
         }
+        address = FilterUtils.getClientIp(headers, address);
+        String requestPayload = null;
         if (!request.getAttributes().getRequest().getHttp().getRawBody().isEmpty()) {
             ByteString byteString = request.getAttributes().getRequest().getHttp().getRawBody();
             if (byteString.isValidUtf8()) {
@@ -100,12 +107,43 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 requestPayload = byteString.toStringUtf8();
             }
         }
-        address = FilterUtils.getClientIp(headers, address);
         ResourceConfig resourceConfig = null;
-        resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
-        return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
-                .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
-                .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).requestPayload(requestPayload).build();
+        ArrayList<ResourceConfig> resourceConfigs = null;
+        boolean isGraphQLAPI = api.getAPIConfig().getApiType().equals(APIConstants.ApiType.GRAPHQL);
+        if (isGraphQLAPI && !HttpConstants.OPTIONS.equals(method)) {
+            // need to decode the payload if request is graphql and a non option call.
+            try {
+                requestPayload = GraphQLPayloadUtils.getGQLRequestPayload(requestPayload, headers);
+                resourceConfigs = GraphQLPayloadUtils.buildGQLRequestContext(api, requestPayload);
+            } catch (EnforcerException exception) {
+                logger.error("Error while processing the graphql api request for {}",
+                        api.getAPIConfig().getName(),
+                        ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6704), exception);
+                RequestContext requestContext = new RequestContext.Builder(requestPath).requestMethod(method)
+                        .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
+                        .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).certificate(certificate)
+                        .requestTimeStamp(requestTimeInMillis).requestPayload(requestPayload).build();
+                requestContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                        APIConstants.StatusCodes.BAD_REQUEST_ERROR.getCode());
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
+                        APIConstants.GraphQL.GRAPHQL_INVALID_QUERY);
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                        APIConstants.GraphQL.GRAPHQL_INVALID_QUERY_MESSAGE);
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                        exception.getMessage());
+                return requestContext;
+            }
+        } else if (!isGraphQLAPI) {
+            resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
+            if (resourceConfig != null) {
+                resourceConfigs = new ArrayList<>();
+                resourceConfigs.add(resourceConfig);
+            }
+        }
+        return new RequestContext.Builder(requestPath).matchedResourceConfigs(resourceConfigs).requestMethod(method)
+                .certificate(certificate).matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID)
+                .address(address).prodClusterHeader(prodCluster).sandClusterHeader(sandCluster)
+                .requestTimeStamp(requestTimeInMillis).pathTemplate(pathTemplate).requestPayload(requestPayload)
+                .build();
     }
 }

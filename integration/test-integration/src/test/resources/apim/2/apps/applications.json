@@ -1,10 +1,30 @@
 [
   {
+    "appName": "SoapBasicApp",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "WebSocketScopeApp",
     "throttleTier": "Unlimited"
   },
   {
     "appName": "WebSocketTimeoutApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "KeyTemplateThrottlingApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "GraphQLThrottlingApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "GraphQLScopeApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "GraphQLBasicApp",
     "throttleTier": "Unlimited"
   }
 ]

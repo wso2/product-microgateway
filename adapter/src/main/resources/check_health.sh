@@ -16,7 +16,7 @@
 # -----------------------------------------------------------------------
 
 ADAPTER_XDS_PORT="${ADAPTER_XDS_PORT:-18000}"
-grpc_health_probe -addr "localhost:${ADAPTER_XDS_PORT}" \
+grpc_health_probe -addr "127.0.0.1:${ADAPTER_XDS_PORT}" \
     -tls \
     -tls-ca-cert "${ADAPTER_PUBLIC_CERT_PATH}" \
     -tls-client-cert "${ADAPTER_PUBLIC_CERT_PATH}" \

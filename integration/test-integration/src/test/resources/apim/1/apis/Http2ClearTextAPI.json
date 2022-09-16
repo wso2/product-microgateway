@@ -1,0 +1,20 @@
+{
+  "name": "Http2ClearTextAPI",
+  "version": "1.0.0",
+  "context": "http2_clear_text",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/hello",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend2:2350"
+    }
+  }
+}

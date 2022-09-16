@@ -68,9 +68,11 @@ public class APIConstants {
     public static final String SWAGGER_API_KEY_IN_QUERY = "query";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
+    public static final String API_SECURITY_MUTUAL_SSL_NAME = "mtls";
+    public static final String CLIENT_CERTIFICATE_HEADER_DEFAULT = "X-WSO2-CLIENT-CERTIFICATE";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
-    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
     public static final String BEGIN_PUBLIC_KEY_STRING = "-----BEGIN PUBLIC KEY-----\n";
     public static final String END_PUBLIC_KEY_STRING = "-----END PUBLIC KEY-----";
@@ -87,20 +89,36 @@ public class APIConstants {
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal Server Error";
 
     //headers and values
-    public static final String CONTENT_TYPE_HEADER = "Content-type";
+    public static final String CONTENT_TYPE_HEADER = "content-type";
+    public static final String SOAP_ACTION_HEADER_NAME = "soapaction";
     public static final String ACCEPT_HEADER = "accept";
     public static final String PREFER_HEADER = "prefer";
     public static final String PREFER_CODE = "code";
     public static final String PREFER_EXAMPLE = "example";
     public static final List<String> PREFER_KEYS = List.of(PREFER_CODE, PREFER_EXAMPLE);
     public static final String APPLICATION_JSON = "application/json";
-    public static final String API_TRACE_KEY = "X-TRACE-KEY";
+    public static final String CONTENT_TYPE_TEXT_XML = "text/xml";
+    public static final String CONTENT_TYPE_SOAP_XML = "application/soap+xml";
+    public static final String APPLICATION_GRAPHQL = "application/graphql";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
     public static final String UPGRADE_HEADER = "upgrade";
     public static final String WEBSOCKET = "websocket";
 
     public static final String LOG_TRACE_ID = "traceId";
+
+    // SOAP protocol versions
+    public static final String SOAP11_PROTOCOL = "SOAP 1.1 Protocol";
+    public static final String SOAP12_PROTOCOL = "SOAP 1.2 Protocol";
+
+    /**
+     * Holds the constants related to denied response types.
+     */
+    public static class ErrorResponseTypes {
+        public static final String SOAP11 = "SOAP11";
+        public static final String SOAP12 = "SOAP12";
+        public static final String JSON = "JSON";
+    }
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
@@ -184,8 +202,6 @@ public class APIConstants {
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
         public static final String PERMITTED_IP = "permittedIP";
         public static final String PERMITTED_REFERER = "permittedReferer";
-        public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
-        public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String PARAM_SEPARATOR = "&";
         public static final String PARAM_VALUE_SEPARATOR = "=";
@@ -386,15 +402,36 @@ public class APIConstants {
      */
     public static class ApiType {
         public static final String WEB_SOCKET = "WS";
+        public static final String GRAPHQL = "GRAPHQL";
         public static final String REST = "HTTP";
     }
 
+
     /**
-     * Holds values for mocked APIs
+     * GraphQL related constants.
      */
-    public static class MockApiConstants {
-        public static final String HEADER = "header";
-        public static final String QUERY = "query";
+    public static class GraphQL {
+        public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+        public static final String GRAPHQL_QUERY = "Query";
+        public static final String GRAPHQL_QUERY_BODY = "query";
+        public static final String GRAPHQL_MUTATION = "Mutation";
+        public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
+        public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
+        public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
+        public static final int GRAPHQL_INVALID_QUERY = 900422;
+        public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
+        public static final int GRAPHQL_QUERY_TOO_DEEP = 900820;
+        public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
+        public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
+        public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
+    }
+
+    /**
+     * Holds values for optionality.
+     */
+    public static class Optionality {
+        public static final String MANDATORY = "mandatory";
+        public static final String OPTIONAL = "optional";
     }
 
 }

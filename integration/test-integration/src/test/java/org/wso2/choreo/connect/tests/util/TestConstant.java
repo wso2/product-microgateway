@@ -29,6 +29,7 @@ public class TestConstant {
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST";
     public static final String HTTP_METHOD_PUT = "PUT";
+    public static final String HTTP_METHOD_PATCH = "PATCH";
     public static final String HTTP_METHOD_DELETE = "DELETE";
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD_HEAD = "HEAD";
@@ -88,6 +89,109 @@ public class TestConstant {
             "UmONQ6_gbAAzEOEXD2K6yTfy16KeZvQTdv-zZJzb6ULi0kAuG4txJh38WMagHtu3fuhKm2KIDrflOZEKWmThU6HqB8aoxROABDlId1" +
             "VS_RbajyF8WfeZDv7W_tqNYbKbJVXxSJFFKfPeqL1A1N5po1dfLByPA==";
 
+    public static final String CLIENT_CERT = "-----BEGIN CERTIFICATE-----MIIEnjCCAoYCFEBlls4RcEF1LLuOu0WK4Ng3rbxmMA" +
+            "0GCSqGSIb3DQEBCwUAMIGKMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzEM" +
+            "MAoGA1UECgwDQUJDMRAwDgYDVQQLDAdGaW5hbmNlMRAwDgYDVQQDDAdhYmMuY29tMRwwGgYJKoZIhvcNAQkBFg1hZG1pbkBhYmMuY2" +
+            "9tMB4XDTIyMDIwOTA1MTgxNFoXDTIzMDYyNDA1MTgxNFowgYsxCzAJBgNVBAYTAlVTMREwDwYDVQQIDAhOZXcgWW9yazEWMBQGA1UE" +
+            "BwwNTmV3IFlvcmsgQ2l0eTEMMAoGA1UECgwDWFlaMRMwEQYDVQQLDApFbmdpbmVlcm5nMRAwDgYDVQQDDAd4eXouY29tMRwwGgYJKo" +
+            "ZIhvcNAQkBFg1hZG1pbkB4eXouY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArdpOkXeYHD22uXKI6BOIRMYV8y3h" +
+            "3/zgr+Ah861cLdtoQnFA/TqueQ3ua0loTyspcct3sgXTp9F49x86ebpv2rYTTXe5r/iSr4c8IhkyoDcMM4+X+uVijLZGfnq0hA+qdG" +
+            "5FcCfucs7uP3QGQw21fZdGE5MoGt6joMDhG9T6WSsEuBlnVcTN+0tsr7fTa6qpEoo2uLZ+tCxaF31NIb+8a6gyJz1z4AC5CJIXpXaY" +
+            "lWyFMW0878u0cbVpXxgTeuxpA7LeH8RYAuJN+nli1Lix5x/JqZ+JvxlvB8BpCTyBitEDcMfU1EUtQz3UxtqILMnBtc8FALLDnS4a35" +
+            "V0Vpx+pQIDAQABMA0GCSqGSIb3DQEBCwUAA4ICAQAaOzFQB+OibydS+2gwXhWJGt4bMEhmYh6v1VNf27VYv84RtfY+rECixAkxPYOJ" +
+            "0L8685u/XMs6g48wVknaj6VYDYZJyCDYCnjw0q1+WwFi1b5jryFVR5mvHxjCbi3rlNP65xra4VOPeGCXfJzyocqvZ3UGPyY0rx9Ax0" +
+            "Uwt2ONmsBY6JIDjRZQLGLlyi0ZRbA4AIayBdBMrA8LvcsewfEXPYXp3vP2QEw1izaO1Jqh4C5yG2eKYooLfMFR+fVNsPbxEKV7YR4J" +
+            "iKFrbybJM4mjeYjQjcZuaLonCh0UnmsaV+2b6jEE5SjjE+Gt05jkk2kYN8CtwPxIyeYepCCEp2KAq9xleblxW7bo9Vk67eZ8Z1+FCY" +
+            "dkHZdr04JAp2gxuv9lpCyBRee1291yavAk5yp1GYlzC7pyzgwc7N34LnjCI1it1wTNq/wiCEus8w2Toq0fxm8dmx5q91zymxn8nTrd" +
+            "0/YmwdmVHpoe6F03s3LUUYh0pYqufInYXsjMh0CVpKHBGl/xRJxlzmRFwO+GEams7PI+ltvyQw7mtBldGXYy1BVTqs/vItD4vo7ooA" +
+            "tAjuVqLPItN6csPb6R94w2edmrwQmaLxklkA/Lez+Rc1oOJp8u+ChzmhIi63AHwlJjYgamw195U4wCZKjobxqzOcwe8/AU0NM9KYCd" +
+            "5QoQYNZgxw==-----END CERTIFICATE-----";
+
+    public static final String INVALID_CLIENT_CERT = "-----BEGIN CERTIFICATE-----MIIESDCCAjACFBGKEeR93EUJwx69IzikB29U" +
+            "GIlcMA0GCSqGSIb3DQEBCwUAMH4xCzAJBgNVBAYTAlNMMQswCQYDVQQIDAJOQzEMMAoGA1UEBwwDQW51MRAwDgYDVQQKDAdhbnUuY2" +
+            "9tMRAwDgYDVQQLDAdmaW5hbmNlMRAwDgYDVQQDDAd0aGFydWthMR4wHAYJKoZIhvcNAQkBFg90aGFydWthQGFudS5jb20wHhcNMjIw" +
+            "NDIxMDgwODUwWhcNMjMwOTAzMDgwODUwWjBDMQswCQYDVQQGEwJJTjELMAkGA1UECAwCTVIxFTATBgNVBAoMDEluZE9yZywgSW5jLj" +
+            "EQMA4GA1UEAwwHaW5kLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM9DrhWez1JFBs9B4f3LazluwP2kp6JYio3l" +
+            "JECWBoSGK64qMKiSzip2DDM6qf4UUcsJC6ofPreRqCQ487N9yT/LDNHqxOHMi5/m/g3480/2sK87RMiTYkWKH9DscEZyFbD3Ol0yXf" +
+            "Nk1Zbe8tm30Pci7sRo0QTquVRewM5wDgDKvwGVrXBKDVUHlTbmM/XgVT/xgk9CZgHzXqMSH9tzKxqiUdFycj7kHTe1F7NL9QJsNuTh" +
+            "cR1EvL07cxBBHe+XUc6GQv4SzW/QQgljWT663osfqTMNwbazh0puQx6QGWK00taAJ3a3lTEw5um6dthWG811UDgS7VlYMB3syfc4gB" +
+            "ECAwEAATANBgkqhkiG9w0BAQsFAAOCAgEAOoBVhNdbZhrkMnkEGUFUWVjmWrcdBZAABZnzoLhf2z0TxkBDyoLecCuL1VYojVqU+hx0" +
+            "y7Fhs19zW08+kTpfnfocgawENGi1DiRit9n4NahpNMEei1avLP7bjK9TWNKgxub0fj7Zh4yO3+7mpYhc5jhAPh6WJbQutiCZlwlsoL" +
+            "OaD2xkJhwx6QFtZxKTRemzFG10h7nhNbvPEEKzPtKgOiQh8XlqOsBn3eKSzIL+gPX93lOTNdhKdAs5+44tkw6GLY+RoSYlnFMEW4qE" +
+            "pQZ0S8PiQzM1ieT5M7AR46hQ/saSNZYYS0mrlWrMGfvsU4vMBuwQEBYi/uVgkQlGWE5WMberGf/Se67fqPtOk96MvIt8vbCQtQHuWG" +
+            "ezZKZmr+VCoWu0ro73skYyrLAd+ONNXF/o2Nf1j61t5bvyDGrroQ3kPXpppYY6mAemIWU6JE4hAwSrJ7aQnFCa4zsAeM5q0blZs90O" +
+            "tGIFDyNqzsf8nFtUqFk+dPmg5WUDJkT9/Di6oUWHCnYSvuYVs8kCOYUoI2UxwxgAt41/n7VfvZjwecwmyiJ12ryaXlNEV4AtUlzdoK" +
+            "OepULnPOtwhNKhjVP9U5p6JotaffsXT58TrIIH/StUJTxk/CmzeD/MtySLlVQgGeyjLOtQQL+I9nbbcHpaA01NjwGJ+tmHrbt2HnEj" +
+            "boA=-----END CERTIFICATE-----";
+
+    public static final String MUTUAL_SSL_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4Tm1GbE5qZ" +
+            "zRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbG" +
+            "ciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidG" +
+            "llclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJpZCI6MSw" +
+            "idXVpZCI6ImQ3NGNmMTkzLTE5MDQtNDRmMS1iOTYzLTc5OGZmNzhmZDE2ZSJ9LCJpc3MiOiJodHRwczpcL1wvYXBpbTo5NDQ0" +
+            "XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q291bnQiL" +
+            "CJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cnVlLCJzcG" +
+            "lrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlBST0RVQ1RJT04iLCJwZXJtaXR" +
+            "0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3VwZXIi" +
+            "LCJuYW1lIjoiTXV0dWFsU1NMIiwiY29udGV4dCI6IlwvdjJcLzEuMC41IiwicHVibGlzaGVyIjoiYWRtaW4iLCJ2ZXJzaW9uI" +
+            "joiMS4wLjUiLCJzdWJzY3JpcHRpb25UaWVyIjoiVW5saW1pdGVkIn1dLCJ0b2tlbl90eXBlIjoiYXBpS2V5IiwicGVybWl0dG" +
+            "VkSVAiOiIiLCJpYXQiOjE2NTYzMDk2MjMsImp0aSI6IjAxZmQyMDYxLTVlMjctNDg1ZS05MjY0LTdmNjUzNTBmNTE2MiJ9.Rn" +
+            "cQXeiBt2olmWben0ZPm1tKq8o8SDqg7sSbNUTK7T0zT6mWHO7z6Oyp3rzJZKjL5xTnDgsTzMiTCfF2maDFgUHBtGZ3m_fi7iB" +
+            "3lUi8Y-eu8bVNo9eJAQ6XV4-kx43HKx57joyShjvZvmfrk43VI5IGWIfwg4TSZGE3yVnsuAO6WukW2fMzRUi1p43maVTZxMCQ" +
+            "8WNXnMS9FNQMR7Kxt5wIIPEv2iwQWTQMY3n7rbpmFdQG-3zRNenthuhTvG618lb7V8gfyGSXMJ0Dxn_RrbxqMS2UMC3npbiX6" +
+            "PG7HJIsR_3PM1HQeKWYxRfTCoTNBBeLhSYoFJWtgfFh0Mqbfw==";
+
+    public static final String MUTUAL_SSL_INVALID_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4T" +
+            "m1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1" +
+            "QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbW" +
+            "luIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLCJ" +
+            "pZCI6MSwidXVpZCI6ImE0MDNiNTM1LTIwODUtNDRkYy1iOWFkLTJjZDY4ODZiODM3NyJ9LCJpc3MiOiJodHRwczpcL1wvYXBp" +
+            "bTo5NDQ0XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0Q" +
+            "291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0cn" +
+            "VlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlNBTkRCT1giLCJwZXJ" +
+            "taXR0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24uc3Vw" +
+            "ZXIiLCJuYW1lIjoiTXV0dWFsU1NMIiwiY29udGV4dCI6IlwvdjJcLzEuMC41IiwicHVibGlzaGVyIjoiYWRtaW4iLCJ2ZXJza" +
+            "W9uIjoiMS4wLjUiLCJzdWJzY3JpcHRpb25UaWVyIjoiVW5saW1pdGVkIn1dLCJ0b2tlbl90eXBlIjoiYXBpS2V5IiwicGVybW" +
+            "l0dGVkSVAiOiIiLCJpYXQiOjE2NTU3OTE4NzIsImp0aSI6ImYwZjE3ZjI1LTUzZWQtNDQ4NS04NDMwLTE4YjhiMTg2N2UxZSJ" +
+            "9.HU8Ng_8Z06dN70PbhTaKHJSs1xZY5Pmcu6RAVfUWsVgOe-YPjuN3ZupC3oEb57pazGbqpgR9_qOE7RLM5lyVwgrei1cwoYh" +
+            "0MTEwbT3lI17QqtUfxw1R_rzXAuUZ9LapsPxAIVGiwSL_-_f8T0wyBnWBhjPSq3IrS_wLGwcE_MfBRrZYkFLLfWle2XBrUDRn" +
+            "-9GQKfO_QXJq24JImsyNwy37HDmRu2xWeV6Km9z6xSiVLqXo3-74UKgqbSg8edqjpjD8VI4MJftX11zXAzwntKgB3gyloBtd3" +
+            "LY5uAVGCziHW0zfEa44tXBYGZZc21QvyuaRKZBywjA1TNZ-TXJ-fQ==";
+
+    public static final String MUTUAL_SSL_OPTIONAL_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4" +
+            "Tm1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV" +
+            "1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkb" +
+            "WluIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXRpb24iLC" +
+            "JpZCI6MSwidXVpZCI6IjBiNzhlNjMxLTdjZWEtNDk4My1hNjhmLWEyNzc5NjMyMTUwMyJ9LCJpc3MiOiJodHRwczpcL1wvYXB" +
+            "pbTo5NDQ0XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZXF1ZXN0" +
+            "Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYWNoIjp0c" +
+            "nVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlBST0RVQ1RJT04iLC" +
+            "JwZXJtaXR0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJib24" +
+            "uc3VwZXIiLCJuYW1lIjoiTXV0dWFsU1NMT3B0aW9uYWwiLCJjb250ZXh0IjoiXC92MlwvMS4wLjUiLCJwdWJsaXNoZXIiOiJh" +
+            "ZG1pbiIsInZlcnNpb24iOiIxLjAuNSIsInN1YnNjcmlwdGlvblRpZXIiOiJVbmxpbWl0ZWQifV0sInRva2VuX3R5cGUiOiJhc" +
+            "GlLZXkiLCJwZXJtaXR0ZWRJUCI6IiIsImlhdCI6MTY1NjMyNTMwOCwianRpIjoiNTVlZTgyY2EtY2FkZS00NGIxLThlOTAtOT" +
+            "M0OWRmYTI5MjQ3In0=.UZx3L-ph7FvpCdCP46-Pc2ydO1Yd5Zi12llQhtityeCOGiZFJdfBzr5moSojiEz53AoYMc5voikocT" +
+            "TNGcTMEXWV41onO2kzmctUr1A0421652Hm7gHh2SDypcRD8uW6Jp7OSRNnRkYExKchn8lk8l8VkuijYD7UVgLghTHbBiSKER1" +
+            "49mQJiZWI5fntM8YIZ9TtznD9hy26ZWFHpcq8jGQPAsOFV_cAUiLKZa-AY_lOc3Y5fcqqpRkqrTmkF4mmIvHp-H8UEjnVgu8W" +
+            "KlZRrSdylPCUEI7F963U1YNQVzcvov37XIoiBhKiaRXarO5zzXALv2il9TEivlC2VwbKBw==";
+
+    public static final String MUTUAL_SSL_OPTIONAL_INVALID_API_KEY = "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalpt" +
+            "WTFZVEF4Tm1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0e" +
+            "XAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lci" +
+            "I6ImFkbWluIiwidGllclF1b3RhVHlwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJEZWZhdWx0QXBwbGljYXR" +
+            "pb24iLCJpZCI6MSwidXVpZCI6ImE0MDNiNTM1LTIwODUtNDRkYy1iOWFkLTJjZDY4ODZiODM3NyJ9LCJpc3MiOiJodHRwczpc" +
+            "L1wvYXBpbTo5NDQ0XC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiVW5saW1pdGVkIjp7InRpZXJRdW90YVR5cGUiOiJyZ" +
+            "XF1ZXN0Q291bnQiLCJncmFwaFFMTWF4Q29tcGxleGl0eSI6MCwiZ3JhcGhRTE1heERlcHRoIjowLCJzdG9wT25RdW90YVJlYW" +
+            "NoIjp0cnVlLCJzcGlrZUFycmVzdExpbWl0IjowLCJzcGlrZUFycmVzdFVuaXQiOm51bGx9fSwia2V5dHlwZSI6IlNBTkRCT1g" +
+            "iLCJwZXJtaXR0ZWRSZWZlcmVyIjoiIiwic3Vic2NyaWJlZEFQSXMiOlt7InN1YnNjcmliZXJUZW5hbnREb21haW4iOiJjYXJi" +
+            "b24uc3VwZXIiLCJuYW1lIjoiTXV0dWFsU1NMT3B0aW9uYWwiLCJjb250ZXh0IjoiXC92MlwvMS4wLjUiLCJwdWJsaXNoZXIiO" +
+            "iJhZG1pbiIsInZlcnNpb24iOiIxLjAuNSIsInN1YnNjcmlwdGlvblRpZXIiOiJVbmxpbWl0ZWQifV0sInRva2VuX3R5cGUiOi" +
+            "JhcGlLZXkiLCJwZXJtaXR0ZWRJUCI6IiIsImlhdCI6MTY1NTc5MTg3MiwianRpIjoiZjBmMTdmMjUtNTNlZC00NDg1LTg0MzA" +
+            "tMThiOGIxODY3ZTFlIn0dTwoZ06dNQ9uFNhwWWEBVFlgOew93ZkLegRtaZgR9ElwK3otXMHQxMTBtPSNe0KofClECGUAhUSJP" +
+            "TDIGdTPSq3IrSwsbBwRGWFJ9aV5wa1A0Z9GQKUFyatuCSMyNLRw5bFZ5XiguUCptKDx52qMwVAwlV1wDPCcBDBtd3LY5BUYLO" +
+            "FtMEThwWBlcVC8pcjA1TH5Ncn59";
+
+    public static final String CLIENT_CERT_HEADER = "X-WSO2-CLIENT-CERTIFICATE";
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
     public static final int GATEWAY_LISTENER_HTTP_PORT = 9090;
     public static final int ADAPTER_PORT = 9843;
@@ -95,15 +199,22 @@ public class TestConstant {
     public final static int MOCK_SERVER2_PORT = 2390;
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9444;
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9764;
+    public static final int MOCK_BACKEND_HTTP2_CLEAR_TEXT_SERVER_PORT = 2350;
+    public static final int MOCK_BACKEND_HTTP2_SECURED_SERVER_PORT = 2351;
+    public final static int MOCK_GRAPHQL_SERVER_PORT = 2320;
+
     public static final String MOCK_BACKEND_BASEPATH = "/v2";
+    public static final String MOCK_GRAPHQL_BASEPATH = "/gql";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
 
     public static final String LINE = "\r\n";
+    public static final String URL_SEPARATOR = "/";
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
+    public static final String CERTS_DIR = File.separator + "certs";
     public static final String CONF_DIR = File.separator + "conf";
     public static final String DATABASE_DIR = File.separator + "database";
     public static final String TEST_DOCKER_COMPOSE_DIR = File.separator + "dockerCompose";
@@ -137,10 +248,15 @@ public class TestConstant {
     public static final String ADMIN_PASSWORD = "admin";
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String INTERNAL_KEY_HEADER = "Internal-Key";
+    public static final String CONTENT_TYPE_HEADER = "content-type";
+    public static final String SOAP_ACTION_HEADER = "SOAPAction";
 
     //apim instances names
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
     public static final String AM_ALL_IN_ONE_INSTANCE = "all-in-one";
+
+    public static final String ENABLE_ENFORCER_CUSTOM_FILTER = "enable-custom-filter";
 
     public static final class THROTTLING {
         public static final String ADVANCED = "advanced";
@@ -174,12 +290,6 @@ public class TestConstant {
 
     public static class RESOURCE_TIER {
         public static final String UNLIMITED = "Unlimited";
-        public static final String TENK_PER_MIN = "10KPerMin";
-        public static final String TWENTYK_PER_MIN = "20KPerMin";
-        public static final String FIFTYK_PER_MIN = "50KPerMin";
-        public static final int ULTIMATE_LIMIT = 20;
-        public static final int PLUS_LIMIT = 5;
-        public static final int BASIC_LIMIT = 1;
 
         public RESOURCE_TIER() {
         }
@@ -187,13 +297,6 @@ public class TestConstant {
 
     public static class API_TIER {
         public static final String UNLIMITED = "Unlimited";
-        public static final String GOLD = "Gold";
-        public static final String SILVER = "Silver";
-        public static final String BRONZE = "Bronze";
-        public static final String ASYNC_UNLIMITED = "AsyncWHUnlimited";
-        public static final int GOLD_LIMIT = 20;
-        public static final int SILVER_LIMIT = 5;
-        public static final int BRONZE_LIMIT = 1;
 
         public API_TIER() {
         }
@@ -201,14 +304,6 @@ public class TestConstant {
 
     public static final class APPLICATION_TIER {
         public static final String UNLIMITED = "Unlimited";
-        public static final String LARGE = "Large";
-        public static final String MEDIUM = "Medium";
-        public static final String SMALL = "Small";
-        public static final String TEN_PER_MIN = "10PerMin";
-        public static final int LARGE_LIMIT = 20;
-        public static final int MEDIUM_LIMIT = 5;
-        public static final int SMALL_LIMIT = 1;
-        public static final String DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN = "50PerMin";
 
         public APPLICATION_TIER() {
         }
@@ -225,10 +320,41 @@ public class TestConstant {
         }
     }
 
-    public static final class SRARTUP_TEST {
-        public static final String API_NAME = "ApiBeforeStartingCC";
-        public static final String API_CONTEXT = "before_starting_CC";
-        public static final String API_VERSION = "1.0.0";
-        public static final String APP_NAME = "AppBeforeStartingCC";
+    public static final class CONTENT_TYPES {
+        public static final String TEXT_XML = "text/xml";
+        public static final String SOAP_XML = "application/soap+xml";
+    }
+
+    public static final class API_TYPES {
+        public static final String SOAP = "SOAP";
+        public static final String GRAPHQL = "GRAPHQL";
+    }
+
+    public static final class SOAP_ENVELOPES {
+        public static final String SOAP11_SAMPLE_REQ_PAYLOAD = "<soap:Envelope\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                "\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                "\t<soap:Body>\n" +
+                "\t\t<CheckPhoneNumber\n" +
+                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+                "\t\t</CheckPhoneNumber>\n" +
+                "\t</soap:Body>\n" +
+                "</soap:Envelope>";
+        public static final String SOAP12_SAMPLE_REQ_PAYLOAD = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<soap12:Envelope\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                "\txmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+                "\t<soap12:Body>\n" +
+                "\t\t<CheckPhoneNumber\n" +
+                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+                "\t\t</CheckPhoneNumber>\n" +
+                "\t</soap12:Body>\n" +
+                "</soap12:Envelope>";
     }
 }

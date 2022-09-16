@@ -118,6 +118,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 	analytics := &enforcer.Analytics{
 		Enabled:          config.Analytics.Enabled,
+		Type:             config.Analytics.Type,
 		ConfigProperties: config.Analytics.Enforcer.ConfigProperties,
 		Service: &enforcer.Service{
 			Port:           config.Analytics.Enforcer.LogReceiver.Port,
@@ -140,6 +141,10 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 
 	restServer := &enforcer.RestServer{
 		Enable: config.Enforcer.RestServer.Enabled,
+	}
+
+	soap := &enforcer.Soap{
+		SoapErrorInXMLEnabled: config.Adapter.SoapErrorInXMLEnabled,
 	}
 
 	filters := []*enforcer.Filter{}
@@ -166,6 +171,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			ClaimsExtractorImpl:   config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
 			PublicCertificatePath: config.Enforcer.JwtGenerator.PublicCertificatePath,
 			PrivateKeyPath:        config.Enforcer.JwtGenerator.PrivateKeyPath,
+			TokenTtl:              config.Enforcer.JwtGenerator.TokenTTL,
 		},
 		JwtIssuer: &enforcer.JWTIssuer{
 			Enabled:               config.Enforcer.JwtIssuer.Enabled,
@@ -185,6 +191,12 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				EnableOutboundAuthHeader: config.Enforcer.Security.AuthHeader.EnableOutboundAuthHeader,
 				AuthorizationHeader:      config.Enforcer.Security.AuthHeader.AuthorizationHeader,
 				TestConsoleHeaderName:    config.Enforcer.Security.AuthHeader.TestConsoleHeaderName,
+			},
+			MutualSSL: &enforcer.MutualSSL{
+				CertificateHeader:               config.Enforcer.Security.MutualSSL.CertificateHeader,
+				EnableClientValidation:          config.Enforcer.Security.MutualSSL.EnableClientValidation,
+				ClientCertificateEncode:         config.Enforcer.Security.MutualSSL.ClientCertificateEncode,
+				EnableOutboundCertificateHeader: config.Enforcer.Security.MutualSSL.EnableOutboundCertificateHeader,
 			},
 		},
 		Cache:     cache,
@@ -233,6 +245,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Management: management,
 		RestServer: restServer,
 		Filters:    filters,
+		Soap:       soap,
 	}
 }
 
@@ -572,7 +585,6 @@ func marshalApplication(appInternal *types.Application) *subscription.Applicatio
 		SubName:      appInternal.SubName,
 		Policy:       appInternal.Policy,
 		TokenType:    appInternal.TokenType,
-		GroupIds:     appInternal.GroupIds,
 		Attributes:   appInternal.Attributes,
 		TenantId:     appInternal.TenantID,
 		TenantDomain: appInternal.TenantDomain,

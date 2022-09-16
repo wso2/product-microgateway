@@ -41,7 +41,8 @@ ARG MOTD="\n\
 RUN \
     addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
-    && mkdir ${MG_USER_HOME}/logs && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME}/logs  \
+    && mkdir ${MG_USER_HOME}/logs && mkdir -p ${MG_USER_HOME}/artifacts/apis \
+    && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME} \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
@@ -49,6 +50,7 @@ RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
+
 COPY maven/security security
 COPY maven/conf/config.toml conf/
 COPY maven/conf/log_config.toml conf/

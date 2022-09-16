@@ -34,6 +34,10 @@ private static final long serialVersionUID = 0L;
     authorizationHeader_ = "";
     vhost_ = "";
     organizationId_ = "";
+    clientCertificates_ = java.util.Collections.emptyList();
+    mutualSSL_ = "";
+    graphQLSchema_ = "";
+    graphqlComplexityInfo_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -209,6 +213,41 @@ private static final long serialVersionUID = 0L;
             isMockedApi_ = input.readBool();
             break;
           }
+          case 162: {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+              clientCertificates_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Certificate>();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            clientCertificates_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.api.Certificate.parser(), extensionRegistry));
+            break;
+          }
+          case 170: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            mutualSSL_ = s;
+            break;
+          }
+          case 176: {
+
+            applicationSecurity_ = input.readBool();
+            break;
+          }
+          case 186: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            graphQLSchema_ = s;
+            break;
+          }
+          case 194: {
+            if (!((mutable_bitField0_ & 0x00000010) != 0)) {
+              graphqlComplexityInfo_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.GraphqlComplexity>();
+              mutable_bitField0_ |= 0x00000010;
+            }
+            graphqlComplexityInfo_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.api.GraphqlComplexity.parser(), extensionRegistry));
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -232,6 +271,12 @@ private static final long serialVersionUID = 0L;
       }
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         security_ = java.util.Collections.unmodifiableList(security_);
+      }
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+        clientCertificates_ = java.util.Collections.unmodifiableList(clientCertificates_);
+      }
+      if (((mutable_bitField0_ & 0x00000010) != 0)) {
+        graphqlComplexityInfo_ = java.util.Collections.unmodifiableList(graphqlComplexityInfo_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -888,6 +933,173 @@ private static final long serialVersionUID = 0L;
     return isMockedApi_;
   }
 
+  public static final int CLIENTCERTIFICATES_FIELD_NUMBER = 20;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> clientCertificates_;
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> getClientCertificatesList() {
+    return clientCertificates_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> 
+      getClientCertificatesOrBuilderList() {
+    return clientCertificates_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public int getClientCertificatesCount() {
+    return clientCertificates_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.Certificate getClientCertificates(int index) {
+    return clientCertificates_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.CertificateOrBuilder getClientCertificatesOrBuilder(
+      int index) {
+    return clientCertificates_.get(index);
+  }
+
+  public static final int MUTUALSSL_FIELD_NUMBER = 21;
+  private volatile java.lang.Object mutualSSL_;
+  /**
+   * <code>string mutualSSL = 21;</code>
+   * @return The mutualSSL.
+   */
+  @java.lang.Override
+  public java.lang.String getMutualSSL() {
+    java.lang.Object ref = mutualSSL_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      mutualSSL_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string mutualSSL = 21;</code>
+   * @return The bytes for mutualSSL.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getMutualSSLBytes() {
+    java.lang.Object ref = mutualSSL_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      mutualSSL_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int APPLICATIONSECURITY_FIELD_NUMBER = 22;
+  private boolean applicationSecurity_;
+  /**
+   * <code>bool applicationSecurity = 22;</code>
+   * @return The applicationSecurity.
+   */
+  @java.lang.Override
+  public boolean getApplicationSecurity() {
+    return applicationSecurity_;
+  }
+
+  public static final int GRAPHQLSCHEMA_FIELD_NUMBER = 23;
+  private volatile java.lang.Object graphQLSchema_;
+  /**
+   * <code>string graphQLSchema = 23;</code>
+   * @return The graphQLSchema.
+   */
+  @java.lang.Override
+  public java.lang.String getGraphQLSchema() {
+    java.lang.Object ref = graphQLSchema_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      graphQLSchema_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string graphQLSchema = 23;</code>
+   * @return The bytes for graphQLSchema.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getGraphQLSchemaBytes() {
+    java.lang.Object ref = graphQLSchema_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      graphQLSchema_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int GRAPHQLCOMPLEXITYINFO_FIELD_NUMBER = 24;
+  private java.util.List<org.wso2.choreo.connect.discovery.api.GraphqlComplexity> graphqlComplexityInfo_;
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.wso2.choreo.connect.discovery.api.GraphqlComplexity> getGraphqlComplexityInfoList() {
+    return graphqlComplexityInfo_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder> 
+      getGraphqlComplexityInfoOrBuilderList() {
+    return graphqlComplexityInfo_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  @java.lang.Override
+  public int getGraphqlComplexityInfoCount() {
+    return graphqlComplexityInfo_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.GraphqlComplexity getGraphqlComplexityInfo(int index) {
+    return graphqlComplexityInfo_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder getGraphqlComplexityInfoOrBuilder(
+      int index) {
+    return graphqlComplexityInfo_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -958,6 +1170,21 @@ private static final long serialVersionUID = 0L;
     }
     if (isMockedApi_ != false) {
       output.writeBool(19, isMockedApi_);
+    }
+    for (int i = 0; i < clientCertificates_.size(); i++) {
+      output.writeMessage(20, clientCertificates_.get(i));
+    }
+    if (!getMutualSSLBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 21, mutualSSL_);
+    }
+    if (applicationSecurity_ != false) {
+      output.writeBool(22, applicationSecurity_);
+    }
+    if (!getGraphQLSchemaBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 23, graphQLSchema_);
+    }
+    for (int i = 0; i < graphqlComplexityInfo_.size(); i++) {
+      output.writeMessage(24, graphqlComplexityInfo_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -1033,6 +1260,24 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(19, isMockedApi_);
     }
+    for (int i = 0; i < clientCertificates_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(20, clientCertificates_.get(i));
+    }
+    if (!getMutualSSLBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, mutualSSL_);
+    }
+    if (applicationSecurity_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(22, applicationSecurity_);
+    }
+    if (!getGraphQLSchemaBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, graphQLSchema_);
+    }
+    for (int i = 0; i < graphqlComplexityInfo_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(24, graphqlComplexityInfo_.get(i));
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1095,6 +1340,16 @@ private static final long serialVersionUID = 0L;
         .equals(other.getOrganizationId())) return false;
     if (getIsMockedApi()
         != other.getIsMockedApi()) return false;
+    if (!getClientCertificatesList()
+        .equals(other.getClientCertificatesList())) return false;
+    if (!getMutualSSL()
+        .equals(other.getMutualSSL())) return false;
+    if (getApplicationSecurity()
+        != other.getApplicationSecurity()) return false;
+    if (!getGraphQLSchema()
+        .equals(other.getGraphQLSchema())) return false;
+    if (!getGraphqlComplexityInfoList()
+        .equals(other.getGraphqlComplexityInfoList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1158,6 +1413,21 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + ISMOCKEDAPI_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getIsMockedApi());
+    if (getClientCertificatesCount() > 0) {
+      hash = (37 * hash) + CLIENTCERTIFICATES_FIELD_NUMBER;
+      hash = (53 * hash) + getClientCertificatesList().hashCode();
+    }
+    hash = (37 * hash) + MUTUALSSL_FIELD_NUMBER;
+    hash = (53 * hash) + getMutualSSL().hashCode();
+    hash = (37 * hash) + APPLICATIONSECURITY_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getApplicationSecurity());
+    hash = (37 * hash) + GRAPHQLSCHEMA_FIELD_NUMBER;
+    hash = (53 * hash) + getGraphQLSchema().hashCode();
+    if (getGraphqlComplexityInfoCount() > 0) {
+      hash = (37 * hash) + GRAPHQLCOMPLEXITYINFO_FIELD_NUMBER;
+      hash = (53 * hash) + getGraphqlComplexityInfoList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1293,6 +1563,8 @@ private static final long serialVersionUID = 0L;
         getResourcesFieldBuilder();
         getSecuritySchemeFieldBuilder();
         getSecurityFieldBuilder();
+        getClientCertificatesFieldBuilder();
+        getGraphqlComplexityInfoFieldBuilder();
       }
     }
     @java.lang.Override
@@ -1360,6 +1632,24 @@ private static final long serialVersionUID = 0L;
 
       isMockedApi_ = false;
 
+      if (clientCertificatesBuilder_ == null) {
+        clientCertificates_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+      } else {
+        clientCertificatesBuilder_.clear();
+      }
+      mutualSSL_ = "";
+
+      applicationSecurity_ = false;
+
+      graphQLSchema_ = "";
+
+      if (graphqlComplexityInfoBuilder_ == null) {
+        graphqlComplexityInfo_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+      } else {
+        graphqlComplexityInfoBuilder_.clear();
+      }
       return this;
     }
 
@@ -1442,6 +1732,27 @@ private static final long serialVersionUID = 0L;
       result.vhost_ = vhost_;
       result.organizationId_ = organizationId_;
       result.isMockedApi_ = isMockedApi_;
+      if (clientCertificatesBuilder_ == null) {
+        if (((bitField0_ & 0x00000008) != 0)) {
+          clientCertificates_ = java.util.Collections.unmodifiableList(clientCertificates_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.clientCertificates_ = clientCertificates_;
+      } else {
+        result.clientCertificates_ = clientCertificatesBuilder_.build();
+      }
+      result.mutualSSL_ = mutualSSL_;
+      result.applicationSecurity_ = applicationSecurity_;
+      result.graphQLSchema_ = graphQLSchema_;
+      if (graphqlComplexityInfoBuilder_ == null) {
+        if (((bitField0_ & 0x00000010) != 0)) {
+          graphqlComplexityInfo_ = java.util.Collections.unmodifiableList(graphqlComplexityInfo_);
+          bitField0_ = (bitField0_ & ~0x00000010);
+        }
+        result.graphqlComplexityInfo_ = graphqlComplexityInfo_;
+      } else {
+        result.graphqlComplexityInfo_ = graphqlComplexityInfoBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -1626,6 +1937,69 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getIsMockedApi() != false) {
         setIsMockedApi(other.getIsMockedApi());
+      }
+      if (clientCertificatesBuilder_ == null) {
+        if (!other.clientCertificates_.isEmpty()) {
+          if (clientCertificates_.isEmpty()) {
+            clientCertificates_ = other.clientCertificates_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureClientCertificatesIsMutable();
+            clientCertificates_.addAll(other.clientCertificates_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.clientCertificates_.isEmpty()) {
+          if (clientCertificatesBuilder_.isEmpty()) {
+            clientCertificatesBuilder_.dispose();
+            clientCertificatesBuilder_ = null;
+            clientCertificates_ = other.clientCertificates_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+            clientCertificatesBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getClientCertificatesFieldBuilder() : null;
+          } else {
+            clientCertificatesBuilder_.addAllMessages(other.clientCertificates_);
+          }
+        }
+      }
+      if (!other.getMutualSSL().isEmpty()) {
+        mutualSSL_ = other.mutualSSL_;
+        onChanged();
+      }
+      if (other.getApplicationSecurity() != false) {
+        setApplicationSecurity(other.getApplicationSecurity());
+      }
+      if (!other.getGraphQLSchema().isEmpty()) {
+        graphQLSchema_ = other.graphQLSchema_;
+        onChanged();
+      }
+      if (graphqlComplexityInfoBuilder_ == null) {
+        if (!other.graphqlComplexityInfo_.isEmpty()) {
+          if (graphqlComplexityInfo_.isEmpty()) {
+            graphqlComplexityInfo_ = other.graphqlComplexityInfo_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+          } else {
+            ensureGraphqlComplexityInfoIsMutable();
+            graphqlComplexityInfo_.addAll(other.graphqlComplexityInfo_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.graphqlComplexityInfo_.isEmpty()) {
+          if (graphqlComplexityInfoBuilder_.isEmpty()) {
+            graphqlComplexityInfoBuilder_.dispose();
+            graphqlComplexityInfoBuilder_ = null;
+            graphqlComplexityInfo_ = other.graphqlComplexityInfo_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+            graphqlComplexityInfoBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getGraphqlComplexityInfoFieldBuilder() : null;
+          } else {
+            graphqlComplexityInfoBuilder_.addAllMessages(other.graphqlComplexityInfo_);
+          }
+        }
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3630,6 +4004,669 @@ private static final long serialVersionUID = 0L;
       isMockedApi_ = false;
       onChanged();
       return this;
+    }
+
+    private java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> clientCertificates_ =
+      java.util.Collections.emptyList();
+    private void ensureClientCertificatesIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        clientCertificates_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.Certificate>(clientCertificates_);
+        bitField0_ |= 0x00000008;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.Certificate, org.wso2.choreo.connect.discovery.api.Certificate.Builder, org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> clientCertificatesBuilder_;
+
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.Certificate> getClientCertificatesList() {
+      if (clientCertificatesBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(clientCertificates_);
+      } else {
+        return clientCertificatesBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public int getClientCertificatesCount() {
+      if (clientCertificatesBuilder_ == null) {
+        return clientCertificates_.size();
+      } else {
+        return clientCertificatesBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate getClientCertificates(int index) {
+      if (clientCertificatesBuilder_ == null) {
+        return clientCertificates_.get(index);
+      } else {
+        return clientCertificatesBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder setClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate value) {
+      if (clientCertificatesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.set(index, value);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder setClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate.Builder builderForValue) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(org.wso2.choreo.connect.discovery.api.Certificate value) {
+      if (clientCertificatesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(value);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate value) {
+      if (clientCertificatesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(index, value);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(
+        org.wso2.choreo.connect.discovery.api.Certificate.Builder builderForValue) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(builderForValue.build());
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addClientCertificates(
+        int index, org.wso2.choreo.connect.discovery.api.Certificate.Builder builderForValue) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder addAllClientCertificates(
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.Certificate> values) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, clientCertificates_);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder clearClientCertificates() {
+      if (clientCertificatesBuilder_ == null) {
+        clientCertificates_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public Builder removeClientCertificates(int index) {
+      if (clientCertificatesBuilder_ == null) {
+        ensureClientCertificatesIsMutable();
+        clientCertificates_.remove(index);
+        onChanged();
+      } else {
+        clientCertificatesBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate.Builder getClientCertificatesBuilder(
+        int index) {
+      return getClientCertificatesFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.CertificateOrBuilder getClientCertificatesOrBuilder(
+        int index) {
+      if (clientCertificatesBuilder_ == null) {
+        return clientCertificates_.get(index);  } else {
+        return clientCertificatesBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> 
+         getClientCertificatesOrBuilderList() {
+      if (clientCertificatesBuilder_ != null) {
+        return clientCertificatesBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(clientCertificates_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate.Builder addClientCertificatesBuilder() {
+      return getClientCertificatesFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.api.Certificate.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.Certificate.Builder addClientCertificatesBuilder(
+        int index) {
+      return getClientCertificatesFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.api.Certificate.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Certificate clientCertificates = 20;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.Certificate.Builder> 
+         getClientCertificatesBuilderList() {
+      return getClientCertificatesFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.Certificate, org.wso2.choreo.connect.discovery.api.Certificate.Builder, org.wso2.choreo.connect.discovery.api.CertificateOrBuilder> 
+        getClientCertificatesFieldBuilder() {
+      if (clientCertificatesBuilder_ == null) {
+        clientCertificatesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.Certificate, org.wso2.choreo.connect.discovery.api.Certificate.Builder, org.wso2.choreo.connect.discovery.api.CertificateOrBuilder>(
+                clientCertificates_,
+                ((bitField0_ & 0x00000008) != 0),
+                getParentForChildren(),
+                isClean());
+        clientCertificates_ = null;
+      }
+      return clientCertificatesBuilder_;
+    }
+
+    private java.lang.Object mutualSSL_ = "";
+    /**
+     * <code>string mutualSSL = 21;</code>
+     * @return The mutualSSL.
+     */
+    public java.lang.String getMutualSSL() {
+      java.lang.Object ref = mutualSSL_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        mutualSSL_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string mutualSSL = 21;</code>
+     * @return The bytes for mutualSSL.
+     */
+    public com.google.protobuf.ByteString
+        getMutualSSLBytes() {
+      java.lang.Object ref = mutualSSL_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        mutualSSL_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string mutualSSL = 21;</code>
+     * @param value The mutualSSL to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMutualSSL(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      mutualSSL_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string mutualSSL = 21;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMutualSSL() {
+      
+      mutualSSL_ = getDefaultInstance().getMutualSSL();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string mutualSSL = 21;</code>
+     * @param value The bytes for mutualSSL to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMutualSSLBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      mutualSSL_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean applicationSecurity_ ;
+    /**
+     * <code>bool applicationSecurity = 22;</code>
+     * @return The applicationSecurity.
+     */
+    @java.lang.Override
+    public boolean getApplicationSecurity() {
+      return applicationSecurity_;
+    }
+    /**
+     * <code>bool applicationSecurity = 22;</code>
+     * @param value The applicationSecurity to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApplicationSecurity(boolean value) {
+      
+      applicationSecurity_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool applicationSecurity = 22;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApplicationSecurity() {
+      
+      applicationSecurity_ = false;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object graphQLSchema_ = "";
+    /**
+     * <code>string graphQLSchema = 23;</code>
+     * @return The graphQLSchema.
+     */
+    public java.lang.String getGraphQLSchema() {
+      java.lang.Object ref = graphQLSchema_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        graphQLSchema_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string graphQLSchema = 23;</code>
+     * @return The bytes for graphQLSchema.
+     */
+    public com.google.protobuf.ByteString
+        getGraphQLSchemaBytes() {
+      java.lang.Object ref = graphQLSchema_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        graphQLSchema_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string graphQLSchema = 23;</code>
+     * @param value The graphQLSchema to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGraphQLSchema(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      graphQLSchema_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string graphQLSchema = 23;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearGraphQLSchema() {
+      
+      graphQLSchema_ = getDefaultInstance().getGraphQLSchema();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string graphQLSchema = 23;</code>
+     * @param value The bytes for graphQLSchema to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGraphQLSchemaBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      graphQLSchema_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.util.List<org.wso2.choreo.connect.discovery.api.GraphqlComplexity> graphqlComplexityInfo_ =
+      java.util.Collections.emptyList();
+    private void ensureGraphqlComplexityInfoIsMutable() {
+      if (!((bitField0_ & 0x00000010) != 0)) {
+        graphqlComplexityInfo_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.api.GraphqlComplexity>(graphqlComplexityInfo_);
+        bitField0_ |= 0x00000010;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.GraphqlComplexity, org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder, org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder> graphqlComplexityInfoBuilder_;
+
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.GraphqlComplexity> getGraphqlComplexityInfoList() {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(graphqlComplexityInfo_);
+      } else {
+        return graphqlComplexityInfoBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public int getGraphqlComplexityInfoCount() {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        return graphqlComplexityInfo_.size();
+      } else {
+        return graphqlComplexityInfoBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.GraphqlComplexity getGraphqlComplexityInfo(int index) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        return graphqlComplexityInfo_.get(index);
+      } else {
+        return graphqlComplexityInfoBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder setGraphqlComplexityInfo(
+        int index, org.wso2.choreo.connect.discovery.api.GraphqlComplexity value) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGraphqlComplexityInfoIsMutable();
+        graphqlComplexityInfo_.set(index, value);
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder setGraphqlComplexityInfo(
+        int index, org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder builderForValue) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        ensureGraphqlComplexityInfoIsMutable();
+        graphqlComplexityInfo_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder addGraphqlComplexityInfo(org.wso2.choreo.connect.discovery.api.GraphqlComplexity value) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGraphqlComplexityInfoIsMutable();
+        graphqlComplexityInfo_.add(value);
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder addGraphqlComplexityInfo(
+        int index, org.wso2.choreo.connect.discovery.api.GraphqlComplexity value) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGraphqlComplexityInfoIsMutable();
+        graphqlComplexityInfo_.add(index, value);
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder addGraphqlComplexityInfo(
+        org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder builderForValue) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        ensureGraphqlComplexityInfoIsMutable();
+        graphqlComplexityInfo_.add(builderForValue.build());
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder addGraphqlComplexityInfo(
+        int index, org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder builderForValue) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        ensureGraphqlComplexityInfoIsMutable();
+        graphqlComplexityInfo_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder addAllGraphqlComplexityInfo(
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.api.GraphqlComplexity> values) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        ensureGraphqlComplexityInfoIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, graphqlComplexityInfo_);
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder clearGraphqlComplexityInfo() {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        graphqlComplexityInfo_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public Builder removeGraphqlComplexityInfo(int index) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        ensureGraphqlComplexityInfoIsMutable();
+        graphqlComplexityInfo_.remove(index);
+        onChanged();
+      } else {
+        graphqlComplexityInfoBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder getGraphqlComplexityInfoBuilder(
+        int index) {
+      return getGraphqlComplexityInfoFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder getGraphqlComplexityInfoOrBuilder(
+        int index) {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        return graphqlComplexityInfo_.get(index);  } else {
+        return graphqlComplexityInfoBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder> 
+         getGraphqlComplexityInfoOrBuilderList() {
+      if (graphqlComplexityInfoBuilder_ != null) {
+        return graphqlComplexityInfoBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(graphqlComplexityInfo_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder addGraphqlComplexityInfoBuilder() {
+      return getGraphqlComplexityInfoFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.api.GraphqlComplexity.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder addGraphqlComplexityInfoBuilder(
+        int index) {
+      return getGraphqlComplexityInfoFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.api.GraphqlComplexity.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder> 
+         getGraphqlComplexityInfoBuilderList() {
+      return getGraphqlComplexityInfoFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.GraphqlComplexity, org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder, org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder> 
+        getGraphqlComplexityInfoFieldBuilder() {
+      if (graphqlComplexityInfoBuilder_ == null) {
+        graphqlComplexityInfoBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.GraphqlComplexity, org.wso2.choreo.connect.discovery.api.GraphqlComplexity.Builder, org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder>(
+                graphqlComplexityInfo_,
+                ((bitField0_ & 0x00000010) != 0),
+                getParentForChildren(),
+                isClean());
+        graphqlComplexityInfo_ = null;
+      }
+      return graphqlComplexityInfoBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

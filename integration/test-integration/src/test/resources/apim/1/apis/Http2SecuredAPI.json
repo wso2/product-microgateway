@@ -1,0 +1,20 @@
+{
+  "name": "Http2SecuredAPI",
+  "version": "1.0.0",
+  "context": "http2_secured",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [
+    {
+      "verb": "GET",
+      "target": "/hello",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "https://mockBackend:2351"
+    }
+  }
+}

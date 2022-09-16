@@ -93,6 +93,8 @@ type adapter struct {
 	Truststore truststore
 	// ArtifactsDirectory is the FilePath where the api artifacts are mounted
 	ArtifactsDirectory string
+	// SoapErrorInXMLEnabled is used to configure gateway error responses(local reply) as soap envelope
+	SoapErrorInXMLEnabled bool
 	// SourceControl represents the configuration related to the repository where the api artifacts are stored
 	SourceControl sourceControl
 }
@@ -103,14 +105,17 @@ type envoy struct {
 	ListenerPort                     uint32
 	SecuredListenerHost              string
 	SecuredListenerPort              uint32
+	ListenerCodecType                string
 	ClusterTimeoutInSeconds          time.Duration
 	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
 	KeyStore                         keystore
 	SystemHost                       string `default:"localhost"`
 	Cors                             globalCors
 	Upstream                         envoyUpstream
+	Downstream                       envoyDownstream
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
+	UseRemoteAddress                 bool
 }
 
 type connectionTimeouts struct {
@@ -223,6 +228,18 @@ type envoyUpstream struct {
 	Health   upstreamHealth
 	DNS      upstreamDNS
 	Retry    upstreamRetry
+	HTTP2    upstreamHTTP2Options
+}
+
+// Envoy Downstream Related Configurations
+type envoyDownstream struct {
+	// DownstreamTLS related Configuration
+	TLS downstreamTLS
+}
+
+type downstreamTLS struct {
+	TrustedCertPath string
+	MTLSAPIsEnabled bool
 }
 
 type upstreamTLS struct {
@@ -252,6 +269,11 @@ type upstreamDNS struct {
 	RespectDNSTtl  bool
 }
 
+type upstreamHTTP2Options struct {
+	HpackTableSize       uint32
+	MaxConcurrentStreams uint32
+}
+
 type upstreamRetry struct {
 	MaxRetryCount        uint32
 	BaseIntervalInMillis uint32
@@ -261,6 +283,7 @@ type upstreamRetry struct {
 type security struct {
 	TokenService []tokenService
 	AuthHeader   authHeader
+	MutualSSL    mutualSSL
 }
 
 type authService struct {
@@ -368,6 +391,7 @@ type jwtGenerator struct {
 	ClaimsExtractorImpl   string
 	PublicCertificatePath string
 	PrivateKeyPath        string
+	TokenTTL              int32
 }
 
 type claimMapping struct {
@@ -383,6 +407,7 @@ type cache struct {
 
 type analytics struct {
 	Enabled  bool
+	Type     string
 	Adapter  analyticsAdapter
 	Enforcer analyticsEnforcer
 }
@@ -457,11 +482,19 @@ type controlPlane struct {
 	Username                   string
 	Password                   string
 	SyncApisOnStartUp          bool
+	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters
 	HTTPClient                 httpClient
+	RequestWorkerPool          requestWorkerPool
+}
+
+type requestWorkerPool struct {
+	PoolSize              int
+	QueueSizePerPool      int
+	PauseTimeAfterFailure time.Duration
 }
 
 type globalAdapter struct {
@@ -503,4 +536,11 @@ type filter struct {
 
 type httpClient struct {
 	RequestTimeOut time.Duration
+}
+
+type mutualSSL struct {
+	CertificateHeader               string
+	EnableClientValidation          bool
+	ClientCertificateEncode         bool
+	EnableOutboundCertificateHeader bool
 }

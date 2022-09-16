@@ -18,6 +18,7 @@
 package oasparser
 
 import (
+	"fmt"
 	"strconv"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -36,18 +37,16 @@ import (
 )
 
 // GetRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
-// when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
+// when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considered.
 func GetRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts map[string][]byte, interceptorCerts map[string][]byte,
-	vHost string, organizationID string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
-	var routes []*routev3.Route
-	var clusters []*clusterv3.Cluster
-	var endpoints []*corev3.Address
+	vHost string, organizationID string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address, error) {
 
-	routes, clusters, endpoints = envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts, interceptorCerts,
+	routes, clusters, endpoints, err := envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts, interceptorCerts,
 		vHost, organizationID)
-	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
-
-	return routes, clusters, endpoints
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("Error while creating routes, clusters and endpoints. %v", err)
+	}
+	return routes, clusters, endpoints, nil
 }
 
 // GetGlobalClusters generates initial internal clusters for given environment.
@@ -124,6 +123,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 	securitySchemes := []*api.SecurityScheme{}
 	securityList := []*api.SecurityList{}
 	isMockedAPI := mgwSwagger.EndpointImplementationType == constants.MockedOASEndpointType
+	clientCertificates := []*api.Certificate{}
 
 	logger.LoggerOasparser.Debugf("Security schemes in GetEnforcerAPI method %v:", mgwSwagger.GetSecurityScheme())
 	for _, securityScheme := range mgwSwagger.GetSecurityScheme() {
@@ -190,26 +190,40 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 		}
 	}
 
+	for _, cert := range mgwSwagger.GetClientCerts() {
+		certificate := &api.Certificate{
+			Alias:   cert.Alias,
+			Tier:    cert.Tier,
+			Content: cert.Content,
+		}
+		clientCertificates = append(clientCertificates, certificate)
+	}
+
 	return &api.Api{
-		Id:                  mgwSwagger.GetID(),
-		Title:               mgwSwagger.GetTitle(),
-		Description:         mgwSwagger.GetDescription(),
-		BasePath:            mgwSwagger.GetXWso2Basepath(),
-		Version:             mgwSwagger.GetVersion(),
-		ApiType:             mgwSwagger.GetAPIType(),
-		ProductionEndpoints: generateRPCEndpointCluster(mgwSwagger.GetProdEndpoints()),
-		SandboxEndpoints:    generateRPCEndpointCluster(mgwSwagger.GetSandEndpoints()),
-		Resources:           resources,
-		ApiLifeCycleState:   mgwSwagger.LifecycleStatus,
-		Tier:                mgwSwagger.GetXWso2ThrottlingTier(),
-		SecurityScheme:      securitySchemes,
-		Security:            securityList,
-		EndpointSecurity:    endpointSecurityDetails,
-		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
-		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
-		OrganizationId:      mgwSwagger.OrganizationID,
-		Vhost:               vhost,
-		IsMockedApi:         isMockedAPI,
+		Id:                    mgwSwagger.GetID(),
+		Title:                 mgwSwagger.GetTitle(),
+		Description:           mgwSwagger.GetDescription(),
+		BasePath:              mgwSwagger.GetXWso2Basepath(),
+		Version:               mgwSwagger.GetVersion(),
+		ApiType:               mgwSwagger.GetAPIType(),
+		ProductionEndpoints:   generateRPCEndpointCluster(mgwSwagger.GetProdEndpoints()),
+		SandboxEndpoints:      generateRPCEndpointCluster(mgwSwagger.GetSandEndpoints()),
+		Resources:             resources,
+		ApiLifeCycleState:     mgwSwagger.LifecycleStatus,
+		Tier:                  mgwSwagger.GetXWso2ThrottlingTier(),
+		SecurityScheme:        securitySchemes,
+		Security:              securityList,
+		EndpointSecurity:      endpointSecurityDetails,
+		AuthorizationHeader:   mgwSwagger.GetXWSO2AuthHeader(),
+		DisableSecurity:       mgwSwagger.GetDisableSecurity(),
+		OrganizationId:        mgwSwagger.OrganizationID,
+		Vhost:                 vhost,
+		IsMockedApi:           isMockedAPI,
+		ClientCertificates:    clientCertificates,
+		MutualSSL:             mgwSwagger.GetXWSO2MutualSSL(),
+		ApplicationSecurity:   mgwSwagger.GetXWSO2ApplicationSecurity(),
+		GraphQLSchema:         mgwSwagger.GraphQLSchema,
+		GraphqlComplexityInfo: mgwSwagger.GraphQLComplexities.Data.List,
 	}
 }
 

@@ -1,5 +1,7 @@
 {
   "JwtScopeAPI": "scopes_openAPI.yaml",
   "APIKeyTestAPI": "api_key_openAPI.yaml",
-  "APIKeyBlockedAPI": "api_key_blocked_openAPI.yaml"
+  "APIKeyBlockedAPI": "api_key_blocked_openAPI.yaml",
+  "Http2ClearTextAPI": "http2_clear_text_openAPI.yaml",
+  "Http2SecuredAPI": "http2_secured_openAPI.yaml"
 }

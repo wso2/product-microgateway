@@ -51,6 +51,7 @@ public class ApictlUtils {
     public static final String ENDPOINT_CERTIFICATES = "Endpoint-certificates";
     public static final String INTERCEPTORS = "interceptors";
     public static final String DEPLOYMENT_ENVIRONMENTS_YAML = "deployment_environments.yaml";
+    public static final String CLIENT_CERTIFICATES = "Client-certificates";
 
     public static final String APICTL_PATH = File.separator + "apictl" + File.separator;
     public static final String API_PROJECTS_PATH = File.separator + "apiProjects" + File.separator;
@@ -66,6 +67,10 @@ public class ApictlUtils {
             File.separator;
     public static final String API_POLICIES_DIR = TestConstant.TEST_RESOURCES_PATH + File.separator + "policies" +
             File.separator;
+    public static final String CLIENT_CERT_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "certs" + File.separator;
+    public static final String CLIENT_CERT_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "certs" + File.separator;
     public static final String MGW_ADAPTER_CERTS_PATH = TestConstant.CC_TEMP_PATH + TestConstant.DOCKER_COMPOSE_DIR
             + File.separator + "resources" + File.separator + "adapter" + File.separator + "security"
             + File.separator + "truststore" + File.separator;
@@ -101,7 +106,7 @@ public class ApictlUtils {
      */
     public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, CCTestException {
         try {
-            createProject(openApiFile, apiProjectName, backendCert, null, null, null);
+            createProject(openApiFile, apiProjectName, backendCert, null, null, null, false, null, null);
         } catch (CCTestException e) {
             if (!e.getMessage().equals("Project already exists")) {
                 throw e;
@@ -122,7 +127,7 @@ public class ApictlUtils {
      * @throws CCTestException if apictl was unable to create the project
      */
     public static void createProject(String openApiFile, String apiProjectName) throws IOException, CCTestException {
-        createProject(openApiFile, apiProjectName, null, null, null, null);
+        createProject(openApiFile, apiProjectName, null, null, null, null, false, null, null);
     }
 
     /**
@@ -139,10 +144,32 @@ public class ApictlUtils {
      * @throws IOException if the runtime fails to execute the apictl command
      * @throws CCTestException if apictl was unable to create the project
      */
-    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
-                                     String interceptorCert, String apiYamlFile)
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert,
+                                     String deployEnvYamlFile, String interceptorCert, String apiYamlFile)
             throws IOException, CCTestException {
-        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, apiYamlFile, false);
+        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, apiYamlFile, false,
+                null, null);
+    }
+
+    /**
+     * Create an API project - To be used before deploying an API via the apictl deploy command
+     *
+     * @param openApiFile openAPI file to create the API project from
+     * @param apiProjectName expected name of the project that gets created
+     * @param backendCert name of the backend cert file that should be included in the
+     *                    Endpoint-certificates folder of the API project
+     * @param deployEnvYamlFile deployment_environments.yaml file of API project
+     * @param interceptorCert name of the interceptor cert file that should be included in the
+     *                    Endpoint-certificates/interceptor folder of the API project
+     * @param apiYamlFile api.yaml file of the API project
+     * @param isInsertPolicies  whether insert or not API Policies to the API project
+     * @throws IOException if the runtime fails to execute the apictl command
+     * @throws CCTestException if apictl was unable to create the project
+     */
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
+                                     String interceptorCert, String apiYamlFile, boolean isInsertPolicies)
+            throws IOException, CCTestException {
+        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, apiYamlFile, isInsertPolicies, null, null);
     }
 
     /**
@@ -157,11 +184,14 @@ public class ApictlUtils {
      *                          Endpoint-certificates/interceptor folder of the API project
      * @param apiYamlFile       api.yaml file of the API project
      * @param isInsertPolicies  whether insert or not API Policies to the API project
+     * @param clientCertYamlFile yaml file for the client certificate
+     * @param clientCert       client certificate
      * @throws IOException     if the runtime fails to execute the apictl command
      * @throws CCTestException if apictl was unable to create the project
      */
     public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
-                                     String interceptorCert, String apiYamlFile, boolean isInsertPolicies)
+                                     String interceptorCert, String apiYamlFile, boolean isInsertPolicies, String clientCert,
+                                     String clientCertYamlFile)
             throws IOException, CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
@@ -210,7 +240,18 @@ public class ApictlUtils {
         if (isInsertPolicies) {
             Utils.copyDirectory(
                     targetDir + API_POLICIES_DIR,
-                    projectPathToCreate+ File.separator + "Policies");
+                    projectPathToCreate + File.separator + "Policies");
+        }
+        if (clientCert != null) {
+            Utils.copyFile(
+                    targetDir + CLIENT_CERT_PATH + clientCert,
+                    projectPathToCreate + File.separator + CLIENT_CERTIFICATES
+                    + File.separator + "client_certificate.crt");
+        }
+        if (clientCertYamlFile != null) {
+            Utils.copyFile(targetDir + CLIENT_CERT_YAML_PATH + clientCertYamlFile,
+                    projectPathToCreate + File.separator + CLIENT_CERTIFICATES
+            + File.separator + "client_certificates.yaml");
         }
         log.info("Created API project " + apiProjectName);
     }
@@ -302,6 +343,32 @@ public class ApictlUtils {
                     + mgwEnv, e);
         }
         log.info("Logged out from apictl microgateway environment: " + mgwEnv);
+    }
+
+    /**
+     * Deploys a sample apictl project located in samples/apiProjects.
+     *
+     * @param projectName Project folder name
+     * @param mgwEnv      environment name used in apictl
+     * @throws CCTestException
+     */
+    public static void deploySampleProject(String projectName, String mgwEnv) throws CCTestException{
+        String samplesDirPath = Utils.getCCSamplesDirPath();
+        String projectPath = samplesDirPath + API_PROJECTS_PATH + projectName;
+
+        String[] cmdArray = { MG, DEPLOY, API };
+        String[] argsArray = { FILE_FLAG, projectPath, ENV_FLAG, mgwEnv };
+        try {
+            String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
+            if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_DEPLOYED_RESPONSE)) {
+                throw new CCTestException("Unable to deploy API project: "
+                        + projectName + " to microgateway adapter environment: " + mgwEnv);
+            }
+        } catch (IOException e) {
+            throw new CCTestException("Unable to deploy API project: "
+                    + projectName + " to microgateway adapter environment: " + mgwEnv, e);
+        }
+        log.info("Deployed API project: " + projectName + " to microgateway adapter environment: " + mgwEnv);
     }
 
     /**

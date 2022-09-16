@@ -37,28 +37,13 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
 
-public class CorsTestCase {
+public class CorsTestCase extends CorsBaseTest {
     protected String jwtTokenProd;
-    private String allowedOrigin1 = "http://test1.com";
-    private String allowedOrigin2 = "http://test2.com";
-    private String allowedMethods = "GET,PUT,POST";
-    private String allowedHeaders = "Authorization,X-PINGOTHER";
-    private String exposeHeaders = "X-Custom-Header";
-
-    private static final String ORIGIN_HEADER = "Origin";
-    private static final String ACCESS_CONTROL_REQUEST_METHOD_HEADER = "access-control-request-method";
-    private static final String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "access-control-allow-origin";
-    private static final String ACCESS_CONTROL_ALLOW_METHODS_HEADER = "access-control-allow-methods";
-    private static final String ACCESS_CONTROL_ALLOW_HEADERS_HEADER = "access-control-allow-headers";
-    private static final String ACCESS_CONTROL_EXPOSE_HEADERS_HEADER = "access-control-expose-headers";
-    private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER = "access-control-allow-credentials";
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
-        String certificatesTrustStorePath = HttpsClientRequest.class.getClassLoader()
-                .getResource("keystore/client-truststore.jks").getPath();
-        System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);
+        HttpsClientRequest.setSSlSystemProperties();
     }
 
     @Test(description = "Success Scenario, with allow credentials is set to true.")
@@ -67,6 +52,48 @@ public class CorsTestCase {
         HttpClient httpclient = HttpClientBuilder.create().build();
         HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/cors/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://test1.com");
+        option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
+        HttpResponse response = httpclient.execute(option);
+        validateCORSHeadersInPreFlightResponse(response);
+    }
+
+    @Test(description = "Success Scenario, with allow credentials is set to true.")
+    public void testCORSHeadersInSimpleResponse() throws IOException {
+
+        HttpClient httpclient = HttpClientBuilder.create().build();
+        HttpUriRequest getRequest = new HttpGet(Utils.getServiceURLHttps("/cors/pet/1"));
+        getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        getRequest.addHeader(ORIGIN_HEADER, "http://test2.com");
+        HttpResponse response = httpclient.execute(getRequest);
+        validateCORSHeadersInSimpleResponse(response);
+    }
+
+    @Test(description = "Success Scenario, with allow credentials is set to true.")
+    public void testCORSHeadersInSimpleResponseWithWildcardSubdomain() throws IOException {
+
+        HttpClient httpclient = HttpClientBuilder.create().build();
+        HttpUriRequest getRequest = new HttpGet(Utils.getServiceURLHttps("/cors/pet/1"));
+        getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        getRequest.addHeader(ORIGIN_HEADER, allowedOriginWildCard);
+        HttpResponse response = httpclient.execute(getRequest);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertNotNull(response.getAllHeaders());
+
+        Header[] responseHeaders = response.getAllHeaders();
+        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER),
+                ACCESS_CONTROL_ALLOW_ORIGIN_HEADER + " header is unavailable");
+        Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER).getValue(),
+                allowedOriginWildCard);
+    }
+
+    @Test(description = "Success Scenario, with allow credentials is set to true.")
+    public void testCORSHeadersInPreFlightResponseWildcardSubdomain() throws Exception {
+        // AccessControlAllowCredentials set to true
+        HttpClient httpclient = HttpClientBuilder.create().build();
+        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/cors/pet/1"));
+        option.addHeader(ORIGIN_HEADER, allowedOriginWildCard);
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
         HttpResponse response = httpclient.execute(option);
 
@@ -78,49 +105,7 @@ public class CorsTestCase {
         Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER),
                 ACCESS_CONTROL_ALLOW_ORIGIN_HEADER + " header is unavailable");
         Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER).getValue(),
-                allowedOrigin1);
-        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_METHODS_HEADER),
-                HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString() + " header is unavailable");
-        Assert.assertEquals(pickHeader(responseHeaders, HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString())
-                        .getValue().replaceAll(" ", "")
-                , allowedMethods);
-        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_HEADERS_HEADER),
-                ACCESS_CONTROL_ALLOW_HEADERS_HEADER + " header is unavailable");
-        Assert.assertEquals(pickHeader(responseHeaders, HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString())
-                        .getValue().replaceAll(" ", ""), allowedHeaders);
-        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER),
-                ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER + " header is unavailable");
-        Assert.assertTrue(Boolean.parseBoolean(pickHeader(responseHeaders,
-                ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER).getValue()));
-    }
-
-    @Test(description = "Success Scenario, with allow credentials is set to true.")
-    public void testCORSHeadersInSimpleResponse() throws IOException {
-
-        HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest getRequest = new HttpGet(Utils.getServiceURLHttps("/cors/pet/1"));
-        getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        getRequest.addHeader(ORIGIN_HEADER, "http://test2.com");
-        HttpResponse response = httpclient.execute(getRequest);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertNotNull(response.getAllHeaders());
-
-        Header[] responseHeaders = response.getAllHeaders();
-        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER),
-                ACCESS_CONTROL_ALLOW_ORIGIN_HEADER + " header is unavailable");
-        Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER).getValue(),
-                allowedOrigin2);
-
-        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_EXPOSE_HEADERS_HEADER),
-                ACCESS_CONTROL_EXPOSE_HEADERS_HEADER + " header is unavailable");
-        Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_EXPOSE_HEADERS_HEADER).getValue(),
-                exposeHeaders, ACCESS_CONTROL_EXPOSE_HEADERS_HEADER + " header mismatched.");
-        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER),
-                ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER + " header is unavailable");
-        Assert.assertTrue(Boolean.parseBoolean(pickHeader(responseHeaders,
-                ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER).getValue()));
+                allowedOriginWildCard);
     }
 
     @Test(description = "Invalid Origin, CORS simple request")
@@ -202,17 +187,5 @@ public class CorsTestCase {
         Assert.assertTrue(accessControlAllowMethods == null ||
                 !accessControlAllowMethods.getValue().contains("DELETE"),
                 "AccessControlRequestMethod is not validated properly.");
-    }
-
-    private Header pickHeader(Header[] headers, String requiredHeader){
-        if (requiredHeader == null){
-            return null;
-        }
-        for (Header header : headers) {
-            if(requiredHeader.equals(header.getName())){
-                return header;
-            }
-        }
-        return null;
     }
 }

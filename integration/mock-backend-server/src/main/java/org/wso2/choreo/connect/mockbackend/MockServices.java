@@ -19,6 +19,8 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import org.wso2.choreo.connect.mockbackend.async.MockAsyncServer;
+import org.wso2.choreo.connect.mockbackend.graphql.MockGraphQLServer;
+import org.wso2.choreo.connect.mockbackend.http2.Http2MockBackend;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,10 +30,12 @@ public class MockServices {
     public static void main(String[] args) {
         MockBackendProd mockBackendProd = new MockBackendProd(Constants.MOCK_BACKEND_SERVER_PORT);
         MockBackendSandbox mockBackendSandbox = new MockBackendSandbox(Constants.MOCK_SANDBOX_SERVER_PORT);
+        MockBackend2 mockBackend2 = new MockBackend2(Constants.MOCK_BACKEND2_SERVER_PORT);
         // TODO: (VirajSalaka) start analytics server only when it requires
         MockAnalyticsServer mockAnalyticsServer = new MockAnalyticsServer(Constants.MOCK_ANALYTICS_SERVER_PORT);
         mockBackendProd.start();
         mockBackendSandbox.start();
+        mockBackend2.start();
         mockAnalyticsServer.start();
         List<String> argList = Arrays.asList(args);
         if (argList.contains("-tls-enabled")) {
@@ -52,6 +56,28 @@ public class MockServices {
         if (argList.contains("-async-enabled")) {
             MockAsyncServer mockAsyncServer = new MockAsyncServer(Constants.WEBSOCKET_SERVER_PORT);
             mockAsyncServer.start();
+        }
+
+        if (argList.contains("-soap-enabled")) {
+            MockBackendSOAP mockBackendSoap = new MockBackendSOAP(Constants.MOCK_BACKEND_SOAP_SERVER_PORT);
+            mockBackendSoap.start();
+        }
+
+        if (argList.contains("-gql-enabled")) {
+            MockGraphQLServer mockGraphQLServer = new MockGraphQLServer(Constants.MOCK_GRAPHQL_SERVER_PORT);
+            mockGraphQLServer.start();
+        }
+
+        if(argList.contains("-http2-server-enabled")){
+            // clear text server
+            Http2MockBackend http2BackendProdClearText = new Http2MockBackend(Constants.MOCK_BACKEND_HTTP2_SERVER_CLEAR_TEXT_PORT, false, false);
+            http2BackendProdClearText.startServer();
+        }
+
+        if(argList.contains("-http2-tls-server-enabled")){
+            // secured server
+            Http2MockBackend http2BackendProdTLS = new Http2MockBackend(Constants.MOCK_BACKEND_HTTP2_SERVER_SECURED_PORT, true, false);
+            http2BackendProdTLS.startServer();
         }
     }
 }

@@ -47,6 +47,9 @@ public class CcWithBackendTlsAndCorsDisabledWithOPA {
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore");
         ApictlUtils.createProject( "api_key_swagger_security_openAPI.yaml", "apikey");
         ApictlUtils.createProject( "api_policy_openAPI.yaml", "api_policy", null, null, null, "api_policies.yaml", true);
+        ApictlUtils.createProject("http2_clear_text_openAPI.yaml", "http2_clear_text", null, null, null, null);
+        ApictlUtils.createProject("http2_secured_openAPI.yaml", "http2_secured", "backend_tls.crt", null, null, null);
+        ApictlUtils.createProject( "api_policy_per_operation_openAPI.yaml", "api_policy_per_operation", null, null, null, "api_policy_per_operation.yaml", true);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -57,6 +60,10 @@ public class CcWithBackendTlsAndCorsDisabledWithOPA {
         ApictlUtils.deployAPI("cors_petstore", "test");
         ApictlUtils.deployAPI("apikey", "test");
         ApictlUtils.deployAPI("api_policy", "test");
+        ApictlUtils.deployAPI("http2_clear_text", "test");
+        ApictlUtils.deployAPI("http2_secured", "test");
+        ApictlUtils.deployAPI("api_policy_per_operation", "test");
+        ApictlUtils.deploySampleProject("SampleSOAPApi", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

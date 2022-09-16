@@ -93,4 +93,24 @@ public interface AnalyticsOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getServiceOrBuilder();
+
+  /**
+   * <pre>
+   * Analytics type
+   * </pre>
+   *
+   * <code>string type = 4;</code>
+   * @return The type.
+   */
+  java.lang.String getType();
+  /**
+   * <pre>
+   * Analytics type
+   * </pre>
+   *
+   * <code>string type = 4;</code>
+   * @return The bytes for type.
+   */
+  com.google.protobuf.ByteString
+      getTypeBytes();
 }

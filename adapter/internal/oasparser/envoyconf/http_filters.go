@@ -68,7 +68,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 		DynamicStats:             nil,
 		StartChildSpan:           false,
 		UpstreamLog:              nil,
-		SuppressEnvoyHeaders:     false,
+		SuppressEnvoyHeaders:     true,
 		StrictCheckHeaders:       nil,
 		RespectExpectedRqTimeout: false,
 	}
@@ -110,8 +110,9 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		// within ext-authz filter. Without this configuration, the API cannot have production
 		// and sandbox endpoints both at once as the cluster is set based on the header added
 		// from the ext-authz filter.
-		ClearRouteCache:     true,
-		TransportApiVersion: corev3.ApiVersion_V3,
+		ClearRouteCache:        true,
+		IncludePeerCertificate: true,
+		TransportApiVersion:    corev3.ApiVersion_V3,
 		Services: &ext_authv3.ExtAuthz_GrpcService{
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
@@ -124,14 +125,14 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		},
 	}
 
-	// configures envoy to handle request body
-	if conf.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
-		extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
-			MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
-			AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
-			PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
-		}
+	// configures envoy to handle request body and GraphQL APIs require below configs to pass request 
+	// payload to the enforcer.
+	extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
+		MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
+		AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
+		PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
 	}
+
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)

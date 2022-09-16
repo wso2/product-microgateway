@@ -54,10 +54,12 @@ public class MediationPolicyFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-        // get operation policies
-        PolicyConfig policyConfig = requestContext.getMatchedResourcePath().getPolicyConfig();
+
+        // only getting first operation is enough as only one resource config will be present for non graphQL APIs.
+        // Mediation policy filter is not applied to graphQL apis
+        PolicyConfig policyConfig = requestContext.getMatchedResourcePaths().get(0).getPolicyConfig();
         // apply in policies
-        if (policyConfig.getRequest() != null && policyConfig.getRequest().size() > 0) {
+        if (policyConfig != null && policyConfig.getRequest() != null && policyConfig.getRequest().size() > 0) {
             for (Policy policy : policyConfig.getRequest()) {
                 if (!applyPolicy(requestContext, policy)) {
                     return false;
@@ -69,16 +71,8 @@ public class MediationPolicyFilter implements Filter {
 
     private boolean applyPolicy(RequestContext requestContext, Policy policy) {
         switch (policy.getAction()) {
-            case "SET_HEADER": {
-                addOrModifyHeader(requestContext, policy.getParameters());
-                return true;
-            }
             case "RENAME_HEADER": {
                 renameHeader(requestContext, policy.getParameters());
-                return true;
-            }
-            case "REMOVE_HEADER": {
-                removeHeader(requestContext, policy.getParameters());
                 return true;
             }
             case "ADD_QUERY": {
@@ -104,7 +98,8 @@ public class MediationPolicyFilter implements Filter {
         }
 
         // should not reach here, if reached, it is due to a validation error in Adapter
-        log.error("Operation policy action \"{}\" is not supported. Adapter has failed to validate the policy action",
+        log.error("Operation policy action \"{}\" is not supported. " +
+                        "Adapter has failed to validate the policy action. {}",
                 policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6100));
         FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
                 APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
@@ -112,11 +107,6 @@ public class MediationPolicyFilter implements Filter {
         return false;
     }
 
-    private void addOrModifyHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String headerName = policyAttrib.get("headerName");
-        String headerValue = policyAttrib.get("headerValue");
-        requestContext.addOrModifyHeaders(headerName, headerValue);
-    }
 
     private void renameHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
         String currentHeaderName = policyAttrib.get("currentHeaderName").toLowerCase();
@@ -126,11 +116,6 @@ public class MediationPolicyFilter implements Filter {
             requestContext.getRemoveHeaders().add(currentHeaderName);
             requestContext.addOrModifyHeaders(updatedHeaderValue, headerValue);
         }
-    }
-
-    private void removeHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String headerName = policyAttrib.get("headerName");
-        requestContext.getRemoveHeaders().add(headerName);
     }
 
     private void removeQuery(RequestContext requestContext, Map<String, String> policyAttrib) {
@@ -181,13 +166,12 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private void modifyMethod(RequestContext requestContext, Map<String, String> policyAttrib) {
-        String currentMethod = policyAttrib.get("currentMethod");
         try {
             HttpMethod updatedMethod = HttpMethod.valueOf(policyAttrib.get("updatedMethod"));
-
-            if (currentMethod.equalsIgnoreCase(requestContext.getHeaders().get(":method"))) {
-                requestContext.addOrModifyHeaders(":method", updatedMethod.toString().toUpperCase());
-            }
+            String newMethod = updatedMethod.toString().toUpperCase();
+            String currentMethod = requestContext.getRequestMethod().toUpperCase();
+            requestContext.addOrModifyHeaders(":method", newMethod);
+            requestContext.addMetadataToMap("method-rewrite", currentMethod + "_to_" + newMethod);
         } catch (IllegalArgumentException ex) {
             log.error("Error while getting mediation policy rewrite method", ex);
         }
@@ -205,7 +189,8 @@ public class MediationPolicyFilter implements Filter {
             }
             return isValid;
         } catch (OPASecurityException e) {
-            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(),
+            log.error("Error while validating the OPA policy for the request: {} {} {}",
+                    requestContext.getRequestPath(),
                     ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101), e);
             FilterUtils.setErrorToContext(requestContext, e);
             return false;

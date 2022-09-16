@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
@@ -75,7 +76,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
         }
         Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
-        for (ExtendedTokenIssuerDto tokenIssuer: tokenIssuers.values()) {
+        for (ExtendedTokenIssuerDto tokenIssuer : tokenIssuers.values()) {
             if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(tokenIssuer.getName())) {
                 apiKeySubValidationEnabled = tokenIssuer.isValidateSubscriptions();
                 break;
@@ -85,16 +86,17 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        return isAPIKey(getAPIKeyFromRequest(requestContext));
+        // only getting first operation is enough as all matched resource configs have the same security schemes
+        // i.e. graphQL apis do not support resource level security yet
+        return isAPIKey(getAPIKeyFromRequest(requestContext, requestContext.getMatchedResourcePaths().get(0)));
     }
 
     // Gets API key from request
-    private static String getAPIKeyFromRequest(RequestContext requestContext) {
+    private static String getAPIKeyFromRequest(RequestContext requestContext, ResourceConfig resourceConfig) {
         Map<String, SecuritySchemaConfig> securitySchemaDefinitions = requestContext.getMatchedAPI().
                 getSecuritySchemeDefinitions();
         // loop over resource security and get definition for the matching security definition name
-        for (String securityDefinitionName : requestContext.getMatchedResourcePath()
-                .getSecuritySchemas().keySet()) {
+        for (String securityDefinitionName : resourceConfig.getSecuritySchemas().keySet()) {
             if (securitySchemaDefinitions.containsKey(securityDefinitionName)) {
                 SecuritySchemaConfig securitySchemaDefinition =
                         securitySchemaDefinitions.get(securityDefinitionName);
@@ -126,8 +128,13 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
+        String apiKey = getAPIKeyFromRequest(requestContext, requestContext.getMatchedResourcePaths().get(0));
+        return processAPIKey(requestContext, apiKey);
+    }
+
+    private AuthenticationContext processAPIKey(RequestContext requestContext, String apiKey)
+            throws APISecurityException {
         try {
-            String apiKey = getAPIKeyFromRequest(requestContext);
             String[] splitToken = apiKey.split("\\.");
 
             SignedJWT signedJWT = SignedJWT.parse(apiKey);
@@ -212,6 +219,15 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 }
 
                 log.debug("API Key authentication successful.");
+
+                /* GraphQL Query Analysis Information */
+                if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI()
+                        .getApiType())) {
+                    requestContext.getProperties().put(APIConstants.GraphQL.MAXIMUM_QUERY_DEPTH,
+                            validationInfoDto.getGraphQLMaxDepth());
+                    requestContext.getProperties().put(APIConstants.GraphQL.MAXIMUM_QUERY_COMPLEXITY,
+                            validationInfoDto.getGraphQLMaxComplexity());
+                }
 
                 // TODO: Add analytics data processing
 

@@ -80,36 +80,11 @@ public interface ApplicationOrBuilder extends
       getTokenTypeBytes();
 
   /**
-   * <code>repeated string groupIds = 8;</code>
-   * @return A list containing the groupIds.
-   */
-  java.util.List<java.lang.String>
-      getGroupIdsList();
-  /**
-   * <code>repeated string groupIds = 8;</code>
-   * @return The count of groupIds.
-   */
-  int getGroupIdsCount();
-  /**
-   * <code>repeated string groupIds = 8;</code>
-   * @param index The index of the element to return.
-   * @return The groupIds at the given index.
-   */
-  java.lang.String getGroupIds(int index);
-  /**
-   * <code>repeated string groupIds = 8;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the groupIds at the given index.
-   */
-  com.google.protobuf.ByteString
-      getGroupIdsBytes(int index);
-
-  /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
   int getAttributesCount();
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
   boolean containsAttributes(
       java.lang.String key);
@@ -120,44 +95,44 @@ public interface ApplicationOrBuilder extends
   java.util.Map<java.lang.String, java.lang.String>
   getAttributes();
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
   java.util.Map<java.lang.String, java.lang.String>
   getAttributesMap();
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
 
   java.lang.String getAttributesOrDefault(
       java.lang.String key,
       java.lang.String defaultValue);
   /**
-   * <code>map&lt;string, string&gt; attributes = 9;</code>
+   * <code>map&lt;string, string&gt; attributes = 8;</code>
    */
 
   java.lang.String getAttributesOrThrow(
       java.lang.String key);
 
   /**
-   * <code>int32 tenantId = 10;</code>
+   * <code>int32 tenantId = 9;</code>
    * @return The tenantId.
    */
   int getTenantId();
 
   /**
-   * <code>string tenantDomain = 11;</code>
+   * <code>string tenantDomain = 10;</code>
    * @return The tenantDomain.
    */
   java.lang.String getTenantDomain();
   /**
-   * <code>string tenantDomain = 11;</code>
+   * <code>string tenantDomain = 10;</code>
    * @return The bytes for tenantDomain.
    */
   com.google.protobuf.ByteString
       getTenantDomainBytes();
 
   /**
-   * <code>int64 timestamp = 12;</code>
+   * <code>int64 timestamp = 11;</code>
    * @return The timestamp.
    */
   long getTimestamp();

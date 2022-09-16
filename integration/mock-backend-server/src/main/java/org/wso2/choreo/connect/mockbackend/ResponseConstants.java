@@ -41,6 +41,10 @@ public class ResponseConstants {
     public static final String API_SANDBOX_RESPONSE = "{\"id\":111111155, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +
             " \"name\":\"doggieUpdated\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
             "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
+    public static final String DYNAMIC_EP_RESPONSE = "{\"service\": \"mock backend 2\"}";
+    public static final String API_SANDBOX_RESPONSE_2 = "{\"id\":111111166, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +
+            " \"name\":\"doggieUpdated\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
+            "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
 
 
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +

@@ -20,8 +20,8 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Certificate;
 import org.wso2.choreo.connect.discovery.api.Operation;
-import org.wso2.choreo.connect.discovery.api.OperationPolicies;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
@@ -35,24 +35,26 @@ import org.wso2.choreo.connect.enforcer.commons.model.MockedApiConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedContentExamples;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
-import org.wso2.choreo.connect.enforcer.commons.model.Policy;
-import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
+import org.wso2.choreo.connect.enforcer.security.mtls.MtlsUtils;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.MockImplUtils;
 
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -87,6 +89,9 @@ public class RestAPI implements API {
         Map<String, List<String>> securityScopesMap = new HashMap<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
+        Map<String, String> mtlsCertificateTiers = new HashMap<>();
+        String mutualSSL = api.getMutualSSL();
+        boolean applicationSecurity = api.getApplicationSecurity();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -137,7 +142,8 @@ public class RestAPI implements API {
 
 
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
+                ResourceConfig resConfig = Utils.buildResource(operation, res.getPath(), securityScopesMap);
+                resConfig.setPolicyConfig(Utils.genPolicyConfig(operation.getPolicies()));
                 resConfig.setEndpoints(endpointClusterMap);
                 resConfig.setMockApiConfig(getMockedApiOperationConfig(operation.getMockedApiConfig(),
                         operation.getMethod()));
@@ -156,13 +162,26 @@ public class RestAPI implements API {
                             api.getEndpointSecurity().getSandBoxSecurityInfo()));
         }
 
+        KeyStore trustStore;
+        try {
+            trustStore = MtlsUtils.createTrustStore(api.getClientCertificatesList());
+        } catch (KeyStoreException e) {
+            throw new SecurityException(e);
+        }
+
+        for (Certificate certificate : api.getClientCertificatesList()) {
+            mtlsCertificateTiers.put(certificate.getAlias(), certificate.getTier());
+        }
+
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
                 .apiSecurity(securityScopesMap).securitySchemeDefinitions(securitySchemeDefinitions)
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
                 .endpoints(endpoints).endpointSecurity(endpointSecurity).mockedApi(api.getIsMockedApi())
-                .organizationId(api.getOrganizationId()).build();
+                .trustStore(trustStore).organizationId(api.getOrganizationId())
+                .mtlsCertificateTiers(mtlsCertificateTiers).mutualSSL(mutualSSL)
+                .applicationSecurity(applicationSecurity).build();
 
         initFilters();
         return basePath;
@@ -175,7 +194,8 @@ public class RestAPI implements API {
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         populateRemoveAndProtectedHeaders(requestContext);
-        boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePath() != null;
+        boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePaths() != null &&
+                requestContext.getMatchedResourcePaths().size() > 0;
         // This flag is used to apply cors filter
         boolean isOptionCall = requestContext.getRequestMethod().contains(HttpConstants.OPTIONS);
         if (!isExistsMatchedResourcePath && !isOptionCall) {
@@ -240,60 +260,6 @@ public class RestAPI implements API {
     @Override
     public APIConfig getAPIConfig() {
         return this.apiConfig;
-    }
-
-    public static ResourceConfig buildResource(Operation operation, String resPath, Map<String,
-            List<String>> apiLevelSecurityList) {
-        ResourceConfig resource = new ResourceConfig();
-        resource.setPath(resPath);
-        resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
-        resource.setTier(operation.getTier());
-        resource.setDisableSecurity(operation.getDisableSecurity());
-        resource.setPolicyConfig(genPolicyConfig(operation.getPolicies()));
-        Map<String, List<String>> securityMap = new HashMap<>();
-        if (operation.getSecurityList().size() > 0) {
-            for (SecurityList securityList : operation.getSecurityList()) {
-                for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
-                    securityMap.put(entry.getKey(), new ArrayList<>());
-                    if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
-                        List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
-                        securityMap.replace(entry.getKey(), scopeList);
-                    }
-                    // only supports security scheme OR combinations. Example -
-                    // Security:
-                    // - api_key: []
-                    //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
-                    break;
-                }
-            }
-            resource.setSecuritySchemas(securityMap);
-        } else {
-            resource.setSecuritySchemas(apiLevelSecurityList);
-        }
-        return resource;
-    }
-
-    private static PolicyConfig genPolicyConfig(OperationPolicies operationPolicies) {
-        PolicyConfig policyConfig = new PolicyConfig();
-        if (operationPolicies.getRequestCount() > 0) {
-            policyConfig.setRequest(genPolicyList(operationPolicies.getRequestList()));
-        }
-        if (operationPolicies.getResponseCount() > 0) {
-            policyConfig.setResponse(genPolicyList(operationPolicies.getResponseList()));
-        }
-        if (operationPolicies.getFaultCount() > 0) {
-            policyConfig.setFault(genPolicyList(operationPolicies.getFaultList()));
-        }
-        return policyConfig;
-    }
-
-    private static ArrayList<Policy> genPolicyList
-            (List<org.wso2.choreo.connect.discovery.api.Policy> operationPoliciesList) {
-        ArrayList<Policy> policyList = new ArrayList<>();
-        for (org.wso2.choreo.connect.discovery.api.Policy policy : operationPoliciesList) {
-            policyList.add(new Policy(policy.getAction(), policy.getParametersMap()));
-        }
-        return policyList;
     }
 
     private MockedApiConfig getMockedApiOperationConfig(
@@ -419,5 +385,14 @@ public class RestAPI implements API {
 
         // not allow clients to set cluster header manually
         requestContext.getRemoveHeaders().add(AdapterConstants.CLUSTER_HEADER);
+
+        // Remove mTLS certificate header
+        MutualSSLDto mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
+        String certificateHeaderName = FilterUtils.getCertificateHeaderName();
+        if (!mtlsInfo.isEnableOutboundCertificateHeader()) {
+            requestContext.getRemoveHeaders().add(certificateHeaderName);
+        }
+        // mTLS Certificate Header should not be included in the throttle publishing event.
+        requestContext.getProtectedHeaders().add(certificateHeaderName);
     }
 }

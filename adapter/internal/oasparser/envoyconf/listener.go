@@ -43,8 +43,9 @@ import (
 func CreateRoutesConfigForRds(vHosts []*routev3.VirtualHost) *routev3.RouteConfiguration {
 	rdsConfigName := defaultRdsConfigName
 	routeConfiguration := routev3.RouteConfiguration{
-		Name:         rdsConfigName,
-		VirtualHosts: vHosts,
+		Name:                   rdsConfigName,
+		VirtualHosts:           vHosts,
+		RequestHeadersToRemove: []string{clusterHeaderName},
 	}
 	return &routeConfiguration
 }
@@ -81,7 +82,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 	var listeners []*listenerv3.Listener
 
 	manager := &hcmv3.HttpConnectionManager{
-		CodecType:  hcmv3.HttpConnectionManager_AUTO,
+		CodecType:  getListenerCodecType(conf.Envoy.ListenerCodecType),
 		StatPrefix: httpConManagerStartPrefix,
 		// WebSocket upgrades enabled from the HCM
 		UpgradeConfigs: []*hcmv3.HttpConnectionManager_UpgradeConfig{{
@@ -110,6 +111,10 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
 			IdleTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.IdleTimeoutInSeconds * time.Second), // Default 1 hr
 		},
+		HttpProtocolOptions: &corev3.Http1ProtocolOptions{
+			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
+		},
+		UseRemoteAddress: &wrappers.BoolValue{Value: conf.Envoy.UseRemoteAddress},
 	}
 
 	if len(accessLogs) > 0 {
@@ -141,6 +146,8 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 	filters = append(filters, &connectionManagerFilterP)
 
 	if conf.Envoy.SecuredListenerPort > 0 {
+		var tlsFilter *tlsv3.DownstreamTlsContext
+
 		listenerHostAddress := defaultListenerHostAddress
 		if len(conf.Envoy.SecuredListenerHost) > 0 {
 			listenerHostAddress = conf.Envoy.SecuredListenerHost
@@ -168,11 +175,34 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 
 		tlsCert := generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
 		//TODO: (VirajSalaka) Make it configurable via SDS
-		tlsFilter := &tlsv3.DownstreamTlsContext{
-			CommonTlsContext: &tlsv3.CommonTlsContext{
-				//TlsCertificateSdsSecretConfigs
-				TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
-			},
+		if conf.Envoy.Downstream.TLS.MTLSAPIsEnabled {
+			tlsFilter = &tlsv3.DownstreamTlsContext{
+				// This is false since the authentication will be done at the enforcer
+				RequireClientCertificate: &wrappers.BoolValue{
+					Value: false,
+				},
+				CommonTlsContext: &tlsv3.CommonTlsContext{
+					//TlsCertificateSdsSecretConfigs
+					TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+					//For the purpose of including peer certificate into the request context
+					ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
+						ValidationContext: &tlsv3.CertificateValidationContext{
+							TrustedCa: &corev3.DataSource{
+								Specifier: &corev3.DataSource_Filename{
+									Filename: conf.Envoy.Downstream.TLS.TrustedCertPath,
+								},
+							},
+						},
+					},
+				},
+			}
+		} else {
+			tlsFilter = &tlsv3.DownstreamTlsContext{
+				CommonTlsContext: &tlsv3.CommonTlsContext{
+					//TlsCertificateSdsSecretConfigs
+					TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+				},
+			}
 		}
 
 		marshalledTLSFilter, err := ptypes.MarshalAny(tlsFilter)
@@ -316,4 +346,17 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 	}
 
 	return tracing, nil
+}
+
+func getListenerCodecType(codecType string) hcmv3.HttpConnectionManager_CodecType {
+	switch codecType {
+	case "AUTO":
+		return hcmv3.HttpConnectionManager_AUTO
+	case "HTTP1":
+		return hcmv3.HttpConnectionManager_HTTP1
+	case "HTTP2":
+		return hcmv3.HttpConnectionManager_HTTP2
+	default:
+		return hcmv3.HttpConnectionManager_AUTO
+	}
 }

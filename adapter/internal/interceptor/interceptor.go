@@ -44,8 +44,9 @@ type Config struct {
 
 //HTTPCallConfig hold values used for external interceptor engine
 type HTTPCallConfig struct {
-	ClusterName string
-	Timeout     string // in milli seconds
+	ClusterName     string
+	Timeout         string // in milli seconds
+	AuthorityHeader string
 }
 
 // RequestInclusions represents which should be included in the request payload to the interceptor service
@@ -78,6 +79,7 @@ var (
 	// Note: this template only applies if request or response interceptor is enabled
 	commonTemplate = `
 local interceptor = require 'home.wso2.interceptor.lib.interceptor'
+local utils = require 'home.wso2.interceptor.lib.utils'
 {{if .IsResponseFlowEnabled -}} {{/* resp_flow details are required in req flow if request info needed in resp flow */}}
 local resp_flow_list = {  
 	{{- range $key, $value := .ResponseFlow -}} 
@@ -95,6 +97,11 @@ local inv_context = {
 	prodClusterName = "{{.Context.ProdClusterName}}",
 	sandClusterName = "{{.Context.SandClusterName}}"
 }
+local wire_log_config = {
+	log_body_enabled = {{ .LogConfig.LogBodyEnabled }},
+	log_headers_enabled = {{ .LogConfig.LogHeadersEnabled }},
+	log_trailers_enabled = {{ .LogConfig.LogTrailersEnabled }}
+}
 `
 	requestInterceptorTemplate = `
 local req_flow_list = {  
@@ -103,11 +110,11 @@ local req_flow_list = {
 	{{- end -}}}
 local req_call_config = {  
 	{{- range $key, $value := .RequestFlow -}} 
-		{{- $key }} = {cluster_name = "{{$value.ExternalCall.ClusterName}}", timeout = {{$value.ExternalCall.Timeout}}}, 
+		{{- $key }} = {cluster_name = "{{$value.ExternalCall.ClusterName}}", timeout = {{$value.ExternalCall.Timeout}}, authority_header = "{{$value.ExternalCall.AuthorityHeader}}"}, 
 	{{- end -}}}
 function envoy_on_request(request_handle)
 	interceptor.handle_request_interceptor(
-		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context
+		request_handle, req_call_config, req_flow_list, resp_flow_list, inv_context, false, wire_log_config
 	)
 end
 `
@@ -115,11 +122,11 @@ end
 	responseInterceptorTemplate = `
 local res_call_config = {  
 	{{- range $key, $value := .ResponseFlow -}} 
-		{{- $key }} = {cluster_name="{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}}, 
+		{{- $key }} = {cluster_name = "{{$value.ExternalCall.ClusterName}}", timeout={{$value.ExternalCall.Timeout}}, authority_header = "{{$value.ExternalCall.AuthorityHeader}}"}, 
 	{{- end -}}}
 function envoy_on_response(response_handle)
 	interceptor.handle_response_interceptor(
-		response_handle, res_call_config, resp_flow_list
+		response_handle, res_call_config, resp_flow_list, wire_log_config
 	)
 end
 `
@@ -127,12 +134,16 @@ end
 	// just updated req flow info with  resp flow without calling interceptor service
 	defaultRequestInterceptorTemplate = `
 function envoy_on_request(request_handle)
-	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true)
+	utils.wire_log_headers(request_handle, " >> request headers >> ", {{ .LogConfig.LogHeadersEnabled }})
+	utils.wire_log_body(request_handle, " >> request body >> ", {{ .LogConfig.LogBodyEnabled }})
+	interceptor.handle_request_interceptor(request_handle, {}, {}, resp_flow_list, inv_context, true, { log_body_enabled = false, log_headers_enabled = false, log_trailers_enabled = false })
+	utils.wire_log_trailers(request_handle, " >> request trailers >> ", {{ .LogConfig.LogTrailersEnabled }})
 end
 `
 	// defaultResponseInterceptorTemplate is the template that is applied when response flow is disabled
 	defaultResponseInterceptorTemplate = `
 function envoy_on_response(response_handle)
+	utils.wire_log(response_handle, " << response body << ", " << response headers << ", " << response trailers << ", wire_log_config)
 end
 `
 	// emptyRequestInterceptorTemplate is the template that is applied when request flow and response flow is disabled
@@ -146,9 +157,8 @@ end
 
 //GetInterceptor inject values and get request interceptor
 // Note: This method is called only if one of request or response interceptor is enabled
-func GetInterceptor(values *Interceptor) string {
-	t, err := template.New("lua-filter").Parse(getTemplate(values.IsRequestFlowEnabled,
-		values.IsResponseFlowEnabled))
+func GetInterceptor(templateValues any, templateString string) string {
+	t, err := template.New("lua-filter").Parse(templateString)
 	if err != nil {
 		logger.LoggerInterceptor.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("error while parsing the interceptor template: %v", err.Error()),
@@ -159,7 +169,8 @@ func GetInterceptor(values *Interceptor) string {
 	}
 	templ := template.Must(t, err)
 	var out bytes.Buffer
-	err = templ.Execute(&out, values)
+
+	err = templ.Execute(&out, templateValues)
 	if err != nil {
 		logger.LoggerInterceptor.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("executing request interceptor template: %v", err.Error()),
@@ -171,7 +182,8 @@ func GetInterceptor(values *Interceptor) string {
 	return out.String()
 }
 
-func getTemplate(isReqIntercept bool, isResIntercept bool) string {
+// GetTemplate returns the combined tempalate for the interceptor lua script
+func GetTemplate(isReqIntercept bool, isResIntercept bool) string {
 	reqT := defaultRequestInterceptorTemplate
 	resT := defaultResponseInterceptorTemplate
 	if isReqIntercept {

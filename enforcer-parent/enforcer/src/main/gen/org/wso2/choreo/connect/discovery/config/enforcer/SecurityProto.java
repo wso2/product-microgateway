@@ -32,29 +32,34 @@ public final class SecurityProto {
       "y.proto\022\036wso2.discovery.config.enforcer\032" +
       "+wso2/discovery/config/enforcer/issuer.p" +
       "roto\0320wso2/discovery/config/enforcer/aut" +
-      "h_header.proto\"\210\001\n\010Security\022<\n\014tokenServ" +
-      "ice\030\001 \003(\0132&.wso2.discovery.config.enforc" +
-      "er.Issuer\022>\n\nauthHeader\030\002 \001(\0132*.wso2.dis" +
-      "covery.config.enforcer.AuthHeaderB\224\001\n1or" +
-      "g.wso2.choreo.connect.discovery.config.e" +
-      "nforcerB\rSecurityProtoP\001ZNgithub.com/env" +
-      "oyproxy/go-control-plane/wso2/discovery/" +
-      "config/enforcer;enforcerb\006proto3"
+      "h_header.proto\032/wso2/discovery/config/en" +
+      "forcer/mutual_ssl.proto\"\306\001\n\010Security\022<\n\014" +
+      "tokenService\030\001 \003(\0132&.wso2.discovery.conf" +
+      "ig.enforcer.Issuer\022>\n\nauthHeader\030\002 \001(\0132*" +
+      ".wso2.discovery.config.enforcer.AuthHead" +
+      "er\022<\n\tmutualSSL\030\003 \001(\0132).wso2.discovery.c" +
+      "onfig.enforcer.MutualSSLB\224\001\n1org.wso2.ch" +
+      "oreo.connect.discovery.config.enforcerB\r" +
+      "SecurityProtoP\001ZNgithub.com/envoyproxy/g" +
+      "o-control-plane/wso2/discovery/config/en" +
+      "forcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.wso2.choreo.connect.discovery.config.enforcer.IssuerProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLProto.getDescriptor(),
         });
     internal_static_wso2_discovery_config_enforcer_Security_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_config_enforcer_Security_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Security_descriptor,
-        new java.lang.String[] { "TokenService", "AuthHeader", });
+        new java.lang.String[] { "TokenService", "AuthHeader", "MutualSSL", });
     org.wso2.choreo.connect.discovery.config.enforcer.IssuerProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderProto.getDescriptor();
+    org.wso2.choreo.connect.discovery.config.enforcer.MutualSSLProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

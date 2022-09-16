@@ -60,6 +60,7 @@ import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -85,25 +86,36 @@ public class JWTAuthenticator implements Authenticator {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
         }
     }
+
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        if (isJWTEnabled(requestContext)) {
-            String jwt = retrieveAuthHeaderValue(requestContext);
-            return jwt != null && jwt.split("\\.").length == 3;
+        // only getting first operation is enough as all matched resource configs have the same security schemes
+        // i.e. graphQL apis do not support resource level security yet
+        if (isJWTEnabled(requestContext.getMatchedAPI().getSecuritySchemeDefinitions(),
+                requestContext.getMatchedResourcePaths().get(0).getSecuritySchemas())) {
+            String authHeaderValue = retrieveAuthHeaderValue(requestContext);
+
+            // Check keyword bearer in header to prevent conflicts with custom authentication
+            // (that maybe added with custom filters / interceptors / opa)
+            // which also includes a jwt in the auth header yet with a scheme other than 'bearer'.
+            //
+            // StringUtils.startsWithIgnoreCase(null, "bearer")         = false
+            // StringUtils.startsWithIgnoreCase("abc", "bearer")        = false
+            // StringUtils.startsWithIgnoreCase("Bearer abc", "bearer") = true
+            return StringUtils.startsWithIgnoreCase(authHeaderValue, JWTConstants.BEARER) &&
+                    authHeaderValue.trim().split("\\s+").length == 2 &&
+                    authHeaderValue.split("\\.").length == 3;
         }
         return false;
     }
 
-    private boolean isJWTEnabled(RequestContext requestContext) {
-        Map<String, List<String>> resourceSecuritySchemes = requestContext.getMatchedResourcePath()
-                .getSecuritySchemas();
+    private boolean isJWTEnabled(Map<String, SecuritySchemaConfig> securitySchemeDefinitions,
+                                 Map<String, List<String>> resourceSecuritySchemes) {
         if (resourceSecuritySchemes.isEmpty()) {
             // handle default security
             return true;
         }
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = requestContext.getMatchedAPI()
-                .getSecuritySchemeDefinitions();
-        for (String securityDefinitionName: resourceSecuritySchemes.keySet()) {
+        for (String securityDefinitionName : resourceSecuritySchemes.keySet()) {
             if (securitySchemeDefinitions.containsKey(securityDefinitionName)) {
                 SecuritySchemaConfig config = securitySchemeDefinitions.get(securityDefinitionName);
                 if (APIConstants.API_SECURITY_OAUTH2.equals(config.getType())) {
@@ -132,10 +144,6 @@ public class JWTAuthenticator implements Authenticator {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
-            if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
-            }
             String[] splitToken = jwtToken.split("\\s");
             // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
             if (splitToken.length > 1) {
@@ -145,7 +153,6 @@ public class JWTAuthenticator implements Authenticator {
             String name = requestContext.getMatchedAPI().getName();
             String version = requestContext.getMatchedAPI().getVersion();
             context = context + "/" + version;
-            ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
             SignedJWTInfo signedJWTInfo;
             Scope decodeTokenHeaderSpanScope = null;
             try {
@@ -157,7 +164,7 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 signedJWTInfo = JWTUtils.getSignedJwt(jwtToken);
             } catch (ParseException | IllegalArgumentException e) {
-                log.error("Failed to decode the token header", e);
+                log.error("Failed to decode the token header. {}", e.getMessage());
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Not a JWT token. Failed to decode the token header", e);
@@ -241,6 +248,16 @@ public class JWTAuthenticator implements Authenticator {
                                             apiKeyValidationInfoDTO.getValidationStatus(),
                                             "User is NOT authorized to access the Resource. "
                                                     + "API Subscription validation failed.");
+                                } else {
+                                    /* GraphQL Query Analysis Information */
+                                    if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI()
+                                            .getApiType())) {
+                                        requestContext.getProperties().put(APIConstants.GraphQL.MAXIMUM_QUERY_DEPTH,
+                                                apiKeyValidationInfoDTO.getGraphQLMaxDepth());
+                                        requestContext.getProperties().put(
+                                                APIConstants.GraphQL.MAXIMUM_QUERY_COMPLEXITY,
+                                                apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
+                                    }
                                 }
                             }
                         } else {
@@ -269,7 +286,8 @@ public class JWTAuthenticator implements Authenticator {
                             Utils.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID,
                                     ThreadContext.get(APIConstants.LOG_TRACE_ID));
                         }
-                        validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
+                        validateScopes(context, version, requestContext.getMatchedResourcePaths(), validationInfo,
+                                signedJWTInfo);
                     } finally {
                         if (Utils.tracingEnabled()) {
                             validateScopesSpanScope.close();
@@ -350,57 +368,44 @@ public class JWTAuthenticator implements Authenticator {
     }
 
 
-
     /**
      * Validate scopes bound to the resource of the API being invoked against the scopes specified
      * in the JWT token payload.
      *
      * @param apiContext        API Context
      * @param apiVersion        API Version
-     * @param matchingResource  Accessed API resource
+     * @param matchingResources Accessed API resources
      * @param jwtValidationInfo Validated JWT Information
      * @param jwtToken          JWT Token
      * @throws APISecurityException in case of scope validation failure
      */
-    private void validateScopes(String apiContext, String apiVersion, ResourceConfig matchingResource,
-            JWTValidationInfo jwtValidationInfo, SignedJWTInfo jwtToken) throws APISecurityException {
-        try {
-            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-            Set<String> scopeSet = new HashSet<>();
-            scopeSet.addAll(jwtValidationInfo.getScopes());
-            apiKeyValidationInfoDTO.setScopes(scopeSet);
+    private void validateScopes(String apiContext, String apiVersion, ArrayList<ResourceConfig> matchingResources,
+                                JWTValidationInfo jwtValidationInfo, SignedJWTInfo jwtToken)
+            throws APISecurityException {
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        Set<String> scopeSet = new HashSet<>(jwtValidationInfo.getScopes());
+        apiKeyValidationInfoDTO.setScopes(scopeSet);
 
-            TokenValidationContext tokenValidationContext = new TokenValidationContext();
-            tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+        TokenValidationContext tokenValidationContext = new TokenValidationContext();
+        tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
 
-            tokenValidationContext.setAccessToken(jwtToken.getToken());
-            tokenValidationContext.setHttpVerb(matchingResource.getPath().toUpperCase());
-            tokenValidationContext.setMatchingResourceConfig(matchingResource);
-            tokenValidationContext.setContext(apiContext);
-            tokenValidationContext.setVersion(apiVersion);
+        tokenValidationContext.setAccessToken(jwtToken.getToken());
+        // since matching resources has same method for all, just get the first element's method is adequate.
+        // i.e. graphQL matching resources has same operation type for a request.
+        tokenValidationContext.setHttpVerb(matchingResources.get(0).getMethod().toString());
+        tokenValidationContext.setMatchingResourceConfigs(matchingResources);
+        tokenValidationContext.setContext(apiContext);
+        tokenValidationContext.setVersion(apiVersion);
 
-            boolean valid = KeyValidator.validateScopes(tokenValidationContext);
-            if (valid) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Scope validation successful for the resource: " + matchingResource.getPath());
-                }
-            } else {
-                String message = "User is NOT authorized to access the Resource: " + matchingResource.getPath()
-                        + ". Scope validation failed.";
-                log.debug(message);
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
-                        APISecurityConstants.INVALID_SCOPE, message);
-            }
-        } catch (EnforcerException e) {
-            String message = "Error while accessing backend services for token scope validation";
-            log.error(message, e);
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
+        boolean valid = KeyValidator.validateScopes(tokenValidationContext);
+        if (valid) {
+            log.debug("Scope validation was successful for the resource.");
         }
     }
 
     private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(RequestContext requestContext,
-            JWTValidationInfo jwtValidationInfo) throws APISecurityException {
+                                                                        JWTValidationInfo jwtValidationInfo)
+            throws APISecurityException {
 
         String apiContext = requestContext.getMatchedAPI().getBasePath();
         String apiVersion = requestContext.getMatchedAPI().getVersion();
@@ -542,7 +547,7 @@ public class JWTAuthenticator implements Authenticator {
                 if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
                     JWTValidationInfo tempJWTValidationInfo =
                             (JWTValidationInfo) CacheProvider.getGatewayKeyCache()
-                            .getIfPresent(jti);
+                                    .getIfPresent(jti);
                     checkTokenExpiration(jti, tempJWTValidationInfo);
                     jwtValidationInfo = tempJWTValidationInfo;
                 }

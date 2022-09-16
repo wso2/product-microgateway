@@ -57,6 +57,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility functions used for jwt authentication.
@@ -154,10 +155,7 @@ public class JWTUtils {
             Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
             String lineSeparator = System.lineSeparator();
-            // Change the lineSeparator to \r\n if it runs on WSL
-            if (System.getProperty("os.version").toLowerCase().contains("wsl")) {
-                lineSeparator = "\r\n";
-            }
+            
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")
                     .replaceAll(lineSeparator, "")
@@ -217,7 +215,7 @@ public class JWTUtils {
         org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().
                 decode(splitToken[1])));
         long exp = payload.getLong(JwtConstants.EXP);
-        long timestampSkew = FilterUtils.getTimeStampSkewInSeconds() * 1000;
-        return (exp - System.currentTimeMillis() < timestampSkew);
+        long timestampSkew = FilterUtils.getTimeStampSkewInSeconds();
+        return (exp - TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) < timestampSkew);
     }
 }

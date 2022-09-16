@@ -21,12 +21,23 @@ package org.wso2.choreo.connect.tests.util;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -35,6 +46,14 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -42,6 +61,9 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * This class can be used to send http request.
@@ -51,34 +73,86 @@ public class HttpsClientRequest {
     private static final int retryIntervalMillis = 3000;
 
     private static final Logger log = LoggerFactory.getLogger(HttpsClientRequest.class);
+
+    /**
+     * Sends an HTTP Mutual SSL GET request to a url.
+     *
+     * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
+     * @param headers- http request header value for authorization key
+     * @param keyStoreName - Keystore name for mutual ssl
+     * @return - HttpResponse from the end point
+     * @throws CCTestException If an error occurs while sending the GET request
+     */
+    public static CloseableHttpResponse doMutualSSLGet(String requestUrl, Map<String, String> headers, String keyStoreName)
+            throws KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException,
+            KeyManagementException, IOException, CCTestException {
+
+        String keyStorePath = Objects.requireNonNull(HttpsClientRequest.class.getClassLoader()
+                .getResource("keystore/" + keyStoreName)).getPath();
+        String trustStorePath = Objects.requireNonNull(HttpsClientRequest.class.getClassLoader()
+                .getResource("keystore/client-truststore.jks")).getPath();
+        CloseableHttpClient httpclient;
+
+        // Get the keystore
+        KeyStore keyStore = KeyStore.getInstance("jks");
+        InputStream ksIn = new FileInputStream(keyStorePath);
+        keyStore.load(ksIn, "password".toCharArray());
+        ksIn.close();
+        KeyManagerFactory keyManagerFactory =
+                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        keyManagerFactory.init(keyStore, "password".toCharArray());
+
+        // Get the truststore
+        KeyStore trustStore = KeyStore.getInstance("jks");
+        InputStream tsIn = new FileInputStream(trustStorePath);
+        trustStore.load(tsIn, "wso2carbon".toCharArray());
+        tsIn.close();
+        TrustManagerFactory trustManagerFactory =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        trustManagerFactory.init(trustStore);
+
+        // Create the SSL configs
+        SSLContext ssl = SSLContext.getInstance("TLS");
+        ssl.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(ssl);
+
+        // Create the request using org.apache.http classes
+        try {
+            int timeout = 7;
+            RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 10000)
+                    .setConnectionRequestTimeout(timeout * 10000).setSocketTimeout(timeout * 10000).build();
+
+            httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).disableRedirectHandling().setDefaultRequestConfig(config)
+                    .setHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER).build();
+            HttpGet request = new HttpGet(requestUrl);
+            if (headers != null) {
+                for (Map.Entry<String, String> head : headers.entrySet()) {
+                    request.addHeader(head.getKey(), head.getValue());
+                }
+            }
+            CloseableHttpResponse responseBuilder =  httpclient.execute(request);
+            return responseBuilder;
+        } catch (Exception e) {
+            throw new CCTestException("Error while sending GET request URL:" + requestUrl, e);
+        }
+    }
     /**
      * Sends an HTTP GET request to a url.
      *
-     * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
+     * @param requestUrl - The URL of the rest. (Example: "https://github.com/wso2/product-microgateway/releases?q=latest")
      * @param headers - http request header map
      * @return - HttpResponse from the end point
      * @throws CCTestException If an error occurs while sending the GET request
      */
     public static HttpResponse doGet(String requestUrl, Map<String, String> headers)
             throws CCTestException {
-        HttpsURLConnection conn = null;
-        try {
-            conn = getURLConnection(requestUrl);
-            setHeadersAndMethod(conn, headers, TestConstant.HTTP_METHOD_GET);
-            conn.connect();
-            return buildResponse(conn);
-        } catch (IOException | CCTestException e) {
-            throw new CCTestException("Error while sending GET request URL:" + requestUrl, e);
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
+        return sendHttpRequestWithoutPayload(TestConstant.HTTP_METHOD_GET, requestUrl, headers, true);
     }
+
     /**
      * Sends an HTTP GET request to a url.
      *
-     * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
+     * @param requestUrl - The URL of the rest. (Example: "https://github.com/wso2/product-microgateway/releases?q=latest")
      * @return - HttpResponse from the end point
      * @throws CCTestException If an error occurs while sending the GET request
      */
@@ -111,6 +185,24 @@ public class HttpsClientRequest {
         return response;
     }
 
+    /**
+     * @param requestUrl Request URL as a string
+     * @param data       Request data sent with the request
+     * @param headers    Request headers
+     * @return
+     * @throws CCTestException If an error occurs while sending the POST request
+     */
+    public static HttpResponse retryPostUntil200(String requestUrl, String data, Map<String, String> headers)
+            throws CCTestException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            response = HttpsClientRequest.doPost(requestUrl, data, headers);
+            retryCount++;
+        } while (response.getResponseCode() != HttpStatus.SC_OK && shouldRetry(retryCount));
+        return response;
+    }
+
     private static boolean shouldRetry(int retryCount) {
         if(retryCount >= maxRetryCount) {
             log.info("Retrying of the request is finished");
@@ -121,32 +213,134 @@ public class HttpsClientRequest {
     }
 
     /**
-     * Send an HTTP POST request to a rest.
+     * Send an HTTP POST request.
      *
-     * @param endpoint - rest endpoint
-     * @param postBody - message payload
-     * @param headers http request headers map
-     * @return - HttpResponse from end point
-     * @throws IOException If an error occurs while sending the GET request
+     * @param endpoint REST endpoint
+     * @param payload  Request payload
+     * @param headers  Request headers map
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs during the POST request
      */
-    public static HttpResponse doPost(String endpoint, String postBody, Map<String, String> headers)
+    public static HttpResponse doPost(String endpoint, String payload, Map<String, String> headers)
+            throws CCTestException {
+        return sendHttpRequestWithPayload(TestConstant.HTTP_METHOD_POST, payload, headers, endpoint);
+    }
+
+    /**
+     * Send an HTTP PUT request.
+     *
+     * @param endpoint REST endpoint
+     * @param payload  Request payload
+     * @param headers  Request headers map
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs during the PUT request
+     */
+    public static HttpResponse doPut(String endpoint, String payload, Map<String, String> headers)
+            throws CCTestException {
+        return sendHttpRequestWithPayload(TestConstant.HTTP_METHOD_PUT, payload, headers, endpoint);
+    }
+
+    /**
+     * Send an HTTP PATCH request.
+     *
+     * @param endpoint REST endpoint
+     * @param payload  Request payload
+     * @param headers  Request headers map
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs during the PATCH request
+     */
+    public static org.apache.http.HttpResponse doPatch(String endpoint, String payload, Map<String, String> headers)
+            throws Exception {
+        // HttpsURLConnection does not support PATCH. Therefore, org.apache.http classes are used here.
+        int timeout = 7;
+        RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 10000)
+                .setConnectionRequestTimeout(timeout * 10000).setSocketTimeout(timeout * 10000).build();
+        CloseableHttpClient httpClient = HttpClients.custom().disableRedirectHandling()
+                .setDefaultRequestConfig(config).setHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER)
+                .build();
+        HttpPatch httpPatch = new HttpPatch(endpoint);
+        for (String headerType : headers.keySet()) {
+            httpPatch.setHeader(headerType, headers.get(headerType));
+        }
+        if (null != payload) {
+            HttpEntity httpEntity = new ByteArrayEntity(payload.getBytes(StandardCharsets.UTF_8));
+            if (headers.get("Content-Type") == null) {
+                httpPatch.setHeader("Content-Type", "application/json");
+            }
+            httpPatch.setEntity(httpEntity);
+        }
+        org.apache.http.HttpResponse httpResponse = httpClient.execute(httpPatch);
+        return httpResponse;
+    }
+
+    /**
+     * Send an HTTP DELETE request.
+     *
+     * @param endpoint REST endpoint
+     * @param headers  Request headers map
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs during the DELETE request
+     */
+    public static HttpResponse doDelete(String endpoint, Map<String, String> headers)
+            throws CCTestException {
+        return sendHttpRequestWithoutPayload(TestConstant.HTTP_METHOD_DELETE, endpoint, headers, true);
+    }
+
+    /**
+     * Send an HTTP OPTIONS request.
+     *
+     * @param endpoint REST endpoint
+     * @param headers  Request headers map
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs during the OPTIONS request
+     */
+    public static HttpResponse doOptions(String endpoint, Map<String, String> headers)
+            throws CCTestException {
+        return sendHttpRequestWithoutPayload(TestConstant.HTTP_METHOD_OPTIONS, endpoint, headers, false);
+    }
+
+    /**
+     * Send an HTTP HEAD request.
+     *
+     * @param endpoint REST endpoint
+     * @param headers  Request headers map
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs during the HEAD request
+     */
+    public static HttpResponse doHead(String endpoint, Map<String, String> headers)
+            throws CCTestException {
+        return sendHttpRequestWithoutPayload(TestConstant.HTTP_METHOD_HEAD, endpoint, headers, false);
+    }
+
+    /**
+     * Send any HTTP request that has a payload.
+     *
+     * @param httpVerb The HTTP verb Ex: POST, PUT, PATCH
+     * @param payload  Request payload
+     * @param headers  Request headers map
+     * @param endpoint REST endpoint
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs while sending the POST request
+     */
+    public static HttpResponse sendHttpRequestWithPayload(String httpVerb, String payload, Map<String, String> headers,
+                                                          String endpoint)
             throws CCTestException {
         HttpsURLConnection urlConnection = null;
         OutputStream outputStream = null;
         Writer writer = null;
         try {
-            urlConnection = getURLConnection(endpoint);
-            setHeadersAndMethod(urlConnection, headers, TestConstant.HTTP_METHOD_POST);
+            urlConnection = getURLConnection(endpoint, true);
+            setHeadersAndMethod(urlConnection, headers, httpVerb);
             outputStream = urlConnection.getOutputStream();
 
             writer = new OutputStreamWriter(outputStream, TestConstant.CHARSET_NAME);
-            writer.write(postBody);
+            writer.write(payload);
             writer.close();
             outputStream.close();
             // Get the response
             return buildResponse(urlConnection);
         } catch (IOException | CCTestException e) {
-            throw new CCTestException("Error while sending GET request URL:" + endpoint, e);
+            throw new CCTestException("Error while sending "+ httpVerb +" request URL:" + endpoint, e);
         }finally {
             IOUtils.closeQuietly(writer);
             IOUtils.closeQuietly(outputStream);
@@ -156,13 +350,40 @@ public class HttpsClientRequest {
         }
     }
 
-    private static HttpsURLConnection getURLConnection(String requestUrl)
+    /**
+     * Send any HTTP request that does not have a payload.
+     *
+     * @param httpVerb The HTTP verb Ex: DELETE, OPTIONS, HEAD
+     * @param headers  Request headers map
+     * @param endpoint REST endpoint
+     * @return - HttpResponse from the endpoint
+     * @throws CCTestException If an error occurs while sending the POST request
+     */
+    public static HttpResponse sendHttpRequestWithoutPayload(String httpVerb, String endpoint,
+                                                             Map<String, String> headers, boolean doOutput)
+            throws CCTestException {
+        HttpsURLConnection conn = null;
+        try {
+            conn = getURLConnection(endpoint, doOutput);
+            setHeadersAndMethod(conn, headers, httpVerb);
+            conn.connect();
+            return buildResponse(conn);
+        } catch (IOException | CCTestException e) {
+            throw new CCTestException("Error while sending " + httpVerb + " request URL:" + endpoint, e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private static HttpsURLConnection getURLConnection(String requestUrl, boolean doOutput)
             throws IOException {
         setSSlSystemProperties();
         URL url = new URL(requestUrl);
 
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setDoOutput(true);
+        conn.setDoOutput(doOutput);
         conn.setReadTimeout(70000);
         conn.setConnectTimeout(15000);
         conn.setDoInput(true);
@@ -187,7 +408,7 @@ public class HttpsClientRequest {
     /**
      * Helper method to set the SSL context.
      */
-    static void setSSlSystemProperties() {
+    public static void setSSlSystemProperties() {
         String certificatesTrustStorePath = Objects.requireNonNull(HttpsClientRequest.class.getClassLoader()
                 .getResource("keystore/client-truststore.jks")).getPath();
         System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);

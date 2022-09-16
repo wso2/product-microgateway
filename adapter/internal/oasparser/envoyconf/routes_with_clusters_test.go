@@ -70,6 +70,15 @@ func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
 	testCreateRoutesWithClustersWebsocketWithEnvProps(t, apiYamlFilePath)
 }
 
+func TestCreateRoutesWithClustersProdSand(t *testing.T) {
+	testCreateRoutesWithClustersAPIClusters(t)
+}
+
+func TestCreateRouteswithClustersGraphQLProdSand(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/graphql_api.yaml"
+	testCreateRouteWithClustersGraphQL(t, apiYamlFilePath)
+}
+
 // commonTestForCreateRoutesWithClusters
 // withExtensions - if definition has endpoints x-wso2 extension
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string, withExtensions bool) {
@@ -78,7 +87,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string,
 	mgwSwaggerForOpenapi := model.MgwSwagger{}
 	err = mgwSwaggerForOpenapi.GetMgwSwagger(openapiByteArr)
 	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, nil, "localhost", "carbon.super")
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, nil, "localhost", "carbon.super")
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	// As the first cluster is always related to API level cluster
@@ -148,8 +157,8 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string,
 		assert.Equal(t, uint32(0), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
 	}
 	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")
-	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[0].GetMatch().GetSafeRegex().Regex)
-	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[1].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[0].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[1].GetMatch().GetSafeRegex().Regex)
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
 }
@@ -161,7 +170,7 @@ func TestCreateRoutesWithClustersForEndpointRef(t *testing.T) {
 	mgwSwaggerForOpenapi := model.MgwSwagger{}
 	err = mgwSwaggerForOpenapi.GetMgwSwagger(openapiByteArr)
 	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, nil, "localhost", "carbon.super")
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, nil, "localhost", "carbon.super")
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 
@@ -234,10 +243,41 @@ func TestCreateRoutesWithClustersForEndpointRef(t *testing.T) {
 	assert.Equal(t, uint32(1), pathLevelClusterPriority1, "Path Level Cluster's second endpoint priority is incorrect.")
 
 	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")
-	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[0].GetMatch().GetSafeRegex().Regex)
-	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[1].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[0].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets[/]{0,1}", "^/pets/([^/]+)[/]{0,1}"}, routes[1].GetMatch().GetSafeRegex().Regex)
+
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
+}
+
+func testCreateRouteWithClustersGraphQL(t *testing.T, apiYamlFilePath string) {
+	var vHost string = "localhost"
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+	assert.Nil(t, err, "Error occurred while processing api.yaml")
+
+	graphQLFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/schema.graphql"
+	graphQLByteArr, err := ioutil.ReadFile(graphQLFilePath)
+	assert.Nil(t, err, "Error while reading the schema.graphql file : %v"+graphQLFilePath)
+	assert.NotEmpty(t, graphQLByteArr, "Cannot process empty schma.grapghql file.")
+
+	var mgwSwagger model.MgwSwagger
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
+	mgwSwagger.GraphQLSchema = string(graphQLByteArr)
+	assert.Nil(t, err, "Error while populating api.yaml file : %v")
+
+	err = mgwSwagger.SetInfoGraphQLAPI(apiYaml)
+	assert.Nil(t, err, "Error while populating GraphQL attributes from api.yaml : %v")
+
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, vHost, "carbon.super")
+	assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+	assert.Equal(t, 2, len(clusters), "Number of clusters created incorrect")
+
+	productionCluster := clusters[0]
+	sandBoxCluster := clusters[1]
+	assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_GraphQLAPI1.0.0", "Production cluster name mismatch")
+	assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_GraphQLAPI1.0.0", "Sandbox cluster name mismatch")
 }
 
 func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string) {
@@ -262,7 +302,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 
 	err = mgwSwagger.SetInfoAsyncAPI(asyncapi)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
@@ -286,8 +326,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 		assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
 		route := routes[0].GetMatch().GetSafeRegex().Regex
-		// TODO: (VirajSalaka) fix the topic's url mapping
-		assert.Equal(t, route, "^/echowebsocket/1.0/notifications(\\?([^/]+))?$", "route created mismatch")
+		assert.Equal(t, "^/echowebsocket/1.0/notifications[/]{0,1}", route, "route created mismatch")
 
 		throttlingPolicy := mgwSwagger.GetXWso2ThrottlingTier()
 		assert.Equal(t, throttlingPolicy, "5PerMin", "API throttling policy is not assigned.")
@@ -306,11 +345,11 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 		assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
 		route := routes[0].GetMatch().GetSafeRegex().Regex
-		assert.Equal(t, route, "^/echowebsocketprod/1.0/notifications(\\?([^/]+))?$", "route created mismatch")
+		assert.Equal(t, route, "^/echowebsocketprod/1.0/notifications[/]{0,1}", "route created mismatch")
 
 		// TODO: (VirajSalaka) add Unit test for second resource too.
 		route2 := routes[1].GetMatch().GetSafeRegex().Regex
-		assert.Equal(t, route2, "^/echowebsocketprod/1.0/rooms/([^/]+)(\\?([^/]+))?$", "route created mismatch")
+		assert.Equal(t, route2, "^/echowebsocketprod/1.0/rooms/([^/]+)[/]{0,1}", "route created mismatch")
 
 	}
 	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
@@ -358,11 +397,11 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 
 	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
-	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+	assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 	productionCluster := clusters[0]
-	sandBoxCluster := clusters[1]
+	sandBoxCluster := clusters[0]
 
 	productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -482,7 +521,7 @@ func TestCreateRoutesWithClustersUsingAsyncAPI(t *testing.T) {
 	err = mgwSwagger.SetInfoAsyncAPI(asyncapi)
 
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
 	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
 }
@@ -507,11 +546,11 @@ func commonTestForClusterPrioritiesInWebSocketAPI(t *testing.T, apiYamlFilePath 
 	var mgwSwagger model.MgwSwagger
 	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+	_, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
-	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+	assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 	productionCluster := clusters[0]
-	sandBoxCluster := clusters[1]
+	sandBoxCluster := clusters[0]
 
 	productionClusterHost0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 	productionClusterPort0 := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -570,7 +609,7 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
 	mgwSwagger.SetEnvLabelProperties(envProps)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+	_, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
 	assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
 	productionCluster := clusters[0]
@@ -587,4 +626,47 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 
 	assert.Equal(t, sandBoxClusterHost0, "env.sand.websocket.org", "Sandbox cluster host mismatch")
 	assert.Equal(t, sandBoxClusterPort0, uint32(80), "Sandbox cluster port mismatch")
+}
+
+func testCreateRoutesWithClustersAPIClusters(t *testing.T) {
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_prod_sand_clusters.yaml"
+	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
+	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
+	mgwSwaggerForOpenapi := model.MgwSwagger{}
+	err = mgwSwaggerForOpenapi.GetMgwSwagger(openapiByteArr)
+	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, nil, "localhost", "carbon.super")
+
+	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
+	// As the first cluster is always related to API level cluster
+	apiLevelCluster := clusters[0]
+	assert.Equal(t, apiLevelCluster.GetName(), "carbon.super_clusterProd_localhost_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
+
+	apiLevelClusterHost0 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetAddress()
+	apiLevelClusterPort0 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetPortValue()
+	apiLevelClusterPriority0 := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].Priority
+
+	assert.NotEmpty(t, apiLevelClusterHost0, "API Level Cluster's assigned host should not be null")
+	assert.Equal(t, "apiLevelProdEndpoint", apiLevelClusterHost0, "API Level Cluster's assigned host is incorrect.")
+	assert.NotEmpty(t, apiLevelClusterPort0, "API Level Cluster's assigned port should not be null")
+	assert.Equal(t, uint32(80), apiLevelClusterPort0, "API Level Cluster's assigned host is incorrect.")
+	assert.Equal(t, uint32(0), apiLevelClusterPriority0, "API Level Cluster's assigned Priority is incorrect.")
+
+	resourceLevelCluster0 := clusters[1]
+	assert.Contains(t, resourceLevelCluster0.GetName(), "carbon.super_clusterProd_localhost_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
+
+	resourceLevelClusterHost0 := resourceLevelCluster0.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetAddress()
+	resourceLevelClusterPort0 := resourceLevelCluster0.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
+		GetAddress().GetSocketAddress().GetPortValue()
+	resourceLevelClusterPriority0 := resourceLevelCluster0.GetLoadAssignment().GetEndpoints()[0].Priority
+
+	assert.NotEmpty(t, resourceLevelClusterHost0, "API Level Cluster's assigned host should not be null")
+	assert.Equal(t, "resourceLevelProdEndpoint", resourceLevelClusterHost0, "API Level Cluster's assigned host is incorrect.")
+	assert.Equal(t, uint32(443), resourceLevelClusterPort0, "API Level Cluster's assigned host is incorrect.")
+	assert.Equal(t, uint32(0), resourceLevelClusterPriority0, "API Level Cluster's assigned Priority is incorrect.")
+
+	assert.Equal(t, 2, len(routes), "Number of routes created is incorrect")
 }

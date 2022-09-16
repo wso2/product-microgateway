@@ -275,6 +275,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 
 	err = apiProject.APIYaml.ValidateAPIType()
 	if err != nil {
+		logger.LoggerXds.Error("Error while populating swagger from api.yaml. ", err)
 		return nil, err
 	}
 
@@ -285,6 +286,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 
 	err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
 	if err != nil {
+		logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)
 		return nil, err
 	}
 
@@ -299,17 +301,42 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		// it will enable folowing securities globally for the API, overriding swagger securities.
 		isYamlAPIKey := false
 		isYamlOauth := false
+		isYamlMutualssl := false
+		isYamlMutualsslMandatory := false
+		isYamlOauthBasicAuthAPIKeyMandatory := false
 		for _, value := range apiYaml.SecurityScheme {
-			if value == constants.APIMAPIKeyType {
+			switch value {
+			case constants.APIMAPIKeyType:
 				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
 				isYamlAPIKey = true
-			} else if value == constants.APIMOauth2Type {
+			case constants.APIMOauth2Type:
 				logger.LoggerXds.Debugf("Oauth2 is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
 				isYamlOauth = true
+			case constants.APIMMutualSSLType:
+				logger.LoggerXds.Debugf("Mutual SSL is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlMutualssl = true
+			case constants.APIMMutualSSLMandatoryType:
+				logger.LoggerXds.Debugf("Mutual SSL Mandatory is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
+				isYamlMutualsslMandatory = true
+			case constants.APIOauthBasicAuthAPIKeyMandatoryType:
+				isYamlOauthBasicAuthAPIKeyMandatory = true
 			}
 		}
-		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
-		mgwSwagger.SetOperationPolicies(apiProject)
+		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth, isYamlMutualssl, isYamlMutualsslMandatory, isYamlOauthBasicAuthAPIKeyMandatory)
+		err = mgwSwagger.SetOperationPolicies(apiProject)
+		if err != nil {
+			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while populating operational policies for the API %s:%s of Organization %s. %s",
+					apiYaml.Name, apiYaml.Version, apiYaml.OrganizationID, err),
+				Severity:  logging.MINOR,
+				ErrorCode: 1416,
+			})
+			return nil, err
+		}
+	}
+
+	if apiYaml.APIType == constants.GRAPHQL {
+		mgwSwagger.GraphQLComplexities = apiProject.GraphQLComplexities
 	}
 	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
@@ -342,6 +369,30 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 		})
 		return nil, validationErr
 	}
+
+	// create client map for API
+	var clientCerts []model.Certificate
+	if len(apiProject.ClientCerts) > 0 && len(apiProject.DownstreamCerts) > 0 {
+		for _, certFile := range apiProject.ClientCerts {
+			var certificate model.Certificate
+			if certBytes, found := apiProject.DownstreamCerts[certFile.CertificateName]; found {
+				certificate.Alias = certFile.Alias
+				certificate.Tier = certFile.Tier
+				certificate.Content = certBytes
+				clientCerts = append(clientCerts, certificate)
+				delete(apiProject.DownstreamCerts, certFile.CertificateName)
+			} else {
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Certificate file %v not found for the alias %v in the API %s - %s:%s", certFile.CertificateName,
+						certFile.Alias, apiYaml.ID, apiYaml.Name, apiYaml.Version),
+					Severity:  logging.MINOR,
+					ErrorCode: 1415,
+				})
+			}
+		}
+	}
+
+	mgwSwagger.SetClientCerts(clientCerts)
 
 	// -------- Finished updating mgwSwagger struct
 
@@ -419,8 +470,12 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	}
 	interceptCertMap["default"] = apiProject.InterceptorCerts
 
-	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
+	routes, clusters, endpoints, err := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
 		interceptCertMap, vHost, organizationID)
+	if err != nil {
+		return nil, fmt.Errorf("Error while deploying API. Name: %s Version: %s, OrgID: %s, Error: %s",
+			mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID, err.Error())
+	}
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes
@@ -673,10 +728,6 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 // DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
 func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, revisionUUID string) {
 	apiIdentifiers := make(map[string]struct{})
-
-	conf, _ := config.ReadConfigs()
-	gaEnabled := conf.GlobalAdapter.Enabled
-
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
 
@@ -701,9 +752,7 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
-				if gaEnabled && revisionUUID != "" {
-					notifier.SendRevisionUndeploy(uuid, revisionUUID, environment)
-				}
+				notifier.SendRevisionUndeployAck(uuid, revisionUUID, environment)
 			}
 		}
 	}

@@ -3,6 +3,8 @@
 [adapter] # --------------------------------------------------------
 
 artifactsDirectory = "/home/wso2/artifacts"
+soapErrorInXMLEnabled = false
+
 # Configurations required for configuring the deployment parameters that are used for identifying the Choreo Connect Adapter REST APIs
 [adapter.server]
   # Enable/Disable Choreo Connect Adapter REST API
@@ -99,12 +101,19 @@ artifactsDirectory = "/home/wso2/artifacts"
   securedListenerHost = "0.0.0.0"
   # Port for secured listener of Router
   securedListenerPort = 9095
+  
+  # Set the listener side http protocol version. Default to AUTO where both http1 and http2 connections are handled
+  # It can be specifically set to either HTTP1 or HTTP2
+  listenerCodecType = "AUTO"
+
   # The timeout for new network connections to hosts in the cluster in seconds
   clusterTimeoutInSeconds = 20
   # The timeout for response coming from enforcer to route per API request
   enforcerResponseTimeoutInSeconds = 20
   # System hostname for system API resources (eg: /testkey and /health)
   systemHost = "localhost"
+  # If configured true, router appends the immediate downstream ip address to the x-forward-for header
+  useRemoteAddress = false
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]
@@ -181,6 +190,21 @@ artifactsDirectory = "/home/wso2/artifacts"
   # HTTP status codes, the retry mechanism will be enabled for.
   # Used when retry config is set via API-M UI or all given status codes are out of range.
   statusCodes = [ 504 ]
+
+# Configs http2 protocol options for upstream http2 cluster endpoints
+[router.upstream.http2]
+  # Maximum table size (in octets) that the encoder is permitted to use for the dynamic HPACK table: https://httpwg.org/specs/rfc7541.html#rfc.section.4.2
+  hpackTableSize = 4096
+  # Maximum concurrent streams allowed for peer on one HTTP/2 connection
+  maxConcurrentStreams = 2147483647
+
+[router.downstream]
+# The configurations for SSL configuration related to the client connection in Choreo Connect
+[router.downstream.tls]
+  # Path to trusted certificates
+  trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
+  # If configured true, router enables the client certificate validation for providing client certificates
+  mTLSAPIsEnabled = false
 
 # Timeouts managed by the connection manager
 [router.connectionTimeout]
@@ -286,6 +310,8 @@ enabled = true
   publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
   # Private key path used for JWT generation
   privateKeyPath = "/home/wso2/security/keystore/mg.key"
+  # Token expiry time in seconds
+  tokenTTL = 3600
 
 # The issuer configuration required to generate token at Choreo Connect
 [enforcer.jwtIssuer]
@@ -319,7 +345,19 @@ enabled = true
   # Header name for the authorization token coming from the downstream client
   authorizationHeader = "authorization"
   testConsoleHeaderName = "Internal-Key"
-  
+
+# Configurations related to Mutual SSL
+[enforcer.security.mutualSSL]
+  # Header name for the client certificate header coming from the downstream client
+  certificateHeader = "X-WSO2-CLIENT-CERTIFICATE"
+  # Enables the mTLS validation using the client certificate coming from TLS handshake
+  # If configured false, mTLS validation is done using the client certificate coming from the header
+  enableClientValidation = true
+  # Enables the decoding process for the encoded client certificate in the header
+  clientCertificateEncode = false
+  # Sends the client certificate header to the backend
+  enableOutboundCertificateHeader = false
+
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
 [[enforcer.security.tokenService]]
@@ -455,11 +493,19 @@ enabled = true
   retryInterval = 5
   # Skip SSL verification
   skipSSLVerification = false
+  # Send revision update success acknowlegdement to the control plane
+  sendRevisionUpdate = false
   # Message broker connection URL of the control plane
   [controlPlane.brokerConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
     reconnectInterval = 5000
     reconnectRetryCount = 60
+  # Worker Pool for sending requests to API Manager to reduce the load if the adapter tries to reconnect.
+  [controlPlane.requestWorkerPool]
+    # Number of workers
+    poolSize = 4
+    # Number of tasks can be submitted to the worker pool without being blocked.
+    queueSizePerPool = 1000
   # HTTP client configuration.
   [controlPlane.httpClient] 
     requestTimeOut = 30
@@ -481,6 +527,11 @@ enabled = true
 [analytics]
   # Enable/Disable Analytics in Choreo Connect
   enabled = false
+  type = "Default"
+  
+  # Use following type to enable ELK analytics
+  # type = "ELK"
+
   [analytics.adapter]
     # Buffer flush interval for gRPC access log client in Router
     bufferFlushInterval = "1s"
@@ -492,9 +543,11 @@ enabled = true
   # Enforcer related configurations
   [analytics.enforcer]
     [analytics.enforcer.configProperties]
-      # Authentication endpoint for Choreo Analytics Publishing
+      # Overrides default analytics publisher reporter class
+      # "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
+      # Authentication endpoint for Choreo Analytics Publishing (This is not used when the type is "elk")
       authURL = "$env{analytics_authURL}"
-      # Authentication token for Choreo Analytics Publishing
+      # Authentication token for Choreo Analytics Publishing (This is not used when the type is "elk")
       authToken = "$env{analytics_authToken}"
 
     # gRPC access log service within Enforcer

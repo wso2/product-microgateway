@@ -57,7 +57,8 @@ var defaultConfig = &Config{
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
-		ArtifactsDirectory: "/home/wso2/artifacts",
+		ArtifactsDirectory:    "/home/wso2/artifacts",
+		SoapErrorInXMLEnabled: false,
 		SourceControl: sourceControl{
 			Enabled:            false,
 			PollInterval:       30,
@@ -71,8 +72,10 @@ var defaultConfig = &Config{
 		ListenerPort:                     9090,
 		SecuredListenerHost:              "0.0.0.0",
 		SecuredListenerPort:              9095,
+		ListenerCodecType:                "AUTO",
 		ClusterTimeoutInSeconds:          20,
 		EnforcerResponseTimeoutInSeconds: 20,
+		UseRemoteAddress:                 false,
 		KeyStore: keystore{
 			KeyPath:  "/home/wso2/security/keystore/mg.key",
 			CertPath: "/home/wso2/security/keystore/mg.pem",
@@ -118,6 +121,16 @@ var defaultConfig = &Config{
 				DNSRefreshRate: 5000,
 				RespectDNSTtl:  false,
 			},
+			HTTP2: upstreamHTTP2Options{
+				HpackTableSize:       4096,
+				MaxConcurrentStreams: 2147483647,
+			},
+		},
+		Downstream: envoyDownstream{
+			TLS: downstreamTLS{
+				TrustedCertPath: "/etc/ssl/certs/ca-certificates.crt",
+				MTLSAPIsEnabled: false,
+			},
 		},
 		Connection: connection{
 			Timeouts: connectionTimeouts{
@@ -129,7 +142,7 @@ var defaultConfig = &Config{
 		},
 		PayloadPassingToEnforcer: payloadPassingToEnforcer{
 			PassRequestPayload:  false,
-			MaxRequestBytes:     10240,
+			MaxRequestBytes:     102400,
 			AllowPartialMessage: false,
 			PackAsBytes:         false,
 		},
@@ -176,6 +189,12 @@ var defaultConfig = &Config{
 				AuthorizationHeader:      "authorization",
 				TestConsoleHeaderName:    "Internal-Key",
 			},
+			MutualSSL: mutualSSL{
+				CertificateHeader:               "X-WSO2-CLIENT-CERTIFICATE",
+				EnableClientValidation:          true,
+				ClientCertificateEncode:         false,
+				EnableOutboundCertificateHeader: false,
+			},
 		},
 		AuthService: authService{
 			Port:           8081,
@@ -201,6 +220,7 @@ var defaultConfig = &Config{
 			ClaimsExtractorImpl:   "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
 			PublicCertificatePath: "/home/wso2/security/truststore/mg.pem",
 			PrivateKeyPath:        "/home/wso2/security/keystore/mg.key",
+			TokenTTL:              3600,
 		},
 		Cache: cache{
 			Enabled:     true,
@@ -298,8 +318,14 @@ var defaultConfig = &Config{
 			ReconnectInterval:       5000, //in milli seconds
 			ReconnectRetryCount:     60,
 		},
+		SendRevisionUpdate: false,
 		HTTPClient: httpClient{
 			RequestTimeOut: 30,
+		},
+		RequestWorkerPool: requestWorkerPool{
+			PoolSize:              4,
+			QueueSizePerPool:      1000,
+			PauseTimeAfterFailure: 5,
 		},
 	},
 	GlobalAdapter: globalAdapter{
@@ -313,6 +339,7 @@ var defaultConfig = &Config{
 	},
 	Analytics: analytics{
 		Enabled: false,
+		Type:    "Default",
 		Adapter: analyticsAdapter{
 			BufferFlushInterval: 1000000000,
 			BufferSizeBytes:     16384,

@@ -26,27 +26,27 @@ import (
 
 // supportedPoliciesMap maps (policy action name) -> (policy layout)
 var supportedPoliciesMap = map[string]policyLayout{
-	"SET_HEADER": {
-		RequiredParams:   []string{"headerName", "headerValue"},
-		IsPassToEnforcer: true,
+	constants.ActionHeaderAdd: {
+		RequiredParams:   []string{constants.HeaderName, constants.HeaderValue},
+		IsPassToEnforcer: false,
 	},
-	"REMOVE_HEADER": {
-		RequiredParams:   []string{"headerName"},
-		IsPassToEnforcer: true,
+	constants.ActionHeaderRemove: {
+		RequiredParams:   []string{constants.HeaderName},
+		IsPassToEnforcer: false,
 	},
 	"ADD_QUERY": {
 		RequiredParams:   []string{"queryParamName", "queryParamValue"},
 		IsPassToEnforcer: true,
 	},
-	constants.InterceptorServiceAction: {
+	constants.ActionInterceptorService: {
 		RequiredParams:   []string{constants.InterceptorServiceURL, constants.InterceptorServiceIncludes},
 		IsPassToEnforcer: false,
 	},
-	constants.RewriteMethodAction: {
-		RequiredParams:   []string{"currentMethod", "updatedMethod"},
+	constants.ActionRewriteMethod: {
+		RequiredParams:   []string{constants.UpdatedMethod},
 		IsPassToEnforcer: true,
 	},
-	constants.RewritePathAction: {
+	constants.ActionRewritePath: {
 		RequiredParams:   []string{constants.RewritePathResourcePath, constants.IncludeQueryParams},
 		IsPassToEnforcer: true,
 	},

@@ -62,6 +62,7 @@ func extractAPIProject(payload []byte) (apiProject model.ProjectAPI, err error) 
 	apiProject.UpstreamCerts = make(map[string][]byte)
 	apiProject.EndpointCerts = make(map[string]string)
 	apiProject.Policies = make(map[string]model.PolicyContainer)
+	apiProject.DownstreamCerts = make(map[string][]byte)
 	for _, file := range zipReader.File {
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
 		unzippedFileBytes, err := readZipFile(file)

@@ -1,0 +1,223 @@
+type: api
+version: v4.1.0
+data:
+  name: API-Policy Per Operation API
+  context: /api-policy-per-operation
+  version: v1.0
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+    - http
+    - https
+  policies:
+    - Unlimited
+  visibility: PUBLIC
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: http://mockBackend:2383/v2
+  endpointImplementationType: ENDPOINT
+  organizationId: carbon.super
+  operations:
+    -
+      target: /echo-full/policies
+      verb: GET
+    -
+      target: /echo-full/policies
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: Request-Header-By-Policy
+              headerValue: Request-Header-By-Policy-value
+          -
+            policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: Request-Header # this should be case-insensitive
+        response: []
+        fault: []
+    -
+      target: /echo-full/policies
+      verb: DELETE
+      operationPolicies:
+        request: [ ]
+        response:
+          - policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: Response-Header-By-Policy
+              headerValue: Response-Header-By-Policy-value
+          - policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: response-header # this should be case-insensitive
+        fault: [ ]
+    -
+      target: /echo-full/policies
+      verb: PATCH
+      operationPolicies:
+        request:
+          -
+            policyName: addQueryParam
+            policyVersion: v1
+            parameters:
+              paramKey: helloQ1
+              paramValue: worldQ1
+          -
+            policyName: addQueryParam
+            policyVersion: v1
+            parameters:
+              paramKey: helloQ2
+              paramValue: worldQ2
+        response: []
+        fault: []
+    -
+      target: /echo-full/policies
+      verb: PUT
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: PUT
+              updatedMethod: GET
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/new-path
+              includeQueryParams: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}.xyz/pets/{petId}/orders
+      verb: PUT
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              updatedMethod: GET
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/pets/{uri.var.petId}.pets/hello-shops/abcd-shops/{uri.var.shopId}
+              includeQueryParams: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}.xyz/pets/{petId}/orders
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              currentMethod: GET
+              updatedMethod: DELETE
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/pets/{uri.var.petId}.pets/hello-shops/abcd-shops/{uri.var.shopId}
+              includeQueryParams: false
+        response: []
+        fault: []
+    -
+      target: /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}.xyz/pets/{petId}/orders
+      verb: PATCH
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: Request-header
+              headerValue: Request-header-value
+          -
+            policyName: opaPolicy
+            policyVersion: v1
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: true
+        response: []
+        fault: []
+    -
+      target: /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}.xyz/pets/{petId}/orders
+      verb: POST
+      operationPolicies:
+        request:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: Request-Header-By-Policy
+              headerValue: Request-Header-By-Policy-value
+          -
+            policyName: addQueryParam
+            policyVersion: v1
+            parameters:
+              paramKey: newQ1
+              paramValue: newQ1Value
+          -
+            policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: Request-header
+          -
+            policyName: rewriteResourcePath
+            policyVersion: v1
+            parameters:
+              newResourcePath: /echo-full/pets/{uri.var.petId}.pets/hello-shops/abcd-shops/{uri.var.shopId}
+              includeQueryParams: true
+          - # apply ccChangeHTTPMethod after rewriteResourcePath, in other places tested reversed of this
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              updatedMethod: PUT
+          -
+            policyName: opaPolicy
+            policyVersion: v1
+            parameters:
+              serverUrl: https://opa-server:8181/v1/data
+              policy: sample
+              rule: allow
+              sendAccessToken: true
+        response:
+          -
+            policyName: ccAddHeader
+            policyVersion: v1
+            parameters:
+              headerName: Response-Header-By-Policy
+              headerValue: Response-Header-By-Policy-value
+          -
+            policyName: ccRemoveHeader
+            policyVersion: v1
+            parameters:
+              headerName: response-header
+        fault: []
+    -
+      target: /echo-full/method-rewrite-only
+      verb: GET
+      operationPolicies:
+        request:
+          -
+            policyName: ccChangeHTTPMethod
+            policyVersion: v1
+            parameters:
+              updatedMethod: POST
+        response: []
+        fault: []

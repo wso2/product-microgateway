@@ -120,3 +120,18 @@ const (
 	// Azure tracer's name
 	TracerTypeAzure = "azure"
 )
+
+// Constants used for SOAP APIs
+const (
+	contentTypeHeaderName = "content-type"
+	contentTypeHeaderXML  = "text/xml"
+	contentTypeHeaderSoap = "application/soap+xml"
+	soap11ProtocolVersion = "SOAP 1.1 Protocol"
+	soap12ProtocolVersion = "SOAP 1.2 Protocol"
+	soapActionHeaderName  = "SOAPAction"
+)
+
+// metadata keys
+const (
+	methodRewrite = "method-rewrite"
+)

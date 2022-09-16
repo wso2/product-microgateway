@@ -23,14 +23,17 @@ import "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIYaml          APIYaml
-	APIEnvProps      map[string]synchronizer.APIEnvProps
-	Deployments      []Deployment
-	APIDefinition    []byte
-	InterceptorCerts []byte
-	UpstreamCerts    map[string][]byte  // cert filename -> cert bytes
-	EndpointCerts    map[string]string  // url -> cert filename
-	Policies         PolicyContainerMap // read from policy dir, policyName -> {policy spec, policy definition}
+	APIYaml             APIYaml
+	APIEnvProps         map[string]synchronizer.APIEnvProps
+	Deployments         []Deployment
+	APIDefinition       []byte
+	InterceptorCerts    []byte
+	UpstreamCerts       map[string][]byte  // cert filename -> cert bytes
+	EndpointCerts       map[string]string  // url -> cert filename
+	Policies            PolicyContainerMap // read from policy dir, policyName -> {policy spec, policy definition}
+	DownstreamCerts     map[string][]byte  // cert filename -> cert bytes
+	ClientCerts         []CertificateDetails
+	GraphQLComplexities GraphQLComplexityYaml
 }
 
 // DeploymentEnvironments represents content of deployment_environments.yaml file
@@ -61,4 +64,36 @@ type EndpointCertificate struct {
 	Alias       string `json:"alias"`
 	Endpoint    string `json:"endpoint"`
 	Certificate string `json:"certificate"`
+}
+
+// ClientCertificatesDetails represents content of client_certificates.yaml file
+// of an API_CTL Project
+type ClientCertificatesDetails struct {
+	Type    string              `yaml:"type" json:"type"`
+	Version string              `yaml:"version" json:"version"`
+	Data    []ClientCertificate `json:"data"`
+}
+
+// ClientCertificate represents certificate information of an API_CTL project
+type ClientCertificate struct {
+	Alias         string  `json:"alias"`
+	Certificate   string  `json:"certificate"`
+	TierName      string  `json:"tierName"`
+	APIIdentifier APIData `json:"apiIdentifier"`
+}
+
+// CertificateDetails represents certificates information that needed to passed to the enforcer
+type CertificateDetails struct {
+	Alias           string
+	Tier            string
+	CertificateName string
+}
+
+// APIData represents API information of relevant API of the certificate
+type APIData struct {
+	ProviderName string `json:"providerName"`
+	APIName      string `json:"apiName"`
+	Version      string `json:"version"`
+	UUID         string `json:"uuid"`
+	ID           uint32 `json:"id"`
 }

@@ -27,13 +27,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.am.integration.clients.admin.api.dto.ConditionalGroupDTO;
-import org.wso2.am.integration.clients.admin.api.dto.HeaderConditionDTO;
-import org.wso2.am.integration.clients.admin.api.dto.IPConditionDTO;
-import org.wso2.am.integration.clients.admin.api.dto.JWTClaimsConditionDTO;
-import org.wso2.am.integration.clients.admin.api.dto.QueryParameterConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
-import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
@@ -49,8 +43,6 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 
@@ -109,7 +101,8 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         // create the advanced throttling policy with conditions
         AdvancedThrottlePolicyDTO conditionPolicyDto = DtoFactory
                 .createAdvancedThrottlePolicyDTO(conditionalPolicyName, "", "", false, defaultLimitForConditions,
-                        createConditionalGroups(limitForConditions));
+                        Utils.createConditionalGroups(limitForConditions, THROTTLED_IP, THROTTLED_HEADER,
+                                THROTTLED_QUERY_PARAM, THROTTLED_QUERY_PARAM_VALUE, THROTTLED_CLAIM));
         ApiResponse<AdvancedThrottlePolicyDTO> addedConditionalPolicy =
                 adminRestClient.addAdvancedThrottlingPolicy(conditionPolicyDto);
 
@@ -242,63 +235,6 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
                 "Request not throttled by request count jwt claim condition in API tier");
         // replace with original token so that rest of the test cases will use initial token
         requestHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + origToken);
-    }
-
-    /**
-     * Creates a set of conditional groups with a list of conditions
-     *
-     * @param limit Throttle limit of the conditional group.
-     * @return Created list of conditional group DTO
-     */
-    private List<ConditionalGroupDTO> createConditionalGroups(ThrottleLimitDTO limit) {
-        List<ConditionalGroupDTO> conditionalGroups = new ArrayList<>();
-
-        // create an IP condition and add it to the throttle conditions list
-        List<ThrottleConditionDTO> ipGrp = new ArrayList<>();
-        IPConditionDTO ipConditionDTO = DtoFactory.createIPConditionDTO(IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC,
-                THROTTLED_IP, null, null);
-        ThrottleConditionDTO ipCondition = DtoFactory
-                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.IPCONDITION, false, null, ipConditionDTO,
-                        null, null);
-        ipGrp.add(ipCondition);
-        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
-                "IP conditional group", ipGrp, limit));
-
-        // create a header condition and add it to the throttle conditions list
-        List<ThrottleConditionDTO> headerGrp = new ArrayList<>();
-        HeaderConditionDTO headerConditionDTO =
-                DtoFactory.createHeaderConditionDTO(HttpHeaders.USER_AGENT.toLowerCase(Locale.ROOT), THROTTLED_HEADER);
-        ThrottleConditionDTO headerCondition = DtoFactory
-                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.HEADERCONDITION, false, headerConditionDTO,
-                        null, null, null);
-        headerGrp.add(headerCondition);
-        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
-                "Header conditional group", headerGrp, limit));
-
-        // create a query parameter condition and add it to the throttle conditions list
-        List<ThrottleConditionDTO> queryGrp = new ArrayList<>();
-        QueryParameterConditionDTO queryParameterConditionDTO =
-                DtoFactory.createQueryParameterConditionDTO(THROTTLED_QUERY_PARAM, THROTTLED_QUERY_PARAM_VALUE);
-        ThrottleConditionDTO queryParameterCondition = DtoFactory
-                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION, false, null, null,
-                        null, queryParameterConditionDTO);
-        queryGrp.add(queryParameterCondition);
-        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
-                "Query param conditional group", queryGrp, limit));
-
-        // create a JWT claims condition and add it to the throttle conditions list
-        List<ThrottleConditionDTO> claimGrp = new ArrayList<>();
-        String claimUrl = "http://wso2.org/claims/applicationname";
-        JWTClaimsConditionDTO jwtClaimsConditionDTO =
-                DtoFactory.createJWTClaimsConditionDTO(claimUrl, THROTTLED_CLAIM);
-        ThrottleConditionDTO jwtClaimsCondition = DtoFactory
-                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION, false, null, null,
-                        jwtClaimsConditionDTO, null);
-        claimGrp.add(jwtClaimsCondition);
-        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
-                "JWT Claim conditional group", claimGrp, limit));
-
-        return conditionalGroups;
     }
 
     @AfterClass

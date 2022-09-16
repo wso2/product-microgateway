@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -32,24 +33,50 @@ import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class QSGAndSwaggerTestCase {
     private static final String encodedCredentials = "Basic YWRtaW46YWRtaW4=";
+    private static final String projectName = "qsg_petstore";
     private String jwtProdToken;
     private String jwtSandToken;
 
     @BeforeClass
     public void createApiProject() throws Exception {
-        ApictlUtils.createProject("https://petstore.swagger.io/v2/swagger.json", "qsg_petstore");
+        ApictlUtils.createProject("https://petstore.swagger.io/v2/swagger.json", projectName);
         jwtProdToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets",
                 false);
         jwtSandToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, "write:pets",
                 false);
+
+        String targetDir = Utils.getTargetDirPath();
+        replaceBackendURL(targetDir + ApictlUtils.API_PROJECTS_PATH + projectName + File.separator +
+                "Definitions" + File.separator + "swagger.yaml");
+        replaceBackendURL(targetDir + ApictlUtils.API_PROJECTS_PATH + projectName + File.separator +
+                "api.yaml");
+        //Backend TLS is tested separately. Hence, remove https from schema list to define endpoint as http.
+        removeHttpsScheme(targetDir + ApictlUtils.API_PROJECTS_PATH + projectName + File.separator +
+                "Definitions" + File.separator + "swagger.yaml");
+    }
+
+    private void replaceBackendURL(String filePath) throws IOException {
+        File file = new File(filePath);
+        String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        content = content.replaceAll("petstore.swagger.io", "mockBackend:2383");
+        FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+    }
+
+    private void removeHttpsScheme(String filePath) throws IOException {
+        File file = new File(filePath);
+        String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        content = content.replaceAll("- https", "");
+        FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
     }
 
     @Test

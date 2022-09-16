@@ -19,8 +19,11 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import com.google.gson.Gson;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 
 import javax.net.ssl.KeyManager;
@@ -41,6 +44,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Utils {
+    private static final Logger log = LogManager.getLogger(Utils.class.getName());
+
     // echo sends request headers in response headers and request body in response body
     public static void echo(HttpExchange exchange) throws IOException {
         byte[] response;
@@ -56,8 +61,9 @@ public class Utils {
     // echo request body, request headers in echo response payload
     public static void echoFullRequest(HttpExchange exchange) throws IOException {
         EchoResponse echoResponse = new EchoResponse();
+        Headers requestHeaders = exchange.getRequestHeaders();
         echoResponse.setData(Utils.requestBodyToString(exchange));
-        echoResponse.setHeaders(exchange.getRequestHeaders());
+        echoResponse.setHeaders(requestHeaders);
         echoResponse.setPath(exchange.getRequestURI().getPath());
         echoResponse.setMethod(exchange.getRequestMethod());
 
@@ -72,6 +78,14 @@ public class Utils {
             queryMap = Collections.emptyMap();
         }
         echoResponse.setQuery(queryMap);
+
+        //This is an additional logic to set headers from the backend
+        if (requestHeaders.containsKey("Set-headers")) {
+            String headerKey = requestHeaders.getFirst("Set-headers");
+            for (String headerToAdd : headerKey.split(",")) {
+                exchange.getResponseHeaders().set(headerToAdd.trim(), "response-header-value");
+            }
+        }
 
         Gson gson = new Gson();
         byte[] response = gson.toJson(echoResponse).getBytes();
@@ -108,6 +122,14 @@ public class Utils {
         exchange.close();
     }
 
+    public static void send403Forbidden(HttpExchange exchange, String message) throws IOException {
+        byte[] response = String.format("{\"status\":\"403 Forbidden\", message: \"%s\"}", message).getBytes();
+        exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
+    }
+
     public static void send200OK(HttpExchange exchange) throws IOException {
         byte[] response = "{\"status\":\"OK\"}".getBytes();
         exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
@@ -140,5 +162,17 @@ public class Utils {
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         kmf.init(keyStore, password.toCharArray());
         return kmf.getKeyManagers();
+    }
+
+    public static String readFileFromInputStream(InputStream is) throws Exception {
+        StringBuilder resultStringBuilder = new StringBuilder();
+        try (BufferedReader br
+                     = new BufferedReader(new InputStreamReader(is))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                resultStringBuilder.append(line).append("\n");
+            }
+        }
+        return resultStringBuilder.toString();
     }
 }

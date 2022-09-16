@@ -22,7 +22,6 @@ package model
 
 import (
 	"errors"
-	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -64,6 +63,18 @@ func getXWso2Basepath(vendorExtensions map[string]interface{}) string {
 		}
 	}
 	return xWso2basepath
+}
+
+// getXWso2HTTP2BackendEnabled extracts the value of XWso2HTTP2BackendEnabled extension.
+// if the property is not available, false is returned.
+func getXWso2HTTP2BackendEnabled(vendorExtensions map[string]interface{}) bool {
+	xWso2HTTP2BackendEnabled := false
+	if y, found := vendorExtensions[constants.XWso2HTTP2BackendEnabled]; found {
+		if val, ok := y.(bool); ok {
+			xWso2HTTP2BackendEnabled = val
+		}
+	}
+	return xWso2HTTP2BackendEnabled
 }
 
 // ResolveThrottlingTier extracts the value of x-wso2-throttling-tier and
@@ -134,7 +145,7 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 	rawURL = strings.Trim(rawURL, " ")
 
 	if !strings.Contains(rawURL, "://") {
-		if apiType == constants.HTTP {
+		if (apiType == constants.HTTP || apiType == constants.GRAPHQL) {
 			rawURL = "http://" + rawURL
 		} else if apiType == constants.WS {
 			rawURL = "ws://" + rawURL
@@ -143,7 +154,7 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
+		logger.LoggerOasparser.Debugf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
 		return nil, err
 	}
 
@@ -197,44 +208,4 @@ func unmarshalSwaggerResources(path string, methods []*Operation, vendorExtensio
 		//security:         operation.Security,
 		vendorExtensions: vendorExtensions,
 	}
-}
-
-// getRewriteRegexFromPathTemplate returns a regex with capture groups for given rewritePathTemplate
-func getRewriteRegexFromPathTemplate(pathTemplate, rewritePathTemplate string) (string, error) {
-	rewriteRegex := "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePathTemplate, "/"), "/")
-	pathParamToIndexMap := getPathParamToIndexMap(pathTemplate)
-	r := regexp.MustCompile(`{uri.var.([^{}]+)}`) // define a capture group to catch the path param
-	matches := r.FindAllStringSubmatch(rewritePathTemplate, -1)
-	for _, match := range matches {
-		// match is slice always with length two (since one capture group is defined in the regex)
-		// hence we do not want to explicitly validate the slice length
-		templatedParam := match[0]
-		param := match[1]
-		if index, ok := pathParamToIndexMap[param]; ok {
-			rewriteRegex = strings.ReplaceAll(rewriteRegex, templatedParam, fmt.Sprintf(`\%d`, index))
-		} else {
-			return "", fmt.Errorf("invalid path param %q in rewrite path", param)
-		}
-	}
-
-	// validate rewriteRegex
-	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9~/_.\-\\]*$`, rewriteRegex); !matched {
-		logger.LoggerOasparser.Error("Rewrite path includes invalid characters")
-		return "", fmt.Errorf("rewrite path regex includes invalid characters, regex %q", rewriteRegex)
-	}
-
-	return rewriteRegex, nil
-}
-
-// getPathParamToIndexMap returns a map of path params to its index (map of path param -> index)
-func getPathParamToIndexMap(pathTemplate string) map[string]int {
-	indexMap := make(map[string]int)
-	r := regexp.MustCompile(`{([^{}]+)}`) // define a capture group to catch the path param
-	matches := r.FindAllStringSubmatch(pathTemplate, -1)
-	for i, paramMatches := range matches {
-		// paramMatches is slice always with length two (since one capture group is defined in the regex)
-		// hence we do not want to explicitly validate the slice length
-		indexMap[paramMatches[1]] = i + 1
-	}
-	return indexMap
 }
