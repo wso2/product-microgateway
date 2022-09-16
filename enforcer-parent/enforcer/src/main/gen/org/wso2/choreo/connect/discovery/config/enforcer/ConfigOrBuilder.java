@@ -240,4 +240,10 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.SoapOrBuilder getSoapOrBuilder();
+
+  /**
+   * <code>bool controlPlaneEnabled = 16;</code>
+   * @return The controlPlaneEnabled.
+   */
+  boolean getControlPlaneEnabled();
 }

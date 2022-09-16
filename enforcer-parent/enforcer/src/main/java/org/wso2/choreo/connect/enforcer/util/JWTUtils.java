@@ -35,14 +35,17 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
+import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,6 +60,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -120,15 +124,18 @@ public class JWTUtils {
      *
      * @param jwt   SignedJwt Token
      * @param alias public certificate alias
-     * @return whether the signature is verified or or not
+     * @return whether the signature is verified or not
      * @throws EnforcerException in case of signature verification failure
      */
     public static boolean verifyTokenSignature(SignedJWT jwt, String alias) throws EnforcerException {
 
         Certificate publicCert;
-        //Read the client-truststore.jks into a KeyStore
         try {
-            publicCert = ConfigHolder.getInstance().getTrustStoreForJWT().getCertificate(alias);
+            if (ConfigHolder.getInstance().getTrustStoreForJWT().containsAlias(alias)) {
+                publicCert = ConfigHolder.getInstance().getTrustStoreForJWT().getCertificate(alias);
+            } else {
+                throw new EnforcerException("Could not find the certificate for the token service.");
+            }
         } catch (KeyStoreException e) {
             throw new EnforcerException("Error while retrieving the certificate for JWT verification.", e);
         }
@@ -217,5 +224,22 @@ public class JWTUtils {
         long exp = payload.getLong(JwtConstants.EXP);
         long timestampSkew = FilterUtils.getTimeStampSkewInSeconds();
         return (exp - TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) < timestampSkew);
+    }
+
+    /**
+     * Populate an empty JWT info DTO for anonymous, with no App or API info.
+     *
+     * @param apiKeyValidationInfoDTO empty JWT info DTO to be populated with anonymous details
+     * @param kmReference             name of the token service
+     */
+    public static void updateApplicationNameForSubscriptionDisabledKM(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                                      String kmReference) {
+        String applicationRef = APIConstants.ANONYMOUS_PREFIX + kmReference;
+        apiKeyValidationInfoDTO.setApplicationName(applicationRef);
+        apiKeyValidationInfoDTO.setApplicationId(-1);
+        apiKeyValidationInfoDTO.setApplicationUUID(
+                UUID.nameUUIDFromBytes(
+                        applicationRef.getBytes(StandardCharsets.UTF_8)).toString());
+        apiKeyValidationInfoDTO.setApplicationTier(APIConstants.UNLIMITED_TIER);
     }
 }
