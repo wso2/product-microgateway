@@ -195,7 +195,7 @@ public class AuthFilter implements Filter {
         if (!canAuthenticated) {
             FilterUtils.setUnauthenticatedErrorToContext(requestContext);
         }
-        log.error("None of the authenticators were able to authenticate the request: {}",
+        log.debug("None of the authenticators were able to authenticate the request: {}",
                 requestContext.getRequestPathTemplate(),
                 ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6600));
         //set WWW_AUTHENTICATE header to error response
