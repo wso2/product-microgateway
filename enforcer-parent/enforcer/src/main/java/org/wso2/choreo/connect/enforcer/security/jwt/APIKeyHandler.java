@@ -118,7 +118,7 @@ public abstract class APIKeyHandler implements Authenticator {
                     .getIfPresent(tokenIdentifier) != null &&
                     apiKey.equals(CacheProvider.getInvalidGatewayAPIKeyCache().getIfPresent(tokenIdentifier));
             if (isInvalidInternalAPIKey || isInvalidAPIKey) {
-                log.error("API key found in cache for invalid API keys. " + FilterUtils.getMaskedToken(splitToken[0]));
+                log.debug("API key found in cache for invalid API keys. " + FilterUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
