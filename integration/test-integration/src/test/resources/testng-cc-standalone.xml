@@ -126,6 +126,8 @@
     <test name="cc-with-multiple-env" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithMultipleEnv"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.SubscriptionValidationTestCase"/>
         </classes>
     </test>
     <test name="cc-with-source-control" preserve-order="true" parallel="false">
