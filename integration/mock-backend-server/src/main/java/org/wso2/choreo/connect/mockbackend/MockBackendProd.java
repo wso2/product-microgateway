@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
@@ -301,6 +303,14 @@ public class MockBackendProd extends Thread {
                 });
                 byte[] response = responseJSON.toString().getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
+            httpServer.createContext(context + "/headers-from-backend", exchange -> {
+                Map<String,String> headers = new HashMap<>();
+                headers.put("X-Header-One", "X-Header-One-Value");
+                headers.put("x-header-two", "x-header-two-value");
+                headers.put("X-HEADER-THREE", "X-HEADER-THREE-VALUE");
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                Utils.send200OK(exchange, response, headers);
             });
 
             // the context "/echo" is used for "/echo-request", "/echo-response" as well in interceptor & request body passing tests.
