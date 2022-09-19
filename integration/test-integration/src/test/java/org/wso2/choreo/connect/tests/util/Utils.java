@@ -44,6 +44,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -454,6 +458,17 @@ public class Utils {
             throw new CCTestException("error while copying file. ", e);
         }
     }
+
+    public static void copyFile2(String sourceLocation, String destLocation) throws CCTestException {
+        try {
+            Path sourcePath = Paths.get(sourceLocation);
+            Path destPath = Paths.get(destLocation);
+            Files.copy(sourcePath,destPath,StandardCopyOption.COPY_ATTRIBUTES);
+        } catch (IOException e) {
+            throw new CCTestException("error while copying file. ", e);
+        }
+    }
+
 
     /**
      * Delay the program for a given time period
