@@ -304,11 +304,9 @@ public class Utils {
      */
     public static HttpResponse invokeApi(String token, String requestUrl) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        //invoke api with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        HttpResponse response = HttpClientRequest
-                .doGet(requestUrl, headers);
-        return response;
+        return HttpClientRequest.retryGetRequestUntilDeployed(
+                Utils.getServiceURLHttps(requestUrl), headers);
     }
 
     /**
