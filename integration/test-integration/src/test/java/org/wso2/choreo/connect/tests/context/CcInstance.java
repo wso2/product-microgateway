@@ -59,6 +59,7 @@ public class CcInstance extends ChoreoConnectImpl {
                             + File.separator + confFileName,
                     ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.CONFIG_TOML_PATH);
         }
+        addCodeCovExec();
         if (withCustomJwtTransformer && withAnalyticsMetricImpl) {
             addCustomJwtTransformer();
         }

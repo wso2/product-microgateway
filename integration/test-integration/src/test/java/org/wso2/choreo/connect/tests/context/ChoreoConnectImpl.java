@@ -182,6 +182,12 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
                         + File.separator + "jwt-transformer.jar");
     }
 
+    public static void addCodeCovExec() throws CCTestException {
+        Utils.copyFile2("/home/ubuntu/lahiru/pmgNew/product-microgateway/resources/enforcer/dropins/aggregate.exec",
+                Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
+                        + File.separator + "aggregate.exec");
+    }
+
     public static void addInterceptorCertToRouterTruststore() throws IOException {
         String routerTruststore = ChoreoConnectImpl.class.getClassLoader()
                 .getResource("certs/" + TestConstant.CA_CERTS_FILE).getPath();
