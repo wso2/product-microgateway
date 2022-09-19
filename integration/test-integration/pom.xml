@@ -40,13 +40,16 @@
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
                         <apictl_version>${apictl.version}</apictl_version>
+<!--                        <jacoco_exec_location>-->
+<!--                            ${ccBaseDir}/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec-->
+<!--                        </jacoco_exec_location>-->
                         <!-- allowRestrictedHeaders enabled for allowing to send host header with requests, for testing vhost feature -->
                         <sun.net.http.allowRestrictedHeaders>true</sun.net.http.allowRestrictedHeaders>
                         <jacoco-agent.destfile>**/jacoco.exec</jacoco-agent.destfile>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>
-<!--                        <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>-->
+                        <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemProperties>
                         <property>
