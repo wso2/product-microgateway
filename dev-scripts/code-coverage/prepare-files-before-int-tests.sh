@@ -19,7 +19,8 @@
 echo "Preparing code coverage files before integration tests..."
 pwd
 mkdir ../../resources/enforcer/dropins/
-cp ../../enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec ../../resources/enforcer/dropins/
-chmod 777 ../../resources/enforcer/dropins/aggregate.exec
+#cp ../../enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec ../../resources/enforcer/dropins/
+#chmod 777 ../../resources/enforcer/dropins/aggregate.exec
+chmod 777 ../../enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec
 #JAVA_OPTS=-javaagent:/home/wso2/lib/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/wso2/lib/dropins/aggregate.exec,append=true
 echo "Preparing code coverage files before integration tests completed successfully..."

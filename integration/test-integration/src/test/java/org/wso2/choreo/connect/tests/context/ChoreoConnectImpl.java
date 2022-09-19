@@ -183,7 +183,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
     }
 
     public static void addCodeCovExec() throws CCTestException {
-        Utils.copyFile2("/home/ubuntu/lahiru/pmgNew/product-microgateway/resources/enforcer/dropins/aggregate.exec",
+        Utils.copyFile2("/home/ubuntu/lahiru/pmgNew/product-microgateway/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec",
                 Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
                         + File.separator + "aggregate.exec");
     }
