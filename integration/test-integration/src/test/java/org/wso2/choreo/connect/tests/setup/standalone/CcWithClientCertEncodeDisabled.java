@@ -31,7 +31,7 @@ public class CcWithClientCertEncodeDisabled {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ccInstance = new CcInstance.Builder().withNewConfig("client-cert-not-encode-config.toml").build();
+        ccInstance = new CcInstance.Builder().withNewConfig("client-cert-not-encode-config.toml").build(false);
         ccInstance.start();
 
         ApictlUtils.addEnv("test");
