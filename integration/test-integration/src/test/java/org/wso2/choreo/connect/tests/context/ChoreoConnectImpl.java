@@ -160,14 +160,14 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         log.info(">>>>>>> ############# Creating a new CC startup....");
         if (!isInitialStartup) {
             log.info(">>>>>>> ############# Creating a new CC startup after initialization....");
-            File myObj = new File("/home/ubuntu/lahiru/pmgNew/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+            File myObj = new File("/home/ubuntu/lahiru/pmgNew/product-microgateway/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
             if (myObj.delete()) {
                 System.out.println("Deleted the file: " + myObj.getName());
             } else {
                 System.out.println("Failed to delete the file.");
             }
             Utils.copyFile2(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH + File.separator + "aggregate.exec",
-                    "/home/ubuntu/lahiru/pmgNew/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+                    "/home/ubuntu/lahiru/pmgNew/product-microgateway/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
         }
         Utils.deleteQuietly(ccTempPath);
         Utils.copyDirectory(ccExtractedPath, ccTempPath);
