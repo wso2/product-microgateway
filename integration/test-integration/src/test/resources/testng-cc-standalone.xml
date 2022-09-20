@@ -63,12 +63,12 @@
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProdSandDiffBasePathTestCase"/>-->
         </classes>
     </test>
-<!--    <test name="cc-with-backend-tls-with-opa-server" preserve-order="true" parallel="false">-->
-<!--        <classes>-->
+    <test name="cc-with-backend-tls-with-opa-server" preserve-order="true" parallel="false">
+        <classes>
 <!--            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabledWithOPA"/>-->
 
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestCase"/>-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestCase"/>-->
@@ -81,8 +81,8 @@
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.soap.SOAPApisTestCase"/>-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2ClearTextApiTestCase2"/>-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2SecuredApiTestCase2"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+        </classes>
+    </test>
 <!--    <test name="cc-with-jwt-config" preserve-order="true" parallel="false">-->
 <!--        <classes>-->
 <!--            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>-->
