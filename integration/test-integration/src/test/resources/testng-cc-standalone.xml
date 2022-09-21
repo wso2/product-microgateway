@@ -134,5 +134,6 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.SourceWatcherTestCase"/>
         </classes>
     </test>
+
 </suite>
 
