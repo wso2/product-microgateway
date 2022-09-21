@@ -156,21 +156,21 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      * @throws CCTestException if an error occurs while file copy operation
      */
     void createTmpMgwSetup(boolean isInitialStartup) throws CCTestException {
-
         log.info(">>>>>>> ############# Creating a new CC startup....");
         if (!isInitialStartup) {
             log.info(">>>>>>> ############# Creating a new CC startup after initialization....");
-            File myObj = new File("/home/ubuntu/lahiru/pmgNew/product-microgateway/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+            File myObj = new File(System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
             if (myObj.delete()) {
                 System.out.println("Deleted the file: " + myObj.getName());
             } else {
                 System.out.println("Failed to delete the file.");
             }
             Utils.copyFile2(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH + File.separator + "aggregate.exec",
-                    "/home/ubuntu/lahiru/pmgNew/product-microgateway/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+                    System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
         }
         Utils.deleteQuietly(ccTempPath);
         Utils.copyDirectory(ccExtractedPath, ccTempPath);
+        log.info(">>" + System.getProperty("root_pom_path"));
     }
 
     public void addCcLoggersToEnv() {
@@ -196,7 +196,8 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
     }
 
     public static void addCodeCovExec() throws CCTestException {
-        Utils.copyFile2("/home/ubuntu/lahiru/pmgNew/product-microgateway/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec",
+        log.info(">>>>>>>> |||||||||||| "+ System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+        Utils.copyFile2(System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec",
                 Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
                         + File.separator + "aggregate.exec");
     }
