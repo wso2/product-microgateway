@@ -67,20 +67,20 @@
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabledWithOPA"/>
 
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.mtls.MtlsFromRouterToBackendTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyPerOperationTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.soap.SOAPApisTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2ClearTextApiTestCase2"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2SecuredApiTestCase2"/>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.APIPolicyPerOperationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorRequestFlowAPIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorResponseFlowAPIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apipolicy.InterceptorServiceRequestBodyAPIPolicyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.soap.SOAPApisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2ClearTextApiTestCase2"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.http2.Http2SecuredApiTestCase2"/>
         </classes>
     </test>
 <!--    <test name="cc-with-jwt-config" preserve-order="true" parallel="false">-->
