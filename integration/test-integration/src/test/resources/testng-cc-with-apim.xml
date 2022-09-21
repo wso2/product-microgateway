@@ -143,10 +143,10 @@
 <!--        </classes>-->
 <!--    </test>-->
 
-<!--    <test name="Shutdown Choreo Connect and API-M" parallel="false">-->
-<!--        <classes>-->
-<!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimShutdownExecutor"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <test name="Shutdown Choreo Connect and API-M" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimShutdownExecutor"/>
+        </classes>
+    </test>
 </suite>
