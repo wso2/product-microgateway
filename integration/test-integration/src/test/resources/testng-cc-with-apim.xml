@@ -63,11 +63,11 @@
 <!--        </classes>-->
 <!--    </test>-->
 
-    <test name="Restart API-M" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
-        </classes>
-    </test>
+<!--    <test name="Restart API-M" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
    <test name="Test new and existing APIs apps subscriptions after API-M restart" parallel="false">
        <classes>
