@@ -49,16 +49,17 @@ public class CcInstance extends ChoreoConnectImpl {
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, String gitServiceFile,
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
                        boolean isInterceptorCertRequired, String enforcerTrustCertsDir, String volumeMountDir,
-                       boolean isClientCertValidationRequired
+                       boolean isClientCertValidationRequired, boolean isInitialStartup
                        )
             throws IOException, CCTestException {
-        createTmpMgwSetup();
+        createTmpMgwSetup(isInitialStartup);
         String targetDir = Utils.getTargetDirPath();
         if (!StringUtils.isEmpty(confFileName)) {
             Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
                             + File.separator + confFileName,
                     ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.CONFIG_TOML_PATH);
         }
+        addCodeCovExec();
         if (withCustomJwtTransformer && withAnalyticsMetricImpl) {
             addCustomJwtTransformer();
         }
@@ -179,11 +180,11 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
-        public CcInstance build() throws IOException, CCTestException {
+        public CcInstance build(boolean isInitialStartUp) throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
                     this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.enforcerTrustCertsDir,
-                    this.volumeMountDir, this.isClientCertValidationRequired
+                    this.volumeMountDir, this.isClientCertValidationRequired, isInitialStartUp
             );
             return instance;
         }

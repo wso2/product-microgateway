@@ -41,7 +41,7 @@ public class CcWithSourceControl {
         ccInstance = new CcInstance.Builder()
                 .withGitServiceFile("git-service.yaml")
                 .withNewConfig("cc-with-source-control.toml")
-                .build();
+                .build(false);
         ccInstance.start();
 
         Awaitility.await().pollDelay(10, TimeUnit.SECONDS).pollInterval(10, TimeUnit.SECONDS)

@@ -40,6 +40,9 @@
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
                         <apictl_version>${apictl.version}</apictl_version>
+<!--                        <jacoco_exec_location>-->
+<!--                            ${ccBaseDir}/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec-->
+<!--                        </jacoco_exec_location>-->
                         <!-- allowRestrictedHeaders enabled for allowing to send host header with requests, for testing vhost feature -->
                         <sun.net.http.allowRestrictedHeaders>true</sun.net.http.allowRestrictedHeaders>
                         <jacoco-agent.destfile>**/jacoco.exec</jacoco-agent.destfile>
@@ -194,16 +197,16 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skip.code.coverage}</skip>
-                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-before-int-tests.sh</executable>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <phase>compile</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>exec</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <skip>${skip.code.coverage}</skip>-->
+<!--                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-before-int-tests.sh</executable>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <execution>
                         <id>after-integration-tests</id>
                         <phase>verify</phase>

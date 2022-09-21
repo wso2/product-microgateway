@@ -221,6 +221,23 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.code.coverage}</skip>
+                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-before-int-tests.sh
+                            </executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <configuration>
@@ -249,7 +266,7 @@
                 <executions>
                     <execution>
                         <id>docker-build</id>
-                        <phase>package</phase>
+                        <phase>install</phase>
                         <goals>
                             <goal>build</goal>
                         </goals>
@@ -323,7 +340,7 @@
                     </execution>
                     <execution>
                         <id>merge-results</id>
-                        <phase>verify</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>merge</goal>
                         </goals>
