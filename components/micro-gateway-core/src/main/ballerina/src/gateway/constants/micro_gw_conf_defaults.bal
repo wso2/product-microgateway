@@ -67,6 +67,7 @@ public const boolean DEFAULT_JWT_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED = false;
 
 public const boolean DEFAULT_CACHING_ENABLED = true;
 public const int DEFAULT_TOKEN_CACHE_EXPIRY = 900000;
+public const int DEFAULT_TOKEN_EXPIRY = 3600;
 public const int DEFAULT_TOKEN_CACHE_CAPACITY = 10000;
 public const float DEFAULT_TOKEN_CACHE_EVICTION_FACTOR = 0.25;
 
