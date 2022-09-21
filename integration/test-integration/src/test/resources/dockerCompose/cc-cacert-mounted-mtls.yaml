@@ -73,7 +73,7 @@ services:
       - ENFORCER_REGION=UNKNOWN
       - XDS_MAX_MSG_SIZE=4194304
       - XDS_MAX_RETRIES=3
-      - JAVA_OPTS=${JAVA_OPTS}
+      - JAVA_OPTS=${JAVA_OPTS} -javaagent:/home/wso2/lib/org.jacoco.agent-0.8.8-runtime.jar=destfile=/home/wso2/lib/dropins/aggregate.exec,append=true
       - apim_admin_pwd=admin
       - enforcer_admin_pwd=admin
       - tm_admin_pwd=admin
