@@ -18,7 +18,9 @@
 # Sets the Choreo Connect version
 echo "Preparing code coverage files after integration tests...."
 rm -f ../../resources/enforcer/dropins/aggregate.exec
-mkdir ../../covReports
-cp ../../adapter/target/coverage.out ../../covReports
-cp ../../integration/test-integration/target/site/jacoco-aggregate/jacoco.xml ../../covReports
+
+rm ../../.github/workflows/coverage.yml
+rm ../../enforcer-parent/commons/target/site/jacoco/jacoco.xml
+rm ../../enforcer-parent/enforcer/target/site/jacoco/jacoco.xml
+rm ../../router/target/mgw-wasm/.cache/bazel/_bazel_envoybuild/ac6b95f765ecc3e5ca8ed36bf09bfca3/external/emscripten_bin_linux/emscripten/system/lib/compiler-rt/lib/sanitizer_common/sanitizer_coverage_interface.inc
 echo "Preparing code coverage files after integration tests completed successfully...."
