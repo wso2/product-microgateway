@@ -17,6 +17,7 @@ FROM envoyproxy/envoy-alpine:v1.20.2
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
+RUN apk add --no-cache tzdata
 
 ENV LANG=C.UTF-8
 
