@@ -904,10 +904,12 @@ public function initAuthHandlers() {
     string keymanagerContext = getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, DEFAULT_KM_TOKEN_CONTEXT);
     introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + keymanagerContext : introspectURL + PATH_SEPERATOR + keymanagerContext;
     introspectURL = (introspectURL.endsWith(PATH_SEPERATOR)) ? introspectURL + INTROSPECT_CONTEXT : introspectURL + PATH_SEPERATOR + INTROSPECT_CONTEXT;
+    int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_EXPIRY);
     oauth2:IntrospectionServerConfig introspectionServerConfig = {
         url: introspectURL,
         oauth2Cache: introspectCache,
-        clientConfig: clientConfig
+        clientConfig: clientConfig,
+        defaultTokenExpTimeInSeconds: cacheExpiryTime
     };
     OAuth2KeyValidationProvider oauth2KeyValidationProvider = new (keyValidationConfig);
     oauth2:InboundOAuth2Provider introspectionProvider = new (introspectionServerConfig);
