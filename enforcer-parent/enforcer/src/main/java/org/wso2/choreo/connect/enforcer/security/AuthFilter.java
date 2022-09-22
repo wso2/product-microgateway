@@ -306,50 +306,31 @@ public class AuthFilter implements Filter {
     }
 
     private void addRouterHttpHeaders(RequestContext requestContext, String keyType) {
-        // for both HTTP and WS
-        if (requestContext.getMatchedAPI().getEndpoints().containsKey(keyType)) {
-            addAPILevelRetryConfigHeaders(requestContext, keyType);
-            addAPILevelTimeoutHeaders(requestContext, keyType);
-        }
-
-        //GraphQL APIs does not have following per resource config, hence skipping.
-        if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI().getApiType())) {
-            return;
-        }
-
-        // From this line onwards graphQL apis won't be present, hence only one matched resource config will be present.
-        // Therefore, requestContext.getMatchedResourcePaths() will only have one element here onwards.
+        // requestContext.getMatchedResourcePaths() will only have one element for non GraphQL APIs.
+        // Also, GraphQL APIs doesn't have resource level endpoint configs
         ResourceConfig resourceConfig = requestContext.getMatchedResourcePaths().get(0);
         // In websockets case, the endpoints object becomes null. Hence it would result
         // in a NPE, if it is not checked.
         if (resourceConfig.getEndpoints() != null &&
                 resourceConfig.getEndpoints().containsKey(keyType)) {
             EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
-
-            // Apply resource level retry headers
-            if (endpointCluster.getRetryConfig() != null) {
-                addRetryConfigHeaders(requestContext, endpointCluster.getRetryConfig());
-            }
-            // Apply resource level timeout headers
-            if (endpointCluster.getRouteTimeoutInMillis() != null) {
-                addTimeoutHeaders(requestContext, endpointCluster.getRouteTimeoutInMillis());
-            }
+            addRetryAndTimeoutConfigHeaders(requestContext, endpointCluster);
+            handleEmptyPathHeader(requestContext, endpointCluster.getBasePath());
+        } else if (requestContext.getMatchedAPI().getEndpoints().containsKey(keyType)) {
+            EndpointCluster endpointCluster = requestContext.getMatchedAPI().getEndpoints().get(keyType);
+            addRetryAndTimeoutConfigHeaders(requestContext, endpointCluster);
+            handleEmptyPathHeader(requestContext, endpointCluster.getBasePath());
         }
     }
 
-    private void addAPILevelRetryConfigHeaders(RequestContext requestContext, String keyType) {
-        RetryConfig apiLevelRetryConfig =
-                requestContext.getMatchedAPI().getEndpoints().get(keyType).getRetryConfig();
-        if (apiLevelRetryConfig != null) {
-            addRetryConfigHeaders(requestContext, apiLevelRetryConfig);
+    private void addRetryAndTimeoutConfigHeaders(RequestContext requestContext, EndpointCluster endpointCluster) {
+        RetryConfig retryConfig = endpointCluster.getRetryConfig();
+        if (retryConfig != null) {
+            addRetryConfigHeaders(requestContext, retryConfig);
         }
-    }
-
-    private void addAPILevelTimeoutHeaders(RequestContext requestContext, String keyType) {
-        Integer apiLevelTimeout =
-                requestContext.getMatchedAPI().getEndpoints().get(keyType).getRouteTimeoutInMillis();
-        if (apiLevelTimeout != null) {
-            addTimeoutHeaders(requestContext, apiLevelTimeout);
+        Integer timeout = endpointCluster.getRouteTimeoutInMillis();
+        if (timeout != null) {
+            addTimeoutHeaders(requestContext, timeout);
         }
     }
 
@@ -378,5 +359,27 @@ public class AuthFilter implements Filter {
                 Objects.toString(authContext.getRawToken(), ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,
                 Objects.toString(authContext.getKeyType(), ""));
+    }
+
+    /**
+     * This will fix sending upstream an empty path header issue.
+     *
+     * @param requestContext request context
+     * @param basePath       endpoint basepath
+     */
+    private void handleEmptyPathHeader(RequestContext requestContext, String basePath) {
+        if (StringUtils.isNotBlank(basePath)) {
+            return;
+        }
+        // remaining path after removing the context and the version from the invoked path.
+        String remainingPath = StringUtils.removeStartIgnoreCase(requestContext.getHeaders()
+                .get(APIConstants.PATH_HEADER).split("\\?")[0], requestContext.getMatchedAPI().getBasePath());
+        // if the :path will be empty after applying the route's substitution, then we have to add a "/" forcefully
+        // to avoid :path being empty.
+        if (StringUtils.isBlank(remainingPath)) {
+            String[] splittedPath = requestContext.getHeaders().get(APIConstants.PATH_HEADER).split("\\?");
+            String newPath = splittedPath.length > 1 ? splittedPath[0] + "/?" + splittedPath[1] : splittedPath[0] + "/";
+            requestContext.addOrModifyHeaders(APIConstants.PATH_HEADER, newPath);
+        }
     }
 }

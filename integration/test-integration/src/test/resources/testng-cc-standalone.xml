@@ -43,6 +43,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.TrailingSlashTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.AllHttpMethodsForWildcardTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.NoBasepathEndpointTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.router.EnvoyHttpFilterTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.BackendSecurityTestCase"/>
