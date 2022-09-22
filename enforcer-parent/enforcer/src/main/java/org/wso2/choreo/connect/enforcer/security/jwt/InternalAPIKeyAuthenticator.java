@@ -17,11 +17,11 @@
  */
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
-import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -37,6 +37,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
+import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
@@ -60,6 +61,8 @@ import java.text.ParseException;
 public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     private static final Logger log = LogManager.getLogger(InternalAPIKeyAuthenticator.class);
+
+    private static String certAlias;
     private String securityParam;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
@@ -70,6 +73,12 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
+        }
+        for (ExtendedTokenIssuerDto tokenIssuer : enforcerConfig.getIssuersMap().values()) {
+            if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(tokenIssuer.getName())) {
+                certAlias = tokenIssuer.getCertificateAlias();
+                break;
+            }
         }
     }
 
@@ -105,7 +114,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
                 String[] splitToken = internalKey.split("\\.");
                 SignedJWT signedJWT = SignedJWT.parse(internalKey);
-                JWSHeader jwsHeader = signedJWT.getHeader();
                 JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
 
                 // Check if the decoded header contains type as 'InternalKey'.
@@ -173,8 +181,15 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                                 ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
                     try {
-                        isVerified = verifyTokenWhenNotInCache(jwsHeader, signedJWT, splitToken, payload,
-                                "InternalKey");
+                        if (!StringUtils.isBlank(certAlias)) {
+                            isVerified = verifyTokenWhenNotInCache(certAlias,
+                                    signedJWT, splitToken, payload, "InternalKey");
+                        } else {
+                            // Logs an error only if Internal Keys are used.
+                            log.error("InternalAPIKeyAuthenticator has not been properly initialized. {} {}",
+                                    "Empty certificate alias.",
+                                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6605));
+                        }
                     } finally {
                         if (Utils.tracingEnabled()) {
                             verifyTokenWithoutCacheSpanScope.close();

@@ -242,10 +242,11 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				},
 			},
 		},
-		Management: management,
-		RestServer: restServer,
-		Filters:    filters,
-		Soap:       soap,
+		Management:          management,
+		RestServer:          restServer,
+		Filters:             filters,
+		Soap:                soap,
+		ControlPlaneEnabled: config.ControlPlane.Enabled,
 	}
 }
 

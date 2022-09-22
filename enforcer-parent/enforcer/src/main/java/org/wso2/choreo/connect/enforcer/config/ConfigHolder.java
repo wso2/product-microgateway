@@ -105,6 +105,7 @@ public class ConfigHolder {
     private KeyStore opaKeyStore = null;
     private TrustManagerFactory trustManagerFactory = null;
     private ArrayList<ExtendedTokenIssuerDto> configIssuerList;
+    private boolean controlPlaneEnabled;
 
     private static final String dtoPackageName = EnforcerConfig.class.getPackageName();
     private static final String apimDTOPackageName = "org.wso2.carbon.apimgt";
@@ -144,6 +145,8 @@ public class ConfigHolder {
 
         // Read jwt token configuration
         populateJWTIssuerConfiguration(config.getSecurity().getTokenServiceList());
+
+        controlPlaneEnabled = config.getControlPlaneEnabled();
 
         // Read throttle publisher configurations
         populateThrottlingConfig(config.getThrottling());
@@ -263,9 +266,11 @@ public class ConfigHolder {
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias.isBlank()) {
                 if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(jwtIssuer.getName())) {
-                    certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+                    certificateAlias = APIConstants.PUBLISHER_CERTIFICATE_ALIAS;
                 } else if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(jwtIssuer.getName())) {
                     certificateAlias = APIConstants.WSO2_PUBLIC_CERTIFICATE_ALIAS;
+                } else if (APIConstants.KeyManager.APIM_APIKEY_ISSUER.equals(jwtIssuer.getName())) {
+                    certificateAlias = APIConstants.APIKEY_CERTIFICATE_ALIAS;
                 }
             }
             issuerDto.setCertificateAlias(certificateAlias);
@@ -286,7 +291,16 @@ public class ConfigHolder {
             issuerDto.setName(jwtIssuer.getName());
             issuerDto.setConsumerKeyClaim(jwtIssuer.getConsumerKeyClaim());
             issuerDto.setValidateSubscriptions(jwtIssuer.getValidateSubscription());
-            config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
+            if (APIConstants.KeyManager.APIM_APIKEY_ISSUER.equals(jwtIssuer.getName())) {
+                // Both API key and Internal key issuers are referred by issuer "name" instead of "issuer"
+                // since the "iss" value present in both are same as oauth tokens. Thus, we override the
+                // "issuer" in issuerDto to avoid conflicts (in case a user sets the same "issuer"
+                // to Resident Key Manager and any of the other issuers).
+                issuerDto.setIssuer(APIConstants.KeyManager.APIM_APIKEY_ISSUER_URL);
+                config.getIssuersMap().put(APIConstants.KeyManager.APIM_APIKEY_ISSUER_URL, issuerDto);
+            } else {
+                config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
+            }
             configIssuerList.add(issuerDto);
         }
     }
@@ -649,5 +663,9 @@ public class ConfigHolder {
 
     public void setConfigIssuerList(ArrayList<ExtendedTokenIssuerDto> configIssuerList) {
         this.configIssuerList = configIssuerList;
+    }
+
+    public boolean isControlPlaneEnabled() {
+        return controlPlaneEnabled;
     }
 }

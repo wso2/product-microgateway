@@ -58,7 +58,6 @@ import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,8 +65,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -265,7 +262,7 @@ public class JWTAuthenticator implements Authenticator {
                             // could provide much better insights.
                             // Since application notion becomes less meaningful with subscription validation disabled,
                             // the application name would be populated under the convention "anon:<KM Reference>"
-                            updateApplicationNameForSubscriptionDisabledKM(apiKeyValidationInfoDTO,
+                            JWTUtils.updateApplicationNameForSubscriptionDisabledKM(apiKeyValidationInfoDTO,
                                     issuerDto.getName());
                         }
                     } finally {
@@ -334,17 +331,6 @@ public class JWTAuthenticator implements Authenticator {
             }
         }
 
-    }
-
-    private void updateApplicationNameForSubscriptionDisabledKM(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
-                                                                String kmReference) {
-        String applicationRef = APIConstants.ANONYMOUS_PREFIX + kmReference;
-        apiKeyValidationInfoDTO.setApplicationName(applicationRef);
-        apiKeyValidationInfoDTO.setApplicationId(-1);
-        apiKeyValidationInfoDTO.setApplicationUUID(
-                UUID.nameUUIDFromBytes(
-                        applicationRef.getBytes(StandardCharsets.UTF_8)).toString());
-        apiKeyValidationInfoDTO.setApplicationTier(APIConstants.UNLIMITED_TIER);
     }
 
     @Override

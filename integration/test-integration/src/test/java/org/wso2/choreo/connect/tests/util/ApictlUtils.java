@@ -346,6 +346,14 @@ public class ApictlUtils {
     }
 
     /**
+     * Deletes all project folders created by apictl.
+     */
+    public static void deleteAllProjects() {
+        String targetDir = Utils.getTargetDirPath();
+        Utils.deleteFolder(new File(targetDir + API_PROJECTS_PATH));
+    }
+
+    /**
      * Deploys a sample apictl project located in samples/apiProjects.
      *
      * @param projectName Project folder name

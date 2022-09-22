@@ -18,7 +18,6 @@
 
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
-import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import net.minidev.json.JSONArray;
@@ -32,6 +31,8 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
@@ -61,26 +62,42 @@ import java.util.Map;
 public class APIKeyAuthenticator extends APIKeyHandler {
 
     private static final Logger log = LogManager.getLogger(APIKeyAuthenticator.class);
+
+    private static String certAlias;
+    private static boolean apiKeySubValidationEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
-    private boolean apiKeySubValidationEnabled = false;
-
     private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
     private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
     public APIKeyAuthenticator() {
-        log.info("API key authenticator initialized.");
+        log.debug("API key authenticator initialized.");
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
         this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
         }
-        Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
-        for (ExtendedTokenIssuerDto tokenIssuer : tokenIssuers.values()) {
-            if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(tokenIssuer.getName())) {
+        for (ExtendedTokenIssuerDto tokenIssuer : enforcerConfig.getIssuersMap().values()) {
+            if (APIConstants.KeyManager.APIM_APIKEY_ISSUER.equals(tokenIssuer.getName())) {
+                certAlias = tokenIssuer.getCertificateAlias();
                 apiKeySubValidationEnabled = tokenIssuer.isValidateSubscriptions();
                 break;
             }
+        }
+
+        // For backward compatibility
+        if (StringUtils.isBlank(certAlias)) {
+            for (ExtendedTokenIssuerDto tokenIssuer : enforcerConfig.getIssuersMap().values()) {
+                if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(tokenIssuer.getName())) {
+                    certAlias = tokenIssuer.getCertificateAlias();
+                    apiKeySubValidationEnabled = tokenIssuer.isValidateSubscriptions();
+                    break;
+                }
+            }
+        }
+        if (StringUtils.isBlank(certAlias)) {
+            log.error("Could not properly initialize APIKeyAuthenticator. Empty certificate alias. {}",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 6604));
         }
     }
 
@@ -122,6 +139,13 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
+        if (StringUtils.isBlank(certAlias)) {
+            log.error("APIKeyAuthenticator has not been properly initialized. Empty certificate alias.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 6604));
+            throw new APISecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
         if (requestContext.getMatchedAPI() == null) {
             log.debug("API Key Authentication failed");
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -138,7 +162,6 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             String[] splitToken = apiKey.split("\\.");
 
             SignedJWT signedJWT = SignedJWT.parse(apiKey);
-            JWSHeader jwsHeader = signedJWT.getHeader();
             JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
 
             String apiVersion = requestContext.getMatchedAPI().getVersion();
@@ -167,7 +190,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
             // Verifies token when it is not found in cache
             if (!isVerified) {
-                isVerified = verifyTokenWhenNotInCache(jwsHeader, signedJWT, splitToken, payload, "API Key");
+                isVerified = verifyTokenWhenNotInCache(certAlias, signedJWT, splitToken, payload, "API Key");
             }
 
             if (isVerified) {
@@ -184,10 +207,21 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
                 validateAPIKeyRestrictions(payload, requestContext, apiContext, apiVersion);
                 APIKeyValidationInfoDTO validationInfoDto;
-                if (apiKeySubValidationEnabled) {
+                if (ConfigHolder.getInstance().isControlPlaneEnabled()) {
+                    log.debug("Validating subscription for API Key against subscription store."
+                            + " context: {} version: {}", apiContext, apiVersion);
                     validationInfoDto = KeyValidator.validateSubscription(apiUuid, apiContext, payload);
-                } else {
+                } else if (apiKeySubValidationEnabled) {
+                    log.debug("Validating subscription for API Key using JWT claims against invoked API info."
+                            + " context: {} version: {}", apiContext, apiVersion);
                     validationInfoDto = getAPIKeyValidationDTO(requestContext, payload);
+                } else {
+                    log.debug("Creating API Key info DTO for unknown API and Application."
+                            + " context: {} version: {}", apiContext, apiVersion);
+                    validationInfoDto = new APIKeyValidationInfoDTO();
+                    JWTUtils.updateApplicationNameForSubscriptionDisabledKM(validationInfoDto,
+                            APIConstants.KeyManager.APIM_APIKEY_ISSUER);
+                    validationInfoDto.setAuthorized(true);
                 }
 
                 if (!validationInfoDto.isAuthorized()) {
