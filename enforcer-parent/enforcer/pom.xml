@@ -34,11 +34,6 @@
         <url>https://wso2.org/</url>
     </organization>
 
-<!--    <property>-->
-<!--        <name>jacocoDependencyAllowedToAdd</name>-->
-<!--        <value>!${skip.code.coverage}</value>-->
-<!--    </property>-->
-
     <build>
         <extensions>
             <extension>

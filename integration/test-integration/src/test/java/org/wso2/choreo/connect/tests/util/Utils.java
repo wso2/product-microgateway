@@ -513,6 +513,13 @@ public class Utils {
         }
     }
 
+    /**
+     * Copies a file with existing attribute values
+     *
+     * @param sourceLocation current location of the file
+     * @param destLocation   destination location path of the file
+     * @throws CCTestException if error happens while copying the file
+     */
     public static void copyFileWithAttributes(String sourceLocation, String destLocation) throws CCTestException {
         try {
             Path sourcePath = Paths.get(sourceLocation);
