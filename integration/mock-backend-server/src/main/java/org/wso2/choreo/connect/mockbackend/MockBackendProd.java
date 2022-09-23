@@ -90,6 +90,10 @@ public class MockBackendProd extends Thread {
             } else {
                 httpServer = HttpServer.create(new InetSocketAddress(backendServerPort), 0);
             }
+            httpServer.createContext("/", exchange -> {
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
             String context = "/v2";
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
 
