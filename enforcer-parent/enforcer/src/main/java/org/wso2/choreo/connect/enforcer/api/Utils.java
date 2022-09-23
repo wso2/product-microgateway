@@ -58,6 +58,9 @@ public class Utils {
         EndpointCluster endpointCluster = new EndpointCluster();
         endpointCluster.setUrls(urls);
 
+        // getting the first endpoint's basepath would be enough,
+        // as all endpoints in the cluster should have the same basepath as of now
+        endpointCluster.setBasePath(rpcEndpointCluster.getUrlsList().get(0).getBasepath());
         if (rpcEndpointCluster.hasConfig()) {
             EndpointClusterConfig endpointClusterConfig = rpcEndpointCluster.getConfig();
             if (endpointClusterConfig.hasRetryConfig()) {
