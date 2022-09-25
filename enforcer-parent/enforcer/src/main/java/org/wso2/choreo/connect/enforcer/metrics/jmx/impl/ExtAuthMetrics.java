@@ -45,7 +45,7 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
      * 
      * @return ExtAuthMetrics
      */
-    public static ExtAuthMetrics getInstance() {
+    public synchronized static ExtAuthMetrics getInstance() {
         if (extAuthMetricsMBean == null) {
             Timer timer = new Timer();
             extAuthMetricsMBean = new ExtAuthMetrics();
