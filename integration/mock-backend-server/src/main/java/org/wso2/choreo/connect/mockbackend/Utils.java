@@ -137,6 +137,16 @@ public class Utils {
         exchange.getResponseBody().write(response);
     }
 
+    public static void send200OK(HttpExchange exchange, byte[] response, Map<String, String> headers) throws IOException {
+        exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
+        headers.forEach(
+                (key, value) -> exchange.getResponseHeaders().set(key, value)
+        );
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
+    }
+
     public static TrustManager[] getTrustManagers() throws Exception {
         InputStream inputStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("mg.pem");

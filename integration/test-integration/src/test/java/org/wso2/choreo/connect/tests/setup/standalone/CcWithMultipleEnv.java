@@ -48,13 +48,25 @@ public class CcWithMultipleEnv {
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
+        ApictlUtils.deleteAllProjects();
+
         ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore2", null,
                 "apictl_test_deploy_multiple_env.yaml", null, null);
+        ApictlUtils.createProject( "api_key_swagger_security_openAPI.yaml", "apikey_swagger");
+        ApictlUtils.createProject( "api_key_openAPI.yaml", "apikey");
+        ApictlUtils.createProject( "openAPI.yaml", "openapi");
+        ApictlUtils.createProject( "openAPI_startup.yaml", "openAPI_startup");
 
-        ApictlUtils.addEnv("test2");
-        ApictlUtils.login("test2");
+        ApictlUtils.addEnv("test");
+        ApictlUtils.login("test");
 
-        ApictlUtils.deployAPI("apictl_petstore2", "test2");
+        ApictlUtils.deployAPI("apictl_petstore2", "test");
+        ApictlUtils.deployAPI("apikey_swagger", "test");
+        ApictlUtils.deployAPI("apikey", "test");
+        ApictlUtils.deployAPI("openapi", "test");
+        ApictlUtils.deployAPI("openAPI_startup", "test");
+
+
 
         String endpoint = Utils.getServiceURLHttps(
                 "/v2/new/pet/findByStatus?status=available");
@@ -78,7 +90,7 @@ public class CcWithMultipleEnv {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
 
         // Undeploy the API from specific environment
-        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "test2", "localhost",
+        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "test", "localhost",
                 "Default");
         response = HttpsClientRequest.retryUntil404(Utils.getServiceURLHttps(
                 "/v2/new/pet/findByStatus?status=available") , headers);
@@ -99,6 +111,5 @@ public class CcWithMultipleEnv {
     void stop() throws CCTestException {
         ccInstance.stop();
         ApictlUtils.removeEnv("test");
-        ApictlUtils.removeEnv("test2");
     }
 }

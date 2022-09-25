@@ -309,4 +309,40 @@ public interface ApiOrBuilder extends
    * @return The applicationSecurity.
    */
   boolean getApplicationSecurity();
+
+  /**
+   * <code>string graphQLSchema = 23;</code>
+   * @return The graphQLSchema.
+   */
+  java.lang.String getGraphQLSchema();
+  /**
+   * <code>string graphQLSchema = 23;</code>
+   * @return The bytes for graphQLSchema.
+   */
+  com.google.protobuf.ByteString
+      getGraphQLSchemaBytes();
+
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  java.util.List<org.wso2.choreo.connect.discovery.api.GraphqlComplexity> 
+      getGraphqlComplexityInfoList();
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.GraphqlComplexity getGraphqlComplexityInfo(int index);
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  int getGraphqlComplexityInfoCount();
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder> 
+      getGraphqlComplexityInfoOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.api.GraphqlComplexity graphqlComplexityInfo = 24;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder getGraphqlComplexityInfoOrBuilder(
+      int index);
 }

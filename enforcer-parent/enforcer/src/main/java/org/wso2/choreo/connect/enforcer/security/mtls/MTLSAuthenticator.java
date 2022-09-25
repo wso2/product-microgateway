@@ -63,7 +63,7 @@ public class MTLSAuthenticator implements Authenticator {
         }
         if (StringUtils.isBlank(cert)) {
             log.debug("Could not find a valid client certificate in the request: {} for the API: {}:{} ",
-                    requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                    requestContext.getMatchedResourcePaths().get(0).getPath(), requestContext.getMatchedAPI().getName(),
                     requestContext.getMatchedAPI().getVersion());
             return false;
         }
@@ -95,8 +95,8 @@ public class MTLSAuthenticator implements Authenticator {
                         .getMatchedCertificateAliasFromTrustStore(clientCert, trustStore);
                 if (StringUtils.isBlank(clientCertificateAlias)) {
                     log.debug("Provided client certificate in request: {} is not in the truststore of the API: {}:{} ",
-                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
-                            requestContext.getMatchedAPI().getVersion());
+                            requestContext.getMatchedResourcePaths().get(0).getPath(),
+                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion());
                     clientCert = null;
                 }
                 if (!Objects.isNull(clientCert)) {
@@ -157,7 +157,7 @@ public class MTLSAuthenticator implements Authenticator {
             return MtlsUtils.getX509Cert(certContent);
         }
         log.debug("Provided client certificate in the request: {} for the API: {}:{} is invalid.",
-                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
+                requestContext.getMatchedResourcePaths().get(0).getPath(), requestContext.getMatchedAPI().getName(),
                 requestContext.getMatchedAPI().getVersion());
         return null;
     }

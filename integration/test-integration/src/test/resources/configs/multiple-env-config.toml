@@ -11,48 +11,13 @@
   # Virtual host to map to the environment
   vhost = "us.wso2.com"
 
-[adapter.server]
-  enabled = true
-  port = "9843"
-  tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
-  [[adapter.server.users]]
-    username = "admin"
-    password = "$env{adapter_admin_pwd}"
-
-[adapter.keystore]
-  certPath = "/home/wso2/security/keystore/mg.pem"
-  keyPath = "/home/wso2/security/keystore/mg.key"
-
-[adapter.truststore]
-  location = "/home/wso2/security/truststore"
-
-[router]
-  listenerPort = 9090
-  securedListenerPort = 9095
-  systemHost = "localhost"
-
-[router.keystore]
-  certPath = "/home/wso2/security/keystore/mg.pem"
-  keyPath = "/home/wso2/security/keystore/mg.key"
-
-[router.upstream]
-[router.upstream.tls]
-  trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
-  verifyHostName = true
-  disableSslVerification = false
-
-[enforcer]
-[enforcer.jwtIssuer]
-  enabled = true
-  issuer = "https://localhost:9095/testkey"
-
-[enforcer.security]
 [[enforcer.security.tokenService]]
   name = "Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
   certificateAlias = "wso2carbon"
   jwksURL = ""
-  validateSubscription = false
+  # Validate subscription - compare JWT claims in oauth token with invoked API
+  validateSubscription = true
   consumerKeyClaim = "azp"
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
@@ -66,19 +31,11 @@
   certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [[enforcer.security.tokenService]]
-  name = "APIM Publisher"
-  issuer = "https://localhost:9443/publisher"
+  name = "APIM APIkey"
+  # Validate subscription - compare JWT claims in apikey with invoked API
+  validateSubscription = true
+  certificateAlias = "apikey_certificate_alias"
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
-[enforcer.throttling]
-  enableGlobalEventPublishing = false
-  jmsConnectionProviderURL = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
-  [enforcer.throttling.publisher]
-    username = "admin"
-    password = "$env{tm_admin_pwd}"
-    [[enforcer.throttling.publisher.URLGroup]]
-      receiverURLs = ["tcp://apim:9611"]
-      authURLs = ["ssl://apim:9711"]
-
-[analytics]
-  enabled = false
+[enforcer.jwtGenerator]
+  enable = true

@@ -57,17 +57,23 @@ public class CorsFilter implements Filter {
             // Preflight success request does not reach here.
             if (requestContext.getRequestMethod().contains(HttpConstants.OPTIONS)) {
                 // If the OPTIONS method is provided under the resource, microgateway do not respond
-                if (requestContext.getMatchedResourcePath() != null) {
+                if (requestContext.getMatchedResourcePaths() != null) {
                     logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
                             "be responded from the upstream");
                     return true;
                 }
                 StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
-                for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getResources()) {
-                    if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
-                        continue;
+                // Handling GraphQL post requests
+                // Only post method is allowed for GQL apis, hence it will be added to the allowed method list.
+                if (APIConstants.ApiType.GRAPHQL.equalsIgnoreCase(requestContext.getMatchedAPI().getApiType())) {
+                    allowedMethodsBuilder.append(", ").append(ResourceConfig.HttpMethods.POST);
+                } else {
+                    for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getResources()) {
+                        if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
+                            continue;
+                        }
+                        allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
                     }
-                    allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
                 }
                 requestContext.getProperties()
                         .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);

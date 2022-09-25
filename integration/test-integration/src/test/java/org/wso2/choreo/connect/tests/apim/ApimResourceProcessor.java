@@ -148,6 +148,8 @@ public class ApimResourceProcessor {
                 if (apiRequest.getType().equals(TestConstant.API_TYPES.SOAP)){
                     apiId = PublisherUtils.createSoapApiFromWsdl(apiRequest, apimArtifactsIndex,
                             apiFileContent, publisherRestClient);
+                } else if (apiRequest.getType().equals(TestConstant.API_TYPES.GRAPHQL)){
+                    apiId = PublisherUtils.createGraphQLApiFromSchema(apiRequest, publisherRestClient, "Unlimited");
                 } else {
                     apiId = PublisherUtils.createAPI(apiRequest, publisherRestClient);
                 }

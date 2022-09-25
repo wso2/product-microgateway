@@ -334,6 +334,10 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 			return nil, err
 		}
 	}
+
+	if apiYaml.APIType == constants.GRAPHQL {
+		mgwSwagger.GraphQLComplexities = apiProject.GraphQLComplexities
+	}
 	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
 	mgwSwagger.OrganizationID = apiYaml.OrganizationID

@@ -55,4 +55,6 @@ message Config {
     repeated Filter filters = 14;
 
     Soap soap = 15;
+
+    bool controlPlaneEnabled = 16;
 }

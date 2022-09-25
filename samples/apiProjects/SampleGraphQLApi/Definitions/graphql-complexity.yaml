@@ -1,0 +1,96 @@
+type: graphql-complexity
+version: v4.1.0
+data:
+  list:
+   -
+    type: Query
+    field: tracksForHome
+    complexityValue: 1
+   -
+    type: Query
+    field: track
+    complexityValue: 1
+   -
+    type: Query
+    field: hello
+    complexityValue: 1
+   -
+    type: Query
+    field: hero
+    complexityValue: 1
+   -
+    type: Mutation
+    field: createHero
+    complexityValue: 1
+   -
+    type: Hero
+    field: id
+    complexityValue: 1
+   -
+    type: Hero
+    field: name
+    complexityValue: 12
+   -
+    type: Hero
+    field: age
+    complexityValue: 1
+   -
+    type: Track
+    field: id
+    complexityValue: 1
+   -
+    type: Track
+    field: title
+    complexityValue: 1
+   -
+    type: Track
+    field: author
+    complexityValue: 1
+   -
+    type: Track
+    field: thumbnail
+    complexityValue: 1
+   -
+    type: Track
+    field: length
+    complexityValue: 1
+   -
+    type: Track
+    field: modulesCount
+    complexityValue: 1
+   -
+    type: Track
+    field: description
+    complexityValue: 1
+   -
+    type: Track
+    field: numberOfViews
+    complexityValue: 1
+   -
+    type: Track
+    field: modules
+    complexityValue: 1
+   -
+    type: Module
+    field: id
+    complexityValue: 1
+   -
+    type: Module
+    field: title
+    complexityValue: 1
+   -
+    type: Module
+    field: length
+    complexityValue: 1
+   -
+    type: Author
+    field: id
+    complexityValue: 1
+   -
+    type: Author
+    field: name
+    complexityValue: 1
+   -
+    type: Author
+    field: photo
+    complexityValue: 1

@@ -37,6 +37,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
 import org.wso2.choreo.connect.enforcer.deniedresponse.DeniedResponsePreparer;
 import org.wso2.choreo.connect.enforcer.jmx.JMXUtils;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
@@ -102,7 +103,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
     private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {
         CheckResponse.Builder checkResponseBuilder = CheckResponse.newBuilder();
-        String traceKey = request.getAttributes().getRequest().getHttp().getId();
         if (responseObject.isDirectResponse()) {
             DeniedResponsePreparer deniedResponsePreparer = new DeniedResponsePreparer(DeniedHttpResponse.newBuilder());
             // set headers
@@ -115,8 +115,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         }
                 );
             }
-            deniedResponsePreparer.addHeaders(HeaderValueOption.newBuilder().setHeader(HeaderValue.newBuilder()
-                    .setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build()));
 
             // set status code
             HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
@@ -183,10 +181,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             }
-            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
-                    .build();
-            okResponseBuilder.addHeaders(headerValueOption);
+            addAccessLogMetadata(structBuilder, responseObject.getRequestPath());
+
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build())
                     .setDynamicMetadata(structBuilder.build())
@@ -245,5 +241,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
         }
         return requestPathBuilder.toString();
+    }
+
+    /**
+     * Adds original request path header without params as a metadata for access
+     * logging.
+     * 
+     * @param structBuilder
+     * @param requestPath
+     */
+    private void addAccessLogMetadata(Struct.Builder structBuilder, String requestPath) {
+        structBuilder.putFields(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
+                Value.newBuilder().setStringValue(requestPath.split("\\?")[0]).build());
     }
 }
