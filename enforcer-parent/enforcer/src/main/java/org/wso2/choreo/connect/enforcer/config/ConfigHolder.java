@@ -390,18 +390,17 @@ public class ConfigHolder {
             Arrays.stream(trustedCerts)
                     .forEach(cert -> {
                         try {
-                            trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false), cert);
+                            trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
+                                    cert);
                         } catch (KeyStoreException e) {
-                            // TODO Auto-generated catch block
-                            logger.error("Error while adding default trusted cert", e);
+                            logger.error("Error while adding default trusted ca cert", e);
                         }
                     });
 
             String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
             TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
-            // trustManagerFactory =
-            // TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(trustStore);
+            trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
 
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             logger.error("Error in loading certs to the trust store.", e);
