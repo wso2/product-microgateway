@@ -367,44 +367,52 @@ public class ConfigHolder {
     private void loadTrustStore() {
         try {
 
-            TrustManagerFactory tmf = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            // Using null here initialises the TMF with the default trust store.
-            tmf.init((KeyStore) null);
-
-            // Get hold of the default trust manager
-            X509TrustManager defaultTm = null;
-            for (TrustManager tm : tmf.getTrustManagers()) {
-                if (tm instanceof X509TrustManager) {
-                    defaultTm = (X509TrustManager) tm;
-                    break;
-                }
-            }
-
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null);
 
-            // Wrap it in your own class.
-            // final X509TrustManager finalDefaultTm = defaultTm;
-            X509Certificate[] trustedCerts = defaultTm.getAcceptedIssuers();
-            Arrays.stream(trustedCerts)
-                    .forEach(cert -> {
-                        try {
-                            trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
-                                    cert);
-                        } catch (KeyStoreException e) {
-                            logger.error("Error while adding default trusted ca cert", e);
-                        }
-                    });
+            // TODO: enable these with a config
+            loadTrustedCertsToTrustStore();
+            loadDefaultCertsToTrustStore();
 
-            String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
-            TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
             trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(trustStore);
 
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             logger.error("Error in loading certs to the trust store.", e);
         }
+    }
+
+    private void loadTrustedCertsToTrustStore() throws IOException {
+        String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
+        TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
+    }
+
+    private void loadDefaultCertsToTrustStore() throws NoSuchAlgorithmException, KeyStoreException {
+        TrustManagerFactory tmf = TrustManagerFactory
+                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        // Using null here initialises the TMF with the default trust store.
+        tmf.init((KeyStore) null);
+
+        // Get hold of the default trust manager
+        X509TrustManager defaultTm = null;
+        for (TrustManager tm : tmf.getTrustManagers()) {
+            if (tm instanceof X509TrustManager) {
+                defaultTm = (X509TrustManager) tm;
+                break;
+            }
+        }
+
+        // Get the certs from defaultTm and add them to our trustStore
+        X509Certificate[] trustedCerts = defaultTm.getAcceptedIssuers();
+        Arrays.stream(trustedCerts)
+                .forEach(cert -> {
+                    try {
+                        trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
+                                cert);
+                    } catch (KeyStoreException e) {
+                        logger.error("Error while adding default trusted ca cert", e);
+                    }
+                });
     }
 
     private void loadOpaClientKeyStore() {
