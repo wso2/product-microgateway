@@ -45,11 +45,15 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
      * 
      * @return ExtAuthMetrics
      */
-    public static synchronized ExtAuthMetrics getInstance() {
+    public static ExtAuthMetrics getInstance() {
         if (extAuthMetricsMBean == null) {
-            Timer timer = new Timer();
-            extAuthMetricsMBean = new ExtAuthMetrics();
-            timer.schedule(extAuthMetricsMBean, 0, REQUEST_COUNT_INTERVAL_MILLIS);
+            synchronized (ExtAuthMetrics.class) {
+                if (extAuthMetricsMBean == null) {
+                    Timer timer = new Timer();
+                    extAuthMetricsMBean = new ExtAuthMetrics();
+                    timer.schedule(extAuthMetricsMBean, 0, REQUEST_COUNT_INTERVAL_MILLIS);
+                }
+            }
         }
         return extAuthMetricsMBean;
     }
