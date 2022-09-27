@@ -1,4 +1,7 @@
-[router] 
+[adapter]
+soapErrorInXMLEnabled = true
+
+[router]
 [router.cors]
 enabled = false
 
@@ -10,31 +13,31 @@ enabled = false
   enable = true
 
 [[enforcer.security.tokenService]]
-name = "Resident Key Manager"
-issuer = "https://localhost:9443/oauth2/token"
-certificateAlias = "wso2carbon"
-jwksURL = ""
-validateSubscription = false
-consumerKeyClaim = "azp"
-certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+  name = "Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
+  jwksURL = ""
+  validateSubscription = false
+  consumerKeyClaim = "azp"
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Issuer 2
 [[enforcer.security.tokenService]]
-name = "MGW"
-issuer = "https://localhost:9095/testkey"
-certificateAlias = "mgw"
-jwksURL = ""
-validateSubscription = false
-consumerKeyClaim = ""
-certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+  name = "MGW"
+  issuer = "https://localhost:9095/testkey"
+  certificateAlias = "mgw"
+  jwksURL = ""
+  validateSubscription = false
+  consumerKeyClaim = ""
+  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 # Issuer 3
 [[enforcer.security.tokenService]]
-name = "APIM Publisher"
-issuer = "https://localhost:9443/publisher"
-validateSubscription = false # set this to false when using API key without APIM
-certificateAlias = ""
-certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+  name = "APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  validateSubscription = true
+  certificateAlias = ""
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [controlPlane]
   skipSSLVerification=true

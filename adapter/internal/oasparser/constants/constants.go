@@ -110,7 +110,9 @@ const (
 // Constants that occur as values in api.yaml
 const (
 	HTTP                  string = "HTTP"
+	SOAP                  string = "SOAP"
 	WS                    string = "WS"
+	GRAPHQL               string = "GRAPHQL"
 	WEBHOOK               string = "WEBHOOK"
 	SSE                   string = "SSE"
 	Prototyped            string = "prototyped"

@@ -549,6 +549,11 @@
                 <artifactId>validation-api</artifactId>
                 <version>${javax.validation.api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.graphql-java</groupId>
+                <artifactId>graphql-java-tools</artifactId>
+                <version>${com.graphql.java.version}</version>
+            </dependency>
             <!-- upgrades apache tomcat annotations version used for jaeger tracing -->
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
@@ -567,6 +572,31 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-jre8</artifactId>
+                <version>${wiremock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.soap</groupId>
+                <artifactId>javax.xml.soap-api</artifactId>
+                <version>${javax.xml.soap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.messaging.saaj</groupId>
+                <artifactId>saaj-impl</artifactId>
+                <version>${com.sun.xml.messaging.saaj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.graphQL</groupId>
+                <artifactId>graphQL</artifactId>
+                <version>${graphql.java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${org.jetbrains.kotlin.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -578,7 +608,7 @@
         <carbon.apimgt.version>9.20.74</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
-        <commons.io.version>2.7</commons.io.version>
+        <commons.io.version>2.11.0</commons.io.version>
         <envoy.controlplane.api.version>0.1.28</envoy.controlplane.api.version>
         <geronimo.jms11.spec.version>1.1.1.wso2v1</geronimo.jms11.spec.version>
         <grpc.netty.shaded.version>1.45.1</grpc.netty.shaded.version>
@@ -623,10 +653,16 @@
         <awaitility.version>3.1.2</awaitility.version>
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
         <jackson.databind.version>2.13.2.1</jackson.databind.version>
-        <snakeyaml.version>1.26</snakeyaml.version>
+        <snakeyaml.version>1.31</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
         <javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
+        <wiremock.version>2.33.2</wiremock.version>
+        <javax.xml.soap.version>1.4.0</javax.xml.soap.version>
+        <com.sun.xml.messaging.saaj.version>1.5.3</com.sun.xml.messaging.saaj.version>
+        <com.graphql.java.version>5.2.4</com.graphql.java.version>
+        <graphql.java.version>17.3.wso2v1</graphql.java.version>
+        <org.jetbrains.kotlin.version>1.3.70</org.jetbrains.kotlin.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.13.2</jackson.annotations.version>

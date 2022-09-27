@@ -45,7 +45,8 @@ public class CcWithBackendTlsAndCorsDisabledWithOPA {
         ApictlUtils.createProject("intercept_request_openAPI.yaml", "intercept_request_petstore", "backend_tls.crt", null, "interceptor.crt", null);
         ApictlUtils.createProject("intercept_response_openAPI.yaml", "intercept_response_petstore", "backend_tls.crt", null, "interceptor.crt", null);
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore");
-        ApictlUtils.createProject( "api_key_swagger_security_openAPI.yaml", "apikey");
+        ApictlUtils.createProject( "api_key_swagger_security_openAPI.yaml", "apikey_swagger");
+        ApictlUtils.createProject( "api_key_openAPI.yaml", "apikey");
         ApictlUtils.createProject( "api_policy_openAPI.yaml", "api_policy", null, null, null, "api_policies.yaml", true);
         ApictlUtils.createProject("http2_clear_text_openAPI.yaml", "http2_clear_text", null, null, null, null);
         ApictlUtils.createProject("http2_secured_openAPI.yaml", "http2_secured", "backend_tls.crt", null, null, null);
@@ -58,11 +59,13 @@ public class CcWithBackendTlsAndCorsDisabledWithOPA {
         ApictlUtils.deployAPI("intercept_request_petstore", "test");
         ApictlUtils.deployAPI("intercept_response_petstore", "test");
         ApictlUtils.deployAPI("cors_petstore", "test");
+        ApictlUtils.deployAPI("apikey_swagger", "test");
         ApictlUtils.deployAPI("apikey", "test");
         ApictlUtils.deployAPI("api_policy", "test");
         ApictlUtils.deployAPI("http2_clear_text", "test");
         ApictlUtils.deployAPI("http2_secured", "test");
         ApictlUtils.deployAPI("api_policy_per_operation", "test");
+        ApictlUtils.deploySampleProject("SampleSOAPApi", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

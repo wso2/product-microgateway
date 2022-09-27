@@ -1,0 +1,77 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: SampleSOAPApi
+security:
+ -
+  default: []
+paths:
+  /*:
+    post:
+      consumes:
+       - text/xml
+       - application/soap+xml
+      parameters:
+       -
+        in: body
+        name: SOAP Request
+        description: SOAP request.
+        required: true
+        schema:
+          type: string
+       -
+        name: SOAPAction
+        in: header
+        description: SOAPAction header for soap 1.1
+        required: false
+        type: string
+      responses:
+        "200":
+          description: OK
+      security:
+       -
+        default: []
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
+securityDefinitions:
+  default:
+    type: oauth2
+    authorizationUrl: https://test.com
+    flow: implicit
+x-wso2-auth-header: Authorization
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+   - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+   - authorization
+   - Access-Control-Allow-Origin
+   - Content-Type
+   - SOAPAction
+   - apikey
+   - Internal-Key
+  accessControlAllowMethods:
+   - GET
+   - PUT
+   - POST
+   - DELETE
+   - PATCH
+   - OPTIONS
+x-wso2-production-endpoints:
+  urls:
+   - http://mockBackend:2340
+  type: http
+x-wso2-basePath: /soap/1.0.0
+x-wso2-transports:
+ - http
+ - https
+x-wso2-application-security:
+  security-types:
+   - oauth2
+  optional: false
+x-wso2-response-cache:
+  enabled: false
+  cacheTimeoutInSeconds: 300

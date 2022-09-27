@@ -3,6 +3,8 @@
 [adapter] # --------------------------------------------------------
 
 artifactsDirectory = "/home/wso2/artifacts"
+soapErrorInXMLEnabled = false
+
 # Configurations required for configuring the deployment parameters that are used for identifying the Choreo Connect Adapter REST APIs
 [adapter.server]
   # Enable/Disable Choreo Connect Adapter REST API
@@ -357,7 +359,7 @@ enabled = true
   enableOutboundCertificateHeader = false
 
 # JWT token authorization configurations. You can provide multiple JWT issuers
-# Issuer 1
+# Issuer 1 - Resident Key Manager Issuer for Access tokens
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
   name = "Resident Key Manager"
@@ -373,7 +375,7 @@ enabled = true
   # Certificate Filepath within Enforcer
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
-# Issuer 2
+# Issuer 2 - Issuer for Enforcer test key
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
   name = "MGW"
@@ -389,14 +391,25 @@ enabled = true
   # Certificate Filepath within Enforcer
   certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
-# Issuer 3
+# Issuer 3 - Issuer for API Manager Internal Key
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
   name = "APIM Publisher"
   issuer = "https://localhost:9443/publisher"
   validateSubscription = true
   # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
-  certificateAlias = ""
+  certificateAlias = "publisher_certificate_alias"
+  # Certificate Filepath within Enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Issuer 4 - Issuer for API Manager API Key
+[[enforcer.security.tokenService]]
+  # Provide unique name for the JWT issuer
+  name = "APIM APIkey"
+  issuer = "https://localhost:9443/publisher"
+  validateSubscription = true
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
+  certificateAlias = "apikey_certificate_alias"
   # Certificate Filepath within Enforcer
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 

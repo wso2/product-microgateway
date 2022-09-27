@@ -125,14 +125,14 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		},
 	}
 
-	// configures envoy to handle request body
-	if conf.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
-		extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
-			MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
-			AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
-			PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
-		}
+	// configures envoy to handle request body and GraphQL APIs require below configs to pass request 
+	// payload to the enforcer.
+	extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
+		MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
+		AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
+		PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
 	}
+
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)

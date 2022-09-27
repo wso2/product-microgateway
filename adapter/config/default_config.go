@@ -57,7 +57,8 @@ var defaultConfig = &Config{
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
-		ArtifactsDirectory: "/home/wso2/artifacts",
+		ArtifactsDirectory:    "/home/wso2/artifacts",
+		SoapErrorInXMLEnabled: false,
 		SourceControl: sourceControl{
 			Enabled:            false,
 			PollInterval:       30,
@@ -141,7 +142,7 @@ var defaultConfig = &Config{
 		},
 		PayloadPassingToEnforcer: payloadPassingToEnforcer{
 			PassRequestPayload:  false,
-			MaxRequestBytes:     10240,
+			MaxRequestBytes:     102400,
 			AllowPartialMessage: false,
 			PackAsBytes:         false,
 		},
@@ -179,7 +180,14 @@ var defaultConfig = &Config{
 					Name:                 "APIM Publisher",
 					Issuer:               "https://localhost:9443/publisher",
 					ValidateSubscription: true,
-					CertificateAlias:     "",
+					CertificateAlias:     "publisher_certificate_alias",
+					CertificateFilePath:  "/home/wso2/security/truststore/wso2carbon.pem",
+				},
+				{
+					Name:                 "APIM APIkey",
+					Issuer:               "",
+					ValidateSubscription: true,
+					CertificateAlias:     "apikey_certificate_alias",
 					CertificateFilePath:  "/home/wso2/security/truststore/wso2carbon.pem",
 				},
 			},

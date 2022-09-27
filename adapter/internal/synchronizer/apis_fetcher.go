@@ -61,14 +61,14 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	// Reading the root zip
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	if err != nil {
-		logger.LoggerSync.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
+		logger.LoggerSync.Errorf("Error occurred while unzipping the apictl project. Error: %v", err.Error())
 		return err
 	}
 
 	// Read deployments from deployment.json file
 	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader)
 	if err != nil {
-		logger.LoggerSync.Error("Error occured while reading root files ", err)
+		logger.LoggerSync.Error("Error occurred while reading root files ", err)
 		return err
 	}
 
@@ -103,7 +103,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		logger.LoggerSync.Infof("Start deploying api from file (API_ID:REVISION_ID).zip : %v", file.Name)
 		f, err := file.Open()
 		if err != nil {
-			logger.LoggerSync.Errorf("Error reading zip file: %v", err)
+			logger.LoggerSync.Errorf("Error reading zip file (API_ID:REVISION_ID).zip : %v, Error : %v", file.Name, err)
 			return err
 		}
 		//Read the files inside each xxxx-api.zip
@@ -114,7 +114,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		var deployedRevisionList []*notifier.DeployedAPIRevision
 		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps)
 		if err != nil {
-			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
+			logger.LoggerSync.Errorf("Error occurred while applying project (API_ID:REVISION_ID).zip : %v, Error : %v", file.Name, err)
 		} else if deployedRevisionList != nil {
 			deploymentList = append(deploymentList, deployedRevisionList...)
 		}

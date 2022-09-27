@@ -1,0 +1,117 @@
+type: api
+version: v4.1.0
+data:
+  id: 735303a5-c5a3-4fd6-8199-11acac91a5ba
+  name: GraphQLAPI
+  context: /graphQLTest
+  version: "1.0.0"
+  provider: admin
+  lifeCycleStatus: CREATED
+  responseCachingEnabled: false
+  cacheTimeout: 300
+  hasThumbnail: false
+  isDefaultVersion: false
+  isRevision: false
+  revisionId: 0
+  enableSchemaValidation: false
+  type: GRAPHQL
+  transport:
+    - http
+    - https
+  tags: []
+  policies:
+    - Unlimited
+  authorizationHeader: Authorization
+  securityScheme:
+    - oauth2
+    - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  mediationPolicies: []
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalProperties: []
+  additionalPropertiesMap: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins:
+      - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+      - authorization
+      - Access-Control-Allow-Origin
+      - Content-Type
+      - SOAPAction
+      - apikey
+      - Internal-Key
+    accessControlAllowMethods:
+      - GET
+      - PUT
+      - POST
+      - DELETE
+      - PATCH
+      - OPTIONS
+  websubSubscriptionConfiguration:
+    enable: false
+    secret: ""
+    signingAlgorithm: SHA1
+    signatureHeader: x-hub-signature
+  createdTime: "1654251970675"
+  lastUpdatedTime: 2022-06-07 11:07:45.179
+  endpointConfig:
+    endpoint_type: http
+    sandbox_endpoints:
+      url: http://www.graphqltestsand.com
+    production_endpoints:
+      url: http://www.graphqltest.com
+  endpointImplementationType: ENDPOINT
+  scopes:
+    -
+      scope:
+        name: TestScope
+        displayName: TestScope
+        description: TestScope
+        bindings:
+          - admin
+      shared: false
+  operations:
+    -
+      id: ""
+      target: track
+      verb: QUERY
+      authType: None
+      throttlingPolicy: 20KPerMin
+      scopes:
+        - TestScope
+      usedProductIds: []
+      operationPolicies:
+        request: []
+        response: []
+        fault: []
+    -
+      id: ""
+      target: tracksForHome
+      verb: QUERY
+      authType: Application & Application User
+      throttlingPolicy: Unlimited
+      scopes: []
+      usedProductIds: []
+      operationPolicies:
+        request: []
+        response: []
+        fault: []
+  categories: []
+  keyManagers:
+    - all
+  advertiseInfo:
+    advertised: false
+    apiOwner: admin
+    vendor: WSO2
+  gatewayVendor: wso2
+  gatewayType: wso2/synapse
+  asyncTransportProtocols: []
+  organizationId: carbon.super

@@ -650,6 +650,14 @@ paths:
           description: successful operation
       security:
         - petstore_auth: [ ]
+  /echo-full:
+    get:
+      security:
+        - petstore_auth: [ ]
+  /headers-from-backend:
+    get:
+      security:
+        - petstore_auth: [ ]
 securityDefinitions:
   api_key:
     type: apiKey

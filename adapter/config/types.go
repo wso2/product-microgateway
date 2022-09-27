@@ -93,6 +93,8 @@ type adapter struct {
 	Truststore truststore
 	// ArtifactsDirectory is the FilePath where the api artifacts are mounted
 	ArtifactsDirectory string
+	// SoapErrorInXMLEnabled is used to configure gateway error responses(local reply) as soap envelope
+	SoapErrorInXMLEnabled bool
 	// SourceControl represents the configuration related to the repository where the api artifacts are stored
 	SourceControl sourceControl
 }

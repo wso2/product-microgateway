@@ -232,6 +232,24 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Filter.parser(), extensionRegistry));
             break;
           }
+          case 122: {
+            org.wso2.choreo.connect.discovery.config.enforcer.Soap.Builder subBuilder = null;
+            if (soap_ != null) {
+              subBuilder = soap_.toBuilder();
+            }
+            soap_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Soap.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(soap_);
+              soap_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 128: {
+
+            controlPlaneEnabled_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -645,6 +663,43 @@ private static final long serialVersionUID = 0L;
     return filters_.get(index);
   }
 
+  public static final int SOAP_FIELD_NUMBER = 15;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Soap soap_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+   * @return Whether the soap field is set.
+   */
+  @java.lang.Override
+  public boolean hasSoap() {
+    return soap_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+   * @return The soap.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Soap getSoap() {
+    return soap_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Soap.getDefaultInstance() : soap_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.SoapOrBuilder getSoapOrBuilder() {
+    return getSoap();
+  }
+
+  public static final int CONTROLPLANEENABLED_FIELD_NUMBER = 16;
+  private boolean controlPlaneEnabled_;
+  /**
+   * <code>bool controlPlaneEnabled = 16;</code>
+   * @return The controlPlaneEnabled.
+   */
+  @java.lang.Override
+  public boolean getControlPlaneEnabled() {
+    return controlPlaneEnabled_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -700,6 +755,12 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < filters_.size(); i++) {
       output.writeMessage(14, filters_.get(i));
+    }
+    if (soap_ != null) {
+      output.writeMessage(15, getSoap());
+    }
+    if (controlPlaneEnabled_ != false) {
+      output.writeBool(16, controlPlaneEnabled_);
     }
     unknownFields.writeTo(output);
   }
@@ -765,6 +826,14 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < filters_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(14, filters_.get(i));
+    }
+    if (soap_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(15, getSoap());
+    }
+    if (controlPlaneEnabled_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(16, controlPlaneEnabled_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -848,6 +917,13 @@ private static final long serialVersionUID = 0L;
     }
     if (!getFiltersList()
         .equals(other.getFiltersList())) return false;
+    if (hasSoap() != other.hasSoap()) return false;
+    if (hasSoap()) {
+      if (!getSoap()
+          .equals(other.getSoap())) return false;
+    }
+    if (getControlPlaneEnabled()
+        != other.getControlPlaneEnabled()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -915,6 +991,13 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + FILTERS_FIELD_NUMBER;
       hash = (53 * hash) + getFiltersList().hashCode();
     }
+    if (hasSoap()) {
+      hash = (37 * hash) + SOAP_FIELD_NUMBER;
+      hash = (53 * hash) + getSoap().hashCode();
+    }
+    hash = (37 * hash) + CONTROLPLANEENABLED_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getControlPlaneEnabled());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1137,6 +1220,14 @@ private static final long serialVersionUID = 0L;
       } else {
         filtersBuilder_.clear();
       }
+      if (soapBuilder_ == null) {
+        soap_ = null;
+      } else {
+        soap_ = null;
+        soapBuilder_ = null;
+      }
+      controlPlaneEnabled_ = false;
+
       return this;
     }
 
@@ -1238,6 +1329,12 @@ private static final long serialVersionUID = 0L;
       } else {
         result.filters_ = filtersBuilder_.build();
       }
+      if (soapBuilder_ == null) {
+        result.soap_ = soap_;
+      } else {
+        result.soap_ = soapBuilder_.build();
+      }
+      result.controlPlaneEnabled_ = controlPlaneEnabled_;
       onBuilt();
       return result;
     }
@@ -1350,6 +1447,12 @@ private static final long serialVersionUID = 0L;
             filtersBuilder_.addAllMessages(other.filters_);
           }
         }
+      }
+      if (other.hasSoap()) {
+        mergeSoap(other.getSoap());
+      }
+      if (other.getControlPlaneEnabled() != false) {
+        setControlPlaneEnabled(other.getControlPlaneEnabled());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3166,6 +3269,156 @@ private static final long serialVersionUID = 0L;
         filters_ = null;
       }
       return filtersBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.Soap soap_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Soap, org.wso2.choreo.connect.discovery.config.enforcer.Soap.Builder, org.wso2.choreo.connect.discovery.config.enforcer.SoapOrBuilder> soapBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     * @return Whether the soap field is set.
+     */
+    public boolean hasSoap() {
+      return soapBuilder_ != null || soap_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     * @return The soap.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Soap getSoap() {
+      if (soapBuilder_ == null) {
+        return soap_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Soap.getDefaultInstance() : soap_;
+      } else {
+        return soapBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     */
+    public Builder setSoap(org.wso2.choreo.connect.discovery.config.enforcer.Soap value) {
+      if (soapBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        soap_ = value;
+        onChanged();
+      } else {
+        soapBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     */
+    public Builder setSoap(
+        org.wso2.choreo.connect.discovery.config.enforcer.Soap.Builder builderForValue) {
+      if (soapBuilder_ == null) {
+        soap_ = builderForValue.build();
+        onChanged();
+      } else {
+        soapBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     */
+    public Builder mergeSoap(org.wso2.choreo.connect.discovery.config.enforcer.Soap value) {
+      if (soapBuilder_ == null) {
+        if (soap_ != null) {
+          soap_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.Soap.newBuilder(soap_).mergeFrom(value).buildPartial();
+        } else {
+          soap_ = value;
+        }
+        onChanged();
+      } else {
+        soapBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     */
+    public Builder clearSoap() {
+      if (soapBuilder_ == null) {
+        soap_ = null;
+        onChanged();
+      } else {
+        soap_ = null;
+        soapBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Soap.Builder getSoapBuilder() {
+      
+      onChanged();
+      return getSoapFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.SoapOrBuilder getSoapOrBuilder() {
+      if (soapBuilder_ != null) {
+        return soapBuilder_.getMessageOrBuilder();
+      } else {
+        return soap_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.Soap.getDefaultInstance() : soap_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Soap soap = 15;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Soap, org.wso2.choreo.connect.discovery.config.enforcer.Soap.Builder, org.wso2.choreo.connect.discovery.config.enforcer.SoapOrBuilder> 
+        getSoapFieldBuilder() {
+      if (soapBuilder_ == null) {
+        soapBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Soap, org.wso2.choreo.connect.discovery.config.enforcer.Soap.Builder, org.wso2.choreo.connect.discovery.config.enforcer.SoapOrBuilder>(
+                getSoap(),
+                getParentForChildren(),
+                isClean());
+        soap_ = null;
+      }
+      return soapBuilder_;
+    }
+
+    private boolean controlPlaneEnabled_ ;
+    /**
+     * <code>bool controlPlaneEnabled = 16;</code>
+     * @return The controlPlaneEnabled.
+     */
+    @java.lang.Override
+    public boolean getControlPlaneEnabled() {
+      return controlPlaneEnabled_;
+    }
+    /**
+     * <code>bool controlPlaneEnabled = 16;</code>
+     * @param value The controlPlaneEnabled to set.
+     * @return This builder for chaining.
+     */
+    public Builder setControlPlaneEnabled(boolean value) {
+      
+      controlPlaneEnabled_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool controlPlaneEnabled = 16;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearControlPlaneEnabled() {
+      
+      controlPlaneEnabled_ = false;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

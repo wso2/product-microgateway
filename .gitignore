@@ -46,3 +46,7 @@ adapter/micro-gw
 
 !integration/test-integration/src/test/resources/git-artifacts/**
 !samples/rest-to-soap-conversion/PhoneVerification/**
+
+# test case relevant files
+integration/mock-backend-server/src/main/resources/schema.graphql
+integration/test-integration/src/test/resources/testng-cc-with-latest-apim.xml

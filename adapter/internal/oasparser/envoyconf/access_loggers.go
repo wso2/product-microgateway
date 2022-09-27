@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -49,6 +50,14 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 				TextFormatSource: &corev3.DataSource{
 					Specifier: &corev3.DataSource_InlineString{
 						InlineString: logConf.AccessLogs.Format,
+					},
+				},
+			},
+			Formatters: []*corev3.TypedExtensionConfig{
+				{
+					Name: "envoy.formatter.req_without_query",
+					TypedConfig: &anypb.Any{
+						TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
 					},
 				},
 			},

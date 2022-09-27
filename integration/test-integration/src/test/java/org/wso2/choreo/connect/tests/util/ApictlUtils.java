@@ -346,6 +346,40 @@ public class ApictlUtils {
     }
 
     /**
+     * Deletes all project folders created by apictl.
+     */
+    public static void deleteAllProjects() {
+        String targetDir = Utils.getTargetDirPath();
+        Utils.deleteFolder(new File(targetDir + API_PROJECTS_PATH));
+    }
+
+    /**
+     * Deploys a sample apictl project located in samples/apiProjects.
+     *
+     * @param projectName Project folder name
+     * @param mgwEnv      environment name used in apictl
+     * @throws CCTestException
+     */
+    public static void deploySampleProject(String projectName, String mgwEnv) throws CCTestException{
+        String samplesDirPath = Utils.getCCSamplesDirPath();
+        String projectPath = samplesDirPath + API_PROJECTS_PATH + projectName;
+
+        String[] cmdArray = { MG, DEPLOY, API };
+        String[] argsArray = { FILE_FLAG, projectPath, ENV_FLAG, mgwEnv };
+        try {
+            String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
+            if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_DEPLOYED_RESPONSE)) {
+                throw new CCTestException("Unable to deploy API project: "
+                        + projectName + " to microgateway adapter environment: " + mgwEnv);
+            }
+        } catch (IOException e) {
+            throw new CCTestException("Unable to deploy API project: "
+                    + projectName + " to microgateway adapter environment: " + mgwEnv, e);
+        }
+        log.info("Deployed API project: " + projectName + " to microgateway adapter environment: " + mgwEnv);
+    }
+
+    /**
      * Deploy an API via apictl
      *
      * @param apiProjectName API project that represents the API

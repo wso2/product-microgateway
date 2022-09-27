@@ -126,6 +126,11 @@
     <test name="Test the 2nd set of APIs apps subscriptions" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketScopeTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLBasicTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLQueryAnalysisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLScopeTestCase"/>
         </classes>
     </test>
 

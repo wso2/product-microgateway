@@ -1,4 +1,4 @@
-[adapter] 
+[adapter]
 [adapter.server]
   enabled = true
   port = "9843"

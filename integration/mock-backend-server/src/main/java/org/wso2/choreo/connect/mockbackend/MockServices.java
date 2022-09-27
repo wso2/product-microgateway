@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.mockbackend;
 
 import org.wso2.choreo.connect.mockbackend.async.MockAsyncServer;
+import org.wso2.choreo.connect.mockbackend.graphql.MockGraphQLServer;
 import org.wso2.choreo.connect.mockbackend.http2.Http2MockBackend;
 
 import java.util.Arrays;
@@ -55,6 +56,16 @@ public class MockServices {
         if (argList.contains("-async-enabled")) {
             MockAsyncServer mockAsyncServer = new MockAsyncServer(Constants.WEBSOCKET_SERVER_PORT);
             mockAsyncServer.start();
+        }
+
+        if (argList.contains("-soap-enabled")) {
+            MockBackendSOAP mockBackendSoap = new MockBackendSOAP(Constants.MOCK_BACKEND_SOAP_SERVER_PORT);
+            mockBackendSoap.start();
+        }
+
+        if (argList.contains("-gql-enabled")) {
+            MockGraphQLServer mockGraphQLServer = new MockGraphQLServer(Constants.MOCK_GRAPHQL_SERVER_PORT);
+            mockGraphQLServer.start();
         }
 
         if(argList.contains("-http2-server-enabled")){

@@ -201,13 +201,16 @@ public class TestConstant {
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9764;
     public static final int MOCK_BACKEND_HTTP2_CLEAR_TEXT_SERVER_PORT = 2350;
     public static final int MOCK_BACKEND_HTTP2_SECURED_SERVER_PORT = 2351;
+    public final static int MOCK_GRAPHQL_SERVER_PORT = 2320;
 
     public static final String MOCK_BACKEND_BASEPATH = "/v2";
+    public static final String MOCK_GRAPHQL_BASEPATH = "/gql";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
 
     public static final String LINE = "\r\n";
+    public static final String URL_SEPARATOR = "/";
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
@@ -245,10 +248,15 @@ public class TestConstant {
     public static final String ADMIN_PASSWORD = "admin";
     public static final String LOCAL_HOST_NAME = "localhost";
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String INTERNAL_KEY_HEADER = "Internal-Key";
+    public static final String CONTENT_TYPE_HEADER = "content-type";
+    public static final String SOAP_ACTION_HEADER = "SOAPAction";
 
     //apim instances names
     public static final String AM_PRODUCT_GROUP_NAME = "APIM";
     public static final String AM_ALL_IN_ONE_INSTANCE = "all-in-one";
+
+    public static final String ENABLE_ENFORCER_CUSTOM_FILTER = "enable-custom-filter";
 
     public static final class THROTTLING {
         public static final String ADVANCED = "advanced";
@@ -312,5 +320,41 @@ public class TestConstant {
         }
     }
 
-    public static final String ENABLE_ENFORCER_CUSTOM_FILTER = "enable-custom-filter";
+    public static final class CONTENT_TYPES {
+        public static final String TEXT_XML = "text/xml";
+        public static final String SOAP_XML = "application/soap+xml";
+    }
+
+    public static final class API_TYPES {
+        public static final String SOAP = "SOAP";
+        public static final String GRAPHQL = "GRAPHQL";
+    }
+
+    public static final class SOAP_ENVELOPES {
+        public static final String SOAP11_SAMPLE_REQ_PAYLOAD = "<soap:Envelope\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                "\txmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                "\t<soap:Body>\n" +
+                "\t\t<CheckPhoneNumber\n" +
+                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+                "\t\t</CheckPhoneNumber>\n" +
+                "\t</soap:Body>\n" +
+                "</soap:Envelope>";
+        public static final String SOAP12_SAMPLE_REQ_PAYLOAD = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<soap12:Envelope\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                "\txmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
+                "\t<soap12:Body>\n" +
+                "\t\t<CheckPhoneNumber\n" +
+                "\t\t\txmlns=\"http://ws.cdyne.com/PhoneVerify/query\">\n" +
+                "\t\t\t<PhoneNumber>18006785432</PhoneNumber>\n" +
+                "\t\t\t<LicenseKey>18006785432</LicenseKey>\n" +
+                "\t\t</CheckPhoneNumber>\n" +
+                "\t</soap12:Body>\n" +
+                "</soap12:Envelope>";
+    }
 }

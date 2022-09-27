@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
+import org.wso2.choreo.connect.enforcer.config.dto.SoapErrorResponseConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 
@@ -62,6 +63,8 @@ public class EnforcerConfig {
     private ManagementCredentialsDto management;
     private AdminRestServerDto restServer;
     private FilterDTO[] customFilters;
+
+    private SoapErrorResponseConfigDto soapErrorResponseConfigDto;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -209,6 +212,14 @@ public class EnforcerConfig {
 
     public void setRestServer(AdminRestServerDto restServer) {
         this.restServer = restServer;
+    }
+
+    public SoapErrorResponseConfigDto getSoapErrorResponseConfigDto() {
+        return soapErrorResponseConfigDto;
+    }
+
+    public void setSoapErrorResponseConfigDto(SoapErrorResponseConfigDto soapErrorResponseConfigDto) {
+        this.soapErrorResponseConfigDto = soapErrorResponseConfigDto;
     }
 
     public FilterDTO[] getCustomFilters() {

@@ -20,7 +20,10 @@ package org.wso2.choreo.connect.mockbackend;
 
 public class Constants {
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+    public static final String CONTENT_TYPE_TEXT_XML = "text/xml";
+    public static final String CONTENT_TYPE_SOAP_XML = "application/soap+xml";
     public static final String CONTENT_TYPE = "content-type";
+    public static final String SOAP_ACTION = "SOAPAction";
     public static final String HTTP_QUERY_SEPARATOR = "&";
     public static final String HTTP_QUERY_KEY_VAL_SEPARATOR = "=";
 
@@ -36,7 +39,9 @@ public class Constants {
     public static final int MTLS_INTERCEPTOR_HANDLER_SERVER_PORT = 2371;
 
     public static final int WEBSOCKET_SERVER_PORT = 2360;
+    public static final int MOCK_BACKEND_SOAP_SERVER_PORT = 2340;
 
     public static final int MOCK_BACKEND_HTTP2_SERVER_CLEAR_TEXT_PORT = 2350;
     public static final int MOCK_BACKEND_HTTP2_SERVER_SECURED_PORT = 2351;
+    public static final int MOCK_GRAPHQL_SERVER_PORT = 2320;
 }
