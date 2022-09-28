@@ -662,7 +662,7 @@
         <com.sun.xml.messaging.saaj.version>1.5.3</com.sun.xml.messaging.saaj.version>
         <com.graphql.java.version>5.2.4</com.graphql.java.version>
         <graphql.java.version>17.3.wso2v1</graphql.java.version>
-        <org.jetbrains.kotlin.version>1.3.70</org.jetbrains.kotlin.version>
+        <org.jetbrains.kotlin.version>1.6.0</org.jetbrains.kotlin.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.13.2</jackson.annotations.version>
