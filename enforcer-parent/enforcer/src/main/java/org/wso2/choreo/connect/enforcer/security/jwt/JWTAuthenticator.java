@@ -177,7 +177,7 @@ public class JWTAuthenticator implements Authenticator {
                         log.debug("Token retrieved from the revoked jwt token map. Token: "
                                 + FilterUtils.getMaskedToken(jwtHeader));
                     }
-                    log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
+                    log.debug("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
                 }
@@ -537,7 +537,7 @@ public class JWTAuthenticator implements Authenticator {
                     log.debug("Token retrieved from the invalid token cache. Token: "
                             + FilterUtils.getMaskedToken(jwtHeader));
                 }
-                log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
+                log.debug("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
                 if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
                     jwtValidationInfo = (JWTValidationInfo) CacheProvider.getGatewayKeyCache().getIfPresent(jti);
                 } else {
