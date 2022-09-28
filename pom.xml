@@ -591,9 +591,9 @@
         <nimbus.jose.jwt.version>7.9</nimbus.jose.jwt.version>
         <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
-        <otel.alpha.version>1.16.0-alpha</otel.alpha.version>
-        <otel.version>1.16.0</otel.version>
-        <otel.otlp.version>1.16.0</otel.otlp.version>
+        <otel.alpha.version>1.18.0-alpha</otel.alpha.version>
+        <otel.version>1.18.0</otel.version>
+        <otel.otlp.version>1.18.0</otel.otlp.version>
         <shade.plugin.version>3.2.4</shade.plugin.version>
         <slf4j.version>1.7.21</slf4j.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
