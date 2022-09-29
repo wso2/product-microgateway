@@ -370,7 +370,8 @@ public class ConfigHolder {
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null);
 
-            // TODO: enable these with a config
+            // TODO: enable these with a config, got error when accessing configHolder
+            // properties since we call loadTrustStore method in ConfigHolder constructor
             loadTrustedCertsToTrustStore();
             loadDefaultCertsToTrustStore();
 
