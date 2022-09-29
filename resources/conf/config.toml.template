@@ -629,3 +629,18 @@ enabled = true
   #   instrumentationName = "CHOREO-CONNECT"
   #   # Maximum number of sampled traces per second string
   #   maximumTracesPerSecond = "2"
+
+  # type = "otlp"
+  # [tracing.configProperties]
+  #   # maximum length of the request path to extract and include in the HttpUrl tag.
+  #   maxPathLength = "256"
+  #   # remote url for publishing traces. i.e - New Relic otlp url.
+  #   connectionString = "https://otlp.nr-data.net"
+  #   # auth header name
+  #   authHeaderName = "api-key"
+  #   # auth header value
+  #   authHeaderValue = "845e16b6cfba0ea5e95e3NRALe8f478ae6d3c97f"
+  #   # library Name to be tagged in traces (`otel.library.name`).
+  #   instrumentationName = "CHOREO-CONNECT"
+  #   # Maximum number of sampled traces per second string
+  #   maximumTracesPerSecond = "2"

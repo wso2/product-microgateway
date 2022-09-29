@@ -27,6 +27,7 @@ public class TracingConstants {
     public static final String AZURE_TRACE_EXPORTER = "azure";
     public static final String JAEGER_TRACE_EXPORTER = "jaeger";
     public static final String ZIPKIN_TRACE_EXPORTER = "zipkin";
+    public static final String OTLP_TRACE_EXPORTER = "otlp";
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
     public static final String ENFORCER_START_SPAN = "Enforcer:Starting request verification";
     public static final String PUBLISH_THROTTLE_EVENT_SPAN = "ThrottleFilter:handleRequest():Publish non " +
@@ -68,6 +69,8 @@ public class TracingConstants {
     public static final String CONF_ENDPOINT = "endpoint";
     public static final String CONF_HOST = "host";
     public static final String CONF_PORT = "port";
+    public static final String CONF_AUTH_HEADER_NAME = "authHeaderName";
+    public static final String CONF_AUTH_HEADER_VALUE = "authHeaderValue";
     public static final int DEFAULT_MAX_TRACES_PER_SEC = 2;
     public static final String DEFAULT_INSTRUMENTATION_NAME = "CHOREO-CONNECT";
     public static final long DEFAULT_TRACING_READ_TIMEOUT = 15;
