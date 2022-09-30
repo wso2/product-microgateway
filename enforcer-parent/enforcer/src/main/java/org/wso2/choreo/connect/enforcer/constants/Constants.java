@@ -73,4 +73,32 @@ public class Constants {
     public static final String PROP_CON_FACTORY = "connectionfactory.TopicConnectionFactory";
     public static final String DEFAULT_DESTINATION_TYPE = "Topic";
     public static final String DEFAULT_CON_FACTORY_JNDI_NAME = "TopicConnectionFactory";
+
+    /**
+     * Enforcer cert trusting methods
+     */
+    public enum CertTrustMethods {
+            TRUST_DEFAULT_CERTS_ONLY("TrustDefaultCertsOnly"),
+            TRUST_PROVIDED_CERTS_ONLY("TrustProvidedCertsOnly"),
+            TRUST_DEFAULT_AND_PROVIDED_CERTS("TrustDefaultAndProvidedCerts");
+
+            private String methodValue;
+
+            CertTrustMethods(String methodValue) {
+                    this.methodValue = methodValue;
+            }
+
+            public String getMethodText() {
+                    return this.methodValue;
+            }
+
+            public static CertTrustMethods fromString(String value) {
+                    for (CertTrustMethods method : CertTrustMethods.values()) {
+                            if (method.methodValue.equals(value)) {
+                                    return method;
+                            }
+                    }
+                    return null;
+            }
+    }
 }
