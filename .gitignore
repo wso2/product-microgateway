@@ -27,7 +27,6 @@ target
 .settings
 .project
 .vscode
-*.i??
 .idea
 *.DS_Store
 *.iml

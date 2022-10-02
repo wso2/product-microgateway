@@ -106,9 +106,9 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
     }
 
     /**
-     * Check if the Gitlab instance is healthy
+     * Check if the Git Service instance is healthy
      *
-     * @return a Callable that checks if the Gitlab instance is healthy
+     * @return a Callable that checks if the Git Service instance is healthy
      */
     public Callable<Boolean> isGitHealthy() throws IOException {
         return new Callable<Boolean>() {
