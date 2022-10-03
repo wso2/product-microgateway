@@ -501,7 +501,7 @@ public class ThrottleDataHolder {
 
         for (Map.Entry<String, String> entry : conditions.getValues().entrySet()) {
             if (headers != null) {
-                String value = headers.get(entry.getKey());
+                String value = headers.get(StringUtils.lowerCase(entry.getKey()));
 
                 if (StringUtils.isEmpty(value)) {
                     status = false;
