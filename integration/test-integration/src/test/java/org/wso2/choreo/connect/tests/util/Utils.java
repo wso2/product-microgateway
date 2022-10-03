@@ -22,6 +22,11 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpHeaders
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.io.FileUtils;
@@ -60,8 +65,10 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.wso2.choreo.connect.tests.util.ApictlUtils.API_PROJECTS_PATH;
 
@@ -256,6 +263,31 @@ public class Utils {
         }
     }
 
+    public static void zip(final String dirPathToZip, final String folderName) throws IOException {
+        Path zipFile = Files.createFile(Paths.get(dirPathToZip + ".zip"));
+        Path sourceDirPath = Paths.get(dirPathToZip);
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile),
+                StandardCharsets.UTF_8); Stream<Path> paths = Files.walk(sourceDirPath)) {
+            paths
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+
+                        ZipEntry zipEntry = new ZipEntry(
+                                // example: dir/petstore.zip/petstore/api.yaml
+                                // to get the correct structure when decompressed.
+                                folderName + File.separator + sourceDirPath.relativize(path));
+                        try {
+                            zipOutputStream.putNextEntry(zipEntry);
+                            Files.copy(path, zipOutputStream);
+                            zipOutputStream.closeEntry();
+                        } catch (IOException e) {
+                            log.error("Error while creating zip for {}", sourceDirPath);
+                        }
+                    });
+        }
+        deleteFolder(new File(dirPathToZip));
+    }
+
     /**
      * Return the system property value of os.name. System.getProperty("os.name").
      *
@@ -294,6 +326,15 @@ public class Utils {
      */
     public static String encodeValueToBase64(String value) throws Exception {
         return Base64.getEncoder().encodeToString(value.getBytes("utf-8"));
+    }
+
+    /**
+     * Encode a byte array to base64 format
+     *
+     * @param value The value to be encoded.
+     */
+    public static String encodeValueToBase64(byte[] value) {
+        return Base64.getEncoder().encodeToString(value);
     }
 
     /**

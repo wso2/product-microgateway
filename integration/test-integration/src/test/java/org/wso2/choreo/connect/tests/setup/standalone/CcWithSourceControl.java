@@ -23,13 +23,11 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.context.CcInstance;
-import org.wso2.choreo.connect.tests.util.*;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
+import org.wso2.choreo.connect.tests.util.SourceControlUtils;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class CcWithSourceControl {
@@ -41,41 +39,26 @@ public class CcWithSourceControl {
         ccInstance = new CcInstance.Builder()
                 .withGitServiceFile("git-service.yaml")
                 .withNewConfig("cc-with-source-control.toml")
+                .withVolumeMountDir("gitea")
                 .build();
         ccInstance.start();
 
-        Awaitility.await().pollDelay(10, TimeUnit.SECONDS).pollInterval(10, TimeUnit.SECONDS)
-                .atMost(6, TimeUnit.MINUTES).until(ccInstance.isGitHealthy());
+        Awaitility.await().pollDelay(10, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
+                .atMost(1, TimeUnit.MINUTES).until(ccInstance.isGitHealthy());
 
-        // Generate an access token for accessing the git instance
-        SourceControlUtils.generateAccessToken();
-        // Test the status of the Gitlab REST API
+        // Test the status of the Git Service REST API
         SourceControlUtils.testGitStatus();
         // Create a new project
-        SourceControlUtils.createProject();
+        SourceControlUtils.createRepo();
         // Commit the initial files to the project
-        commitInitialFiles();
+        SourceControlUtils.commitApiProjectToRepo(Utils.getTargetDirPath()
+                        + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY,
+                false, "Add API Project");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
 
-        TimeUnit.SECONDS.sleep(5);
-    }
-
-    private void commitInitialFiles() throws Exception {
-        List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY);
-        SourceControlUtils.getFiles(artifactsDir, filePaths);
-        Map<String, String> fileActions = new HashMap<>();
-
-        for (String filePath : filePaths){
-            fileActions.put(filePath, SourceControlUtils.ADD_FILE);
-        }
-
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY, "Initial Commit", fileActions);
-        TimeUnit.SECONDS.sleep(10);
+        Utils.delay(5000, "Interrupted while waiting for adapter to sync");
     }
 
     @AfterTest(description = "stop the setup")
@@ -83,5 +66,4 @@ public class CcWithSourceControl {
         ccInstance.stop();
         ApictlUtils.removeEnv("test");
     }
-
 }

@@ -1,0 +1,26 @@
+type: api
+version: v4.0.0
+data:
+  name: SwaggerPetstoreZip
+  description: 'This is a sample server Petstore server.'
+  context: /zip
+  version: 1.0.6
+  provider: admin
+  lifeCycleStatus: CREATED
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+  - http
+  - https
+  policies:
+  - Unlimited
+  visibility: PUBLIC
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: http://localhost:8080
+    sandbox_endpoints:
+      url: http://localhost:8081
+  endpointImplementationType: ENDPOINT
+  websubSubscriptionConfiguration: null
