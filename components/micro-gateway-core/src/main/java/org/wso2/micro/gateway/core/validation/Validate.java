@@ -134,6 +134,10 @@ public class Validate {
     private static String extractReference(String schemaNode) {
         String schemaContent = null;
         String[] val = schemaNode.split("" + Constants.HASH);
+        if (val.length ==  1) {
+            JSONArray jsonArray = new JSONArray(val[0]);
+            return jsonArray.getJSONObject(0).toString();
+        }
         String path = val[1].replaceAll("\"|}|]|\\\\", "");
         String searchLastIndex = null;
         if (StringUtils.isNotEmpty(path)) {
