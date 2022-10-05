@@ -164,8 +164,7 @@ public class JWTUtils {
 
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")
-                    .replaceAll("\r\n", "") // for certs created in a Windows platform
-                    .replaceAll("\n", "") // for certs created in a Unix platform
+                    .replaceAll("\n", "").replaceAll("\r", "") // certs could be created in a Unix/Windows platform
                     .replace(Constants.END_OF_PRIVATE_KEY, "");
 
             byte[] encoded = Base64.getDecoder().decode(strKeyPEM);
