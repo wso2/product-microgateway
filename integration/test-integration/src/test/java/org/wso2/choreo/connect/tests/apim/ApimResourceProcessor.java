@@ -90,6 +90,10 @@ public class ApimResourceProcessor {
     }
 
     public void populateApiManager() throws CCTestException {
+        // Clear the values from the previous iteration
+        apiNameToId.clear();
+        applicationNameToId.clear();
+
         createAdminThrottlePolicies();
         createApisAndUpdateMap();
         createAppsAndUpdateMap();
@@ -137,6 +141,24 @@ public class ApimResourceProcessor {
                 APIM_ARTIFACTS_FOLDER + apimArtifactsIndex + APIS_FOLDER);
         try (Stream<Path> paths = Files.walk(apisLocation, 1)) {
             for (Iterator<Path> apiFiles = paths.filter(Files::isRegularFile).iterator(); apiFiles.hasNext();) {
+                // API-M has a default limit of 25 for the getAllAPIs method. ApimPreparer uses the getAllAPIs
+                // method to delete already created APIs, in the later runs of ApimPreparer in the same testng file.
+                //
+                // If more than 25 APIs were created, this method will not return all the APIs,
+                // and therefore some APIs will not be deleted leading to an error in the next run of ApimPreparer.
+                //
+                // The default limit of 25 can be increased by setting a higher limit in the REST API call.
+                // Yet, deploying a larger number would make test debugging difficult. Hence, we limit the number
+                // of APIs that can be created to 25.
+                //
+                // At this point, if 25 are already added, this will be the 26th API.
+                // Therefore, stop before reaching 25.
+                if (apiNameToId.size() > 24) {
+                    throw new CCTestException("Number of APIs exceeded for ApimPreparer with apimArtifactsIndex "
+                            + apimArtifactsIndex + ". Please add the new API to a different folder in "
+                            + "integration/test-integration/src/test/resources/apim and move the testcase to the "
+                            + "relevant group within the testng file.");
+                }
                 Path apiFilePath = apiFiles.next();
                 String apiFileContent = Files.readString(apiFilePath);
                 APIRequest apiRequest = new Gson().fromJson(apiFileContent, TYPE_API_REQUEST);
