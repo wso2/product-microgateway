@@ -161,11 +161,10 @@ public class JWTUtils {
             String strKeyPEM;
             Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
-            String lineSeparator = System.lineSeparator();
-            
+
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")
-                    .replaceAll(lineSeparator, "")
+                    .replaceAll("\n", "").replaceAll("\r", "") // certs could be created in a Unix/Windows platform
                     .replace(Constants.END_OF_PRIVATE_KEY, "");
 
             byte[] encoded = Base64.getDecoder().decode(strKeyPEM);
