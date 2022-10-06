@@ -68,7 +68,6 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
-import org.wso2.choreo.connect.enforcer.constants.Constants.CertTrustMethods;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -371,19 +370,10 @@ public class ConfigHolder {
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null);
 
-            CertTrustMethods certTrustMethod = CertTrustMethods.fromString(getEnvVarConfig().getCertsTrustingMethod());
-            switch (certTrustMethod) {
-                case TRUST_DEFAULT_CERTS_ONLY:
-                    loadDefaultCertsToTrustStore();
-                    break;
-                case TRUST_PROVIDED_CERTS_ONLY:
-                    loadTrustedCertsToTrustStore();
-                    break;
-                case TRUST_DEFAULT_AND_PROVIDED_CERTS:
-                default:
-                    loadTrustedCertsToTrustStore();
-                    loadDefaultCertsToTrustStore();
+            if (getEnvVarConfig().getTrustDefaultCerts()) {
+                loadDefaultCertsToTrustStore();
             }
+            loadTrustedCertsToTrustStore();
 
             trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(trustStore);

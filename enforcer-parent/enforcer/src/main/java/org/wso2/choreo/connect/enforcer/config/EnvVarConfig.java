@@ -20,14 +20,13 @@ package org.wso2.choreo.connect.enforcer.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
-import org.wso2.choreo.connect.enforcer.constants.Constants.CertTrustMethods;
 
 /**
  * Holds and returns the configuration values retrieved from the environment variables.
  */
 public class EnvVarConfig {
     private static final String TRUSTED_CA_CERTS_PATH = "TRUSTED_CA_CERTS_PATH";
-    private static final String TRUST_CERTS_METHOD = "TRUST_CERTS_METHOD";
+    private static final String TRUST_DEFAULT_CERTS = "TRUST_DEFAULT_CERTS";
     private static final String ADAPTER_HOST_NAME = "ADAPTER_HOST_NAME";
     private static final String ENFORCER_PRIVATE_KEY_PATH = "ENFORCER_PRIVATE_KEY_PATH";
     private static final String ENFORCER_PUBLIC_CERT_PATH = "ENFORCER_PUBLIC_CERT_PATH";
@@ -44,8 +43,7 @@ public class EnvVarConfig {
 
     // Since the container is running in linux container, path separator is not needed.
     private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
-    private static final String DEFAULT_TRUST_CERTS_METHOD = CertTrustMethods.TRUST_DEFAULT_AND_PROVIDED_CERTS
-            .getMethodText();
+    private static final String DEFAULT_TRUST_DEFAULT_CERTS = "true";
     private static final String DEFAULT_ADAPTER_HOST_NAME = "adapter";
     private static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/security/keystore/mg.key";
     private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/keystore/mg.pem";
@@ -60,7 +58,7 @@ public class EnvVarConfig {
 
     private static EnvVarConfig instance;
     private final String trustedAdapterCertsPath;
-    private final String certsTrustingMethod;
+    private final String trustDefaultCerts;
     private final String enforcerPrivateKeyPath;
     private final String enforcerPublicKeyPath;
     private final String opaClientPrivateKeyPath;
@@ -80,8 +78,8 @@ public class EnvVarConfig {
     private EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
                 DEFAULT_TRUSTED_CA_CERTS_PATH);
-        certsTrustingMethod = retrieveEnvVarOrDefault(TRUST_CERTS_METHOD,
-                DEFAULT_TRUST_CERTS_METHOD);
+        trustDefaultCerts = retrieveEnvVarOrDefault(TRUST_DEFAULT_CERTS,
+                DEFAULT_TRUST_DEFAULT_CERTS);
         enforcerPrivateKeyPath = retrieveEnvVarOrDefault(ENFORCER_PRIVATE_KEY_PATH,
                 DEFAULT_ENFORCER_PRIVATE_KEY_PATH);
         enforcerPublicKeyPath = retrieveEnvVarOrDefault(ENFORCER_PUBLIC_CERT_PATH,
@@ -126,8 +124,8 @@ public class EnvVarConfig {
         return trustedAdapterCertsPath;
     }
 
-    public String getCertsTrustingMethod() {
-        return certsTrustingMethod;
+    public boolean getTrustDefaultCerts() {
+        return Boolean.valueOf(trustDefaultCerts);
     }
 
     public String getEnforcerPrivateKeyPath() {
