@@ -1,0 +1,25 @@
+{
+  "name": "CompressionTestAPI",
+  "version": "1.0.0",
+  "context": "compressionTestAPI",
+  "type": "HTTP",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [
+    {
+      "verb": "POST",
+      "target": "/echo-gzip",
+      "throttlingPolicy": "Unlimited"
+    },
+    {
+      "verb": "POST",
+      "target": "/echo",
+      "throttlingPolicy": "Unlimited"
+    }
+  ],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2383/v2"
+    }
+  }
+}

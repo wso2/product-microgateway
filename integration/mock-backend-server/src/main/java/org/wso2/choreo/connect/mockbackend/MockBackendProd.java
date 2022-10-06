@@ -326,6 +326,8 @@ public class MockBackendProd extends Thread {
 
             // echo request body, request headers in echo response payload
             httpServer.createContext(context + "/echo-full", Utils::echoFullRequest);
+            // echo resource with gzip support
+            httpServer.createContext(context+"/echo-gzip",Utils::sendGzipCompression);
 
             httpServer.start();
         } catch (Exception ex) {

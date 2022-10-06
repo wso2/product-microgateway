@@ -58,6 +58,17 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		lua,
 		router,
 	}
+	conf, _ := config.ReadConfigs()
+	if conf.Envoy.Filters.Compression.Enabled {
+		compressionFilter, err := getCompressorFilter()
+		if (err != nil) {
+			logger.LoggerOasparser.Error("Error occurred while creating the compression filter. ", err)
+			return httpFilters
+		}
+		httpFilters = httpFilters[:len(httpFilters)-1]
+		httpFilters = append(httpFilters, compressionFilter)
+		httpFilters = append(httpFilters, router)
+	}
 	return httpFilters
 }
 

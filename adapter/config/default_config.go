@@ -146,6 +146,30 @@ var defaultConfig = &Config{
 			AllowPartialMessage: false,
 			PackAsBytes:         false,
 		},
+		Filters: filters{
+			Compression: compression{
+				Enabled: false,
+				Library: "gzip",
+				RequestDirection: requestDirection{
+					Enabled:              false,
+					MinimumContentLength: 30,
+					ContentType:          []string{"text/html", "application/json"},
+				},
+				ResponseDirection: responseDirection{
+					Enabled:              true,
+					MinimumContentLength: 30,
+					ContentType:          []string{"text/html", "application/json"},
+					EnableForEtagHeader:  true,
+				},
+				LibraryProperties: map[string]interface{}{
+					"memoryLevel":         3,
+					"windowBits":          12,
+					"compressionLevel":    9,
+					"compressionStrategy": "defaultStrategy",
+					"chunkSize":           4096,
+				},
+			},
+		},
 	},
 	Enforcer: enforcer{
 		Management: management{

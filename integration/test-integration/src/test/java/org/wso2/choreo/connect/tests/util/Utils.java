@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.Header;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -651,6 +652,23 @@ public class Utils {
                 getLocation().getPath());
         return targetClassesDir.getParentFile().getParentFile().getParentFile().getParentFile().toString()
                 + File.separator + "samples";
+    }
+
+    /**
+     * @param responseHeaders HTTP response headers list
+     * @param requiredHeader  header name as a string
+     * @return the required HTTP header (if not found, null will be returned)
+     */
+    public static String pickHeader(Map<String, String> responseHeaders, String requiredHeader) {
+        if (requiredHeader == null) {
+            return null;
+        }
+        for (String headerName : responseHeaders.keySet()) {
+            if (requiredHeader.equalsIgnoreCase(headerName)) {
+                return headerName;
+            }
+        }
+        return null;
     }
 
     public static String getAdapterServiceURLHttps(String servicePath) throws MalformedURLException {
