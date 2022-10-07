@@ -610,7 +610,7 @@
 
         <andes.client.version>3.3.23</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
-        <carbon.apimgt.version>9.20.74</carbon.apimgt.version>
+        <carbon.apimgt.version>9.26.29</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.11.0</commons.io.version>

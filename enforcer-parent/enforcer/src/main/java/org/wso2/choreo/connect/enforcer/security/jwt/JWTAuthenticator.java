@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -249,10 +250,10 @@ public class JWTAuthenticator implements Authenticator {
                                     /* GraphQL Query Analysis Information */
                                     if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI()
                                             .getApiType())) {
-                                        requestContext.getProperties().put(APIConstants.GraphQL.MAXIMUM_QUERY_DEPTH,
+                                        requestContext.getProperties().put(GraphQLConstants.MAXIMUM_QUERY_DEPTH,
                                                 apiKeyValidationInfoDTO.getGraphQLMaxDepth());
                                         requestContext.getProperties().put(
-                                                APIConstants.GraphQL.MAXIMUM_QUERY_COMPLEXITY,
+                                                GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY,
                                                 apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
                                     }
                                 }

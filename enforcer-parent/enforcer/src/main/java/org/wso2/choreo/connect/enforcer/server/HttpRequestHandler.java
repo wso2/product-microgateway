@@ -22,6 +22,7 @@ import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
@@ -34,7 +35,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
-import org.wso2.choreo.connect.enforcer.graphql.utils.GraphQLPayloadUtils;
+import org.wso2.choreo.connect.enforcer.graphql.GraphQLPayloadUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
@@ -126,9 +127,9 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
                 requestContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
                         APIConstants.StatusCodes.BAD_REQUEST_ERROR.getCode());
                 requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
-                        APIConstants.GraphQL.GRAPHQL_INVALID_QUERY);
+                        GraphQLConstants.GRAPHQL_INVALID_QUERY);
                 requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                        APIConstants.GraphQL.GRAPHQL_INVALID_QUERY_MESSAGE);
+                        GraphQLConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
                 requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                         exception.getMessage());
                 return requestContext;

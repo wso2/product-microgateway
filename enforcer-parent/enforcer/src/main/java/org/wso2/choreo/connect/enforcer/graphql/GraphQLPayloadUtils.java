@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.enforcer.graphql.utils;
+package org.wso2.choreo.connect.enforcer.graphql;
 
 import graphql.language.Definition;
 import graphql.language.Document;
@@ -29,6 +29,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
+import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.choreo.connect.discovery.api.GraphqlComplexity;
 import org.wso2.choreo.connect.enforcer.api.API;
@@ -43,6 +45,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -75,7 +78,7 @@ public class GraphQLPayloadUtils {
                         OperationDefinition operation = (OperationDefinition) definition;
                         if (operation.getOperation() != null) {
                             method = operation.getOperation().toString();
-                            operationList = GraphQLProcessorUtils.getOperationList(operation,
+                            operationList = GraphQLProcessorUtil.getOperationList(operation,
                                     graphQLSchemaDTO.getTypeDefinitionRegistry());
                             logger.debug("Found operation list : " + operationList.toString());
                             break;
@@ -120,7 +123,7 @@ public class GraphQLPayloadUtils {
                         .equalsIgnoreCase(requestHeaders.get(APIConstants.CONTENT_TYPE_HEADER)))) {
             try {
                 JSONObject jsonObject = new JSONObject(requestPayload);
-                queryBody = jsonObject.getString(APIConstants.GraphQL.GRAPHQL_QUERY_BODY);
+                queryBody = jsonObject.getString(GraphQLConstants.GRAPHQL_QUERY.toLowerCase(Locale.ROOT));
             } catch (JSONException e) {
                 throw new EnforcerException("Invalid GraphQL query body structure");
             }
