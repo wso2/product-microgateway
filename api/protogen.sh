@@ -60,6 +60,7 @@ docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-re
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/subscription/
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/throttle/
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/ga/
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/apkmgt/
 printf " - ${GREEN}${BOLD}done${NC}\n"
 
 # map of proto imports for which we need to update the genrated import path
@@ -75,6 +76,7 @@ docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i ta
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/subscription
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/throttle
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/ga
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/apkmgt
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/ws-go --go-source-relative -d proto/wso2/discovery/service/websocket
 printf "protoc go services - ${GREEN}${BOLD}done${NC}\n"
 
@@ -83,6 +85,9 @@ rm -rf $ENFORCER_GEN_DIR/org
 # Java generated implementations are not required for global adapter related protobufs
 rm -rf target/gen/java/org/wso2/choreo/connect/discovery/ga
 rm -rf target/gen/java/org/wso2/choreo/connect/discovery/service/ga
+# Java generated implementations are not required for apkmgt related protobufs
+rm -rf target/gen/java/org/wso2/choreo/connect/discovery/apkmgt
+rm -rf target/gen/java/org/wso2/choreo/connect/discovery/service/apkmgt
 cp -r target/gen/go/* $ADAPTER_GEN_DIR
 cp -r target/gen/java/* $ENFORCER_GEN_DIR
 
