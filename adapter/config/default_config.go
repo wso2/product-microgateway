@@ -148,7 +148,7 @@ var defaultConfig = &Config{
 		},
 		Filters: filters{
 			Compression: compression{
-				Enabled: false,
+				Enabled: true,
 				Library: "gzip",
 				RequestDirection: requestDirection{
 					Enabled:              false,

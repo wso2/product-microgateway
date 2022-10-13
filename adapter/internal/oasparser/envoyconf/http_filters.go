@@ -20,6 +20,7 @@
 package envoyconf
 
 import (
+	"fmt"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -37,6 +38,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
 	//mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
 	"github.com/golang/protobuf/ptypes/any"
@@ -61,8 +63,12 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	conf, _ := config.ReadConfigs()
 	if conf.Envoy.Filters.Compression.Enabled {
 		compressionFilter, err := getCompressorFilter()
-		if (err != nil) {
-			logger.LoggerOasparser.Error("Error occurred while creating the compression filter. ", err)
+		if err != nil {
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while creating the compression filter: %v", err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 2234,
+			})
 			return httpFilters
 		}
 		httpFilters = httpFilters[:len(httpFilters)-1]
@@ -136,7 +142,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		},
 	}
 
-	// configures envoy to handle request body and GraphQL APIs require below configs to pass request 
+	// configures envoy to handle request body and GraphQL APIs require below configs to pass request
 	// payload to the enforcer.
 	extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
 		MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,

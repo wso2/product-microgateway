@@ -234,7 +234,7 @@ soapErrorInXMLEnabled = false
   # Configurations relevant to the compression filter
   [router.filters.compression]
     # Enable/Disable compression filter for the router
-    enabled = false
+    enabled = true
     # Defines compression library used in the filter
     library = "gzip"
   # Configurations relevant to the compression filter's request direction (router's upstream request)
@@ -267,7 +267,6 @@ soapErrorInXMLEnabled = false
     compressionStrategy = "defaultStrategy"
     # zlib's next output buffer
     chunkSize = 4096
-
 
 [enforcer] # --------------------------------------------------------
 
