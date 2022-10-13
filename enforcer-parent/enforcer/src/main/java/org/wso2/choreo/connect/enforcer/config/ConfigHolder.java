@@ -404,16 +404,18 @@ public class ConfigHolder {
         }
 
         // Get the certs from defaultTm and add them to our trustStore
-        X509Certificate[] trustedCerts = defaultTm.getAcceptedIssuers();
-        Arrays.stream(trustedCerts)
-                .forEach(cert -> {
-                    try {
-                        trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
-                                cert);
-                    } catch (KeyStoreException e) {
-                        logger.error("Error while adding default trusted ca cert", e);
-                    }
-                });
+        if (defaultTm != null) {
+            X509Certificate[] trustedCerts = defaultTm.getAcceptedIssuers();
+            Arrays.stream(trustedCerts)
+                    .forEach(cert -> {
+                        try {
+                            trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
+                                    cert);
+                        } catch (KeyStoreException e) {
+                            logger.error("Error while adding default trusted ca cert", e);
+                        }
+                    });
+        }
     }
 
     private void loadOpaClientKeyStore() {
