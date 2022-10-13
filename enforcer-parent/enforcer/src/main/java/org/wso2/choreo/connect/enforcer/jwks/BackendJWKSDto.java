@@ -3,12 +3,14 @@ package org.wso2.choreo.connect.enforcer.jwks;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 
-
 import java.util.List;
 
+/**
+ * Configuration holder for Backend JWKS endpoint
+ */
 public class BackendJWKSDto {
     private boolean isEnabled = false;
-    private JWKSet JWKS;
+    private JWKSet jwks;
 
     public BackendJWKSDto() {
 
@@ -22,14 +24,14 @@ public class BackendJWKSDto {
         isEnabled = enabled;
     }
 
-    public JWKSet getJWKS() {
-        if (JWKS==null) {
-            return new JWKSet();
+    public JWKSet getJwks() {
+        if (jwks == null) {
+            this.jwks = new JWKSet();
         }
-        return JWKS;
+        return jwks;
     }
 
-    public void setJWKS(List<JWK> ls) {
-        this.JWKS = new JWKSet(ls);
+    public void setJwks(List<JWK> ls) {
+        this.jwks = new JWKSet(ls);
     }
 }

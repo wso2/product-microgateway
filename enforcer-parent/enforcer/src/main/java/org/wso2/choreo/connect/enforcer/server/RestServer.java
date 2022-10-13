@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.admin.AdminServerInitializer;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.jwks.JWKSServerInitializer;
 import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerInitializer;
 
 import java.io.File;
@@ -48,6 +49,8 @@ public class RestServer {
     private static final Logger logger = LogManager.getLogger(RestServer.class);
     static final int TOKEN_PORT = 8082;
     static final int ADMIN_PORT = 9001;
+
+    static final int JWKS_PORT = 9002;
 
     public void initServer() throws SSLException, CertificateException, InterruptedException {
 
@@ -76,6 +79,23 @@ public class RestServer {
             Channel tokenChannel = tokenServer.bind(TOKEN_PORT).sync().channel();
             logger.info("Token endpoint started Listening in port : " + TOKEN_PORT);
 
+            // JWKS Server
+
+            if (ConfigHolder.getInstance().getConfig().getBackendJWKSDto().isEnabled()) {
+                ServerBootstrap jwksServer = new ServerBootstrap();
+                // Configure the server
+                jwksServer.option(ChannelOption.SO_BACKLOG, 1024);
+                jwksServer.group(bossGroup, workerGroup)
+                        .channel(NioServerSocketChannel.class)
+                        .handler(new LoggingHandler(LogLevel.INFO))
+                        .childHandler(new JWKSServerInitializer(sslCtx));
+
+                Channel jwksChannel = jwksServer.bind(JWKS_PORT).sync().channel();
+                logger.info("JWKS endpoint started Listening in port : " + JWKS_PORT);
+                jwksChannel.closeFuture().sync();
+            }
+
+
 
             if (ConfigHolder.getInstance().getConfig().getRestServer().isEnable()) {
                 ServerBootstrap adminServer = new ServerBootstrap();
@@ -90,6 +110,9 @@ public class RestServer {
                 logger.info("Admin endpoint started Listening in port : " + ADMIN_PORT);
                 adminChannel.closeFuture().sync();
             }
+
+
+
 
             // Wait until server socket is closed
             tokenChannel.closeFuture().sync();

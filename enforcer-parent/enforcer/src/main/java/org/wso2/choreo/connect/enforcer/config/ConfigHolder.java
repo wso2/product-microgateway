@@ -18,6 +18,12 @@
 
 package org.wso2.choreo.connect.enforcer.config;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.X509CertUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,6 +73,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.jwks.BackendJWKSDto;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -80,6 +87,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -462,8 +471,44 @@ public class ConfigHolder {
         } catch (EnforcerException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);
         }
+
         config.setJwtConfigurationDto(jwtConfigurationDto);
+        populateBackendJWKSConfiguration(jwtGenerator);
     }
+
+    private void populateBackendJWKSConfiguration(JWTGenerator jwtGenerator) {
+        BackendJWKSDto backendJWKSDto = new BackendJWKSDto();
+        backendJWKSDto.setEnabled(jwtGenerator.getJwksEnabled());
+        if (jwtGenerator.getJwksEnabled()) {
+            String[] publicCertPaths = new String[jwtGenerator.getJwksPublicCertificatePathsCount()];
+            for (int i = 0; i < jwtGenerator.getJwksPublicCertificatePathsCount(); i++) {
+                publicCertPaths[i] = jwtGenerator.getJwksPublicCertificatePaths(i);
+            }
+            ArrayList<JWK> jwks = new ArrayList<>(publicCertPaths.length);
+            try {
+                for (String publicCertPath : publicCertPaths) {
+
+                    X509Certificate cert = X509CertUtils.parse(TLSUtils.getCertificate(publicCertPath).getEncoded());
+                    RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
+                    RSAKey jwk = new RSAKey.Builder(publicKey)
+                            .keyUse(KeyUse.SIGNATURE)
+                            .algorithm(JWSAlgorithm.RS256)
+                            .keyIDFromThumbprint()
+                            .build().toPublicJWK();
+                    jwks.add(jwk);
+
+                }
+            } catch (JOSEException | CertificateException | IOException e) {
+                logger.error("Error in loading public cert for JWKS", e);
+            }
+            backendJWKSDto.setJwks(jwks);
+        }
+
+        config.setBackendJWKSDto(backendJWKSDto);
+
+    }
+
+
 
     private void populateCacheConfigs(Cache cache) {
         CacheDto cacheDto = new CacheDto();

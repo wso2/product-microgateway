@@ -28,6 +28,7 @@ private static final long serialVersionUID = 0L;
     claimsExtractorImpl_ = "";
     publicCertificatePath_ = "";
     privateKeyPath_ = "";
+    jwksPublicCertificatePaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
   }
 
   @java.lang.Override
@@ -50,6 +51,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -128,6 +130,20 @@ private static final long serialVersionUID = 0L;
             tokenTtl_ = input.readInt32();
             break;
           }
+          case 104: {
+
+            jwksEnabled_ = input.readBool();
+            break;
+          }
+          case 114: {
+            java.lang.String s = input.readStringRequireUtf8();
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              jwksPublicCertificatePaths_ = new com.google.protobuf.LazyStringArrayList();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            jwksPublicCertificatePaths_.add(s);
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -143,6 +159,9 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        jwksPublicCertificatePaths_ = jwksPublicCertificatePaths_.getUnmodifiableView();
+      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -508,6 +527,52 @@ private static final long serialVersionUID = 0L;
     return tokenTtl_;
   }
 
+  public static final int JWKS_ENABLED_FIELD_NUMBER = 13;
+  private boolean jwksEnabled_;
+  /**
+   * <code>bool jwks_enabled = 13;</code>
+   * @return The jwksEnabled.
+   */
+  @java.lang.Override
+  public boolean getJwksEnabled() {
+    return jwksEnabled_;
+  }
+
+  public static final int JWKS_PUBLIC_CERTIFICATE_PATHS_FIELD_NUMBER = 14;
+  private com.google.protobuf.LazyStringList jwksPublicCertificatePaths_;
+  /**
+   * <code>repeated string jwks_public_certificate_paths = 14;</code>
+   * @return A list containing the jwksPublicCertificatePaths.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getJwksPublicCertificatePathsList() {
+    return jwksPublicCertificatePaths_;
+  }
+  /**
+   * <code>repeated string jwks_public_certificate_paths = 14;</code>
+   * @return The count of jwksPublicCertificatePaths.
+   */
+  public int getJwksPublicCertificatePathsCount() {
+    return jwksPublicCertificatePaths_.size();
+  }
+  /**
+   * <code>repeated string jwks_public_certificate_paths = 14;</code>
+   * @param index The index of the element to return.
+   * @return The jwksPublicCertificatePaths at the given index.
+   */
+  public java.lang.String getJwksPublicCertificatePaths(int index) {
+    return jwksPublicCertificatePaths_.get(index);
+  }
+  /**
+   * <code>repeated string jwks_public_certificate_paths = 14;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the jwksPublicCertificatePaths at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getJwksPublicCertificatePathsBytes(int index) {
+    return jwksPublicCertificatePaths_.getByteString(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -558,6 +623,12 @@ private static final long serialVersionUID = 0L;
     if (tokenTtl_ != 0) {
       output.writeInt32(12, tokenTtl_);
     }
+    if (jwksEnabled_ != false) {
+      output.writeBool(13, jwksEnabled_);
+    }
+    for (int i = 0; i < jwksPublicCertificatePaths_.size(); i++) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 14, jwksPublicCertificatePaths_.getRaw(i));
+    }
     unknownFields.writeTo(output);
   }
 
@@ -607,6 +678,18 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt32Size(12, tokenTtl_);
     }
+    if (jwksEnabled_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(13, jwksEnabled_);
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < jwksPublicCertificatePaths_.size(); i++) {
+        dataSize += computeStringSizeNoTag(jwksPublicCertificatePaths_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getJwksPublicCertificatePathsList().size();
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -646,6 +729,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getPrivateKeyPath())) return false;
     if (getTokenTtl()
         != other.getTokenTtl()) return false;
+    if (getJwksEnabled()
+        != other.getJwksEnabled()) return false;
+    if (!getJwksPublicCertificatePathsList()
+        .equals(other.getJwksPublicCertificatePathsList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -684,6 +771,13 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getPrivateKeyPath().hashCode();
     hash = (37 * hash) + TOKEN_TTL_FIELD_NUMBER;
     hash = (53 * hash) + getTokenTtl();
+    hash = (37 * hash) + JWKS_ENABLED_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getJwksEnabled());
+    if (getJwksPublicCertificatePathsCount() > 0) {
+      hash = (37 * hash) + JWKS_PUBLIC_CERTIFICATE_PATHS_FIELD_NUMBER;
+      hash = (53 * hash) + getJwksPublicCertificatePathsList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -845,6 +939,10 @@ private static final long serialVersionUID = 0L;
 
       tokenTtl_ = 0;
 
+      jwksEnabled_ = false;
+
+      jwksPublicCertificatePaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -871,6 +969,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator result = new org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator(this);
+      int from_bitField0_ = bitField0_;
       result.enable_ = enable_;
       result.encoding_ = encoding_;
       result.claimDialect_ = claimDialect_;
@@ -883,6 +982,12 @@ private static final long serialVersionUID = 0L;
       result.publicCertificatePath_ = publicCertificatePath_;
       result.privateKeyPath_ = privateKeyPath_;
       result.tokenTtl_ = tokenTtl_;
+      result.jwksEnabled_ = jwksEnabled_;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        jwksPublicCertificatePaths_ = jwksPublicCertificatePaths_.getUnmodifiableView();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      }
+      result.jwksPublicCertificatePaths_ = jwksPublicCertificatePaths_;
       onBuilt();
       return result;
     }
@@ -975,6 +1080,19 @@ private static final long serialVersionUID = 0L;
       if (other.getTokenTtl() != 0) {
         setTokenTtl(other.getTokenTtl());
       }
+      if (other.getJwksEnabled() != false) {
+        setJwksEnabled(other.getJwksEnabled());
+      }
+      if (!other.jwksPublicCertificatePaths_.isEmpty()) {
+        if (jwksPublicCertificatePaths_.isEmpty()) {
+          jwksPublicCertificatePaths_ = other.jwksPublicCertificatePaths_;
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          ensureJwksPublicCertificatePathsIsMutable();
+          jwksPublicCertificatePaths_.addAll(other.jwksPublicCertificatePaths_);
+        }
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -1003,6 +1121,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private boolean enable_ ;
     /**
@@ -1732,6 +1851,147 @@ private static final long serialVersionUID = 0L;
     public Builder clearTokenTtl() {
       
       tokenTtl_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private boolean jwksEnabled_ ;
+    /**
+     * <code>bool jwks_enabled = 13;</code>
+     * @return The jwksEnabled.
+     */
+    @java.lang.Override
+    public boolean getJwksEnabled() {
+      return jwksEnabled_;
+    }
+    /**
+     * <code>bool jwks_enabled = 13;</code>
+     * @param value The jwksEnabled to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJwksEnabled(boolean value) {
+      
+      jwksEnabled_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool jwks_enabled = 13;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearJwksEnabled() {
+      
+      jwksEnabled_ = false;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.LazyStringList jwksPublicCertificatePaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private void ensureJwksPublicCertificatePathsIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        jwksPublicCertificatePaths_ = new com.google.protobuf.LazyStringArrayList(jwksPublicCertificatePaths_);
+        bitField0_ |= 0x00000001;
+       }
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @return A list containing the jwksPublicCertificatePaths.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getJwksPublicCertificatePathsList() {
+      return jwksPublicCertificatePaths_.getUnmodifiableView();
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @return The count of jwksPublicCertificatePaths.
+     */
+    public int getJwksPublicCertificatePathsCount() {
+      return jwksPublicCertificatePaths_.size();
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @param index The index of the element to return.
+     * @return The jwksPublicCertificatePaths at the given index.
+     */
+    public java.lang.String getJwksPublicCertificatePaths(int index) {
+      return jwksPublicCertificatePaths_.get(index);
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the jwksPublicCertificatePaths at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getJwksPublicCertificatePathsBytes(int index) {
+      return jwksPublicCertificatePaths_.getByteString(index);
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @param index The index to set the value at.
+     * @param value The jwksPublicCertificatePaths to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJwksPublicCertificatePaths(
+        int index, java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureJwksPublicCertificatePathsIsMutable();
+      jwksPublicCertificatePaths_.set(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @param value The jwksPublicCertificatePaths to add.
+     * @return This builder for chaining.
+     */
+    public Builder addJwksPublicCertificatePaths(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureJwksPublicCertificatePathsIsMutable();
+      jwksPublicCertificatePaths_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @param values The jwksPublicCertificatePaths to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllJwksPublicCertificatePaths(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureJwksPublicCertificatePathsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, jwksPublicCertificatePaths_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearJwksPublicCertificatePaths() {
+      jwksPublicCertificatePaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000001);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string jwks_public_certificate_paths = 14;</code>
+     * @param value The bytes of the jwksPublicCertificatePaths to add.
+     * @return This builder for chaining.
+     */
+    public Builder addJwksPublicCertificatePathsBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      ensureJwksPublicCertificatePathsIsMutable();
+      jwksPublicCertificatePaths_.add(value);
       onChanged();
       return this;
     }
