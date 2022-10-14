@@ -17,8 +17,8 @@
 FROM adoptopenjdk/openjdk11:jre-11.0.16.1_1
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
-RUN apk update && apk upgrade --no-cache
-RUN apk add --no-cache tzdata
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y tzdata
 
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
@@ -55,8 +55,8 @@ ARG MOTD="\n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
 RUN \
-    addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
-    && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
+    groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
+    && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
     && mkdir ${MG_USER_HOME}/logs && mkdir -p ${MG_USER_HOME}/lib/dropins \
     && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME} \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
