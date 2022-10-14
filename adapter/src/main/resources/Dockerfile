@@ -14,11 +14,11 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM alpine:3.15.4
+FROM alpine:3.16.2
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
-RUN apk add  --no-cache tzdata
+RUN apk add --no-cache tzdata
 
 ENV LANG=C.UTF-8
 

@@ -14,11 +14,11 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/openjdk11:jre-11.0.14.1_1-alpine
+FROM adoptopenjdk/openjdk11:jre-11.0.16.1_1
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
-RUN apk add  --no-cache tzdata
+RUN apk add --no-cache tzdata
 
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
