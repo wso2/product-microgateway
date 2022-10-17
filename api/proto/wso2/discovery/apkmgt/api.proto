@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package wso2.discovery.apkmgt;
 
-option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/appikmgt;apikmgt";
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/apkmgtapi;apkmgtapi";
 option java_package = "org.wso2.choreo.connect.discovery.apkmgt";
-option java_outer_classname = "GAApiProto";
+option java_outer_classname = "ApkMgtApiProto";
 option java_multiple_files = false;
 
 // [#protodoc-title: Api]

@@ -25,6 +25,7 @@ import (
 	streamv3 "github.com/envoyproxy/go-control-plane/pkg/server/stream/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/apkmgt"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/keymgt"
@@ -50,6 +51,7 @@ type Server interface {
 	keymgt.RevokedTokenDiscoveryServiceServer
 	throttle.ThrottleDataDiscoveryServiceServer
 	ga.ApiGADiscoveryServiceServer
+	apkmgt.APKMgtDiscoveryServiceServer
 
 	rest.Server
 	envoy_sotw.Server
@@ -80,6 +82,7 @@ type server struct {
 	keymgt.UnimplementedRevokedTokenDiscoveryServiceServer
 	throttle.UnimplementedThrottleDataDiscoveryServiceServer
 	ga.UnimplementedApiGADiscoveryServiceServer
+	apkmgt.UnimplementedAPKMgtDiscoveryServiceServer
 	rest  rest.Server
 	sotw  envoy_sotw.Server
 	delta envoy_delta.Server
@@ -137,6 +140,10 @@ func (s *server) StreamGAApis(stream ga.ApiGADiscoveryService_StreamGAApisServer
 	return s.StreamHandler(stream, resource.GAAPIType)
 }
 
+func (s *server) StreamAPKMgtApis(stream apkmgt.APKMgtDiscoveryService_StreamAPKMgtApisServer) error {
+	return s.StreamHandler(stream, resource.APKMgtType)
+}
+
 // Fetch is the universal fetch method.
 func (s *server) Fetch(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
 	return s.rest.Fetch(ctx, req)
@@ -179,6 +186,14 @@ func (s *server) FetchGAApis(ctx context.Context, req *discovery.DiscoveryReques
 		return nil, status.Errorf(codes.Unavailable, "empty request")
 	}
 	req.TypeUrl = resource.GAAPIType
+	return s.Fetch(ctx, req)
+}
+
+func (s *server) FetchAPKMgtApis(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
+	if req == nil {
+		return nil, status.Errorf(codes.Unavailable, "empty request")
+	}
+	req.TypeUrl = resource.APKMgtType
 	return s.Fetch(ctx, req)
 }
 
