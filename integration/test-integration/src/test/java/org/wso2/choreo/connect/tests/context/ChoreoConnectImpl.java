@@ -155,22 +155,19 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      *
      * @throws CCTestException if an error occurs while file copy operation
      */
-    void createTmpMgwSetup(boolean isInitialStartup) throws CCTestException {
-        log.info(">>>>>>> ############# Creating a new CC startup....");
-        if (!isInitialStartup) {
-            log.info(">>>>>>> ############# Creating a new CC startup after initialization....");
-            File myObj = new File(System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+    void createTmpMgwSetup(boolean isInitialStartup, boolean isCodeCovAllowedToSkip) throws CCTestException {
+        if (!isCodeCovAllowedToSkip && !isInitialStartup) {
+            File myObj = new File(System.getProperty("root_pom_path") + "/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
             if (myObj.delete()) {
-                System.out.println("Deleted the file: " + myObj.getName());
+                log.debug("Deleted the aggregate.exec file");
             } else {
-                System.out.println("Failed to delete the file.");
+                log.debug("Failed to delete aggregate.exec file");
             }
-            Utils.copyFile2(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH + File.separator + "aggregate.exec",
+            Utils.copyFileWithAttributes(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH + File.separator + "aggregate.exec",
                     System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
         }
         Utils.deleteQuietly(ccTempPath);
         Utils.copyDirectory(ccExtractedPath, ccTempPath);
-        log.info(">>" + System.getProperty("root_pom_path"));
     }
 
     public void addCcLoggersToEnv() {
@@ -195,9 +192,9 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
                         + File.separator + "jwt-transformer.jar");
     }
 
+    // adds aggregated jacoco exec (relevant to the enforcer) into the cc-temp dropins directory
     public static void addCodeCovExec() throws CCTestException {
-        log.info(">>>>>>>> |||||||||||| "+ System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
-        Utils.copyFile2(System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec",
+        Utils.copyFileWithAttributes(System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec",
                 Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
                         + File.separator + "aggregate.exec");
     }

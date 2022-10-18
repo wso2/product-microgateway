@@ -50,16 +50,22 @@ public class CcInstance extends ChoreoConnectImpl {
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
                        boolean isInterceptorCertRequired, String enforcerTrustCertsDir, String volumeMountDir,
                        boolean isClientCertValidationRequired, boolean isInitialStartup
-                       )
-            throws IOException, CCTestException {
-        createTmpMgwSetup(isInitialStartup);
+                       ) throws IOException, CCTestException {
+        boolean isCodeCovAllowedToSkip = true;
+        if (System.getProperty("is_code_coverage_enabled") != null) {
+            String codeCovProperty = System.getProperty("is_code_coverage_enabled");
+            isCodeCovAllowedToSkip = Boolean.valueOf(codeCovProperty);
+        }
+        createTmpMgwSetup(isInitialStartup, isCodeCovAllowedToSkip);
         String targetDir = Utils.getTargetDirPath();
         if (!StringUtils.isEmpty(confFileName)) {
             Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
                             + File.separator + confFileName,
                     ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.CONFIG_TOML_PATH);
         }
-        addCodeCovExec();
+        if(!isCodeCovAllowedToSkip) {
+            addCodeCovExec();
+        }
         if (withCustomJwtTransformer && withAnalyticsMetricImpl) {
             addCustomJwtTransformer();
         }

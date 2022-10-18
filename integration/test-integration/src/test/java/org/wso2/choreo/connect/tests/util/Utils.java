@@ -513,7 +513,7 @@ public class Utils {
         }
     }
 
-    public static void copyFile2(String sourceLocation, String destLocation) throws CCTestException {
+    public static void copyFileWithAttributes(String sourceLocation, String destLocation) throws CCTestException {
         try {
             Path sourcePath = Paths.get(sourceLocation);
             Path destPath = Paths.get(destLocation);

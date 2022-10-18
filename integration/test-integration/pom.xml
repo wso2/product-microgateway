@@ -39,7 +39,8 @@
                         <jwt_transformer_jar>
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
-                    <root_pom_path>${ccBaseDir}</root_pom_path>
+                        <root_pom_path>${ccBaseDir}</root_pom_path>
+                        <is_code_coverage_enabled>${skip.code.coverage}</is_code_coverage_enabled>
                         <apictl_version>${apictl.version}</apictl_version>
 <!--                        <jacoco_exec_location>-->
 <!--                            ${ccBaseDir}/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec-->
