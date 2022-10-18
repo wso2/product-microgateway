@@ -131,6 +131,9 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <skip>${skip.code.coverage}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -183,6 +186,33 @@
                             <url>https://github.com/wso2/product-apim-tooling/releases/download/v${apictl.version}/${apictl.package}</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.code.coverage}</skip>
+                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-before-int-tests.sh</executable>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>after-integration-tests</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.code.coverage}</skip>
+                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-after-int-tests.sh</executable>
                         </configuration>
                     </execution>
                 </executions>
