@@ -91,6 +91,6 @@ public class PrototypedAPITestCase extends ApimBaseTest {
                         Utils.getServiceURLHttps("/petstore-prototype/1.0.0/pet/findByStatus"), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
     }
 }

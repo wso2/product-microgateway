@@ -120,17 +120,6 @@ public class AuthFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-
-        // It is required to skip the auth Filter if the lifecycle status is prototype
-        if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(
-                requestContext.getMatchedAPI().getApiLifeCycleState())) {
-            // For prototyped endpoints, only the production endpoints could be available.
-            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
-                    requestContext.getProdClusterHeader());
-            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
-            return true;
-        }
-
         boolean canAuthenticated = false;
         for (Authenticator authenticator : authenticators) {
             if (authenticator.canAuthenticate(requestContext)) {
