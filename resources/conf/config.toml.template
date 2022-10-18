@@ -244,7 +244,7 @@ soapErrorInXMLEnabled = false
     # Minimum byte amount considered before applying the compression
     minimumContentLength = 30
     # Content types to consider for the compression
-    contentType = ["text/html","application/json"]
+    contentType = ["application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"]
   # Configurations relevant to the compression filter's response direction (router's downstream request)
   [router.filters.compression.responseDirection]
     # Enable/Disable request direction compression
@@ -252,7 +252,7 @@ soapErrorInXMLEnabled = false
     # Minimum byte amount considered before applying the compression
     minimumContentLength = 30
     # Content types to consider for the compression
-    contentType = ["text/html","application/json"]
+    contentType = ["application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"]
     # Enable/Disable the compression if there is an Etag header
     enableForEtagHeader = true
   # Configurations relevant to the compression library
