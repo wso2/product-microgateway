@@ -229,6 +229,45 @@ soapErrorInXMLEnabled = false
   # If enabled, request body will send as raw bytes, otherwise it will be a UTF-8 string request body.
   packAsBytes = false
 
+# Configurations relevant to the router filters
+[router.filters]
+  # Configurations relevant to the compression filter
+  [router.filters.compression]
+    # Enable/Disable compression filter for the router
+    enabled = true
+    # Defines compression library used in the filter
+    library = "gzip"
+  # Configurations relevant to the compression filter's request direction (router's upstream request)
+  [router.filters.compression.requestDirection]
+    # Enable/Disable request direction compression
+    enabled = false
+    # Minimum byte amount considered before applying the compression
+    minimumContentLength = 30
+    # Content types to consider for the compression
+    contentType = ["application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"]
+  # Configurations relevant to the compression filter's response direction (router's downstream request)
+  [router.filters.compression.responseDirection]
+    # Enable/Disable request direction compression
+    enabled = true
+    # Minimum byte amount considered before applying the compression
+    minimumContentLength = 30
+    # Content types to consider for the compression
+    contentType = ["application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"]
+    # Enable/Disable the compression if there is an Etag header
+    enableForEtagHeader = true
+  # Configurations relevant to the compression library
+  [router.filters.compression.libraryProperties]
+    # controls the amount of internal memory used by zlib (value range is 1 to 9)
+    memoryLevel = 3
+    # base two logarithmic of the compressor's window size (value range is 9 to 15)
+    windowBits = 12
+    # zlib compression level (higher values provide better compression level. Value range is 0 to 9)
+    compressionLevel = 9
+    # zlib compression strategy (values: defaultStrategy, gzipFiltered, gzipHuffmanOnly, gzipRle, gzipFixed)
+    compressionStrategy = "defaultStrategy"
+    # zlib's next output buffer
+    chunkSize = 4096
+
 [enforcer] # --------------------------------------------------------
 
 # If Custom Filters needs to be engaged, mention them here with position.

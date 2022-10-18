@@ -38,6 +38,7 @@ const (
 	mgwWASMVmRuntime           string = "envoy.wasm.runtime.v8"
 	mgwWebSocketWASMFilterRoot string = "mgw_WASM_websocket_root"
 	mgwWebSocketWASM           string = "/home/wso2/wasm/websocket/mgw-websocket.wasm"
+	compressorFilterName       string = "envoy.filters.http.compressor"
 )
 
 const (

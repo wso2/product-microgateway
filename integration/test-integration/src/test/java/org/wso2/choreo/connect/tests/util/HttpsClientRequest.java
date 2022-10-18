@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +60,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
@@ -429,6 +431,12 @@ public class HttpsClientRequest {
 
         try {
             if (responseCode < 400) {
+                Map<String, String> headers = readHeaders(conn);
+                if(headers.containsKey("content-encoding") && headers.get("content-encoding").equalsIgnoreCase("gzip")) {
+                    httpResponse = new HttpResponse(convertGzipEncodingToString(conn.getInputStream()), responseCode, readHeaders(conn));
+                    httpResponse.setResponseMessage(conn.getResponseMessage());
+                    return httpResponse;
+                }
                 inputStreamReader = new InputStreamReader(conn.getInputStream(), Charset.defaultCharset());
             } else {
                 inputStreamReader = new InputStreamReader(conn.getErrorStream(), Charset.defaultCharset());
@@ -449,6 +457,20 @@ public class HttpsClientRequest {
         } finally {
             IOUtils.closeQuietly(bufferedReader);
             IOUtils.closeQuietly(inputStreamReader);
+        }
+    }
+
+    private static String convertGzipEncodingToString(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream)) {
+            int len = -1;
+            byte[] buf = new byte[4096];
+            while ((len = gzipInputStream.read(buf, 0, buf.length)) != -1) {
+                byteArrayOutputStream.write(buf, 0, len);
+            }
+            return byteArrayOutputStream.toString();
+        } finally {
+            byteArrayOutputStream.close();
         }
     }
 
