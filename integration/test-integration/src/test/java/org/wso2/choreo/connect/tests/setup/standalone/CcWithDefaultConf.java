@@ -49,7 +49,7 @@ public class CcWithDefaultConf {
                 .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH +
                         "openAPI_startup_zipped.zip")
                 .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH + "openAPI_startup")
-                .build();
+                .build(true);
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());

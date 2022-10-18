@@ -43,7 +43,7 @@ public class CcStartupExecutorTwo extends ApimBaseTest {
                 .withNewConfig("cc-special-scenarios-with-apim.toml")
                 .withBackendServiceFile("backend-service-with-tls-and-network.yaml")
                 .withInterceptorCertInRouterTruststore()
-                .withAllCustomImpls().build();
+                .withAllCustomImpls().build(false);
         ccInstance.start();
         Awaitility.await().pollDelay(20, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());

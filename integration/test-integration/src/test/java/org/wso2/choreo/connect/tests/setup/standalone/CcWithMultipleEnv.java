@@ -43,7 +43,7 @@ public class CcWithMultipleEnv {
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
 
-        ccInstance = new CcInstance.Builder().withNewConfig("multiple-env-config.toml").build();
+        ccInstance = new CcInstance.Builder().withNewConfig("multiple-env-config.toml").build(false);
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
