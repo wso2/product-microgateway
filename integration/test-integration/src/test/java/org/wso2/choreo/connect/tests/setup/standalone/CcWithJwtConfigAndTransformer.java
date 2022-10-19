@@ -30,7 +30,7 @@ public class CcWithJwtConfigAndTransformer {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").withAllCustomImpls().build(false);
+        ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").withAllCustomImpls().build();
         ccInstance.start();
         //TODO: (SuKSW) Check why this fails
 //        Awaitility.await().pollDelay(20, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)

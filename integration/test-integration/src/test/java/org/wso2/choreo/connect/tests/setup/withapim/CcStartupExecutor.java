@@ -35,7 +35,7 @@ public class CcStartupExecutor extends ApimBaseTest {
         ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
                 .withNewConfig("controlplane-enabled-config.toml")
                 .withBackendServiceFile("backend-service-with-tls-and-network.yaml")
-                .withAllCustomImpls().build(false);
+                .withAllCustomImpls().build();
         ccInstance.start();
         Awaitility.await().pollDelay(20, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());

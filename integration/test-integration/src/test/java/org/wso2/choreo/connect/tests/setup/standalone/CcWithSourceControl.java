@@ -40,7 +40,7 @@ public class CcWithSourceControl {
                 .withGitServiceFile("git-service.yaml")
                 .withNewConfig("cc-with-source-control.toml")
                 .withVolumeMountDir("gitea")
-                .build(false);
+                .build();
         ccInstance.start();
 
         Awaitility.await().pollDelay(10, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)

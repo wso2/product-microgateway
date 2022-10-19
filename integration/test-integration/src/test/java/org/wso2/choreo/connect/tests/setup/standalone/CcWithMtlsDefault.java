@@ -34,7 +34,7 @@ public class CcWithMtlsDefault {
     void start() throws Exception {
 
         ccInstance = new CcInstance.Builder().withNewConfig("mtls-enabled-config.toml").
-                withNewDockerCompose("cc-cacert-mounted-mtls.yaml").withClientCertValidation().build(false);
+                withNewDockerCompose("cc-cacert-mounted-mtls.yaml").withClientCertValidation().build();
         ccInstance.start();
 
         ApictlUtils.createProject("mutual_ssl_openAPI.yaml", "MutualSSL", null, null, null, "mutual_ssl_api.yaml", false, "client_certificate.crt", "client_certificates.yaml");

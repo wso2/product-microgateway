@@ -530,7 +530,6 @@ public class Utils {
         }
     }
 
-
     /**
      * Delay the program for a given time period
      *
@@ -656,6 +655,17 @@ public class Utils {
             headersCaseInsensitive.put(key, headers.get(keyRaw));
         }
         return headersCaseInsensitive;
+    }
+
+    /**
+     * Gives jacoco aggregate.exec file containing path relevant to the Enforcer
+     *
+     * @return jacoco aggregate.exec file path
+     */
+    public static String getEnforcerCodeCovExecPath() {
+        return File.separator + TestConstant.ENFORCER_PARENT_DIR_NAME + File.separator + TestConstant.ENFORCER_DIR_NAME
+                + File.separator + TestConstant.TARGET_DIR_NAME + File.separator +
+                TestConstant.CODECOV_AGGREGATE_REPORT_DIR_NAME + File.separator + TestConstant.JACOCO_EXEC_NAME;
     }
 
     public static String getTargetDirPath() {

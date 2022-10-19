@@ -15,7 +15,6 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Sets the Choreo Connect version
 echo "Preparing code coverage files after integration tests...."
 rm -f ../../resources/enforcer/dropins/aggregate.exec
 rm ../../.github/workflows/coverage.yml

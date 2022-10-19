@@ -157,14 +157,14 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      */
     void createTmpMgwSetup(boolean isInitialStartup, boolean isCodeCovAllowedToSkip) throws CCTestException {
         if (!isCodeCovAllowedToSkip && !isInitialStartup) {
-            File myObj = new File(System.getProperty("root_pom_path") + "/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+            File myObj = new File(System.getProperty("root_pom_path") + Utils.getEnforcerCodeCovExecPath());
             if (myObj.delete()) {
                 log.debug("Deleted the aggregate.exec file");
             } else {
                 log.debug("Failed to delete aggregate.exec file");
             }
-            Utils.copyFileWithAttributes(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH + File.separator + "aggregate.exec",
-                    System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec");
+            Utils.copyFileWithAttributes(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH + File.separator + TestConstant.JACOCO_EXEC_NAME,
+                    System.getProperty("root_pom_path")+ Utils.getEnforcerCodeCovExecPath());
         }
         Utils.deleteQuietly(ccTempPath);
         Utils.copyDirectory(ccExtractedPath, ccTempPath);
@@ -194,9 +194,9 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
 
     // adds aggregated jacoco exec (relevant to the enforcer) into the cc-temp dropins directory
     public static void addCodeCovExec() throws CCTestException {
-        Utils.copyFileWithAttributes(System.getProperty("root_pom_path")+"/enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec",
+        Utils.copyFileWithAttributes(System.getProperty("root_pom_path")+ Utils.getEnforcerCodeCovExecPath(),
                 Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
-                        + File.separator + "aggregate.exec");
+                        + File.separator + TestConstant.JACOCO_EXEC_NAME);
     }
 
     public static void addInterceptorCertToRouterTruststore() throws IOException {

@@ -52,8 +52,9 @@ public class CcInstance extends ChoreoConnectImpl {
                        boolean isClientCertValidationRequired, boolean isInitialStartup
                        ) throws IOException, CCTestException {
         boolean isCodeCovAllowedToSkip = true;
-        if (System.getProperty("is_code_coverage_enabled") != null) {
-            String codeCovProperty = System.getProperty("is_code_coverage_enabled");
+        String codeCoverageEnabled = System.getProperty("is_code_coverage_enabled");
+        if (codeCoverageEnabled != null) {
+            String codeCovProperty = codeCoverageEnabled;
             isCodeCovAllowedToSkip = Boolean.valueOf(codeCovProperty);
         }
         createTmpMgwSetup(isInitialStartup, isCodeCovAllowedToSkip);
@@ -133,6 +134,7 @@ public class CcInstance extends ChoreoConnectImpl {
         boolean withAnalyticsMetricImpl = false;
         boolean isInterceptorCertRequired = false;
         boolean isClientCertValidationRequired = false;
+        boolean isInitialStartUp = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -186,12 +188,17 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
-        public CcInstance build(boolean isInitialStartUp) throws IOException, CCTestException {
+        // to indicate Choreo-Connect initial startup during the integration tests
+        public Builder markInitialCCStartup(boolean isInitialStartUp) {
+            this.isInitialStartUp = isInitialStartUp;
+            return this;
+        }
+
+        public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
                     this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.enforcerTrustCertsDir,
-                    this.volumeMountDir, this.isClientCertValidationRequired, isInitialStartUp
-            );
+                    this.volumeMountDir, this.isClientCertValidationRequired, this.isInitialStartUp);
             return instance;
         }
     }

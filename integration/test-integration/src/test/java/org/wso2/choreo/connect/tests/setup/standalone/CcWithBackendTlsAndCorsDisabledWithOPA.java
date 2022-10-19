@@ -36,7 +36,7 @@ public class CcWithBackendTlsAndCorsDisabledWithOPA {
                 .withEnforcerTrustCertsDir("enforcer-truststore-opa-certs")
                 .withVolumeMountDir("opa-volume")
                 .withAllCustomImpls() // for custom OPA request generator
-                .build(false);
+                .build();
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());

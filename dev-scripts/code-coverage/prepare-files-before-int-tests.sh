@@ -15,12 +15,12 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Sets the Choreo Connect version
 echo "Preparing code coverage files before integration tests..."
 mkdir ../../resources/enforcer/dropins/
 chmod 777 ../../enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec
-sed -i 's/JAVA_OPTS.*/JAVA_OPTS=${JAVA_OPTS} -javaagent:\/home\/wso2\/lib\/org.jacoco.agent-0.8.8-runtime.jar=destfile=\/home\/wso2\/lib\/dropins\/aggregate.exec,append=true/g'  ../../resources/docker-compose/docker-compose.yaml
-sed -i 's/JAVA_OPTS.*/JAVA_OPTS=${JAVA_OPTS} -javaagent:\/home\/wso2\/lib\/org.jacoco.agent-0.8.8-runtime.jar=destfile=\/home\/wso2\/lib\/dropins\/aggregate.exec,append=true -Dhttpclient.hostnameVerifier=AllowAll/g'  ../../resources/docker-compose/apim/docker-compose.yaml
-sed -i 's/JAVA_OPTS.*/JAVA_OPTS=${JAVA_OPTS} -javaagent:\/home\/wso2\/lib\/org.jacoco.agent-0.8.8-runtime.jar=destfile=\/home\/wso2\/lib\/dropins\/aggregate.exec,append=true/g'  ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
-sed -i 's/JAVA_OPTS.*/JAVA_OPTS=${JAVA_OPTS} -javaagent:\/home\/wso2\/lib\/org.jacoco.agent-0.8.8-runtime.jar=destfile=\/home\/wso2\/lib\/dropins\/aggregate.exec,append=true -Dhttpclient.hostnameVerifier=AllowAll/g'  ../../integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml
+export JAVA_AGENT_ARG="-javaagent:\/home\/wso2\/lib\/org.jacoco.agent-0.8.8-runtime.jar=destfile=\/home\/wso2\/lib\/dropins\/aggregate.exec,append=true"
+sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../resources/docker-compose/docker-compose.yaml
+sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../resources/docker-compose/apim/docker-compose.yaml
+sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
+sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml
 echo "Preparing code coverage files before integration tests completed successfully..."
