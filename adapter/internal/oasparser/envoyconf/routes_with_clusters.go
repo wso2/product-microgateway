@@ -1246,7 +1246,6 @@ func CreateHealthEndpoint() *routev3.Route {
 }
 func CreateJwksEndpoint() *routev3.Route {
 	var (
-		jwksPath  string = "/.wellknown/jwks"
 		router    routev3.Route
 		action    *routev3.Route_Route
 		match     *routev3.RouteMatch
