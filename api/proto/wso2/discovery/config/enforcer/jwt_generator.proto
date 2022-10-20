@@ -38,5 +38,5 @@ message JWTGenerator {
 
     bool jwks_enabled = 13;
 
-    repeated string jwks_public_certificate_paths = 14;
+    repeated string additional_jwks_cert_paths = 14;
 }

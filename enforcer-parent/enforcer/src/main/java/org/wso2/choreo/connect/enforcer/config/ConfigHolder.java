@@ -480,23 +480,22 @@ public class ConfigHolder {
         BackendJWKSDto backendJWKSDto = new BackendJWKSDto();
         backendJWKSDto.setEnabled(jwtGenerator.getJwksEnabled());
         if (jwtGenerator.getJwksEnabled()) {
-            String[] publicCertPaths = new String[jwtGenerator.getJwksPublicCertificatePathsCount()];
-            for (int i = 0; i < jwtGenerator.getJwksPublicCertificatePathsCount(); i++) {
-                publicCertPaths[i] = jwtGenerator.getJwksPublicCertificatePaths(i);
+            String[] publicCertPaths = new String[jwtGenerator.getAdditionalJwksCertPathsCount()];
+            for (int i = 0; i < jwtGenerator.getAdditionalJwksCertPathsCount(); i++) {
+                publicCertPaths[i] = jwtGenerator.getAdditionalJwksCertPaths(i);
             }
-            ArrayList<JWK> jwks = new ArrayList<>(publicCertPaths.length);
+            ArrayList<JWK> jwks = new ArrayList<>(publicCertPaths.length + 1); // Additonal paths + 1
+            // Public cert path provided to JWT generator
+            try {
+                jwks.add(jwkFromCertPath(jwtGenerator.getPublicCertificatePath()));
+            } catch (JOSEException | IOException | CertificateException e) {
+                logger.error("Error in loading public cert for JWKS ", e);
+            }
+
+            // Additional public cert paths
             try {
                 for (String publicCertPath : publicCertPaths) {
-
-                    X509Certificate cert = X509CertUtils.parse(TLSUtils.getCertificate(publicCertPath).getEncoded());
-                    RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
-                    RSAKey jwk = new RSAKey.Builder(publicKey)
-                            .keyUse(KeyUse.SIGNATURE)
-                            .algorithm(JWSAlgorithm.RS256)
-                            .keyIDFromThumbprint()
-                            .build().toPublicJWK();
-                    jwks.add(jwk);
-
+                    jwks.add(jwkFromCertPath(publicCertPath));
                 }
             } catch (JOSEException | CertificateException | IOException e) {
                 logger.error("Error in loading public cert for JWKS", e);
@@ -506,6 +505,16 @@ public class ConfigHolder {
 
         config.setBackendJWKSDto(backendJWKSDto);
 
+    }
+    private JWK jwkFromCertPath(String certPath) throws CertificateException, IOException, JOSEException {
+        X509Certificate cert = X509CertUtils.parse(TLSUtils.getCertificate(certPath).getEncoded());
+        RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
+        RSAKey jwk = new RSAKey.Builder(publicKey)
+                .keyUse(KeyUse.SIGNATURE)
+                .algorithm(JWSAlgorithm.RS256)
+                .keyIDFromThumbprint()
+                .build().toPublicJWK();
+        return jwk;
     }
 
 

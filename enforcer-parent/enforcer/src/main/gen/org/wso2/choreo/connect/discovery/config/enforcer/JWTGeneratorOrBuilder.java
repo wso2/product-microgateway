@@ -126,4 +126,35 @@ public interface JWTGeneratorOrBuilder extends
    * @return The tokenTtl.
    */
   int getTokenTtl();
+
+  /**
+   * <code>bool jwks_enabled = 13;</code>
+   * @return The jwksEnabled.
+   */
+  boolean getJwksEnabled();
+
+  /**
+   * <code>repeated string additional_jwks_cert_paths = 14;</code>
+   * @return A list containing the additionalJwksCertPaths.
+   */
+  java.util.List<java.lang.String>
+      getAdditionalJwksCertPathsList();
+  /**
+   * <code>repeated string additional_jwks_cert_paths = 14;</code>
+   * @return The count of additionalJwksCertPaths.
+   */
+  int getAdditionalJwksCertPathsCount();
+  /**
+   * <code>repeated string additional_jwks_cert_paths = 14;</code>
+   * @param index The index of the element to return.
+   * @return The additionalJwksCertPaths at the given index.
+   */
+  java.lang.String getAdditionalJwksCertPaths(int index);
+  /**
+   * <code>repeated string additional_jwks_cert_paths = 14;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the additionalJwksCertPaths at the given index.
+   */
+  com.google.protobuf.ByteString
+      getAdditionalJwksCertPathsBytes(int index);
 }
