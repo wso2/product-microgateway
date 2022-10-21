@@ -175,6 +175,28 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>${directory.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>directories</id>
+                        <goals>
+                            <goal>highest-basedir</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>ccBaseDir</property>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+            </plugin>
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <inherited>false</inherited>
                 <executions>
@@ -589,6 +611,12 @@
                 <version>${slf4j.api.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.agent</artifactId>
+                <version>${jacoco.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.github.tomakehurst</groupId>
                 <artifactId>wiremock-jre8</artifactId>
                 <version>${wiremock.version}</version>
@@ -618,6 +646,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <andes.client.version>3.3.23</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
@@ -680,6 +709,7 @@
         <graphql.java.version>17.3.wso2v1</graphql.java.version>
         <org.jetbrains.kotlin.version>1.6.0</org.jetbrains.kotlin.version>
         <protobuf.java.version>3.21.7</protobuf.java.version>
+        <directory.maven.plugin.version>1.0</directory.maven.plugin.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.14.0-rc1</jackson.annotations.version>
@@ -689,5 +719,9 @@
         <!-- dependency check plugin properties -->
         <dependency.check.maven.version>7.1.1</dependency.check.maven.version>
         <dependency.check.cvss.threshold.value>4</dependency.check.cvss.threshold.value>
+        <!-- -code coverage related properties -->
+        <maven.failsafe.plugin.version>2.15</maven.failsafe.plugin.version>
+        <jacoco.version>0.8.8</jacoco.version>
+        <skip.code.coverage>true</skip.code.coverage>
     </properties>
 </project>

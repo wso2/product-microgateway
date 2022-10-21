@@ -61,6 +61,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -510,6 +514,23 @@ public class Utils {
     }
 
     /**
+     * Copies a file with existing attribute values
+     *
+     * @param sourceLocation current location of the file
+     * @param destLocation   destination location path of the file
+     * @throws CCTestException if error happens while copying the file
+     */
+    public static void copyFileWithAttributes(String sourceLocation, String destLocation) throws CCTestException {
+        try {
+            Path sourcePath = Paths.get(sourceLocation);
+            Path destPath = Paths.get(destLocation);
+            Files.copy(sourcePath,destPath,StandardCopyOption.COPY_ATTRIBUTES);
+        } catch (IOException e) {
+            throw new CCTestException("error while copying file. ", e);
+        }
+    }
+
+    /**
      * Delay the program for a given time period
      *
      * @param sourceLocation folder location.
@@ -634,6 +655,17 @@ public class Utils {
             headersCaseInsensitive.put(key, headers.get(keyRaw));
         }
         return headersCaseInsensitive;
+    }
+
+    /**
+     * Gives jacoco aggregate.exec file containing path relevant to the Enforcer
+     *
+     * @return jacoco aggregate.exec file path
+     */
+    public static String getEnforcerCodeCovExecPath() {
+        return File.separator + TestConstant.ENFORCER_PARENT_DIR_NAME + File.separator + TestConstant.ENFORCER_DIR_NAME
+                + File.separator + TestConstant.TARGET_DIR_NAME + File.separator +
+                TestConstant.CODECOV_AGGREGATE_REPORT_DIR_NAME + File.separator + TestConstant.JACOCO_EXEC_NAME;
     }
 
     public static String getTargetDirPath() {

@@ -49,12 +49,10 @@ jobs:
       - name: Build with Maven
         run: |
           export GOFLAGS=-mod=mod
-          mvn clean install -PRelease -s .maven/settings.xml \
-            -pl '!:integration' -pl '!:mock-backend-server' -pl '!:test-integration'
-      - name: Run integration tests
-        run: |
-          mvn clean install -PRelease -pl ':integration' -amd -s .maven/settings.xml
+          mvn clean install -Dskip.code.coverage=false -PRelease -s .maven/settings.xml
       - name: Build multi platform Ubuntu images
         run: |
           ./build-ubuntu-multi-platform-images.sh all
           docker images
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v3
