@@ -370,7 +370,7 @@ public class ConfigHolder {
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null);
 
-            if (getEnvVarConfig().getTrustDefaultCerts()) {
+            if (getEnvVarConfig().isTrustDefaultCerts()) {
                 loadDefaultCertsToTrustStore();
             }
             loadTrustedCertsToTrustStore();

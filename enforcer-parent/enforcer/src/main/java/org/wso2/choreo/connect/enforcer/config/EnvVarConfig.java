@@ -124,7 +124,7 @@ public class EnvVarConfig {
         return trustedAdapterCertsPath;
     }
 
-    public boolean getTrustDefaultCerts() {
+    public boolean isTrustDefaultCerts() {
         return Boolean.valueOf(trustDefaultCerts);
     }
 
