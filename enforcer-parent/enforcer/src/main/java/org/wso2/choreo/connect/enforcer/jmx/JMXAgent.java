@@ -48,8 +48,9 @@ public class JMXAgent {
 
                 LocateRegistry.createRegistry(Integer.parseInt(rmiRegistryPort));
 
-                String jmxURL = "service:jmx:rmi://" + hostname + ":" + rmiServerPort
-                        + "/jndi/rmi://" + hostname + ":" + rmiRegistryPort + "/jmxrmi";
+                String jmxURL = String.format("service:jmx:rmi://%s:%s/jndi/rmi://%s:%s/jmxrmi", hostname,
+                        rmiServerPort,
+                        hostname, rmiRegistryPort);
                 JMXServiceURL jmxServiceURL = new JMXServiceURL(jmxURL);
 
                 jmxConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, null,

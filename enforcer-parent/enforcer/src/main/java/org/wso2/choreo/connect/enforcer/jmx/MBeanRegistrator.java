@@ -56,7 +56,7 @@ public class MBeanRegistrator {
                 className = className.substring(className.lastIndexOf('.') + 1);
             }
 
-            String objectName = SERVER_PACKAGE + ":type=" + className;
+            String objectName = String.format("%s:type=%s", SERVER_PACKAGE, className);
             try {
                 MBeanServer mBeanServer = MBeanManagementFactory.getMBeanServer();
                 Set set = mBeanServer.queryNames(new ObjectName(objectName), null);

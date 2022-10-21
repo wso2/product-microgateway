@@ -25,9 +25,10 @@ import javax.management.MBeanServerFactory;
 public class MBeanManagementFactory {
 
     /*
-     * @return A MBeanServer instance.
      * If one already exists, it will return that else it will create a new one and
      * return.
+     * 
+     * @return A MBeanServer instance.
      */
     public static MBeanServer getMBeanServer() {
         MBeanServer mBeanServer;
