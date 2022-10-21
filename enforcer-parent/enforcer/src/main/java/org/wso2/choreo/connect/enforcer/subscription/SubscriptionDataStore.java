@@ -18,8 +18,6 @@
 
 package org.wso2.choreo.connect.enforcer.subscription;
 
-import org.wso2.choreo.connect.discovery.subscription.APIs;
-import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
 import org.wso2.choreo.connect.enforcer.models.ApplicationKeyMapping;
@@ -50,14 +48,6 @@ public interface SubscriptionDataStore {
      * @return {@link ApplicationKeyMapping} entry
      */
     ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager);
-
-    /**
-     * Get API by Context and Version.
-     *
-     * @param uuid UUID of the API
-     * @return {@link API} entry represented by Context and Version.
-     */
-    API getApiByContextAndVersion(String uuid);
 
     /**
      * Gets Subscription by ID.
@@ -96,8 +86,6 @@ public interface SubscriptionDataStore {
 
     void addApplications(List<org.wso2.choreo.connect.discovery.subscription.Application> applicationList);
 
-    void addApis(List<APIs> apisList);
-
     void addApplicationPolicies(
             List<org.wso2.choreo.connect.discovery.subscription.ApplicationPolicy> applicationPolicyList);
 
@@ -111,10 +99,6 @@ public interface SubscriptionDataStore {
 
     void addOrUpdateSubscription(Subscription subscription);
 
-    void addOrUpdateAPI(API api);
-
-    void addOrUpdateAPIWithUrlTemplates(API api);
-
     void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
 
     void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy);
@@ -125,8 +109,6 @@ public interface SubscriptionDataStore {
 
     void removeApplication(Application application);
 
-    void removeAPI(API api);
-
     void removeSubscription(Subscription subscription);
 
     void removeApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
@@ -136,27 +118,6 @@ public interface SubscriptionDataStore {
     void removeApplicationPolicy(ApplicationPolicy applicationPolicy);
 
     void removeApiPolicy(ApiPolicy apiPolicy);
-
-    API getDefaultApiByContext(String context);
-
-    /**
-     * Filter the API map according to the provided parameters
-     * @param name API Name
-     * @param context API Context
-     * @param version API Version
-     * @param uuid API UUID
-     * @return Matching list of apis.
-     */
-    List<API> getMatchingAPIs(String name, String context, String version, String uuid);
-
-    /**
-     * Filter the API map according to the provided parameters
-     *
-     * @param context API Context
-     * @param version API Version
-     * @return Matching list of apis.
-     */
-    API getMatchingAPI(String context, String version);
 
     /**
      * Filter the applications map based on the criteria.

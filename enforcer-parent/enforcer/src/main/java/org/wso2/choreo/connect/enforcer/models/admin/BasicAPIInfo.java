@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,33 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.enforcer.models;
 
-import java.util.List;
+package org.wso2.choreo.connect.enforcer.models.admin;
 
 /**
- * Model class for API Information
+ * Entity for representing API related information for Admin REST API within enforcer.
  */
-public class APIInfo {
-    private Integer apiId = null;
+public class BasicAPIInfo {
+
     private String provider = null;
     private String name = null;
     private String version = null;
     private String context = null;
-    private String tier = null;
+    private String policy = null;
     private String apiType = null;
     private boolean isDefaultVersion = false;
     private String apiUUID = null;
     private String lcState = null;
-    private List<SubscriptionInfo> subscriptions = null;
-
-    public Integer getApiId() {
-        return apiId;
-    }
-
-    public void setApiId(Integer apiId) {
-        this.apiId = apiId;
-    }
 
     public String getProvider() {
         return provider;
@@ -59,14 +49,6 @@ public class APIInfo {
         this.name = name;
     }
 
-    public String getTier() {
-        return tier;
-    }
-
-    public void setTier(String tier) {
-        this.tier = tier;
-    }
-
     public String getVersion() {
         return version;
     }
@@ -81,6 +63,14 @@ public class APIInfo {
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    public String getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
     }
 
     public String getApiType() {
@@ -113,13 +103,5 @@ public class APIInfo {
 
     public void setLcState(String lcState) {
         this.lcState = lcState;
-    }
-
-    public List<SubscriptionInfo> getSubscriptions() {
-        return subscriptions;
-    }
-
-    public void setSubscriptions(List<SubscriptionInfo> subscriptions) {
-        this.subscriptions = subscriptions;
     }
 }

@@ -116,7 +116,7 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArr
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition
 // along with the vhost to deploy the API.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost string) *api.Api {
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 	resources := []*api.Resource{}
 	securitySchemes := []*api.SecurityScheme{}
 	securityList := []*api.SecurityList{}
@@ -196,7 +196,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		ProductionEndpoints: generateRPCEndpointCluster(mgwSwagger.GetProdEndpoints()),
 		SandboxEndpoints:    generateRPCEndpointCluster(mgwSwagger.GetSandEndpoints()),
 		Resources:           resources,
-		ApiLifeCycleState:   lifeCycleState,
+		ApiLifeCycleState:   mgwSwagger.LifeCycleState,
 		Tier:                mgwSwagger.GetXWso2ThrottlingTier(),
 		SecurityScheme:      securitySchemes,
 		Security:            securityList,

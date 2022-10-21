@@ -20,7 +20,6 @@ package org.wso2.choreo.connect.enforcer.discovery.scheduler;
 
 import org.wso2.choreo.connect.enforcer.config.EnvVarConfig;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
-import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationPolicyDiscoveryClient;
@@ -79,13 +78,6 @@ public class XdsSchedulerManager {
     public synchronized void stopAPIDiscoveryScheduling() {
         if (apiDiscoveryScheduledFuture != null && !apiDiscoveryScheduledFuture.isDone()) {
             apiDiscoveryScheduledFuture.cancel(false);
-        }
-    }
-
-    public synchronized void startAPIListDiscoveryScheduling() {
-        if (apiDiscoveryListScheduledFuture == null || apiDiscoveryListScheduledFuture.isDone()) {
-            apiDiscoveryListScheduledFuture = discoveryClientScheduler
-                    .scheduleWithFixedDelay(ApiListDiscoveryClient.getInstance(), 1, retryPeriod, TimeUnit.SECONDS);
         }
     }
 

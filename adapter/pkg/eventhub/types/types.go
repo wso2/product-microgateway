@@ -76,18 +76,9 @@ type ApplicationKeyMappingList struct {
 
 // API for struct Api
 type API struct {
-	APIID            int    `json:"apiId"`
 	UUID             string `json:"uuid"`
-	Provider         string `json:"provider" json:"apiProvider"`
-	Name             string `json:"name" json:"apiName"`
-	Version          string `json:"version" json:"apiVersion"`
-	Context          string `json:"context" json:"apiContext"`
-	Policy           string `json:"policy"`
-	APIType          string `json:"apiType"`
 	IsDefaultVersion bool   `json:"isDefaultVersion"`
 	APIStatus        string `json:"status"`
-	TenantID         int32  `json:"tenanId,omitempty"`
-	TenantDomain     string `json:"tenanDomain,omitempty"`
 	TimeStamp        int64  `json:"timeStamp,omitempty"`
 }
 
