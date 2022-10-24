@@ -1,29 +1,20 @@
 package org.wso2.choreo.connect.enforcer.jwks;
 
 
-
 import com.nimbusds.jose.jwk.JWKSet;
 import io.grpc.netty.shaded.io.netty.buffer.Unpooled;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFuture;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFutureListener;
 import io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext;
 import io.grpc.netty.shaded.io.netty.channel.SimpleChannelInboundHandler;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpRequest;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpResponse;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObject;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpVersion;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 
 
 /**
-    JWKS Request Handler for Backend JWT's
-
+ * JWKS Request Handler for Backend JWT's
  */
 public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
     private static final String CONTENT_LENGTH = "content-length";
@@ -34,7 +25,7 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
 
     private static final Logger logger = LogManager.getLogger(JWKSRequestHandler.class);
 
- 
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
 
@@ -43,7 +34,6 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
 
         BackendJWKSDto backendJWKSDto = ConfigHolder.getInstance().getConfig().getBackendJWKSDto();
         JWKSet jwks = backendJWKSDto.getJwks();
-
 
 
         if (msg instanceof HttpRequest) {
@@ -81,7 +71,6 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
         logger.error(cause);
         ctx.close();
     }
-
 
 
 }

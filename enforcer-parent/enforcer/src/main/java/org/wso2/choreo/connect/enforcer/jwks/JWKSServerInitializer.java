@@ -10,8 +10,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 
 
 /**
-
- JWKS Handler Initializer
+ * JWKS Handler Initializer
  */
 public class JWKSServerInitializer extends ChannelInitializer<SocketChannel> {
     private final SslContext sslCtx;
