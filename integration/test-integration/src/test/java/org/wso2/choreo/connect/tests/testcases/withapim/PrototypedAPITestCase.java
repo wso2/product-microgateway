@@ -25,7 +25,9 @@ import net.minidev.json.parser.JSONParser;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.am.integration.clients.publisher.api.ApiResponse;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIKeyDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.WorkflowResponseDTO;
 import org.wso2.am.integration.test.utils.bean.APILifeCycleAction;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
@@ -83,7 +85,7 @@ public class PrototypedAPITestCase extends ApimBaseTest {
     }
 
     @Test(description = "Test to check the PrototypedAPI is working")
-    public void invokePrototypeAPISuccessTest() throws Exception {
+    public void invokePrototypeAPITest() throws Exception {
         // Set header
         Map<String, String> headers = new HashMap<>();
         org.wso2.choreo.connect.tests.util.HttpResponse response =
@@ -91,6 +93,14 @@ public class PrototypedAPITestCase extends ApimBaseTest {
                         Utils.getServiceURLHttps("/petstore-prototype/1.0.0/pet/findByStatus"), headers);
 
         Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        ApiResponse<APIKeyDTO> internalApiKeyDTO =
+                publisherRestClient.generateInternalApiKey(apiId);
+
+        String internalKey = internalApiKeyDTO.getData().getApikey();
+        headers.put("apikey", internalKey);
+        response = HttpsClientRequest.doGet(
+                        Utils.getServiceURLHttps("/petstore-prototype/1.0.0/pet/findByStatus"), headers);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 }
