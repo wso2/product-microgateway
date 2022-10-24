@@ -6,16 +6,13 @@ import "envoy/service/discovery/v3/discovery.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/service/apkmgt";
 option java_package = "org.wso2.choreo.connect.discovery.service.apkmgt";
-option java_outer_classname = "APIDsProto";
+option java_outer_classname = "ApplicationDsProto";
 option java_multiple_files = false;
 option java_generic_services = true;
 
-// [#protodoc-title: APIDS]
+// [#protodoc-title: ApplicationDS]
 service APKMgtDiscoveryService {
-  rpc StreamAPKMgtApis(stream envoy.service.discovery.v3.DiscoveryRequest)
+  rpc StreamAPKMgtApplications(stream envoy.service.discovery.v3.DiscoveryRequest)
       returns (stream envoy.service.discovery.v3.DiscoveryResponse) {
-  }
-
-  rpc FetchAPKMgtApis(envoy.service.discovery.v3.DiscoveryRequest) returns (envoy.service.discovery.v3.DiscoveryResponse) {
   }
 }

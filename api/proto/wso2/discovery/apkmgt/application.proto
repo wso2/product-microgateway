@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package wso2.discovery.apkmgt;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/apkmgtapplication;apkmgtapplication";
+option java_package = "org.wso2.choreo.connect.discovery.apkmgt";
+option java_outer_classname = "ApkMgtApplicationProto";
+option java_multiple_files = false;
+
+// [#protodoc-title: ApplicationDetails]
+
+message Application {
+  string applicationId = 1;
+  string applicationName = 2;
+  string tokenType = 3;
+  map<string, string> attributes = 4;
+  string subscriber = 5;
+  string organization = 6;
+  string updatedTimeStamp = 7;
+  string tenantId = 8;
+  string tenantDomain = 9;
+}
+
+message ApplicationDetails {
+  repeated Application applications = 1;
+}

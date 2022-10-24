@@ -31,6 +31,6 @@ const (
 	RevokedTokens
 	ThrottleData
 	GAAPI
-	APKMgtAPI
+	APKMgtApplicationList
 	UnknownType // token to count the total number of supported types
 )

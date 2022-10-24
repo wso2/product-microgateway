@@ -140,8 +140,8 @@ func (s *server) StreamGAApis(stream ga.ApiGADiscoveryService_StreamGAApisServer
 	return s.StreamHandler(stream, resource.GAAPIType)
 }
 
-func (s *server) StreamAPKMgtApis(stream apkmgt.APKMgtDiscoveryService_StreamAPKMgtApisServer) error {
-	return s.StreamHandler(stream, resource.APKMgtType)
+func (s *server) StreamAPKMgtApplications(stream apkmgt.APKMgtDiscoveryService_StreamAPKMgtApplicationsServer) error {
+	return s.StreamHandler(stream, resource.APKMgtApplicationType)
 }
 
 // Fetch is the universal fetch method.
@@ -189,11 +189,11 @@ func (s *server) FetchGAApis(ctx context.Context, req *discovery.DiscoveryReques
 	return s.Fetch(ctx, req)
 }
 
-func (s *server) FetchAPKMgtApis(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
+func (s *server) FetchAPKMgtApplications(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
 	if req == nil {
 		return nil, status.Errorf(codes.Unavailable, "empty request")
 	}
-	req.TypeUrl = resource.APKMgtType
+	req.TypeUrl = resource.APKMgtApplicationType
 	return s.Fetch(ctx, req)
 }
 

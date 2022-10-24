@@ -56,8 +56,8 @@ func GetResponseType(typeURL string) types.ResponseType {
 		return types.ThrottleData
 	case resource.GAAPIType:
 		return types.GAAPI
-	case resource.APKMgtType:
-		return types.APKMgtAPI
+	case resource.APKMgtApplicationType:
+		return types.APKMgtApplicationList
 	}
 	return types.UnknownType
 }
@@ -90,8 +90,8 @@ func GetResourceName(res envoy_types.Resource) string {
 		return "ThrottleData"
 	case *ga.Api:
 		return fmt.Sprint(v.ApiUUID)
-	case *apikmgt.Api:
-		return fmt.Sprint(v.ApiUUID)
+	case *apikmgt.Application:
+		return fmt.Sprint(v.ApplicationId)
 	case *keymgt.RevokedToken:
 		return fmt.Sprint(v.Jti)
 	default:
