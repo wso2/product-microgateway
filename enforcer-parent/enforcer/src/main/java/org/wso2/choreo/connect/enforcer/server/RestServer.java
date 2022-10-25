@@ -78,9 +78,7 @@ public class RestServer {
 
             Channel tokenChannel = tokenServer.bind(TOKEN_PORT).sync().channel();
             logger.info("Token endpoint started Listening in port : " + TOKEN_PORT);
-
             // JWKS Server
-
             if (ConfigHolder.getInstance().getConfig().getBackendJWKSDto().isEnabled()) {
                 ServerBootstrap jwksServer = new ServerBootstrap();
                 // Configure the server
@@ -94,8 +92,6 @@ public class RestServer {
                 logger.info("JWKS endpoint started Listening in port : " + JWKS_PORT);
                 jwksChannel.closeFuture().sync();
             }
-
-
 
             if (ConfigHolder.getInstance().getConfig().getRestServer().isEnable()) {
                 ServerBootstrap adminServer = new ServerBootstrap();

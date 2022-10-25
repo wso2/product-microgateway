@@ -484,14 +484,13 @@ public class ConfigHolder {
             for (int i = 0; i < jwtGenerator.getAdditionalJwksCertPathsCount(); i++) {
                 publicCertPaths[i] = jwtGenerator.getAdditionalJwksCertPaths(i);
             }
-            ArrayList<JWK> jwks = new ArrayList<>(publicCertPaths.length + 1); // Additonal paths + 1
+            ArrayList<JWK> jwks = new ArrayList<>(publicCertPaths.length + 1);
             // Public cert path provided to JWT generator
             try {
                 jwks.add(jwkFromCertPath(jwtGenerator.getPublicCertificatePath()));
             } catch (JOSEException | IOException | CertificateException e) {
                 logger.error("Error in loading public cert for JWKS ", e);
             }
-
             // Additional public cert paths
             try {
                 for (String publicCertPath : publicCertPaths) {
@@ -502,9 +501,7 @@ public class ConfigHolder {
             }
             backendJWKSDto.setJwks(jwks);
         }
-
         config.setBackendJWKSDto(backendJWKSDto);
-
     }
     private JWK jwkFromCertPath(String certPath) throws CertificateException, IOException, JOSEException {
         X509Certificate cert = X509CertUtils.parse(TLSUtils.getCertificate(certPath).getEncoded());
