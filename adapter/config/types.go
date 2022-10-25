@@ -25,7 +25,8 @@ import (
 // This uses singleton pattern where creating a single channel for communication
 //
 // To get a instance of the channel for a data publisher go routine
-//  `publisher := NewSender()`
+//
+//	`publisher := NewSender()`
 //
 // Create a receiver channel in worker go routine
 // receiver := NewReceiver()
@@ -67,8 +68,9 @@ const (
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
 // Note :
-// 		Don't use toml tag for configuration properties as it may affect environment variable based
-// 		config resolution.
+//
+//	Don't use toml tag for configuration properties as it may affect environment variable based
+//	config resolution.
 type Config struct {
 	Adapter       adapter
 	Enforcer      enforcer
@@ -405,19 +407,21 @@ type binaryAgent struct {
 
 type jwtGenerator struct {
 	// Deprecated: Use Enabled instead
-	Enable                bool
-	Enabled               bool
-	Encoding              string
-	ClaimDialect          string
-	ConvertDialect        bool
-	Header                string
-	SigningAlgorithm      string
-	EnableUserClaims      bool
-	GatewayGeneratorImpl  string
-	ClaimsExtractorImpl   string
-	PublicCertificatePath string
-	PrivateKeyPath        string
-	TokenTTL              int32
+	Enable                  bool
+	Enabled                 bool
+	Encoding                string
+	ClaimDialect            string
+	ConvertDialect          bool
+	Header                  string
+	SigningAlgorithm        string
+	EnableUserClaims        bool
+	GatewayGeneratorImpl    string
+	ClaimsExtractorImpl     string
+	PublicCertificatePath   string
+	PrivateKeyPath          string
+	TokenTTL                int32
+	JwksEnabled             bool
+	AdditionalJwksCertPaths []string
 }
 
 type claimMapping struct {

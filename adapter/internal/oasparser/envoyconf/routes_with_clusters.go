@@ -1244,6 +1244,79 @@ func CreateHealthEndpoint() *routev3.Route {
 	}
 	return &router
 }
+func CreateJwksEndpoint() *routev3.Route {
+	var (
+		router    routev3.Route
+		action    *routev3.Route_Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: jwksPath,
+		},
+	}
+
+	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
+		AutoHostRewrite: &wrapperspb.BoolValue{
+			Value: true,
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: jwksPath,
+	}
+
+	// Request isn't checked by enforcer
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+			Disabled: true,
+		},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+
+	action = &routev3.Route_Route{
+		Route: &routev3.RouteAction{
+			HostRewriteSpecifier: hostRewriteSpecifier,
+			RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
+				Pattern: &envoy_type_matcherv3.RegexMatcher{
+					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+							MaxProgramSize: nil,
+						},
+					},
+					Regex: jwksPath,
+				},
+				Substitution: "/",
+			},
+		},
+	}
+
+	directClusterSpecifier := &routev3.RouteAction_Cluster{
+		Cluster: "jwks_cluster",
+	}
+	action.Route.ClusterSpecifier = directClusterSpecifier
+
+	router = routev3.Route{
+		Name:      jwksPath, //Categorize routes with same base path
+		Match:     match,
+		Action:    action,
+		Metadata:  nil,
+		Decorator: decorator,
+		TypedPerFilterConfig: map[string]*any.Any{
+			wellknown.HTTPExternalAuthorization: filter,
+		},
+	}
+	return &router
+}
 
 // CreateReadyEndpoint generates a route for the router /ready endpoint
 // Replies with direct response.

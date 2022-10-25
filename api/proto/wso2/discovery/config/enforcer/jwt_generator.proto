@@ -35,4 +35,8 @@ message JWTGenerator {
     string private_key_path = 11;
 
     int32 token_ttl = 12;
+
+    bool jwks_enabled = 13;
+
+    repeated string additional_jwks_cert_paths = 14;
 }
