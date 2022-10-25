@@ -34,6 +34,9 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This test case runs twice with issuer "APIM Publisher" and issuer "APIM APIkey".
+ */
 public class APIKeyTestCase extends ApimBaseTest {
     private String testAPIKey =
             "eyJ4NXQiOiJOMkpqTWpOaU0yRXhZalJrTnpaalptWTFZVEF4Tm1GbE5qZzRPV1UxWVdRMll6YzFObVk1TlE9PS" +
@@ -92,6 +95,30 @@ public class APIKeyTestCase extends ApimBaseTest {
                 Utils.getServiceURLHttps("/v2/pet/1"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
+    }
+
+    @Test(description = "Test to invoke with an APIKey of uppercase")
+    public void invokeWithAnApiKeyOfUppercaseInHeader() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("X-APIKEY", testAPIKey);
+        HttpResponse response = HttpsClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pet/1"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+    }
+
+    @Test(description = "Test to invoke with an APIKey of uppercase")
+    public void invokeWithAnApiKeyOfUppercaseInQuery() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        HttpResponse response1 = HttpsClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pet/1?X-ApiKey-Q=" + testAPIKey), headers);
+        Assert.assertNotNull(response1);
+        Assert.assertEquals(response1.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        HttpResponse response2 = HttpsClientRequest.doGet(
+                Utils.getServiceURLHttps("/apiKey/1.0.0/pet/1?x-apikey-q=" + testAPIKey), headers);
+        Assert.assertNotNull(response2);
+        Assert.assertEquals(response2.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
     }
 
     @Test(description = "Test to check the API Key fails for only oauth2 secured resource")

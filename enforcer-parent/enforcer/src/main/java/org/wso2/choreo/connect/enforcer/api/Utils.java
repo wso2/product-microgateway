@@ -25,8 +25,13 @@ import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.Policy;
 import org.wso2.choreo.connect.enforcer.commons.model.PolicyConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
+import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,4 +137,33 @@ public class Utils {
         return policyList;
     }
 
+    /**
+     * Set common authentication headers as headers to be removed and protected headers,
+     * so that they will be removed by the router before being sent to the backend.
+     * Also prevents being published in the throttle event.
+     *
+     * @param requestContext requestContext
+     */
+    public static void removeCommonAuthHeaders(RequestContext requestContext) {
+        // Internal-Key credential is considered to be protected headers,
+        // such that the header would not be sent
+        // to backend and traffic manager.
+        String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                .getTestConsoleHeaderName().toLowerCase();
+        requestContext.getRemoveHeaders().add(internalKeyHeader);
+        // Avoid internal key being published to the Traffic Manager
+        requestContext.getProtectedHeaders().add(internalKeyHeader);
+
+        // Remove Authorization Header
+        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
+        String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
+        if (!authHeader.isEnableOutboundAuthHeader()) {
+            requestContext.getRemoveHeaders().add(authHeaderName);
+        }
+        // Authorization Header should not be included in the throttle publishing event.
+        requestContext.getProtectedHeaders().add(authHeaderName);
+
+        // not allow clients to set cluster header manually
+        requestContext.getRemoveHeaders().add(AdapterConstants.CLUSTER_HEADER);
+    }
 }
