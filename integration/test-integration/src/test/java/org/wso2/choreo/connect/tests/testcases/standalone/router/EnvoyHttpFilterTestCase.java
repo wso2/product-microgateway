@@ -68,12 +68,13 @@ public class EnvoyHttpFilterTestCase {
 
         // Response headers received by the client
         Map<String, String> headersToClient = response.getHeaders();
-        Assert.assertEquals(headersToClient.size(), 4, "Unexpected number of headers received by the client");
+        Assert.assertEquals(headersToClient.size(), 5, "Unexpected number of headers received by the client");
 
         Assert.assertNotNull(headersToClient.get("date"));      // = Fri, 15 Apr 2022 05:10:41 GMT
         Assert.assertNotNull(headersToClient.get("server"));    // = envoy
         Assert.assertNotNull(headersToClient.get("content-length"));
         Assert.assertNotNull(headersToClient.get("content-type"));
+        Assert.assertNotNull(headersToClient.get("vary"));     // header comes due to compression filter to indicate data compression capability
     }
 
     /*

@@ -25,6 +25,7 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -257,9 +258,9 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 /* GraphQL Query Analysis Information */
                 if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI()
                         .getApiType())) {
-                    requestContext.getProperties().put(APIConstants.GraphQL.MAXIMUM_QUERY_DEPTH,
+                    requestContext.getProperties().put(GraphQLConstants.MAXIMUM_QUERY_DEPTH,
                             validationInfoDto.getGraphQLMaxDepth());
-                    requestContext.getProperties().put(APIConstants.GraphQL.MAXIMUM_QUERY_COMPLEXITY,
+                    requestContext.getProperties().put(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY,
                             validationInfoDto.getGraphQLMaxComplexity());
                 }
 

@@ -228,15 +228,22 @@ public class TestConstant {
     public static final String DOCKER_COMPOSE_YAML_PATH = File.separator + "docker-compose.yaml";
     public static final String CA_CERTS_FILE = File.separator + "ca-certificates.crt";
 
+    public static final String ENFORCER_DIR_NAME = "enforcer";
     public static final String ROUTER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "router"
             + SECURITY_DIR + File.separator + "truststore";
-    public static final String ENFORCER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "enforcer"
+    public static final String ENFORCER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + ENFORCER_DIR_NAME
             + SECURITY_DIR + File.separator + "truststore";
     public static final String DOCKER_COMPOSE_CC_DIR = DOCKER_COMPOSE_DIR + File.separator + "choreo-connect";
     public static final String DROPINS_FOLDER_PATH = DOCKER_COMPOSE_DIR + RESOURCES_DIR
-            + File.separator + "enforcer" + File.separator + "dropins";
+            + File.separator + ENFORCER_DIR_NAME + File.separator + "dropins";
     public static final String STARTUP_APIS_DIR = RESOURCES_DIR + File.separator
             + "adapter" + File.separator + "artifacts" + File.separator + "apis";
+    public static final String JACOCO_EXEC_NAME = "aggregate.exec";
+    public static final String ENFORCER_PARENT_DIR_NAME = "enforcer-parent";
+    public static final String TARGET_DIR_NAME = "target";
+    public static final String CODECOV_AGGREGATE_REPORT_DIR_NAME = "coverage-aggregate-reports";
+
+
 
     public static final String HEALTH_ENDPOINT_RESPONSE = "{\"status\": \"healthy\"}";
 

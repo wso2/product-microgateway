@@ -414,25 +414,6 @@ public class APIConstants {
 
 
     /**
-     * GraphQL related constants.
-     */
-    public static class GraphQL {
-        public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
-        public static final String GRAPHQL_QUERY = "Query";
-        public static final String GRAPHQL_QUERY_BODY = "query";
-        public static final String GRAPHQL_MUTATION = "Mutation";
-        public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
-        public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
-        public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
-        public static final int GRAPHQL_INVALID_QUERY = 900422;
-        public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
-        public static final int GRAPHQL_QUERY_TOO_DEEP = 900820;
-        public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
-        public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
-        public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
-    }
-
-    /**
      * Holds values for optionality.
      */
     public static class Optionality {

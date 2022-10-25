@@ -33,5 +33,10 @@
     "apiName": "GraphQLScopeAPI",
     "appName": "GraphQLScopeApp",
     "tier": "Unlimited"
+  },
+  {
+    "apiName": "CompressionTestAPI",
+    "appName": "CompressionTestApp",
+    "tier": "Unlimited"
   }
 ]

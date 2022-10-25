@@ -26,5 +26,9 @@
   {
     "appName": "GraphQLBasicApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "CompressionTestApp",
+    "throttleTier": "Unlimited"
   }
 ]

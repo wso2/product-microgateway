@@ -23,16 +23,21 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.tests.util.*;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.SourceControlUtils;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.TokenUtil;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class SourceWatcherTestCase {
+    public static final String ZIP = File.separator + "zip";
+    public static final String UPDATED = File.separator + "updated";
+    public static final String PETSTORE1 = File.separator + "petstore1";
 
     protected String jwtToken;
 
@@ -43,97 +48,83 @@ public class SourceWatcherTestCase {
     }
 
     @Test(description = "Test if artifacts added from source version control are deployed")
-    public void AddAPIProjectTest() throws Exception{
+    public void testAddedAPI() throws Exception{
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(
                 Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
-    void commitDeletedFiles() throws Exception {
-        List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY);
-        SourceControlUtils.getFiles(artifactsDir, filePaths);
-        Map<String, String> fileActions = new HashMap<>();
+    @Test(description = "Test if zip artifacts updated from source version control are deployed",
+            dependsOnMethods = {"testAddedAPI"})
+    public void testUpdatingAPI() throws Exception{
+        String projectDir = Utils.getTargetDirPath()
+                + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + UPDATED;
+        SourceControlUtils.updateApiProjectInRepo(projectDir, false);
+        Utils.delay(4000, "Interrupted while waiting for adapter to sync");
 
-        for (String filePath : filePaths){
-            fileActions.put(filePath, SourceControlUtils.DELETE_FILE);
-        }
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
 
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY, "Delete artifacts", fileActions);
-        TimeUnit.SECONDS.sleep(4);
+        HttpResponse response1 = HttpsClientRequest.retryUntil404(
+                Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
+        Assert.assertNotNull(response1);
+        Assert.assertEquals(response1.getResponseCode(), HttpStatus.SC_NOT_FOUND,"Response code mismatched");
+
+        HttpResponse response2 = HttpsClientRequest.retryGetRequestUntilDeployed(
+                Utils.getServiceURLHttps("/v2/store/inventory") , headers);
+        Assert.assertNotNull(response2);
+        Assert.assertEquals(response2.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
     @Test(description = "Test if artifacts deleted from source version control are undeployed",
-            dependsOnMethods = {"AddAPIProjectTest"})
-    public void DeleteAPIProjectTest() throws Exception{
-        commitDeletedFiles();
+            dependsOnMethods = {"testUpdatingAPI"})
+    public void testDeletedAPI() throws Exception {
+        SourceControlUtils.deleteApiProjectInRepo(Utils.getTargetDirPath()
+                + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.DIRECTORY);
+        Utils.delay(4000, "Interrupted while waiting for adapter to sync");
+
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(
-                Utils.getServiceURLHttps("/v2/pet/findByStatus?status=available") , headers);
 
+        HttpResponse response = HttpsClientRequest.retryUntil404(
+                Utils.getServiceURLHttps("/zip/pet/1"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,"Response code mismatched");
     }
 
-    void commitZipArtifact() throws Exception {
-        List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.ZIP);
-        SourceControlUtils.getFiles(artifactsDir, filePaths);
-        Map<String, String> fileActions = new HashMap<>();
+    @Test(description = "Test if zip artifacts added from source version control are deployed")
+    public void testAddedZipAPI() throws Exception{
+        String projectDir = Utils.getTargetDirPath()
+                + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + ZIP;
+        Utils.zip(projectDir + PETSTORE1, PETSTORE1);
+        SourceControlUtils.commitApiProjectToRepo(projectDir, true, "Add Zipped API Project");
+        Utils.delay(4000, "Interrupted while waiting for adapter to sync");
 
-        for (String filePath : filePaths){
-            fileActions.put(filePath, SourceControlUtils.ADD_FILE);
-        }
-
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.ZIP, "Add zip artifacts", fileActions);
-        TimeUnit.SECONDS.sleep(4);
-    }
-
-    @Test(description = "Test if zip artifacts added from source version control are deployed",
-            dependsOnMethods = {"DeleteAPIProjectTest"})
-    public void AddAPIZipProjectTest() throws Exception{
-        commitZipArtifact();
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/store/inventory") , headers);
 
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(
+                Utils.getServiceURLHttps("/zip/store/inventory") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
-    void commitUpdatedArtifact() throws Exception {
-        List<String> filePaths = new ArrayList<>();
-        File artifactsDir = new File(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.UPDATE);
-        SourceControlUtils.getFiles(artifactsDir, filePaths);
-        Map<String, String> fileActions = new HashMap<>();
+    @Test(description = "Test if zip artifacts deleted from source version control are undeployed",
+            dependsOnMethods = {"testAddedZipAPI"})
+    public void testDeletedZipAPI() throws Exception {
+        SourceControlUtils.deleteApiProjectInRepo(Utils.getTargetDirPath()
+                + TestConstant.TEST_RESOURCES_PATH + SourceControlUtils.ARTIFACTS_DIR + ZIP);
+        Utils.delay(4000, "Interrupted while waiting for adapter to sync");
 
-        for (String filePath : filePaths){
-            fileActions.put(filePath, SourceControlUtils.UPDATE_FILE);
-        }
-
-        SourceControlUtils.commitFiles(Utils.getTargetDirPath() + TestConstant.TEST_RESOURCES_PATH
-                + SourceControlUtils.ARTIFACTS_DIR + SourceControlUtils.UPDATE, "Update zip artifacts", fileActions);
-        TimeUnit.SECONDS.sleep(4);
-    }
-
-    @Test(description = "Test if zip artifacts updated from source version control are deployed",
-            dependsOnMethods = {"AddAPIZipProjectTest"})
-    public void UpdateAPIZipProjectTest() throws Exception{
-        commitUpdatedArtifact();
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/store/inventory") , headers);
 
+        HttpResponse response = HttpsClientRequest.retryUntil404(
+                Utils.getServiceURLHttps("/zip/pet/1"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,"Response code mismatched");
     }

@@ -26,6 +26,7 @@ import org.wso2.choreo.connect.enforcer.constants.Constants;
  */
 public class EnvVarConfig {
     private static final String TRUSTED_CA_CERTS_PATH = "TRUSTED_CA_CERTS_PATH";
+    private static final String TRUST_DEFAULT_CERTS = "TRUST_DEFAULT_CERTS";
     private static final String ADAPTER_HOST_NAME = "ADAPTER_HOST_NAME";
     private static final String ENFORCER_PRIVATE_KEY_PATH = "ENFORCER_PRIVATE_KEY_PATH";
     private static final String ENFORCER_PUBLIC_CERT_PATH = "ENFORCER_PUBLIC_CERT_PATH";
@@ -42,6 +43,7 @@ public class EnvVarConfig {
 
     // Since the container is running in linux container, path separator is not needed.
     private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
+    private static final String DEFAULT_TRUST_DEFAULT_CERTS = "true";
     private static final String DEFAULT_ADAPTER_HOST_NAME = "adapter";
     private static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/security/keystore/mg.key";
     private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/keystore/mg.pem";
@@ -56,6 +58,7 @@ public class EnvVarConfig {
 
     private static EnvVarConfig instance;
     private final String trustedAdapterCertsPath;
+    private final String trustDefaultCerts;
     private final String enforcerPrivateKeyPath;
     private final String enforcerPublicKeyPath;
     private final String opaClientPrivateKeyPath;
@@ -75,6 +78,8 @@ public class EnvVarConfig {
     private EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
                 DEFAULT_TRUSTED_CA_CERTS_PATH);
+        trustDefaultCerts = retrieveEnvVarOrDefault(TRUST_DEFAULT_CERTS,
+                DEFAULT_TRUST_DEFAULT_CERTS);
         enforcerPrivateKeyPath = retrieveEnvVarOrDefault(ENFORCER_PRIVATE_KEY_PATH,
                 DEFAULT_ENFORCER_PRIVATE_KEY_PATH);
         enforcerPublicKeyPath = retrieveEnvVarOrDefault(ENFORCER_PUBLIC_CERT_PATH,
@@ -117,6 +122,10 @@ public class EnvVarConfig {
 
     public String getTrustedAdapterCertsPath() {
         return trustedAdapterCertsPath;
+    }
+
+    public boolean isTrustDefaultCerts() {
+        return Boolean.valueOf(trustDefaultCerts);
     }
 
     public String getEnforcerPrivateKeyPath() {

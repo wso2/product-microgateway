@@ -24,6 +24,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.X509CertUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,6 +89,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,7 +98,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Configuration holder class for Microgateway.
@@ -240,6 +244,8 @@ public class ConfigHolder {
         authDto.setMaxMessageSize(cdsAuth.getMaxMessageSize());
 
         ThreadPoolConfig threadPool = new ThreadPoolConfig();
+        MBeanRegistrator.registerMBean(threadPool);
+
         threadPool.setCoreSize(cdsAuth.getThreadPool().getCoreSize());
         threadPool.setKeepAliveTime(cdsAuth.getThreadPool().getKeepAliveTime());
         threadPool.setMaxSize(cdsAuth.getThreadPool().getMaxSize());
@@ -385,14 +391,55 @@ public class ConfigHolder {
 
     private void loadTrustStore() {
         try {
+
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null);
-            String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
-            TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
+
+            if (getEnvVarConfig().isTrustDefaultCerts()) {
+                loadDefaultCertsToTrustStore();
+            }
+            loadTrustedCertsToTrustStore();
+
             trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(trustStore);
+
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             logger.error("Error in loading certs to the trust store.", e);
+        }
+    }
+
+    private void loadTrustedCertsToTrustStore() throws IOException {
+        String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
+        TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
+    }
+
+    private void loadDefaultCertsToTrustStore() throws NoSuchAlgorithmException, KeyStoreException {
+        TrustManagerFactory tmf = TrustManagerFactory
+                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        // Using null here initialises the TMF with the default trust store.
+        tmf.init((KeyStore) null);
+
+        // Get hold of the default trust manager
+        X509TrustManager defaultTm = null;
+        for (TrustManager tm : tmf.getTrustManagers()) {
+            if (tm instanceof X509TrustManager) {
+                defaultTm = (X509TrustManager) tm;
+                break;
+            }
+        }
+
+        // Get the certs from defaultTm and add them to our trustStore
+        if (defaultTm != null) {
+            X509Certificate[] trustedCerts = defaultTm.getAcceptedIssuers();
+            Arrays.stream(trustedCerts)
+                    .forEach(cert -> {
+                        try {
+                            trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
+                                    cert);
+                        } catch (KeyStoreException e) {
+                            logger.error("Error while adding default trusted ca cert", e);
+                        }
+                    });
         }
     }
 

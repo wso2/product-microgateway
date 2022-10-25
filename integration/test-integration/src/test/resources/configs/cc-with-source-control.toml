@@ -22,10 +22,10 @@ artifactsDirectory = "/home/wso2/git-artifacts"
   maxRetryCount = 60
   artifactsDirectory = "/home/wso2/git-artifacts"
   [adapter.sourceControl.repository]
-    URL = "http://gitlab/root/testProject"
+    URL = "http://gitea:8285/username/testProject"
     branch = ""
-    username = "root"
-    accessToken = "svcAdmin"
+    username = "username"
+    accessToken = "556018e1140708b97d5f3d189055a37e89b9ba82"
     sshKeyFile = ""
 
 [router]

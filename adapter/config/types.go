@@ -118,6 +118,7 @@ type envoy struct {
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
 	UseRemoteAddress                 bool
+	Filters                          filters
 }
 
 type connectionTimeouts struct {
@@ -125,6 +126,31 @@ type connectionTimeouts struct {
 	RequestHeadersTimeoutInSeconds time.Duration // default disabled
 	StreamIdleTimeoutInSeconds     time.Duration // Default 5 mins
 	IdleTimeoutInSeconds           time.Duration // default 1hr
+}
+
+type filters struct {
+	Compression compression
+}
+
+type compression struct {
+	Enabled           bool
+	Library           string
+	RequestDirection  requestDirection
+	ResponseDirection responseDirection
+	LibraryProperties map[string]interface{}
+}
+
+type requestDirection struct {
+	Enabled              bool
+	MinimumContentLength int
+	ContentType          []string
+}
+
+type responseDirection struct {
+	Enabled              bool
+	MinimumContentLength int
+	ContentType          []string
+	EnableForEtagHeader  bool
 }
 
 type connection struct {

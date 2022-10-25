@@ -1,0 +1,41 @@
+basePath: /v2
+host: mockBackend:2383
+info:
+  title: Swagger Petstore
+  version: 1.0.6
+paths:
+  /store/inventory:
+    get:
+      summary: Find pet by ID
+      produces:
+        - application/json
+      parameters:
+        - name: petId
+          in: path
+          description: ID of pet to return
+          required: true
+          type: integer
+          format: int64
+definitions:
+  Pet:
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        example: doggie
+        type: string
+    required:
+      - name
+    type: object
+schemes:
+- http
+securityDefinitions:
+  petstore_auth:
+    authorizationUrl: https://petstore.swagger.io/oauth/authorize
+    flow: implicit
+    scopes:
+      read:pets: read your pets
+      write:pets: modify pets in your account
+    type: oauth2
+swagger: "2.0"

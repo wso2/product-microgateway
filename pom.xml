@@ -175,6 +175,28 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>${directory.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>directories</id>
+                        <goals>
+                            <goal>highest-basedir</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>ccBaseDir</property>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+            </plugin>
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <inherited>false</inherited>
                 <executions>
@@ -299,6 +321,17 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.protobuf.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.protobuf</groupId>
+                        <artifactId>protobuf-java</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency> <!-- Transitive dependency of grpc-protobuf. Added explicitly to use a non-vulnerable version-->
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.java.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
@@ -529,6 +562,11 @@
                 <version>${otel.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-otlp</artifactId>
+                <version>${otel.otlp.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.azure</groupId>
                 <artifactId>azure-messaging-eventhubs</artifactId>
                 <version>${azure.messaging.eventhubs.version}</version>
@@ -573,6 +611,12 @@
                 <version>${slf4j.api.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.agent</artifactId>
+                <version>${jacoco.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.github.tomakehurst</groupId>
                 <artifactId>wiremock-jre8</artifactId>
                 <version>${wiremock.version}</version>
@@ -602,10 +646,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <andes.client.version>3.3.23</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
-        <carbon.apimgt.version>9.20.74</carbon.apimgt.version>
+        <carbon.apimgt.version>9.26.29</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.11.0</commons.io.version>
@@ -632,13 +677,13 @@
         <nimbus.jose.jwt.version>7.9</nimbus.jose.jwt.version>
         <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
-        <otel.alpha.version>1.6.0-alpha</otel.alpha.version>
-        <otel.version>1.6.0</otel.version>
+        <otel.alpha.version>1.18.0-alpha</otel.alpha.version>
+        <otel.version>1.18.0</otel.version>
+        <otel.otlp.version>1.18.0</otel.otlp.version>
         <shade.plugin.version>3.2.4</shade.plugin.version>
         <slf4j.version>1.7.21</slf4j.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
-        <testcontainers.version>1.16.2</testcontainers.version>
-        <ryuk.image.version>0.3.2</ryuk.image.version>
+        <testcontainers.version>1.17.5</testcontainers.version>
         <testng.version>6.11</testng.version>
         <tomcat.annotations.api.version>6.0.53</tomcat.annotations.api.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -648,12 +693,12 @@
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
         <apictl.version>4.1.0</apictl.version>
         <apim.version>4.1.0</apim.version>
-        <grpc.healthProbe.version>0.4.11</grpc.healthProbe.version>
-        <analytics.publisher.client.version>1.0.8</analytics.publisher.client.version>
+        <grpc.healthProbe.version>0.4.14</grpc.healthProbe.version>
+        <analytics.publisher.client.version>1.0.10</analytics.publisher.client.version>
         <awaitility.version>3.1.2</awaitility.version>
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
-        <jackson.databind.version>2.13.2.1</jackson.databind.version>
-        <snakeyaml.version>1.31</snakeyaml.version>
+        <jackson.databind.version>2.14.0-rc1</jackson.databind.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
         <javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
@@ -662,15 +707,21 @@
         <com.sun.xml.messaging.saaj.version>1.5.3</com.sun.xml.messaging.saaj.version>
         <com.graphql.java.version>5.2.4</com.graphql.java.version>
         <graphql.java.version>17.3.wso2v1</graphql.java.version>
-        <org.jetbrains.kotlin.version>1.3.70</org.jetbrains.kotlin.version>
+        <org.jetbrains.kotlin.version>1.6.0</org.jetbrains.kotlin.version>
+        <protobuf.java.version>3.21.7</protobuf.java.version>
+        <directory.maven.plugin.version>1.0</directory.maven.plugin.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
-        <jackson.annotations.version>2.13.2</jackson.annotations.version>
+        <jackson.annotations.version>2.14.0-rc1</jackson.annotations.version>
         <applicationinsights.core.version>2.6.3</applicationinsights.core.version>
         <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.5</azure.monitor.opentelemetry.exporter.version>
         <azure.core.http.okhttp.version>1.3.3</azure.core.http.okhttp.version>
         <!-- dependency check plugin properties -->
         <dependency.check.maven.version>7.1.1</dependency.check.maven.version>
         <dependency.check.cvss.threshold.value>4</dependency.check.cvss.threshold.value>
+        <!-- -code coverage related properties -->
+        <maven.failsafe.plugin.version>2.15</maven.failsafe.plugin.version>
+        <jacoco.version>0.8.8</jacoco.version>
+        <skip.code.coverage>true</skip.code.coverage>
     </properties>
 </project>

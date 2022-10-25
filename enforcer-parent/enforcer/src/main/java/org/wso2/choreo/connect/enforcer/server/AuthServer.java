@@ -43,6 +43,7 @@ import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.OpenTelemetryInterceptor;
+import org.wso2.choreo.connect.enforcer.jmx.JMXAgent;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
@@ -136,6 +137,9 @@ public class AuthServer {
             // Start the server
             server.start();
             logger.info("Sever started Listening in port : " + 8081);
+
+            // Initialize JMX Agent
+            JMXAgent.initJMXAgent();
 
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();

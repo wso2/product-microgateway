@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -181,7 +182,7 @@ public class JWTAuthenticator implements Authenticator {
                         log.debug("Token retrieved from the revoked jwt token map. Token: "
                                 + FilterUtils.getMaskedToken(jwtHeader));
                     }
-                    log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
+                    log.debug("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
                 }
@@ -249,10 +250,10 @@ public class JWTAuthenticator implements Authenticator {
                                     /* GraphQL Query Analysis Information */
                                     if (APIConstants.ApiType.GRAPHQL.equals(requestContext.getMatchedAPI()
                                             .getApiType())) {
-                                        requestContext.getProperties().put(APIConstants.GraphQL.MAXIMUM_QUERY_DEPTH,
+                                        requestContext.getProperties().put(GraphQLConstants.MAXIMUM_QUERY_DEPTH,
                                                 apiKeyValidationInfoDTO.getGraphQLMaxDepth());
                                         requestContext.getProperties().put(
-                                                APIConstants.GraphQL.MAXIMUM_QUERY_COMPLEXITY,
+                                                GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY,
                                                 apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
                                     }
                                 }
@@ -543,7 +544,7 @@ public class JWTAuthenticator implements Authenticator {
                     log.debug("Token retrieved from the invalid token cache. Token: "
                             + FilterUtils.getMaskedToken(jwtHeader));
                 }
-                log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
+                log.debug("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
                 if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
                     jwtValidationInfo = (JWTValidationInfo) CacheProvider.getGatewayKeyCache().getIfPresent(jti);
                 } else {

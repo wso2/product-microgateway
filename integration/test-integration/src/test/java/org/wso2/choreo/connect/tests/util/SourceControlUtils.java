@@ -18,159 +18,231 @@
 
 package org.wso2.choreo.connect.tests.util;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import com.azure.core.http.ContentType;
 import com.google.common.net.HttpHeaders;
-import org.apache.commons.codec.binary.Base64;
-import org.json.JSONArray;
+import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 public class SourceControlUtils {
 
     private static final Logger log = LoggerFactory.getLogger(SourceControlUtils.class);
 
     public static final String GIT_URL = "http://localhost:8285";
-    public static final String GIT_API_URL = "http://localhost:8285/api/v4";
-    public static final String GIT_HEALTH_URL = "http://localhost:8285/-/liveness";
+    public static final String GIT_API_URL = "http://localhost:8285/api/v1";
+    public static final String GIT_HEALTH_URL = "http://localhost:8285/api/v1/topics/search?q=git";
     public static final String ARTIFACTS_DIR = File.separator + "git-artifacts";
-    public static final String GIT_USERNAME = "root";
-    public static final String GIT_PASSWORD = "svcAdmin";
+    public static final String GIT_USERNAME = "username";
     public static final String GIT_PROJECT_NAME = "testProject";
     public static final String GIT_PROJECT_PATH = "testProject";
     public static final String GIT_PROJECT_BRANCH = "main";
-    public static final String ADD_FILE = "Add";
-    public static final String UPDATE_FILE = "Update";
-    public static final String DELETE_FILE = "Delete";
-    public static final String ZIP_EXT = ".zip";
-
     public static final String DIRECTORY = File.separator + "directory";
-    public static final String ZIP = File.separator + "zip";
-    public static final String UPDATE = File.separator + "update";
 
-    private static String accessToken = "";
+    private static final String accessToken = "556018e1140708b97d5f3d189055a37e89b9ba82";
 
-    /**
-     * Generate an access token for invoking the Gitlab REST API
-     *
-     * @throws IOException  If an error occurs while sending the POST request
-     */
-    public static void generateAccessToken() throws IOException {
-        String postBody = "grant_type=password&username=" + GIT_USERNAME + "&password=" + GIT_PASSWORD;
-        Map<String, String> headers = new HashMap<String, String>(0);
-        HttpResponse response = HttpClientRequest.doPost(GIT_URL + "/oauth/token", postBody, headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK);
-        JSONObject tokenDataObject = new JSONObject(response.getData());
-        accessToken = tokenDataObject.getString("access_token");
-    }
+    // filesAddedAndSHA contains the last commit sha of each file and used when updating and deleting files.
+    private static final Map<String, String> filesAddedAndSHA = new HashMap<>();
 
     /**
-     * Test the status of the Gitlab REST API with the accessToken - To be used before invoking the Gitlab REST API
+     * Test the status of the Git service REST API with the accessToken.
      *
      * @throws IOException  If an error occurs while sending the GET request
      */
     public static void testGitStatus() throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        HttpResponse response = HttpClientRequest.doGet(GIT_API_URL + "/projects", headers);
+        headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON);
+        HttpResponse response = HttpClientRequest.doGet(GIT_API_URL + "/user/repos", headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK);
         log.info("REST API invoked successfully");
     }
 
     /**
-     * Create a new Gitlab project owned by the authenticated user
+     * Create a new repository owned by the authenticated user.
      *
      * @throws IOException  If an error occurs while sending the POST request
      */
-    public static void createProject() throws IOException {
-        String postBody = "name=" + GIT_PROJECT_NAME + "&path=" + GIT_PROJECT_PATH;
+    public static void createRepo() throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        HttpResponse response = HttpClientRequest.doPost(GIT_API_URL + "/projects", postBody, headers);
+        headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON);
+        headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON);
+        String postBody = "{\n" +
+                "  \"auto_init\": true,\n" +
+                "  \"name\": \"" + GIT_PROJECT_NAME + "\",\n" +
+                "  \"private\": true\n" +
+                "}";
+        HttpResponse response = HttpClientRequest.doPost(GIT_API_URL + "/user/repos", postBody, headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_CREATED);
         log.info("New project created at " + GIT_URL + "/" + GIT_USERNAME + "/" + GIT_PROJECT_PATH + ".git");
     }
 
     /**
-     * Commits files to the given Gitlab repository
+     * Commit the initial set of files to the repository.
      *
-     * @param artifactsDirectoryPath    Path of the artifacts directory
-     * @param commitMessage             Commit Message
-     * @param fileActions               Map of file paths and their corresponding actions
-     * @throws IOException              If an error occurs while reading the directory or committing the files
+     * @param artifactsDirPath  Directory that contains the project
+     * @param isZip             Whether the project is a zip
+     * @param commitMessage     Commit Message
+     * @throws Exception if an error occurs while reading files or sending the POST request
      */
-    public static void commitFiles(String artifactsDirectoryPath, String commitMessage,
-                                   Map<String, String> fileActions) throws IOException {
-        JSONObject payload = new JSONObject();
+    public static void commitApiProjectToRepo(String artifactsDirPath, boolean isZip, String commitMessage) throws Exception {
+        List<String> filePaths = new ArrayList<>();
+        File artifactsDir = new File(artifactsDirPath);
+        SourceControlUtils.getFiles(artifactsDir, filePaths);
 
-        JSONArray actions = new JSONArray();
-        File artifactsDir = new File(artifactsDirectoryPath);
-        readArtifactsDirectory(artifactsDir, artifactsDirectoryPath, actions, fileActions);
-
-        payload.put("branch", GIT_PROJECT_BRANCH);
-        payload.put("commit_message", commitMessage);
-        payload.put("actions", actions);
-        String payloadString = payload.toString();
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        headers.put("Content-Type", "application/json");
-
-        HttpResponse response = HttpClientRequest.doPost(GIT_API_URL + "/projects/"
-                + GIT_USERNAME + "%2F" + GIT_PROJECT_PATH + "/repository/commits", payloadString, headers);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_CREATED);
-
-        log.info(commitMessage + " : Artifacts committed to Git repository successfully");
+        for (String filePath : filePaths) {
+            String fileContentBase64;
+            if (isZip) {
+                byte[] bytes = FileUtils.readFileToByteArray(new File(filePath));
+                fileContentBase64 = Utils.encodeValueToBase64(bytes);
+            } else {
+                String fileContent = FileUtils.readFileToString(new File(filePath), StandardCharsets.UTF_8);
+                fileContentBase64 = Utils.encodeValueToBase64(fileContent);
+            }
+            commitFileWithPOST(filePath.replace(artifactsDirPath, ""), fileContentBase64,
+                    commitMessage);
+        }
     }
 
     /**
-     * Reads the artifacts directory and creates a JSONArray of file actions for the Gitlab REST API
+     * Update the already committed API project in repository.
      *
-     * @param directory                Path of the directory
-     * @param baseDirectory            Path of the base directory (artifacts directory)
-     * @param actions                  JSON Array of actions for committing the files to the repository
-     * @param fileActions              Map of file paths and their corresponding actions
-     * @throws IOException             If an error occurs while reading the directory
+     * @param artifactsDirPath  Directory that contains the project
+     * @param isZip             Whether the project is a zip
+     * @throws Exception if an error occurs while sending the PUT request
      */
-    public static void readArtifactsDirectory(File directory, String baseDirectory, JSONArray actions,
-                                              Map<String, String> fileActions) throws IOException {
+    public static void updateApiProjectInRepo(String artifactsDirPath, boolean isZip) throws Exception {
         List<String> filePaths = new ArrayList<>();
-        getFiles(directory, filePaths);
-        for (String filePath : filePaths){
-            // Convert the filePath to a relative path
-            String relativePath = filePath.replace(baseDirectory, ".");
-            if (fileActions.containsKey(filePath)){
-                String fileAction = fileActions.get(filePath);
-                if (fileAction.equals(ADD_FILE)){
-                    File addedFile = new File(filePath);
-                    JSONObject action = addFile(addedFile, relativePath);
-                    actions.put(action);
-                } else if (fileAction.equals(UPDATE_FILE)){
-                    File updatedFile = new File(filePath);
-                    JSONObject action = updateFile(updatedFile, relativePath);
-                    actions.put(action);
-                } else if (fileAction.equals(DELETE_FILE)){
-                    JSONObject action = deleteFile(relativePath);
-                    actions.put(action);
-                }
+        File artifactsDir = new File(artifactsDirPath);
+        SourceControlUtils.getFiles(artifactsDir, filePaths);
+
+        for (String filePath : filePaths) {
+            String fileContentBase64;
+            if (isZip) {
+                byte[] bytes = FileUtils.readFileToByteArray(new File(filePath));
+                fileContentBase64 = Utils.encodeValueToBase64(bytes);
+            } else {
+                String fileContent = FileUtils.readFileToString(new File(filePath), StandardCharsets.UTF_8);
+                fileContentBase64 = Utils.encodeValueToBase64(fileContent);
             }
+            commitFileWithPUT(filePath.replace(artifactsDirPath, ""), fileContentBase64,
+                    "Update artifacts");
         }
+    }
+
+    /**
+     * Delete the already committed API project from repository.
+     *
+     * @param artifactsDirPath   Directory that contains the project
+     * @throws Exception if an error occurs while sending the DELETE request
+     */
+    public static void deleteApiProjectInRepo(String artifactsDirPath) throws Exception {
+        List<String> filePaths = new ArrayList<>();
+        File artifactsDir = new File(artifactsDirPath);
+        SourceControlUtils.getFiles(artifactsDir, filePaths);
+
+        for (String filePath : filePaths){
+            String pathInRepo = filePath.replace(artifactsDirPath, "");
+            String sha = filesAddedAndSHA.get(pathInRepo);
+            commitFilesWithDELETE(pathInRepo, sha, "Delete artifacts");
+        }
+    }
+
+    /**
+     * Commits a new file to the given repository.
+     *
+     * @param filePathInRepo     Relative path of the artifacts to set in path parameter
+     * @param fileContentBase64  Absolute path of the artifacts directory to read from
+     * @param commitMessage      Commit Message
+     * @throws IOException       If an error occurs while reading the directory or committing the files
+     */
+    static void commitFileWithPOST(String filePathInRepo, String fileContentBase64, String commitMessage) throws Exception {
+        JSONObject payload = new JSONObject();
+        payload.put("branch", GIT_PROJECT_BRANCH);
+        payload.put("message", commitMessage);
+        payload.put("content", fileContentBase64);
+        String payloadString = payload.toString();
+
+        HttpResponse response = HttpClientRequest.doPost(GIT_API_URL + "/repos/" + GIT_USERNAME + "/"
+                + GIT_PROJECT_NAME + "/contents" + filePathInRepo, payloadString, getHeaders());
+        JSONObject commitResponse = new JSONObject(response.getData());
+        JSONObject content = commitResponse.getJSONObject("content");
+        String sha = content.getString("sha");
+        filesAddedAndSHA.put(filePathInRepo, sha);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_CREATED);
+        log.info("{} : Artifact {} added to Git repository successfully", commitMessage, filePathInRepo);
+    }
+
+    /**
+     * Commits an updated file to the given repository.
+     *
+     * @param filePathInRepo     Relative path of the artifacts to set in path parameter
+     * @param fileContentBase64  Absolute path of the artifacts directory to read from
+     * @param commitMessage      Commit Message
+     * @throws IOException       If an error occurs while reading the directory or committing the files
+     */
+    static void commitFileWithPUT(String filePathInRepo, String fileContentBase64,
+                                  String commitMessage) throws Exception {
+        JSONObject payload = new JSONObject();
+        payload.put("branch", GIT_PROJECT_BRANCH);
+        payload.put("message", commitMessage);
+        payload.put("sha", filesAddedAndSHA.get(filePathInRepo));
+        payload.put("content", fileContentBase64);
+        String payloadString = payload.toString();
+
+        HttpResponse response = HttpClientRequest.doPut(GIT_API_URL + "/repos/" + GIT_USERNAME + "/"
+                + GIT_PROJECT_NAME + "/contents" + filePathInRepo, payloadString, getHeaders());
+        JSONObject commitResponse = new JSONObject(response.getData());
+        JSONObject content = commitResponse.getJSONObject("content");
+        String sha = content.getString("sha");
+        filesAddedAndSHA.put(filePathInRepo, sha);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK);
+        log.info("{} : Artifact {} updated in Git repository successfully", commitMessage, filePathInRepo);
+    }
+
+    /**
+     * Commits a deleted file to the given repository.
+     *
+     * @param filePathInRepo     Relative path of the artifacts to set in path parameter
+     * @param sha                Sha of the last commit of the file
+     * @param commitMessage      Commit Message
+     * @throws IOException       If an error occurs while reading the directory or committing the files
+     */
+    static void commitFilesWithDELETE(String filePathInRepo, String sha, String commitMessage) throws Exception {
+        JSONObject payload = new JSONObject();
+        payload.put("branch", GIT_PROJECT_BRANCH);
+        payload.put("message", commitMessage);
+        payload.put("sha", sha);
+        String payloadString = payload.toString();
+
+        HttpResponse response = HttpClientRequest.doDelete(GIT_API_URL + "/repos/" + GIT_USERNAME + "/"
+                + GIT_PROJECT_NAME + "/contents" + filePathInRepo, payloadString, getHeaders());
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK);
+        log.info("{} : Artifact {} deleted from repository successfully", commitMessage, filePathInRepo);
+    }
+
+    static Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        headers.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON);
+        headers.put(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON);
+        return headers;
     }
 
     /**
@@ -189,98 +261,5 @@ public class SourceControlUtils {
                 filesList.add(filePath);
             }
         }
-    }
-
-    /**
-     * Reads the content of the given file and returns it as a string
-     *
-     * @param file                      The file to read
-     * @return                          The content of the file
-     * @throws FileNotFoundException    If any error occurs when reading the file
-     */
-    public static String readFile(File file) throws FileNotFoundException {
-        String line = "";
-        Scanner sc = new Scanner(file);
-        StringBuffer buffer = new StringBuffer();
-        while(sc.hasNextLine()){
-            line = sc.nextLine();
-            buffer.append(line + "\n");
-        }
-        return buffer.toString();
-    }
-
-    /**
-     * Reads the given zip file and returns the content as a base64 encoded string
-     *
-     * @param file          The zip file to read
-     * @return              The content of the zip file in base64 format
-     * @throws IOException  If any error occurs when reading the zip file
-     */
-    public static String readZip(File file) throws IOException {
-        String encodedBase64 = "";
-        FileInputStream fileInputStreamReader = new FileInputStream(file);
-        byte[] bytes = new byte[(int) file.length()];
-        fileInputStreamReader.read(bytes);
-        encodedBase64 = new String(Base64.encodeBase64(bytes));
-        return encodedBase64;
-    }
-
-    /**
-     * Returns a JSON object for adding a file to the repository
-     *
-     * @param file          The file to be added
-     * @param filePath      The path of the file to be added in the repository
-     * @return              A JSON object for adding a file to the repository
-     * @throws IOException  If any error occurs when reading the file
-     */
-    public static JSONObject addFile(File file, String filePath) throws IOException {
-        JSONObject action = new JSONObject();
-        action.put("action", "create");
-        action.put("file_path", filePath);
-        String content = "";
-        if (file.getName().endsWith(ZIP_EXT)){
-            content = readZip(file);
-            action.put("encoding", "base64");
-        } else {
-            content = readFile(file);
-        }
-        action.put("content", content);
-        return action;
-    }
-
-    /**
-     * Returns a JSON object for updating a file in the repository
-     *
-     * @param file          The file to be updated
-     * @param filePath      The path of the file to be updated in the repository
-     * @return              A JSON object for updating a file in the repository
-     * @throws IOException  If any error occurs when reading the file
-     */
-    public static JSONObject updateFile(File file, String filePath) throws IOException {
-        JSONObject action = new JSONObject();
-        action.put("action", "update");
-        action.put("file_path", filePath);
-        String content = "";
-        if (file.getName().endsWith(ZIP_EXT)){
-            content = readZip(file);
-            action.put("encoding", "base64");
-        } else {
-            content = readFile(file);
-        }
-        action.put("content", content);
-        return action;
-    }
-
-    /**
-     * Returns a JSON object for deleting a file from the repository
-     *
-     * @param filePath      The path of the file to be deleted in the repository
-     * @return              A JSON object for deleting a file from the repository
-     */
-    public static JSONObject deleteFile(String filePath){
-        JSONObject action = new JSONObject();
-        action.put("action", "delete");
-        action.put("file_path", filePath);
-        return action;
     }
 }

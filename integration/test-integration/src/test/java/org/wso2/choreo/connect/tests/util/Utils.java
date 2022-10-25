@@ -22,9 +22,15 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpHeaders
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.Header;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,13 +61,19 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.wso2.choreo.connect.tests.util.ApictlUtils.API_PROJECTS_PATH;
 
@@ -256,6 +268,31 @@ public class Utils {
         }
     }
 
+    public static void zip(final String dirPathToZip, final String folderName) throws IOException {
+        Path zipFile = Files.createFile(Paths.get(dirPathToZip + ".zip"));
+        Path sourceDirPath = Paths.get(dirPathToZip);
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile),
+                StandardCharsets.UTF_8); Stream<Path> paths = Files.walk(sourceDirPath)) {
+            paths
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+
+                        ZipEntry zipEntry = new ZipEntry(
+                                // example: dir/petstore.zip/petstore/api.yaml
+                                // to get the correct structure when decompressed.
+                                folderName + File.separator + sourceDirPath.relativize(path));
+                        try {
+                            zipOutputStream.putNextEntry(zipEntry);
+                            Files.copy(path, zipOutputStream);
+                            zipOutputStream.closeEntry();
+                        } catch (IOException e) {
+                            log.error("Error while creating zip for {}", sourceDirPath);
+                        }
+                    });
+        }
+        deleteFolder(new File(dirPathToZip));
+    }
+
     /**
      * Return the system property value of os.name. System.getProperty("os.name").
      *
@@ -294,6 +331,15 @@ public class Utils {
      */
     public static String encodeValueToBase64(String value) throws Exception {
         return Base64.getEncoder().encodeToString(value.getBytes("utf-8"));
+    }
+
+    /**
+     * Encode a byte array to base64 format
+     *
+     * @param value The value to be encoded.
+     */
+    public static String encodeValueToBase64(byte[] value) {
+        return Base64.getEncoder().encodeToString(value);
     }
 
     /**
@@ -468,6 +514,23 @@ public class Utils {
     }
 
     /**
+     * Copies a file with existing attribute values
+     *
+     * @param sourceLocation current location of the file
+     * @param destLocation   destination location path of the file
+     * @throws CCTestException if error happens while copying the file
+     */
+    public static void copyFileWithAttributes(String sourceLocation, String destLocation) throws CCTestException {
+        try {
+            Path sourcePath = Paths.get(sourceLocation);
+            Path destPath = Paths.get(destLocation);
+            Files.copy(sourcePath,destPath,StandardCopyOption.COPY_ATTRIBUTES);
+        } catch (IOException e) {
+            throw new CCTestException("error while copying file. ", e);
+        }
+    }
+
+    /**
      * Delay the program for a given time period
      *
      * @param sourceLocation folder location.
@@ -594,6 +657,17 @@ public class Utils {
         return headersCaseInsensitive;
     }
 
+    /**
+     * Gives jacoco aggregate.exec file containing path relevant to the Enforcer
+     *
+     * @return jacoco aggregate.exec file path
+     */
+    public static String getEnforcerCodeCovExecPath() {
+        return File.separator + TestConstant.ENFORCER_PARENT_DIR_NAME + File.separator + TestConstant.ENFORCER_DIR_NAME
+                + File.separator + TestConstant.TARGET_DIR_NAME + File.separator +
+                TestConstant.CODECOV_AGGREGATE_REPORT_DIR_NAME + File.separator + TestConstant.JACOCO_EXEC_NAME;
+    }
+
     public static String getTargetDirPath() {
         File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
@@ -610,6 +684,23 @@ public class Utils {
                 getLocation().getPath());
         return targetClassesDir.getParentFile().getParentFile().getParentFile().getParentFile().toString()
                 + File.separator + "samples";
+    }
+
+    /**
+     * @param responseHeaders HTTP response headers list
+     * @param requiredHeader  header name as a string
+     * @return the required HTTP header (if not found, null will be returned)
+     */
+    public static String pickHeader(Map<String, String> responseHeaders, String requiredHeader) {
+        if (requiredHeader == null) {
+            return null;
+        }
+        for (String headerName : responseHeaders.keySet()) {
+            if (requiredHeader.equalsIgnoreCase(headerName)) {
+                return headerName;
+            }
+        }
+        return null;
     }
 
     public static String getAdapterServiceURLHttps(String servicePath) throws MalformedURLException {
