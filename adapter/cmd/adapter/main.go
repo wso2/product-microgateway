@@ -56,7 +56,7 @@ func startMicroGateway(args []string) {
 	if errReadConfig != nil {
 		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}
-	// TODO: enable via a config
+	// TODO: enable starting apk operator via a config
 	go apk.Run()
 	adapter.Run(conf)
 }
