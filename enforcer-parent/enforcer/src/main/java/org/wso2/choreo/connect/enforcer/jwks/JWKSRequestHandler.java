@@ -42,9 +42,7 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
     private static final String CLOSE = "close";
     private static final String APPLICATION_JSON = "application/json";
     private static final String CONTENT_TYPE = "Content-Type";
-
     private static final Logger logger = LogManager.getLogger(JWKSRequestHandler.class);
-
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) {
