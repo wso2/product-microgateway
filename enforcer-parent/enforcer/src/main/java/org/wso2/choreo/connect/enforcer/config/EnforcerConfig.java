@@ -66,7 +66,6 @@ public class EnforcerConfig {
     private AdminRestServerDto restServer;
     private FilterDTO[] customFilters;
 
-
     private SoapErrorResponseConfigDto soapErrorResponseConfigDto;
 
     public AuthServiceConfigurationDto getAuthService() {
