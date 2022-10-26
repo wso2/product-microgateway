@@ -48,7 +48,6 @@ public class BackendJwtTest {
     private static JWTConfigurationDto jwtConfig;
     private static AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
 
-
     // Init JWT generator
     @BeforeClass
     public static void start() throws Exception {
@@ -57,7 +56,6 @@ public class BackendJwtTest {
         jwtGenerator.setJWTConfigurationDto((jwtConfig));
 
     }
-
 
     public static JWTConfigurationDto getConfigDto() {
         JWTConfigurationDto configDto = new JWTConfigurationDto();
@@ -81,14 +79,12 @@ public class BackendJwtTest {
 
     }
 
-
     @Test
     public void generateJwt() throws Exception {
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(new JWTValidationInfo());
         String jwt = jwtGenerator.generateToken(jwtInfoDto);
         Assert.assertNotNull(jwt);
-
     }
 
     @Test
@@ -109,9 +105,5 @@ public class BackendJwtTest {
         boolean verifiedSignature = false;
         verifiedSignature = jwsObject.verify(verifier);
         Assert.assertTrue(verifiedSignature);
-
-
     }
-
-
 }

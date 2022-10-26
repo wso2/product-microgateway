@@ -51,7 +51,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-
 go vet -c=5 ./...
 if [ $? -ne 0 ]; then 
   echo "FAILED: go vet Failure"
