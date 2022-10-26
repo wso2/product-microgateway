@@ -12,10 +12,6 @@ public class BackendJWKSDto {
     private boolean isEnabled = false;
     private JWKSet jwks;
 
-    public BackendJWKSDto() {
-
-    }
-
     public boolean isEnabled() {
         return isEnabled;
     }
