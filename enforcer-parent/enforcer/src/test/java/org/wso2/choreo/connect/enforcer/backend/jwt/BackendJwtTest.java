@@ -54,7 +54,6 @@ public class BackendJwtTest {
         jwtConfig = getConfigDto();
         jwtGenerator = new APIMgtGatewayJWTGeneratorImpl();
         jwtGenerator.setJWTConfigurationDto((jwtConfig));
-
     }
 
     public static JWTConfigurationDto getConfigDto() {
@@ -74,9 +73,7 @@ public class BackendJwtTest {
         configDto.setEnableUserClaims(false);
         configDto.setGatewayJWTGeneratorImpl("org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl");
         configDto.setTtl(3600);
-
         return configDto;
-
     }
 
     @Test
