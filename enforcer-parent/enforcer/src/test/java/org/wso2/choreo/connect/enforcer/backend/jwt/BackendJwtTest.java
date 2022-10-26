@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.choreo.connect.enforcer.backend.jwt;
 
 import com.nimbusds.jose.JWSObject;
@@ -47,7 +48,6 @@ public class BackendJwtTest {
     private static final String privateKey = "mg.key";
     private static JWTConfigurationDto jwtConfig;
     private static AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
-
     // Init JWT generator
     @BeforeClass
     public static void start() throws Exception {

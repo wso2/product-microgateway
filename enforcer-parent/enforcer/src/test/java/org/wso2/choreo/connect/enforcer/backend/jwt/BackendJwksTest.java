@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.choreo.connect.enforcer.backend.jwt;
 
 import org.junit.Assert;
