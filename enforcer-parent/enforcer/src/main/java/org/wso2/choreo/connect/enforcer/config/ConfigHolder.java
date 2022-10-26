@@ -518,7 +518,6 @@ public class ConfigHolder {
         } catch (EnforcerException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);
         }
-
         config.setJwtConfigurationDto(jwtConfigurationDto);
         populateBackendJWKSConfiguration(jwtGenerator);
     }
