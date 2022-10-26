@@ -550,6 +550,7 @@ public class ConfigHolder {
         }
         config.setBackendJWKSDto(backendJWKSDto);
     }
+
     private JWK jwkFromCertPath(String certPath) throws CertificateException, IOException, JOSEException {
         X509Certificate cert = X509CertUtils.parse(TLSUtils.getCertificate(certPath).getEncoded());
         RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
