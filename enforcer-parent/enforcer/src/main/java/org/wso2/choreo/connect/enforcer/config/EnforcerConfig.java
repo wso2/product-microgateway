@@ -54,7 +54,6 @@ public class EnforcerConfig {
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
     private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
-
     private BackendJWKSDto backendJWKSDto;
     private CredentialDto[] jwtUsersCredentials;
     private String publicCertificatePath = "";
