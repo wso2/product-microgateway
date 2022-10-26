@@ -68,7 +68,6 @@ public class BackendJwtTest {
         } catch (EnforcerException | CertificateException | IOException e) {
             throw new RuntimeException(e);
         }
-
         configDto.setEnabled(true);
         configDto.setEnableUserClaims(false);
         configDto.setGatewayJWTGeneratorImpl("org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl");

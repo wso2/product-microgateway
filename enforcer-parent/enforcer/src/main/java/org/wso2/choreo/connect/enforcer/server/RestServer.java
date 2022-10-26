@@ -49,7 +49,6 @@ public class RestServer {
     private static final Logger logger = LogManager.getLogger(RestServer.class);
     static final int TOKEN_PORT = 8082;
     static final int ADMIN_PORT = 9001;
-
     static final int JWKS_PORT = 9002;
 
     public void initServer() throws SSLException, CertificateException, InterruptedException {
@@ -106,13 +105,8 @@ public class RestServer {
                 logger.info("Admin endpoint started Listening in port : " + ADMIN_PORT);
                 adminChannel.closeFuture().sync();
             }
-
-
-
-
             // Wait until server socket is closed
             tokenChannel.closeFuture().sync();
-
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
