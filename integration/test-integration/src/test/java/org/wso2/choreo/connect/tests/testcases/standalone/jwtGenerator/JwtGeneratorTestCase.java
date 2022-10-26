@@ -163,8 +163,5 @@ public class JwtGeneratorTestCase {
 
         JWSVerifier verifier = new RSASSAVerifier(jwk.toRSAPublicKey());
         Assert.assertTrue(jwsObject.verify(verifier));
-
     }
-
-
 }
