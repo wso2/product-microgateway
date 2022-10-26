@@ -46,8 +46,8 @@ func GetOpenAPIVersionAndJSONContent(apiContent []byte) (string, []byte, error) 
 
 // GetOpenAPIV3Struct converts the json content to the openAPIv3 struct
 // TODO: (VirajSalaka) Use the MGWSwagger instead of this.
-func GetOpenAPIV3Struct(openAPIJson []byte) (openapi3.Swagger, error) {
-	var apiData3 openapi3.Swagger
+func GetOpenAPIV3Struct(openAPIJson []byte) (openapi3.T, error) {
+	var apiData3 openapi3.T
 
 	err := json.Unmarshal(openAPIJson, &apiData3)
 	if err != nil {

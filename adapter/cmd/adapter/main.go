@@ -24,6 +24,8 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/adapter"
+
+	apk "github.com/wso2/product-microgateway/adapter/internal/operator"
 	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
@@ -54,5 +56,7 @@ func startMicroGateway(args []string) {
 	if errReadConfig != nil {
 		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}
+	// TODO: enable via a config
+	go apk.Run()
 	adapter.Run(conf)
 }
