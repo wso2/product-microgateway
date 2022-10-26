@@ -162,6 +162,6 @@ public class JwtGeneratorTestCase {
         Assert.assertNotNull(jwsObject);
 
         JWSVerifier verifier = new RSASSAVerifier(jwk.toRSAPublicKey());
-        Assert.assertTrue(jwsObject.verify(verifier));
+        Assert.assertTrue(jwsObject.verify(verifier),"JWT failed to validate with JWKS response");
     }
 }

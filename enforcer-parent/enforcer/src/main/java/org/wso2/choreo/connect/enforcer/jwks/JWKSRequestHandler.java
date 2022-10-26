@@ -70,6 +70,7 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
                 .setInt(CONTENT_LENGTH, res.content().readableBytes());
         ChannelFuture f = ctx.write(res);
         f.addListener(ChannelFutureListener.CLOSE);
+        //TODO: keep alive
     }
 
     @Override
