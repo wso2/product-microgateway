@@ -561,8 +561,6 @@ public class ConfigHolder {
         return jwk;
     }
 
-
-
     private void populateCacheConfigs(Cache cache) {
         CacheDto cacheDto = new CacheDto();
         cacheDto.setEnabled(cache.getEnable());
