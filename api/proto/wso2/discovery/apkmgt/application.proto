@@ -10,17 +10,30 @@ option java_multiple_files = false;
 // [#protodoc-title: ApplicationDetails]
 
 message Application {
-  string applicationId = 1;
-  string applicationName = 2;
-  string tokenType = 3;
+  string uuid = 1;
+  string name = 2;
+  string owner = 3;
   map<string, string> attributes = 4;
   string subscriber = 5;
   string organization = 6;
-  string updatedTimeStamp = 7;
-  string tenantId = 8;
-  string tenantDomain = 9;
+  repeated Subscription subscriptions = 7;
+  repeated ConsumerKey consumerKeys = 8;
 }
 
 message ApplicationDetails {
   repeated Application applications = 1;
+}
+
+message ConsumerKey {
+  string key = 1;
+  string keyManager = 2;
+}
+
+message Subscription {
+  string uuid = 1;
+  string apiUuid = 2;
+  string policyId = 3;
+  string subscriptionStatus = 4;
+  string organization = 5;
+  string createdBy = 6;
 }

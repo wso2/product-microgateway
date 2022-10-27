@@ -91,7 +91,7 @@ func GetResourceName(res envoy_types.Resource) string {
 	case *ga.Api:
 		return fmt.Sprint(v.ApiUUID)
 	case *apikmgt.Application:
-		return fmt.Sprint(v.ApplicationId)
+		return fmt.Sprint(v.Uuid)
 	case *keymgt.RevokedToken:
 		return fmt.Sprint(v.Jti)
 	default:
