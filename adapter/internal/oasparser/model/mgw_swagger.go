@@ -1194,7 +1194,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			err = swagger.SetInfoSwagger(swaggerSpec)
 		}
 	} else if definitionVersion == constants.OpenAPI3 {
-		var openAPISpec openapi3.Swagger
+		var openAPISpec openapi3.T
 		err = json.Unmarshal(definitionJsn, &openAPISpec)
 		if err == nil {
 			err = swagger.SetInfoOpenAPI(openAPISpec)

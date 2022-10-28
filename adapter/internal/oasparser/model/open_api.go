@@ -58,7 +58,7 @@ const (
 // UUID.
 //
 // No operation specific information is extracted.
-func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
+func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.T) error {
 	var err error
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
@@ -122,7 +122,7 @@ func setPathInfoOpenAPI(path string, methods []*Operation, pathItem *openapi3.Pa
 	return resource
 }
 
-func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
+func setResourcesOpenAPI(openAPI openapi3.T) ([]*Resource, error) {
 	var resources []*Resource
 
 	// Check the disable security vendor ext at API level.
@@ -174,7 +174,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 	return SortResources(resources), nil
 }
 
-func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) []SecurityScheme {
+func setSecuritySchemesOpenAPI(openAPI openapi3.T) []SecurityScheme {
 	var securitySchemes []SecurityScheme
 	for key, val := range openAPI.Components.SecuritySchemes {
 		scheme := SecurityScheme{DefinitionName: key, Type: val.Value.Type, Name: val.Value.Name, In: val.Value.In}

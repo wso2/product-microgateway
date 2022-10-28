@@ -1,0 +1,36 @@
+apiVersion: cp.wso2.com/v1alpha1
+kind: ApplicationData
+metadata:
+  labels:
+    app.kubernetes.io/name: applicationdata
+    app.kubernetes.io/instance: applicationdata-sample
+    app.kubernetes.io/part-of: test
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: test
+  name: applicationdata-sample
+spec:
+  applications:
+    - uuid: 9ec2b927-47aa-456f-b6de-1959274f3444
+      name: app1
+      owner: admin
+      policy: 10PerMin
+      consumerKeys:
+        - key: yef14gh8syDvTt56rdtIHYbjF_Ya
+          type: SANDBOX
+          keyManager: Resident Key Manager
+    - uuid: f46b39bf-2f22-4224-ae8b-bc295dcf9d78
+      name: app2
+      owner: Alice
+      policy: 20PerMin
+      consumerKeys:
+        - key: hef14gh8syDvTtvoWYeIHYbjF_Ya
+          type: PRODUCTION
+          keyManager: Resident Key Manager
+    - uuid: 77557d54-fcba-4da8-8300-2ab82b11347d
+      name: app3
+      owner: Bob
+      policy: 10PerMin
+      consumerKeys:
+        - key: hef14gh8syDvTtvoWYeIHYbjF_Ya
+          type: PRODUCTION_AND_SANDBOX
+          keyManager: Resident Key Manager

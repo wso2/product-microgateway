@@ -1,0 +1,59 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - cp.wso2.com
+  resources:
+  - applicationdata
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cp.wso2.com
+  resources:
+  - applicationdata/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cp.wso2.com
+  resources:
+  - applicationdata/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - cp.wso2.com
+  resources:
+  - subscriptiondata
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cp.wso2.com
+  resources:
+  - subscriptiondata/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cp.wso2.com
+  resources:
+  - subscriptiondata/status
+  verbs:
+  - get
+  - patch
+  - update

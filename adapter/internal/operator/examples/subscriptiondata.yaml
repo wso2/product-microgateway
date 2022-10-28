@@ -1,0 +1,48 @@
+apiVersion: wso2.com/v1beta1
+kind: SubscriptionData
+metadata:
+   name: subscriptions
+spec:
+  subscriptions:
+    - uuid: ff041d1b-be19-4529-a861-86a79905a1ad
+      name: sub1
+      apiDisplayName: SwaggerPetstore
+      businessPlan: Unlimited
+      subscriptionStatus: ACTIVE
+      lifecycleStatus: PUBLISHED
+      appRef: app1
+    - uuid: 9f3ba7f2-8b92-41e2-8504-13bfb9417525
+      name: sub2
+      apiDisplayName: PetFood
+      businessPlan: Bronze
+      subscriptionStatus: BLOCKED
+      lifecycleStatus: PUBLISHED
+      appRef: app1
+    - uuid: 7135278f-3c6a-4ebe-b651-c90d252ce07f
+      name: sub3
+      apiDisplayName: SwaggerPetstore
+      businessPlan: Unlimited
+      subscriptionStatus: ACTIVE
+      lifecycleStatus: PUBLISHED
+      appRef: app2
+    - uuid: 6d643577-94e5-486e-b742-5fa086bfb7aa
+      name: sub4
+      apiDisplayName: SwaggerPetstore
+      businessPlan: Unlimited
+      subscriptionStatus: ACTIVE
+      lifecycleStatus: PUBLISHED
+      appRef: app3
+    - uuid: 82e2cab7-cba5-4b0d-b8b6-133e108e05e1
+      name: sub5
+      apiDisplayName: PetFood
+      businessPlan: Bronze
+      subscriptionStatus: BLOCKED
+      lifecycleStatus: PUBLISHED
+      appRef: app3
+    - uuid: ba832101-4fa6-42ba-bf8b-e729d4216755
+      name: sub6
+      apiDisplayName: Pizzashack
+      businessPlan: Unlimited
+      subscriptionStatus: ACTIVE
+      lifecycleStatus: PUBLISHED
+      appRef: app3
