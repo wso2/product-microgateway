@@ -20,6 +20,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -28,6 +29,8 @@ import (
 	apk "github.com/wso2/product-microgateway/adapter/internal/operator"
 	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
+
+const runAPK = "RUN_APK"
 
 func main() {
 
@@ -56,7 +59,9 @@ func startMicroGateway(args []string) {
 	if errReadConfig != nil {
 		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}
-	// TODO: enable via a config
-	go apk.Run()
+
+	if run, err := strconv.ParseBool(os.Getenv(runAPK)); err == nil && run {
+		go apk.Run()
+	}
 	adapter.Run(conf)
 }
