@@ -45,6 +45,7 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
     private static final String APPLICATION_JSON = "application/json";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final Logger logger = LogManager.getLogger(JWKSRequestHandler.class);
+    private static final String route = "/jwks";
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) {
@@ -55,22 +56,21 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
         if (msg instanceof HttpRequest) {
 
             req = (FullHttpRequest) msg;
-            if (!(req.method() == HttpMethod.GET)) {
+            String path = req.uri().split("\\?")[0];
+            if (!(req.method() == HttpMethod.GET && path.equals(route))) {
+                ctx.fireChannelRead(msg);
                 return;
             }
-        } else {
-            logger.error("Error occurred while processing the request. Request isn't an instance of HTTP request");
-            return;
+            res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
+                    Unpooled.wrappedBuffer(jwks.toJSONObject().toString().getBytes()));
+            res.headers()
+                    .set(CONNECTION, CLOSE)
+                    .set(CONTENT_TYPE, APPLICATION_JSON)
+                    .setInt(CONTENT_LENGTH, res.content().readableBytes());
+            ChannelFuture f = ctx.write(res);
+            f.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            //TODO: keep alive
         }
-        res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer(jwks.toJSONObject().toString().getBytes()));
-        res.headers()
-                .set(CONNECTION, CLOSE)
-                .set(CONTENT_TYPE, APPLICATION_JSON)
-                .setInt(CONTENT_LENGTH, res.content().readableBytes());
-        ChannelFuture f = ctx.write(res);
-        f.addListener(ChannelFutureListener.CLOSE);
-        //TODO: keep alive
     }
 
     @Override
