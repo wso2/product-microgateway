@@ -33,6 +33,7 @@ import (
 
 	cpv1alpha1 "github.com/wso2/product-microgateway/adapter/internal/operator/api/v1alpha1"
 	"github.com/wso2/product-microgateway/adapter/internal/operator/controllers"
+	"github.com/wso2/product-microgateway/adapter/internal/operator/mgtserver"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -97,13 +98,6 @@ func Run() {
 		setupLog.Error(err, "unable to create controller", "controller", "ApplicationData")
 		os.Exit(1)
 	}
-	if err = (&controllers.SubscriptionDataReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "SubscriptionData")
-		os.Exit(1)
-	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
@@ -120,4 +114,7 @@ func Run() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+
+	// Management server response syncing to k8s API server
+	go mgtserver.StartSync(mgr.GetClient())
 }

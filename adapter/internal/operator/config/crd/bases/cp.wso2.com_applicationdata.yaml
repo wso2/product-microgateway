@@ -39,6 +39,10 @@ spec:
                 items:
                   description: Application defines the properties of Application
                   properties:
+                    attributes:
+                      additionalProperties:
+                        type: string
+                      type: object
                     consumerKeys:
                       items:
                         description: ConsumerKey defines the consumer keys of Application
@@ -47,24 +51,49 @@ spec:
                             type: string
                           keyManager:
                             type: string
-                          type:
-                            type: string
                         required:
                         - key
                         - keyManager
-                        - type
                         type: object
                       type: array
                     name:
+                      type: string
+                    organization:
                       type: string
                     owner:
                       type: string
                     policy:
                       type: string
+                    subscriptions:
+                      items:
+                        description: Subscription defines a subscription of Application
+                        properties:
+                          apiRef:
+                            type: string
+                          name:
+                            type: string
+                          policyId:
+                            type: string
+                          subscriber:
+                            type: string
+                          subscriptionStatus:
+                            type: string
+                          uuid:
+                            type: string
+                        required:
+                        - apiRef
+                        - name
+                        - policyId
+                        - subscriber
+                        - subscriptionStatus
+                        - uuid
+                        type: object
+                      type: array
                     uuid:
                       type: string
                   required:
                   - name
+                  - organization
                   - owner
                   - policy
                   - uuid

@@ -33,18 +33,30 @@ type ApplicationDataSpec struct {
 
 // Application defines the properties of Application
 type Application struct {
-	UUID         string        `json:"uuid"`
-	Name         string        `json:"name"`
-	Owner        string        `json:"owner"`
-	Policy       string        `json:"policy"`
-	ConsumerKeys []ConsumerKey `json:"consumerKeys,omitempty"`
+	UUID          string            `json:"uuid"`
+	Name          string            `json:"name"`
+	Owner         string            `json:"owner"`
+	Policy        string            `json:"policy"`
+	Organization  string            `json:"organization"`
+	Attributes    map[string]string `json:"attributes,omitempty"`
+	ConsumerKeys  []ConsumerKey     `json:"consumerKeys,omitempty"`
+	Subscriptions []Subscription    `json:"subscriptions,omitempty"`
 }
 
 // ConsumerKey defines the consumer keys of Application
 type ConsumerKey struct {
 	Key        string `json:"key"`
-	Type       string `json:"type"`
 	KeyManager string `json:"keyManager"`
+}
+
+// Subscription defines a subscription of Application
+type Subscription struct {
+	UUID               string `json:"uuid"`
+	Name               string `json:"name"`
+	APIRef             string `json:"apiRef"`
+	PolicyID           string `json:"policyId"`
+	SubscriptionStatus string `json:"subscriptionStatus"`
+	Subscriber         string `json:"subscriber"`
 }
 
 // ApplicationDataStatus defines the observed state of ApplicationData

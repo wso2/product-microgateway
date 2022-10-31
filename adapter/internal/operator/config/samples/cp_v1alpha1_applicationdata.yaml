@@ -10,27 +10,60 @@ metadata:
   name: applicationdata-sample
 spec:
   applications:
-    - uuid: 9ec2b927-47aa-456f-b6de-1959274f3444
+    - uuid: 9ec2b927-47aa-456f-b6de-1959274f3asdasdaz
       name: app1
       owner: admin
       policy: 10PerMin
+      organization: wso2 # not in the current application.proto
+      attributes: 
+        attb1: value1
+        attb2: value2
       consumerKeys:
         - key: yef14gh8syDvTt56rdtIHYbjF_Ya
-          type: SANDBOX
           keyManager: Resident Key Manager
+      subscriptions:
+        - uuid: ff041d1b-be19-4529-a861-86a79905a1aq
+          name: sub1
+          apiRef: SwaggerPetstore
+          policyId: Unlimited
+          subscriptionStatus: ACTIVE
+          subscriber: Tom # not in the current application_key_mapping.proto
+        - uuid: ff041d1b-be19-4529-a861-86a79905a1ad
+          name: sub2
+          apiRef: PizzaShack
+          policyId: Unlimited
+          subscriptionStatus: ACTIVE
+          subscriber: Bob
     - uuid: f46b39bf-2f22-4224-ae8b-bc295dcf9d78
       name: app2
       owner: Alice
       policy: 20PerMin
+      organization: wso2 
+      attributes: 
+        attb3: value3
+        attb4: value4
       consumerKeys:
         - key: hef14gh8syDvTtvoWYeIHYbjF_Ya
-          type: PRODUCTION
           keyManager: Resident Key Manager
+      subscriptions:
+        - uuid: ff041d1b-be19-4529-a861-86a79905a1ad
+          name: sub1
+          apiRef: SwaggerPetstore
+          policyId: Unlimited
+          subscriptionStatus: ACTIVE
+          subscriber: Tom 
     - uuid: 77557d54-fcba-4da8-8300-2ab82b11347d
       name: app3
       owner: Bob
       policy: 10PerMin
+      organization: wso2
       consumerKeys:
         - key: hef14gh8syDvTtvoWYeIHYbjF_Ya
-          type: PRODUCTION_AND_SANDBOX
           keyManager: Resident Key Manager
+      subscriptions:
+        - uuid: ff041d1b-be19-4529-a861-86a79905a1ad
+          name: sub1
+          apiRef: SwaggerPetstore
+          policyId: Unlimited
+          subscriptionStatus: ACTIVE
+          subscriber: Tom

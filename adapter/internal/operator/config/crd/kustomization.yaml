@@ -3,7 +3,6 @@
 # It should be run by config/default
 resources:
 - bases/cp.wso2.com_applicationdata.yaml
-- bases/cp.wso2.com_subscriptiondata.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

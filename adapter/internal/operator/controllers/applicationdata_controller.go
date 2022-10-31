@@ -63,10 +63,19 @@ func (r *ApplicationDataReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	// create application resource list from loaded apps
+	var applications []cpv1alpha1.Application
 	if len(applicationDataList.Items) > 0 {
-		appList := marshalApplicationList(applicationDataList.Items[0].Spec.Applications)
-		xds.UpdateEnforcerApplications(appList)
+		applications = applicationDataList.Items[0].Spec.Applications
 	}
+
+	appList := marshalApplicationList(applications)
+	xds.UpdateEnforcerApplications(appList)
+
+	subList := marshalSubscriptionList(applications)
+	xds.UpdateEnforcerSubscriptions(subList)
+
+	appKeyMappingList := marshalApplicationKeyMapping(applications)
+	xds.UpdateEnforcerApplicationKeyMappings(appKeyMappingList)
 
 	return ctrl.Result{}, nil
 }
@@ -75,25 +84,51 @@ func marshalApplicationList(applicationList []cpv1alpha1.Application) *subscript
 	applications := []*subscription.Application{}
 	for _, appInternal := range applicationList {
 		app := &subscription.Application{
-			Uuid: appInternal.UUID,
-			// Id:   index,
-			Name: appInternal.Name,
-			// SubId:        appInternal.ID,
-			// SubName:      appInternal.SubName,
-			Policy: appInternal.Policy,
-			// TokenType:    appInternal.TokenType,
-			// Attributes:   appInternal.Attributes,
-			// TenantId:     appInternal.TenantID,
-			// TenantDomain: appInternal.TenantDomain,
-			// Timestamp:    appInternal.TimeStamp,
-		}
-		if app.TenantDomain == "" {
-			app.TenantDomain = "supertenant"
+			Uuid:       appInternal.UUID,
+			Name:       appInternal.Name,
+			Policy:     appInternal.Policy,
+			Attributes: appInternal.Attributes,
 		}
 		applications = append(applications, app)
 	}
 	return &subscription.ApplicationList{
 		List: applications,
+	}
+}
+
+func marshalSubscriptionList(applicationList []cpv1alpha1.Application) *subscription.SubscriptionList {
+	subscriptions := []*subscription.Subscription{}
+	for _, appInternal := range applicationList {
+		for _, subInternal := range appInternal.Subscriptions {
+			sub := &subscription.Subscription{
+				SubscriptionUUID:  subInternal.UUID,
+				PolicyId:          subInternal.PolicyID,
+				SubscriptionState: subInternal.SubscriptionStatus,
+				AppUUID:           appInternal.UUID,
+				// ApiUUID: subInternal.ApiRef,
+			}
+			subscriptions = append(subscriptions, sub)
+		}
+	}
+	return &subscription.SubscriptionList{
+		List: subscriptions,
+	}
+}
+
+func marshalApplicationKeyMapping(applicationList []cpv1alpha1.Application) *subscription.ApplicationKeyMappingList {
+	applicationKeyMappings := []*subscription.ApplicationKeyMapping{}
+	for _, appInternal := range applicationList {
+		for _, consumerKeyInternal := range appInternal.ConsumerKeys {
+			consumerKey := &subscription.ApplicationKeyMapping{
+				ConsumerKey:     consumerKeyInternal.Key,
+				KeyManager:      consumerKeyInternal.KeyManager,
+				ApplicationUUID: appInternal.UUID,
+			}
+			applicationKeyMappings = append(applicationKeyMappings, consumerKey)
+		}
+	}
+	return &subscription.ApplicationKeyMappingList{
+		List: applicationKeyMappings,
 	}
 }
 
