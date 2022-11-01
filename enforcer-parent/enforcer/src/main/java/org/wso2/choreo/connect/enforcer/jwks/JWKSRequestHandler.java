@@ -57,7 +57,7 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
 
             req = (FullHttpRequest) msg;
             String path = req.uri().split("\\?")[0];
-            if (!(req.method() == HttpMethod.GET && path.equals(route))) {
+            if (!(req.method().equals(HttpMethod.GET) && path.equals(route))) {
                 ctx.fireChannelRead(msg);
                 return;
             }

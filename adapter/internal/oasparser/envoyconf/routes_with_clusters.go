@@ -1167,7 +1167,7 @@ func CreateTokenRoute() *routev3.Route {
 					},
 					Regex: testKeyPath,
 				},
-				Substitution: "/",
+				Substitution: "/token",
 			},
 		},
 	}
@@ -1295,13 +1295,13 @@ func CreateJwksEndpoint() *routev3.Route {
 					},
 					Regex: jwksPath,
 				},
-				Substitution: "/",
+				Substitution: "/jwks",
 			},
 		},
 	}
 
 	directClusterSpecifier := &routev3.RouteAction_Cluster{
-		Cluster: "jwks_cluster",
+		Cluster: "token_cluster",
 	}
 	action.Route.ClusterSpecifier = directClusterSpecifier
 
