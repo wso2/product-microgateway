@@ -896,23 +896,8 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 					})
 					continue
 				}
-				isDefaultVersion := false
-				if enforcerAPISwagger, ok := orgIDAPIMgwSwaggerMap[organizationID][apiKey]; ok {
-					isDefaultVersion = enforcerAPISwagger.IsDefaultVersion
-				} else {
-					// If the mgwSwagger is not found, proceed with other APIs. (Unreachable condition at this point)
-					// If that happens, there is no purpose in processing clusters too.
-					continue
-				}
-				// If it is a default versioned API, the routes are added to the end of the existing array.
-				// Otherwise the routes would be added to the front.
-				// /fooContext/2.0.0/* resource path should be matched prior to the /fooContext/* .
-				if isDefaultVersion {
-					vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
-				} else {
-					vhostToRouteArrayMap[vhost] = append(orgIDOpenAPIRoutesMap[organizationID][apiKey], vhostToRouteArrayMap[vhost]...)
-				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
+				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
 				endpointArray = append(endpointArray, orgIDOpenAPIEndpointsMap[organizationID][apiKey]...)
 				enfocerAPI, ok := orgIDOpenAPIEnforcerApisMap[organizationID][apiKey]
 				if ok {
