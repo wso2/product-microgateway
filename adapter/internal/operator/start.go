@@ -109,12 +109,13 @@ func Run() {
 		os.Exit(1)
 	}
 
+	// Management server response syncing to k8s API server
+	go mgtserver.StartSync(mgr.GetClient())
+
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
 
-	// Management server response syncing to k8s API server
-	go mgtserver.StartSync(mgr.GetClient())
 }
