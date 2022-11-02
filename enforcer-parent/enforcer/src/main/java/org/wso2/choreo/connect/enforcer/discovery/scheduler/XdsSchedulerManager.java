@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 public class XdsSchedulerManager {
     private static int retryPeriod;
     private static volatile XdsSchedulerManager instance;
-
     private static ScheduledExecutorService discoveryClientScheduler;
     private ScheduledFuture<?> apiDiscoveryScheduledFuture;
     private ScheduledFuture<?> apiDiscoveryListScheduledFuture;

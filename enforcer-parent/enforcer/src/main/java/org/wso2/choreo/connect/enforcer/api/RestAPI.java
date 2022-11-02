@@ -139,7 +139,6 @@ public class RestAPI implements API {
                 endpointClusterMap.put(APIConstants.API_KEY_TYPE_SANDBOX, sandEndpointCluster);
             }
 
-
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = Utils.buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setPolicyConfig(Utils.genPolicyConfig(operation.getPolicies()));
@@ -195,7 +194,7 @@ public class RestAPI implements API {
         populateRemoveAndProtectedHeaders(requestContext);
         boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePaths() != null &&
                 requestContext.getMatchedResourcePaths().size() > 0;
-        // This flag is used to apply cors filter
+        // This flag is used to apply CORS filter
         boolean isOptionCall = requestContext.getRequestMethod().contains(HttpConstants.OPTIONS);
         if (!isExistsMatchedResourcePath && !isOptionCall) {
             // handle other not allowed non option calls

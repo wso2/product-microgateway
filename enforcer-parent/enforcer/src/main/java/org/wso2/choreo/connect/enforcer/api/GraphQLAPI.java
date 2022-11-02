@@ -163,7 +163,7 @@ public class GraphQLAPI implements API {
         populateRemoveAndProtectedHeaders(requestContext);
         boolean isExistsMatchedOperations = requestContext.getMatchedResourcePaths() != null &&
                 requestContext.getMatchedResourcePaths().size() > 0;
-        // This flag is used to apply cors filter
+        // This flag is used to apply CORS filter
         boolean isOptionCall = requestContext.getRequestMethod().contains(HttpConstants.OPTIONS);
 
         // handle other not allowed && non option request && not yet handled error scenarios.

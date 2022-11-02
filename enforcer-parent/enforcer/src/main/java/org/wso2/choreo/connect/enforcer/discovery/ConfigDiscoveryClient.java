@@ -121,12 +121,12 @@ public class ConfigDiscoveryClient implements Runnable {
             shutdown();
             XdsSchedulerManager.getInstance().stopConfigDiscoveryScheduling();
 
-            // Theres only one config root resource here. Therefore taking 0, no need to iterate
+            // There's only one config root resource here. Therefore, taking 0 and no need to iterate
             Config config = res.getResources(0).unpack(Config.class);
             ConfigHolder.load(config);
             this.latch.countDown();
         } catch (Exception e) {
-            // catching generic error here to wrap any grpc communication errors in the runtime
+            // Catching generic error here to wrap any gRPC communication errors in the runtime
             log.error("Error occurred during Config discovery", e);
             XdsSchedulerManager.getInstance().startConfigDiscoveryScheduling();
         }

@@ -107,7 +107,6 @@ public class MediationPolicyFilter implements Filter {
         return false;
     }
 
-
     private void renameHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
         String currentHeaderName = policyAttrib.get("currentHeaderName").toLowerCase();
         String updatedHeaderValue = policyAttrib.get("updatedHeaderName");

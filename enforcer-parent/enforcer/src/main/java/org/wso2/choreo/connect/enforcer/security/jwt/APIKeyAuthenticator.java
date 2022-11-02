@@ -332,7 +332,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             validationInfoDTO.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
         }
 
-        //check whether name is assigned correctly (This was not populated in JWTAuthenticator)
+        // Check whether name is assigned correctly (This was not populated in JWTAuthenticator)
         String name = requestContext.getMatchedAPI().getName();
         String version = requestContext.getMatchedAPI().getVersion();
         validationInfoDTO.setApiName(name);
