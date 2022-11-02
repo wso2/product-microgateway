@@ -35,10 +35,10 @@ import (
 type ApplicationReconciler struct {
 	client.Client
 	Scheme    *runtime.Scheme
-	appStatus *ApplicationsStatus
+	appStatus *applicationsStatus
 }
 
-type ApplicationsStatus map[string]int64
+type applicationsStatus map[string]int64
 
 //+kubebuilder:rbac:groups=cp.wso2.com,resources=applications,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=cp.wso2.com,resources=applications/status,verbs=get;update;patch
@@ -89,12 +89,12 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, nil
 }
 
-func shouldSendUpdates(currentAppStatus *ApplicationsStatus, newAppStatus *ApplicationsStatus) bool {
+func shouldSendUpdates(currentAppStatus *applicationsStatus, newAppStatus *applicationsStatus) bool {
 	return !reflect.DeepEqual(currentAppStatus, newAppStatus)
 }
 
-func generateApplicationStaus(applicationList cpv1alpha1.ApplicationList) *ApplicationsStatus {
-	var appStatus = make(ApplicationsStatus)
+func generateApplicationStaus(applicationList cpv1alpha1.ApplicationList) *applicationsStatus {
+	var appStatus = make(applicationsStatus)
 	for _, application := range applicationList.Items {
 		namespacedName := application.Namespace + "/" + application.Name
 		appStatus[namespacedName] = application.Generation
