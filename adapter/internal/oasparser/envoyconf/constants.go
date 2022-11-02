@@ -102,6 +102,11 @@ const (
 	jwksPath    string = "/.wellknown/jwks"
 )
 
+// Clusters predefined on envoy
+const (
+	tokenCluster = "token_cluster"
+)
+
 const (
 	// healthEndpointResponse - response from the health endpoint
 	healthEndpointResponse = "{\"status\": \"healthy\"}"
