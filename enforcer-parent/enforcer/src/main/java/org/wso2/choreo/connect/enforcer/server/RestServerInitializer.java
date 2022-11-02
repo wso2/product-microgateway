@@ -47,7 +47,9 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
         }
         p.addLast(new HttpServerCodec());
         p.addLast(new HttpObjectAggregator(1048576));
-        p.addLast(new JWKSRequestHandler());
+        if (ConfigHolder.getInstance().getConfig().getJwtConfigurationDto().isEnabled()) {
+            p.addLast(new JWKSRequestHandler());
+        }
         if (ConfigHolder.getInstance().getConfig().getJwtIssuerConfigurationDto().isEnabled()) {
             p.addLast(new HttpTokenServerHandler());
         }

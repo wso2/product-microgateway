@@ -27,7 +27,6 @@ import io.grpc.netty.shaded.io.netty.channel.SimpleChannelInboundHandler;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpResponse;
-import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObject;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
@@ -62,7 +61,7 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
     private static String username = null;
     private static boolean isAuthorized = false;
     private static final Logger logger = LogManager.getLogger(HttpTokenServerHandler.class);
-    private static final String route = "/token";
+    private static final String route = "/testkey";
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
@@ -77,7 +76,7 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
             FullHttpRequest req = (FullHttpRequest) msg;
 
             String path = req.uri().split("\\?")[0];
-            if (!(req.method().equals(HttpMethod.GET) && path.equals(route))) {
+            if (!(path.equals(route))) {
                 ctx.fireChannelRead(msg);
                 return;
             }
