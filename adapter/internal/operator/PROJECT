@@ -2,7 +2,7 @@ domain: wso2.com
 layout:
 - go.kubebuilder.io/v4-alpha
 projectName: test
-repo: github.com/wso2/product-microgateway
+repo: github.com/wso2/product-microgateway/adapter/internal/operator
 resources:
 - api:
     crdVersion: v1
@@ -10,16 +10,7 @@ resources:
   controller: true
   domain: wso2.com
   group: cp
-  kind: ApplicationData
-  path: github.com/wso2/product-microgateway/adapter/internal/operator/api/v1alpha1
-  version: v1alpha1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: wso2.com
-  group: cp
-  kind: SubscriptionData
+  kind: Application
   path: github.com/wso2/product-microgateway/adapter/internal/operator/api/v1alpha1
   version: v1alpha1
 version: "3"

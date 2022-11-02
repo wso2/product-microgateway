@@ -2,7 +2,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: applicationdata.cp.wso2.com
+  name: applications.cp.wso2.com
 spec:
   conversion:
     strategy: Webhook

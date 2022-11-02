@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package apk
+package operator
 
 import (
 	"flag"
@@ -91,11 +91,11 @@ func Run() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.ApplicationDataReconciler{
+	if err = (&controllers.ApplicationReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "ApplicationData")
+		setupLog.Error(err, "unable to create controller", "controller", "Application")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

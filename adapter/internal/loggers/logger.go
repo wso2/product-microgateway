@@ -47,6 +47,7 @@ const (
 	pkgGA                   = "github.com/wso2/product-microgateway/adapter/internal/ga"
 	pkgNotifier             = "github.com/wso2/product-microgateway/adapter/internal/notifier"
 	pkgSourceWatcher        = "github.com/wso2/product-microgateway/adapter/internal/sourcewatcher"
+	pkgOperator             = "github.com/wso2/product-microgateway/adapter/internal/operator"
 )
 
 // logger package references
@@ -66,6 +67,7 @@ var (
 	LoggerGA                   logging.Log
 	LoggerNotifier             logging.Log
 	LoggerSourceWatcher        logging.Log
+	LoggerOperator             logging.Log
 )
 
 func init() {
@@ -90,5 +92,6 @@ func UpdateLoggers() {
 	LoggerGA = logging.InitPackageLogger(pkgGA)
 	LoggerNotifier = logging.InitPackageLogger(pkgNotifier)
 	LoggerSourceWatcher = logging.InitPackageLogger(pkgSourceWatcher)
+	LoggerOperator = logging.InitPackageLogger(pkgOperator)
 	logrus.Info("Updated loggers")
 }

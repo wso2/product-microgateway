@@ -1,0 +1,104 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: applications.cp.wso2.com
+spec:
+  group: cp.wso2.com
+  names:
+    kind: Application
+    listKind: ApplicationList
+    plural: applications
+    singular: application
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Application is the Schema for the applications API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ApplicationSpec defines the desired state of Application
+            properties:
+              attributes:
+                additionalProperties:
+                  type: string
+                type: object
+              consumerKeys:
+                items:
+                  description: ConsumerKey defines the consumer keys of Application
+                  properties:
+                    key:
+                      type: string
+                    keyManager:
+                      type: string
+                  required:
+                  - key
+                  - keyManager
+                  type: object
+                type: array
+              name:
+                type: string
+              organization:
+                type: string
+              owner:
+                type: string
+              policy:
+                type: string
+              subscriptions:
+                items:
+                  description: Subscription defines a subscription of Application
+                  properties:
+                    apiRef:
+                      type: string
+                    name:
+                      type: string
+                    policyId:
+                      type: string
+                    subscriber:
+                      type: string
+                    subscriptionStatus:
+                      type: string
+                    uuid:
+                      type: string
+                  required:
+                  - apiRef
+                  - name
+                  - policyId
+                  - subscriber
+                  - subscriptionStatus
+                  - uuid
+                  type: object
+                type: array
+              uuid:
+                type: string
+            required:
+            - name
+            - organization
+            - owner
+            - policy
+            - uuid
+            type: object
+          status:
+            description: ApplicationStatus defines the observed state of Application
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

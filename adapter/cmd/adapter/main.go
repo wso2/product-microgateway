@@ -26,7 +26,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/adapter"
 
-	apk "github.com/wso2/product-microgateway/adapter/internal/operator"
+	operator "github.com/wso2/product-microgateway/adapter/internal/operator"
 	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
@@ -61,7 +61,7 @@ func startMicroGateway(args []string) {
 	}
 
 	if run, err := strconv.ParseBool(os.Getenv(runAPK)); err == nil && run {
-		go apk.Run()
+		go operator.Run()
 	}
 	adapter.Run(conf)
 }

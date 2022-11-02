@@ -23,16 +23,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ApplicationDataSpec defines the desired state of ApplicationData
-type ApplicationDataSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	Applications []Application `json:"applications"`
-}
-
-// Application defines the properties of Application
-type Application struct {
+// ApplicationSpec defines the desired state of Application
+type ApplicationSpec struct {
 	UUID          string            `json:"uuid"`
 	Name          string            `json:"name"`
 	Owner         string            `json:"owner"`
@@ -59,8 +51,8 @@ type Subscription struct {
 	Subscriber         string `json:"subscriber"`
 }
 
-// ApplicationDataStatus defines the observed state of ApplicationData
-type ApplicationDataStatus struct {
+// ApplicationStatus defines the observed state of Application
+type ApplicationStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -68,24 +60,24 @@ type ApplicationDataStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// ApplicationData is the Schema for the applicationdata API
-type ApplicationData struct {
+// Application is the Schema for the applications API
+type Application struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ApplicationDataSpec   `json:"spec,omitempty"`
-	Status ApplicationDataStatus `json:"status,omitempty"`
+	Spec   ApplicationSpec   `json:"spec,omitempty"`
+	Status ApplicationStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// ApplicationDataList contains a list of ApplicationData
-type ApplicationDataList struct {
+// ApplicationList contains a list of Application
+type ApplicationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ApplicationData `json:"items"`
+	Items           []Application `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ApplicationData{}, &ApplicationDataList{})
+	SchemeBuilder.Register(&Application{}, &ApplicationList{})
 }

@@ -1,0 +1,26 @@
+apiVersion: cp.wso2.com/v1alpha1
+kind: Application
+metadata:
+  labels:
+    app.kubernetes.io/name: application
+    app.kubernetes.io/instance: application-sample
+    app.kubernetes.io/part-of: test
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: test
+  name: application-sample-3
+spec:
+  uuid: 77557d54-fcba-4da8-8300-2ab82b11347d
+  name: app3
+  owner: Bob
+  policy: 10PerMin
+  organization: wso2
+  consumerKeys:
+    - key: hef14gh8syDvTtvoWYeIHYbjF_Ya
+      keyManager: Resident Key Manager
+  subscriptions:
+    - uuid: ff041d1b-be19-4529-a861-86a79905a1ad
+      name: sub1
+      apiRef: SwaggerPetstore
+      policyId: Unlimited
+      subscriptionStatus: ACTIVE
+      subscriber: Tom
