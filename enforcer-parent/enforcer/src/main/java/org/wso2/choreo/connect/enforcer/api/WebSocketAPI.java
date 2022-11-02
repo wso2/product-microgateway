@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * Specific implementation for a WebSocket API type APIs. Contains 2 filter chains to process initial HTTP request and
- * websocket frame data.
+ * WebSocket frame data.
  */
 public class WebSocketAPI implements API {
 
@@ -221,7 +221,6 @@ public class WebSocketAPI implements API {
         }
         return true;
     }
-
 
     public List<Filter> getUpgradeFilters() {
         return upgradeFilters;
