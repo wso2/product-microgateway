@@ -453,12 +453,20 @@ type analyticsAdapter struct {
 	BufferFlushInterval time.Duration
 	BufferSizeBytes     uint32
 	GRPCRequestTimeout  time.Duration
+	CustomProperties    analyticsCustomProperties
 }
 
 type analyticsEnforcer struct {
 	// TODO: (VirajSalaka) convert it to map[string]{}interface
 	ConfigProperties map[string]string
 	LogReceiver      authService
+}
+
+type analyticsCustomProperties struct {
+	Enabled          bool
+	RequestHeaders   []string
+	ResponseHeaders  []string
+	ResponseTrailers []string
 }
 
 type authHeader struct {
