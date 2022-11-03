@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.throttle;
 
+import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -365,7 +366,7 @@ public class ThrottleDataHolder {
             }
             if (conf.isJwtClaimConditionsEnabled()
                     && (claimConditions != null && !claimConditions.getValues().isEmpty())) {
-                Map<String, String> c = ThrottleUtils.getJWTClaims(req.getAuthenticationContext().getCallerToken());
+                JSONObject c = ThrottleUtils.getJWTClaims(req.getAuthenticationContext().getCallerToken());
                 if (c == null || !isJwtClaimPresent(c, claimConditions)) {
                     isThrottled = false;
                 }
@@ -521,11 +522,11 @@ public class ThrottleDataHolder {
         return status;
     }
 
-    private boolean isJwtClaimPresent(Map<String, String> claims, ThrottleCondition.JWTClaimConditions conditions) {
+    private boolean isJwtClaimPresent(JSONObject claims, ThrottleCondition.JWTClaimConditions conditions) {
         boolean status = true;
 
         for (Map.Entry<String, String> jwtClaim : conditions.getValues().entrySet()) {
-            String value = claims.get(jwtClaim.getKey());
+            String value = claims.getAsString(jwtClaim.getKey());
             if (value == null) {
                 status = false;
                 break;
