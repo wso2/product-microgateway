@@ -19,23 +19,25 @@
 package org.wso2.choreo.connect.enforcer.throttle.utils;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.nimbusds.jose.util.JSONObjectUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.throttle.PolicyConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
+import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.throttle.dto.ThrottleCondition;
 
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -43,6 +45,9 @@ import java.util.regex.Pattern;
  * Utilities related to throttling.
  */
 public class ThrottleUtils {
+
+    private static final Logger log = LogManager.getLogger(ThrottleFilter.class);
+
     /**
      * Extract a {@code ThrottleCondition} from a provided compatible base64 encoded string.
      *
@@ -135,23 +140,30 @@ public class ThrottleUtils {
     }
 
     /**
-     * Parse a JWT and returns it's claims and a Map.
+     * Parse a JWT and return its claims.
      *
      * @param token JWT token to parse.
-     * @return Map of claims.
+     * @return JSONObject containing the claims.
      */
-    public static Map<String, String> getJWTClaims(String token) {
-        if (token == null) {
-            return null;
+    public static net.minidev.json.JSONObject getJWTClaims(String token) {
+        try {
+            if (token == null) {
+                return null;
+            }
+
+            // decoding JWT
+            String[] jwtTokenArray = token.split(Pattern.quote("."));
+            byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes(StandardCharsets.UTF_8));
+            String jwtAssertion = new String(jwtByteArray, StandardCharsets.UTF_8);
+            net.minidev.json.JSONObject claims = JSONObjectUtils.parse(jwtAssertion);
+            return claims;
+        } catch (ParseException e) {
+            // This exception is supposed to be unreachable.
+            // JSONObjectUtils.parse() used above is used within SignedJWT.parse(accessToken)
+            // and therefore has already been used in the auth filters.
+            log.error("Error while parsing the JWT payload.", e);
+            throw new RuntimeException(e);
         }
-
-        // decoding JWT
-        String[] jwtTokenArray = token.split(Pattern.quote("."));
-        byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes(StandardCharsets.UTF_8));
-        String jwtAssertion = new String(jwtByteArray, StandardCharsets.UTF_8);
-        Type mapType = new TypeToken<Map<String, String>>() { }.getType();
-
-        return new Gson().fromJson(jwtAssertion, mapType);
     }
 
     /**

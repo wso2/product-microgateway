@@ -284,7 +284,7 @@ public class WebSocketThrottleFilter implements Filter {
 
         String callerToken = requestContext.getAuthenticationContext().getCallerToken();
         if (config.isJwtClaimConditionsEnabled() && callerToken != null) {
-            Map<String, String> claims = ThrottleUtils.getJWTClaims(callerToken);
+            net.minidev.json.JSONObject claims = ThrottleUtils.getJWTClaims(callerToken);
             for (String key : claims.keySet()) {
                 jsonObMap.put(key, claims.get(key));
             }

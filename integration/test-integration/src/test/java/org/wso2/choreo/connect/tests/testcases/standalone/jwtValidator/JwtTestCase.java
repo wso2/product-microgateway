@@ -20,9 +20,12 @@ package org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
+import org.wso2.choreo.connect.tests.common.model.API;
+import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -140,5 +143,30 @@ public class JwtTestCase {
                 "Response message mismatched");
         Assert.assertTrue(response.getHeaders().containsKey("www-authenticate"),
                 "\"www-authenticate\" is not available");
+    }
+
+    @Test(description = "Test to check a JWT that contains an object as a claim")
+    public void invokeWithJwtContainingObjectClaimSuccessTest() throws Exception {
+        // Generate JWT with an object as a claim
+        JSONObject realm = new JSONObject();
+        realm.put("signing_tenant", "carbon.super");
+
+        JSONObject specificClaims = new JSONObject();
+        specificClaims.put("realm", realm);
+        API api = new API();
+        ApplicationDTO application = new ApplicationDTO();
+        String jwtWithObjectClaim = TokenUtil.getJWT(api, application, "Unlimited",
+                TestConstant.KEY_TYPE_PRODUCTION, 3600, specificClaims);
+
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithObjectClaim);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/standard/pet/2") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertFalse(response.getHeaders().containsKey("www-authenticate"),
+                "\"www-authenticate\" is available");
     }
 }
