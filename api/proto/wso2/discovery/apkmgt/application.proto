@@ -20,10 +20,6 @@ message Application {
   repeated ConsumerKey consumerKeys = 8;
 }
 
-message ApplicationDetails {
-  repeated Application applications = 1;
-}
-
 message ConsumerKey {
   string key = 1;
   string keyManager = 2;
