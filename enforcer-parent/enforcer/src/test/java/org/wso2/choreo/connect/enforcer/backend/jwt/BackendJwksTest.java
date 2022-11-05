@@ -53,7 +53,6 @@ public class BackendJwksTest {
         Assert.assertEquals("Failed to generate single JWKS", 1, configHolder.getConfig()
                 .getBackendJWKSDto().getJwks().getKeys().size());
     }
-
     @Test
     public void AdditionalCerts() {
         String certPath = resourcePath + keyStore + File.separator + keyStoreSingleCert + File.separator + cert;
@@ -76,6 +75,4 @@ public class BackendJwksTest {
         Assert.assertEquals("Failed to generate multiple JWKS", 2, configHolder.getConfig()
                 .getBackendJWKSDto().getJwks().getKeys().size());
     }
-
-
 }
