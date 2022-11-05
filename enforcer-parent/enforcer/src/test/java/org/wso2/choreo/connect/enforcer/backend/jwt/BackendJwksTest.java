@@ -49,7 +49,8 @@ public class BackendJwksTest {
                         .buildPartial())
         .build();
         ConfigHolder.load(Config.newBuilder().setJwtGenerator(jwtGenerator).buildPartial());
-        Assert.assertTrue(configHolder.getConfig().getJwtConfigurationDto().isEnabled());
+        Assert.assertTrue("JWT Configuration wasn't enabled",
+                configHolder.getConfig().getJwtConfigurationDto().isEnabled());
         Assert.assertEquals("Failed to generate single JWKS", 1, configHolder.getConfig()
                 .getBackendJWKSDto().getJwks().getKeys().size());
     }
@@ -71,7 +72,8 @@ public class BackendJwksTest {
                         .buildPartial())
                 .build();
         ConfigHolder.load(Config.newBuilder().setJwtGenerator(jwtGenerator).buildPartial());
-        Assert.assertTrue(configHolder.getConfig().getJwtConfigurationDto().isEnabled());
+        Assert.assertTrue("JWT Configuration wasn't enabled",
+                configHolder.getConfig().getJwtConfigurationDto().isEnabled());
         Assert.assertEquals("Failed to generate multiple JWKS", 2, configHolder.getConfig()
                 .getBackendJWKSDto().getJwks().getKeys().size());
     }

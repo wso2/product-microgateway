@@ -46,6 +46,11 @@ public class BackendJwtTest {
     private static final String keystore = "keystore";
     private static final String publicCert = "mg.pem";
     private static final String privateKey = "mg.key";
+
+    private static final String certPath = BackendJwtTest.class.getProtectionDomain().getCodeSource().
+            getLocation().getPath() + keystore + File.separator + publicCert;
+    private static final String keyPath = BackendJwtTest.class.getProtectionDomain().getCodeSource().
+            getLocation().getPath() + keystore + File.separator + privateKey;
     private static JWTConfigurationDto jwtConfig;
     private static AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     // Init JWT generator
@@ -58,10 +63,6 @@ public class BackendJwtTest {
 
     public static JWTConfigurationDto getConfigDto() {
         JWTConfigurationDto configDto = new JWTConfigurationDto();
-        String certPath = BackendJwtTest.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath() + keystore + File.separator + publicCert;
-        String keyPath = TLSUtilsTest.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath() + keystore + File.separator + privateKey;
         try {
             configDto.setPublicCert(TLSUtils.getCertificateFromFile(certPath));
             configDto.setPrivateKey(JWTUtils.getPrivateKey(keyPath));
@@ -76,23 +77,15 @@ public class BackendJwtTest {
     }
 
     @Test
-    public void generateJwt() throws Exception {
-        JWTInfoDto jwtInfoDto = new JWTInfoDto();
-        jwtInfoDto.setJwtValidationInfo(new JWTValidationInfo());
-        String jwt = jwtGenerator.generateToken(jwtInfoDto);
-        Assert.assertNotNull(jwt);
-    }
-
-    @Test
     public void validateJWT() throws Exception {
         JWSObject jwsObject;
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(new JWTValidationInfo());
         String jwt = jwtGenerator.generateToken(jwtInfoDto);
-        Assert.assertNotNull(jwt);
+        Assert.assertNotNull("JWT Generation failed",jwt);
 
         jwsObject = JWSObject.parse(jwt);
-        Assert.assertNotNull(jwsObject);
+        Assert.assertNotNull("JWT Couldn't be parsed",jwsObject);
 
         X509Certificate cert = X509CertUtils.parse(jwtConfig.getPublicCert().getEncoded());
         RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
@@ -100,6 +93,6 @@ public class BackendJwtTest {
         JWSVerifier verifier = new RSASSAVerifier(publicKey);
         boolean verifiedSignature = false;
         verifiedSignature = jwsObject.verify(verifier);
-        Assert.assertTrue(verifiedSignature);
+        Assert.assertTrue("JWT failed to verify",verifiedSignature);
     }
 }

@@ -54,7 +54,6 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
         BackendJWKSDto backendJWKSDto = ConfigHolder.getInstance().getConfig().getBackendJWKSDto();
         JWKSet jwks = backendJWKSDto.getJwks();
         if (msg instanceof HttpRequest) {
-
             req = (FullHttpRequest) msg;
             String path = req.uri().split("\\?")[0];
             if (!(req.method().equals(HttpMethod.GET) && path.equals(route))) {
