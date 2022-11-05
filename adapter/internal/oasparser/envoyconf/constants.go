@@ -23,6 +23,11 @@ const (
 	tracingClusterName      string = "wso2_cc_trace"
 )
 
+// Clusters predefined on envoy
+const (
+	tokenCluster = "token_cluster"
+)
+
 const (
 	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
 	luaFilterName              string = "envoy.filters.http.lua"
@@ -100,11 +105,6 @@ const (
 	testKeyPath string = "/testkey"
 	readyPath   string = "/ready"
 	jwksPath    string = "/.wellknown/jwks"
-)
-
-// Clusters predefined on envoy
-const (
-	tokenCluster = "token_cluster"
 )
 
 const (
