@@ -29,7 +29,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
-import org.wso2.choreo.connect.tests.util.*;
+import org.wso2.choreo.connect.tests.util.HttpClientRequest;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.TokenUtil;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.Base64;
 import java.util.HashMap;

@@ -36,7 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 /**
- * JWKS Request Handler for Backend JWT's
+ * JWKS Request Handler for Backend JWTs
  */
 public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
     private static final String CONTENT_LENGTH = "content-length";
