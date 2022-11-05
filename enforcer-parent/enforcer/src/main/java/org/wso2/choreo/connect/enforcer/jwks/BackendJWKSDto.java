@@ -27,16 +27,7 @@ import java.util.List;
  * Configuration holder for Backend JWKS endpoint
  */
 public class BackendJWKSDto {
-    private boolean isEnabled = false;
     private JWKSet jwks;
-
-    public boolean isEnabled() {
-        return isEnabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
-    }
 
     public JWKSet getJwks() {
         if (jwks == null) {

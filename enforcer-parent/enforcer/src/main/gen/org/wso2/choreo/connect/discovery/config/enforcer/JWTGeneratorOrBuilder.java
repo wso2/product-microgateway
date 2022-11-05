@@ -98,63 +98,32 @@ public interface JWTGeneratorOrBuilder extends
       getClaimsExtractorImplBytes();
 
   /**
-   * <code>string public_certificate_path = 10;</code>
-   * @return The publicCertificatePath.
-   */
-  java.lang.String getPublicCertificatePath();
-  /**
-   * <code>string public_certificate_path = 10;</code>
-   * @return The bytes for publicCertificatePath.
-   */
-  com.google.protobuf.ByteString
-      getPublicCertificatePathBytes();
-
-  /**
-   * <code>string private_key_path = 11;</code>
-   * @return The privateKeyPath.
-   */
-  java.lang.String getPrivateKeyPath();
-  /**
-   * <code>string private_key_path = 11;</code>
-   * @return The bytes for privateKeyPath.
-   */
-  com.google.protobuf.ByteString
-      getPrivateKeyPathBytes();
-
-  /**
-   * <code>int32 token_ttl = 12;</code>
+   * <code>int32 token_ttl = 10;</code>
    * @return The tokenTtl.
    */
   int getTokenTtl();
 
   /**
-   * <code>bool jwks_enabled = 13;</code>
-   * @return The jwksEnabled.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  boolean getJwksEnabled();
-
+  java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Keypair> 
+      getKeypairsList();
   /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @return A list containing the additionalJwksCertPaths.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  java.util.List<java.lang.String>
-      getAdditionalJwksCertPathsList();
+  org.wso2.choreo.connect.discovery.config.enforcer.Keypair getKeypairs(int index);
   /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @return The count of additionalJwksCertPaths.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  int getAdditionalJwksCertPathsCount();
+  int getKeypairsCount();
   /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @param index The index of the element to return.
-   * @return The additionalJwksCertPaths at the given index.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  java.lang.String getAdditionalJwksCertPaths(int index);
+  java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder> 
+      getKeypairsOrBuilderList();
   /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the additionalJwksCertPaths at the given index.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  com.google.protobuf.ByteString
-      getAdditionalJwksCertPathsBytes(int index);
+  org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder getKeypairsOrBuilder(
+      int index);
 }

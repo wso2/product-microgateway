@@ -31,27 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
-import org.wso2.choreo.connect.discovery.config.enforcer.Analytics;
-import org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader;
-import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
-import org.wso2.choreo.connect.discovery.config.enforcer.Cache;
-import org.wso2.choreo.connect.discovery.config.enforcer.ClaimMapping;
-import org.wso2.choreo.connect.discovery.config.enforcer.Config;
-import org.wso2.choreo.connect.discovery.config.enforcer.Filter;
-import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
-import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
-import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
-import org.wso2.choreo.connect.discovery.config.enforcer.Management;
-import org.wso2.choreo.connect.discovery.config.enforcer.Metrics;
-import org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL;
-import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
-import org.wso2.choreo.connect.discovery.config.enforcer.RestServer;
-import org.wso2.choreo.connect.discovery.config.enforcer.Service;
-import org.wso2.choreo.connect.discovery.config.enforcer.Soap;
-import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
-import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
-import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
-import org.wso2.choreo.connect.discovery.config.enforcer.Tracing;
+import org.wso2.choreo.connect.discovery.config.enforcer.*;
 import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
@@ -84,6 +64,7 @@ import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -512,42 +493,39 @@ public class ConfigHolder {
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
         jwtConfigurationDto.setTtl(jwtGenerator.getTokenTtl());
+        List<Keypair> keypairs = jwtGenerator.getKeypairsList();
+        Keypair signingKey = getSigningKey(keypairs);
+
         try {
-            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
-            jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
+            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(signingKey.getPublicCertificatePath()));
+            jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(signingKey.getPrivateKeyPath()));
         } catch (EnforcerException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);
         }
         config.setJwtConfigurationDto(jwtConfigurationDto);
-        populateBackendJWKSConfiguration(jwtGenerator);
+        populateBackendJWKSConfiguration(keypairs);
     }
 
-    private void populateBackendJWKSConfiguration(JWTGenerator jwtGenerator) {
+    private void populateBackendJWKSConfiguration(List<Keypair> keypairs) {
         BackendJWKSDto backendJWKSDto = new BackendJWKSDto();
-        backendJWKSDto.setEnabled(jwtGenerator.getJwksEnabled());
-        if (jwtGenerator.getJwksEnabled()) {
-            String[] publicCertPaths = new String[jwtGenerator.getAdditionalJwksCertPathsCount()];
-            for (int i = 0; i < jwtGenerator.getAdditionalJwksCertPathsCount(); i++) {
-                publicCertPaths[i] = jwtGenerator.getAdditionalJwksCertPaths(i);
+        ArrayList<JWK> jwks = new ArrayList<>();
+        try {
+            for (Keypair keypair : keypairs) {
+                jwks.add(jwkFromCertPath(keypair.getPublicCertificatePath()));
             }
-            ArrayList<JWK> jwks = new ArrayList<>(publicCertPaths.length + 1);
-            // Public cert path provided to JWT generator
-            try {
-                jwks.add(jwkFromCertPath(jwtGenerator.getPublicCertificatePath()));
-            } catch (JOSEException | IOException | CertificateException e) {
-                logger.error("Error in loading public cert for JWKS ", e);
-            }
-            // Additional public cert paths
-            try {
-                for (String publicCertPath : publicCertPaths) {
-                    jwks.add(jwkFromCertPath(publicCertPath));
-                }
-            } catch (JOSEException | CertificateException | IOException e) {
-                logger.error("Error in loading additional public certs for JWKS", e);
-            }
-            backendJWKSDto.setJwks(jwks);
+        } catch (JOSEException | CertificateException | IOException e) {
+            logger.error("Error in loading additional public certs for JWKS", e);
         }
+        backendJWKSDto.setJwks(jwks);
         config.setBackendJWKSDto(backendJWKSDto);
+    }
+    private Keypair getSigningKey(List<Keypair> keypairs) {
+        for (Keypair keypair : keypairs) {
+            if (keypair.getUseForSigning())  {
+                return keypair;
+            }
+        }
+        return null; // TODO: ask viraj
     }
 
     private JWK jwkFromCertPath(String certPath) throws CertificateException, IOException, JOSEException {

@@ -407,21 +407,24 @@ type binaryAgent struct {
 
 type jwtGenerator struct {
 	// Deprecated: Use Enabled instead
-	Enable                  bool
-	Enabled                 bool
-	Encoding                string
-	ClaimDialect            string
-	ConvertDialect          bool
-	Header                  string
-	SigningAlgorithm        string
-	EnableUserClaims        bool
-	GatewayGeneratorImpl    string
-	ClaimsExtractorImpl     string
-	PublicCertificatePath   string
-	PrivateKeyPath          string
-	TokenTTL                int32
-	JwksEnabled             bool
-	AdditionalJwksCertPaths []string
+	Enable               bool
+	Enabled              bool
+	Encoding             string
+	ClaimDialect         string
+	ConvertDialect       bool
+	Header               string
+	SigningAlgorithm     string
+	EnableUserClaims     bool
+	GatewayGeneratorImpl string
+	ClaimsExtractorImpl  string
+	TokenTTL             int32
+	Keypairs             []KeyPair
+}
+
+type KeyPair struct {
+	PrivateKeyPath        string
+	PublicCertificatePath string
+	UseForSigning         bool
 }
 
 type claimMapping struct {

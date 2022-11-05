@@ -26,9 +26,7 @@ private static final long serialVersionUID = 0L;
     signingAlgorithm_ = "";
     gatewayGeneratorImpl_ = "";
     claimsExtractorImpl_ = "";
-    publicCertificatePath_ = "";
-    privateKeyPath_ = "";
-    additionalJwksCertPaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    keypairs_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -113,35 +111,18 @@ private static final long serialVersionUID = 0L;
             claimsExtractorImpl_ = s;
             break;
           }
-          case 82: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            publicCertificatePath_ = s;
-            break;
-          }
-          case 90: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            privateKeyPath_ = s;
-            break;
-          }
-          case 96: {
+          case 80: {
 
             tokenTtl_ = input.readInt32();
             break;
           }
-          case 104: {
-
-            jwksEnabled_ = input.readBool();
-            break;
-          }
-          case 114: {
-            java.lang.String s = input.readStringRequireUtf8();
+          case 90: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              additionalJwksCertPaths_ = new com.google.protobuf.LazyStringArrayList();
+              keypairs_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.config.enforcer.Keypair>();
               mutable_bitField0_ |= 0x00000001;
             }
-            additionalJwksCertPaths_.add(s);
+            keypairs_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Keypair.parser(), extensionRegistry));
             break;
           }
           default: {
@@ -160,7 +141,7 @@ private static final long serialVersionUID = 0L;
           e).setUnfinishedMessage(this);
     } finally {
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        additionalJwksCertPaths_ = additionalJwksCertPaths_.getUnmodifiableView();
+        keypairs_ = java.util.Collections.unmodifiableList(keypairs_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -440,86 +421,10 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int PUBLIC_CERTIFICATE_PATH_FIELD_NUMBER = 10;
-  private volatile java.lang.Object publicCertificatePath_;
-  /**
-   * <code>string public_certificate_path = 10;</code>
-   * @return The publicCertificatePath.
-   */
-  @java.lang.Override
-  public java.lang.String getPublicCertificatePath() {
-    java.lang.Object ref = publicCertificatePath_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      publicCertificatePath_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string public_certificate_path = 10;</code>
-   * @return The bytes for publicCertificatePath.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getPublicCertificatePathBytes() {
-    java.lang.Object ref = publicCertificatePath_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      publicCertificatePath_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int PRIVATE_KEY_PATH_FIELD_NUMBER = 11;
-  private volatile java.lang.Object privateKeyPath_;
-  /**
-   * <code>string private_key_path = 11;</code>
-   * @return The privateKeyPath.
-   */
-  @java.lang.Override
-  public java.lang.String getPrivateKeyPath() {
-    java.lang.Object ref = privateKeyPath_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      privateKeyPath_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string private_key_path = 11;</code>
-   * @return The bytes for privateKeyPath.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getPrivateKeyPathBytes() {
-    java.lang.Object ref = privateKeyPath_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      privateKeyPath_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int TOKEN_TTL_FIELD_NUMBER = 12;
+  public static final int TOKEN_TTL_FIELD_NUMBER = 10;
   private int tokenTtl_;
   /**
-   * <code>int32 token_ttl = 12;</code>
+   * <code>int32 token_ttl = 10;</code>
    * @return The tokenTtl.
    */
   @java.lang.Override
@@ -527,50 +432,44 @@ private static final long serialVersionUID = 0L;
     return tokenTtl_;
   }
 
-  public static final int JWKS_ENABLED_FIELD_NUMBER = 13;
-  private boolean jwksEnabled_;
+  public static final int KEYPAIRS_FIELD_NUMBER = 11;
+  private java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Keypair> keypairs_;
   /**
-   * <code>bool jwks_enabled = 13;</code>
-   * @return The jwksEnabled.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
   @java.lang.Override
-  public boolean getJwksEnabled() {
-    return jwksEnabled_;
-  }
-
-  public static final int ADDITIONAL_JWKS_CERT_PATHS_FIELD_NUMBER = 14;
-  private com.google.protobuf.LazyStringList additionalJwksCertPaths_;
-  /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @return A list containing the additionalJwksCertPaths.
-   */
-  public com.google.protobuf.ProtocolStringList
-      getAdditionalJwksCertPathsList() {
-    return additionalJwksCertPaths_;
+  public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Keypair> getKeypairsList() {
+    return keypairs_;
   }
   /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @return The count of additionalJwksCertPaths.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  public int getAdditionalJwksCertPathsCount() {
-    return additionalJwksCertPaths_.size();
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder> 
+      getKeypairsOrBuilderList() {
+    return keypairs_;
   }
   /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @param index The index of the element to return.
-   * @return The additionalJwksCertPaths at the given index.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  public java.lang.String getAdditionalJwksCertPaths(int index) {
-    return additionalJwksCertPaths_.get(index);
+  @java.lang.Override
+  public int getKeypairsCount() {
+    return keypairs_.size();
   }
   /**
-   * <code>repeated string additional_jwks_cert_paths = 14;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the additionalJwksCertPaths at the given index.
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
    */
-  public com.google.protobuf.ByteString
-      getAdditionalJwksCertPathsBytes(int index) {
-    return additionalJwksCertPaths_.getByteString(index);
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Keypair getKeypairs(int index) {
+    return keypairs_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder getKeypairsOrBuilder(
+      int index) {
+    return keypairs_.get(index);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -614,20 +513,11 @@ private static final long serialVersionUID = 0L;
     if (!getClaimsExtractorImplBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 9, claimsExtractorImpl_);
     }
-    if (!getPublicCertificatePathBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, publicCertificatePath_);
-    }
-    if (!getPrivateKeyPathBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, privateKeyPath_);
-    }
     if (tokenTtl_ != 0) {
-      output.writeInt32(12, tokenTtl_);
+      output.writeInt32(10, tokenTtl_);
     }
-    if (jwksEnabled_ != false) {
-      output.writeBool(13, jwksEnabled_);
-    }
-    for (int i = 0; i < additionalJwksCertPaths_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 14, additionalJwksCertPaths_.getRaw(i));
+    for (int i = 0; i < keypairs_.size(); i++) {
+      output.writeMessage(11, keypairs_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -668,27 +558,13 @@ private static final long serialVersionUID = 0L;
     if (!getClaimsExtractorImplBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, claimsExtractorImpl_);
     }
-    if (!getPublicCertificatePathBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, publicCertificatePath_);
-    }
-    if (!getPrivateKeyPathBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, privateKeyPath_);
-    }
     if (tokenTtl_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(12, tokenTtl_);
+        .computeInt32Size(10, tokenTtl_);
     }
-    if (jwksEnabled_ != false) {
+    for (int i = 0; i < keypairs_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(13, jwksEnabled_);
-    }
-    {
-      int dataSize = 0;
-      for (int i = 0; i < additionalJwksCertPaths_.size(); i++) {
-        dataSize += computeStringSizeNoTag(additionalJwksCertPaths_.getRaw(i));
-      }
-      size += dataSize;
-      size += 1 * getAdditionalJwksCertPathsList().size();
+        .computeMessageSize(11, keypairs_.get(i));
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -723,16 +599,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getGatewayGeneratorImpl())) return false;
     if (!getClaimsExtractorImpl()
         .equals(other.getClaimsExtractorImpl())) return false;
-    if (!getPublicCertificatePath()
-        .equals(other.getPublicCertificatePath())) return false;
-    if (!getPrivateKeyPath()
-        .equals(other.getPrivateKeyPath())) return false;
     if (getTokenTtl()
         != other.getTokenTtl()) return false;
-    if (getJwksEnabled()
-        != other.getJwksEnabled()) return false;
-    if (!getAdditionalJwksCertPathsList()
-        .equals(other.getAdditionalJwksCertPathsList())) return false;
+    if (!getKeypairsList()
+        .equals(other.getKeypairsList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -765,18 +635,11 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getGatewayGeneratorImpl().hashCode();
     hash = (37 * hash) + CLAIMS_EXTRACTOR_IMPL_FIELD_NUMBER;
     hash = (53 * hash) + getClaimsExtractorImpl().hashCode();
-    hash = (37 * hash) + PUBLIC_CERTIFICATE_PATH_FIELD_NUMBER;
-    hash = (53 * hash) + getPublicCertificatePath().hashCode();
-    hash = (37 * hash) + PRIVATE_KEY_PATH_FIELD_NUMBER;
-    hash = (53 * hash) + getPrivateKeyPath().hashCode();
     hash = (37 * hash) + TOKEN_TTL_FIELD_NUMBER;
     hash = (53 * hash) + getTokenTtl();
-    hash = (37 * hash) + JWKS_ENABLED_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getJwksEnabled());
-    if (getAdditionalJwksCertPathsCount() > 0) {
-      hash = (37 * hash) + ADDITIONAL_JWKS_CERT_PATHS_FIELD_NUMBER;
-      hash = (53 * hash) + getAdditionalJwksCertPathsList().hashCode();
+    if (getKeypairsCount() > 0) {
+      hash = (37 * hash) + KEYPAIRS_FIELD_NUMBER;
+      hash = (53 * hash) + getKeypairsList().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -910,6 +773,7 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getKeypairsFieldBuilder();
       }
     }
     @java.lang.Override
@@ -933,16 +797,14 @@ private static final long serialVersionUID = 0L;
 
       claimsExtractorImpl_ = "";
 
-      publicCertificatePath_ = "";
-
-      privateKeyPath_ = "";
-
       tokenTtl_ = 0;
 
-      jwksEnabled_ = false;
-
-      additionalJwksCertPaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000001);
+      if (keypairsBuilder_ == null) {
+        keypairs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      } else {
+        keypairsBuilder_.clear();
+      }
       return this;
     }
 
@@ -979,15 +841,16 @@ private static final long serialVersionUID = 0L;
       result.enableUserClaims_ = enableUserClaims_;
       result.gatewayGeneratorImpl_ = gatewayGeneratorImpl_;
       result.claimsExtractorImpl_ = claimsExtractorImpl_;
-      result.publicCertificatePath_ = publicCertificatePath_;
-      result.privateKeyPath_ = privateKeyPath_;
       result.tokenTtl_ = tokenTtl_;
-      result.jwksEnabled_ = jwksEnabled_;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        additionalJwksCertPaths_ = additionalJwksCertPaths_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000001);
+      if (keypairsBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          keypairs_ = java.util.Collections.unmodifiableList(keypairs_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.keypairs_ = keypairs_;
+      } else {
+        result.keypairs_ = keypairsBuilder_.build();
       }
-      result.additionalJwksCertPaths_ = additionalJwksCertPaths_;
       onBuilt();
       return result;
     }
@@ -1069,29 +932,34 @@ private static final long serialVersionUID = 0L;
         claimsExtractorImpl_ = other.claimsExtractorImpl_;
         onChanged();
       }
-      if (!other.getPublicCertificatePath().isEmpty()) {
-        publicCertificatePath_ = other.publicCertificatePath_;
-        onChanged();
-      }
-      if (!other.getPrivateKeyPath().isEmpty()) {
-        privateKeyPath_ = other.privateKeyPath_;
-        onChanged();
-      }
       if (other.getTokenTtl() != 0) {
         setTokenTtl(other.getTokenTtl());
       }
-      if (other.getJwksEnabled() != false) {
-        setJwksEnabled(other.getJwksEnabled());
-      }
-      if (!other.additionalJwksCertPaths_.isEmpty()) {
-        if (additionalJwksCertPaths_.isEmpty()) {
-          additionalJwksCertPaths_ = other.additionalJwksCertPaths_;
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          ensureAdditionalJwksCertPathsIsMutable();
-          additionalJwksCertPaths_.addAll(other.additionalJwksCertPaths_);
+      if (keypairsBuilder_ == null) {
+        if (!other.keypairs_.isEmpty()) {
+          if (keypairs_.isEmpty()) {
+            keypairs_ = other.keypairs_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureKeypairsIsMutable();
+            keypairs_.addAll(other.keypairs_);
+          }
+          onChanged();
         }
-        onChanged();
+      } else {
+        if (!other.keypairs_.isEmpty()) {
+          if (keypairsBuilder_.isEmpty()) {
+            keypairsBuilder_.dispose();
+            keypairsBuilder_ = null;
+            keypairs_ = other.keypairs_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+            keypairsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getKeypairsFieldBuilder() : null;
+          } else {
+            keypairsBuilder_.addAllMessages(other.keypairs_);
+          }
+        }
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1672,161 +1540,9 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object publicCertificatePath_ = "";
-    /**
-     * <code>string public_certificate_path = 10;</code>
-     * @return The publicCertificatePath.
-     */
-    public java.lang.String getPublicCertificatePath() {
-      java.lang.Object ref = publicCertificatePath_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        publicCertificatePath_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string public_certificate_path = 10;</code>
-     * @return The bytes for publicCertificatePath.
-     */
-    public com.google.protobuf.ByteString
-        getPublicCertificatePathBytes() {
-      java.lang.Object ref = publicCertificatePath_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        publicCertificatePath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string public_certificate_path = 10;</code>
-     * @param value The publicCertificatePath to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPublicCertificatePath(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      publicCertificatePath_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string public_certificate_path = 10;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearPublicCertificatePath() {
-      
-      publicCertificatePath_ = getDefaultInstance().getPublicCertificatePath();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string public_certificate_path = 10;</code>
-     * @param value The bytes for publicCertificatePath to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPublicCertificatePathBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      publicCertificatePath_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object privateKeyPath_ = "";
-    /**
-     * <code>string private_key_path = 11;</code>
-     * @return The privateKeyPath.
-     */
-    public java.lang.String getPrivateKeyPath() {
-      java.lang.Object ref = privateKeyPath_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        privateKeyPath_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string private_key_path = 11;</code>
-     * @return The bytes for privateKeyPath.
-     */
-    public com.google.protobuf.ByteString
-        getPrivateKeyPathBytes() {
-      java.lang.Object ref = privateKeyPath_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        privateKeyPath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string private_key_path = 11;</code>
-     * @param value The privateKeyPath to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPrivateKeyPath(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      privateKeyPath_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string private_key_path = 11;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearPrivateKeyPath() {
-      
-      privateKeyPath_ = getDefaultInstance().getPrivateKeyPath();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string private_key_path = 11;</code>
-     * @param value The bytes for privateKeyPath to set.
-     * @return This builder for chaining.
-     */
-    public Builder setPrivateKeyPathBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      privateKeyPath_ = value;
-      onChanged();
-      return this;
-    }
-
     private int tokenTtl_ ;
     /**
-     * <code>int32 token_ttl = 12;</code>
+     * <code>int32 token_ttl = 10;</code>
      * @return The tokenTtl.
      */
     @java.lang.Override
@@ -1834,7 +1550,7 @@ private static final long serialVersionUID = 0L;
       return tokenTtl_;
     }
     /**
-     * <code>int32 token_ttl = 12;</code>
+     * <code>int32 token_ttl = 10;</code>
      * @param value The tokenTtl to set.
      * @return This builder for chaining.
      */
@@ -1845,7 +1561,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>int32 token_ttl = 12;</code>
+     * <code>int32 token_ttl = 10;</code>
      * @return This builder for chaining.
      */
     public Builder clearTokenTtl() {
@@ -1855,145 +1571,244 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private boolean jwksEnabled_ ;
-    /**
-     * <code>bool jwks_enabled = 13;</code>
-     * @return The jwksEnabled.
-     */
-    @java.lang.Override
-    public boolean getJwksEnabled() {
-      return jwksEnabled_;
-    }
-    /**
-     * <code>bool jwks_enabled = 13;</code>
-     * @param value The jwksEnabled to set.
-     * @return This builder for chaining.
-     */
-    public Builder setJwksEnabled(boolean value) {
-      
-      jwksEnabled_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool jwks_enabled = 13;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearJwksEnabled() {
-      
-      jwksEnabled_ = false;
-      onChanged();
-      return this;
-    }
-
-    private com.google.protobuf.LazyStringList additionalJwksCertPaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    private void ensureAdditionalJwksCertPathsIsMutable() {
+    private java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Keypair> keypairs_ =
+      java.util.Collections.emptyList();
+    private void ensureKeypairsIsMutable() {
       if (!((bitField0_ & 0x00000001) != 0)) {
-        additionalJwksCertPaths_ = new com.google.protobuf.LazyStringArrayList(additionalJwksCertPaths_);
+        keypairs_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.config.enforcer.Keypair>(keypairs_);
         bitField0_ |= 0x00000001;
        }
     }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Keypair, org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder, org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder> keypairsBuilder_;
+
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @return A list containing the additionalJwksCertPaths.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public com.google.protobuf.ProtocolStringList
-        getAdditionalJwksCertPathsList() {
-      return additionalJwksCertPaths_.getUnmodifiableView();
+    public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Keypair> getKeypairsList() {
+      if (keypairsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(keypairs_);
+      } else {
+        return keypairsBuilder_.getMessageList();
+      }
     }
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @return The count of additionalJwksCertPaths.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public int getAdditionalJwksCertPathsCount() {
-      return additionalJwksCertPaths_.size();
+    public int getKeypairsCount() {
+      if (keypairsBuilder_ == null) {
+        return keypairs_.size();
+      } else {
+        return keypairsBuilder_.getCount();
+      }
     }
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @param index The index of the element to return.
-     * @return The additionalJwksCertPaths at the given index.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public java.lang.String getAdditionalJwksCertPaths(int index) {
-      return additionalJwksCertPaths_.get(index);
+    public org.wso2.choreo.connect.discovery.config.enforcer.Keypair getKeypairs(int index) {
+      if (keypairsBuilder_ == null) {
+        return keypairs_.get(index);
+      } else {
+        return keypairsBuilder_.getMessage(index);
+      }
     }
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the additionalJwksCertPaths at the given index.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public com.google.protobuf.ByteString
-        getAdditionalJwksCertPathsBytes(int index) {
-      return additionalJwksCertPaths_.getByteString(index);
-    }
-    /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @param index The index to set the value at.
-     * @param value The additionalJwksCertPaths to set.
-     * @return This builder for chaining.
-     */
-    public Builder setAdditionalJwksCertPaths(
-        int index, java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureAdditionalJwksCertPathsIsMutable();
-      additionalJwksCertPaths_.set(index, value);
-      onChanged();
+    public Builder setKeypairs(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Keypair value) {
+      if (keypairsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureKeypairsIsMutable();
+        keypairs_.set(index, value);
+        onChanged();
+      } else {
+        keypairsBuilder_.setMessage(index, value);
+      }
       return this;
     }
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @param value The additionalJwksCertPaths to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public Builder addAdditionalJwksCertPaths(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureAdditionalJwksCertPathsIsMutable();
-      additionalJwksCertPaths_.add(value);
-      onChanged();
+    public Builder setKeypairs(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder builderForValue) {
+      if (keypairsBuilder_ == null) {
+        ensureKeypairsIsMutable();
+        keypairs_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        keypairsBuilder_.setMessage(index, builderForValue.build());
+      }
       return this;
     }
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @param values The additionalJwksCertPaths to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public Builder addAllAdditionalJwksCertPaths(
-        java.lang.Iterable<java.lang.String> values) {
-      ensureAdditionalJwksCertPathsIsMutable();
-      com.google.protobuf.AbstractMessageLite.Builder.addAll(
-          values, additionalJwksCertPaths_);
-      onChanged();
+    public Builder addKeypairs(org.wso2.choreo.connect.discovery.config.enforcer.Keypair value) {
+      if (keypairsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureKeypairsIsMutable();
+        keypairs_.add(value);
+        onChanged();
+      } else {
+        keypairsBuilder_.addMessage(value);
+      }
       return this;
     }
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public Builder clearAdditionalJwksCertPaths() {
-      additionalJwksCertPaths_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000001);
-      onChanged();
+    public Builder addKeypairs(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Keypair value) {
+      if (keypairsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureKeypairsIsMutable();
+        keypairs_.add(index, value);
+        onChanged();
+      } else {
+        keypairsBuilder_.addMessage(index, value);
+      }
       return this;
     }
     /**
-     * <code>repeated string additional_jwks_cert_paths = 14;</code>
-     * @param value The bytes of the additionalJwksCertPaths to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
      */
-    public Builder addAdditionalJwksCertPathsBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      ensureAdditionalJwksCertPathsIsMutable();
-      additionalJwksCertPaths_.add(value);
-      onChanged();
+    public Builder addKeypairs(
+        org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder builderForValue) {
+      if (keypairsBuilder_ == null) {
+        ensureKeypairsIsMutable();
+        keypairs_.add(builderForValue.build());
+        onChanged();
+      } else {
+        keypairsBuilder_.addMessage(builderForValue.build());
+      }
       return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public Builder addKeypairs(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder builderForValue) {
+      if (keypairsBuilder_ == null) {
+        ensureKeypairsIsMutable();
+        keypairs_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        keypairsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public Builder addAllKeypairs(
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.config.enforcer.Keypair> values) {
+      if (keypairsBuilder_ == null) {
+        ensureKeypairsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, keypairs_);
+        onChanged();
+      } else {
+        keypairsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public Builder clearKeypairs() {
+      if (keypairsBuilder_ == null) {
+        keypairs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+      } else {
+        keypairsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public Builder removeKeypairs(int index) {
+      if (keypairsBuilder_ == null) {
+        ensureKeypairsIsMutable();
+        keypairs_.remove(index);
+        onChanged();
+      } else {
+        keypairsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder getKeypairsBuilder(
+        int index) {
+      return getKeypairsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder getKeypairsOrBuilder(
+        int index) {
+      if (keypairsBuilder_ == null) {
+        return keypairs_.get(index);  } else {
+        return keypairsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder> 
+         getKeypairsOrBuilderList() {
+      if (keypairsBuilder_ != null) {
+        return keypairsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(keypairs_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder addKeypairsBuilder() {
+      return getKeypairsFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.config.enforcer.Keypair.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder addKeypairsBuilder(
+        int index) {
+      return getKeypairsFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.config.enforcer.Keypair.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder> 
+         getKeypairsBuilderList() {
+      return getKeypairsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Keypair, org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder, org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder> 
+        getKeypairsFieldBuilder() {
+      if (keypairsBuilder_ == null) {
+        keypairsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Keypair, org.wso2.choreo.connect.discovery.config.enforcer.Keypair.Builder, org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder>(
+                keypairs_,
+                ((bitField0_ & 0x00000001) != 0),
+                getParentForChildren(),
+                isClean());
+        keypairs_ = null;
+      }
+      return keypairsBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

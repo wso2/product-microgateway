@@ -932,19 +932,13 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			ErrorCode: 1412,
 		})
 	}
-	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
 	systemHost := conf.Envoy.SystemHost
-	if enableJwtIssuer {
+	if conf.Enforcer.JwtIssuer.Enabled {
 		routeToken := envoyconf.CreateTokenRoute()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
-	}
-
-	enableJwksEndpoint := conf.Enforcer.JwtGenerator.JwksEnabled
-	if enableJwksEndpoint {
 		routeJwks := envoyconf.CreateJwksEndpoint()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeJwks)
 	}
-
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
 	vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeHealth)

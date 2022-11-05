@@ -47,6 +47,7 @@ const DefaultGatewayName = "Default"
 
 // DefaultGatewayVHost represents the default vhost of default gateway environment if it is not configured
 const DefaultGatewayVHost = "localhost"
+
 // for /testtoken and /health check, if user not configured default env, we have no vhost
 
 const (
@@ -229,6 +230,17 @@ func (config *Config) resolveDeprecatedProperties() {
 
 }
 
+func (config *Config) resolveInvalidConfiguration() {
+	//assuming we will keep the original priv/pub key
+	KeyPairs := config.Enforcer.JwtGenerator.Keypairs
+	if numberOfKeyPairs := len(KeyPairs); numberOfKeyPairs > 2 {
+		logger.Warnf("There are %d keypairs provided to JWTGenerator, please only configure it with 2.", numberOfKeyPairs)
+	}
+	if KeyPairs[0].UseForSigning && KeyPairs[1].UseForSigning {
+		logger.Warn("Only one keypair must be configured to be used for signing.")
+		KeyPairs[1].UseForSigning = false
+	}
+}
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {
 	logger.Warnf("%s is deprecated. Use %s instead", deprecatedTerm, currentTerm)
 }
