@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.choreo.connect.discovery.config.enforcer.Config;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
+import org.wso2.choreo.connect.discovery.config.enforcer.Keypair;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 
 import java.io.File;
@@ -42,12 +43,14 @@ public class BackendJwksTest {
         ConfigHolder configHolder = ConfigHolder.getInstance();
         JWTGenerator jwtGenerator = JWTGenerator.newBuilder()
                 .setEnable(true)
-                .setPublicCertificatePath(certPath)
-                .setJwksEnabled(true)
-                .build();
+                .addKeypairs(Keypair.newBuilder()
+                        .setPublicCertificatePath(certPath)
+                        .setUseForSigning(true)
+                        .buildPartial())
+        .build();
         ConfigHolder.load(Config.newBuilder().setJwtGenerator(jwtGenerator).buildPartial());
-        Assert.assertTrue(configHolder.getConfig().getBackendJWKSDto().isEnabled());
-        Assert.assertEquals("Number of JWK's", 1, configHolder.getConfig()
+        Assert.assertTrue(configHolder.getConfig().getJwtConfigurationDto().isEnabled());
+        Assert.assertEquals("Failed to generate single JWKS", 1, configHolder.getConfig()
                 .getBackendJWKSDto().getJwks().getKeys().size());
     }
 
@@ -59,13 +62,20 @@ public class BackendJwksTest {
         ConfigHolder configHolder = ConfigHolder.getInstance();
         JWTGenerator jwtGenerator = JWTGenerator.newBuilder()
                 .setEnable(true)
-                .setPublicCertificatePath(certPath)
-                .setJwksEnabled(true)
-                .addAdditionalJwksCertPaths(additionalCertPath)
+                .addKeypairs(Keypair.newBuilder()
+                        .setPublicCertificatePath(certPath)
+                        .setUseForSigning(true)
+                        .buildPartial())
+                .addKeypairs(Keypair.newBuilder()
+                        .setPublicCertificatePath(additionalCertPath)
+                        .setUseForSigning(true)
+                        .buildPartial())
                 .build();
         ConfigHolder.load(Config.newBuilder().setJwtGenerator(jwtGenerator).buildPartial());
-        Assert.assertTrue(configHolder.getConfig().getBackendJWKSDto().isEnabled());
-        Assert.assertEquals("Number of JWK's", 2, configHolder.getConfig()
+        Assert.assertTrue(configHolder.getConfig().getJwtConfigurationDto().isEnabled());
+        Assert.assertEquals("Failed to generate multiple JWKS", 2, configHolder.getConfig()
                 .getBackendJWKSDto().getJwks().getKeys().size());
     }
+
+
 }
