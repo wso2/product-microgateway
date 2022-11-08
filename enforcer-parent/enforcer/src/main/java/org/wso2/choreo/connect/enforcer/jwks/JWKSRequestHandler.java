@@ -55,8 +55,9 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
         JWKSet jwks = backendJWKSDto.getJwks();
         if (msg instanceof HttpRequest) {
             req = (FullHttpRequest) msg;
-            String path = req.uri().split("\\?")[0];
-            if (!(req.method().equals(HttpMethod.GET) && path.equals(route))) {
+            String path = req.uri().split("\\?")[0]; //Get the context without query params
+
+            if (!(HttpMethod.GET.equals(req.method()) && path.equals(route))) {
                 ctx.fireChannelRead(msg);
                 return;
             }

@@ -32,6 +32,11 @@ import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerHandl
 /**
     Channel Initializer for the utility rest server
 
+    Add Handlers to the pipeline which only respond to messages with a specific context.
+    eg: "/jwks"
+    Fire next channel read if context doesn't match
+
+
  */
 public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
     private final SslContext sslCtx;
@@ -56,5 +61,7 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
         if (ConfigHolder.getInstance().getConfig().getRestServer().isEnable()) {
             p.addLast(new AdminServerHandler());
         }
+
+        //TODO: Add handler to deal with resource not found
     }
 }
