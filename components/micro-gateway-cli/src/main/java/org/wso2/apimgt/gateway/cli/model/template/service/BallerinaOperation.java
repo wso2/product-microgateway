@@ -29,6 +29,7 @@ import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.ArrayList;
@@ -196,6 +197,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
         if (operation.getParameters() != null) {
             for (Parameter parameter : operation.getParameters()) {
+                 parameter.setName(CodegenUtils.replaceSpecialChars(parameter.getName()));
                 if ("path".equals(parameter.getIn())) {
                     this.pathParameters.add(new BallerinaParameter().buildContext(parameter, api));
                 }

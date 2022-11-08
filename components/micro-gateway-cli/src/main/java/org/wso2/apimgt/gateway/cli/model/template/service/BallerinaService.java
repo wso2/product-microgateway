@@ -137,8 +137,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     public BallerinaService buildContext(OpenAPI definition, ExtendedAPI api) throws BallerinaServiceGenException {
         this.name = CodegenUtils.trim(api.getName());
         this.api = api;
-        this.qualifiedServiceName =
-                CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
+        if (Character.isDigit(api.getName().charAt(0))) {
+            this.qualifiedServiceName =
+                    CodegenUtils.trim("_" + api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
+        } else {
+            this.qualifiedServiceName =
+                    CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
+        }
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
         this.setProjectName(CodeGenerator.projectName);
@@ -294,7 +299,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 operation.setScope(api.getMgwApiScope());
 
             });
-            paths.add(new AbstractMap.SimpleEntry<>(path.getKey(), balPath));
+            paths.add(new AbstractMap.SimpleEntry<>(CodegenUtils.removeSpecialCharsInPathParameters(path.getKey()),
+                    balPath));
         }
     }
 

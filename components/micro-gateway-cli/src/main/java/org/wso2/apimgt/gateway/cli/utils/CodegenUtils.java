@@ -159,4 +159,33 @@ public final class CodegenUtils {
         }
         return variable;
     }
+
+    /**
+     * Replace special chars in a string.
+     *
+     * @param originalStr Original string
+     * @return New string
+     */
+    public static String replaceSpecialChars(String originalStr) {
+        return originalStr.replace("-", "_hyphen_");
+    }
+
+    /**
+     * Replace special chars in a path.
+     *
+     * @param originalPath Original path
+     * @return New path
+     */
+    public static String removeSpecialCharsInPathParameters(String originalPath) {
+        String modifiedPath = originalPath;
+        String[] pathSeparators = originalPath.split("/");
+        for (String item : pathSeparators) {
+            if (item.startsWith("{") && item.endsWith("}")) {
+                String modifiedItem = replaceSpecialChars(item);
+                modifiedPath = modifiedPath.replace(item, modifiedItem);
+            }
+        }
+        return modifiedPath;
+    }
+
 }
