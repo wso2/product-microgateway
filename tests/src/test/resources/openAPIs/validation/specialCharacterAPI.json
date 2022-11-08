@@ -1,0 +1,1031 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.2",
+        "title": "N2_PSD2_CheckSpecialCharApp",
+        "description":"Sample API to test when the definition having index numbers in title and special characters in path parameters"
+    },
+    "basePath": "/CA.PSD2.API.Auth/CA.PSD2.API.AuthSvc",
+    "security": [
+        {
+            "mybasic": []
+        }
+    ],
+    "paths": {
+        "/auth/sca-initiation-iban-selection/{payment-product}": {
+            "post": {
+                "tags": [
+                    "Sca"
+                ],
+                "operationId": "ScaInitiationRequestForIbanSelectionAsync",
+                "consumes": [
+                    "application/json-patch+json",
+                    "application/csp-report",
+                    "application/json",
+                    "text/json",
+                    "application/*+json"
+                ],
+                "produces": [
+                    "text/plain",
+                    "application/json",
+                    "text/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "tpp-redirect-uri",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 2048,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "tpp-nok-redirect-uri",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 2048,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "aspsp-product-code",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-id",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 100,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-id-type",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-corporate-id",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 100,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-corporate-id-type",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "tpp-registration-number",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "tpp-name",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "aspsp-code",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "request-id",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "Date",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "in": "body",
+                        "name": "model",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/definitions/ScaInitiationForIbanSelectionRequest"
+                        }
+                    },
+                    {
+                        "name": "payment-product",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/ScaInitiationForAccountSelectionResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "mybasic": []
+                    }
+                ]
+            }
+        }
+    },
+    "securityDefinitions": {
+        "default": {
+            "type": "oauth2",
+            "authorizationUrl": "https://test.com",
+            "flow": "implicit"
+        }
+    },
+    "definitions": {
+        "BaseHeader": {
+            "type": "object",
+            "required": [
+                "aspspCode",
+                "date",
+                "requestId",
+                "tppName",
+                "tppRegistrationNumber"
+            ],
+            "properties": {
+                "psuId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "psuIdType": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "psuCorporateId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "psuCorporateIdType": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "tppRegistrationNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "tppName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "aspspCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20
+                },
+                "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "date": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 31
+                }
+            }
+        },
+        "PsuAuthenticationRequest": {
+            "type": "object",
+            "required": [
+                "psuCredentials"
+            ],
+            "properties": {
+                "psuCredentials": {
+                    "$ref": "#/definitions/CredentialsContainer"
+                },
+                "paymentProduct": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "paymentId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "consentId": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "CredentialsContainer": {
+            "type": "object",
+            "required": [
+                "credentialsDetails",
+                "productCode"
+            ],
+            "properties": {
+                "productCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "credentialsDetails": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Credential"
+                    }
+                }
+            }
+        },
+        "Credential": {
+            "type": "object",
+            "required": [
+                "credentialDetailId",
+                "credentialValue"
+            ],
+            "properties": {
+                "credentialDetailId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50
+                },
+                "credentialValue": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                }
+            }
+        },
+        "PsuAuthorizationResponse": {
+            "type": "object",
+            "properties": {
+                "psuId": {
+                    "type": "string"
+                },
+                "psuIdType": {
+                    "type": "string"
+                },
+                "psuCorporateId": {
+                    "type": "string"
+                },
+                "psuCorporateIdType": {
+                    "type": "string"
+                },
+                "endUserIdentification": {
+                    "type": "string"
+                },
+                "psuMessage": {
+                    "type": "string"
+                },
+                "errorManagement": {
+                    "$ref": "#/definitions/ErrorResponse"
+                }
+            }
+        },
+        "ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "string"
+                },
+                "errorDescription": {
+                    "type": "string"
+                }
+            }
+        },
+        "ScaInitiationHeader": {
+            "type": "object",
+            "required": [
+                "aspspCode",
+                "aspspProductCode",
+                "date",
+                "requestId",
+                "tppName",
+                "tppRegistrationNumber"
+            ],
+            "properties": {
+                "tppRedirectUri": {
+                    "type": "string",
+                    "maxLength": 2048
+                },
+                "tppNokRedirectUri": {
+                    "type": "string",
+                    "maxLength": 2048
+                },
+                "aspspProductCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 45
+                },
+                "psuId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "psuIdType": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "psuCorporateId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "psuCorporateIdType": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "tppRegistrationNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "tppName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "aspspCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20
+                },
+                "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "date": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 31
+                }
+            }
+        },
+        "ScaInitiationForIbanSelectionRequest": {
+            "type": "object",
+            "required": [
+                "paymentTransactionData",
+                "psuAlreadyAuthenticated",
+                "selectedScaApproach",
+                "selectedScaMethod"
+            ],
+            "properties": {
+                "paymentId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "paymentTransactionData": {
+                    "$ref": "#/definitions/TransactionDataForIbanSelection"
+                },
+                "psuAlreadyAuthenticated": {
+                    "type": "boolean"
+                },
+                "selectedScaApproach": {
+                    "type": "string"
+                },
+                "selectedScaMethod": {
+                    "$ref": "#/definitions/AuthenticationData"
+                }
+            }
+        },
+        "TransactionDataForIbanSelection": {
+            "type": "object",
+            "required": [
+                "creditorAccount",
+                "creditorName",
+                "instructedAmount"
+            ],
+            "properties": {
+                "instructedAmount": {
+                    "$ref": "#/definitions/AmountModel"
+                },
+                "ultimateDebtor": {
+                    "type": "string",
+                    "maxLength": 70
+                },
+                "creditorAccount": {
+                    "$ref": "#/definitions/AccountModel"
+                },
+                "creditorAgent": {
+                    "type": "string",
+                    "maxLength": 11
+                },
+                "creditorName": {
+                    "type": "string",
+                    "maxLength": 70
+                },
+                "creditorAddress": {
+                    "$ref": "#/definitions/Address"
+                },
+                "ultimateCreditor": {
+                    "type": "string",
+                    "maxLength": 70
+                },
+                "purposeCode": {
+                    "type": "string",
+                    "maxLength": 4
+                },
+                "remittanceInformationUnstructured": {
+                    "type": "string",
+                    "maxLength": 140
+                },
+                "remittanceInformationStructured": {
+                    "$ref": "#/definitions/Remittance"
+                },
+                "requestedExecutionDate": {
+                    "type": "string",
+                    "maxLength": 10
+                },
+                "requestedExecutionTime": {
+                    "type": "string",
+                    "maxLength": 24
+                }
+            }
+        },
+        "AuthenticationData": {
+            "type": "object",
+            "required": [
+                "authenticationMethodId",
+                "authenticationType"
+            ],
+            "properties": {
+                "authenticationType": {
+                    "type": "string",
+                    "maxLength": 9
+                },
+                "authType": {
+                    "type": "string",
+                    "readOnly": true,
+                    "enum": [
+                        "SMS_OTP",
+                        "CHIP_OTP",
+                        "PHOTO_OTP",
+                        "PUSH_OTP"
+                    ]
+                },
+                "authenticationVersion": {
+                    "type": "string",
+                    "maxLength": 10
+                },
+                "authenticationMethodId": {
+                    "type": "string",
+                    "maxLength": 45
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "explanation": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "AmountModel": {
+            "type": "object",
+            "required": [
+                "amount",
+                "currency"
+            ],
+            "properties": {
+                "currency": {
+                    "type": "string",
+                    "maxLength": 3
+                },
+                "amount": {
+                    "type": "string",
+                    "maxLength": 16
+                }
+            }
+        },
+        "AccountModel": {
+            "type": "object",
+            "properties": {
+                "iban": {
+                    "type": "string",
+                    "maxLength": 34,
+                    "pattern": "[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}"
+                },
+                "bban": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "pattern": "[a-zA-Z0-9]{1,30}"
+                },
+                "pan": {
+                    "type": "string",
+                    "maxLength": 19
+                },
+                "maskedPan": {
+                    "type": "string",
+                    "maxLength": 35
+                },
+                "msisdn": {
+                    "type": "string",
+                    "maxLength": 15
+                },
+                "currency": {
+                    "type": "string",
+                    "maxLength": 3,
+                    "pattern": "[A-Z]{3,3}"
+                }
+            }
+        },
+        "Address": {
+            "type": "object",
+            "required": [
+                "country"
+            ],
+            "properties": {
+                "street": {
+                    "type": "string",
+                    "maxLength": 70
+                },
+                "buildingNumber": {
+                    "type": "string",
+                    "maxLength": 5
+                },
+                "city": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "postalCode": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "country": {
+                    "type": "string",
+                    "maxLength": 3
+                }
+            }
+        },
+        "Remittance": {
+            "type": "object",
+            "required": [
+                "reference"
+            ],
+            "properties": {
+                "reference": {
+                    "type": "string",
+                    "maxLength": 35
+                },
+                "referenceType": {
+                    "type": "string",
+                    "maxLength": 35
+                },
+                "referenceIssuer": {
+                    "type": "string",
+                    "maxLength": 35
+                }
+            }
+        },
+        "ScaInitiationForAccountSelectionResponse": {
+            "type": "object",
+            "properties": {
+                "aspspUrlForAccountSelection": {
+                    "type": "string"
+                },
+                "psuMessage": {
+                    "type": "string"
+                },
+                "errorManagement": {
+                    "$ref": "#/definitions/ErrorResponse"
+                }
+            }
+        },
+        "ScaInitiationRequest": {
+            "type": "object",
+            "required": [
+                "psuAlreadyAuthenticated",
+                "selectedScaApproach",
+                "selectedScaMethod"
+            ],
+            "properties": {
+                "psuAlreadyAuthenticated": {
+                    "type": "boolean"
+                },
+                "paymentId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "consentId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "consentData": {
+                    "$ref": "#/definitions/ConsData"
+                },
+                "selectedScaApproach": {
+                    "type": "string",
+                    "maxLength": 14
+                },
+                "selectedScaMethod": {
+                    "$ref": "#/definitions/AuthenticationData"
+                },
+                "psd2CallbackURL": {
+                    "type": "string",
+                    "maxLength": 2048
+                }
+            }
+        },
+        "ConsData": {
+            "type": "object",
+            "required": [
+                "access",
+                "combinedServiceIndicator",
+                "frequencyPerDay",
+                "recurringIndicator",
+                "validUntil"
+            ],
+            "properties": {
+                "access": {
+                    "$ref": "#/definitions/AccessModel"
+                },
+                "recurringIndicator": {
+                    "type": "boolean"
+                },
+                "validUntil": {
+                    "type": "string",
+                    "maxLength": 19
+                },
+                "frequencyPerDay": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 1,
+                    "maximum": 99999
+                },
+                "combinedServiceIndicator": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "AccessModel": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AccessData"
+                    }
+                },
+                "balances": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AccessData"
+                    }
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AccessData"
+                    }
+                },
+                "availableAccounts": {
+                    "type": "string",
+                    "maxLength": 25
+                },
+                "allPsd2": {
+                    "type": "string",
+                    "maxLength": 25
+                },
+                "availableAccountsWithBalance": {
+                    "type": "string",
+                    "maxLength": 25
+                }
+            }
+        },
+        "AccessData": {
+            "type": "object",
+            "required": [
+                "accountId"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "iban": {
+                    "type": "string",
+                    "maxLength": 34,
+                    "pattern": "[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}"
+                },
+                "bban": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "pattern": "[a-zA-Z0-9]{1,30}"
+                },
+                "pan": {
+                    "type": "string",
+                    "maxLength": 19
+                },
+                "maskedPan": {
+                    "type": "string",
+                    "maxLength": 35
+                },
+                "msisdn": {
+                    "type": "string",
+                    "maxLength": 15
+                },
+                "currency": {
+                    "type": "string",
+                    "maxLength": 3,
+                    "pattern": "[A-Z]{3,3}"
+                }
+            }
+        },
+        "ScaInitiationResponse": {
+            "type": "object",
+            "properties": {
+                "challengeData": {
+                    "$ref": "#/definitions/DataChallenge"
+                },
+                "aspspScaUrl": {
+                    "type": "string"
+                },
+                "psuMessage": {
+                    "type": "string"
+                },
+                "errorManagement": {
+                    "$ref": "#/definitions/ErrorResponse"
+                }
+            }
+        },
+        "DataChallenge": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "imageLink": {
+                    "type": "string"
+                },
+                "otpMaxLength": {
+                    "type": "string"
+                },
+                "otpFormat": {
+                    "type": "string"
+                },
+                "additionalData": {
+                    "type": "string"
+                }
+            }
+        },
+        "ScaValidationHeader": {
+            "type": "object",
+            "required": [
+                "aspspCode",
+                "date",
+                "requestId",
+                "tppName",
+                "tppRegistrationNumber"
+            ],
+            "properties": {
+                "tppRegistrationNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "tppName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "aspspCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20
+                },
+                "requestId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                },
+                "date": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 31
+                }
+            }
+        },
+        "ScaValidationRequest": {
+            "type": "object",
+            "required": [
+                "scaAuthenticationData"
+            ],
+            "properties": {
+                "scaAuthenticationData": {
+                    "type": "string",
+                    "maxLength": 2048
+                },
+                "paymentId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "consentId": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "ScaValidationResponse": {
+            "type": "object",
+            "properties": {
+                "paymentTransactionStatus": {
+                    "type": "string"
+                },
+                "signatureData": {
+                    "$ref": "#/definitions/SignData"
+                },
+                "psuMessage": {
+                    "type": "string"
+                },
+                "errorManagement": {
+                    "$ref": "#/definitions/ErrorResponse"
+                }
+            }
+        },
+        "SignData": {
+            "type": "object",
+            "required": [
+                "aspsCertificate",
+                "digest",
+                "digitalSignature"
+            ],
+            "properties": {
+                "digest": {
+                    "type": "string"
+                },
+                "digitalSignature": {
+                    "type": "string"
+                },
+                "aspsCertificate": {
+                    "type": "string"
+                }
+            }
+        },
+        "ScaNotificationHeader": {
+            "type": "object",
+            "required": [
+                "aspspCode",
+                "cpaasTenantId",
+                "xRequestId"
+            ],
+            "properties": {
+                "cpaasTenantId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "xRequestId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "psuId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "psuIdType": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "psuCorporateId": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "psuCorporateIdType": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "aspspCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20
+                }
+            }
+        },
+        "ScaNotificationRequest": {
+            "type": "object",
+            "properties": {
+                "scaValidationResult": {
+                    "type": "string"
+                },
+                "scaExecutionDate": {
+                    "type": "string"
+                },
+                "paymentTransactionStatus": {
+                    "type": "string"
+                },
+                "endUserIdentification": {
+                    "type": "string"
+                }
+            }
+        },
+        "BaseResponse": {
+            "type": "object",
+            "properties": {
+                "errorManagement": {
+                    "$ref": "#/definitions/ErrorResponse"
+                }
+            }
+        },
+        "ScaNotificationForIbanSelectionRequest": {
+            "type": "object",
+            "required": [
+                "customerCode",
+                "debtorIban",
+                "productCode"
+            ],
+            "properties": {
+                "customerCode": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "productCode": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "debtorIban": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        }
+    },
+    "x-wso2-production-endpoints": "#/x-wso2-endpoints/dummyEndpoint",
+    "x-wso2-sandbox-endpoints": "#/x-wso2-endpoints/dummyEndpoint",
+    "x-wso2-endpoints": [
+        {
+            "dummyEndpoint": {
+                "urls": [
+                    "https://test.com"
+                ]
+            }
+        }
+    ],
+    "x-wso2-basePath": "/bank/npp/payments-notification/{version}",
+    "x-wso2-transports": [
+        "http"
+    ],
+    "x-mgw-endpoints": [
+        {
+            "myEndpoint": {
+                "urls": [
+                    "https://run.mocky.io/v3/2988f3b5-e77b-4f29-8ee6-729b89cd5c93"
+                ]
+            }
+        },
+        {
+            "myEndpoint2": {
+                "urls": [
+                    "https://run.mocky.io/v3/2988f3b5-e77b-4f29-8ee6-729b89cd5c93"
+                ]
+            }
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "mybasic": {
+                "type": "http",
+                "scheme": "basic"
+            },
+            "OAuth2": {
+                "type": "oauth2",
+                "flows": {
+                    "authorizationCode": {
+                        "authorizationUrl": "https://example.com/oauth/authorize",
+                        "tokenUrl": "https://example.com/oauth/token"
+                    }
+                }
+            }
+        }
+    },
+    "x-wso2-response-cache": {
+        "enabled": false,
+        "cacheTimeoutInSeconds": 300
+    }
+}
