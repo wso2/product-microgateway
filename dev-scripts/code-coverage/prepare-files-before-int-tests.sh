@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # --------------------------------------------------------------------
 # Copyright (c) 2022, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
@@ -19,8 +19,15 @@ echo "Preparing code coverage files before integration tests..."
 mkdir ../../resources/enforcer/dropins/
 chmod 777 ../../enforcer-parent/enforcer/target/coverage-aggregate-reports/aggregate.exec
 export JAVA_AGENT_ARG="-javaagent:\/home\/wso2\/lib\/org.jacoco.agent-0.8.8-runtime.jar=destfile=\/home\/wso2\/lib\/dropins\/aggregate.exec,append=true"
-sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../resources/docker-compose/docker-compose.yaml
-sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../resources/docker-compose/apim/docker-compose.yaml
-sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
-sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../resources/docker-compose/docker-compose.yaml
+  sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../resources/docker-compose/apim/docker-compose.yaml
+  sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
+  sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../resources/docker-compose/docker-compose.yaml
+  sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../resources/docker-compose/apim/docker-compose.yaml
+  sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
+  sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml
+fi
 echo "Preparing code coverage files before integration tests completed successfully..."

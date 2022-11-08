@@ -23,6 +23,7 @@ import io.envoyproxy.envoy.data.accesslog.v3.AccessLogCommon;
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
@@ -46,10 +47,14 @@ import java.util.Map;
  */
 public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     private static final Logger logger = LogManager.getLogger(ChoreoAnalyticsProvider.class);
+    private static Map<String, Object> customProperties = new HashMap<>();
     protected final HTTPAccessLogEntry logEntry;
 
     public ChoreoAnalyticsProvider(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
+        if (AnalyticsFilter.getAnalyticsCustomDataProvider() != null) {
+            setCustomPropertiesMap(logEntry, customProperties);
+        }
     }
 
     @Override
@@ -216,6 +221,16 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         return logEntry.getCommonProperties().getDownstreamRemoteAddress().getSocketAddress().getAddress();
     }
 
+    @Override
+    public Map<String, Object> getProperties() {
+        AnalyticsCustomDataProvider customDataProvider = AnalyticsFilter.getAnalyticsCustomDataProvider();
+        if (customDataProvider != null && customDataProvider.getCustomProperties(customProperties) != null) {
+            return customDataProvider.getCustomProperties(customProperties);
+        }
+        return this.customProperties;
+    }
+
+
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
         if (fieldsMap == null || !fieldsMap.containsKey(key)) {
             return null;
@@ -233,5 +248,17 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         }
         return logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
                 .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap();
+    }
+
+    private void setCustomPropertiesMap(HTTPAccessLogEntry logEntry, Map<String, Object> customProperties) {
+        if (logEntry.getRequest().getRequestHeadersMap() != null) {
+            customProperties.putAll(logEntry.getRequest().getRequestHeadersMap());
+        }
+        if (logEntry.getResponse().getResponseHeadersMap() != null) {
+            customProperties.putAll(logEntry.getResponse().getResponseHeadersMap());
+        }
+        if (logEntry.getResponse().getResponseTrailersMap() != null) {
+            customProperties.putAll(logEntry.getResponse().getResponseTrailersMap());
+        }
     }
 }
