@@ -21,7 +21,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -109,7 +108,7 @@ func ReadConfigs() (*Config, error) {
 				ErrorCode: 1003,
 			})
 		}
-
+		adapterConfig.resolveInvalidConfiguration()
 		adapterConfig.resolveDeprecatedProperties()
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
@@ -240,12 +239,18 @@ func (config *Config) resolveDeprecatedProperties() {
 
 func (config *Config) resolveInvalidConfiguration() error {
 	KeyPairs := config.Enforcer.JwtGenerator.Keypair
-	if numberOfKeyPairs := len(KeyPairs); numberOfKeyPairs > 2 {
-		return errors.New(fmt.Sprintf("Too many keypairs provided to JWT generator, Number of keys: %d"))
+	numberOfKeyPairs := len(KeyPairs)
+	if numberOfKeyPairs > 2 {
+		return fmt.Errorf("too many keypairs provided to jwt generator, number of keys: %d", numberOfKeyPairs)
 	}
-	if KeyPairs[0].UseForSigning && KeyPairs[1].UseForSigning {
-		return errors.New(fmt.Sprintf("Only one keypair should be set to be used for signing"))
+	if numberOfKeyPairs == 2 && KeyPairs[0].UseForSigning && KeyPairs[1].UseForSigning {
+		return fmt.Errorf("only one keypair should be set to be used for signing")
 	}
+	if numberOfKeyPairs == 1 && !KeyPairs[0].UseForSigning {
+		return fmt.Errorf("atleast one keypair should be set to be used for signing")
+
+	}
+	return nil
 }
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {
 	logger.Warnf("%s is deprecated. Use %s instead", deprecatedTerm, currentTerm)
