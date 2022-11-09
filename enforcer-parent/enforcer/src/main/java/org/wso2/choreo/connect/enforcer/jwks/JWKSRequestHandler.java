@@ -32,18 +32,16 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObject;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpVersion;
+import org.apache.http.protocol.HTTP;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+
 /**
  * JWKS Request Handler for Backend JWTs
  */
 public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> {
-    private static final String CONTENT_LENGTH = "content-length";
-    private static final String CONNECTION = "Connection";
-    private static final String CLOSE = "close";
-    private static final String APPLICATION_JSON = "application/json";
-    private static final String CONTENT_TYPE = "Content-Type";
     private static final Logger logger = LogManager.getLogger(JWKSRequestHandler.class);
     private static final String route = "/jwks";
 
@@ -64,12 +62,11 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
             res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
                     Unpooled.wrappedBuffer(jwks.toJSONObject().toString().getBytes()));
             res.headers()
-                    .set(CONNECTION, CLOSE)
-                    .set(CONTENT_TYPE, APPLICATION_JSON)
-                    .setInt(CONTENT_LENGTH, res.content().readableBytes());
+                    .set(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE)
+                    .set(HTTP.CONTENT_TYPE, HttpConstants.APPLICATION_JSON)
+                    .setInt(HTTP.CONTENT_LEN, res.content().readableBytes());
             ChannelFuture f = ctx.write(res);
             f.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-            //TODO: keep alive
         }
     }
 
