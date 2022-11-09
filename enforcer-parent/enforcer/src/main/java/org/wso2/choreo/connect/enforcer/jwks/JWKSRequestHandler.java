@@ -69,15 +69,4 @@ public class JWKSRequestHandler extends SimpleChannelInboundHandler<HttpObject> 
             f.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }
-
-    @Override
-    public void channelReadComplete(io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext ctx) {
-        ctx.flush();
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error(cause);
-        ctx.close();
-    }
 }
