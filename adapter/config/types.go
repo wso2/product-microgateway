@@ -418,7 +418,7 @@ type jwtGenerator struct {
 	GatewayGeneratorImpl string
 	ClaimsExtractorImpl  string
 	TokenTTL             int32
-	Keypairs             []KeyPair
+	Keypair              []KeyPair
 }
 
 type KeyPair struct {

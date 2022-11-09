@@ -80,7 +80,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	keyPairs := []*enforcer.Keypair{}
-	for _, kp := range config.Enforcer.JwtGenerator.Keypairs {
+	for _, kp := range config.Enforcer.JwtGenerator.Keypair {
 		keypair := &enforcer.Keypair{
 			PublicCertificatePath: kp.PublicCertificatePath,
 			PrivateKeyPath:        kp.PrivateKeyPath,

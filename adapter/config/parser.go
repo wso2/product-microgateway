@@ -232,7 +232,7 @@ func (config *Config) resolveDeprecatedProperties() {
 
 func (config *Config) resolveInvalidConfiguration() {
 	//assuming we will keep the original priv/pub key
-	KeyPairs := config.Enforcer.JwtGenerator.Keypairs
+	KeyPairs := config.Enforcer.JwtGenerator.Keypair
 	if numberOfKeyPairs := len(KeyPairs); numberOfKeyPairs > 2 {
 		logger.Warnf("There are %d keypairs provided to JWTGenerator, please only configure it with 2.", numberOfKeyPairs)
 	}
