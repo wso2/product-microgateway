@@ -1116,7 +1116,7 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 	return interceptor.GetInterceptor(templateValues, templateString)
 }
 
-func CreateStaticRoute(path string, hostRewrite bool, disableExtAuth bool, pathSubstitute string, clusterName string) *routev3.Route {
+func CreateStaticRoute(path string, pathSubstitute string, clusterName string) *routev3.Route {
 	var (
 		router    routev3.Route
 		action    *routev3.Route_Route
@@ -1131,7 +1131,7 @@ func CreateStaticRoute(path string, hostRewrite bool, disableExtAuth bool, pathS
 	}
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
 		AutoHostRewrite: &wrapperspb.BoolValue{
-			Value: hostRewrite,
+			Value: true,
 		},
 	}
 	decorator = &routev3.Decorator{
@@ -1139,7 +1139,7 @@ func CreateStaticRoute(path string, hostRewrite bool, disableExtAuth bool, pathS
 	}
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
-			Disabled: disableExtAuth,
+			Disabled: true,
 		},
 	}
 	filter := marshalFilterConfig(&perFilterConfig)
@@ -1170,10 +1170,10 @@ func CreateStaticRoute(path string, hostRewrite bool, disableExtAuth bool, pathS
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
-	return CreateStaticRoute(testKeyPath, true, true, "/testkey", tokenCluster)
+	return CreateStaticRoute(testKeyPath, "/testkey", tokenCluster)
 }
 func CreateJwksEndpoint() *routev3.Route {
-	return CreateStaticRoute(jwksPath, true, true, "/jwks", tokenCluster)
+	return CreateStaticRoute(jwksPath, "/jwks", tokenCluster)
 }
 
 func marshalFilterConfig(perFilterConfig *extAuthService.ExtAuthzPerRoute) *anypb.Any {
