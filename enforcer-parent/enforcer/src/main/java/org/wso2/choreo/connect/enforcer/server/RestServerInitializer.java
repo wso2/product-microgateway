@@ -43,7 +43,6 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
     public RestServerInitializer(SslContext sslCtx) {
         this.sslCtx = sslCtx;
     }
-    //TODO: Logging?
     @Override
     public void initChannel(SocketChannel ch) {
         ChannelPipeline p = ch.pipeline();
@@ -51,6 +50,7 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
             p.addLast(sslCtx.newHandler(ch.alloc()));
         }
         p.addLast(new HttpServerCodec());
+        // Maximum content length in bytes, set to 1mb
         p.addLast(new HttpObjectAggregator(1048576));
         if (ConfigHolder.getInstance().getConfig().getJwtConfigurationDto().isEnabled()) {
             p.addLast(new JWKSRequestHandler());
@@ -61,7 +61,5 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
         if (ConfigHolder.getInstance().getConfig().getRestServer().isEnable()) {
             p.addLast(new AdminServerHandler());
         }
-
-        //TODO: Add handler to deal with resource not found
     }
 }
