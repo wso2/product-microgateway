@@ -523,11 +523,12 @@ public class ConfigHolder {
             logger.error("Error in loading public cert or private key", e);
         }
         config.setJwtConfigurationDto(jwtConfigurationDto);
-        populateBackendJWKSConfiguration(keypairs);
+        populateBackendJWKSConfiguration(jwtGenerator);
     }
 
-    private void populateBackendJWKSConfiguration(List<Keypair> keypairs) {
+    private void populateBackendJWKSConfiguration(JWTGenerator jwtGenerator) {
         BackendJWKSDto backendJWKSDto = new BackendJWKSDto();
+        List<Keypair> keypairs = jwtGenerator.getKeypairsList();
         ArrayList<JWK> jwks = new ArrayList<>();
         try {
             for (Keypair keypair : keypairs) {
@@ -545,7 +546,7 @@ public class ConfigHolder {
                 return keypair;
             }
         }
-        return null; // TODO: ask viraj
+        return null;
     }
 
     private JWK jwkFromCertPath(String certPath) throws CertificateException, IOException, JOSEException {

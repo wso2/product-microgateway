@@ -421,6 +421,7 @@ type jwtGenerator struct {
 	Keypair              []KeyPair
 }
 
+// KeyPair represents hthe rsa keypair used for signing JWTs
 type KeyPair struct {
 	PrivateKeyPath        string
 	PublicCertificatePath string

@@ -1116,7 +1116,7 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 	return interceptor.GetInterceptor(templateValues, templateString)
 }
 
-func CreateStaticRoute(path string, pathSubstitute string, clusterName string) *routev3.Route {
+func createStaticRoute(path string, pathSubstitute string, clusterName string) *routev3.Route {
 	var (
 		router    routev3.Route
 		action    *routev3.Route_Route
@@ -1170,10 +1170,12 @@ func CreateStaticRoute(path string, pathSubstitute string, clusterName string) *
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
-	return CreateStaticRoute(testKeyPath, "/testkey", tokenCluster)
+	return createStaticRoute(testKeyPath, "/testkey", tokenCluster)
 }
+
+// CreateJwksEndpoint generates a route for JWKS /.wellknown/jwks endpoint
 func CreateJwksEndpoint() *routev3.Route {
-	return CreateStaticRoute(jwksPath, "/jwks", tokenCluster)
+	return createStaticRoute(jwksPath, "/jwks", tokenCluster)
 }
 
 func marshalFilterConfig(perFilterConfig *extAuthService.ExtAuthzPerRoute) *anypb.Any {
