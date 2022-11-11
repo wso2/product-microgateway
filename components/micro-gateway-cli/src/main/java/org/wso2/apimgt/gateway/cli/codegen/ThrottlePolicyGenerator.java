@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Template;
-import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
@@ -35,6 +34,7 @@ import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicy;
 import org.wso2.apimgt.gateway.cli.model.template.policy.ThrottlePolicyInitializer;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils.CustomFieldValueResolver;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 
 import java.io.File;
@@ -239,7 +239,7 @@ public class ThrottlePolicyGenerator {
         try {
             Template template = CodegenUtils.compileTemplate(templateDir, templateName);
             Context context = Context.newBuilder(object)
-                    .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                    .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, new CustomFieldValueResolver())
                     .build();
             writer = new PrintWriter(outPath, GeneratorConstants.UTF_8);
             writer.println(template.apply(context));
@@ -284,7 +284,7 @@ public class ThrottlePolicyGenerator {
         Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.THROTTLE_POLICY_TEMPLATE_NAME);
         Context context = Context.newBuilder(object)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, new CustomFieldValueResolver())
                 .build();
 
         return template.apply(context);
@@ -295,7 +295,7 @@ public class ThrottlePolicyGenerator {
         Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR,
                 GeneratorConstants.THROTTLE_POLICY_INIT_TEMPLATE_NAME);
         Context context = Context.newBuilder(object)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, new CustomFieldValueResolver())
                 .build();
 
         return template.apply(context);

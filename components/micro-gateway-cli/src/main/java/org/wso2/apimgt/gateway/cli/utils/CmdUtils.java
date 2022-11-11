@@ -19,6 +19,7 @@ package org.wso2.apimgt.gateway.cli.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
@@ -54,6 +55,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.lang.reflect.AccessibleObject;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -68,8 +70,10 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -1343,6 +1347,30 @@ public final class CmdUtils {
     public static void printCallHomeMessage() {
         if (!"".equals(callHomeMessage)) {
             OUT.println(callHomeMessage);
+        }
+    }
+
+    /**
+     * Alternative class for FieldValueResolver class. This is to overcome handlebar is which is occurs after 4.3.1
+     * handlebars upgrade.
+     */
+    public static class CustomFieldValueResolver extends FieldValueResolver {
+        @Override
+        protected Set<FieldWrapper> members(Class<?> clazz) {
+            Set members = super.members(clazz);
+            return (Set<FieldWrapper>) members.stream()
+                    .filter(fw -> isValidField((FieldWrapper) fw))
+                    .collect(Collectors.toSet());
+        }
+
+        boolean isValidField(FieldWrapper fw) {
+            if (fw instanceof AccessibleObject) {
+                if (isUseSetAccessible(fw)) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
         }
     }
 
