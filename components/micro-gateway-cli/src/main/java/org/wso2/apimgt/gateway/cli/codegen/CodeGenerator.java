@@ -18,7 +18,6 @@ package org.wso2.apimgt.gateway.cli.codegen;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Template;
-import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import io.swagger.v3.core.util.Yaml;
@@ -42,6 +41,7 @@ import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.protobuf.ProtobufParser;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils.CustomFieldValueResolver;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
@@ -389,7 +389,7 @@ public class CodeGenerator {
                                                  BallerinaService service, BallerinaPath path) throws IOException {
         Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR, templateName);
         Context context = Context.newBuilder(endpoints).combine("service", service).combine("path", path)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, new CustomFieldValueResolver())
                 .build();
         return template.apply(context);
     }
@@ -406,7 +406,7 @@ public class CodeGenerator {
         Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR, templateName);
         Context context = Context.newBuilder(endpoints).combine("generateGlobalFaultResponses",
                 generateGlobalFaultResponses && addApiNotFoundService)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, new CustomFieldValueResolver())
                 .build();
         return template.apply(context);
     }
@@ -422,7 +422,7 @@ public class CodeGenerator {
     private String getContent(Object endpoints, String templateName) throws IOException {
         Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR, templateName);
         Context context = Context.newBuilder(endpoints)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, new CustomFieldValueResolver())
                 .build();
         return template.apply(context);
     }

@@ -37,7 +37,7 @@ target = "java8"
     path = "../../../target/lib/dependencies/jackson-core-2.13.2.jar"
 
     [[platform.libraries]]
-    path = "../../../target/lib/dependencies/jackson-databind-2.13.2.2.jar"
+    path = "../../../target/lib/dependencies/jackson-databind-2.13.4.2.jar"
 
 [dependencies]
 "ballerina/java.jms" = "0.8.1"
