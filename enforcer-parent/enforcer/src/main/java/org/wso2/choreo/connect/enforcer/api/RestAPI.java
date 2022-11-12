@@ -288,6 +288,16 @@ public class RestAPI implements API {
     }
 
     private void populateRemoveAndProtectedHeaders(RequestContext requestContext) {
+        // If the resource has disabled security, then the authorization headers are passed as it is.
+        // Expectation is that the backend should validate the authorization header if it is not processed
+        // at the gateway level.
+        // It is required to check if the resource Path is not null, because when CORS preflight request handling, or
+        // generic OPTIONS method call happens, matchedResourcePath becomes null.
+        if (requestContext.getMatchedResourcePath() != null &&
+                requestContext.getMatchedResourcePath().isDisableSecurity()) {
+            return;
+        }
+
         Map<String, SecuritySchemaConfig> securitySchemeDefinitions =
                 requestContext.getMatchedAPI().getSecuritySchemeDefinitions();
         // API key headers are considered to be protected headers, such that the header would not be sent
