@@ -37,7 +37,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
     private static final String NON_EXISTING_CONTEXT = "/not/exists/1.0.0";
     private static final String API_VERSION = "1.0.0";
     private static final String APPLICATION_NAME = "VHostApp";
-    private static final String HOST_ADDRESS = "https://localhost:8082";
+    private static final String HOST_ADDRESS = "https://localhost:9001";
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {

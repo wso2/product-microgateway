@@ -44,7 +44,7 @@ import javax.net.ssl.SSLException;
  */
 public class RestServer {
     private static final Logger logger = LogManager.getLogger(RestServer.class);
-    static final int SERVER_PORT = 8082;
+    static final int SERVER_PORT = 9001;
     public void initServer() throws SSLException, CertificateException, InterruptedException {
 
         // Configure SSL
