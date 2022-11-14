@@ -101,14 +101,13 @@ func ReadConfigs() (*Config, error) {
 			})
 			return
 		}
-		if invalidConfigError := adapterConfig.resolveInvalidConfiguration(); invalidConfigError != nil {
+		if invalidConfigError := adapterConfig.resolveJWTGeneratorConfig(); invalidConfigError != nil {
 			loggerConfig.ErrorC(logging.ErrorDetails{
 				Message:   fmt.Sprintf("Error parsing the configurations : %s", invalidConfigError.Error()),
 				Severity:  logging.BLOCKER,
 				ErrorCode: 1003,
 			})
 		}
-		adapterConfig.resolveInvalidConfiguration()
 		adapterConfig.resolveDeprecatedProperties()
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
@@ -237,18 +236,23 @@ func (config *Config) resolveDeprecatedProperties() {
 
 }
 
-func (config *Config) resolveInvalidConfiguration() error {
+func (config *Config) resolveJWTGeneratorConfig() error {
 	KeyPairs := config.Enforcer.JwtGenerator.Keypair
 	numberOfKeyPairs := len(KeyPairs)
 	if numberOfKeyPairs > 2 {
 		return fmt.Errorf("too many keypairs provided to jwt generator, number of keys: %d", numberOfKeyPairs)
 	}
-	if numberOfKeyPairs == 2 && KeyPairs[0].UseForSigning && KeyPairs[1].UseForSigning {
-		return fmt.Errorf("only one keypair should be set to be used for signing")
+	signingCount := 0
+	for i, keypair := range KeyPairs {
+		if keypair.UseForSigning {
+			signingCount++
+		} else {
+			// Removing non signing private key paths from config
+			config.Enforcer.JwtGenerator.Keypair[i].PrivateKeyPath = ""
+		}
 	}
-	if numberOfKeyPairs == 1 && !KeyPairs[0].UseForSigning {
-		return fmt.Errorf("atleast one keypair should be set to be used for signing")
-
+	if signingCount != 1 {
+		return fmt.Errorf("one keypair should be set to be used for signing")
 	}
 	return nil
 }

@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.config;
 
+import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
@@ -75,6 +76,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.jmx.MBeanRegistrator;
 import org.wso2.choreo.connect.enforcer.jwks.BackendJWKSDto;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
@@ -532,7 +534,15 @@ public class ConfigHolder {
         ArrayList<JWK> jwks = new ArrayList<>();
         try {
             for (Keypair keypair : keypairs) {
-                jwks.add(jwkFromCertPath(keypair.getPublicCertificatePath()));
+                X509Certificate cert = X509CertUtils
+                        .parse(TLSUtils.getCertificate(keypair.getPublicCertificatePath()).getEncoded());
+                RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
+                RSAKey jwk = new RSAKey.Builder(publicKey)
+                        .keyUse(KeyUse.SIGNATURE)
+                        .algorithm(getJWKSAlgorithm(jwtGenerator.getSigningAlgorithm()))
+                        .keyIDFromThumbprint()
+                        .build().toPublicJWK();
+                jwks.add(jwk);
             }
         } catch (JOSEException | CertificateException | IOException e) {
             logger.error("Error in loading additional public certs for JWKS", e);
@@ -540,6 +550,7 @@ public class ConfigHolder {
         backendJWKSDto.setJwks(jwks);
         config.setBackendJWKSDto(backendJWKSDto);
     }
+
     private Keypair getSigningKey(List<Keypair> keypairs) {
         for (Keypair keypair : keypairs) {
             if (keypair.getUseForSigning())  {
@@ -549,15 +560,15 @@ public class ConfigHolder {
         return null;
     }
 
-    private JWK jwkFromCertPath(String certPath) throws CertificateException, IOException, JOSEException {
-        X509Certificate cert = X509CertUtils.parse(TLSUtils.getCertificate(certPath).getEncoded());
-        RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
-        RSAKey jwk = new RSAKey.Builder(publicKey)
-                .keyUse(KeyUse.SIGNATURE)
-                .algorithm(JWSAlgorithm.RS256)
-                .keyIDFromThumbprint()
-                .build().toPublicJWK();
-        return jwk;
+    private Algorithm getJWKSAlgorithm(String alg) {
+        switch (alg) {
+            case JwtConstants.RS384:
+                return JWSAlgorithm.RS384;
+            case JwtConstants.RS512:
+                return JWSAlgorithm.RS512;
+            default:
+                return JWSAlgorithm.RS256;
+        }
     }
 
     private void populateCacheConfigs(Cache cache) {
@@ -567,7 +578,6 @@ public class ConfigHolder {
         cacheDto.setExpiryTime(cache.getExpiryTime());
         config.setCacheDto(cacheDto);
     }
-
     private void populateAnalyticsConfig(Analytics analyticsConfig) {
 
         AnalyticsReceiverConfigDTO serverConfig = new AnalyticsReceiverConfigDTO();
