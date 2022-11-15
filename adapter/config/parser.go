@@ -238,10 +238,6 @@ func (config *Config) resolveDeprecatedProperties() {
 
 func (config *Config) resolveJWTGeneratorConfig() error {
 	KeyPairs := config.Enforcer.JwtGenerator.Keypair
-	numberOfKeyPairs := len(KeyPairs)
-	if numberOfKeyPairs > 2 {
-		return fmt.Errorf("too many keypairs provided to jwt generator, number of keys: %d", numberOfKeyPairs)
-	}
 	signingCount := 0
 	for i, keypair := range KeyPairs {
 		if keypair.UseForSigning {
@@ -251,8 +247,12 @@ func (config *Config) resolveJWTGeneratorConfig() error {
 			config.Enforcer.JwtGenerator.Keypair[i].PrivateKeyPath = ""
 		}
 	}
-	if signingCount != 1 {
-		return fmt.Errorf("one keypair should be set to be used for signing")
+	if signingCount > 1 {
+		return fmt.Errorf("only one keypair should be set to be used for signing the backend JWT")
+	}
+	if signingCount == 0 {
+		return fmt.Errorf("atleast one keypair should be set to be used for signing the backend JWT")
+
 	}
 	return nil
 }
