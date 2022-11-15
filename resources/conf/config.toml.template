@@ -589,6 +589,15 @@ enabled = true
     bufferSizeBytes = 16384
     # gRPC connection timeout for access log service
     gRPCRequestTimeout = "20s"
+  [analytics.adapter.customProperties]
+    # Enable/Disable analytics custom properties in Choreo Connect
+    enabled = true
+    # Request headers required to pass from Router to the Enforcer. Accept, User-Agent headers are available by default.
+    requestHeaders = []
+    # Response headers required to pass from Router to the Enforcer. Content-length, Content-type, Date headers are available by default.
+    responseHeaders = []
+    # Response trailers required to pass from Router to the Enforcer
+    responseTrailers = []
 
   # Enforcer related configurations
   [analytics.enforcer]
@@ -596,6 +605,8 @@ enabled = true
       # Overrides default analytics publisher reporter class
       # "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
       # Authentication endpoint for Choreo Analytics Publishing (This is not used when the type is "elk")
+      # Fully qualified class name relevant to the custom analytics data handling
+      #"publisher.custom.data.provider.class" = "org.wso2.carbon.apimgt.gateway.sample.publisher.CustomDataProvider"
       authURL = "$env{analytics_authURL}"
       # Authentication token for Choreo Analytics Publishing (This is not used when the type is "elk")
       authToken = "$env{analytics_authToken}"

@@ -123,8 +123,9 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     // If Defined in openAPI definition (when not enabled at APIM App level),
                     // key must exist in specified location
                     if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
-                        if (requestContext.getHeaders().containsKey(securitySchemaDefinition.getName())) {
-                            return requestContext.getHeaders().get(securitySchemaDefinition.getName());
+                        String header = StringUtils.lowerCase(securitySchemaDefinition.getName());
+                        if (requestContext.getHeaders().containsKey(header)) {
+                            return requestContext.getHeaders().get(header);
                         }
                     }
                     if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equalsIgnoreCase(securitySchemaDefinition.getIn())) {
@@ -331,7 +332,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             validationInfoDTO.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
         }
 
-        //check whether name is assigned correctly (This was not populated in JWTAuthenticator)
+        // Check whether name is assigned correctly (This was not populated in JWTAuthenticator)
         String name = requestContext.getMatchedAPI().getName();
         String version = requestContext.getMatchedAPI().getVersion();
         validationInfoDTO.setApiName(name);

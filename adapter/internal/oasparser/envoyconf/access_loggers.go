@@ -26,6 +26,7 @@ import (
 	grpc_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/grpc/v3"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -97,6 +98,20 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 		logger.LoggerOasparser.Debug("gRPC access logs are not enabled as analytics is disabled.")
 		return nil
 	}
+	var requestHeaders []string
+	var responseHeaders []string
+	var responseTrailers []string
+	if conf.Analytics.Adapter.CustomProperties.Enabled {
+		if len(conf.Analytics.Adapter.CustomProperties.RequestHeaders) == 0 {
+			loggers.LoggerAPI.Warn("Analytics data with custom properties enabled with empty request headers list. Accept, User-Agent headers are available by default")
+		}
+		requestHeaders = append(requestHeaders, conf.Analytics.Adapter.CustomProperties.RequestHeaders...)
+		if len(conf.Analytics.Adapter.CustomProperties.ResponseHeaders) == 0 {
+			loggers.LoggerAPI.Warn("Analytics data with custom properties enabled with empty response headers list. Content-length, Content-type, Date headers are available by default")
+		}
+		responseHeaders = append(responseHeaders, conf.Analytics.Adapter.CustomProperties.ResponseHeaders...)
+		responseTrailers = append(responseTrailers, conf.Analytics.Adapter.CustomProperties.ResponseTrailers...)
+	}
 	accessLogConf := &grpc_accesslogv3.HttpGrpcAccessLogConfig{
 		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
@@ -112,6 +127,9 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 				Timeout: ptypes.DurationProto(conf.Analytics.Adapter.GRPCRequestTimeout),
 			},
 		},
+		AdditionalResponseHeadersToLog:  responseHeaders,
+		AdditionalRequestHeadersToLog:   requestHeaders,
+		AdditionalResponseTrailersToLog: responseTrailers,
 	}
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {

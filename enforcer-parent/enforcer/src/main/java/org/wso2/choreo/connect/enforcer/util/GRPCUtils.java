@@ -36,7 +36,7 @@ import javax.net.ssl.SSLException;
  */
 public class GRPCUtils {
 
-    public static ManagedChannel createSecuredChannel(Logger logger, String host, int port)  {
+    public static ManagedChannel createSecuredChannel(Logger logger, String host, int port) {
         File certFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPublicKeyPath()).toFile();
         File keyFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPrivateKeyPath()).toFile();
         SslContext sslContext = null;

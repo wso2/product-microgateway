@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.api;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
@@ -39,11 +40,9 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
-import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
@@ -140,7 +139,6 @@ public class RestAPI implements API {
                 endpointClusterMap.put(APIConstants.API_KEY_TYPE_SANDBOX, sandEndpointCluster);
             }
 
-
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = Utils.buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setPolicyConfig(Utils.genPolicyConfig(operation.getPolicies()));
@@ -196,7 +194,7 @@ public class RestAPI implements API {
         populateRemoveAndProtectedHeaders(requestContext);
         boolean isExistsMatchedResourcePath = requestContext.getMatchedResourcePaths() != null &&
                 requestContext.getMatchedResourcePaths().size() > 0;
-        // This flag is used to apply cors filter
+        // This flag is used to apply CORS filter
         boolean isOptionCall = requestContext.getRequestMethod().contains(HttpConstants.OPTIONS);
         if (!isExistsMatchedResourcePath && !isOptionCall) {
             // handle other not allowed non option calls
@@ -356,8 +354,9 @@ public class RestAPI implements API {
             SecuritySchemaConfig schema = entry.getValue();
             if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(schema.getType())) {
                 if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equals(schema.getIn())) {
-                    requestContext.getProtectedHeaders().add(schema.getName());
-                    requestContext.getRemoveHeaders().add(schema.getName());
+                    String header = StringUtils.lowerCase(schema.getName());
+                    requestContext.getProtectedHeaders().add(header);
+                    requestContext.getRemoveHeaders().add(header);
                     continue;
                 }
                 if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equals(schema.getIn())) {
@@ -366,25 +365,7 @@ public class RestAPI implements API {
             }
         }
 
-        // Internal-Key credential is considered to be protected headers, such that the header would not be sent
-        // to backend and traffic manager.
-        String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
-                .getTestConsoleHeaderName().toLowerCase();
-        requestContext.getRemoveHeaders().add(internalKeyHeader);
-        // Avoid internal key being published to the Traffic Manager
-        requestContext.getProtectedHeaders().add(internalKeyHeader);
-
-        // Remove Authorization Header
-        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
-        String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
-        if (!authHeader.isEnableOutboundAuthHeader()) {
-            requestContext.getRemoveHeaders().add(authHeaderName);
-        }
-        // Authorization Header should not be included in the throttle publishing event.
-        requestContext.getProtectedHeaders().add(authHeaderName);
-
-        // not allow clients to set cluster header manually
-        requestContext.getRemoveHeaders().add(AdapterConstants.CLUSTER_HEADER);
+        Utils.removeCommonAuthHeaders(requestContext);
 
         // Remove mTLS certificate header
         MutualSSLDto mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();

@@ -106,7 +106,9 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 || StringUtils.isEmpty(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY))) {
             logger.error(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
                     AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY +
-                    "  are not provided under analytics configurations.");
+                    "  are not provided. Hence assigning default values");
+            configuration.put(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY, "");
+            configuration.put(AnalyticsConstants.AUTH_URL_CONFIG_KEY, "https://localhost:8080");
             return;
         }
         Map<String, String> publisherConfig = new HashMap<>(2);

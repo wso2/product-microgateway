@@ -380,6 +380,12 @@ var defaultConfig = &Config{
 			BufferFlushInterval: 1000000000,
 			BufferSizeBytes:     16384,
 			GRPCRequestTimeout:  20000000000,
+			CustomProperties: analyticsCustomProperties{
+				Enabled:          false,
+				RequestHeaders:   []string{""},
+				ResponseHeaders:  []string{""},
+				ResponseTrailers: []string{""},
+			},
 		},
 		Enforcer: analyticsEnforcer{
 			ConfigProperties: map[string]string{

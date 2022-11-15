@@ -19,8 +19,7 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
@@ -44,17 +43,21 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Generate FaultDTO for the errors generated from enforcer.
  */
 public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
-    private static final Logger logger = LogManager.getLogger(ChoreoFaultAnalyticsProvider.class);
+    private static Map<String, Object> customProperties = new HashMap<>();
     private final boolean isWebsocketUpgradeRequest;
 
     public ChoreoFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
+        // sets all the headers available in the request context
+        customProperties.putAll(requestContext.getHeaders());
         isWebsocketUpgradeRequest =
                 APIConstants.WEBSOCKET.equals(requestContext.getHeaders().get(APIConstants.UPGRADE_HEADER));
     }
@@ -232,5 +235,14 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     public String getEndUserIP() {
         // EndUserIP is not validated for fault events.
         return null;
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        AnalyticsCustomDataProvider customDataProvider = AnalyticsFilter.getAnalyticsCustomDataProvider();
+        if (customDataProvider != null && customDataProvider.getCustomProperties(customProperties) != null) {
+            return customDataProvider.getCustomProperties(customProperties);
+        }
+        return this.customProperties;
     }
 }

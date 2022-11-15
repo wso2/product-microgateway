@@ -287,7 +287,6 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
                     dataEndpoint.getState().equals(DataEndpoint.State.INITIALIZING))) {
                 /**
                  * Wait for some time until the failover endpoint finish publishing
-                 *
                  */
                 busyWait(1);
             } else {

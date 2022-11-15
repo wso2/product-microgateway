@@ -34,6 +34,7 @@ public class AnalyticsConstants {
     public static final String HEALTH_ENDPOINT_PATH = "/health";
 
     public static final String DEFAULT_FOR_UNASSIGNED = "UNKNOWN";
+    public static final String DATA_PROVIDER_CLASS_PROPERTY = "publisher.custom.data.provider.class";
 
     public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
     public static final int HARD_LIMIT_EXCEEDED_ERROR_CODE = 900801;
