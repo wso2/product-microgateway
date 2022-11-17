@@ -101,14 +101,18 @@ func ReadConfigs() (*Config, error) {
 			})
 			return
 		}
-		if invalidConfigError := adapterConfig.resolveJWTGeneratorConfig(); invalidConfigError != nil {
-			loggerConfig.ErrorC(logging.ErrorDetails{
-				Message:   fmt.Sprintf("Error parsing the configurations : %s", invalidConfigError.Error()),
-				Severity:  logging.BLOCKER,
-				ErrorCode: 1003,
-			})
-		}
+
 		adapterConfig.resolveDeprecatedProperties()
+		if adapterConfig.Enforcer.JwtGenerator.Enabled {
+			invalidConfigError := adapterConfig.resolveJWTGeneratorConfig()
+			if invalidConfigError != nil {
+				loggerConfig.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error parsing the configurations : %s", invalidConfigError.Error()),
+					Severity:  logging.BLOCKER,
+					ErrorCode: 1003,
+				})
+			}
+		}
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem(), "Router", true)
@@ -242,6 +246,12 @@ func (config *Config) resolveJWTGeneratorConfig() error {
 	for i, keypair := range KeyPairs {
 		if keypair.UseForSigning {
 			signingCount++
+			if keypair.PrivateKeyPath == "" {
+				return fmt.Errorf("private key path has not been set for backend JWT")
+			}
+			if keypair.PublicCertificatePath == "" {
+				return fmt.Errorf("public certificate path has not been set for backend JWT")
+			}
 		} else {
 			// Removing non signing private key paths from config
 			config.Enforcer.JwtGenerator.Keypair[i].PrivateKeyPath = ""
@@ -250,12 +260,13 @@ func (config *Config) resolveJWTGeneratorConfig() error {
 	if signingCount > 1 {
 		return fmt.Errorf("only one keypair should be set to be used for signing the backend JWT")
 	}
+
 	if signingCount == 0 {
 		return fmt.Errorf("atleast one keypair should be set to be used for signing the backend JWT")
-
 	}
 	return nil
 }
+
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {
 	logger.Warnf("%s is deprecated. Use %s instead", deprecatedTerm, currentTerm)
 }
