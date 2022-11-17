@@ -55,6 +55,8 @@ import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
 import org.wso2.choreo.connect.discovery.config.enforcer.Tracing;
 import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
@@ -516,14 +518,14 @@ public class ConfigHolder {
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
         jwtConfigurationDto.setTtl(jwtGenerator.getTokenTtl());
         List<Keypair> keypairs = jwtGenerator.getKeypairsList();
-        // Validation is done at the adapter to ensure only one signing keypair is sent here.
+        // Validation is done at the adapter to ensure that only one signing keypair is available
         Keypair signingKey = getSigningKey(keypairs);
-
         try {
             jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(signingKey.getPublicCertificatePath()));
             jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(signingKey.getPrivateKeyPath()));
         } catch (EnforcerException | CertificateException | IOException e) {
-            logger.error("Error in loading public cert or private key", e);
+            String err = "Error in loading keypair for Backend JWTs: " + e;
+            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL,5400));
         }
         config.setJwtConfigurationDto(jwtConfigurationDto);
         populateBackendJWKSConfiguration(jwtGenerator);
@@ -546,7 +548,8 @@ public class ConfigHolder {
                 jwks.add(jwk);
             }
         } catch (JOSEException | CertificateException | IOException e) {
-            logger.error("Error in loading additional public certs for JWKS", e);
+            String err = "Error in loading additional public certificates for JWKS: " + e;
+            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL,5401));
         }
         backendJWKSDto.setJwks(jwks);
         config.setBackendJWKSDto(backendJWKSDto);
