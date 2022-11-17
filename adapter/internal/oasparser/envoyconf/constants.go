@@ -25,7 +25,7 @@ const (
 
 // Clusters predefined on envoy
 const (
-	tokenCluster = "token_cluster"
+	tokenCluster = "ext_authz_http_cluster"
 )
 
 const (
