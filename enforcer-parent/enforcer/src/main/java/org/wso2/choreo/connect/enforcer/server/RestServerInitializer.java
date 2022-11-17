@@ -26,6 +26,7 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpServerCodec;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import org.wso2.choreo.connect.enforcer.admin.AdminServerHandler;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.jwks.JWKSRequestHandler;
 import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerHandler;
 
@@ -43,8 +44,11 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
     public RestServerInitializer(SslContext sslCtx) {
         this.sslCtx = sslCtx;
     }
+
     @Override
     public void initChannel(SocketChannel ch) {
+        EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
+
         ChannelPipeline p = ch.pipeline();
         if (sslCtx != null) {
             p.addLast(sslCtx.newHandler(ch.alloc()));
@@ -52,13 +56,13 @@ public class RestServerInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast(new HttpServerCodec());
         // Maximum content length in bytes, set to 1mb
         p.addLast(new HttpObjectAggregator(1048576));
-        if (ConfigHolder.getInstance().getConfig().getJwtConfigurationDto().isEnabled()) {
+        if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             p.addLast(new JWKSRequestHandler());
         }
-        if (ConfigHolder.getInstance().getConfig().getJwtIssuerConfigurationDto().isEnabled()) {
+        if (enforcerConfig.getJwtIssuerConfigurationDto().isEnabled()) {
             p.addLast(new HttpTokenServerHandler());
         }
-        if (ConfigHolder.getInstance().getConfig().getRestServer().isEnable()) {
+        if (enforcerConfig.getRestServer().isEnable()) {
             p.addLast(new AdminServerHandler());
         }
     }

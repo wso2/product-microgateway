@@ -33,13 +33,12 @@ public class BackendJwksTest {
             .getCodeSource().getLocation().getPath();
     private final String keyStore = "keystore";
     private final String keyStoreSingleCert = "singleCert";
-    private final String keyStoreMultiCert = "multipleCerts";
     private final String cert = "cert.pem";
-    private final String additionalCert = "mg.pem";
+    private final String  certPath = resourcePath + keyStore + File.separator + keyStoreSingleCert
+            + File.separator + cert;
 
     @Test
     public void DefaultConfig() {
-        String certPath = resourcePath + keyStore + File.separator + keyStoreSingleCert + File.separator + cert;
         ConfigHolder configHolder = ConfigHolder.getInstance();
         JWTGenerator jwtGenerator = JWTGenerator.newBuilder()
                 .setEnable(true)
@@ -56,7 +55,8 @@ public class BackendJwksTest {
     }
     @Test
     public void AdditionalCerts() {
-        String certPath = resourcePath + keyStore + File.separator + keyStoreSingleCert + File.separator + cert;
+        String keyStoreMultiCert = "multipleCerts";
+        String additionalCert = "mg.pem";
         String additionalCertPath = resourcePath + keyStore + File.separator
                 + keyStoreMultiCert + File.separator + additionalCert;
         ConfigHolder configHolder = ConfigHolder.getInstance();

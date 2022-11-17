@@ -21,11 +21,7 @@ const (
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
-)
-
-// Clusters predefined on envoy
-const (
-	tokenCluster = "ext_authz_http_cluster"
+	tokenCluster                   = "ext_authz_http_cluster"
 )
 
 const (
