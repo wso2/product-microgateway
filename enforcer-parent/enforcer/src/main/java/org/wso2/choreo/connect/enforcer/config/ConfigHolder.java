@@ -525,7 +525,7 @@ public class ConfigHolder {
             jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(signingKey.getPrivateKeyPath()));
         } catch (EnforcerException | CertificateException | IOException e) {
             String err = "Error in loading keypair for Backend JWTs: " + e;
-            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL,5400));
+            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5400));
         }
         config.setJwtConfigurationDto(jwtConfigurationDto);
         populateBackendJWKSConfiguration(jwtGenerator);
@@ -549,7 +549,7 @@ public class ConfigHolder {
             }
         } catch (JOSEException | CertificateException | IOException e) {
             String err = "Error in loading additional public certificates for JWKS: " + e;
-            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL,5401));
+            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5401));
         }
         backendJWKSDto.setJwks(jwks);
         config.setBackendJWKSDto(backendJWKSDto);
