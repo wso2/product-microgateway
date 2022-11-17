@@ -1165,7 +1165,6 @@ func createStaticRoute(path string, pathSubstitute string, clusterName string) *
 		},
 	}
 	return &router
-
 }
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
