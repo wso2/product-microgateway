@@ -17,4 +17,5 @@ message Keypair {
   string private_key_path = 2;
 
   bool use_for_signing = 3;
+
 }
