@@ -107,7 +107,7 @@ func ReadConfigs() (*Config, error) {
 			invalidConfigError := adapterConfig.resolveJWTGeneratorConfig()
 			if invalidConfigError != nil {
 				loggerConfig.ErrorC(logging.ErrorDetails{
-					Message:   fmt.Sprintf("Error parsing the configurations : %s", invalidConfigError.Error()),
+					Message:   fmt.Sprintf("Error parsing the configurations: %s", invalidConfigError.Error()),
 					Severity:  logging.BLOCKER,
 					ErrorCode: 1003,
 				})
