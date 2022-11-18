@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.channels.ByteChannel;
+import java.util.Arrays;
 
 /**
  * Represents the headers and body of a message. This can be used to represent both the entity of a top level message
@@ -89,14 +90,16 @@ public class Entity {
      * @return The header values the specified header key maps to. Null is returned if header does not present.
      */
     public String[] getHeaders(String headerName) {
+
         if (hasHeader(headerName)) {
             ArrayValue headerArray = EntityHeaders.getHeaders(entityObj, headerName, Constants.LEADING_HEADER);
-            String[] stringArray;
-            if ((stringArray = headerArray.getStringArray()) != null) {
+            Object[] values = headerArray.getValues();
+            String[] stringArray = Arrays.stream(values).map(Object::toString).toArray(String[]::new);
+            if (stringArray.length > 0) {
                 return stringArray;
             }
         }
-        return null;
+        return new String[0];
     }
 
     /**
