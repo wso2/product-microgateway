@@ -69,7 +69,7 @@ public class RestServer {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new RestServerInitializer(sslCtx));
             Channel tokenChannel = tokenServer.bind(SERVER_PORT).sync().channel();
-            logger.info("Utility rest server started on port: " + SERVER_PORT);
+            logger.info("Utility REST server started on port: " + SERVER_PORT);
             // Wait until server socket is closed
             tokenChannel.closeFuture().sync();
         } finally {

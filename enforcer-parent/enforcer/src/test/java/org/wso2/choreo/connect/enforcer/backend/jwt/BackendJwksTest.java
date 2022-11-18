@@ -37,6 +37,8 @@ public class BackendJwksTest {
     private final String  certPath = resourcePath + keyStore + File.separator + keyStoreSingleCert
             + File.separator + cert;
 
+
+    // Test whether JWKS generation works for 1 public certificate
     @Test
     public void DefaultConfig() {
         ConfigHolder configHolder = ConfigHolder.getInstance();
@@ -53,6 +55,8 @@ public class BackendJwksTest {
         Assert.assertEquals("Failed to generate single JWKS", 1, configHolder.getConfig()
                 .getBackendJWKSDto().getJwks().getKeys().size());
     }
+
+    // Test whether JWKS generation works for 2 public certificates
     @Test
     public void AdditionalCerts() {
         String keyStoreMultiCert = "multipleCerts";

@@ -61,6 +61,7 @@ public class BackendJwtTest {
         jwtGenerator.setJWTConfigurationDto((jwtConfig));
     }
 
+    // Initialize config object to use for JWT generation
     public static JWTConfigurationDto getConfigDto() {
         JWTConfigurationDto configDto = new JWTConfigurationDto();
         try {
@@ -76,6 +77,7 @@ public class BackendJwtTest {
         return configDto;
     }
 
+    // Test whether backend JWT generates and validates
     @Test
     public void validateJWT() throws Exception {
         JWSObject jwsObject;
