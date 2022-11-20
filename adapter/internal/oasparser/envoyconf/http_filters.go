@@ -51,7 +51,6 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
 	router := getRouterHTTPFilter()
 	lua := getLuaFilter()
-	rateLimit := getRateLimitFilter()
 	cors := &hcmv3.HttpFilter{
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
@@ -63,8 +62,14 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		localRateLimit,
 		extAauth,
 		lua,
-		rateLimit,
 		router,
+	}
+	conf, _ := config.ReadConfigs()
+	if conf.Envoy.RateLimit.Enable {
+		rateLimit := getRateLimitFilter()
+		httpFilters = httpFilters[:len(httpFilters)-1]
+		httpFilters = append(httpFilters, rateLimit)
+		httpFilters = append(httpFilters, router)
 	}
 	return httpFilters
 }
@@ -110,7 +115,7 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 	return upgradeFilters
 }
 
-// getRateLimitFilter gets ratelimit filter
+// getRateLimitFilter configures the ratelimit filter
 func getRateLimitFilter() *hcmv3.HttpFilter {
 	rateLimit := &rate_limit.RateLimit{
 		Domain:          "default",
@@ -120,7 +125,7 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
-						ClusterName: "rate-limit",
+						ClusterName: rateLimitClusterName,
 					},
 				},
 				Timeout: &durationpb.Duration{

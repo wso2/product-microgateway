@@ -71,8 +71,8 @@ func (operation *Operation) GetID() string {
 
 // NewOperation Creates and returns operation type object
 func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) *Operation {
-	// tier := ResolveThrottlingTier(extensions)
+	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	return &Operation{id, method, security, "", disableSecurity, extensions,""}
+	return &Operation{id, method, security, tier, disableSecurity, extensions,""}
 }

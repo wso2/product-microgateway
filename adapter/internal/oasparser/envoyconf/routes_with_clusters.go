@@ -381,12 +381,13 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 
 // CreateRateLimitCluster creates cluster relevant to the rate limit service
 func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
+	config, _ := config.ReadConfigs()
 	rlCluster := &model.EndpointCluster{
 		Endpoints: []model.Endpoint{
 			{
-				Host:    "host.docker.internal",
+				Host:    config.Envoy.RateLimit.Hostname,
 				URLType: "http",
-				Port:    uint32(8083),
+				Port:    config.Envoy.RateLimit.Port,
 			},
 		},
 	}
@@ -854,7 +855,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 					GenericKey: &routev3.RateLimit_Action_GenericKey{
 						DescriptorKey:   "org",
-						DescriptorValue: "John",
+						DescriptorValue: "wso2",
 					},
 				},
 			},
@@ -921,8 +922,10 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				MaxStreamDuration: getMaxStreamDuration(apiType),
 				Timeout:           ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
 				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
-				RateLimits:        []*routev3.RateLimit{&rateLimit},
 			},
+		}
+		if config.Envoy.RateLimit.Enable {
+			action.Route.RateLimits = []*routev3.RateLimit{&rateLimit}
 		}
 	} else {
 		action = &routev3.Route_Route{

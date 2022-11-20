@@ -121,6 +121,11 @@ var defaultConfig = &Config{
 				IdleTimeoutInSeconds:           3600,
 			},
 		},
+		RateLimit: rateLimit{
+			Enable: false,
+			Hostname: "host.docker.internal",
+			Port: 8083,
+		},
 	},
 	Enforcer: enforcer{
 		Management: management{

@@ -166,27 +166,13 @@ type OperationYaml struct {
 	RateLimitPolicy string `json:"rateLimitPolicy,omitempty"`
 }
 
-// type ConditionalGroup struct {
-// 	ConditionGroupId string `json:"conditionGroupID,omitempty"`
-// 	Conditions       []RateLimitConditions
-// 	RequestsPerUnit  int    `json:"requestsPerUnit,omitempty"`
-// 	UnitTime         int    `json:"unitTime,omitempty"`
-// 	Unit             string `json:"unit,omitempty"`
-// }
-
-// type RateLimitConditions struct {
-// 	ConditionType string      `json:"id,omitempty"`
-// 	Parameters    interface{} `json:"parameters,omitempty"`
-// }
-
-// APILevelPolicy data
+// APILevelPolicy data holds policy details relevant to the rate limiting
 type APILevelPolicy struct {
 	PolicyID        string `json:"policyId,omitempty"`
 	PolicyName      string `json:"policyName,omitempty"`
 	RequestsPerUnit string `json:"requestsPerUnit,omitempty"`
 	UnitTime        int    `json:"unitTime,omitempty"`
 	Unit            string `json:"unit,omitempty"`
-	// ConditionalGroups []ConditionalGroup
 }
 
 // RateLimitPolicy contains all the fields in the ratelimit policy file

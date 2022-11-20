@@ -117,59 +117,6 @@ func TestCreateRoute(t *testing.T) {
 
 	IdleTimeOutConfig := ptypes.DurationProto(300 * time.Second)
 
-	rateLimit := routev3.RateLimit{
-		Actions: []*routev3.RateLimit_Action{
-			{
-				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-					GenericKey: &routev3.RateLimit_Action_GenericKey{
-						DescriptorKey:   "org",
-						DescriptorValue: "John",
-					},
-				},
-			},
-			{
-				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-					GenericKey: &routev3.RateLimit_Action_GenericKey{
-						DescriptorKey:   "vhost",
-						DescriptorValue: "localhost",
-					},
-				},
-			},
-			{
-				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-					GenericKey: &routev3.RateLimit_Action_GenericKey{
-						DescriptorKey:   "path",
-						DescriptorValue: "/pets/v2",
-					},
-				},
-			},
-			{
-				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-					GenericKey: &routev3.RateLimit_Action_GenericKey{
-						DescriptorKey:   "method",
-						DescriptorValue: "ALL",
-					},
-				},
-			},
-			{
-				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-					GenericKey: &routev3.RateLimit_Action_GenericKey{
-						DescriptorKey:   "policy",
-						DescriptorValue: "$_5PerMin",
-					},
-				},
-			},
-			{
-				ActionSpecifier: &routev3.RateLimit_Action_RequestHeaders_{
-					RequestHeaders: &routev3.RateLimit_Action_RequestHeaders{
-						DescriptorKey: "condition",
-						HeaderName:    "x-wso2-ratelimit-api-policy",
-					},
-				},
-			},
-		},
-	}
-
 	expectedRouteActionWithXWso2BasePath := &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
@@ -178,7 +125,6 @@ func TestCreateRoute(t *testing.T) {
 			UpgradeConfigs:       UpgradeConfigsDisabled,
 			Timeout:              TimeOutConfig,
 			IdleTimeout:          IdleTimeOutConfig,
-			RateLimits:           []*routev3.RateLimit{&rateLimit},
 		},
 	}
 

@@ -55,10 +55,12 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 	)
 	conf, _ := config.ReadConfigs()
 
-	rlCluster, rlEP, errRL := envoy.CreateRateLimitCluster()
-	if (errRL == nil) {
-		clusters = append(clusters, rlCluster)
-		endpoints = append(endpoints, rlEP...)
+	if conf.Envoy.RateLimit.Enable {
+		rlCluster, rlEP, errRL := envoy.CreateRateLimitCluster()
+		if errRL == nil {
+			clusters = append(clusters, rlCluster)
+			endpoints = append(endpoints, rlEP...)
+		}
 	}
 
 	if conf.Tracing.Enabled && conf.Tracing.Type != envoyconf.TracerTypeAzure {

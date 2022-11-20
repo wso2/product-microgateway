@@ -1,7 +1,7 @@
 domain: default
 descriptors:
   - key: org
-    value: John
+    value: wso2
     descriptors:
       - key: vhost # There can be multiple vhost for one org. For example dev, prod.
         value: localhost # Different vhosts can have different limits.

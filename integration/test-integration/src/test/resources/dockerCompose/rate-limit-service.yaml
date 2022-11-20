@@ -5,9 +5,6 @@
       - 6379
     ports:
       - 6379:6379
-    networks:
-      - ratelimit-network
-
   statsd:
     image: prom/statsd-exporter:v0.18.0
     entrypoint: /bin/statsd_exporter
@@ -19,11 +16,8 @@
     ports:
       - 9125:9125
       - 9102:9102 # Visit http://localhost:9102/metrics to see metrics in Prometheus format
-    networks:
-      - ratelimit-network
     volumes:
       - ../../rateLimit/conf.yaml:/etc/statsd-exporter/conf.yaml
-
   ratelimit:
     image: envoyproxy/ratelimit:master
     command: /bin/ratelimit
@@ -34,8 +28,6 @@
     depends_on:
       - redis
       - statsd
-    networks:
-      - ratelimit-network
     volumes:
       - ../../rateLimit/config:/data/ratelimit/config
     environment:
@@ -49,5 +41,3 @@
       - RUNTIME_SUBDIRECTORY=ratelimit
       - RUNTIME_WATCH_ROOT=false
 
-networks:
-  ratelimit-network:

@@ -112,6 +112,7 @@ type envoy struct {
 	Cors                             globalCors
 	Upstream                         envoyUpstream
 	Connection                       connection
+	RateLimit                        rateLimit
 }
 
 type connectionTimeouts struct {
@@ -123,6 +124,12 @@ type connectionTimeouts struct {
 
 type connection struct {
 	Timeouts connectionTimeouts
+}
+
+type rateLimit struct {
+	Enable bool
+	Hostname string
+	Port uint32
 }
 
 type enforcer struct {

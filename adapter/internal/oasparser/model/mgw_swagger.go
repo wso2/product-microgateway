@@ -405,7 +405,7 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	}
 
 	swagger.setXWso2Cors()
-	// swagger.setXWso2ThrottlingTier()
+	swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
 
@@ -647,12 +647,12 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 	return nil
 }
 
-// func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
-// 	tier := ResolveThrottlingTier(swagger.vendorExtensions)
-// 	if tier != "" {
-// 		swagger.xWso2ThrottlingTier = tier
-// 	}
-// }
+func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
+	tier := ResolveThrottlingTier(swagger.vendorExtensions)
+	if tier != "" {
+		swagger.xWso2ThrottlingTier = tier
+	}
+}
 
 // getXWso2AuthHeader extracts the value of xWso2AuthHeader extension.
 // if the property is not available, an empty string is returned.
@@ -1002,19 +1002,19 @@ func generateGlobalCors() *CorsConfig {
 // x-throttling-tier extension. if x-wso2-throttling-tier is available it
 // will be prioritized.
 // if both the properties are not available, an empty string is returned.
-// func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
-// 	xTier := ""
-// 	if x, found := vendorExtensions[xWso2ThrottlingTier]; found {
-// 		if val, ok := x.(string); ok {
-// 			xTier = val
-// 		}
-// 	} else if y, found := vendorExtensions[xThrottlingTier]; found {
-// 		if val, ok := y.(string); ok {
-// 			xTier = val
-// 		}
-// 	}
-// 	return xTier
-// }
+func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
+	xTier := ""
+	if x, found := vendorExtensions[xWso2ThrottlingTier]; found {
+		if val, ok := x.(string); ok {
+			xTier = val
+		}
+	} else if y, found := vendorExtensions[xThrottlingTier]; found {
+		if val, ok := y.(string); ok {
+			xTier = val
+		}
+	}
+	return xTier
+}
 
 // ResolveDisableSecurity extracts the value of x-auth-type extension.
 // if the property is not available, false is returned.
