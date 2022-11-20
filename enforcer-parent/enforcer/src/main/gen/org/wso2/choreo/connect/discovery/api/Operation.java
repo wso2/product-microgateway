@@ -23,6 +23,7 @@ private static final long serialVersionUID = 0L;
     method_ = "";
     security_ = java.util.Collections.emptyList();
     tier_ = "";
+    rateLimitPolicy_ = "";
   }
 
   @java.lang.Override
@@ -80,6 +81,12 @@ private static final long serialVersionUID = 0L;
           case 32: {
 
             disableSecurity_ = input.readBool();
+            break;
+          }
+          case 42: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            rateLimitPolicy_ = s;
             break;
           }
           default: {
@@ -244,6 +251,44 @@ private static final long serialVersionUID = 0L;
     return disableSecurity_;
   }
 
+  public static final int RATELIMITPOLICY_FIELD_NUMBER = 5;
+  private volatile java.lang.Object rateLimitPolicy_;
+  /**
+   * <code>string rateLimitPolicy = 5;</code>
+   * @return The rateLimitPolicy.
+   */
+  @java.lang.Override
+  public java.lang.String getRateLimitPolicy() {
+    java.lang.Object ref = rateLimitPolicy_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      rateLimitPolicy_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string rateLimitPolicy = 5;</code>
+   * @return The bytes for rateLimitPolicy.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getRateLimitPolicyBytes() {
+    java.lang.Object ref = rateLimitPolicy_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      rateLimitPolicy_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -270,6 +315,9 @@ private static final long serialVersionUID = 0L;
     if (disableSecurity_ != false) {
       output.writeBool(4, disableSecurity_);
     }
+    if (!getRateLimitPolicyBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, rateLimitPolicy_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -292,6 +340,9 @@ private static final long serialVersionUID = 0L;
     if (disableSecurity_ != false) {
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(4, disableSecurity_);
+    }
+    if (!getRateLimitPolicyBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, rateLimitPolicy_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -316,6 +367,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTier())) return false;
     if (getDisableSecurity()
         != other.getDisableSecurity()) return false;
+    if (!getRateLimitPolicy()
+        .equals(other.getRateLimitPolicy())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -338,6 +391,8 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getDisableSecurity());
+    hash = (37 * hash) + RATELIMITPOLICY_FIELD_NUMBER;
+    hash = (53 * hash) + getRateLimitPolicy().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -488,6 +543,8 @@ private static final long serialVersionUID = 0L;
 
       disableSecurity_ = false;
 
+      rateLimitPolicy_ = "";
+
       return this;
     }
 
@@ -527,6 +584,7 @@ private static final long serialVersionUID = 0L;
       }
       result.tier_ = tier_;
       result.disableSecurity_ = disableSecurity_;
+      result.rateLimitPolicy_ = rateLimitPolicy_;
       onBuilt();
       return result;
     }
@@ -611,6 +669,10 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getDisableSecurity() != false) {
         setDisableSecurity(other.getDisableSecurity());
+      }
+      if (!other.getRateLimitPolicy().isEmpty()) {
+        rateLimitPolicy_ = other.rateLimitPolicy_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1061,6 +1123,82 @@ private static final long serialVersionUID = 0L;
     public Builder clearDisableSecurity() {
       
       disableSecurity_ = false;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object rateLimitPolicy_ = "";
+    /**
+     * <code>string rateLimitPolicy = 5;</code>
+     * @return The rateLimitPolicy.
+     */
+    public java.lang.String getRateLimitPolicy() {
+      java.lang.Object ref = rateLimitPolicy_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        rateLimitPolicy_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string rateLimitPolicy = 5;</code>
+     * @return The bytes for rateLimitPolicy.
+     */
+    public com.google.protobuf.ByteString
+        getRateLimitPolicyBytes() {
+      java.lang.Object ref = rateLimitPolicy_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        rateLimitPolicy_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string rateLimitPolicy = 5;</code>
+     * @param value The rateLimitPolicy to set.
+     * @return This builder for chaining.
+     */
+    public Builder setRateLimitPolicy(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      rateLimitPolicy_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string rateLimitPolicy = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearRateLimitPolicy() {
+      
+      rateLimitPolicy_ = getDefaultInstance().getRateLimitPolicy();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string rateLimitPolicy = 5;</code>
+     * @param value The bytes for rateLimitPolicy to set.
+     * @return This builder for chaining.
+     */
+    public Builder setRateLimitPolicyBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      rateLimitPolicy_ = value;
       onChanged();
       return this;
     }

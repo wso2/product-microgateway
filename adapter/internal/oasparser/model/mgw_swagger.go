@@ -62,6 +62,7 @@ type MgwSwagger struct {
 	disableSecurity     bool
 	OrganizationID      string
 	IsProtoTyped        bool
+	RateLimitLevel      string
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 }
@@ -404,12 +405,36 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	}
 
 	swagger.setXWso2Cors()
-	swagger.setXWso2ThrottlingTier()
+	// swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
 
 	// Error nil for successful execution
 	return nil
+}
+
+// SetRateLimitPoliciesForOperations assings rate limit policies to work with envoy rate limit service
+func (swagger *MgwSwagger) SetRateLimitPoliciesForOperations(apiYamlOperations []OperationYaml) {
+	m := createOperationRateLimitDataMap(apiYamlOperations)
+	for _, resource := range swagger.resources {
+		for _, operation := range resource.methods {
+			key := resource.path + operation.method
+			if val, ok := m[key]; ok {
+				operation.RateLimitPolicy = val
+			} else {
+				logger.LoggerAPI.Error("Could not find the Rate Limit Policy relevant to the API operation")
+			}
+		}
+	}
+}
+
+func createOperationRateLimitDataMap(apiYamlOperations []OperationYaml) map[string]string {
+	m := make(map[string]string)
+	for _, operation := range apiYamlOperations {
+		keyValue := operation.Target + operation.Verb
+		m[keyValue] = operation.RateLimitPolicy
+	}
+	return m
 }
 
 // SetEnvLabelProperties sets environment specific values
@@ -622,12 +647,12 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 	return nil
 }
 
-func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
-	tier := ResolveThrottlingTier(swagger.vendorExtensions)
-	if tier != "" {
-		swagger.xWso2ThrottlingTier = tier
-	}
-}
+// func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
+// 	tier := ResolveThrottlingTier(swagger.vendorExtensions)
+// 	if tier != "" {
+// 		swagger.xWso2ThrottlingTier = tier
+// 	}
+// }
 
 // getXWso2AuthHeader extracts the value of xWso2AuthHeader extension.
 // if the property is not available, an empty string is returned.
@@ -977,19 +1002,19 @@ func generateGlobalCors() *CorsConfig {
 // x-throttling-tier extension. if x-wso2-throttling-tier is available it
 // will be prioritized.
 // if both the properties are not available, an empty string is returned.
-func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
-	xTier := ""
-	if x, found := vendorExtensions[xWso2ThrottlingTier]; found {
-		if val, ok := x.(string); ok {
-			xTier = val
-		}
-	} else if y, found := vendorExtensions[xThrottlingTier]; found {
-		if val, ok := y.(string); ok {
-			xTier = val
-		}
-	}
-	return xTier
-}
+// func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
+// 	xTier := ""
+// 	if x, found := vendorExtensions[xWso2ThrottlingTier]; found {
+// 		if val, ok := x.(string); ok {
+// 			xTier = val
+// 		}
+// 	} else if y, found := vendorExtensions[xThrottlingTier]; found {
+// 		if val, ok := y.(string); ok {
+// 			xTier = val
+// 		}
+// 	}
+// 	return xTier
+// }
 
 // ResolveDisableSecurity extracts the value of x-auth-type extension.
 // if the property is not available, false is returned.
@@ -1195,6 +1220,8 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
+
+	swagger.RateLimitLevel = data.RateLimitLevel
 
 	if endpointConfig.ImplementationStatus == prototypedAPI {
 		swagger.IsProtoTyped = true

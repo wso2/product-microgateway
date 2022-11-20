@@ -312,6 +312,9 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		mgwSwagger.SetEnvLabelProperties(apiEnvProps, false)
 	}
 
+	if apiYaml.RateLimitLevel != "" {
+		mgwSwagger.SetRateLimitPoliciesForOperations(apiYaml.Operations)
+	}
 	mgwSwagger.SetID(apiYaml.ID)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)

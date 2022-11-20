@@ -55,6 +55,12 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 	)
 	conf, _ := config.ReadConfigs()
 
+	rlCluster, rlEP, errRL := envoy.CreateRateLimitCluster()
+	if (errRL == nil) {
+		clusters = append(clusters, rlCluster)
+		endpoints = append(endpoints, rlEP...)
+	}
+
 	if conf.Tracing.Enabled && conf.Tracing.Type != envoyconf.TracerTypeAzure {
 		logger.LoggerOasparser.Debugln("Creating global cluster - Tracing")
 		if c, e, err := envoyconf.CreateTracingCluster(conf); err == nil {
@@ -230,6 +236,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		Security:        secSchemas,
 		Tier:            operation.GetTier(),
 		DisableSecurity: operation.GetDisableSecurity(),
+		RateLimitPolicy: operation.RateLimitPolicy,
 	}
 	return &apiOperation
 }

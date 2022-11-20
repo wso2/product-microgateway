@@ -379,6 +379,20 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 	return processEndpoints(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout, endpoint.EndpointCluster.Endpoints[0].Basepath)
 }
 
+// CreateRateLimitCluster creates cluster relevant to the rate limit service
+func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
+	rlCluster := &model.EndpointCluster{
+		Endpoints: []model.Endpoint{
+			{
+				Host:    "host.docker.internal",
+				URLType: "http",
+				Port:    uint32(8083),
+			},
+		},
+	}
+	return processEndpoints(rateLimitClusterName, rlCluster, nil, 20, "")
+}
+
 // CreateTracingCluster creates a cluster definition for router's tracing server.
 func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
 	var epHost string
@@ -514,6 +528,10 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+	}
+
+	if clusterName == rateLimitClusterName {
+		cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{}
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
@@ -677,6 +695,9 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	endpointBasepath := params.endpointBasePath
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
+	// DO NOT DELETE
+	// rlMethodDescriptorValue := params.rateLimitLevel
+	// rateLimitPolicyName := params.rateLimitPolicyName
 	config, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
@@ -827,6 +848,59 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 	pathRegex := "^" + basePath + resourceRegex
 
+	rateLimit := routev3.RateLimit{
+		Actions: []*routev3.RateLimit_Action{
+			{
+				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+					GenericKey: &routev3.RateLimit_Action_GenericKey{
+						DescriptorKey:   "org",
+						DescriptorValue: "John",
+					},
+				},
+			},
+			{
+				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+					GenericKey: &routev3.RateLimit_Action_GenericKey{
+						DescriptorKey:   "vhost",
+						DescriptorValue: "localhost", // vHost
+					},
+				},
+			},
+			{
+				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+					GenericKey: &routev3.RateLimit_Action_GenericKey{
+						DescriptorKey:   "path",
+						DescriptorValue: "/pets/v2", // xwso2basePath
+					},
+				},
+			},
+			{
+				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+					GenericKey: &routev3.RateLimit_Action_GenericKey{
+						DescriptorKey:   "method",
+						DescriptorValue: "ALL",//rlMethodDescriptorValue,
+					},
+				},
+			},
+			{
+				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+					GenericKey: &routev3.RateLimit_Action_GenericKey{
+						DescriptorKey:   "policy",
+						DescriptorValue: "$_5PerMin", //rateLimitPolicyName,
+					},
+				},
+			},
+			{
+				ActionSpecifier: &routev3.RateLimit_Action_RequestHeaders_{
+					RequestHeaders: &routev3.RateLimit_Action_RequestHeaders{
+						DescriptorKey: "condition",
+						HeaderName:    "x-wso2-ratelimit-api-policy",
+					},
+				},
+			},
+		},
+	}
+
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
@@ -847,6 +921,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				MaxStreamDuration: getMaxStreamDuration(apiType),
 				Timeout:           ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
 				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
+				RateLimits:        []*routev3.RateLimit{&rateLimit},
 			},
 		}
 	} else {
@@ -1317,6 +1392,16 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
 	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
+
+		var rateLimitPolicyName, rlMethodDescriptorValue string
+		if (swagger.RateLimitLevel == "API") {
+			for _, operation := range resource.GetMethod() {
+				// ALL denotes API level rate limiting
+				rlMethodDescriptorValue = "ALL"
+				rateLimitPolicyName = operation.RateLimitPolicy
+				break
+			}
+		}
 	params := &routeCreateParams{
 		organizationID:      organizationID,
 		title:               swagger.GetTitle(),
@@ -1333,6 +1418,8 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		resourceMethods:     getDefaultResourceMethods(swagger.GetAPIType()),
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
+		rateLimitLevel:      rlMethodDescriptorValue, 
+		rateLimitPolicyName: rateLimitPolicyName,
 	}
 
 	if resource != nil {

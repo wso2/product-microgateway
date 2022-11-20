@@ -37,6 +37,7 @@ const (
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	endpointCertFile           string = "endpoint_certificates."
 	apiJSONFile                string = "api.json"
+	rateLimitPoliciesFile      string = "rate-limit-policies.yaml"
 	endpointCertDir            string = "Endpoint-certificates"
 	interceptorCertDir         string = "Endpoint-certificates/interceptors"
 	crtExtension               string = ".crt"
@@ -56,6 +57,7 @@ const (
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
 	APIYaml            APIYaml
+	RateLimitPolicy    RateLimitPolicy
 	APIEnvProps        map[string]synchronizer.APIEnvProps
 	Deployments        []Deployment
 	OpenAPIJsn         []byte
@@ -137,6 +139,7 @@ type APIYaml struct {
 		SecurityScheme             []string `json:"securityScheme,omitempty"`
 		OrganizationID             string   `json:"organizationId,omitempty"`
 		Provider                   string   `json:"provider,omitempty"`
+		RateLimitLevel             string   `json:"rateLimitLevel,omitempty"`
 		EndpointConfig             struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
@@ -151,7 +154,47 @@ type APIYaml struct {
 			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
 			ImplementationStatus         string         `json:"implementation_status,omitempty"`
 		} `json:"endpointConfig,omitempty"`
+		Operations []OperationYaml `json:"Operations,omitempty"`
 	} `json:"data"`
+}
+
+// OperationYaml holds attributes of APIM operations
+type OperationYaml struct {
+	ID              string `json:"id,omitempty"`
+	Target          string `json:"target,omitempty"`
+	Verb            string `json:"verb,omitempty"`
+	RateLimitPolicy string `json:"rateLimitPolicy,omitempty"`
+}
+
+// type ConditionalGroup struct {
+// 	ConditionGroupId string `json:"conditionGroupID,omitempty"`
+// 	Conditions       []RateLimitConditions
+// 	RequestsPerUnit  int    `json:"requestsPerUnit,omitempty"`
+// 	UnitTime         int    `json:"unitTime,omitempty"`
+// 	Unit             string `json:"unit,omitempty"`
+// }
+
+// type RateLimitConditions struct {
+// 	ConditionType string      `json:"id,omitempty"`
+// 	Parameters    interface{} `json:"parameters,omitempty"`
+// }
+
+// APILevelPolicy data
+type APILevelPolicy struct {
+	PolicyID        string `json:"policyId,omitempty"`
+	PolicyName      string `json:"policyName,omitempty"`
+	RequestsPerUnit string `json:"requestsPerUnit,omitempty"`
+	UnitTime        int    `json:"unitTime,omitempty"`
+	Unit            string `json:"unit,omitempty"`
+	// ConditionalGroups []ConditionalGroup
+}
+
+// RateLimitPolicy contains all the fields in the ratelimit policy file
+type RateLimitPolicy struct {
+	ApimMeta
+	Data struct {
+		APILevelPolicy APILevelPolicy
+	}
 }
 
 // EndpointInfo holds config values regards to the endpoint
@@ -265,6 +308,19 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.APIYaml = apiYaml
 		ExtractAPIInformation(apiProject, apiYaml)
+	} else if strings.Contains(fileName, rateLimitPoliciesFile) {
+		loggers.LoggerAPI.Debugf("fileName : %v available for the API project.", fileName)
+		rlPoliciesJsn, conversionErr := utills.ToJSON(fileContent)
+		if conversionErr != nil {
+			loggers.LoggerAPI.Errorf("Error occured rate limit policies file to json: %v", conversionErr.Error())
+			return conversionErr
+		}
+		var rlPolicies RateLimitPolicy
+		err := json.Unmarshal(rlPoliciesJsn, &rlPolicies)
+		if err != nil {
+			loggers.LoggerAPI.Errorf("Error occured while parsing rate-limit-policies.yaml %v", err.Error())
+			return err
+		}
 	}
 	return nil
 }

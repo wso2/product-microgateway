@@ -106,7 +106,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 			[]*Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []*Operation{{"", "GET", nil, "", false, nil}},
+					methods:     []*Operation{{"", "GET", nil, "", false, nil,""}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",

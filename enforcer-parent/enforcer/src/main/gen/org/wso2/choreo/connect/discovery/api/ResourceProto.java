@@ -51,14 +51,14 @@ public final class ResourceProto {
       "curity\030\010 \003(\0132*.wso2.discovery.api.Resour" +
       "ce.SecurityEntry\022\020\n\010consumes\030\t \003(\t\022\017\n\007sc" +
       "hemes\030\n \003(\t\022\014\n\004tags\030\013 \003(\t\032/\n\rSecurityEnt" +
-      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"v\n\tOp" +
-      "eration\022\016\n\006method\030\001 \001(\t\0222\n\010security\030\002 \003(" +
-      "\0132 .wso2.discovery.api.SecurityList\022\014\n\004t" +
-      "ier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010Bw\n%or" +
-      "g.wso2.choreo.connect.discovery.apiB\rRes" +
-      "ourceProtoP\001Z=github.com/envoyproxy/go-c" +
-      "ontrol-plane/wso2/discovery/api;apib\006pro" +
-      "to3"
+      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\217\001\n\tO" +
+      "peration\022\016\n\006method\030\001 \001(\t\0222\n\010security\030\002 \003" +
+      "(\0132 .wso2.discovery.api.SecurityList\022\014\n\004" +
+      "tier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010\022\027\n\017r" +
+      "ateLimitPolicy\030\005 \001(\tBw\n%org.wso2.choreo." +
+      "connect.discovery.apiB\rResourceProtoP\001Z=" +
+      "github.com/envoyproxy/go-control-plane/w" +
+      "so2/discovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -83,7 +83,7 @@ public final class ResourceProto {
     internal_static_wso2_discovery_api_Operation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Operation_descriptor,
-        new java.lang.String[] { "Method", "Security", "Tier", "DisableSecurity", });
+        new java.lang.String[] { "Method", "Security", "Tier", "DisableSecurity", "RateLimitPolicy", });
     org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor();
   }

@@ -1,0 +1,26 @@
+domain: default
+descriptors:
+  - key: org
+    value: John
+    descriptors:
+      - key: vhost # There can be multiple vhost for one org. For example dev, prod.
+        value: localhost # Different vhosts can have different limits.
+        descriptors:
+          # API level policy
+          - key: path # For API:/petstore/v1,others full path:/petstore/v1/findById
+            descriptors:
+              - key: method # method: [ALL|GET|PUT|POST...] ('ALL' for API level)
+                descriptors:
+                  - key: policy
+                    value: $_5PerMin # policyName_UUID from CP, if name there, it is easy to debug
+                    descriptors:
+                      - key: condition
+                        value: default
+                        rate_limit:
+                          unit: minute
+                          requests_per_unit: 5
+                      - key: condition
+                        value: c1
+                        rate_limit:
+                          unit: minute
+                          requests_per_unit: 3

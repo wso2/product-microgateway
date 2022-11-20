@@ -19,10 +19,17 @@
 package org.wso2.choreo.connect.tests.mockbackend;
 
 import org.apache.commons.lang3.StringUtils;
+import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.FileFileFilter;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.FileFilterUtils;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.IOFileFilter;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -42,18 +49,6 @@ public class MockBackendServer {
      * Get Mock backend server module root path.
      *
      * @param dockerComposePath - path for the mgw setup docker-compose file
-     * @throws IOException          if something goes wrong while file operations
-     * @throws CCTestException if something goes wrong while copying the config file
-     */
-    public static void addMockBackendServiceToDockerCompose(String dockerComposePath)
-            throws IOException, CCTestException {
-        addMockBackendServiceToDockerCompose(dockerComposePath, null);
-    }
-
-    /**
-     * Get Mock backend server module root path.
-     *
-     * @param dockerComposePath - path for the mgw setup docker-compose file
      * @param backendServiceFile  backendService different to the default, to be appended to docker-compose file
      * @throws IOException          if something goes wrong while file operations
      * @throws CCTestException if something goes wrong while copying the config file
@@ -66,6 +61,8 @@ public class MockBackendServer {
         String targetDir = targetClassesDir.getParentFile().toString();
         String backendService = MockBackendServer.class.getClassLoader()
                 .getResource("dockerCompose/backend-service.yaml").getPath();
+        String rateLimitService = MockBackendServer.class.getClassLoader()
+                .getResource("dockerCompose/rate-limit-service.yaml").getPath();
         if (StringUtils.isNotEmpty(backendServiceFile)) {
             // if tls enabled, the command in docker-compose should be overridden
             backendService = MockBackendServer.class.getClassLoader()
@@ -75,8 +72,17 @@ public class MockBackendServer {
         // Input files
         List<Path> inputs = Arrays.asList(
                 Paths.get(dockerComposePath),
-                Paths.get(backendService)
+                Paths.get(backendService),
+                Paths.get(rateLimitService)
         );
+        String s = targetClassesDir.getParentFile().getParentFile().getPath() + "/src/test/resources/rateLimit";
+
+        IOFileFilter yamlSuffixFilter = FileFilterUtils.suffixFileFilter(".yaml");
+        IOFileFilter yamlFiles = FileFilterUtils.andFileFilter(FileFileFilter.FILE, yamlSuffixFilter);
+        FileFilter filter = FileFilterUtils.orFileFilter(DirectoryFileFilter.DIRECTORY, yamlFiles);
+
+        FileUtils.copyDirectory(new File(s), new File(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH +
+                File.separator + "rateLimit"), filter, false);
 
         // Output file
         String tmpDockerCompose = targetDir + File.separator + System.currentTimeMillis() + ".yaml";

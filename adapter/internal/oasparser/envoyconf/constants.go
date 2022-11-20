@@ -22,10 +22,12 @@ const (
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
 	extAuthzHTTPCluster     string = "ext_authz_http_cluster"
+	rateLimitClusterName    string = "rate-limit"
 )
 
 const (
 	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
+	rateLimitFilterName        string = "envoy.filters.http.ratelimit"
 	luaFilterName              string = "envoy.filters.http.lua"
 	transportSocketName        string = "envoy.transport_sockets.tls"
 	fileAccessLogName          string = "envoy.access_loggers.file"
