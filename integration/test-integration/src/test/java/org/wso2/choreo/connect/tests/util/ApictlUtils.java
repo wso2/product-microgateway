@@ -60,6 +60,8 @@ public class ApictlUtils {
             "certs" + File.separator;
     public static final String DEPLOYMENT_ENVIRONMENTS_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
             "deploymentEnvironments" + File.separator;
+    public static final String API_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator + "apiYaml" +
+            File.separator;
     public static final String MGW_ADAPTER_CERTS_PATH = TestConstant.CC_TEMP_PATH + TestConstant.DOCKER_COMPOSE_DIR
             + File.separator + "resources" + File.separator + "adapter" + File.separator + "security"
             + File.separator + "truststore" + File.separator;
@@ -95,7 +97,7 @@ public class ApictlUtils {
      */
     public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, CCTestException {
         try {
-            createProject(openApiFile, apiProjectName, backendCert, null, null);
+            createProject(openApiFile, apiProjectName, backendCert, null, null,null);
         } catch (CCTestException e) {
             if (!e.getMessage().equals("Project already exists")) {
                 throw e;
@@ -116,7 +118,7 @@ public class ApictlUtils {
      * @throws CCTestException if apictl was unable to create the project
      */
     public static void createProject(String openApiFile, String apiProjectName) throws IOException, CCTestException {
-        createProject(openApiFile, apiProjectName, null, null, null);
+        createProject(openApiFile, apiProjectName, null, null, null,null);
     }
 
     /**
@@ -133,7 +135,7 @@ public class ApictlUtils {
      * @throws CCTestException if apictl was unable to create the project
      */
     public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
-                                     String interceptorCert)
+                                     String interceptorCert, String apiYamlFile)
             throws IOException, CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
@@ -167,6 +169,11 @@ public class ApictlUtils {
             Utils.copyFile(
                     targetDir + DEPLOYMENT_ENVIRONMENTS_YAML_PATH + deployEnvYamlFile,
                     projectPathToCreate + File.separator + DEPLOYMENT_ENVIRONMENTS_YAML);
+        }
+        if (apiYamlFile != null) {
+            Utils.copyFile(
+                    targetDir + API_YAML_PATH + apiYamlFile,
+                    projectPathToCreate + File.separator + "api.yaml");
         }
         if (interceptorCert != null) {
             Utils.copyFile(

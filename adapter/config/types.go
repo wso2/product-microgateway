@@ -127,7 +127,7 @@ type connection struct {
 }
 
 type rateLimit struct {
-	Enable bool
+	Enabled bool
 	Hostname string
 	Port uint32
 }

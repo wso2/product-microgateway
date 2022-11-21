@@ -421,8 +421,6 @@ func (swagger *MgwSwagger) SetRateLimitPoliciesForOperations(apiYamlOperations [
 			key := resource.path + operation.method
 			if val, ok := m[key]; ok {
 				operation.RateLimitPolicy = val
-			} else {
-				logger.LoggerAPI.Error("Could not find the Rate Limit Policy relevant to the API operation")
 			}
 		}
 	}

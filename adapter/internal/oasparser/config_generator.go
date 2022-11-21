@@ -55,7 +55,7 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 	)
 	conf, _ := config.ReadConfigs()
 
-	if conf.Envoy.RateLimit.Enable {
+	if conf.Envoy.RateLimit.Enabled {
 		rlCluster, rlEP, errRL := envoy.CreateRateLimitCluster()
 		if errRL == nil {
 			clusters = append(clusters, rlCluster)

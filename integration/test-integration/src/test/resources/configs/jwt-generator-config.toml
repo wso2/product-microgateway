@@ -11,6 +11,11 @@
   maxRouteTimeoutInSeconds = 60
   routeIdleTimeoutInSeconds = 300
 
+[router.ratelimit]
+  enabled = true
+  hostName = "host.docker.internal"
+  port = 8083
+
 [enforcer]
 [enforcer.jwtGenerator]
   enable = true

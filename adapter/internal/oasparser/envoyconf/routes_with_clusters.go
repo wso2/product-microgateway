@@ -924,7 +924,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
-		if config.Envoy.RateLimit.Enable {
+		if config.Envoy.RateLimit.Enabled {
 			action.Route.RateLimits = []*routev3.RateLimit{&rateLimit}
 		}
 	} else {
