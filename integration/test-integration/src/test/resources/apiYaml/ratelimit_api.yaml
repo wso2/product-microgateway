@@ -6,6 +6,7 @@ data:
   context: /ratelimit
   version: 1.0.0
   rateLimitLevel: API
+  rateLimitPolicy: $_5PerMin
   provider: admin
   lifeCycleStatus: PUBLISHED
   responseCachingEnabled: false
@@ -75,7 +76,6 @@ data:
       target: /pet/findByStatus
       verb: GET
       authType: Application & Application User
-      rateLimitPolicy: $_5PerMin
       scopes: []
       usedProductIds: []
       operationPolicies:

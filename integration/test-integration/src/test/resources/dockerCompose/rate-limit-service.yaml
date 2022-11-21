@@ -5,19 +5,6 @@
       - 6379
     ports:
       - 6379:6379
-  statsd:
-    image: prom/statsd-exporter:v0.18.0
-    entrypoint: /bin/statsd_exporter
-    command:
-      - "--statsd.mapping-config=/etc/statsd-exporter/conf.yaml"
-    expose:
-      - 9125
-      - 9102
-    ports:
-      - 9125:9125
-      - 9102:9102 # Visit http://localhost:9102/metrics to see metrics in Prometheus format
-    volumes:
-      - ../../rateLimit/conf.yaml:/etc/statsd-exporter/conf.yaml
   ratelimit:
     image: envoyproxy/ratelimit:master
     command: /bin/ratelimit
@@ -31,7 +18,7 @@
     volumes:
       - ../../rateLimit/config:/data/ratelimit/config
     environment:
-      - USE_STATSD=true
+      - USE_STATSD=false
       - STATSD_HOST=statsd
       - STATSD_PORT=9125
       - LOG_LEVEL=debug
