@@ -83,6 +83,7 @@ public class CustomFilterTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        Utils.delay(40000, "Interrupted while waiting for the testQueryParameterReadWithinFilter test case");
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/standard/headers?queryParam=abc"), headers);
         Assert.assertNotNull(response);
@@ -100,6 +101,7 @@ public class CustomFilterTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         headers.put("Custom-remove-header", "Bar");
+        Utils.delay(40000, "Interrupted while waiting for the testRemoveHeadersWithinFilter test case");
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/standard/headers"), headers);
         Assert.assertNotNull(response);

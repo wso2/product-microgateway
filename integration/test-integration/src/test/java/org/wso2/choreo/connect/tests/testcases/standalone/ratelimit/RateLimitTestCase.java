@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org).
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RateLimitTestCase {
-
     private String testKey;
 
     @BeforeClass
@@ -59,7 +58,7 @@ public class RateLimitTestCase {
                 3600, null, true);
     }
 
-    @Test(description = "Test auth token")
+    @Test(description = "Test rate-limiting with envoy rate-limit service")
     public void testRateLimitsWithEnvoyRateLimitService() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", testKey);

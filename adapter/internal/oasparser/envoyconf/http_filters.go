@@ -121,7 +121,7 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 		Domain:          "default",
 		FailureModeDeny: true,
 		RateLimitService: &envoy_config_ratelimit_v3.RateLimitServiceConfig{
-			TransportApiVersion: 2,
+			TransportApiVersion: corev3.ApiVersion_V3,
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{

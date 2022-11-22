@@ -5,6 +5,14 @@
       - 6379
     ports:
       - 6379:6379
+    deploy:
+      resources:
+        reservations:
+          memory: "500m"
+          cpus: "0.5"
+        limits:
+          memory: "500m"
+          cpus: "0.5"
   ratelimit:
     image: envoyproxy/ratelimit:master
     command: /bin/ratelimit
@@ -14,17 +22,21 @@
       - 6070:6070
     depends_on:
       - redis
-      - statsd
     volumes:
       - ../../rateLimit/config:/data/ratelimit/config
     environment:
       - USE_STATSD=false
-      - STATSD_HOST=statsd
-      - STATSD_PORT=9125
       - LOG_LEVEL=debug
       - REDIS_SOCKET_TYPE=tcp
       - REDIS_URL=redis:6379
       - RUNTIME_ROOT=/data
       - RUNTIME_SUBDIRECTORY=ratelimit
       - RUNTIME_WATCH_ROOT=false
-
+    deploy:
+      resources:
+        reservations:
+          memory: "500m"
+          cpus: "1.0"
+        limits:
+          memory: "500m"
+          cpus: "1.0"

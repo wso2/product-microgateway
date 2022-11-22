@@ -252,7 +252,7 @@ public class HttpsClientRequest {
             setHeadersAndMethod(conn, headers, httpVerb);
             conn.connect();
             return buildResponse(conn);
-        } catch (IOException | CCTestException e) {
+        } catch (IOException | CCTestException | NullPointerException e) {
             throw new CCTestException("Error while sending " + httpVerb + " request URL:" + endpoint, e);
         } finally {
             if (conn != null) {

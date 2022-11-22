@@ -171,9 +171,8 @@ public class ApictlUtils {
                     projectPathToCreate + File.separator + DEPLOYMENT_ENVIRONMENTS_YAML);
         }
         if (apiYamlFile != null) {
-            Utils.copyFile(
-                    targetDir + API_YAML_PATH + apiYamlFile,
-                    projectPathToCreate + File.separator + "api.yaml");
+            Utils.copyFile(targetDir + API_YAML_PATH + apiYamlFile, projectPathToCreate +
+                    File.separator + "api.yaml");
         }
         if (interceptorCert != null) {
             Utils.copyFile(

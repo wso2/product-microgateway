@@ -855,7 +855,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 					GenericKey: &routev3.RateLimit_Action_GenericKey{
 						DescriptorKey:   "org",
-						DescriptorValue: "wso2",
+						DescriptorValue: "wso2", // organizationId
 					},
 				},
 			},
@@ -879,7 +879,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 					GenericKey: &routev3.RateLimit_Action_GenericKey{
 						DescriptorKey:   "method",
-						DescriptorValue: "ALL",//rlMethodDescriptorValue,
+						DescriptorValue: "ALL", // rlMethodDescriptorValue,
 					},
 				},
 			},
@@ -887,7 +887,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 					GenericKey: &routev3.RateLimit_Action_GenericKey{
 						DescriptorKey:   "policy",
-						DescriptorValue: "$_5PerMin", //rateLimitPolicyName,
+						DescriptorValue: "$_5PerMin", // rateLimitPolicyName,
 					},
 				},
 			},
@@ -924,7 +924,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
-		if config.Envoy.RateLimit.Enabled {
+		if config.Envoy.RateLimit.Enabled && params.rateLimitLevel != "" {
 			action.Route.RateLimits = []*routev3.RateLimit{&rateLimit}
 		}
 	} else {
@@ -1396,15 +1396,15 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
 	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 
-		var rateLimitPolicyName, rlMethodDescriptorValue string
-		if (swagger.RateLimitLevel == "API") {
-			for _, operation := range resource.GetMethod() {
-				// ALL denotes API level rate limiting
-				rlMethodDescriptorValue = "ALL"
-				rateLimitPolicyName = operation.RateLimitPolicy
-				break
-			}
+	var rateLimitPolicyName, rlMethodDescriptorValue string
+	if swagger.RateLimitLevel == "API" {
+		for _, operation := range resource.GetMethod() {
+			// ALL denotes API level rate limiting
+			rlMethodDescriptorValue = "ALL"
+			rateLimitPolicyName = operation.RateLimitPolicy
+			break
 		}
+	}
 	params := &routeCreateParams{
 		organizationID:      organizationID,
 		title:               swagger.GetTitle(),
@@ -1421,7 +1421,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		resourceMethods:     getDefaultResourceMethods(swagger.GetAPIType()),
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
-		rateLimitLevel:      rlMethodDescriptorValue, 
+		rateLimitLevel:      rlMethodDescriptorValue,
 		rateLimitPolicyName: rateLimitPolicyName,
 	}
 

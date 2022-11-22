@@ -3,16 +3,16 @@ descriptors:
   - key: org
     value: wso2
     descriptors:
-      - key: vhost # There can be multiple vhost for one org. For example dev, prod.
-        value: localhost # Different vhosts can have different limits.
+      - key: vhost
+        value: localhost
         descriptors:
           # API level policy
-          - key: path # For API:/petstore/v1,others full path:/petstore/v1/findById
+          - key: path
             descriptors:
-              - key: method # method: [ALL|GET|PUT|POST...] ('ALL' for API level)
+              - key: method
                 descriptors:
                   - key: policy
-                    value: $_5PerMin # policyName_UUID from CP, if name there, it is easy to debug
+                    value: $_5PerMin 
                     descriptors:
                       - key: condition
                         value: default

@@ -13,7 +13,7 @@
 
 [router.ratelimit]
   enabled = true
-  hostName = "host.docker.internal"
+  hostname = "172.17.0.1"
   port = 8083
 
 [enforcer]
