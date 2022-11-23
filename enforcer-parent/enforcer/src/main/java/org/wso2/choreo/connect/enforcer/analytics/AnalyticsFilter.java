@@ -196,6 +196,13 @@ public class AnalyticsFilter {
             requestContext.addMetadataToMap(MetadataConstants.CLIENT_IP_KEY, requestContext.getClientIp());
             requestContext.addMetadataToMap(MetadataConstants.USER_AGENT_KEY,
                     AnalyticsUtils.setDefaultIfNull(requestContext.getHeaders().get("user-agent")));
+
+            // Adding UserName and the APIContext
+            requestContext.addMetadataToMap(MetadataConstants.API_USER_NAME_KEY,
+                    requestContext.getAuthenticationContext().getUsername());
+            requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
+                    requestContext.getMatchedAPI().getBasePath());
+
         } finally {
             if (Utils.tracingEnabled()) {
                 analyticsSpanScope.close();
