@@ -21,6 +21,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -88,6 +89,12 @@ func ReadConfigs() (*Config, error) {
 		}
 
 		adapterConfig.resolveDeprecatedProperties()
+		if adapterConfig.Enforcer.JwtGenerator.Enabled {
+			invalidConfigError := adapterConfig.resolveJWTGeneratorConfig()
+			if invalidConfigError != nil {
+				logger.Fatal("Error parsing the configuration ", invalidConfigError)
+			}
+		}
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem(), "Router", true)
@@ -203,6 +210,33 @@ func (config *Config) resolveDeprecatedProperties() {
 		config.Enforcer.JwtGenerator.Enabled = config.Enforcer.JwtGenerator.Enable
 	}
 
+}
+
+func (config *Config) resolveJWTGeneratorConfig() error {
+	KeyPairs := config.Enforcer.JwtGenerator.Keypair
+	signingCount := 0
+	for i, keypair := range KeyPairs {
+		if keypair.UseForSigning {
+			signingCount++
+			if keypair.PrivateKeyPath == "" {
+				return fmt.Errorf("private key path has not been set for backend JWT")
+			}
+			if keypair.PublicCertificatePath == "" {
+				return fmt.Errorf("public certificate path has not been set for backend JWT")
+			}
+		} else {
+			// Removing non signing private key paths from config
+			config.Enforcer.JwtGenerator.Keypair[i].PrivateKeyPath = ""
+		}
+	}
+	if signingCount > 1 {
+		return fmt.Errorf("only one keypair should be set to be used for signing the backend JWT")
+	}
+
+	if signingCount == 0 {
+		return fmt.Errorf("atleast one keypair should be set to be used for signing the backend JWT")
+	}
+	return nil
 }
 
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {

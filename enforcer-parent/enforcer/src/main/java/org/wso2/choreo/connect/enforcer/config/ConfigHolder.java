@@ -18,6 +18,13 @@
 
 package org.wso2.choreo.connect.enforcer.config;
 
+import com.nimbusds.jose.Algorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.X509CertUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -35,6 +42,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.Filter;
 import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
+import org.wso2.choreo.connect.discovery.config.enforcer.Keypair;
 import org.wso2.choreo.connect.discovery.config.enforcer.Management;
 import org.wso2.choreo.connect.discovery.config.enforcer.Metrics;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
@@ -63,7 +71,9 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.jwks.BackendJWKSDto;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
@@ -77,6 +87,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -452,15 +463,65 @@ public class ConfigHolder {
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
         jwtConfigurationDto.setTtl(jwtGenerator.getTokenTtl());
+        List<Keypair> keypairs = jwtGenerator.getKeypairsList();
+        // Validation is done at the adapter to ensure that only one signing keypair is available
+        Keypair signingKey = getSigningKey(keypairs);
         try {
-            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
-            jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
+            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(signingKey.getPublicCertificatePath()));
+            jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(signingKey.getPrivateKeyPath()));
         } catch (EnforcerException | CertificateException | IOException e) {
-            logger.error("Error in loading public cert or private key", e);
+            String err = "Error in loading keypair for Backend JWTs: " + e;
+//            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5400));
+            logger.error(err);
         }
         config.setJwtConfigurationDto(jwtConfigurationDto);
+        populateBackendJWKSConfiguration(jwtGenerator);
     }
 
+    private void populateBackendJWKSConfiguration(JWTGenerator jwtGenerator) {
+        BackendJWKSDto backendJWKSDto = new BackendJWKSDto();
+        List<Keypair> keypairs = jwtGenerator.getKeypairsList();
+        ArrayList<JWK> jwks = new ArrayList<>();
+        try {
+            for (Keypair keypair : keypairs) {
+                X509Certificate cert = X509CertUtils
+                        .parse(TLSUtils.getCertificate(keypair.getPublicCertificatePath()).getEncoded());
+                RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
+                RSAKey jwk = new RSAKey.Builder(publicKey)
+                        .keyUse(KeyUse.SIGNATURE)
+                        .algorithm(getJWKSAlgorithm(jwtGenerator.getSigningAlgorithm()))
+                        .keyIDFromThumbprint()
+                        .build().toPublicJWK();
+                jwks.add(jwk);
+            }
+        } catch (JOSEException | CertificateException | IOException e) {
+            String err = "Error in loading additional public certificates for JWKS: " + e;
+//            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5401));
+            logger.error(err);
+        }
+        backendJWKSDto.setJwks(jwks);
+        config.setBackendJWKSDto(backendJWKSDto);
+    }
+
+    private Keypair getSigningKey(List<Keypair> keypairs) {
+        for (Keypair keypair : keypairs) {
+            if (keypair.getUseForSigning())  {
+                return keypair;
+            }
+        }
+        return null;
+    }
+
+    private Algorithm getJWKSAlgorithm(String alg) {
+        switch (alg) {
+            case JwtConstants.RS384:
+                return JWSAlgorithm.RS384;
+            case JwtConstants.RS512:
+                return JWSAlgorithm.RS512;
+            default:
+                return JWSAlgorithm.RS256;
+        }
+    }
     private void populateCacheConfigs(Cache cache) {
         CacheDto cacheDto = new CacheDto();
         cacheDto.setEnabled(cache.getEnable());

@@ -61,6 +61,7 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
     private static String username = null;
     private static boolean isAuthorized = false;
     private static final Logger logger = LogManager.getLogger(HttpTokenServerHandler.class);
+    private static final String route = "/testkey";
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
@@ -73,8 +74,13 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
 
         if (msg instanceof HttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
-            boolean keepAlive = HttpUtil.isKeepAlive(req);
 
+            String path = req.uri().split("\\?")[0];
+            if (!(path.equals(route))) {
+                ctx.fireChannelRead(msg);
+                return;
+            }
+            boolean keepAlive = HttpUtil.isKeepAlive(req);
             String authHeader = req.headers().get(AUTHORIZATION);
 
             if (authHeader == null) {

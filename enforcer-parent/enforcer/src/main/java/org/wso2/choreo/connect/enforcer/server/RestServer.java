@@ -30,9 +30,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.admin.AdminServerInitializer;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
-import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerInitializer;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -41,14 +39,11 @@ import java.security.cert.CertificateException;
 import javax.net.ssl.SSLException;
 
 /**
- * TokenServer to handle JWT /testkey endpoint backend HTTPS service.
+ * Netty server which handles Admin, Testkey and backend JWKS endpoints
  */
 public class RestServer {
-
     private static final Logger logger = LogManager.getLogger(RestServer.class);
-    static final int TOKEN_PORT = 8082;
-    static final int ADMIN_PORT = 9001;
-
+    static final int SERVER_PORT = 9001;
     public void initServer() throws SSLException, CertificateException, InterruptedException {
 
         // Configure SSL
@@ -71,29 +66,11 @@ public class RestServer {
             tokenServer.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new HttpTokenServerInitializer(sslCtx));
-
-            Channel tokenChannel = tokenServer.bind(TOKEN_PORT).sync().channel();
-            logger.info("Token endpoint started Listening in port : " + TOKEN_PORT);
-
-
-            if (ConfigHolder.getInstance().getConfig().getRestServer().isEnable()) {
-                ServerBootstrap adminServer = new ServerBootstrap();
-                // Configure the server
-                adminServer.option(ChannelOption.SO_BACKLOG, 1024);
-                adminServer.group(bossGroup, workerGroup)
-                        .channel(NioServerSocketChannel.class)
-                        .handler(new LoggingHandler(LogLevel.INFO))
-                        .childHandler(new AdminServerInitializer(sslCtx));
-
-                Channel adminChannel = adminServer.bind(ADMIN_PORT).sync().channel();
-                logger.info("Admin endpoint started Listening in port : " + ADMIN_PORT);
-                adminChannel.closeFuture().sync();
-            }
-
+                    .childHandler(new RestServerInitializer(sslCtx));
+            Channel tokenChannel = tokenServer.bind(SERVER_PORT).sync().channel();
+            logger.info("Utility REST server started on port: " + SERVER_PORT);
             // Wait until server socket is closed
             tokenChannel.closeFuture().sync();
-
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

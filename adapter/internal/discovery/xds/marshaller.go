@@ -79,6 +79,17 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		jwtUsers = append(jwtUsers, jwtUser)
 	}
 
+	keyPairs := []*enforcer.Keypair{}
+	for _, kp := range config.Enforcer.JwtGenerator.Keypair {
+		keypair := &enforcer.Keypair{
+			PublicCertificatePath: kp.PublicCertificatePath,
+			PrivateKeyPath:        kp.PrivateKeyPath,
+			UseForSigning:         kp.UseForSigning,
+		}
+
+		keyPairs = append(keyPairs, keypair)
+	}
+
 	for _, urlGroup := range config.Enforcer.Throttling.Publisher.URLGroup {
 		group := &enforcer.TMURLGroup{
 			AuthURLs:     urlGroup.AuthURLs,
@@ -155,18 +166,17 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 
 	return &enforcer.Config{
 		JwtGenerator: &enforcer.JWTGenerator{
-			Enable:                config.Enforcer.JwtGenerator.Enabled,
-			Encoding:              config.Enforcer.JwtGenerator.Encoding,
-			ClaimDialect:          config.Enforcer.JwtGenerator.ClaimDialect,
-			ConvertDialect:        config.Enforcer.JwtGenerator.ConvertDialect,
-			Header:                config.Enforcer.JwtGenerator.Header,
-			SigningAlgorithm:      config.Enforcer.JwtGenerator.SigningAlgorithm,
-			EnableUserClaims:      config.Enforcer.JwtGenerator.EnableUserClaims,
-			GatewayGeneratorImpl:  config.Enforcer.JwtGenerator.GatewayGeneratorImpl,
-			ClaimsExtractorImpl:   config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
-			PublicCertificatePath: config.Enforcer.JwtGenerator.PublicCertificatePath,
-			PrivateKeyPath:        config.Enforcer.JwtGenerator.PrivateKeyPath,
-			TokenTtl:              config.Enforcer.JwtGenerator.TokenTTL,
+			Enable:               config.Enforcer.JwtGenerator.Enabled,
+			Encoding:             config.Enforcer.JwtGenerator.Encoding,
+			ClaimDialect:         config.Enforcer.JwtGenerator.ClaimDialect,
+			ConvertDialect:       config.Enforcer.JwtGenerator.ConvertDialect,
+			Header:               config.Enforcer.JwtGenerator.Header,
+			SigningAlgorithm:     config.Enforcer.JwtGenerator.SigningAlgorithm,
+			EnableUserClaims:     config.Enforcer.JwtGenerator.EnableUserClaims,
+			GatewayGeneratorImpl: config.Enforcer.JwtGenerator.GatewayGeneratorImpl,
+			ClaimsExtractorImpl:  config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
+			TokenTtl:             config.Enforcer.JwtGenerator.TokenTTL,
+			Keypairs:             keyPairs,
 		},
 		JwtIssuer: &enforcer.JWTIssuer{
 			Enabled:               config.Enforcer.JwtIssuer.Enabled,
