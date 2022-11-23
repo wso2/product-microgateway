@@ -18,14 +18,20 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator;
 
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
-import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -129,5 +135,38 @@ public class JwtGeneratorTestCase {
         Assert.assertNotEquals(token1, token3, "Generated Backend JWTs for two invocations from the different " +
                 "tokens to same api are same. Hence there is an issue for backend JWT generation where the generated" +
                 "JWT remains same for different users.");
+    }
+
+    @Test(description = "Test JWT generator token verification")
+    public void testJWTVerification() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/standard/jwttoken"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+
+        JSONObject responseJSON = new JSONObject(response.getData());
+        String jwt = responseJSON.get("token").toString();
+        HttpResponse res = HttpClientRequest.doGet(Utils.getServiceURLHttps("/.wellknown/jwks"), headers);
+        Assert.assertEquals(res.getResponseCode(), 200);
+        Assert.assertNotNull(res.getData());
+
+        JWKSet publicKeys = JWKSet.parse(res.getData());
+        Assert.assertNotNull(publicKeys);
+
+        //:TODO select key based on jwt's kid property
+        // Take first key and only key
+        RSAKey jwk = (RSAKey) publicKeys.getKeys().get(0);
+        Assert.assertNotNull(jwk);
+        Assert.assertEquals(jwk.getKeyType().toString(), "RSA", "Incorrect key type set on JWKS");
+        Assert.assertEquals(jwk.getKeyUse().toString(), "sig", "Incorrect key use set on JWKS");
+        Assert.assertEquals(jwk.getAlgorithm().toString(), "RS256", "Incorrect algorithm set on JWKS");
+
+        JWSObject jwsObject = JWSObject.parse(jwt);
+        Assert.assertNotNull(jwsObject);
+
+        JWSVerifier verifier = new RSASSAVerifier(jwk.toRSAPublicKey());
+        Assert.assertTrue(jwsObject.verify(verifier),"JWT failed to validate with JWKS response");
     }
 }

@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.config.dto.SoapErrorResponseConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
+import org.wso2.choreo.connect.enforcer.jwks.BackendJWKSDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class EnforcerConfig {
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
     private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
+    private BackendJWKSDto backendJWKSDto;
     private CredentialDto[] jwtUsersCredentials;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
@@ -112,6 +114,14 @@ public class EnforcerConfig {
 
     public void setJwtIssuerConfigurationDto(JWTIssuerConfigurationDto jwtIssuerConfigurationDto) {
         this.jwtIssuerConfigurationDto = jwtIssuerConfigurationDto;
+    }
+
+    public BackendJWKSDto getBackendJWKSDto() {
+        return backendJWKSDto;
+    }
+
+    public void setBackendJWKSDto(BackendJWKSDto backendJWKSDto) {
+        this.backendJWKSDto = backendJWKSDto;
     }
 
     public JWTIssuerConfigurationDto getJwtIssuerConfigurationDto() {

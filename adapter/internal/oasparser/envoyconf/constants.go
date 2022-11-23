@@ -21,6 +21,7 @@ const (
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
+	tokenCluster                   = "ext_authz_http_cluster"
 )
 
 const (
@@ -49,7 +50,7 @@ const (
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
 
-//cluster prefixes
+// cluster prefixes
 const (
 	xWso2EPClustersConfigNamePrefix     string = "xwso2cluster"
 	requestInterceptClustersNamePrefix  string = "reqInterceptor"
@@ -99,6 +100,7 @@ const (
 	healthPath  string = "/health"
 	testKeyPath string = "/testkey"
 	readyPath   string = "/ready"
+	jwksPath    string = "/.wellknown/jwks"
 )
 
 const (

@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.tests.testcases.withapim;
 
+import org.apache.catalina.Host;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -36,6 +37,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
     private static final String NON_EXISTING_CONTEXT = "/not/exists/1.0.0";
     private static final String API_VERSION = "1.0.0";
     private static final String APPLICATION_NAME = "VHostApp";
+    private static final String HOST_ADDRESS = "https://localhost:9001";
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
@@ -44,7 +46,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetAPIInfo() throws IOException {
-        String requestUrl = "https://localhost:9001/api/info?context=" + API_CONTEXT + "&version=" + API_VERSION;
+        String requestUrl = HOST_ADDRESS + "/api/info?context=" + API_CONTEXT + "&version=" + API_VERSION;
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
@@ -57,7 +59,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetNonExistingAPIInfo() throws IOException {
-        String requestUrl = "https://localhost:9001/api/info?context=" + NON_EXISTING_CONTEXT + "&version=" + API_VERSION;
+        String requestUrl = HOST_ADDRESS + "/api/info?context=" + NON_EXISTING_CONTEXT + "&version=" + API_VERSION;
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
@@ -68,7 +70,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetAllAPIs() throws IOException {
-        String requestUrl = "https://localhost:9001/apis";
+        String requestUrl = HOST_ADDRESS + "/apis";
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
@@ -78,7 +80,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testQueryAPIs() throws IOException {
-        String requestUrl = "https://localhost:9001/apis?context=" + API_CONTEXT;
+        String requestUrl = HOST_ADDRESS + "/apis?context=" + API_CONTEXT;
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
@@ -90,7 +92,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetApplications() throws IOException {
-        String requestUrl = "https://localhost:9001/applications?orgId=carbon.super";
+        String requestUrl =  HOST_ADDRESS + "/applications?orgId=carbon.super";
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
@@ -100,7 +102,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetSubscriptions() throws IOException {
-        String requestUrl = "https://localhost:9001/subscriptions";
+        String requestUrl = HOST_ADDRESS + "/subscriptions";
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
@@ -110,14 +112,14 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetApplicationPolicies() throws IOException {
-        String appPolicyRequestURL = "https://localhost:9001/throttling_policies/application";
+        String appPolicyRequestURL = HOST_ADDRESS + "/throttling_policies/application";
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse appPolicyResponse = HttpClientRequest.doGet(appPolicyRequestURL, headers);
         Assert.assertNotNull(appPolicyResponse.getData());
         Assert.assertTrue(appPolicyResponse.getData().contains("count"));
 
-        String requestUrl = "https://localhost:9001/throttling_policies/application";
+        String requestUrl = HOST_ADDRESS + "/throttling_policies/application";
         Map<String, String> subPolicyRequestURL = new HashMap<>();
         subPolicyRequestURL.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse subPolicyResponse = HttpClientRequest.doGet(requestUrl, subPolicyRequestURL);
@@ -127,7 +129,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetSubscriptionPolicies() throws IOException {
-        String requestUrl = "https://localhost:9001/throttling_policies/subscription";
+        String requestUrl = HOST_ADDRESS + "/throttling_policies/subscription";
         Map<String, String> subPolicyRequestURL = new HashMap<>();
         subPolicyRequestURL.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse subPolicyResponse = HttpClientRequest.doGet(requestUrl, subPolicyRequestURL);
