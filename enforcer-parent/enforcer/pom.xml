@@ -496,7 +496,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
-            <version>${carbon.apimgt.common.gateway.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.azure</groupId>
@@ -642,7 +641,6 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <carbon.apimgt.common.analytics.version>9.27.17-SNAPSHOT</carbon.apimgt.common.analytics.version>
-        <carbon.apimgt.common.gateway.version>9.20.74.27</carbon.apimgt.common.gateway.version>
         <org.wso2.am.analytics.publisher.version>1.1.1-SNAPSHOT</org.wso2.am.analytics.publisher.version>
     </properties>
 
