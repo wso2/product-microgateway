@@ -1,0 +1,95 @@
+type: api
+version: v4.1.0
+data:
+  id: 2b547d7c-4f7b-4f31-ad6b-05b4960dcbf1
+  name: ratelimit
+  context: /ratelimit
+  version: 1.0.0
+  rateLimitLevel: API
+  rateLimitPolicy: $_5PerMin
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  responseCachingEnabled: false
+  cacheTimeout: 300
+  hasThumbnail: false
+  isDefaultVersion: false
+  isRevision: false
+  revisionId: 0
+  enableSchemaValidation: false
+  type: HTTP
+  transport:
+    - http
+    - https
+  tags: []
+  authorizationHeader: Authorization
+  securityScheme:
+    - oauth2
+    - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  mediationPolicies: []
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalProperties: []
+  additionalPropertiesMap: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins:
+      - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+      - authorization
+      - Access-Control-Allow-Origin
+      - Content-Type
+      - SOAPAction
+      - apikey
+      - Internal-Key
+    accessControlAllowMethods:
+      - GET
+      - PUT
+      - POST
+      - DELETE
+      - PATCH
+      - OPTIONS
+  websubSubscriptionConfiguration:
+    enable: false
+    secret: ""
+    signingAlgorithm: SHA1
+    signatureHeader: x-hub-signature
+  createdTime: "1667890908062"
+  lastUpdatedTime: 2022-11-08 12:31:51.42
+  endpointConfig:
+    endpoint_type: http
+    sandbox_endpoints:
+      url: http://mockBackend:2383/v2
+    production_endpoints:
+      url: http://mockBackend:2383/v2
+  endpointImplementationType: ENDPOINT
+  scopes: []
+  operations:
+    -
+      id: ""
+      target: /pet/findByStatus
+      verb: GET
+      authType: Application & Application User
+      scopes: []
+      usedProductIds: []
+      operationPolicies:
+        request: []
+        response: []
+        fault: []
+  categories: []
+  keyManagers:
+    - all
+  advertiseInfo:
+    advertised: false
+    apiOwner: admin
+    vendor: WSO2
+  gatewayVendor: wso2
+  gatewayType: wso2/synapse
+  asyncTransportProtocols: []
+  organizationId: carbon.super

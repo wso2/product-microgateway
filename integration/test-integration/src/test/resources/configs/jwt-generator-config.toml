@@ -13,8 +13,13 @@
 
 [router.ratelimit]
   enabled = true
-  hostname = "172.17.0.1"
-  port = 8083
+  hostname = "ratelimit"
+  port = 8091
+  requestTimeoutInNanoSeconds = 80000000
+  keyFilePath = "/home/wso2/security/keystore/mg.key"
+  certFilePath = "/home/wso2/security/keystore/mg.pem"
+  caCertFilePath = "/home/wso2/security/truststore/mg.pem"
+  sSLCertSANHostname = "localhost"
 
 [enforcer]
 [enforcer.jwtGenerator]

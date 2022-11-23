@@ -161,9 +161,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
 
             if (responseObject.getHeaderMap() != null) {
-                Map<String, String> headersMap = responseObject.getHeaderMap();
-                headersMap.put("x-wso2-ratelimit-api-policy", "default");
-                headersMap.forEach((key, value) -> {
+                responseObject.getHeaderMap().forEach((key, value) -> {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();

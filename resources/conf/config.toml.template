@@ -171,6 +171,25 @@ sandboxVhost = "sandbox.host"
   # If the connection is an HTTP/2 downstream connection a drain sequence will occur prior to closing the connection
   idleTimeoutInSeconds = 3600
 
+Configs relevant to the envoy rate-limit service
+[router.ratelimit]
+  # Enable / disable envoy rate-limit service
+  enabled = true
+  # Hostname relevant to the rate-limit service
+  hostname = "ratelimit-service"
+  # Post used for the listening
+  port = 8083
+  # Rate-limit request timeout duration in nano seconds
+  requestTimeoutInNanoSeconds = 80000000
+  # Key file path used for the rate-limit service mTLS
+  keyFilePath = "/home/wso2/security/keystore/mg.key"
+  # Cert file path used for the rate-limit service mTLS
+  certFilePath = "/home/wso2/security/keystore/mg.pem"
+  # Truststore file path used for the rate-limit service mTLS
+  caCertFilePath = "/home/wso2/security/truststore/mg.pem"
+  # SAN hostname represented in the public cert
+  sSLCertSANHostname = "localhost"
+
 [enforcer] # --------------------------------------------------------
 
 # If Custom Filters needs to be engaged, mention them here with position.

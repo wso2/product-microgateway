@@ -127,9 +127,14 @@ type connection struct {
 }
 
 type rateLimit struct {
-	Enabled bool
-	Hostname string
-	Port uint32
+	Enabled                     bool
+	Hostname                    string
+	Port                        uint32
+	RequestTimeoutInNanoSeconds int32
+	KeyFilePath                 string
+	CertFilePath                string
+	CaCertFilePath              string
+	SSLCertSANHostname          string
 }
 
 type enforcer struct {

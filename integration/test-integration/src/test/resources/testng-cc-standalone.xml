@@ -83,9 +83,10 @@
     <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.ratelimit.RateLimitTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.standalone.filter.CustomFilterTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.ratelimit.RatelimitTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.ratelimit.OperationLevelRatelimitTestcase"/>
         </classes>
     </test>
     <test name="cc-with-multiple-env" preserve-order="true" parallel="false">

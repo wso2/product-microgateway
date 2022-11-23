@@ -51,7 +51,7 @@ public class EnvoyHttpFilterTestCase {
 
         // Request headers received by the backend
         JSONObject headersSentToBackend = new JSONObject(response.getData());
-        Assert.assertEquals(headersSentToBackend.length(), 9, "Unexpected number of headers received by the backend");
+        Assert.assertEquals(headersSentToBackend.length(), 8, "Unexpected number of headers received by the backend");
 
         JSONObject headersToBackend = Utils.changeHeadersToLowerCase(headersSentToBackend);
 
@@ -63,7 +63,7 @@ public class EnvoyHttpFilterTestCase {
         Assert.assertNotNull(headersToBackend.get("pragma"));
         Assert.assertNotNull(headersToBackend.get("user-agent"));
         Assert.assertNotNull(headersToBackend.get("cache-control"));
-        Assert.assertNotNull(headersToBackend.get("x-wso2-ratelimit-api-policy"));
+
 
         Assert.assertFalse(headersToBackend.has("x-envoy-original-path"), "x-envoy-original-path not removed");
         Assert.assertFalse(headersToBackend.has("x-wso2-cluster-header"), "x-wso2-cluster-header not removed");

@@ -167,20 +167,21 @@ type OperationYaml struct {
 	RateLimitPolicy string `json:"rateLimitPolicy,omitempty"`
 }
 
-// APILevelPolicy data holds policy details relevant to the rate limiting
-type APILevelPolicy struct {
-	PolicyID        string `json:"policyId,omitempty"`
-	PolicyName      string `json:"policyName,omitempty"`
-	RequestsPerUnit string `json:"requestsPerUnit,omitempty"`
-	UnitTime        int    `json:"unitTime,omitempty"`
-	Unit            string `json:"unit,omitempty"`
+// APIRateLimitPolicy holds policy details relevant to the rate limiting
+type APIRateLimitPolicy struct {
+	PolicyName string `json:"policyName,omitempty"`
+	Type       string `json:"type,omitempty"`
+	Count      int    `json:"count,omitempty"`
+	Unit       string `json:"unit,omitempty"`
+	Span       uint32 `json:"span,omitempty"`
+	SpanUnit   string `json:"spanUnit,omitempty"`
 }
 
-// RateLimitPolicy contains all the fields in the ratelimit policy file
+// RateLimitPolicy contains all the fields in the rate-limit_policies.yaml file
 type RateLimitPolicy struct {
 	ApimMeta
 	Data struct {
-		APILevelPolicy APILevelPolicy
+		APIRateLimitPolicies []APIRateLimitPolicy
 	}
 }
 

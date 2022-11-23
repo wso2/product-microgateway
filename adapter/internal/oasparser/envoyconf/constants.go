@@ -133,3 +133,11 @@ const (
 	// Azure tracer's name
 	TracerTypeAzure = "azure"
 )
+
+// Constants relevant to the rate-limit service
+const (
+	// ALL denotes API level rate limiting
+	APILevelRateLimitDescriptor       string = "ALL"
+	OperationLevelRateLimitDescriptor string = "OPERATION"
+	APILevelRateLimit                 string = "API"
+)

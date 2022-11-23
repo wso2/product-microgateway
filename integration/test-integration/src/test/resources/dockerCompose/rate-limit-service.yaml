@@ -20,10 +20,12 @@
       - 8080:8080
       - 8083:8081
       - 6070:6070
+      - 8091:8091
     depends_on:
       - redis
     volumes:
       - ../../rateLimit/config:/data/ratelimit/config
+      - ../resources/router/security:/home/wso2/security
     environment:
       - USE_STATSD=false
       - LOG_LEVEL=debug
@@ -32,6 +34,13 @@
       - RUNTIME_ROOT=/data
       - RUNTIME_SUBDIRECTORY=ratelimit
       - RUNTIME_WATCH_ROOT=false
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=8091
+      - GRPC_SERVER_USE_TLS=true
+      - GRPC_SERVER_TLS_KEY=/home/wso2/security/keystore/mg.key
+      - GRPC_SERVER_TLS_CERT=/home/wso2/security/keystore/mg.pem
+      - GRPC_CLIENT_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+      - GRPC_CLIENT_TLS_SAN=localhost
     deploy:
       resources:
         reservations:

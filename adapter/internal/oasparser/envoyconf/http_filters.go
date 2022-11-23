@@ -117,6 +117,7 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 
 // getRateLimitFilter configures the ratelimit filter
 func getRateLimitFilter() *hcmv3.HttpFilter {
+	conf, _ := config.ReadConfigs()
 	rateLimit := &rate_limit.RateLimit{
 		Domain:          "default",
 		FailureModeDeny: true,
@@ -129,17 +130,17 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 					},
 				},
 				Timeout: &durationpb.Duration{
-					Seconds: 2,
+					Nanos: conf.Envoy.RateLimit.RequestTimeoutInNanoSeconds,
 				},
 			},
 		},
 	}
 	ext, err2 := ptypes.MarshalAny(rateLimit)
 	if err2 != nil {
-		logger.LoggerOasparser.Error(err2)
+		logger.LoggerOasparser.Errorf("Error occurred while parsing ratelimit filter config %v", err2.Error())
 	}
 	rlFilter := hcmv3.HttpFilter{
-		Name: rateLimitFilterName, 
+		Name: rateLimitFilterName,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{
 			TypedConfig: ext,
 		},

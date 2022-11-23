@@ -18,6 +18,8 @@
 package oasparser
 
 import (
+	"os"
+
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -60,6 +62,9 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 		if errRL == nil {
 			clusters = append(clusters, rlCluster)
 			endpoints = append(endpoints, rlEP...)
+		} else {
+			logger.LoggerOasparser.Error("Failed to initialize rate-limit cluster. Hence terminating the adapter. Error: ", errRL)
+			os.Exit(1)
 		}
 	}
 

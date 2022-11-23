@@ -122,9 +122,14 @@ var defaultConfig = &Config{
 			},
 		},
 		RateLimit: rateLimit{
-			Enabled: false,
-			Hostname: "ratelimit-service",
-			Port: 8083,
+			Enabled:                     false,
+			Hostname:                    "ratelimit-service",
+			Port:                        8083,
+			RequestTimeoutInNanoSeconds: 80000000,
+			KeyFilePath:                 "/home/wso2/security/keystore/mg.key",
+			CertFilePath:                "/home/wso2/security/keystore/mg.pem",
+			CaCertFilePath:              "/home/wso2/security/truststore/mg.pem",
+			SSLCertSANHostname:          "localhost",
 		},
 	},
 	Enforcer: enforcer{
