@@ -300,6 +300,10 @@
                         <groupId>org.codehaus.woodstox</groupId>
                         <artifactId>wstx-asl</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.ops4j.pax.logging</groupId>
+                        <artifactId>pax-logging-api</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -570,6 +574,12 @@
                 <groupId>com.azure</groupId>
                 <artifactId>azure-messaging-eventhubs</artifactId>
                 <version>${azure.messaging.eventhubs.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.woodstox</groupId>
+                        <artifactId>woodstox-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.azure</groupId>
@@ -641,6 +651,11 @@
                 <artifactId>kotlin-stdlib</artifactId>
                 <version>${org.jetbrains.kotlin.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.woodstox</groupId>
+                <artifactId>woodstox-core</artifactId>
+                <version>${woodstox-core.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -650,6 +665,7 @@
 
         <andes.client.version>3.3.23</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
+        <woodstox-core.version>6.4.0</woodstox-core.version>
         <carbon.apimgt.version>9.26.59</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
@@ -661,7 +677,7 @@
         <grpc.stub.version>1.45.1</grpc.stub.version>
         <gson.version>2.8.9</gson.version>
         <guava.version>30.0-jre</guava.version>
-        <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
+        <io.fabric8.docker.plugin.version>0.40.2</io.fabric8.docker.plugin.version>
         <io.netty.version>4.1.77.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
         <apache.tomcat.dependency.version>10.0.23</apache.tomcat.dependency.version>
