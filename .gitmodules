@@ -1,3 +1,7 @@
 [submodule "envoy-filters/envoy"]
 	path = envoy-filters/envoy
 	url = https://github.com/envoyproxy/envoy.git
+[submodule "rate-limiter/rate-limiter-service"]
+	path = rate-limiter/rate-limiter-service
+	url = https://github.com/renuka-fernando/ratelimit.git
+	branch = choreo

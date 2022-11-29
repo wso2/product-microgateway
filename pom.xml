@@ -65,6 +65,7 @@
                 <module>router</module>
                 <module>adapter</module>
                 <module>enforcer-parent</module>
+                <module>rate-limiter</module>
                 <module>distribution</module>
                 <module>integration</module>
             </modules>
