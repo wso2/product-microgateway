@@ -506,7 +506,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
-            <version>${org.carbon.apimgt.common.analytic.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -521,7 +520,6 @@
         <dependency>
             <groupId>org.wso2.am.analytics.publisher</groupId>
             <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
-            <version>${org.wso2.am.analytics.publisher.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -639,8 +637,6 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <org.carbon.apimgt.common.analytic.version>9.27.17-SNAPSHOT</org.carbon.apimgt.common.analytic.version>
-        <org.wso2.am.analytics.publisher.version>1.1.1-SNAPSHOT</org.wso2.am.analytics.publisher.version>
     </properties>
 
 </project>
