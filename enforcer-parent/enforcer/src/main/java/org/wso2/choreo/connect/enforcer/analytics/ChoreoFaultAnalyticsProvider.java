@@ -237,7 +237,6 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         return null;
     }
 
-
     public String getUserName() {
         return null;
     }
