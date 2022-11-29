@@ -80,13 +80,25 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	keyPairs := []*enforcer.Keypair{}
-	for _, kp := range config.Enforcer.JwtGenerator.Keypair {
-		keypair := &enforcer.Keypair{
-			PublicCertificatePath: kp.PublicCertificatePath,
-			PrivateKeyPath:        kp.PrivateKeyPath,
-			UseForSigning:         kp.UseForSigning,
-		}
 
+	if config.Enforcer.JwtGenerator.PrivateKeyPath == "" {
+		// New configuration
+		for _, kp := range config.Enforcer.JwtGenerator.Keypair {
+			keypair := &enforcer.Keypair{
+				PublicCertificatePath: kp.PublicCertificatePath,
+				PrivateKeyPath:        kp.PrivateKeyPath,
+				UseForSigning:         kp.UseForSigning,
+			}
+
+			keyPairs = append(keyPairs, keypair)
+		}
+	} else {
+		// Marshal old config
+		keypair := &enforcer.Keypair{
+			PrivateKeyPath:        config.Enforcer.JwtGenerator.PrivateKeyPath,
+			PublicCertificatePath: config.Enforcer.JwtGenerator.PublicCertificatePath,
+			UseForSigning:         true,
+		}
 		keyPairs = append(keyPairs, keypair)
 	}
 

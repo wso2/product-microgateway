@@ -332,18 +332,20 @@ type binaryAgent struct {
 
 type jwtGenerator struct {
 	// Deprecated: Use Enabled instead
-	Enable               bool
-	Enabled              bool
-	Encoding             string
-	ClaimDialect         string
-	ConvertDialect       bool
-	Header               string
-	SigningAlgorithm     string
-	EnableUserClaims     bool
-	GatewayGeneratorImpl string
-	ClaimsExtractorImpl  string
-	TokenTTL             int32
-	Keypair              []KeyPair
+	Enable                bool
+	Enabled               bool
+	Encoding              string
+	ClaimDialect          string
+	ConvertDialect        bool
+	Header                string
+	SigningAlgorithm      string
+	EnableUserClaims      bool
+	GatewayGeneratorImpl  string
+	ClaimsExtractorImpl   string
+	TokenTTL              int32
+	PublicCertificatePath string
+	PrivateKeyPath        string
+	Keypair               []KeyPair
 }
 
 // KeyPair represents hthe rsa keypair used for signing JWTs
