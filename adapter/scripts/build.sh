@@ -51,7 +51,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
- removed from build branch.
+
 golint -set_exit_status ./...
 if [ $? -ne 0 ]; then
   echo "INFO: Trying to install golint"
