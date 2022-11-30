@@ -95,3 +95,55 @@ services:
     ports:
       - "8081:8081"
       - "9001:9001"
+  rate-limiter:
+    image: wso2/choreo-connect-rate-limiter:1.1.0-m1-SNAPSHOT
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    volumes: # TODO: (renuka) Remove temporary config file - until Adapter implements the rate limiter xDS config proto
+      - ./conf/rate-limiter-config.yaml:/home/wso2/rate-limits/config/config.yaml
+    environment:
+      - HOST=0.0.0.0
+      - PORT=9081
+      - USE_STATSD=false
+      - LOG_LEVEL=INFO
+      - LOCAL_CACHE_SIZE_IN_BYTES=1024000
+      - LIMIT_RESPONSE_HEADERS_ENABLED=false
+      # Redis
+      - REDIS_SOCKET_TYPE=tcp
+      - REDIS_URL=redis:6379
+      - REDIS_PIPELINE_WINDOW=0.2ms
+      - REDIS_PIPELINE_LIMIT=0
+      - REDIS_TLS=false
+      - REDIS_TLS_CLIENT_CERT=""
+      - REDIS_TLS_CLIENT_KEY=""
+      - REDIS_TLS_CACERT=""
+      # gRPC server
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=9081
+      - GRPC_SERVER_USE_TLS=true
+      - GRPC_SERVER_TLS_KEY=/home/wso2/security/keystore/mg.key
+      - GRPC_SERVER_TLS_CERT=/home/wso2/security/keystore/mg.pem
+      - GRPC_CLIENT_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+      - GRPC_CLIENT_TLS_SAN=localhost
+      # xDS config server
+      - CONFIG_TYPE=FILE # TODO: (renuka) Temporary use file configs, should be GRPC_XDS_SOTW
+      - CONFIG_GRPC_XDS_NODE_ID=default
+      - CONFIG_GRPC_XDS_SERVER_URL=adapter:18000
+      - CONFIG_GRPC_XDS_SERVER_USE_TLS=true
+      - CONFIG_GRPC_XDS_CLIENT_TLS_KEY=/home/wso2/security/keystore/mg.key
+      - CONFIG_GRPC_XDS_CLIENT_TLS_CERT=/home/wso2/security/keystore/mg.pem
+      - CONFIG_GRPC_XDS_SERVER_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+      - CONFIG_GRPC_XDS_SERVER_TLS_SAN=localhost
+      # TODO: (renuka) Temporary file based configs, should be removed
+      - RUNTIME_ROOT=/home/wso2
+      - RUNTIME_SUBDIRECTORY=rate-limits
+      - RUNTIME_WATCH_ROOT=false
+    ports:
+      - 9080:9080
+      - 9081:9081
+  redis:
+    image: redis:6.2.7-alpine
+    ports:
+      - "6379:6379"

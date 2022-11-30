@@ -143,6 +143,10 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
         </file>
         <file>
+            <source>../resources/conf/rate-limiter-config.yaml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
+        </file>
+        <file>
             <source>../resources/conf/config.toml.template</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
         </file>
@@ -161,6 +165,11 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
             </outputDirectory>
             <destName>config.toml</destName>
+        </file>
+        <file>
+            <source>../resources/conf/rate-limiter-config.yaml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/conf/config.toml.template</source>
