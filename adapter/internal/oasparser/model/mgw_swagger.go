@@ -413,9 +413,29 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 }
 
 // SetEnvLabelProperties sets environment specific values
-func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvProps) {
+func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvProps, isChoreoSandbox bool) {
 	var productionUrls []Endpoint
 	var sandboxUrls []Endpoint
+
+	if isChoreoSandbox {
+		if envProps.APIConfigs.SandboxEndpointChoreo != "" {
+			logger.LoggerOasparser.Infof("SandboxEndpointChoreo is found in env properties for %v : %v",
+				swagger.title, swagger.version)
+			endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.SandboxEndpointChoreo)
+			if err == nil {
+				productionUrls = append(productionUrls, *endpoint)
+			} else {
+				logger.LoggerOasparser.Errorf("Error encountered when parsing the Choreo sandbox endpoint for %v : %v. %v",
+					swagger.title, swagger.version, err.Error())
+			}
+		}
+
+		if len(productionUrls) > 0 {
+			logger.LoggerOasparser.Infof("Production endpoint is overridden by env property SandboxEndpointChoreo %v : %v", swagger.title, swagger.version)
+			swagger.productionEndpoints = generateEndpointCluster(prodClustersConfigNamePrefix, productionUrls, LoadBalance)
+		}
+		return
+	}
 
 	if envProps.APIConfigs.ProductionEndpoint != "" {
 		logger.LoggerOasparser.Infof("Production endpoints are found in env properties for %v : %v",

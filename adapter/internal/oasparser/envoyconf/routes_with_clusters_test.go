@@ -336,7 +336,7 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	var mgwSwagger model.MgwSwagger
 	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
-	mgwSwagger.SetEnvLabelProperties(envProps)
+	mgwSwagger.SetEnvLabelProperties(envProps, false)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
@@ -359,6 +359,56 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 
 }
 
+func testCreateRoutesWithChoreoSandboxEnvProp(t *testing.T) {
+	envProps := synchronizer.APIEnvProps{
+		EnvID: "some id",
+		APIConfigs: synchronizer.APIConfigs{
+			ProductionEndpoint:    "http://ep1.com:3000",
+			SandBoxEndpoint:       "http://ep2.com:3000",
+			SandboxEndpointChoreo: "http://ep3.com:3000",
+		},
+	}
+
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_basic.yaml"
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_basic.yaml"
+
+	// Read api.yaml
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v", apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v", apiYamlFilePath)
+
+	// Read swagger.yaml
+	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
+	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
+
+	var apiYaml model.APIYaml
+	var mgwSwagger model.MgwSwagger
+
+	// Unmarshal and populate mgwSwagger
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	apiYaml = model.PopulateEndpointsInfo(apiYaml)
+	assert.Nil(t, err, "Error occurred while parsing api.yaml")
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.HTTP)
+	assert.Nil(t, err, "Error occurred while populating mgwSwagger from APIYaml")
+	err = mgwSwagger.GetMgwSwagger(openapiByteArr)
+	assert.Nil(t, err, "Error occurred while parsing swagger.yaml")
+
+	mgwSwagger.SetEnvLabelProperties(envProps, true)
+
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "sandbox.vhost", "org-id")
+
+	assert.Equal(t, 1, len(clusters), "Number of clusters created incorrect")
+	assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+	productionCluster := clusters[0]
+
+	productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+	assert.Equal(t, productionClusterHost, "ep3.com", "Production cluster host mismatch")
+	assert.Equal(t, productionClusterPort, uint32(3000), "Production cluster port mismatch")
+}
+
 func TestCreateHealthEndpoint(t *testing.T) {
 	route := envoy.CreateHealthEndpoint()
 	assert.NotNil(t, route, "Health Endpoint Route should not be null.")
@@ -372,7 +422,7 @@ func TestCreateHealthEndpoint(t *testing.T) {
 // func TestCreateRoutesWithClustersProdSandEp(t *testing.T) {
 // 	// Tested Features
 // 	// 1. Production Sandbox endpoint assignment for the routes.
-// 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_prod_sand_extensions.yaml"
+// 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/swagger_with_prod_sand_extensions.yaml"
 // 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 // 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 // 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
@@ -557,7 +607,7 @@ func commonTestForClusterPrioritiesInWebSocketAPIWithEnvProps(t *testing.T, apiY
 	assert.Nil(t, err, "Error occured while parsing api.yaml")
 	var mgwSwagger model.MgwSwagger
 	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.WS)
-	mgwSwagger.SetEnvLabelProperties(envProps)
+	mgwSwagger.SetEnvLabelProperties(envProps, false)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	_, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 

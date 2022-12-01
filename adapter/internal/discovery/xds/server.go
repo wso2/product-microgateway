@@ -303,7 +303,15 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
-	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
+
+	conf, _ := config.ReadConfigs()
+	if vHost == conf.Adapter.SandboxVhost {
+		// Set the Choreo sandbox endpoint as the main endpoint
+		mgwSwagger.SetEnvLabelProperties(apiEnvProps, true)
+	} else {
+		mgwSwagger.SetEnvLabelProperties(apiEnvProps, false)
+	}
+
 	mgwSwagger.SetID(apiYaml.ID)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)

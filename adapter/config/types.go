@@ -93,6 +93,8 @@ type adapter struct {
 	Truststore truststore
 	// ArtifactsDirectory is the FilePath where the api artifacts are mounted
 	ArtifactsDirectory string
+	// Sandbox vhost for Choreo that exposes the sandbox endpoint
+	SandboxVhost string
 }
 
 // Envoy Listener Component related configurations.

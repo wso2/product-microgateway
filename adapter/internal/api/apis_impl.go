@@ -259,6 +259,13 @@ func ApplyAPIProjectFromAPIM(
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
 
+	conf, _ := config.ReadConfigs()
+	currentEnv := conf.ControlPlane.EnvironmentLabels[0] // assumption - adapter has only one environment
+
+	if apiEnvs[apiProject.APIYaml.Data.ID][currentEnv].APIConfigs.SandboxEndpointChoreo != "" {
+		vhostToEnvsMap[conf.Adapter.SandboxVhost] = []string{currentEnv}
+	}
+
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
 		// search for vhosts in the given environments
