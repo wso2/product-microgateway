@@ -256,9 +256,6 @@ func ApplyAPIProjectFromAPIM(
 	}
 	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiYaml.Name, apiYaml.Version, apiProject.OrganizationID)
 
-	// vhostsToRemove contains vhosts and environments to undeploy
-	vhostsToRemove := make(map[string][]string)
-
 	conf, _ := config.ReadConfigs()
 	currentEnv := conf.ControlPlane.EnvironmentLabels[0] // assumption - adapter has only one environment
 
@@ -268,18 +265,6 @@ func ApplyAPIProjectFromAPIM(
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		// search for vhosts in the given environments
-		for _, env := range environments {
-			if existingVhost, exists := xds.GetVhostOfAPI(apiYaml.ID, env); exists {
-				loggers.LoggerAPI.Infof("API %v:%v with UUID \"%v\" already deployed to vhost: %v",
-					apiYaml.Name, apiYaml.Version, apiYaml.ID, existingVhost)
-				if vhost != existingVhost {
-					loggers.LoggerAPI.Infof("Un-deploying API %v:%v with UUID \"%v\" which is already deployed to vhost: %v",
-						apiYaml.Name, apiYaml.Version, apiYaml.ID, existingVhost)
-					vhostsToRemove[existingVhost] = append(vhostsToRemove[existingVhost], env)
-				}
-			}
-		}
 
 		// allEnvironments represent all the environments the API should be deployed
 		allEnvironments := xds.GetAllEnvironments(apiYaml.ID, vhost, environments)
@@ -295,16 +280,6 @@ func ApplyAPIProjectFromAPIM(
 		}
 	}
 
-	// undeploy APIs with other vhosts in the same gateway environment
-	for vhost, environments := range vhostsToRemove {
-		if vhost == "" {
-			// ignore if vhost is empty, since it deletes all vhosts of API
-			continue
-		}
-		if err := xds.DeleteAPIsWithUUID(vhost, apiYaml.ID, environments, apiProject.OrganizationID); err != nil {
-			return deployedRevisionList, err
-		}
-	}
 	return deployedRevisionList, nil
 }
 
