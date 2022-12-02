@@ -17,7 +17,6 @@
 package operator_test
 
 import (
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"strings"
@@ -184,7 +183,7 @@ func testGetOpenAPIVersionAndJSONContent(t *testing.T, apiYamlFilePath string) {
 		assert.Equal(t, swaggerVerison, "2", "Default swaggerVersion should be 2")
 	}
 
-	if strings.HasSuffix(apiYamlFilePath, "/openapi_with_prod_sand_extensions.yaml") {
+	if strings.HasSuffix(apiYamlFilePath, "/swagger_with_prod_sand_extensions.yaml") {
 		assert.Equal(t, swaggerVerison, "2", "swaggerVersion mismatch")
 	}
 
@@ -206,7 +205,7 @@ func TestGetOpenAPIV3Struct(t *testing.T) {
 	}
 
 	for _, f := range files {
-		if strings.HasSuffix(f.Name(), ".yaml") {
+		if strings.HasSuffix(f.Name(), ".yaml") && strings.Contains(f.Name(), "openapi_") {
 			testGetOpenAPIV3Struct(t, apiYamlFilePath+"/"+f.Name())
 		}
 	}
@@ -215,14 +214,14 @@ func TestGetOpenAPIV3Struct(t *testing.T) {
 //helper function for TestGetOpenAPIV3Struct
 func testGetOpenAPIV3Struct(t *testing.T, apiYamlFilePath string) {
 	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
-	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the openapi.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 
-	mgwSwagger, _ := operator.GetOpenAPIV3Struct(apiJsn)
+	_, err = operator.GetOpenAPIV3Struct(apiJsn)
 
-	assert.NotNil(t, mgwSwagger.Validate(context.Background()), "MgwSwagger validation failed for : %v", apiYamlFilePath)
-
+	assert.Equal(t, nil, err, "OpenAPI validation failed for : %v", apiYamlFilePath)
+	// swagger.Validate(context.Background() throws an error for correct schemas. Hence not used.
 }
 
 func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {

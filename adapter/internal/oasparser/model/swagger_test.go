@@ -82,7 +82,7 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 }
 
 func TestValidate(t *testing.T) {
-	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_prod_sand_extensions.yaml"
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/swagger_with_prod_sand_extensions.yaml"
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := model.MgwSwagger{}
