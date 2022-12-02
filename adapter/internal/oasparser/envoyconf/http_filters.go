@@ -130,7 +130,8 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 					},
 				},
 				Timeout: &durationpb.Duration{
-					Nanos: conf.Envoy.RateLimit.RequestTimeoutInNanoSeconds,
+					Nanos:   conf.Envoy.RateLimit.RatelimitRequestTimeouts.RequestTimeoutInNanoSeconds,
+					Seconds: conf.Envoy.RateLimit.RatelimitRequestTimeouts.RequestTimeoutInSeconds,
 				},
 			},
 		},

@@ -6,7 +6,6 @@ descriptors:
       - key: vhost
         value: localhost
         descriptors:
-          # API level policy
           - key: path
             descriptors:
               - key: method
@@ -16,3 +15,8 @@ descriptors:
                     rate_limit:
                       unit: minute
                       requests_per_unit: 5
+                  - key: policy
+                    value: $_3PerMin
+                    rate_limit:
+                      unit: minute
+                      requests_per_unit: 3

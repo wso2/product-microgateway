@@ -5,8 +5,7 @@ data:
   name: ratelimit
   context: /ratelimit
   version: 1.0.0
-  rateLimitLevel: API
-  rateLimitPolicy: $_5PerMin
+  rateLimitLevel: OPERATION
   provider: admin
   lifeCycleStatus: PUBLISHED
   responseCachingEnabled: false
@@ -78,6 +77,19 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
+      rateLimitPolicy: $_3PerMin
+      operationPolicies:
+        request: []
+        response: []
+        fault: []
+    -
+      id: ""
+      target: /pet/{petId}
+      verb: GET
+      authType: Application & Application User
+      scopes: []
+      usedProductIds: []
+      rateLimitPolicy: $_5PerMin
       operationPolicies:
         request: []
         response: []

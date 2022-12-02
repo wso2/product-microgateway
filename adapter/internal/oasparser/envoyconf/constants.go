@@ -137,7 +137,7 @@ const (
 // Constants relevant to the rate-limit service
 const (
 	// ALL denotes API level rate limiting
-	APILevelRateLimitDescriptor       string = "ALL"
-	OperationLevelRateLimitDescriptor string = "OPERATION"
-	APILevelRateLimit                 string = "API"
+	APILevelRateLimitDescriptor string = "ALL"
+	OperationLevelRateLimit     string = "OPERATION"
+	APILevelRateLimit           string = "API"
 )

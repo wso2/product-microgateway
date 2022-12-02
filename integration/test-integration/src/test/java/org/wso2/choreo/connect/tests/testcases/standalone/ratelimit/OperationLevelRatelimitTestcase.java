@@ -20,12 +20,10 @@ package org.wso2.choreo.connect.tests.testcases.standalone.ratelimit;
 
 
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
-import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.testcases.withapim.throttle.ThrottlingBaseTestCase;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -44,7 +42,7 @@ public class OperationLevelRatelimitTestcase {
                 null, null, null, "operation_level_ratelimit_api.yaml");
         ApictlUtils.login("test");
         ApictlUtils.deployAPI("ratelimit_operation_level_test", "test");
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
+        Utils.delay(5000, "Could not wait till initial setup completion.");
 
         API api = new API();
         api.setName("ratelimit");
@@ -61,12 +59,23 @@ public class OperationLevelRatelimitTestcase {
                 3600, null, true);
     }
 
-    @Test(description = "Test rate-limiting with envoy rate-limit service")
-    public void testRateLimitsWithEnvoyRateLimitService() throws Exception {
+    @Test(description = "Test operation level 3 permin rate-limiting with envoy rate-limit service")
+    public void testRateLimitsWithEnvoyRateLimitService3PerMin() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", testKey);
-        Utils.delay(10000, "Could not wait till initial setup completion.");
+        Utils.delay(3000, "Could not wait till initial setup completion.");
         String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
-        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 5), "API level rate-limit throttling failed.");
+        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 3),
+                "Operation level rate-limit 3 per min testcase failed.");
+    }
+
+    @Test(description = "Test operation level 5 per min rate-limiting with envoy rate-limit service")
+    public void testRateLimitsWithEnvoyRateLimitService5PerMin() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", testKey);
+        Utils.delay(3000, "Could not wait till initial setup completion.");
+        String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/3");
+        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 5),
+                "Operation level rate-limit 5 per min testcase failed.");
     }
 }

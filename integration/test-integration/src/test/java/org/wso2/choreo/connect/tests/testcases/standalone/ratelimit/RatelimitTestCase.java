@@ -44,7 +44,7 @@ public class RatelimitTestCase {
                 null, null, null, "ratelimit_api.yaml");
         ApictlUtils.login("test");
         ApictlUtils.deployAPI("ratelimit_test", "test");
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
+        Utils.delay(10000, "Could not wait till initial setup completion.");
 
         API api = new API();
         api.setName("ratelimit");
@@ -67,6 +67,6 @@ public class RatelimitTestCase {
         headers.put("Internal-Key", testKey);
         Utils.delay(10000, "Could not wait till initial setup completion.");
         String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
-        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 5), "API level rate-limit throttling failed.");
+        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 5), "API level rate-limit testcase failed.");
     }
 }
