@@ -21,7 +21,7 @@ const (
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
-	tokenCluster                   = "ext_authz_http_cluster"
+	extAuthzHTTPClusterName string = "ext_authz_http_cluster"
 )
 
 const (

@@ -1169,12 +1169,12 @@ func createStaticRoute(path string, pathSubstitute string, clusterName string) *
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
-	return createStaticRoute(testKeyPath, "/testkey", tokenCluster)
+	return createStaticRoute(testKeyPath, "/testkey", extAuthzHTTPClusterName)
 }
 
 // CreateJwksEndpoint generates a route for JWKS /.wellknown/jwks endpoint
 func CreateJwksEndpoint() *routev3.Route {
-	return createStaticRoute(jwksPath, "/jwks", tokenCluster)
+	return createStaticRoute(jwksPath, "/jwks", extAuthzHTTPClusterName)
 }
 
 func marshalFilterConfig(perFilterConfig *extAuthService.ExtAuthzPerRoute) *anypb.Any {
