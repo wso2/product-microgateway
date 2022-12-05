@@ -14,15 +14,21 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/openjdk11:jre-11.0.16.1_1
-LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
-
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y tzdata
-
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
+FROM alpine:3.16.2
+LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
 
 ENV LANG=C.UTF-8
+
+RUN apk update && apk upgrade --no-cache
+RUN apk add --no-cache tzdata
+
+ENV JAVA_VERSION 11
+
+# install OpenJDK
+RUN apk update && apk fetch openjdk${JAVA_VERSION} && apk add openjdk${JAVA_VERSION}
+
+ENV JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk
+ENV PATH="$JAVA_HOME/bin:${PATH}"
 
 ARG MG_USER=wso2
 ARG MG_USER_ID=10500
@@ -55,8 +61,8 @@ ARG MOTD="\n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
 RUN \
-    groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
-    && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
+    addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
+    && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
     && mkdir ${MG_USER_HOME}/logs && mkdir -p ${MG_USER_HOME}/lib/dropins \
     && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME} \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
