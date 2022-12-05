@@ -35,6 +35,10 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>../resources/rate-limiter</directory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/rate-limiter</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>../resources/license</directory>
             <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
         </fileSet>
@@ -123,6 +127,21 @@
         <file>
             <source>../resources/security/mg.pem</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router/security/truststore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/rate-limiter/security/keystore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/rate-limiter/security/keystore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/rate-limiter/security/truststore
             </outputDirectory>
         </file>
         <file>

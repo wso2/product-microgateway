@@ -87,8 +87,10 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
-    volumes: # TODO: (renuka) Remove temporary config file - until Adapter implements the rate limiter xDS config proto
+    volumes:
+      # TODO: (renuka) Remove temporary config file - until Adapter implements the rate limiter xDS config proto
       - ./conf/rate-limiter-config.yaml:/home/wso2/rate-limits/config/config.yaml
+      - ../resources/rate-limiter/security:/home/wso2/security
     environment:
       - HOST=0.0.0.0
       - PORT=8090
