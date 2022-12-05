@@ -20,9 +20,13 @@ LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
 ENV LANG=C.UTF-8
 
 RUN apk update && apk upgrade --no-cache
-RUN apk add --no-cache tzdata
+RUN apk add --no-cache tzdata wget ca-certificates
 
 ENV JAVA_VERSION 11
+
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk && \
+    apk add --force-overwrite glibc-2.35-r0.apk
 
 # install OpenJDK
 RUN apk update && apk fetch openjdk${JAVA_VERSION} && apk add openjdk${JAVA_VERSION}
