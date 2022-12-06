@@ -33,6 +33,8 @@ public class AnalyticsConstants {
     public static final String TOKEN_ENDPOINT_PATH = "/testkey";
     public static final String HEALTH_ENDPOINT_PATH = "/health";
 
+    public static final String JWKS_ENDPOINT_PATH = "/.wellknown/jwks";
+
     public static final String DEFAULT_FOR_UNASSIGNED = "UNKNOWN";
 
     public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
