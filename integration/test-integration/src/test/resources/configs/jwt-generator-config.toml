@@ -13,7 +13,7 @@
 
 [router.ratelimit]
   enabled = true
-  hostname = "ratelimit"
+  hostname = "rate-limiter"
   port = 8091
   keyFilePath = "/home/wso2/security/keystore/mg.key"
   certFilePath = "/home/wso2/security/keystore/mg.pem"

@@ -61,8 +61,6 @@ public class MockBackendServer {
         String targetDir = targetClassesDir.getParentFile().toString();
         String backendService = MockBackendServer.class.getClassLoader()
                 .getResource("dockerCompose/backend-service.yaml").getPath();
-        String rateLimitService = MockBackendServer.class.getClassLoader()
-                .getResource("dockerCompose/rate-limit-service.yaml").getPath();
         if (StringUtils.isNotEmpty(backendServiceFile)) {
             // if tls enabled, the command in docker-compose should be overridden
             backendService = MockBackendServer.class.getClassLoader()
@@ -72,17 +70,8 @@ public class MockBackendServer {
         // Input files
         List<Path> inputs = Arrays.asList(
                 Paths.get(dockerComposePath),
-                Paths.get(backendService),
-                Paths.get(rateLimitService)
+                Paths.get(backendService)
         );
-        String s = targetClassesDir.getParentFile().getParentFile().getPath() + "/src/test/resources/rateLimit";
-
-        IOFileFilter yamlSuffixFilter = FileFilterUtils.suffixFileFilter(".yaml");
-        IOFileFilter yamlFiles = FileFilterUtils.andFileFilter(FileFileFilter.FILE, yamlSuffixFilter);
-        FileFilter filter = FileFilterUtils.orFileFilter(DirectoryFileFilter.DIRECTORY, yamlFiles);
-
-        FileUtils.copyDirectory(new File(s), new File(Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH +
-                File.separator + "rateLimit"), filter, false);
 
         // Output file
         String tmpDockerCompose = targetDir + File.separator + System.currentTimeMillis() + ".yaml";

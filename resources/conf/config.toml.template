@@ -174,9 +174,9 @@ sandboxVhost = "sandbox.host"
 # Configs relevant to the envoy rate-limit service
 [router.ratelimit]
   # Enable / disable envoy rate-limit service
-  enabled = true
+  enabled = false
   # Hostname relevant to the rate-limit service
-  hostname = "ratelimit-service"
+  hostname = "rate-limiter"
   # Post used for the listening
   port = 8083
   # Key file path used for the rate-limit service mTLS

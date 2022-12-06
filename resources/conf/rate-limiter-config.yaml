@@ -1,27 +1,22 @@
-# Sample config until, Adapter xDS implementation is done
 domain: default
 descriptors:
   - key: org
-    value: wso2
+    value: carbon.super
     descriptors:
       - key: vhost
         value: localhost
         descriptors:
-          # API level policy
           - key: path
             descriptors:
               - key: method
                 descriptors:
                   - key: policy
                     value: $_5PerMin
-                    descriptors:
-                      - key: condition
-                        value: default
-                        rate_limit:
-                          unit: minute
-                          requests_per_unit: 5
-                      - key: condition
-                        value: c1
-                        rate_limit:
-                          unit: minute
-                          requests_per_unit: 3
+                    rate_limit:
+                      unit: minute
+                      requests_per_unit: 5
+                  - key: policy
+                    value: $_3PerMin
+                    rate_limit:
+                      unit: minute
+                      requests_per_unit: 3
