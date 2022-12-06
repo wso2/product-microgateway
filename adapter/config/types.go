@@ -25,7 +25,8 @@ import (
 // This uses singleton pattern where creating a single channel for communication
 //
 // To get a instance of the channel for a data publisher go routine
-//  `publisher := NewSender()`
+//
+//	`publisher := NewSender()`
 //
 // Create a receiver channel in worker go routine
 // receiver := NewReceiver()
@@ -67,8 +68,9 @@ const (
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
 // Note :
-// 		Don't use toml tag for configuration properties as it may affect environment variable based
-// 		config resolution.
+//
+//	Don't use toml tag for configuration properties as it may affect environment variable based
+//	config resolution.
 type Config struct {
 	Adapter       adapter
 	Enforcer      enforcer
@@ -342,9 +344,17 @@ type jwtGenerator struct {
 	EnableUserClaims      bool
 	GatewayGeneratorImpl  string
 	ClaimsExtractorImpl   string
+	TokenTTL              int32
 	PublicCertificatePath string
 	PrivateKeyPath        string
-	TokenTTL              int32
+	Keypair               []KeyPair
+}
+
+// KeyPair represents hthe rsa keypair used for signing JWTs
+type KeyPair struct {
+	PrivateKeyPath        string
+	PublicCertificatePath string
+	UseForSigning         bool
 }
 
 type claimMapping struct {

@@ -225,12 +225,12 @@ func GetEnforcerKeyManagerCache() wso2_cache.SnapshotCache {
 	return enforcerKeyManagerCache
 }
 
-//GetEnforcerRevokedTokenCache return token cache
+// GetEnforcerRevokedTokenCache return token cache
 func GetEnforcerRevokedTokenCache() wso2_cache.SnapshotCache {
 	return enforcerRevokedTokensCache
 }
 
-//GetEnforcerThrottleDataCache return throttle data cache
+// GetEnforcerThrottleDataCache return throttle data cache
 func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
 	return enforcerThrottleDataCache
 }
@@ -825,11 +825,16 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
-	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
 	systemHost := conf.Envoy.SystemHost
-	if enableJwtIssuer {
+
+	// Add testkey and JWKS endpoints
+	if conf.Enforcer.JwtIssuer.Enabled {
 		routeToken := envoyconf.CreateTokenRoute()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
+	}
+	if conf.Enforcer.JwtGenerator.Enabled {
+		routeJwks := envoyconf.CreateJwksEndpoint()
+		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeJwks)
 	}
 
 	// Add health endpoint
@@ -865,7 +870,7 @@ func GenerateGlobalClusters(label string) {
 	envoyEndpointConfigMap[label] = endpoints
 }
 
-//use UpdateXdsCacheWithLock to avoid race conditions
+// use UpdateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) bool {
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.

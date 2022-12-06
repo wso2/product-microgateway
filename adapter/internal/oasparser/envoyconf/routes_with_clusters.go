@@ -25,6 +25,7 @@ import (
 	"strconv"
 
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 
@@ -940,8 +941,7 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 	return interceptor.GetInterceptor(i)
 }
 
-// CreateTokenRoute generates a route for the jwt /testkey endpoint
-func CreateTokenRoute() *routev3.Route {
+func createStaticRoute(path string, pathSubstitute string, clusterName string) *routev3.Route {
 	var (
 		router    routev3.Route
 		action    *routev3.Route_Route
@@ -951,58 +951,36 @@ func CreateTokenRoute() *routev3.Route {
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_Path{
-			Path: testKeyPath,
+			Path: path,
 		},
 	}
-
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
 		AutoHostRewrite: &wrapperspb.BoolValue{
 			Value: true,
 		},
 	}
-
 	decorator = &routev3.Decorator{
-		Operation: testKeyPath,
+		Operation: path,
 	}
-
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
 			Disabled: true,
 		},
 	}
-
-	b := proto.NewBuffer(nil)
-	b.SetDeterministic(true)
-	_ = b.Marshal(&perFilterConfig)
-	filter := &any.Any{
-		TypeUrl: extAuthzPerRouteName,
-		Value:   b.Bytes(),
-	}
+	filter := marshalFilterConfig(&perFilterConfig)
 
 	action = &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
-			RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
-				Pattern: &envoy_type_matcherv3.RegexMatcher{
-					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-							MaxProgramSize: nil,
-						},
-					},
-					Regex: testKeyPath,
-				},
-				Substitution: "/",
-			},
+			PrefixRewrite:        pathSubstitute,
 		},
 	}
-
-	directClusterSpecifier := &routev3.RouteAction_Cluster{
-		Cluster: "token_cluster",
+	action.Route.ClusterSpecifier = &routev3.RouteAction_Cluster{
+		Cluster: clusterName,
 	}
-	action.Route.ClusterSpecifier = directClusterSpecifier
 
 	router = routev3.Route{
-		Name:      testKeyPath, //Categorize routes with same base path
+		Name:      path, //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
 		Metadata:  nil,
@@ -1012,6 +990,27 @@ func CreateTokenRoute() *routev3.Route {
 		},
 	}
 	return &router
+}
+
+// CreateTokenRoute generates a route for the jwt /testkey endpoint
+func CreateTokenRoute() *routev3.Route {
+	return createStaticRoute(testKeyPath, "/testkey", extAuthzHTTPCluster)
+}
+
+// CreateJwksEndpoint generates a route for JWKS /.wellknown/jwks endpoint
+func CreateJwksEndpoint() *routev3.Route {
+	return createStaticRoute(jwksPath, "/jwks", extAuthzHTTPCluster)
+}
+
+func marshalFilterConfig(perFilterConfig *extAuthService.ExtAuthzPerRoute) *anypb.Any {
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+	return filter
 }
 
 // CreateHealthEndpoint generates a route for the jwt /health endpoint

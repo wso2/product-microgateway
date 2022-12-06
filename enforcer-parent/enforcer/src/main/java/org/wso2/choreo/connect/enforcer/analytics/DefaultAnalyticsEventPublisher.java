@@ -128,6 +128,9 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 // Token endpoint calls needs to be removed as well
                 || (AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
                 // Health endpoint calls are not published
-                || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()));
+                || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath())
+                // JWKS endpoint calls should not be published
+                || (AnalyticsConstants.JWKS_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
+        );
     }
 }
