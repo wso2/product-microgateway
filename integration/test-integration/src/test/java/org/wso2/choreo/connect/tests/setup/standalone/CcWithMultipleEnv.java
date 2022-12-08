@@ -49,7 +49,7 @@ public class CcWithMultipleEnv {
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore2", null,
-                "apictl_test_deploy_multiple_env.yaml", null,null);
+                "apictl_test_deploy_multiple_env.yaml", null);
 
         ApictlUtils.addEnv("test2");
         ApictlUtils.login("test2");

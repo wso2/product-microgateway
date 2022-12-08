@@ -97,7 +97,7 @@ public class ApictlUtils {
      */
     public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, CCTestException {
         try {
-            createProject(openApiFile, apiProjectName, backendCert, null, null,null);
+            createProject(openApiFile, apiProjectName, backendCert, null, null);
         } catch (CCTestException e) {
             if (!e.getMessage().equals("Project already exists")) {
                 throw e;
@@ -118,7 +118,25 @@ public class ApictlUtils {
      * @throws CCTestException if apictl was unable to create the project
      */
     public static void createProject(String openApiFile, String apiProjectName) throws IOException, CCTestException {
-        createProject(openApiFile, apiProjectName, null, null, null,null);
+        createProject(openApiFile, apiProjectName, null, null, null);
+    }
+
+    /**
+     * Create an API project - To be used before deploying an API via the apictl deploy command
+     *
+     * @param openApiFile       openAPI file to create the API project from
+     * @param apiProjectName    expected name of the project that gets created
+     * @param backendCert       name of the backend cert file that should be included in the
+     *                          Endpoint-certificates folder of the API project
+     * @param deployEnvYamlFile deployment_environments.yaml file of API project
+     * @param interceptorCert   name of the interceptor cert file that should be included in the
+     *                          Endpoint-certificates/interceptor folder of the API project
+     * @throws IOException     if the runtime fails to execute the apictl command
+     * @throws CCTestException if apictl was unable to create the project
+     */
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
+                                     String interceptorCert) throws IOException, CCTestException {
+        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, null);
     }
 
     /**
@@ -131,6 +149,7 @@ public class ApictlUtils {
      * @param deployEnvYamlFile deployment_environments.yaml file of API project
      * @param interceptorCert name of the interceptor cert file that should be included in the
      *                    Endpoint-certificates/interceptor folder of the API project
+     * @param apiYamlFile name of the api.yaml file
      * @throws IOException if the runtime fails to execute the apictl command
      * @throws CCTestException if apictl was unable to create the project
      */

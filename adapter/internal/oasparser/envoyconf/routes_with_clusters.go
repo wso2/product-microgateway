@@ -37,8 +37,10 @@ import (
 	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
+	upstreams "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
+	envoy_type_metadata_v3 "github.com/envoyproxy/go-control-plane/envoy/type/metadata/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -381,17 +383,95 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 
 // CreateRateLimitCluster creates cluster relevant to the rate limit service
 func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
-	config, _ := config.ReadConfigs()
+	conf, _ := config.ReadConfigs()
 	rlCluster := &model.EndpointCluster{
 		Endpoints: []model.Endpoint{
 			{
-				Host:    config.Envoy.RateLimit.Hostname,
+				Host:    conf.Envoy.RateLimit.Host,
 				URLType: httpsURLType,
-				Port:    config.Envoy.RateLimit.Port,
+				Port:    conf.Envoy.RateLimit.Port,
 			},
 		},
 	}
-	return processEndpoints(rateLimitClusterName, rlCluster, nil, 20, "")
+	cluster, address, rlErr := processEndpoints(rateLimitClusterName, rlCluster, nil, 20, "")
+	config := &upstreams.HttpProtocolOptions{
+		UpstreamHttpProtocolOptions: &corev3.UpstreamHttpProtocolOptions{
+			AutoSni: true,
+		},
+		UpstreamProtocolOptions: &upstreams.HttpProtocolOptions_ExplicitHttpConfig_{
+			ExplicitHttpConfig: &upstreams.HttpProtocolOptions_ExplicitHttpConfig{
+				ProtocolConfig: &upstreams.HttpProtocolOptions_ExplicitHttpConfig_Http2ProtocolOptions{
+					Http2ProtocolOptions: &corev3.Http2ProtocolOptions{},
+				},
+			},
+		},
+	}
+	a, err := proto.Marshal(config)
+	if err != nil {
+		logger.LoggerOasparser.Errorf("Error occurred while parsing rate-limit HTTP protocol options. %v", err)
+	}
+	cluster.TypedExtensionProtocolOptions = map[string]*anypb.Any{
+		"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": {
+			TypeUrl: httpProtocolOptionsName,
+			Value:   a,
+		},
+	}
+
+	// =====
+	tlsCert := generateTLSCert(conf.Envoy.RateLimit.KeyFilePath, conf.Envoy.RateLimit.CertFilePath)
+
+	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
+	for i := range ciphersArray {
+		ciphersArray[i] = strings.TrimSpace(ciphersArray[i])
+	}
+	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
+		CommonTlsContext: &tlsv3.CommonTlsContext{
+			TlsParams: &tlsv3.TlsParameters{
+				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinimumProtocolVersion),
+				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaximumProtocolVersion),
+				CipherSuites:              ciphersArray,
+			},
+			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+		},
+	}
+	trustedCASrc := &corev3.DataSource{
+		Specifier: &corev3.DataSource_Filename{
+			Filename: conf.Envoy.RateLimit.CaCertFilePath,
+		},
+	}
+	upstreamTLSContext.Sni = conf.Envoy.RateLimit.SSLCertSANHostname
+	upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
+		ValidationContext: &tlsv3.CertificateValidationContext{
+			TrustedCa: trustedCASrc,
+			MatchSubjectAltNames: []*envoy_type_matcherv3.StringMatcher{
+				{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+						Exact: conf.Envoy.RateLimit.SSLCertSANHostname,
+					},
+				},
+			},
+		},
+	}
+	marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
+	if err != nil {
+		return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
+	}
+
+	cluster.TransportSocketMatches[0] = &clusterv3.Cluster_TransportSocketMatch{
+		Name: "ts" + strconv.Itoa(0),
+		Match: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"lb_id": structpb.NewStringValue(strconv.Itoa(0)),
+			},
+		},
+		TransportSocket: &corev3.TransportSocket{
+			Name: transportSocketName,
+			ConfigType: &corev3.TransportSocket_TypedConfig{
+				TypedConfig: marshalledTLSContext,
+			},
+		},
+	}
+	return cluster, address, rlErr
 }
 
 // CreateTracingCluster creates a cluster definition for router's tracing server.
@@ -442,8 +522,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	priority := 0
 	// epType {loadbalance, failover}
 	epType := clusterDetails.EndpointType
-	// denotes rate-limit ep creation
-	var isRateLimitCluster bool = false
 
 	addresses := []*corev3.Address{}
 
@@ -477,11 +555,9 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 				epCert = cert
 			} else if defaultCerts, found := upstreamCerts["default"]; found {
 				epCert = defaultCerts
-			} else if clusterName == rateLimitClusterName {
-				isRateLimitCluster = true
 			}
 
-			upstreamtlsContext := createUpstreamTLSContext(epCert, address, isRateLimitCluster)
+			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
 			marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
@@ -533,10 +609,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
-	}
-
-	if clusterName == rateLimitClusterName {
-		cluster.Http2ProtocolOptions = &corev3.Http2ProtocolOptions{}
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {
@@ -595,7 +667,7 @@ func createHealthCheck() []*corev3.HealthCheck {
 	}
 }
 
-func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, isRateLimitCluster bool) *tlsv3.UpstreamTlsContext {
+func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tlsv3.UpstreamTlsContext {
 	conf, errReadConfig := config.ReadConfigs()
 	var tlsCert *tlsv3.TlsCertificate
 	//TODO: (VirajSalaka) Error Handling
@@ -603,11 +675,8 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, isR
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 		return nil
 	}
-	if isRateLimitCluster {
-		tlsCert = generateTLSCert(conf.Envoy.RateLimit.KeyFilePath, conf.Envoy.RateLimit.CertFilePath)
-	} else {
-		tlsCert = generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
-	}
+	tlsCert = generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
+
 	// Convert the cipher string to a string array
 	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
 	for i := range ciphersArray {
@@ -634,12 +703,6 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, isR
 					InlineBytes: upstreamCerts,
 				},
 			}
-		} else if isRateLimitCluster {
-			trustedCASrc = &corev3.DataSource{
-				Specifier: &corev3.DataSource_Filename{
-					Filename: conf.Envoy.RateLimit.CaCertFilePath,
-				},
-			}
 		} else {
 			trustedCASrc = &corev3.DataSource{
 				Specifier: &corev3.DataSource_Filename{
@@ -649,21 +712,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, isR
 		}
 
 		// Sni should be assigned when there is a hostname
-		if isRateLimitCluster {
-			upstreamTLSContext.Sni = conf.Envoy.RateLimit.SSLCertSANHostname
-			upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
-				ValidationContext: &tlsv3.CertificateValidationContext{
-					TrustedCa: trustedCASrc,
-					MatchSubjectAltNames: []*envoy_type_matcherv3.StringMatcher{
-						{
-							MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
-								Exact: conf.Envoy.RateLimit.SSLCertSANHostname,
-							},
-						},
-					},
-				},
-			}
-		} else if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
+		if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
 			upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
 			upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
 				ValidationContext: &tlsv3.CertificateValidationContext{
@@ -682,9 +731,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address, isR
 				},
 			},
 		}
-		if !isRateLimitCluster {
-			upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchSubjectAltNames = subjectAltNames
-		}
+		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchSubjectAltNames = subjectAltNames
 	}
 	return upstreamTLSContext
 }
@@ -727,7 +774,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
 	rlMethodDescriptorValue := params.rateLimitLevel
-	rateLimitPolicyName := params.rateLimitPolicyName
 	config, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
@@ -900,7 +946,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
-		if config.Envoy.RateLimit.Enabled && params.rateLimitLevel != "" {
+		if config.Envoy.RateLimit.Enabled && rlMethodDescriptorValue != "" {
 			if rlMethodDescriptorValue == OperationLevelRateLimit {
 				basePath += resourcePathParam
 			}
@@ -932,7 +978,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					},
 				},
 			}
-			if params.rateLimitLevel != OperationLevelRateLimit {
+			if rlMethodDescriptorValue != OperationLevelRateLimit {
 				apiLevelRateLimitActions := []*routev3.RateLimit_Action{
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
@@ -957,12 +1003,22 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				}
 				rateLimit.Actions = append(rateLimit.Actions, operationLevelRateLimitActions...)
 			}
-			// assigns the ratelimit policy
+
 			rateLimit.Actions = append(rateLimit.Actions, &routev3.RateLimit_Action{
-				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-					GenericKey: &routev3.RateLimit_Action_GenericKey{
-						DescriptorKey:   "policy",
-						DescriptorValue: rateLimitPolicyName,
+				ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+					Metadata: &routev3.RateLimit_Action_MetaData{
+						DescriptorKey: "policy",
+						MetadataKey: &envoy_type_metadata_v3.MetadataKey{
+							Key: "envoy.filters.http.ext_authz",
+							Path: []*envoy_type_metadata_v3.MetadataKey_PathSegment{
+								{
+									Segment: &envoy_type_metadata_v3.MetadataKey_PathSegment_Key{
+										Key: "rate-limit-policy",
+									},
+								},
+							},
+						},
+						Source: routev3.RateLimit_Action_MetaData_DYNAMIC,
 					},
 				},
 			})
@@ -1440,15 +1496,10 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	var rateLimitPolicyName, rlMethodDescriptorValue string
 	if swagger.RateLimitLevel == APILevelRateLimit {
 		rlMethodDescriptorValue = APILevelRateLimitDescriptor
-		for _, operation := range resource.GetMethod() {
-			rateLimitPolicyName = operation.RateLimitPolicy
-			break
-		}
+		rateLimitPolicyName = swagger.RateLimitPolicy
 	} else if swagger.RateLimitLevel == OperationLevelRateLimit {
-		for _, operation := range resource.GetMethod() {
-			rateLimitPolicyName = operation.RateLimitPolicy
-			rlMethodDescriptorValue = OperationLevelRateLimit
-		}
+		rlMethodDescriptorValue = OperationLevelRateLimit
+		rateLimitPolicyName = ""
 	}
 	params := &routeCreateParams{
 		organizationID:      organizationID,

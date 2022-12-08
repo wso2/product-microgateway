@@ -36,6 +36,7 @@ const (
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
 	localRateLimitPerRouteName string = "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
+	httpProtocolOptionsName    string = "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"

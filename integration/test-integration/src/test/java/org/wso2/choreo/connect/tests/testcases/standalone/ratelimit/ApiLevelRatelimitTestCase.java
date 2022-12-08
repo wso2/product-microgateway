@@ -35,7 +35,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RatelimitTestCase {
+public class ApiLevelRatelimitTestCase {
     private String testKey;
 
     @BeforeClass

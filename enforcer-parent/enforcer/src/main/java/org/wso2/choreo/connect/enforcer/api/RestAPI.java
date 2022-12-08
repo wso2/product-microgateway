@@ -37,6 +37,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
@@ -173,6 +174,11 @@ public class RestAPI implements API {
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
             }
+            // sets metadata for rate-limit policy if operation level rate-limiting is enabled
+            if (!requestContext.getRateLimitPolicy().isBlank()) {
+                requestContext.addMetadataToMap(MetadataConstants.RATE_LIMIT_POLICY,
+                        requestContext.getRateLimitPolicy());
+            }
             // set metadata for interceptors
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {
@@ -216,6 +222,7 @@ public class RestAPI implements API {
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
         resource.setTier(operation.getTier());
         resource.setDisableSecurity(operation.getDisableSecurity());
+        resource.setRateLimitPolicy(operation.getRateLimitPolicy());
         Map<String, List<String>> securityMap = new HashMap<>();
         if (operation.getSecurityList().size() > 0) {
             for (SecurityList securityList : operation.getSecurityList()) {

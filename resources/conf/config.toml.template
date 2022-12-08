@@ -173,12 +173,16 @@ sandboxVhost = "sandbox.host"
 
 # Configs relevant to the envoy rate-limit service
 [router.ratelimit]
-  # Enable / disable envoy rate-limit service
+  # Enable/disable envoy rate-limit service
   enabled = false
   # Hostname relevant to the rate-limit service
-  hostname = "rate-limiter"
+  host = "rate-limiter"
   # Post used for the listening
   port = 8083
+  # request timeouts period in milliseconds
+  requestTimeoutInMillis= 80
+  # Allow to fail requests in case the rate limiting service does not respond back
+  failureModeDeny = false
   # Key file path used for the rate-limit service mTLS
   keyFilePath = "/home/wso2/security/keystore/mg.key"
   # Cert file path used for the rate-limit service mTLS
@@ -187,12 +191,6 @@ sandboxVhost = "sandbox.host"
   caCertFilePath = "/home/wso2/security/truststore/mg.pem"
   # SAN hostname represented in the public cert
   sSLCertSANHostname = "localhost"
-  # Configs request timeouts relevant to the envoy rate-limit service
-  [router.ratelimit.ratelimitRequestTimeouts]
-    # Request timeouts in seconds
-    requestTimeoutInSeconds = 0
-    # Request timeouts in nano seconds
-    requestTimeoutInNanoSeconds = 80000000
 
 [enforcer] # --------------------------------------------------------
 

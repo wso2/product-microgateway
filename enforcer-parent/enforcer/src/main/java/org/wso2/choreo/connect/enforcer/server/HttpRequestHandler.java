@@ -59,6 +59,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
+        String rateLimitPolicy = "";
         String method = request.getAttributes().getRequest().getHttp().getMethod();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
         String pathTemplate = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
@@ -81,9 +82,13 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         } else {
             resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
         }
+
+        if (resourceConfig != null) {
+            rateLimitPolicy = resourceConfig.getRateLimitPolicy();
+        }
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).build();
+                .pathTemplate(pathTemplate).rateLimitPolicy(rateLimitPolicy).build();
     }
 }

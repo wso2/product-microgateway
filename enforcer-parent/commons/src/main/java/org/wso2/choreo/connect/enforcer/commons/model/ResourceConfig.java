@@ -32,6 +32,7 @@ public class ResourceConfig {
     private String tier = "Unlimited";
     private boolean disableSecurity = false;
     private Map<String, EndpointCluster> endpoints; // "PRODUCTION" OR "SANDBOX" -> endpoint cluster
+    private String rateLimitPolicy;
 
     /**
      * ENUM to hold http operations.
@@ -128,5 +129,20 @@ public class ResourceConfig {
         this.endpoints = endpoints;
     }
 
+    /**
+     * Returns rate-limit policy relevant to the operation
+     * @return rate-limit policy as a String
+     */
+    public String getRateLimitPolicy() {
+        return rateLimitPolicy;
+    }
+
+    /**
+     * Sets rate-limit policy relevant to the operation
+     * @param rateLimitPolicy rate-limit policy name
+     */
+    public void setRateLimitPolicy(String rateLimitPolicy) {
+        this.rateLimitPolicy = rateLimitPolicy;
+    }
 }
 

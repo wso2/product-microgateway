@@ -127,14 +127,15 @@ type connection struct {
 }
 
 type rateLimit struct {
-	Enabled                  bool
-	Hostname                 string
-	Port                     uint32
-	RatelimitRequestTimeouts ratelimitRequestTimeouts
-	KeyFilePath              string
-	CertFilePath             string
-	CaCertFilePath           string
-	SSLCertSANHostname       string
+	Enabled                bool
+	Host                   string
+	Port                   uint32
+	FailureModeDeny        bool
+	RequestTimeoutInMillis int64
+	KeyFilePath            string
+	CertFilePath           string
+	CaCertFilePath         string
+	SSLCertSANHostname     string
 }
 
 type ratelimitRequestTimeouts struct {
