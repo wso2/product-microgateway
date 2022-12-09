@@ -16,7 +16,7 @@ public class APiDeployViaApictlTestCase {
         ApictlUtils.createProject("deploy_openAPI.yaml", "apictl_petstore", null, "apictl_test_deploy_env.yaml", null);
         ApictlUtils.removeEnv("apictl_test");
         ApictlUtils.addEnv("apictl_test");
-        Utils.delay(1000, "Interrupted while waiting for DELETE and CREATE events to be deployed");
+        Utils.delay(1000, "Interrupted while waiting for project creation");
     }
 
     @Test

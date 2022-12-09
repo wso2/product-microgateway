@@ -74,5 +74,5 @@ func NewOperation(method string, security []map[string][]string, extensions map[
 	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	id := uuid.New().String()
-	return &Operation{id, method, security, tier, disableSecurity, extensions,""}
+	return &Operation{id, method, security, tier, disableSecurity, extensions, ""}
 }

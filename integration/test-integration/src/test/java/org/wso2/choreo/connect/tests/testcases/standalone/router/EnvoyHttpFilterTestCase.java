@@ -64,7 +64,6 @@ public class EnvoyHttpFilterTestCase {
         Assert.assertNotNull(headersToBackend.get("user-agent"));
         Assert.assertNotNull(headersToBackend.get("cache-control"));
 
-
         Assert.assertFalse(headersToBackend.has("x-envoy-original-path"), "x-envoy-original-path not removed");
         Assert.assertFalse(headersToBackend.has("x-wso2-cluster-header"), "x-wso2-cluster-header not removed");
         Assert.assertFalse(headersToBackend.has("x-envoy-expected-rq-timeout-ms"), "x-envoy-expected-rq-timeout-ms not removed");

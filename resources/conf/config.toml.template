@@ -177,9 +177,9 @@ sandboxVhost = "sandbox.host"
   enabled = false
   # Hostname relevant to the rate-limit service
   host = "rate-limiter"
-  # Post used for the listening
+  # Port used for the listening
   port = 8083
-  # request timeouts period in milliseconds
+  # Request timeouts period in milliseconds
   requestTimeoutInMillis= 80
   # Allow to fail requests in case the rate limiting service does not respond back
   failureModeDeny = false

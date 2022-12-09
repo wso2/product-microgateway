@@ -72,7 +72,7 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject("circuit_breakers_openAPI.yaml", "circuit_breakers");
         ApictlUtils.createProject("disable_security_openAPI.yaml", "disable_security");
         ApictlUtils.createProject("backend_security_openAPI.yaml", "backend_security");
-        ApictlUtils.createProject( "scopes_openAPI.yaml", "scopes");
+        ApictlUtils.createProject("scopes_openAPI.yaml", "scopes");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");

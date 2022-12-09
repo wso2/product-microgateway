@@ -416,8 +416,6 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 			Value:   a,
 		},
 	}
-
-	// =====
 	tlsCert := generateTLSCert(conf.Envoy.RateLimit.KeyFilePath, conf.Envoy.RateLimit.CertFilePath)
 
 	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
@@ -694,6 +692,11 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		},
 	}
 
+	// Sni should be assigned when there is a hostname
+	if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
+		upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
+	}
+
 	if !conf.Envoy.Upstream.TLS.DisableSslVerification {
 		var trustedCASrc *corev3.DataSource
 
@@ -711,14 +714,10 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 			}
 		}
 
-		// Sni should be assigned when there is a hostname
-		if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
-			upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
-			upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
-				ValidationContext: &tlsv3.CertificateValidationContext{
-					TrustedCa: trustedCASrc,
-				},
-			}
+		upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
+			ValidationContext: &tlsv3.CertificateValidationContext{
+				TrustedCa: trustedCASrc,
+			},
 		}
 	}
 
@@ -1493,13 +1492,11 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
 	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 
-	var rateLimitPolicyName, rlMethodDescriptorValue string
+	var rlMethodDescriptorValue string
 	if swagger.RateLimitLevel == APILevelRateLimit {
 		rlMethodDescriptorValue = APILevelRateLimitDescriptor
-		rateLimitPolicyName = swagger.RateLimitPolicy
 	} else if swagger.RateLimitLevel == OperationLevelRateLimit {
 		rlMethodDescriptorValue = OperationLevelRateLimit
-		rateLimitPolicyName = ""
 	}
 	params := &routeCreateParams{
 		organizationID:      organizationID,
@@ -1518,7 +1515,6 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
 		rateLimitLevel:      rlMethodDescriptorValue,
-		rateLimitPolicyName: rateLimitPolicyName,
 	}
 
 	if resource != nil {

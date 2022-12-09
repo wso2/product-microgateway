@@ -138,11 +138,6 @@ type rateLimit struct {
 	SSLCertSANHostname     string
 }
 
-type ratelimitRequestTimeouts struct {
-	RequestTimeoutInSeconds     int64
-	RequestTimeoutInNanoSeconds int32
-}
-
 type enforcer struct {
 	Security     security
 	AuthService  authService
