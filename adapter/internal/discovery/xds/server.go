@@ -35,6 +35,8 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 
+	rls_config "github.com/envoyproxy/go-control-plane/ratelimit/config/ratelimit/v3"
+
 	envoy_resource "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
@@ -85,6 +87,8 @@ var (
 	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
 	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:API_UUID -> API Resource map
 	orgIDvHostBasepathMap       map[string]map[string]string               // organizationID -> Vhost:basepath -> Vhost:API_UUID
+
+	orgIdOpenAPIRateLimitConfigsMap map[string]map[string][]*rls_config.RateLimitDescriptor // organizationID -> Vhost:API_UUID -> Rate Limit Configs map
 
 	reverseAPINameVersionMap map[string]string
 
@@ -319,6 +323,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
 	mgwSwagger.OrganizationID = apiProject.OrganizationID
+	mgwSwagger.VHost = vHost
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
@@ -419,6 +424,12 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
 		interceptCertMap, vHost, organizationID)
+
+	// TODO: (renuka)
+	if err := rlsPolicyCache.AddAPILevelRateLimitPolicies(apiIdentifier, mgwSwagger, apiProject.RateLimitPolicies); err != nil {
+		logger.LoggerXds.Error("Error while populating API level rate limit policies", err)
+		return nil, err
+	}
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes

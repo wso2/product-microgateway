@@ -61,6 +61,7 @@ type MgwSwagger struct {
 	xWso2AuthHeader     string
 	disableSecurity     bool
 	OrganizationID      string
+	VHost               string
 	IsProtoTyped        bool
 	RateLimitLevel      string
 	RateLimitPolicy     string

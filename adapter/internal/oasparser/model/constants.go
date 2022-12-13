@@ -82,6 +82,11 @@ const (
 	WEBHOOK string = "WEBHOOK"
 )
 
+const (
+	RateLimitPolicy_APILevel       = "API"
+	RateLimitPolicy_OperationLevel = "OPERATION"
+)
+
 // Constants to represent errors
 const (
 	AlreadyExists string = "ALREADY_EXISTS"
