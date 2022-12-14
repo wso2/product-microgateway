@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.tests.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.tests.common.model.API;
@@ -33,7 +34,9 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -42,9 +45,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class TokenUtil {
 
-    public static String getBasicJWT(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo, String keyType,
+    public static String getBasicJWT(ApplicationDTO applicationDTO, JSONObject claims, String keyType,
             int validityPeriod, String scopes) throws Exception {
 
+        JSONObject jwtTokenInfo = new JSONObject();
         jwtTokenInfo.put("aud", "http://org.wso2.apimgt/gateway");
         jwtTokenInfo.put("sub", "admin");
         if (scopes != null) {
@@ -56,6 +60,13 @@ public class TokenUtil {
         jwtTokenInfo.put("iat", System.currentTimeMillis());
         jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
         jwtTokenInfo.put("jti", UUID.randomUUID());
+
+        // Override jwtTokenInfo with already defined claims
+        Iterator<String> keys = claims.keys();
+        while(keys.hasNext()) {
+            String key = keys.next();
+            jwtTokenInfo.put(key, claims.get(key));
+        }
 
         String payload = jwtTokenInfo.toString();
 
@@ -161,8 +172,42 @@ public class TokenUtil {
      */
     public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
                                 int validityPeriod, String scopes, boolean isInternalKey) throws Exception {
+
+        JSONObject jwtTokenInfo = new JSONObject();
+        jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(getSubscribedApiDTO(api, tier))));
+        jwtTokenInfo.put("tierInfo",  tierInfoJSONObject(tier));
+
+        if (isInternalKey) {
+            return TokenUtil.getInternalKey(jwtTokenInfo, keyType, validityPeriod);
+        }
+        return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, scopes);
+    }
+
+    /**
+     * Get an OAuth JWT token with specific JWT claims.
+     *
+     * @param api            API info to include in subscribed API section
+     * @param applicationDTO Application info
+     * @param tier           Subscription tier to include in tierInfo
+     * @param keyType        key type as PRODUCTION or SANDBOX
+     * @param validityPeriod validity period
+     * @param specificClaims non default or updated claims to include in the final JWT
+     * @throws Exception     if an error occurs while loading keystore
+     * @return               OAuth JWT token
+     */
+    public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
+                                int validityPeriod, JSONObject specificClaims) throws Exception {
+        JSONObject jwtClaims;
+        jwtClaims = Objects.requireNonNullElseGet(specificClaims, JSONObject::new);
+        jwtClaims.put("subscribedAPIs", new JSONArray(Arrays.asList(getSubscribedApiDTO(api, tier))));
+        jwtClaims.put("tierInfo", tierInfoJSONObject(tier));
+
+        return TokenUtil.getBasicJWT(applicationDTO, jwtClaims, keyType, validityPeriod, null);
+    }
+
+    private static SubscribedApiDTO getSubscribedApiDTO(API api, String tier) {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-        if (!api.getContext().startsWith("/")) {
+        if (!StringUtils.startsWith(api.getContext(), "/")) {
             api.setContext("/" + api.getContext());
         }
         subscribedApiDTO.setContext(api.getContext());
@@ -172,21 +217,15 @@ public class TokenUtil {
 
         subscribedApiDTO.setSubscriptionTier(tier);
         subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
+        return subscribedApiDTO;
+    }
 
-        JSONObject jwtTokenInfo = new JSONObject();
-
+    private static JSONObject tierInfoJSONObject(String tier) {
+        JSONObject tierInfoDTO = new JSONObject();
         JSONObject tierDTO = new JSONObject();
         tierDTO.put("stopOnQuotaReach", true);
-        JSONObject tierInfoDTO = new JSONObject();
         tierInfoDTO.put(tier, tierDTO);
-
-        jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
-        jwtTokenInfo.put("tierInfo", tierInfoDTO);
-
-        if (isInternalKey) {
-            return TokenUtil.getInternalKey(jwtTokenInfo, keyType, validityPeriod);
-        }
-        return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, scopes);
+        return tierInfoDTO;
     }
 
     public static String getJwtForPetstore(String keyType, String scopes, boolean isInternalKey) throws Exception {

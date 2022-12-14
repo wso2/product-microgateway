@@ -178,6 +178,7 @@ public class APIConstants {
         public static final String PARAM_SEPARATOR = "&";
         public static final String PARAM_VALUE_SEPARATOR = "=";
         public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
+        public static final String ENV_NAME_PREFIX = "choreo:environment:";
 
     }
 
