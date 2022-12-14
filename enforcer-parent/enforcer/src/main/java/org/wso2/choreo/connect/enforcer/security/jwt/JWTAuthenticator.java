@@ -78,12 +78,16 @@ public class JWTAuthenticator implements Authenticator {
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
 
+    private final String choreoGatewayEnv;
+
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
         this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
         }
+        this.choreoGatewayEnv = APIConstants.JwtTokenConstants.ENV_NAME_PREFIX
+                + ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
     }
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
@@ -187,8 +191,7 @@ public class JWTAuthenticator implements Authenticator {
             if (validationInfo != null) {
                 if (validationInfo.isValid()) {
                     // Check if the token has access to the gateway configured environment.
-                    String gatewayEnv = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
-                    checkTokenEnv(claims, gatewayEnv);
+                    checkTokenEnv(claims);
 
                     // Validate subscriptions
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
@@ -311,22 +314,28 @@ public class JWTAuthenticator implements Authenticator {
 
     }
 
-    private void checkTokenEnv(JWTClaimsSet claims, String gatewayEnv) throws APISecurityException {
+    private void checkTokenEnv(JWTClaimsSet claims) throws APISecurityException {
         // If the claim "aud" does not exist, getAudience() returns an empty list.
         // If the value for "aud" is a String, getAudience() appends the value to the list that is returned.
         List<String> aud = claims.getAudience();
         for (String item: aud) {
+            // If value assigned to choreoGatewayEnv is present in the audience array, the token is valid.
+            // The token is invalid if there are at least one list item that starts with the ENV_NAME_PREFIX but
+            // the exact value for the gateway's environment (choreoGatewayEnv) is not present.
+
             if (item.startsWith(APIConstants.JwtTokenConstants.ENV_NAME_PREFIX)) {
-                String choreoGatewayEnv = APIConstants.JwtTokenConstants.ENV_NAME_PREFIX + gatewayEnv;
+                // At least one list item that starts with the ENV_NAME_PREFIX has been found.
                 if (aud.contains(choreoGatewayEnv)) {
+                    // The expected value was one of the elements in the array.
                     log.debug("Environment validation for the access token was successful.");
+                    break;
                 } else {
-                    log.debug("The access token does not have access to the environment {}.", gatewayEnv);
+                    // None of the elements were equal to choreoGatewayEnv
+                    log.debug("The access token does not have access to the environment {}.", choreoGatewayEnv);
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                             APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
                             APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
                 }
-                break;
             }
         }
     }
