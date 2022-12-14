@@ -186,6 +186,10 @@ public class JWTAuthenticator implements Authenticator {
             JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
             if (validationInfo != null) {
                 if (validationInfo.isValid()) {
+                    // Check if the token has access to the gateway configured environment.
+                    String gatewayEnv = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
+                    checkTokenEnv(claims, gatewayEnv);
+
                     // Validate subscriptions
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
                     EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
@@ -305,6 +309,26 @@ public class JWTAuthenticator implements Authenticator {
             }
         }
 
+    }
+
+    private void checkTokenEnv(JWTClaimsSet claims, String gatewayEnv) throws APISecurityException {
+        // If the claim "aud" does not exist, getAudience() returns an empty list.
+        // If the value for "aud" is a String, getAudience() appends the value to the list that is returned.
+        List<String> aud = claims.getAudience();
+        for (String item: aud) {
+            if (item.startsWith(APIConstants.JwtTokenConstants.ENV_NAME_PREFIX)) {
+                String choreoGatewayEnv = APIConstants.JwtTokenConstants.ENV_NAME_PREFIX + gatewayEnv;
+                if (aud.contains(choreoGatewayEnv)) {
+                    log.debug("Environment validation for the access token was successful.");
+                } else {
+                    log.debug("The access token does not have access to the environment {}.", gatewayEnv);
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                            APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
+                }
+                break;
+            }
+        }
     }
 
     private void updateApplicationNameForSubscriptionDisabledKM(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,

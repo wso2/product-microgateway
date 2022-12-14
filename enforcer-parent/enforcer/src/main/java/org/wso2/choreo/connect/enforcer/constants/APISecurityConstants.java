@@ -69,6 +69,9 @@ public class APISecurityConstants {
     public static final int API_AUTH_MISSING_OPEN_API_DEF = 900911;
     public static final String API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE = "Internal Server Error";
 
+    public static final int API_AUTH_INVALID_ENVIRONMENT = 900912;
+    public static final String API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE = "Invalid environment";
+
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";
