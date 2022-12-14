@@ -99,14 +99,16 @@ public class GatewayEnvTokenTestCase {
     }
 
     @Test(description = "Test without valid env name in audience array")
-    public void jwtWithInvalidEnvUnauthenticatedTest() throws Exception {
+    public void jwtWithInvalidEnvUnauthorizedTest() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithInValidEnv);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/standard/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN,"Response code mismatched");
+        Assert.assertTrue(response.getData().contains("The access token is not authorized to access the environment."),
+                "Incorrect response message");
     }
 
     @Test(description = "Test with valid env name in audience array with other envs")

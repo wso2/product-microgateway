@@ -332,7 +332,7 @@ public class JWTAuthenticator implements Authenticator {
                 } else {
                     // None of the elements were equal to choreoGatewayEnv
                     log.debug("The access token does not have access to the environment {}.", choreoGatewayEnv);
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                             APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
                             APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
                 }
