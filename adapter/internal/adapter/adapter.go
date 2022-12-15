@@ -30,6 +30,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/common"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
+	ratelimiterCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/ratelimitercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
 	"github.com/wso2/product-microgateway/adapter/internal/messaging"
@@ -92,7 +93,7 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
+func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
 	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
 	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server,
 	enforcerKeyManagerDsSrv wso2_server.Server, enforcerRevokedTokenDsSrv wso2_server.Server,
@@ -132,6 +133,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 
 	// register services
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
+	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, rlsServer)
 	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, enforcerServer)
 	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
 	subscriptionservice.RegisterSubscriptionDiscoveryServiceServer(grpcServer, enforcerSdsServer)
@@ -184,6 +186,7 @@ func Run(conf *config.Config) {
 
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()
+	rateLimiterCache := xds.GetRateLimiterCache()
 	enforcerCache := xds.GetEnforcerCache()
 	enforcerSubscriptionCache := xds.GetEnforcerSubscriptionCache()
 	enforcerApplicationCache := xds.GetEnforcerApplicationCache()
@@ -196,6 +199,7 @@ func Run(conf *config.Config) {
 	enforcerThrottleDataCache := xds.GetEnforcerThrottleDataCache()
 
 	srv := xdsv3.NewServer(ctx, cache, &routercb.Callbacks{})
+	rlsSrv := xdsv3.NewServer(ctx, rateLimiterCache, &ratelimiterCallbacks.Callbacks{})
 	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &enforcerCallbacks.Callbacks{})
 	enforcerSdsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionCache, &enforcerCallbacks.Callbacks{})
 	enforcerAppDsSrv := wso2_server.NewServer(ctx, enforcerApplicationCache, &enforcerCallbacks.Callbacks{})
@@ -207,7 +211,7 @@ func Run(conf *config.Config) {
 	enforcerRevokedTokenDsSrv := wso2_server.NewServer(ctx, enforcerRevokedTokenCache, &enforcerCallbacks.Callbacks{})
 	enforcerThrottleDataDsSrv := wso2_server.NewServer(ctx, enforcerThrottleDataCache, &enforcerCallbacks.Callbacks{})
 
-	runManagementServer(conf, srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
+	runManagementServer(conf, srv, rlsSrv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv,
 		enforcerRevokedTokenDsSrv, enforcerThrottleDataDsSrv, port)
 

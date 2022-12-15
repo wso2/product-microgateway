@@ -35,8 +35,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 
-	rls_config "github.com/envoyproxy/go-control-plane/ratelimit/config/ratelimit/v3"
-
 	envoy_resource "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
@@ -87,8 +85,6 @@ var (
 	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
 	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:API_UUID -> API Resource map
 	orgIDvHostBasepathMap       map[string]map[string]string               // organizationID -> Vhost:basepath -> Vhost:API_UUID
-
-	orgIdOpenAPIRateLimitConfigsMap map[string]map[string][]*rls_config.RateLimitDescriptor // organizationID -> Vhost:API_UUID -> Rate Limit Configs map
 
 	reverseAPINameVersionMap map[string]string
 
@@ -187,6 +183,11 @@ func init() {
 // GetXdsCache returns xds server cache.
 func GetXdsCache() envoy_cachev3.SnapshotCache {
 	return cache
+}
+
+// GetRateLimiterCache returns xds server cache for rate limiter service.
+func GetRateLimiterCache() envoy_cachev3.SnapshotCache {
+	return rlsPolicyCache.xdsCache
 }
 
 // GetEnforcerCache returns xds server cache.
@@ -784,6 +785,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
 		UpdateEnforcerApis(newLabel, apis, "")
+		_ = rlsPolicyCache.updateXdsCache(newLabel)
 		success := UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 		if success {
@@ -797,6 +799,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
 		if !arrayContains(newLabels, oldLabel) {
 			listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(oldLabel)
 			UpdateEnforcerApis(oldLabel, apis, "")
+			_ = rlsPolicyCache.updateXdsCache(oldLabel)
 			UpdateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}

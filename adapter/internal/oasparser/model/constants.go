@@ -83,8 +83,10 @@ const (
 )
 
 const (
-	RateLimitPolicy_APILevel       = "API"
-	RateLimitPolicy_OperationLevel = "OPERATION"
+	// RateLimitPolicyAPILevel represents API Level rate limit policy
+	RateLimitPolicyAPILevel = "API"
+	// RateLimitPolicyOperationLevel represents Operation Level rate limit policy
+	RateLimitPolicyOperationLevel = "OPERATION"
 )
 
 // Constants to represent errors

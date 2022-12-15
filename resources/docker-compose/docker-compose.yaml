@@ -88,8 +88,6 @@ services:
         max-size: "20m"
         max-file: "5"
     volumes:
-      # TODO: (renuka) Remove temporary config file - until Adapter implements the rate limiter xDS config proto
-      - ./conf/rate-limiter-config.yaml:/home/wso2/rate-limits/config/config.yaml
       - ../resources/rate-limiter/security:/home/wso2/security
     environment:
       - HOST=0.0.0.0
@@ -116,18 +114,14 @@ services:
       - GRPC_CLIENT_TLS_CACERT=/home/wso2/security/truststore/mg.pem
       - GRPC_CLIENT_TLS_SAN=localhost
         # xDS config server
-      - CONFIG_TYPE=FILE # TODO: (renuka) Temporary use file configs, should be GRPC_XDS_SOTW
-      - CONFIG_GRPC_XDS_NODE_ID=default
+      - CONFIG_TYPE=GRPC_XDS_SOTW
+      - CONFIG_GRPC_XDS_NODE_ID=Default # TODO: (renuka) RATE_LIMITER_LABEL to align with other
       - CONFIG_GRPC_XDS_SERVER_URL=adapter:18000
       - CONFIG_GRPC_XDS_SERVER_USE_TLS=true
       - CONFIG_GRPC_XDS_CLIENT_TLS_KEY=/home/wso2/security/keystore/mg.key
       - CONFIG_GRPC_XDS_CLIENT_TLS_CERT=/home/wso2/security/keystore/mg.pem
       - CONFIG_GRPC_XDS_SERVER_TLS_CACERT=/home/wso2/security/truststore/mg.pem
       - CONFIG_GRPC_XDS_SERVER_TLS_SAN=localhost
-        # TODO: (renuka) Temporary file based configs, should be removed
-      - RUNTIME_ROOT=/home/wso2
-      - RUNTIME_SUBDIRECTORY=rate-limits
-      - RUNTIME_WATCH_ROOT=false
     ports:
       - 8090:8090
       - 8091:8091
