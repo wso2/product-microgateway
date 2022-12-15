@@ -300,13 +300,13 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		loggers.LoggerAPI.Debugf("fileName : %v available for the API project.", fileName)
 		rlPoliciesJsn, conversionErr := utills.ToJSON(fileContent)
 		if conversionErr != nil {
-			loggers.LoggerAPI.Errorf("Error occured rate limit policies file to json: %v", conversionErr.Error())
+			loggers.LoggerAPI.Errorf("Error occured rate limit policies file to json. Error: %s", conversionErr.Error())
 			return conversionErr
 		}
 		var rlPolicies RateLimitPolicy
 		err := json.Unmarshal(rlPoliciesJsn, &rlPolicies)
 		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while parsing rate-limit-policies.yaml %v", err.Error())
+			loggers.LoggerAPI.Errorf("Error occured while parsing rate-limit-policies.yaml. Error: %s", err.Error())
 			return err
 		}
 	}

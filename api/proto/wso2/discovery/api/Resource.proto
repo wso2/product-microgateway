@@ -49,5 +49,4 @@ message Operation {
     repeated SecurityList security = 2;
     string tier = 3;
     bool disableSecurity = 4;
-    string rateLimitPolicy = 5;
 }

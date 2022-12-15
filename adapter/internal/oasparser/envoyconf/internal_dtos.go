@@ -41,5 +41,5 @@ type routeCreateParams struct {
 	responseInterceptor map[string]model.InterceptEndpoint
 	corsPolicy          *model.CorsConfig
 	rateLimitLevel      string
-	rateLimitPolicyName string
+	isRLPolicyAvailable bool
 }

@@ -131,8 +131,7 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 					},
 				},
 				Timeout: &durationpb.Duration{
-					Nanos: ((int32(conf.Envoy.RateLimit.RequestTimeoutInMillis) * 1000000) -
-						(int32(conf.Envoy.RateLimit.RequestTimeoutInMillis)/1000)*1000000000),
+					Nanos:   (int32(conf.Envoy.RateLimit.RequestTimeoutInMillis) % 1000) * 1000000,
 					Seconds: conf.Envoy.RateLimit.RequestTimeoutInMillis / 1000,
 				},
 			},
@@ -140,7 +139,7 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 	}
 	ext, err2 := ptypes.MarshalAny(rateLimit)
 	if err2 != nil {
-		logger.LoggerOasparser.Errorf("Error occurred while parsing ratelimit filter config %v", err2.Error())
+		logger.LoggerOasparser.Errorf("Error occurred while parsing ratelimit filter config. Error: %s", err2.Error())
 	}
 	rlFilter := hcmv3.HttpFilter{
 		Name: rateLimitFilterName,

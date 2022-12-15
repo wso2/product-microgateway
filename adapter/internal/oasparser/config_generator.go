@@ -61,7 +61,7 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 			clusters = append(clusters, rlCluster)
 			endpoints = append(endpoints, rlEP...)
 		} else {
-			logger.LoggerOasparser.Fatalf("Failed to initialize rate-limit cluster. Hence terminating the adapter. Error: %v", errRL)
+			logger.LoggerOasparser.Fatalf("Failed to initialize rate-limit cluster. Hence terminating the adapter. Error: %s", errRL)
 		}
 	}
 
@@ -240,7 +240,6 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		Security:        secSchemas,
 		Tier:            operation.GetTier(),
 		DisableSecurity: operation.GetDisableSecurity(),
-		RateLimitPolicy: operation.RateLimitPolicy,
 	}
 	return &apiOperation
 }

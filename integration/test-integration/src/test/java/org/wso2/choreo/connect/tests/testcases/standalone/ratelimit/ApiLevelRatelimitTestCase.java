@@ -18,16 +18,11 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.ratelimit;
 
-
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
-import org.wso2.choreo.connect.tests.context.CCTestException;
-import org.wso2.choreo.connect.tests.testcases.withapim.throttle.ThrottlingBaseTestCase;
-import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -40,12 +35,6 @@ public class ApiLevelRatelimitTestCase {
 
     @BeforeClass
     public void createApiProject() throws Exception {
-        ApictlUtils.createProject("rateLimit_openAPI.yaml", "ratelimit_test",
-                null, null, null, "ratelimit_api.yaml");
-        ApictlUtils.login("test");
-        ApictlUtils.deployAPI("ratelimit_test", "test");
-        Utils.delay(10000, "Could not wait till initial setup completion.");
-
         API api = new API();
         api.setName("ratelimit");
         api.setContext("v2/ratelimitService");
@@ -67,6 +56,7 @@ public class ApiLevelRatelimitTestCase {
         headers.put("Internal-Key", testKey);
         Utils.delay(10000, "Could not wait till initial setup completion.");
         String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
-        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 5), "API level rate-limit testcase failed.");
+        Assert.assertTrue(RateLimitUtils.isThrottled(RateLimitUtils.sendMultipleRequests(
+                endpointURL, headers, 5)), "API level rate-limit testcase failed.");
     }
 }

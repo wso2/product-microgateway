@@ -416,13 +416,7 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 
 // SetRateLimitPoliciesForOperations assings rate limit policies to work with envoy rate limit service
 func (swagger *MgwSwagger) SetRateLimitPoliciesForOperations(apiYamlOperations []OperationYaml) {
-	if swagger.RateLimitLevel == "API" {
-		for _, resource := range swagger.resources {
-			for _, operation := range resource.methods {
-				operation.RateLimitPolicy = swagger.RateLimitPolicy
-			}
-		}
-	} else {
+	if swagger.RateLimitLevel != "API" {
 		m := createOperationRateLimitDataMap(apiYamlOperations)
 		for _, resource := range swagger.resources {
 			for _, operation := range resource.methods {

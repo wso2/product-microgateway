@@ -18,14 +18,14 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.ratelimit;
 
-
+import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
-import org.wso2.choreo.connect.tests.testcases.withapim.throttle.ThrottlingBaseTestCase;
-import org.wso2.choreo.connect.tests.util.ApictlUtils;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -33,20 +33,15 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OperationLevelRatelimitTestcase {
+public class OperationLevelRatelimitTestzCase {
     private String testKey;
+    private static Map<String, String> headers = new HashMap<>();
 
     @BeforeClass
     public void createApiProject() throws Exception {
-        ApictlUtils.createProject("rateLimit_openAPI.yaml", "ratelimit_operation_level_test",
-                null, null, null, "operation_level_ratelimit_api.yaml");
-        ApictlUtils.login("test");
-        ApictlUtils.deployAPI("ratelimit_operation_level_test", "test");
-        Utils.delay(5000, "Could not wait till initial setup completion.");
-
         API api = new API();
         api.setName("ratelimit");
-        api.setContext("v2/ratelimitService");
+        api.setContext("v2/operationLevelRL");
         api.setVersion("1.0.0");
         api.setProvider("admin");
 
@@ -57,25 +52,37 @@ public class OperationLevelRatelimitTestcase {
 
         testKey = TokenUtil.getJWT(api, applicationDto, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
                 3600, null, true);
+        headers.put("Internal-Key", testKey);
     }
 
     @Test(description = "Test operation level 3 permin rate-limiting with envoy rate-limit service")
     public void testRateLimitsWithEnvoyRateLimitService3PerMin() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Internal-Key", testKey);
-        Utils.delay(3000, "Could not wait till initial setup completion.");
-        String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
-        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 3),
+        String endpointURL = Utils.getServiceURLHttps("/v2/operationLevelRL/pet/findByStatus");
+        Assert.assertTrue(RateLimitUtils.isThrottled(
+                        RateLimitUtils.sendMultipleRequests(endpointURL, headers, 4)),
                 "Operation level rate-limit 3 per min testcase failed.");
     }
 
     @Test(description = "Test operation level 5 per min rate-limiting with envoy rate-limit service")
     public void testRateLimitsWithEnvoyRateLimitService5PerMin() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Internal-Key", testKey);
-        Utils.delay(3000, "Could not wait till initial setup completion.");
-        String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/3");
-        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL, headers, null, 5),
-                "Operation level rate-limit 5 per min testcase failed.");
+        String requestData = "Payload to create pet 5";
+        String endpointURL1 = Utils.getServiceURLHttps("/v2/operationLevelRL/pet/3");
+        String endpointURL2 = Utils.getServiceURLHttps("/v2/operationLevelRL/pet/4");
+        RateLimitUtils.sendMultipleRequests(endpointURL2, headers, 2);
+        Assert.assertTrue(RateLimitUtils.isThrottled(
+                        RateLimitUtils.sendMultipleRequests(endpointURL1, headers, 4))
+                , "Operation level rate-limit 5 per min testcase failed.");
+        HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
+                "/v2/operationLevelRL/pet/5"), requestData, headers);
+        Assert.assertNotNull(response, "Response value recieved as null");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(response.getData(), requestData, "Request data and response data is not equal ");
+    }
+
+    @Test(description = "Test an operation without defining envoy rate-limits")
+    public void testResourceWithoutEnvoyRateLimits() throws Exception {
+        String endpointURL = Utils.getServiceURLHttps("/v2/operationLevelRL/pets/findByTags");
+        Assert.assertFalse(RateLimitUtils.isThrottled(RateLimitUtils.sendMultipleRequests(
+                endpointURL, headers, 10)), "Rate-limit applied to a rate-limit level undefined operation.");
     }
 }

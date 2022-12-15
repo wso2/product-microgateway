@@ -69,9 +69,6 @@ public class RequestContext {
 
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
-    // Rate-limit policy value relevant to the request
-    // This value will be only available if operation level rate-limit policies are enabled
-    private String rateLimitPolicy;
 
     /**
      * The dynamic metadata sent from enforcer are stored in this metadata map.
@@ -342,15 +339,6 @@ public class RequestContext {
     }
 
     /**
-     * Gives rate-limit policy relevant to the request
-     *
-     * @return rate-limit policy
-     */
-    public String getRateLimitPolicy() {
-        return rateLimitPolicy;
-    }
-
-    /**
      * Implements builder pattern to build an {@link RequestContext} object.
      */
     public static class Builder {
@@ -369,7 +357,6 @@ public class RequestContext {
         private String clientIp;
         private ArrayList<String> removeHeaders;
         private WebSocketFrameContext webSocketFrameContext;
-        private String rateLimitPolicy;
 
         public Builder(String requestPath) {
             this.requestPath = requestPath;
@@ -434,11 +421,6 @@ public class RequestContext {
             return this;
         }
 
-        public Builder rateLimitPolicy(String rateLimitPolicy) {
-            this.rateLimitPolicy = rateLimitPolicy;
-            return this;
-        }
-
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -458,7 +440,6 @@ public class RequestContext {
             requestContext.removeHeaders = new ArrayList<>();
             requestContext.queryParamsToRemove = new ArrayList<>();
             requestContext.protectedHeaders = new ArrayList<>();
-            requestContext.rateLimitPolicy = this.rateLimitPolicy;
             String[] queryParts = this.requestPath.split("\\?");
             String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
 

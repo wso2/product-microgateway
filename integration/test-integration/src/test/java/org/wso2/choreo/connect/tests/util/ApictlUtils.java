@@ -122,7 +122,7 @@ public class ApictlUtils {
     }
 
     /**
-     * Create an API project - To be used before deploying an API via the apictl deploy command
+     * Create an API project - To be used for APICTL project creations without specifying the api.yaml file
      *
      * @param openApiFile       openAPI file to create the API project from
      * @param apiProjectName    expected name of the project that gets created

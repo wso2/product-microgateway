@@ -7,16 +7,26 @@ descriptors:
         value: localhost
         descriptors:
           - key: path
+            value: /v2/ratelimitService
             descriptors:
               - key: method
-                descriptors:
-                  - key: policy
-                    value: $_5PerMin
-                    rate_limit:
-                      unit: minute
-                      requests_per_unit: 5
-                  - key: policy
-                    value: $_3PerMin
-                    rate_limit:
-                      unit: minute
-                      requests_per_unit: 3
+                value: ALL
+                rate_limit:
+                  unit: minute
+                  requests_per_unit: 5
+          - key: path
+            value: /v2/operationLevelRL/pet/findByStatus
+            descriptors:
+              - key: method
+                value: GET
+                rate_limit:
+                  unit: minute
+                  requests_per_unit: 3
+          - key: path
+            value: /v2/operationLevelRL/pet/{petId}
+            descriptors:
+              - key: method
+                value: GET
+                rate_limit:
+                  unit: minute
+                  requests_per_unit: 5

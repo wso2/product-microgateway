@@ -252,7 +252,7 @@ public class HttpsClientRequest {
             setHeadersAndMethod(conn, headers, httpVerb);
             conn.connect();
             return buildResponse(conn);
-        } catch (IOException | CCTestException | NullPointerException e) {
+        } catch (IOException | CCTestException e) {
             throw new CCTestException("Error while sending " + httpVerb + " request URL:" + endpoint, e);
         } finally {
             if (conn != null) {
@@ -315,6 +315,9 @@ public class HttpsClientRequest {
             if (responseCode < 400) {
                 inputStreamReader = new InputStreamReader(conn.getInputStream(), Charset.defaultCharset());
             } else {
+                if (conn.getErrorStream() == null) {
+                    throw new CCTestException("Connection error stream not available");
+                }
                 inputStreamReader = new InputStreamReader(conn.getErrorStream(), Charset.defaultCharset());
             }
             bufferedReader = new BufferedReader(inputStreamReader);

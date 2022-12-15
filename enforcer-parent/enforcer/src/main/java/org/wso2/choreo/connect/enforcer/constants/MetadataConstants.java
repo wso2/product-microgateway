@@ -47,5 +47,4 @@ public class MetadataConstants {
     public static final String DESTINATION = WSO2_METADATA_PREFIX + "destination";
 
     public static final String ERROR_CODE_KEY = "ErrorCode";
-    public static final String RATE_LIMIT_POLICY = "rate-limit-policy";
 }

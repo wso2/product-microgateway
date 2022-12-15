@@ -22,8 +22,7 @@ import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
-
-import java.util.concurrent.TimeUnit;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 public class CcWithJwtConfigAndTransformer {
     CcInstance ccInstance;
@@ -38,8 +37,16 @@ public class CcWithJwtConfigAndTransformer {
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
+        ApictlUtils.createProject("ratelimit_openAPI.yaml", "ratelimit_test",
+                null, null, null, "ratelimit_api.yaml");
+        ApictlUtils.createProject("operation_level_ratelimit_openAPI.yaml", "ratelimit_operation_level_test",
+                null, null, null, "operation_level_ratelimit_api.yaml");
+        Utils.delay(10000, "Could not wait till project creation.");
+
         ApictlUtils.deployAPI("petstore", "test");
-        TimeUnit.SECONDS.sleep(5);
+        ApictlUtils.deployAPI("ratelimit_test", "test");
+        ApictlUtils.deployAPI("ratelimit_operation_level_test", "test");
+        Utils.delay(5000, "Could not wait till initial setup completion.");
     }
 
     @AfterTest(description = "stop the setup")

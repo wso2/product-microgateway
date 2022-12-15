@@ -117,6 +117,11 @@ public class MockBackendProd extends Thread {
                 byte[] response = ResponseConstants.RESPONSE_VALID_JWT_TRANSFORMER.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
             });
+            httpServer.createContext(context + "/pet/4", exchange -> {
+
+                byte[] response = ResponseConstants.GET_PET_BY_ID_4_RESPONSE.getBytes();
+                Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
+            });
             httpServer.createContext(context + "/store/1/pet/123", exchange -> {
                 byte[] response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();
                 Utils.respondWithBodyAndClose(HttpURLConnection.HTTP_OK, response, exchange);
@@ -293,6 +298,8 @@ public class MockBackendProd extends Thread {
             // sent request body in response body
             httpServer.createContext(context + "/echo", Utils::echo);
             httpServer.createContext(context + "/echo2", Utils::echo);
+            // considering for the operation level rate-limit test case
+            httpServer.createContext(context + "/pet/5", Utils::echo);
 
             // echo request body, request headers in echo response payload
             httpServer.createContext(context + "/echo-full", Utils::echoFullRequest);

@@ -60,16 +60,4 @@ public interface OperationOrBuilder extends
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
-
-  /**
-   * <code>string rateLimitPolicy = 5;</code>
-   * @return The rateLimitPolicy.
-   */
-  java.lang.String getRateLimitPolicy();
-  /**
-   * <code>string rateLimitPolicy = 5;</code>
-   * @return The bytes for rateLimitPolicy.
-   */
-  com.google.protobuf.ByteString
-      getRateLimitPolicyBytes();
 }
