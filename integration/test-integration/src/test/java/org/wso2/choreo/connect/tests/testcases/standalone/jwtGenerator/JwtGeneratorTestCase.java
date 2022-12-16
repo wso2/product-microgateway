@@ -29,12 +29,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
+import java.net.MalformedURLException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -167,5 +169,19 @@ public class JwtGeneratorTestCase {
 
         JWSVerifier verifier = new RSASSAVerifier(jwk.toRSAPublicKey());
         Assert.assertTrue(jwsObject.verify(verifier),"JWT failed to validate with JWKS response");
+    }
+
+    @Test(description = "Test Rate limiting on JWKS", dependsOnMethods = "testJWTVerification")
+    public void testJWKSEndpointRatelimit() throws MalformedURLException, CCTestException {
+        boolean received429 = false;
+        for (int i = 0; i < 6; i++) {
+            HttpResponse res = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/.wellknown/jwks"),
+                    new HashMap<>());
+            if (res.getResponseCode() == 429) {
+                received429 = true;
+                break;
+            }
+        }
+        Assert.assertTrue(received429, "JWKS endpoint is not rate limited.");
     }
 }
