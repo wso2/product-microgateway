@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 
-package enforcercallbacks
+package ratelimitercallbacks
 
 import (
 	"context"
@@ -40,40 +40,28 @@ func (cb *Callbacks) Report() {}
 
 // OnStreamOpen prints debug logs
 func (cb *Callbacks) OnStreamOpen(_ context.Context, id int64, typ string) error {
-	logger.LoggerEnforcerXdsCallbacks.Debugf("stream %d open for %s\n", id, typ)
+	logger.LoggerRateLimiterXdsCallbacks.Debugf("stream %d open for %s\n", id, typ)
 	return nil
 }
 
 // OnStreamClosed prints debug logs
 func (cb *Callbacks) OnStreamClosed(id int64) {
-	logger.LoggerEnforcerXdsCallbacks.Debugf("stream %d closed\n", id)
+	logger.LoggerRateLimiterXdsCallbacks.Debugf("stream %d closed\n", id)
 }
 
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	nodeIdentifier := common.GetNodeIdentifier(request)
 	if nodeQueueInstance.IsNewNode(nodeIdentifier) {
-		logger.LoggerEnforcerXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s",
+		logger.LoggerRateLimiterXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s",
 			id, nodeIdentifier, request.VersionInfo)
 	}
-	logger.LoggerEnforcerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
-		id, nodeIdentifier, request.GetVersionInfo(), request.GetTypeUrl())
+	logger.LoggerRateLimiterXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
+		id, nodeIdentifier, request.VersionInfo, request.TypeUrl)
 	if request.ErrorDetail != nil {
-		logger.LoggerEnforcerXdsCallbacks.Errorf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(),
-			id, request.ErrorDetail.Message)
+		logger.LoggerEnforcerXdsCallbacks.Errorf("Stream request for type %s on stream id: %d, from node: %s, Error: %s", request.GetTypeUrl(),
+			id, nodeIdentifier, request.ErrorDetail.Message)
 	}
-	// TODO: (VirajSalaka) Remove the commented logic once the fallback is implemented.
-	// requestEventChannel := xds.GetRequestEventChannel()
-	// if resource.APIType == request.GetTypeUrl() {
-	// 	requestEvent := xds.NewRequestEvent()
-	// 	if request.ErrorDetail != nil {
-	// 		logger.LoggerEnforcerXdsCallbacks.Errorf("stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
-	// 		requestEvent.IsError = true
-	// 	}
-	// 	requestEvent.Node = request.GetNode().GetId()
-	// 	requestEvent.Version = request.VersionInfo
-	// 	requestEventChannel <- requestEvent
-	// }
 	return nil
 }
 
@@ -81,22 +69,20 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest,
 	response *discovery.DiscoveryResponse) {
 	nodeIdentifier := common.GetNodeIdentifier(request)
-	logger.LoggerEnforcerXdsCallbacks.Debugf("stream response on stream id: %d node: %s for type: %s version: %s",
-		id, nodeIdentifier, request.GetTypeUrl(), response.GetVersionInfo())
+	logger.LoggerRateLimiterXdsCallbacks.Debugf("stream response on stream id: %d, to node: %s, version: %s, for type: %v", id,
+		nodeIdentifier, response.VersionInfo, response.TypeUrl)
 }
 
 // OnFetchRequest prints debug logs
 func (cb *Callbacks) OnFetchRequest(_ context.Context, req *discovery.DiscoveryRequest) error {
-	nodeIdentifier := common.GetNodeIdentifier(req)
-	logger.LoggerEnforcerXdsCallbacks.Debugf("fetch request from node: %s, version: %s, for type: %s", nodeIdentifier,
+	logger.LoggerRateLimiterXdsCallbacks.Debugf("fetch request from node %s, version: %s, for type %s", common.GetNodeIdentifier(req),
 		req.VersionInfo, req.TypeUrl)
 	return nil
 }
 
 // OnFetchResponse prints debug logs
 func (cb *Callbacks) OnFetchResponse(req *discovery.DiscoveryRequest, res *discovery.DiscoveryResponse) {
-	nodeIdentifier := common.GetNodeIdentifier(req)
-	logger.LoggerEnforcerXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type: %s", nodeIdentifier,
+	logger.LoggerRateLimiterXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type %s", common.GetNodeIdentifier(req),
 		req.VersionInfo, res.TypeUrl)
 }
 

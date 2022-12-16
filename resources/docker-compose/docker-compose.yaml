@@ -116,7 +116,7 @@ services:
         # xDS config server
       - CONFIG_TYPE=GRPC_XDS_SOTW
       - CONFIG_GRPC_XDS_NODE_ID=Default # TODO: (renuka) RATE_LIMITER_LABEL to align with other
-      - CONFIG_GRPC_XDS_SERVER_URL=adapter:18000
+      - CONFIG_GRPC_XDS_SERVER_URL=adapter:18001
       - CONFIG_GRPC_XDS_SERVER_USE_TLS=true
       - CONFIG_GRPC_XDS_CLIENT_TLS_KEY=/home/wso2/security/keystore/mg.key
       - CONFIG_GRPC_XDS_CLIENT_TLS_CERT=/home/wso2/security/keystore/mg.pem
@@ -125,6 +125,7 @@ services:
     ports:
       - 8090:8090
       - 8091:8091
+      - 6070:6070 # debug port
   redis:
     image: redis:6.2.7-alpine
     ports:

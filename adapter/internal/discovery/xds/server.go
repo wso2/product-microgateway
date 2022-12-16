@@ -426,8 +426,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
 		interceptCertMap, vHost, organizationID)
 
-	// TODO: (renuka)
-	if err := rlsPolicyCache.AddAPILevelRateLimitPolicies(apiIdentifier, mgwSwagger, apiProject.RateLimitPolicies); err != nil {
+	// Add Rate Limit inline policies in API to the cache
+	if err := rlsPolicyCache.AddAPILevelRateLimitPolicies(apiIdentifier, &mgwSwagger, apiProject.RateLimitPolicies); err != nil {
 		logger.LoggerXds.Error("Error while populating API level rate limit policies", err)
 		return nil, err
 	}
@@ -728,6 +728,12 @@ func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs 
 	delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIEnforcerApisMap[organizationID], apiIdentifier)
 
+	vHost, err := ExtractVhostFromAPIIdentifier(apiIdentifier)
+	if err != nil {
+		logger.LoggerXds.Error("Error extracting vhost from apiIdentifier. Continue cleaning maps", err)
+	}
+	rlsPolicyCache.DeleteAPILevelRateLimitPolicies(organizationID, vHost, apiIdentifier)
+
 	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
 	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with
 	//resources that belongs to the remaining APIs
@@ -785,7 +791,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
 		UpdateEnforcerApis(newLabel, apis, "")
-		_ = rlsPolicyCache.updateXdsCache(newLabel)
+		UpdateRateLimiterPolicies(newLabel)
 		success := UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 		if success {
@@ -799,7 +805,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
 		if !arrayContains(newLabels, oldLabel) {
 			listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(oldLabel)
 			UpdateEnforcerApis(oldLabel, apis, "")
-			_ = rlsPolicyCache.updateXdsCache(oldLabel)
+			UpdateRateLimiterPolicies(oldLabel)
 			UpdateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
@@ -911,6 +917,11 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	logger.LoggerXds.Infof("New Router cache updated for the label: " + label + " version: " + fmt.Sprint(version))
 	return true
+}
+
+// UpdateRateLimiterPolicies update the rate limiter xDS cache with latest rate limit policies
+func UpdateRateLimiterPolicies(label string) {
+	_ = rlsPolicyCache.updateXdsCache(label)
 }
 
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration

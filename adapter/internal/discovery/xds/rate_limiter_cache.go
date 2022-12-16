@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package xds
 
 import (
@@ -25,7 +41,7 @@ var rlUnits = rateLimitUnits{
 
 type rateLimitUnits map[string]rls_config.RateLimitUnit
 
-func (r rateLimitUnits) fromName(name string) (rls_config.RateLimitUnit, error) {
+func (r rateLimitUnits) get(name string) (rls_config.RateLimitUnit, error) {
 	n := strings.ToUpper(name)
 	if unit, ok := r[n]; ok {
 		return unit, nil
@@ -34,14 +50,15 @@ func (r rateLimitUnits) fromName(name string) (rls_config.RateLimitUnit, error) 
 }
 
 type rateLimitPolicyCache struct {
-	// xdsCache is the snapshot cache for the 
+	// xdsCache is the snapshot cache for the
 	xdsCache gcp_cache.SnapshotCache
 
 	// org -> vhost -> API-Identifier (i.e. Vhost:API-UUID) -> Rate Limit Configs
 	apiLevelRateLimitPolicies map[string]map[string]map[string][]*rls_config.RateLimitDescriptor
 }
 
-func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwagger mgw.MgwSwagger, policies map[string]*mgw.APIRateLimitPolicy) error {
+// AddAPILevelRateLimitPolicies adds inline Rate Limit policies in APIs to be updated in the Rate Limiter service.
+func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwagger *mgw.MgwSwagger, policies map[string]*mgw.APIRateLimitPolicy) error {
 	if mgwSwagger.RateLimitLevel == "" {
 		return nil
 	}
@@ -75,15 +92,14 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 
 		rlsConfigs = make([]*rls_config.RateLimitDescriptor, 0, len(mgwSwagger.GetResources()))
 		for _, resource := range mgwSwagger.GetResources() {
-			path := resource.GetPath()
+			path := mgwSwagger.GetXWso2Basepath() + resource.GetPath()
 			if _, ok := apiOperations[path]; ok {
 				// Unreachable if the swagger definition is valid
 				loggers.LoggerXds.Warnf("Duplicate API resource %q in the swagger definition, skipping rate limit policy for the duplicate resource.", path)
 				continue
-			} else {
-				apiOperations[path] = make(map[string]struct{})
 			}
 
+			apiOperations[path] = make(map[string]struct{})
 			operationRlsConfigs := make([]*rls_config.RateLimitDescriptor, 0, len(resource.GetMethod()))
 			operationPolicyExists := false
 			for _, operation := range resource.GetMethod() {
@@ -144,13 +160,18 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 	return nil
 }
 
+// DeleteAPILevelRateLimitPolicies deletes inline Rate Limit policies added with the API.
+func (r *rateLimitPolicyCache) DeleteAPILevelRateLimitPolicies(org, vHost, apiID string) {
+	delete(r.apiLevelRateLimitPolicies[org][vHost], apiID)
+}
+
 func getRateLimitPolicy(policies map[string]*mgw.APIRateLimitPolicy, policyName string) (*rls_config.RateLimitPolicy, error) {
 	policy, ok := policies[policyName]
 	if !ok {
 		return nil, fmt.Errorf("rate limit policy %q not defined", policyName)
 	}
 
-	unit, err := rlUnits.fromName(policy.SpanUnit)
+	unit, err := rlUnits.get(policy.SpanUnit)
 	if err != nil {
 		return nil, err
 	}
@@ -160,45 +181,6 @@ func getRateLimitPolicy(policies map[string]*mgw.APIRateLimitPolicy, policyName 
 		RequestsPerUnit: policy.Count,
 	}, nil
 }
-
-// func (r *RateLimitPolicyCache) AddInlineRateLimitPolicy(policyName string, unit RateLimitUnit, reqCount uint32) {
-// 	if policyName == "" {
-// 		loggers.LoggerXds.Warn("Inline rate limit policy name is empty, skipping adding the policy")
-// 		return
-// 	}
-// 	if _, ok := r.inlinePolicyNames[policyName]; ok {
-// 		loggers.LoggerXds.Debugf("Inline rate limit policy %q already exists, skipping adding the policy")
-// 	}
-
-// 	r.inlinePolicyNames[policyName] = void
-// 	policy := &rls_config.RateLimitDescriptor{
-// 		Key:   "policy",
-// 		Value: policyName,
-// 		RateLimit: &rls_config.RateLimitPolicy{
-// 			Unit:            rls_config.RateLimitUnit_MINUTE, // TODO
-// 			RequestsPerUnit: reqCount,
-// 		},
-// 	}
-// 	r.inlinePolicies = append(r.inlinePolicies, policy)
-// }
-
-// func (r *RateLimitPolicyCache) AddSubscriptionRateLimitPolicy(org, policyName string, unit RateLimitUnit, reqCount uint32, spikeArrest bool, spikeUnit RateLimitUnit, spikeReqCount uint32) {
-
-// }
-
-// func (r *RateLimitPolicyCache) GetRateLimitConfig() *rls_config.RateLimitConfig {
-// 	conf := &rls_config.RateLimitConfig{
-// 		Name:   "Default",
-// 		Domain: "Default",
-// 		Descriptors: []*rls_config.RateLimitDescriptor{
-// 			{
-// 				Key:         "inline_policy_key",
-// 				Descriptors: r.inlinePolicies,
-// 			},
-// 		},
-// 	}
-// 	return conf
-// }
 
 func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config.RateLimitConfig {
 	var orgDescriptors []*rls_config.RateLimitDescriptor
@@ -231,14 +213,9 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 	}
 
 	return &rls_config.RateLimitConfig{
-		Name:   "Default",
-		Domain: "Default",
-		Descriptors: []*rls_config.RateLimitDescriptor{
-			{
-				Key:         "inline_policy_key",
-				Descriptors: orgDescriptors,
-			},
-		},
+		Name:        "Default",
+		Domain:      "Default",
+		Descriptors: orgDescriptors,
 	}
 }
 
@@ -251,20 +228,21 @@ func (r *rateLimitPolicyCache) updateXdsCache(label string) bool {
 			rlsConf,
 		},
 	})
-
 	if err != nil {
 		loggers.LoggerXds.Error("Error while updating the rate limit snapshot", err)
 		return false
 	}
+	if err := snap.Consistent(); err != nil {
+		loggers.LoggerXds.Error("Inconsistent rate limiter snapshot", err)
+		return false
+	}
 
-	err = snap.Consistent()
-
-	err = r.xdsCache.SetSnapshot(context.Background(), label, snap)
-	if err != nil {
+	if err := r.xdsCache.SetSnapshot(context.Background(), label, snap); err != nil {
 		loggers.LoggerXds.Error("Error while updating the rate limit snapshot", err)
 		return false
 	}
 	loggers.LoggerXds.Infof("New rate limit cache updated for the label: %q version: %q", label, version)
+	loggers.LoggerXds.Trace("Updated rate limit config", rlsConf)
 	return true
 }
 
