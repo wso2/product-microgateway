@@ -29,14 +29,12 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
-	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
-
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
@@ -1014,14 +1012,14 @@ func CreateJwksEndpoint() *routev3.Route {
 		FilterEnabled: &corev3.RuntimeFractionalPercent{
 			DefaultValue: &typev3.FractionalPercent{
 				Numerator:   100,
-				Denominator: 100,
+				Denominator: typev3.FractionalPercent_HUNDRED,
 			},
 			RuntimeKey: "jwks_ratelimit_enabled",
 		},
 		FilterEnforced: &corev3.RuntimeFractionalPercent{
 			DefaultValue: &typev3.FractionalPercent{
 				Numerator:   100,
-				Denominator: 100,
+				Denominator: typev3.FractionalPercent_HUNDRED,
 			},
 			RuntimeKey: "jwks_ratelimit_enforced",
 		},

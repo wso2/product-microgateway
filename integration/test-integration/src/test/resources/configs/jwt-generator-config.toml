@@ -15,7 +15,7 @@
 [enforcer.jwtGenerator]
   enable = true
   jwksRatelimitQuota = 5
-  jwksRatelimitTimeWindowInSeconds = 30
+  jwksRatelimitTimeWindowInSeconds = 300
 
 [enforcer.throttling]
   jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"

@@ -174,7 +174,7 @@ public class JwtGeneratorTestCase {
     @Test(description = "Test Rate limiting on JWKS", dependsOnMethods = "testJWTVerification")
     public void testJWKSEndpointRatelimit() throws MalformedURLException, CCTestException {
         boolean received429 = false;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 10; i++) {
             HttpResponse res = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/.wellknown/jwks"),
                     new HashMap<>());
             if (res.getResponseCode() == 429) {
