@@ -146,6 +146,11 @@ var defaultConfig = &Config{
 			AllowPartialMessage: false,
 			PackAsBytes:         false,
 		},
+		AwsLambda: awsLambda{
+			Enabled:            false,
+			awsRegion:          "",
+			payloadPassthrough: true,
+		},
 	},
 	Enforcer: enforcer{
 		Management: management{
