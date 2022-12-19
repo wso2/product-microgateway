@@ -1008,7 +1008,7 @@ func CreateJwksEndpoint() *routev3.Route {
 		TokenBucket: &typev3.TokenBucket{
 			MaxTokens:     conf.Enforcer.JwtGenerator.JwksRatelimitQuota,
 			TokensPerFill: &wrapperspb.UInt32Value{Value: conf.Enforcer.JwtGenerator.JwksRatelimitQuota},
-			FillInterval:  ptypes.DurationProto(1 * time.Second)},
+			FillInterval:  durationpb.New(time.Duration(conf.Enforcer.JwtGenerator.JwksRatelimitTimeWindowInSeconds) * time.Second)},
 		FilterEnabled: &corev3.RuntimeFractionalPercent{
 			DefaultValue: &typev3.FractionalPercent{
 				Numerator:   100,
