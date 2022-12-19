@@ -24,6 +24,7 @@ import (
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	local_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	wasm_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/wasm/v3"
@@ -51,9 +52,11 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
 	}
+	localRateLimit := getHTTPLocalRateLimitFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
+		localRateLimit,
 		extAauth,
 		lua,
 		router,
@@ -156,6 +159,24 @@ func getLuaFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &luaFilter
+}
+
+// getHTTPLocalRateLimitFilter returns the local rate limit filter which is used for JWKS endpoint specifically.
+func getHTTPLocalRateLimitFilter() *hcmv3.HttpFilter {
+	localRateLimitConfig := &local_ratelimit_v3.LocalRateLimit{
+		StatPrefix: localRateLimitStatPrefix,
+	}
+	marshalledRateLimitConfig, err := ptypes.MarshalAny(localRateLimitConfig)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while generating the local rate limit filter.", err)
+	}
+	localRateLimitFilter := &hcmv3.HttpFilter{
+		Name: localRatelimitFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: marshalledRateLimitConfig,
+		},
+	}
+	return localRateLimitFilter
 }
 
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {

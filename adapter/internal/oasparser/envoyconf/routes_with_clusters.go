@@ -1004,7 +1004,7 @@ func CreateJwksEndpoint() *routev3.Route {
 	conf, _ := config.ReadConfigs()
 	route := createStaticRoute(jwksPath, "/jwks", extAuthzHTTPCluster)
 	ratelimitPerRoute := &local_rate_limitv3.LocalRateLimit{
-		StatPrefix: "jwks_rate_limit",
+		StatPrefix: jwksRateLimitStatPrefix,
 		TokenBucket: &typev3.TokenBucket{
 			MaxTokens:     conf.Enforcer.JwtGenerator.JwksRatelimitQuota,
 			TokensPerFill: &wrapperspb.UInt32Value{Value: conf.Enforcer.JwtGenerator.JwksRatelimitQuota},
@@ -1014,14 +1014,14 @@ func CreateJwksEndpoint() *routev3.Route {
 				Numerator:   100,
 				Denominator: typev3.FractionalPercent_HUNDRED,
 			},
-			RuntimeKey: "jwks_ratelimit_enabled",
+			RuntimeKey: jwksRateLimitEnabledRuntimeKey,
 		},
 		FilterEnforced: &corev3.RuntimeFractionalPercent{
 			DefaultValue: &typev3.FractionalPercent{
 				Numerator:   100,
 				Denominator: typev3.FractionalPercent_HUNDRED,
 			},
-			RuntimeKey: "jwks_ratelimit_enforced",
+			RuntimeKey: jwksRateLimitEnforcedRuntimeKey,
 		},
 	}
 	buffer := proto.NewBuffer(nil)
@@ -1029,7 +1029,7 @@ func CreateJwksEndpoint() *routev3.Route {
 	_ = buffer.Marshal(ratelimitPerRoute)
 
 	currentFilterMap := route.GetTypedPerFilterConfig()
-	currentFilterMap["envoy.filters.http.local_ratelimit"] = &any.Any{
+	currentFilterMap[localRatelimitFilterName] = &any.Any{
 		TypeUrl: localRateLimitPerRouteName,
 		Value:   buffer.Bytes(),
 	}
