@@ -40,7 +40,6 @@ import (
 	upstreams "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
-	envoy_type_metadata_v3 "github.com/envoyproxy/go-control-plane/envoy/type/metadata/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -56,6 +55,16 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+)
+
+// Constants relevant to the route related rate-limit configurations
+const (
+	descriptorKeyForOrg               = "org"
+	descriptorKeyForVhost             = "vhost"
+	descriptorKeyForPath              = "path"
+	descriptorKeyForMethod            = "method"
+	descriptorValueForAPIMethod       = "ALL"
+	descriptorValueForOperationMethod = ":method"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -384,6 +393,12 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 // CreateRateLimitCluster creates cluster relevant to the rate limit service
 func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 	conf, _ := config.ReadConfigs()
+	var sslCertSanHostName string = ""
+	if conf.Envoy.RateLimit.SSLCertSANHostname == "" {
+		sslCertSanHostName = conf.Envoy.RateLimit.Host
+	} else {
+		sslCertSanHostName = conf.Envoy.RateLimit.SSLCertSANHostname
+	}
 	rlCluster := &model.EndpointCluster{
 		Endpoints: []model.Endpoint{
 			{
@@ -394,6 +409,9 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 		},
 	}
 	cluster, address, rlErr := processEndpoints(rateLimitClusterName, rlCluster, nil, 20, "")
+	if rlErr != nil {
+		return nil, nil, rlErr
+	}
 	config := &upstreams.HttpProtocolOptions{
 		UpstreamHttpProtocolOptions: &corev3.UpstreamHttpProtocolOptions{
 			AutoSni: true,
@@ -408,7 +426,7 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 	}
 	MarshalledHTTPProtocolOptions, err := proto.Marshal(config)
 	if err != nil {
-		logger.LoggerOasparser.Errorf("Error occurred while parsing rate-limit HTTP protocol options. Error: %s", err)
+		return nil, nil, err
 	}
 	cluster.TypedExtensionProtocolOptions = map[string]*anypb.Any{
 		"envoy.extensions.upstreams.http.v3.HttpProtocolOptions": {
@@ -437,14 +455,14 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 			Filename: conf.Envoy.RateLimit.CaCertFilePath,
 		},
 	}
-	upstreamTLSContext.Sni = conf.Envoy.RateLimit.SSLCertSANHostname
+	upstreamTLSContext.Sni = sslCertSanHostName
 	upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
 		ValidationContext: &tlsv3.CertificateValidationContext{
 			TrustedCa: trustedCASrc,
 			MatchSubjectAltNames: []*envoy_type_matcherv3.StringMatcher{
 				{
 					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
-						Exact: conf.Envoy.RateLimit.SSLCertSANHostname,
+						Exact: sslCertSanHostName,
 					},
 				},
 			},
@@ -469,7 +487,7 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 			},
 		},
 	}
-	return cluster, address, rlErr
+	return cluster, address, nil
 }
 
 // CreateTracingCluster creates a cluster definition for router's tracing server.
@@ -946,9 +964,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
-		if config.Envoy.RateLimit.Enabled &&
-			((ratelimitLevel == RateLimitPolicyOperationLevel && isRLPolicyAvailable) || ratelimitLevel == RateLimitPolicyAPILevel) {
-				basePathForRLService := basePath
+		if config.Envoy.RateLimit.Enabled && isRLPolicyAvailable {
+			basePathForRLService := basePath
 			if ratelimitLevel == RateLimitPolicyOperationLevel {
 				basePathForRLService += resourcePathParam
 			}
@@ -957,7 +974,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
-								DescriptorKey:   "org",
+								DescriptorKey:   descriptorKeyForOrg,
 								DescriptorValue: params.organizationID,
 							},
 						},
@@ -965,7 +982,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
-								DescriptorKey:   "vhost",
+								DescriptorKey:   descriptorKeyForVhost,
 								DescriptorValue: params.vHost,
 							},
 						},
@@ -973,7 +990,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
-								DescriptorKey:   "path",
+								DescriptorKey:   descriptorKeyForPath,
 								DescriptorValue: basePathForRLService,
 							},
 						},
@@ -985,8 +1002,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				rateLimit.Actions = append(rateLimit.Actions, &routev3.RateLimit_Action{
 					ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 						GenericKey: &routev3.RateLimit_Action_GenericKey{
-							DescriptorKey:   "method",
-							DescriptorValue: "ALL",
+							DescriptorKey:   descriptorKeyForMethod,
+							DescriptorValue: descriptorValueForAPIMethod,
 						},
 					},
 				})
@@ -996,8 +1013,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_RequestHeaders_{
 							RequestHeaders: &routev3.RateLimit_Action_RequestHeaders{
-								DescriptorKey: "method",
-								HeaderName:    ":method",
+								DescriptorKey: descriptorKeyForMethod,
+								HeaderName:    descriptorValueForOperationMethod,
 							},
 						},
 					},
@@ -1479,6 +1496,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	var isRLPolicyAvailable bool = false
 	if swagger.RateLimitLevel == RateLimitPolicyAPILevel {
 		rlMethodDescriptorValue = RateLimitPolicyAPILevel
+		isRLPolicyAvailable = true
 	} else if swagger.RateLimitLevel == RateLimitPolicyOperationLevel {
 		for _, operation := range resource.GetMethod() {
 			if operation.RateLimitPolicy != "" {

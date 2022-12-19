@@ -33,7 +33,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OperationLevelRatelimitTestzCase {
+public class OperationLevelRatelimitTestCase {
     private String testKey;
     private static Map<String, String> headers = new HashMap<>();
 

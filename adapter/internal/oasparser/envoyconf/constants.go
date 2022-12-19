@@ -138,5 +138,5 @@ const (
 // Constants relevant to the rate-limit service
 const (
 	RateLimitPolicyOperationLevel string = "OPERATION"
-	RateLimitPolicyAPILevel             string = "API"
+	RateLimitPolicyAPILevel       string = "API"
 )

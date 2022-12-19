@@ -130,7 +130,7 @@ var defaultConfig = &Config{
 			KeyFilePath:            "/home/wso2/security/keystore/mg.key",
 			CertFilePath:           "/home/wso2/security/keystore/mg.pem",
 			CaCertFilePath:         "/home/wso2/security/truststore/mg.pem",
-			SSLCertSANHostname:     "localhost",
+			SSLCertSANHostname:     "",
 		},
 	},
 	Enforcer: enforcer{
