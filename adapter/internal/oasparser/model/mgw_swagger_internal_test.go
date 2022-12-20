@@ -309,8 +309,3 @@ func TestValidateBasePath(t *testing.T) {
 		assert.Equal(t, item.errorNil, err == nil, item.message)
 	}
 }
-
-// SetXWso2Basepath sets basepath of API for unit testing
-func (swagger *MgwSwagger) SetXWso2Basepath() string {
-	return swagger.xWso2Basepath
-}
