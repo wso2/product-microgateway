@@ -198,8 +198,10 @@ public class AnalyticsFilter {
                     AnalyticsUtils.setDefaultIfNull(requestContext.getHeaders().get("user-agent")));
 
             // Adding UserName and the APIContext
+            String endUserName = requestContext.getAuthenticationContext().getUsername();
             requestContext.addMetadataToMap(MetadataConstants.API_USER_NAME_KEY,
-                    requestContext.getAuthenticationContext().getUsername());
+                    endUserName == null ? APIConstants.END_USER_ANONYMOUS: endUserName);
+
             requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
                     requestContext.getMatchedAPI().getBasePath());
 
