@@ -165,7 +165,7 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
                 // Tell the client we're going to close the connection.
                 response.headers().set(CONNECTION, CLOSE);
             }
-            ChannelFuture f = ctx.write(response);
+            ChannelFuture f = ctx.writeAndFlush(response);
             if (!keepAlive) {
                 f.addListener(ChannelFutureListener.CLOSE);
             }
