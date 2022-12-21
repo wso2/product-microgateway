@@ -315,6 +315,9 @@ public class HttpsClientRequest {
             if (responseCode < 400) {
                 inputStreamReader = new InputStreamReader(conn.getInputStream(), Charset.defaultCharset());
             } else {
+                if (conn.getErrorStream() == null) {
+                    throw new CCTestException("Connection error stream not available");
+                }
                 inputStreamReader = new InputStreamReader(conn.getErrorStream(), Charset.defaultCharset());
             }
             bufferedReader = new BufferedReader(inputStreamReader);

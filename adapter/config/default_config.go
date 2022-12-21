@@ -121,6 +121,17 @@ var defaultConfig = &Config{
 				IdleTimeoutInSeconds:           3600,
 			},
 		},
+		RateLimit: rateLimit{
+			Enabled:                false,
+			Host:                   "rate-limiter",
+			Port:                   8083,
+			FailureModeDeny:        false,
+			RequestTimeoutInMillis: 80,
+			KeyFilePath:            "/home/wso2/security/keystore/mg.key",
+			CertFilePath:           "/home/wso2/security/keystore/mg.pem",
+			CaCertFilePath:         "/home/wso2/security/truststore/mg.pem",
+			SSLCertSANHostname:     "",
+		},
 	},
 	Enforcer: enforcer{
 		Management: management{

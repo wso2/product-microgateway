@@ -11,6 +11,17 @@
   maxRouteTimeoutInSeconds = 60
   routeIdleTimeoutInSeconds = 300
 
+[router.ratelimit]
+  enabled = true
+  host = "rate-limiter"
+  port = 8091
+  requestTimeoutInMillis= 80
+  failureModeDeny = false
+  keyFilePath = "/home/wso2/security/keystore/mg.key"
+  certFilePath = "/home/wso2/security/keystore/mg.pem"
+  caCertFilePath = "/home/wso2/security/truststore/mg.pem"
+  sSLCertSANHostname = "localhost"
+
 [enforcer]
 [enforcer.jwtGenerator]
   enable = true

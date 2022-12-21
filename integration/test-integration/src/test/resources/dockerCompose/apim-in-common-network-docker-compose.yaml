@@ -16,4 +16,3 @@ services:
       - ./database:/home/wso2carbon/wso2am-4.0.0/repository/database:rw
     networks:
       - apim_and_cc
-  

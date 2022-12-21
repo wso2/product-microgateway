@@ -55,6 +55,16 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 	)
 	conf, _ := config.ReadConfigs()
 
+	if conf.Envoy.RateLimit.Enabled {
+		rlCluster, rlEP, errRL := envoy.CreateRateLimitCluster()
+		if errRL == nil {
+			clusters = append(clusters, rlCluster)
+			endpoints = append(endpoints, rlEP...)
+		} else {
+			logger.LoggerOasparser.Fatalf("Failed to initialize rate-limit cluster. Hence terminating the adapter. Error: %s", errRL)
+		}
+	}
+
 	if conf.Tracing.Enabled && conf.Tracing.Type != envoyconf.TracerTypeAzure {
 		logger.LoggerOasparser.Debugln("Creating global cluster - Tracing")
 		if c, e, err := envoyconf.CreateTracingCluster(conf); err == nil {

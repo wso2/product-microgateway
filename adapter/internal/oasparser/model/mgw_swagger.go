@@ -62,6 +62,8 @@ type MgwSwagger struct {
 	disableSecurity     bool
 	OrganizationID      string
 	IsProtoTyped        bool
+	RateLimitLevel      string
+	RateLimitPolicy     string
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 }
@@ -410,6 +412,31 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 
 	// Error nil for successful execution
 	return nil
+}
+
+// SetRateLimitPoliciesForOperations assings rate limit policies to work with envoy rate limit service
+func (swagger *MgwSwagger) SetRateLimitPoliciesForOperations(apiYamlOperations []OperationYaml) {
+	if swagger.RateLimitLevel != "API" {
+		m := createOperationRateLimitDataMap(apiYamlOperations)
+		for _, resource := range swagger.resources {
+			for _, operation := range resource.methods {
+				key := resource.path + operation.method
+				if val, ok := m[key]; ok {
+					operation.RateLimitPolicy = val
+					logger.LoggerAPI.Debugf("Ratelimit policy %v found for the operation %v", val, key)
+				}
+			}
+		}
+	}
+}
+
+func createOperationRateLimitDataMap(apiYamlOperations []OperationYaml) map[string]string {
+	m := make(map[string]string)
+	for _, operation := range apiYamlOperations {
+		keyValue := operation.Target + operation.Verb
+		m[keyValue] = operation.RateLimitPolicy
+	}
+	return m
 }
 
 // SetEnvLabelProperties sets environment specific values
@@ -1195,6 +1222,11 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
+
+	swagger.RateLimitLevel = data.RateLimitLevel
+	if swagger.RateLimitLevel == "API" {
+		swagger.RateLimitPolicy = data.RateLimitPolicy
+	}
 
 	if endpointConfig.ImplementationStatus == prototypedAPI {
 		swagger.IsProtoTyped = true

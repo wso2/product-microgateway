@@ -5,6 +5,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
 
@@ -12,8 +13,10 @@ public class APiDeployViaApictlTestCase {
 
     @BeforeClass
     public void createApiProject() throws IOException, CCTestException {
-        ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore", null, "apictl_test_deploy_env.yaml", null);
+        ApictlUtils.createProject("deploy_openAPI.yaml", "apictl_petstore", null, "apictl_test_deploy_env.yaml", null);
+        ApictlUtils.removeEnv("apictl_test");
         ApictlUtils.addEnv("apictl_test");
+        Utils.delay(1000, "Interrupted while waiting for project creation");
     }
 
     @Test

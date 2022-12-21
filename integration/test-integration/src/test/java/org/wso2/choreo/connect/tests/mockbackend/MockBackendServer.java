@@ -19,10 +19,17 @@
 package org.wso2.choreo.connect.tests.mockbackend;
 
 import org.apache.commons.lang3.StringUtils;
+import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.FileFileFilter;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.FileFilterUtils;
+import org.testcontainers.shaded.org.apache.commons.io.filefilter.IOFileFilter;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -37,18 +44,6 @@ import java.util.List;
  * Mock backend server class.
  */
 public class MockBackendServer {
-
-    /**
-     * Get Mock backend server module root path.
-     *
-     * @param dockerComposePath - path for the mgw setup docker-compose file
-     * @throws IOException          if something goes wrong while file operations
-     * @throws CCTestException if something goes wrong while copying the config file
-     */
-    public static void addMockBackendServiceToDockerCompose(String dockerComposePath)
-            throws IOException, CCTestException {
-        addMockBackendServiceToDockerCompose(dockerComposePath, null);
-    }
 
     /**
      * Get Mock backend server module root path.

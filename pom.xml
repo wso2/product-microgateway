@@ -541,8 +541,7 @@
         <slf4j-ext.version>1.7.26</slf4j-ext.version>
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
-        <testcontainers.version>1.15.0</testcontainers.version>
-        <ryuk.image.version>0.3.0</ryuk.image.version>
+        <testcontainers.version>1.17.5</testcontainers.version>
         <testng.version>6.11</testng.version>
         <tomcat.annotations.api.version>6.0.53</tomcat.annotations.api.version>
         <toml4j.version>0.7.2</toml4j.version>

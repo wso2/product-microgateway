@@ -40,8 +40,8 @@ public class CcWithBackendTlsAndCorsDisabled {
         ApictlUtils.createProject("mtls_from_router_to_backend_openAPI.yaml", "mtls_from_router_to_backend", "backend_tls.crt", null, null);
         ApictlUtils.createProject("intercept_request_openAPI.yaml", "intercept_request_petstore", "backend_tls.crt", null, "interceptor.crt");
         ApictlUtils.createProject("intercept_response_openAPI.yaml", "intercept_response_petstore", "backend_tls.crt", null, "interceptor.crt");
-        ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore");
-        ApictlUtils.createProject( "api_key_swagger_security_openAPI.yaml", "apikey");
+        ApictlUtils.createProject("cors_openAPI.yaml", "cors_petstore");
+        ApictlUtils.createProject("api_key_swagger_security_openAPI.yaml", "apikey");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");

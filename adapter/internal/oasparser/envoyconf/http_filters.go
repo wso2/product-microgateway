@@ -23,15 +23,18 @@ import (
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	envoy_config_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	local_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
+	rate_limit "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ratelimit/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	wasm_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/wasm/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	wasmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/wasm/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	//rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/proto"
@@ -60,6 +63,14 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		extAauth,
 		lua,
 		router,
+	}
+	conf, _ := config.ReadConfigs()
+	if conf.Envoy.RateLimit.Enabled {
+		rateLimit := getRateLimitFilter()
+		httpFilters = httpFilters[:len(httpFilters)-2]
+		httpFilters = append(httpFilters, rateLimit)
+		httpFilters = append(httpFilters, lua)
+		httpFilters = append(httpFilters, router)
 	}
 	return httpFilters
 }
@@ -103,6 +114,40 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 		router,
 	}
 	return upgradeFilters
+}
+
+// getRateLimitFilter configures the ratelimit filter
+func getRateLimitFilter() *hcmv3.HttpFilter {
+	conf, _ := config.ReadConfigs()
+	rateLimit := &rate_limit.RateLimit{
+		Domain:          "default",
+		FailureModeDeny: true,
+		RateLimitService: &envoy_config_ratelimit_v3.RateLimitServiceConfig{
+			TransportApiVersion: corev3.ApiVersion_V3,
+			GrpcService: &corev3.GrpcService{
+				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
+					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
+						ClusterName: rateLimitClusterName,
+					},
+				},
+				Timeout: &durationpb.Duration{
+					Nanos:   (int32(conf.Envoy.RateLimit.RequestTimeoutInMillis) % 1000) * 1000000,
+					Seconds: conf.Envoy.RateLimit.RequestTimeoutInMillis / 1000,
+				},
+			},
+		},
+	}
+	ext, err2 := ptypes.MarshalAny(rateLimit)
+	if err2 != nil {
+		logger.LoggerOasparser.Errorf("Error occurred while parsing ratelimit filter config. Error: %s", err2.Error())
+	}
+	rlFilter := hcmv3.HttpFilter{
+		Name: rateLimitFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: ext,
+		},
+	}
+	return &rlFilter
 }
 
 // getExtAuthzHTTPFilter gets ExtAauthz http filter.

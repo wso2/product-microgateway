@@ -22,10 +22,12 @@ const (
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
 	extAuthzHTTPCluster     string = "ext_authz_http_cluster"
+	rateLimitClusterName    string = "rate-limit"
 )
 
 const (
 	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
+	rateLimitFilterName        string = "envoy.filters.http.ratelimit"
 	luaFilterName              string = "envoy.filters.http.lua"
 	transportSocketName        string = "envoy.transport_sockets.tls"
 	fileAccessLogName          string = "envoy.access_loggers.file"
@@ -34,6 +36,7 @@ const (
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
 	localRateLimitPerRouteName string = "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
+	httpProtocolOptionsName    string = "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"
@@ -130,4 +133,10 @@ const (
 	tracerNameZipkin    = "envoy.tracers.zipkin"
 	// Azure tracer's name
 	TracerTypeAzure = "azure"
+)
+
+// Constants relevant to the rate-limit service
+const (
+	RateLimitPolicyOperationLevel string = "OPERATION"
+	RateLimitPolicyAPILevel       string = "API"
 )

@@ -38,6 +38,9 @@ public class ResponseConstants {
     public static final String RESPONSE_VALID_JWT_TRANSFORMER = "{\"id\":3, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
             "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}], " +
             "\"status\":\"hello\"}";
+    public static final String GET_PET_BY_ID_4_RESPONSE = "{\"id\":4, \"category\":{\"id\":1, \"name\":\"John Doe2\"}, " +
+            "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem2\"], \"tags\":[{\"id\":2, \"name\":\"TfNSW\"}], " +
+            "\"status\":\"hello\"}";
     public static final String API_SANDBOX_RESPONSE = "{\"id\":111111155, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +
             " \"name\":\"doggieUpdated\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
             "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
