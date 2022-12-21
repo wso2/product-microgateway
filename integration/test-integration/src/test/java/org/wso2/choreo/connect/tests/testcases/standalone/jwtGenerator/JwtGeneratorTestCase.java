@@ -173,8 +173,6 @@ public class JwtGeneratorTestCase {
         Assert.assertEquals(jwk.getKeyUse().toString(), "sig", "Incorrect key use set on JWKS");
         Assert.assertEquals(jwk.getAlgorithm().toString(), "RS256", "Incorrect algorithm set on JWKS");
 
-
-
         JWSVerifier verifier = new RSASSAVerifier(jwk.toRSAPublicKey());
         Assert.assertTrue(jwsObject.verify(verifier),"JWT failed to validate with JWKS response");
     }
