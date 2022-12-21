@@ -148,8 +148,9 @@ var defaultConfig = &Config{
 		},
 		AwsLambda: awsLambda{
 			Enabled:            false,
-			awsRegion:          "",
-			payloadPassthrough: true,
+			AwsRegion:          "",
+			PayloadPassthrough: true,
+			InvocationMode:     "SYNCHRONOUS",
 		},
 	},
 	Enforcer: enforcer{

@@ -20,9 +20,11 @@
 package envoyconf
 
 import (
+	"strings"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	awslambdav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/aws_lambda/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
@@ -44,9 +46,11 @@ import (
 
 // getHTTPFilters generates httpFilter configuration
 func getHTTPFilters() []*hcmv3.HttpFilter {
+	conf, _ := config.ReadConfigs()
 	extAauth := getExtAuthzHTTPFilter()
 	router := getRouterHTTPFilter()
 	lua := getLuaFilter()
+	awsLambda := getAwsLambdaFilter()
 	cors := &hcmv3.HttpFilter{
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
@@ -56,9 +60,15 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		cors,
 		extAauth,
 		lua,
-		// aws_lambda,
+		// awsLambda,
 		router,
 	}
+
+	if conf.Envoy.AwsLambda.Enabled {
+		httpFilters = append(httpFilters[:3], httpFilters[2:]...)
+		httpFilters[3] = awsLambda
+	}
+
 	return httpFilters
 }
 
@@ -167,6 +177,35 @@ func getLuaFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &luaFilter
+}
+
+//getAwsLambdaFilter gets AWS Lambda filter
+func getAwsLambdaFilter() *hcmv3.HttpFilter {
+	conf, _ := config.ReadConfigs()
+
+	var mode awslambdav3.Config_InvocationMode
+	if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == "SYNCHRONOUS" {
+		mode = awslambdav3.Config_SYNCHRONOUS
+	} else {
+		mode = awslambdav3.Config_ASYNCHRONOUS
+	}
+
+	awsLambdaConfig := &awslambdav3.Config{
+		Arn:                "arn:aws:lambda:" + conf.Envoy.AwsLambda.AwsRegion + ":account_id:function:func_name",
+		PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
+		InvocationMode:     mode,
+	}
+	ext, err2 := ptypes.MarshalAny(awsLambdaConfig)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+	awsLambdaFilter := hcmv3.HttpFilter{
+		Name: awsLambdaFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: ext,
+		},
+	}
+	return &awsLambdaFilter
 }
 
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {

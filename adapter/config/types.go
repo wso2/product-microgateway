@@ -224,8 +224,9 @@ type payloadPassingToEnforcer struct {
 // Configurations related to Aws lmabda endpoint support
 type awsLambda struct {
 	Enabled            bool
-	awsRegion          string
-	payloadPassthrough bool
+	AwsRegion          string
+	PayloadPassthrough bool
+	InvocationMode     string
 }
 
 // Envoy Upstream Related Configurations
