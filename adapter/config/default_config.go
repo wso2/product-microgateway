@@ -122,9 +122,13 @@ var defaultConfig = &Config{
 			},
 		},
 		RateLimit: rateLimit{
-			Enabled:                false,
-			Host:                   "rate-limiter",
-			Port:                   8083,
+			Enabled: false,
+			Host:    "rate-limiter",
+			Port:    8091,
+			XRateLimitHeaders: xRateLimitHeaders{
+				Enabled:    true,
+				RFCVersion: "DRAFT_VERSION_03",
+			},
 			FailureModeDeny:        false,
 			RequestTimeoutInMillis: 80,
 			KeyFilePath:            "/home/wso2/security/keystore/mg.key",

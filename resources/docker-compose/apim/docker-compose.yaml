@@ -3,7 +3,7 @@ services:
   apim:
     image: wso2/wso2am:4.0.0-alpine
     healthcheck:
-      test: ["CMD", "nc", "-z","localhost", "9443"]
+      test: [ "CMD", "nc", "-z", "localhost", "9443" ]
       interval: 10s
       retries: 50
     ports:
@@ -137,9 +137,9 @@ services:
       - CONFIG_GRPC_XDS_SERVER_TLS_CACERT=/home/wso2/security/truststore/mg.pem
       - CONFIG_GRPC_XDS_SERVER_TLS_SAN=localhost
     ports:
-      - 8090:8090
-      - 8091:8091
-      - 6070:6070 # debug port
+      - "8090:8090"
+      - "8091:8091"
+      - "6070:6070" # debug port
   redis:
     image: redis:6.2.7-alpine
     ports:

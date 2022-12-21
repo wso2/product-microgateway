@@ -20,6 +20,7 @@
 package envoyconf
 
 import (
+	"strings"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -119,9 +120,26 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 // getRateLimitFilter configures the ratelimit filter
 func getRateLimitFilter() *hcmv3.HttpFilter {
 	conf, _ := config.ReadConfigs()
+
+	// X-RateLimit Headers
+	var enableXRatelimitHeaders rate_limit.RateLimit_XRateLimitHeadersRFCVersion
+	if conf.Envoy.RateLimit.XRateLimitHeaders.Enabled {
+		switch strings.ToUpper(conf.Envoy.RateLimit.XRateLimitHeaders.RFCVersion) {
+		case rate_limit.RateLimit_DRAFT_VERSION_03.String():
+			enableXRatelimitHeaders = rate_limit.RateLimit_DRAFT_VERSION_03
+		default:
+			defaultType := rate_limit.RateLimit_DRAFT_VERSION_03
+			logger.LoggerOasparser.Errorf("Invalid XRatelimitHeaders type, continue with default type %s", defaultType)
+			enableXRatelimitHeaders = defaultType
+		}
+	} else {
+		enableXRatelimitHeaders = rate_limit.RateLimit_OFF
+	}
+
 	rateLimit := &rate_limit.RateLimit{
-		Domain:          "default",
-		FailureModeDeny: true,
+		Domain:                  "Default",
+		FailureModeDeny:         conf.Envoy.RateLimit.FailureModeDeny,
+		EnableXRatelimitHeaders: enableXRatelimitHeaders,
 		RateLimitService: &envoy_config_ratelimit_v3.RateLimitServiceConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
 			GrpcService: &corev3.GrpcService{

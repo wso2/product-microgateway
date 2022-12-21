@@ -213,8 +213,8 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 	}
 
 	return &rls_config.RateLimitConfig{
-		Name:        "Default",
-		Domain:      "Default",
+		Name:        "Default", // TODO: (renuka) configure this
+		Domain:      "Default", // TODO: (renuka) configure this
 		Descriptors: orgDescriptors,
 	}
 }
