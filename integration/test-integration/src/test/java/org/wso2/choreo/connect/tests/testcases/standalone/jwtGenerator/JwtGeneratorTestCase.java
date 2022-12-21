@@ -18,10 +18,15 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator;
 
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKMatcher;
+import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.RSAKey;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
@@ -39,6 +44,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.net.MalformedURLException;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -150,22 +156,24 @@ public class JwtGeneratorTestCase {
         JSONObject responseJSON = new JSONObject(response.getData());
         String jwt = responseJSON.get("token").toString();
         HttpResponse res = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/.wellknown/jwks"), headers);
+        JWSObject jwsObject = JWSObject.parse(jwt);
+        Assert.assertNotNull(jwsObject);
         Assert.assertEquals(res.getResponseCode(), 200);
         Assert.assertNotNull(res.getData());
 
         JWKSet publicKeys = JWKSet.parse(res.getData());
         Assert.assertNotNull(publicKeys);
 
-        //:TODO select key based on jwt's kid property
-        // Take first key and only key
-        RSAKey jwk = (RSAKey) publicKeys.getKeys().get(0);
+        JWSHeader jwsHeader = jwsObject.getHeader();
+        List<JWK> matches = new JWKSelector(JWKMatcher.forJWSHeader(jwsHeader))
+                .select(publicKeys);
+        RSAKey jwk = (RSAKey) matches.get(0);
         Assert.assertNotNull(jwk);
         Assert.assertEquals(jwk.getKeyType().toString(), "RSA", "Incorrect key type set on JWKS");
         Assert.assertEquals(jwk.getKeyUse().toString(), "sig", "Incorrect key use set on JWKS");
         Assert.assertEquals(jwk.getAlgorithm().toString(), "RS256", "Incorrect algorithm set on JWKS");
 
-        JWSObject jwsObject = JWSObject.parse(jwt);
-        Assert.assertNotNull(jwsObject);
+
 
         JWSVerifier verifier = new RSASSAVerifier(jwk.toRSAPublicKey());
         Assert.assertTrue(jwsObject.verify(verifier),"JWT failed to validate with JWKS response");

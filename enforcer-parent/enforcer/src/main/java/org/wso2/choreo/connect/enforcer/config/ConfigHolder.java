@@ -81,10 +81,13 @@ import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -490,11 +493,11 @@ public class ConfigHolder {
                 RSAKey jwk = new RSAKey.Builder(publicKey)
                         .keyUse(KeyUse.SIGNATURE)
                         .algorithm(getJWKSAlgorithm(jwtGenerator.getSigningAlgorithm()))
-                        .keyIDFromThumbprint()
+                        .keyID(getJWKSThumbprint(cert))
                         .build().toPublicJWK();
                 jwks.add(jwk);
             }
-        } catch (JOSEException | CertificateException | IOException e) {
+        } catch (JOSEException | CertificateException | IOException | NoSuchAlgorithmException e) {
             String err = "Error in loading additional public certificates for JWKS: " + e;
 //            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5401));
             logger.error(err);
@@ -502,7 +505,19 @@ public class ConfigHolder {
         backendJWKSDto.setJwks(jwks);
         config.setBackendJWKSDto(backendJWKSDto);
     }
-
+    private String getJWKSThumbprint(Certificate publicCert) throws CertificateEncodingException,
+            NoSuchAlgorithmException {
+        MessageDigest digestValue;
+        byte[] der = publicCert.getEncoded();
+        digestValue = MessageDigest.getInstance("SHA-256");
+        digestValue.update(der);
+        byte[] digestInBytes = digestValue.digest();
+        String publicCertThumbprint = hexify(digestInBytes);
+        String base64UrlEncodedThumbPrint;
+        base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
+        return base64UrlEncodedThumbPrint;
+    }
     private Keypair getSigningKey(List<Keypair> keypairs) {
         for (Keypair keypair : keypairs) {
             if (keypair.getUseForSigning())  {
@@ -521,6 +536,25 @@ public class ConfigHolder {
             default:
                 return JWSAlgorithm.RS256;
         }
+    }
+
+    /**
+     * Helper method to hexify a byte array.
+     *
+     * @param bytes - The input byte array
+     * @return hexadecimal representation
+     */
+    public static String hexify(byte bytes[]) {
+
+        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
+                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+        StringBuilder buf = new StringBuilder(bytes.length * 2);
+        for (byte aByte : bytes) {
+            buf.append(hexDigits[(aByte & 0xf0) >> 4]);
+            buf.append(hexDigits[aByte & 0x0f]);
+        }
+        return buf.toString();
     }
     private void populateCacheConfigs(Cache cache) {
         CacheDto cacheDto = new CacheDto();
