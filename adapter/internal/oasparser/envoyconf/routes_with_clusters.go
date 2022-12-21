@@ -34,9 +34,11 @@ import (
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -999,7 +1001,40 @@ func CreateTokenRoute() *routev3.Route {
 
 // CreateJwksEndpoint generates a route for JWKS /.wellknown/jwks endpoint
 func CreateJwksEndpoint() *routev3.Route {
-	return createStaticRoute(jwksPath, "/jwks", extAuthzHTTPCluster)
+	conf, _ := config.ReadConfigs()
+	route := createStaticRoute(jwksPath, "/jwks", extAuthzHTTPCluster)
+	ratelimitPerRoute := &local_rate_limitv3.LocalRateLimit{
+		StatPrefix: jwksRateLimitStatPrefix,
+		TokenBucket: &typev3.TokenBucket{
+			MaxTokens:     conf.Enforcer.JwtGenerator.JwksRatelimitQuota,
+			TokensPerFill: &wrapperspb.UInt32Value{Value: conf.Enforcer.JwtGenerator.JwksRatelimitQuota},
+			FillInterval:  durationpb.New(time.Duration(conf.Enforcer.JwtGenerator.JwksRatelimitTimeWindowInSeconds) * time.Second)},
+		FilterEnabled: &corev3.RuntimeFractionalPercent{
+			DefaultValue: &typev3.FractionalPercent{
+				Numerator:   100,
+				Denominator: typev3.FractionalPercent_HUNDRED,
+			},
+			RuntimeKey: jwksRateLimitEnabledRuntimeKey,
+		},
+		FilterEnforced: &corev3.RuntimeFractionalPercent{
+			DefaultValue: &typev3.FractionalPercent{
+				Numerator:   100,
+				Denominator: typev3.FractionalPercent_HUNDRED,
+			},
+			RuntimeKey: jwksRateLimitEnforcedRuntimeKey,
+		},
+	}
+	buffer := proto.NewBuffer(nil)
+	buffer.SetDeterministic(true)
+	_ = buffer.Marshal(ratelimitPerRoute)
+
+	currentFilterMap := route.GetTypedPerFilterConfig()
+	currentFilterMap[localRatelimitFilterName] = &any.Any{
+		TypeUrl: localRateLimitPerRouteName,
+		Value:   buffer.Bytes(),
+	}
+	route.TypedPerFilterConfig = currentFilterMap
+	return route
 }
 
 func marshalFilterConfig(perFilterConfig *extAuthService.ExtAuthzPerRoute) *anypb.Any {

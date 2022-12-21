@@ -197,6 +197,8 @@ var defaultConfig = &Config{
 					UseForSigning:         true,
 				},
 			},
+			JwksRatelimitQuota:               1000,
+			JwksRatelimitTimeWindowInSeconds: 10,
 		},
 		Cache: cache{
 			Enabled:     true,

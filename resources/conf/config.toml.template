@@ -248,12 +248,18 @@ enabled = true
   gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
   # Custom Claim Retriever to add custom claims into JWT
   claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
-  # Public certificate for generated JWT
-  publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
-  # Private key path used for JWT generation
-  privateKeyPath = "/home/wso2/security/keystore/mg.key"
   # Token expiry time
   tokenTTL = 3600
+  # JWKS Endpoint calls allowed per a configured time window
+  jwksRatelimitQuota = 1000
+  # JWKS Endpoint rate limiting time window
+  jwksRatelimitTimeWindowInSeconds = 10
+  # Key-Certificate pairs used for JWT Generation. Multiple Certificates could be added to generate multiple JWK
+  # Entries. This is to do certificate rotation.
+  [[enforcer.jwtGenerator.keypair]]
+      publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+      privateKeyPath = "/home/wso2/security/keystore/mg.key"
+      useForSigning = true
 
 # The issuer configuration required to generate token at Choreo Connect
 [enforcer.jwtIssuer]
