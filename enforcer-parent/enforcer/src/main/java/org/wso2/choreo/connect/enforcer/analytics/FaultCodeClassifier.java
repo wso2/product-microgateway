@@ -69,6 +69,7 @@ public class FaultCodeClassifier {
                 return FaultSubCategories.Authentication.AUTHENTICATION_FAILURE;
             case APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
             case APISecurityConstants.INVALID_SCOPE:
+            case APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT:
                 return FaultSubCategories.Authentication.AUTHORIZATION_FAILURE;
             case APISecurityConstants.API_BLOCKED:
             case APISecurityConstants.API_AUTH_FORBIDDEN:
