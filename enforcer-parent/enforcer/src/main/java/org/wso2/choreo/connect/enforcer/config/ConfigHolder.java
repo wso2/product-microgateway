@@ -505,6 +505,7 @@ public class ConfigHolder {
         backendJWKSDto.setJwks(jwks);
         config.setBackendJWKSDto(backendJWKSDto);
     }
+    // TODO: Move this to carbon-apimgt common package
     private String getJWKSThumbprint(Certificate publicCert) throws CertificateEncodingException,
             NoSuchAlgorithmException {
         MessageDigest digestValue;
