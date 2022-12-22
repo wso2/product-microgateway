@@ -229,16 +229,16 @@ func (r *rateLimitPolicyCache) updateXdsCache(label string) bool {
 		},
 	})
 	if err != nil {
-		loggers.LoggerXds.Error("Error while updating the rate limit snapshot", err)
+		loggers.LoggerXds.Error("Error while updating the rate limit snapshot: ", err)
 		return false
 	}
 	if err := snap.Consistent(); err != nil {
-		loggers.LoggerXds.Error("Inconsistent rate limiter snapshot", err)
+		loggers.LoggerXds.Error("Inconsistent rate limiter snapshot: ", err)
 		return false
 	}
 
 	if err := r.xdsCache.SetSnapshot(context.Background(), label, snap); err != nil {
-		loggers.LoggerXds.Error("Error while updating the rate limit snapshot", err)
+		loggers.LoggerXds.Error("Error while updating the rate limit snapshot: ", err)
 		return false
 	}
 	loggers.LoggerXds.Infof("New rate limit cache updated for the label: %q version: %q", label, version)

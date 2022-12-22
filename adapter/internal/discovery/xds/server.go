@@ -428,7 +428,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	// Add Rate Limit inline policies in API to the cache
 	if err := rlsPolicyCache.AddAPILevelRateLimitPolicies(apiIdentifier, &mgwSwagger, apiProject.RateLimitPolicies); err != nil {
-		logger.LoggerXds.Error("Error while populating API level rate limit policies", err)
+		logger.LoggerXds.Error("Error while populating API level rate limit policies: ", err)
 		return nil, err
 	}
 
@@ -730,7 +730,7 @@ func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs 
 
 	vHost, err := ExtractVhostFromAPIIdentifier(apiIdentifier)
 	if err != nil {
-		logger.LoggerXds.Error("Error extracting vhost from apiIdentifier. Continue cleaning maps", err)
+		logger.LoggerXds.Error("Error extracting vhost from apiIdentifier. Continue cleaning maps: ", err)
 	}
 	rlsPolicyCache.DeleteAPILevelRateLimitPolicies(organizationID, vHost, apiIdentifier)
 
