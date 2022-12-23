@@ -77,7 +77,7 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: $_3PerMin
+      rateLimitPolicy: 3PerMin
       operationPolicies:
         request: []
         response: []
@@ -89,7 +89,7 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: $_5PerMin
+      rateLimitPolicy: 5PerMin
       operationPolicies:
         request: []
         response: []

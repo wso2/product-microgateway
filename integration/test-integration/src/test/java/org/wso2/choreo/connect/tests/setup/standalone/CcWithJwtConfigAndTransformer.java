@@ -38,9 +38,9 @@ public class CcWithJwtConfigAndTransformer {
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
         ApictlUtils.createProject("ratelimit_openAPI.yaml", "ratelimit_test",
-                null, null, null, "ratelimit_api.yaml");
+                null, null, null, "ratelimit_api.yaml", "rate_limit_api_policies.yaml");
         ApictlUtils.createProject("operation_level_ratelimit_openAPI.yaml", "ratelimit_operation_level_test",
-                null, null, null, "operation_level_ratelimit_api.yaml");
+                null, null, null, "operation_level_ratelimit_api.yaml", "rate_limit_api_policies.yaml");
         Utils.delay(10000, "Could not wait till project creation.");
 
         ApictlUtils.deployAPI("petstore", "test");
