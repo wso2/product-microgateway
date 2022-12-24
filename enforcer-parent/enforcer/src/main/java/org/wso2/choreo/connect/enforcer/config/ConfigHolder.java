@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.choreo.connect.discovery.config.enforcer.Analytics;
 import org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader;
 import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
@@ -98,8 +99,6 @@ import java.util.regex.Pattern;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-
-import static org.wso2.carbon.apimgt.common.gateway.util.JWTUtil.generateThumbprint;
 
 /**
  * Configuration holder class for Microgateway.
@@ -492,7 +491,7 @@ public class ConfigHolder {
                 RSAKey jwk = new RSAKey.Builder(publicKey)
                         .keyUse(KeyUse.SIGNATURE)
                         .algorithm(getJWKSAlgorithm(jwtGenerator.getSigningAlgorithm()))
-                        .keyID(generateThumbprint("SHA-256", cert, false))
+                        .keyID(JWTUtil.generateThumbprint("SHA-256", cert, false))
                         .build().toPublicJWK();
                 jwks.add(jwk);
             }
