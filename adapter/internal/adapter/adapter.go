@@ -125,18 +125,8 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 		}),
 	)
 	grpcServer := grpc.NewServer(grpcOptions...)
-	// It is required a separate gRPC server for the rate limit xDS, since it is the same RPC method
-	// ADS used in both envoy xDS and rate limiter xDS.
-	// According to https://github.com/envoyproxy/ratelimit/pull/368#discussion_r995831078 a separate RPC service is not
-	// defined specifically to the rate limit xDS, instead using the ADS.
-	rlsGrpcServer := grpc.NewServer(grpcOptions...)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		logger.LoggerMgw.Fatal("failed to listen: ", err)
-	}
-
-	rlsLis, err := net.Listen("tcp", fmt.Sprintf(":%d", rlsPort))
 	if err != nil {
 		logger.LoggerMgw.Fatal("failed to listen: ", err)
 	}
@@ -158,9 +148,6 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 	// register health service
 	healthservice.RegisterHealthServer(grpcServer, &health.Server{})
 
-	// register rate limit service
-	discoveryv3.RegisterAggregatedDiscoveryServiceServer(rlsGrpcServer, rlsServer)
-
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
 		// if control plane enabled wait until it starts
@@ -174,12 +161,26 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 		}
 	}()
 
-	go func() {
-		logger.LoggerMgw.Info("Starting Rate Limiter xDS gRPC server.")
-		if err = rlsGrpcServer.Serve(rlsLis); err != nil {
-			logger.LoggerMgw.Error("Error serving Rate Limiter xDS gRPC server: ", err)
+	if conf.Envoy.RateLimit.Enabled {
+		// It is required a separate gRPC server for the rate limit xDS, since it is the same RPC method
+		// ADS used in both envoy xDS and rate limiter xDS.
+		// According to https://github.com/envoyproxy/ratelimit/pull/368#discussion_r995831078 a separate RPC service is not
+		// defined specifically to the rate limit xDS, instead using the ADS.
+		rlsGrpcServer := grpc.NewServer(grpcOptions...)
+		rlsLis, err := net.Listen("tcp", fmt.Sprintf(":%d", rlsPort))
+		if err != nil {
+			logger.LoggerMgw.Fatal("failed to listen: ", err)
 		}
-	}()
+
+		discoveryv3.RegisterAggregatedDiscoveryServiceServer(rlsGrpcServer, rlsServer)
+		go func() {
+			logger.LoggerMgw.Info("Starting Rate Limiter xDS gRPC server.")
+			if err = rlsGrpcServer.Serve(rlsLis); err != nil {
+				logger.LoggerMgw.Error("Error serving Rate Limiter xDS gRPC server: ", err)
+			}
+		}()
+	}
+
 }
 
 // Run starts the XDS server and Rest API server.

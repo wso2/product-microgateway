@@ -426,10 +426,13 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
 		interceptCertMap, vHost, organizationID)
 
-	// Add Rate Limit inline policies in API to the cache
-	if err := rlsPolicyCache.AddAPILevelRateLimitPolicies(apiIdentifier, &mgwSwagger, apiProject.RateLimitPolicies); err != nil {
-		logger.LoggerXds.Error("Error while populating API level rate limit policies: ", err)
-		return nil, err
+	// Rate Limit Policies
+	if conf.Envoy.RateLimit.Enabled {
+		// Add Rate Limit inline policies in API to the cache
+		if err := rlsPolicyCache.AddAPILevelRateLimitPolicies(apiIdentifier, &mgwSwagger, apiProject.RateLimitPolicies); err != nil {
+			logger.LoggerXds.Error("Error while populating API level rate limit policies: ", err)
+			return nil, err
+		}
 	}
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
