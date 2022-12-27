@@ -366,7 +366,7 @@ func TestGenerateRateLimitConfig(t *testing.T) {
 		rlsConfig                 *rls_config.RateLimitConfig
 	}{
 		{
-			desc: "",
+			desc: "Test config with multiple labels",
 			orgIDOpenAPIEnvoyMap: map[string]map[string][]string{
 				"org1": {
 					"vhost1:API2": []string{"Default"},
@@ -521,7 +521,18 @@ func TestGenerateRateLimitConfig(t *testing.T) {
 			c := &rateLimitPolicyCache{
 				apiLevelRateLimitPolicies: test.apiLevelRateLimitPolicies,
 			}
-			assert.Equal(t, test.rlsConfig, c.generateRateLimitConfig("Default"))
+			actualConf := c.generateRateLimitConfig("Default")
+			// Construct expected and actual here, since the diff gen by assert is bit difficult to read.
+			valuesAsStr := fmt.Sprintf("expected: %v\nactual: %v", test.rlsConfig, actualConf)
+
+			// Test descriptors inside Org1, vHost1 (because the order of the elements can not be guaranteed)
+			assert.ElementsMatch(t, test.rlsConfig.Descriptors[0].Descriptors[0].Descriptors,
+				actualConf.Descriptors[0].Descriptors[0].Descriptors, valuesAsStr)
+
+			// Test other parts of the config
+			test.rlsConfig.Descriptors[0].Descriptors[0] = nil
+			actualConf.Descriptors[0].Descriptors[0] = nil
+			assert.Equal(t, test.rlsConfig, actualConf)
 		})
 	}
 }
