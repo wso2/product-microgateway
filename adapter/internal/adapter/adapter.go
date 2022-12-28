@@ -166,6 +166,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 		// ADS used in both envoy xDS and rate limiter xDS.
 		// According to https://github.com/envoyproxy/ratelimit/pull/368#discussion_r995831078 a separate RPC service is not
 		// defined specifically to the rate limit xDS, instead using the ADS.
+		logger.LoggerMgw.Info("port: ", rlsPort, " rate-limiter management server listening")
 		rlsGrpcServer := grpc.NewServer(grpcOptions...)
 		rlsLis, err := net.Listen("tcp", fmt.Sprintf(":%d", rlsPort))
 		if err != nil {

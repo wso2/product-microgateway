@@ -522,7 +522,7 @@ func TestGenerateRateLimitConfig(t *testing.T) {
 				apiLevelRateLimitPolicies: test.apiLevelRateLimitPolicies,
 			}
 			actualConf := c.generateRateLimitConfig("Default")
-			// Construct expected and actual here, since the diff gen by assert is bit difficult to read.
+			// Construct "expected" and "actual" here, since the diff gen by assert is bit difficult to read.
 			valuesAsStr := fmt.Sprintf("expected: %v\nactual: %v", test.rlsConfig, actualConf)
 
 			// Test descriptors inside Org1, vHost1 (because the order of the elements can not be guaranteed)

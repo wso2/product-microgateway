@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org).
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -33,13 +33,19 @@ import java.io.IOException;
 
 public class RateLimiterXdsTestCase {
     private static final String MG_ENV = "rate_limiter_mg_test";
-    private static final String SHOULD_EXISTS = "Rate-limit config should exists";
-    private static final String SHOULD_NOT_EXISTS = "Rate-limit config should not exists";
+    public static final int DEPLOY_DELAY = 5000; // 5 seconds
+    public static final String DEPLOY_DELAY_ERROR_MSG = "Could not wait till deploying API";
 
     @BeforeClass
-    public void setup() throws CCTestException {
+    public void setup() throws CCTestException, IOException {
         ApictlUtils.addEnv(MG_ENV);
         ApictlUtils.login(MG_ENV);
+
+        // Second API
+        String apiProjectName = "rate_limiter_xds_2_test";
+        ApictlUtils.createProject("rate_limiter_xds_2_openAPI.yaml", apiProjectName,
+                null, null, null, "rate_limiter_xds_2_operation_level_api.yaml", "rate_limiter_xds_policies.yaml");
+        ApictlUtils.deployAPI(apiProjectName, MG_ENV);
     }
 
     @AfterClass
@@ -49,16 +55,18 @@ public class RateLimiterXdsTestCase {
 
     @Test(description = "Test deploy API with Operation Level Rate-Limits")
     public void testDeployAPIWithOperationLevelRateLimits() throws IOException, CCTestException {
+        // First API
         String apiProjectName = "rate_limiter_xds_test";
         ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
                 null, null, null, "rate_limiter_xds_operation_level_api.yaml", "rate_limiter_xds_policies.yaml");
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
-        Utils.delay(5000, "Could not wait till deploying API.");
+        Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
 
         RateLimiterConfigDump configDump = RateLimiterConfigDump.getConfigDump();
-        Assert.assertTrue(configDump.containsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "POST", "MINUTE", 10000), SHOULD_EXISTS);
-        Assert.assertTrue(configDump.containsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "GET", "MINUTE", 20000), SHOULD_EXISTS);
-        Assert.assertTrue(configDump.containsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "DELETE", "MINUTE", 10000), SHOULD_EXISTS);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "POST", "MINUTE", 10000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "GET", "MINUTE", 20000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "DELETE", "MINUTE", 10000);
+        assertSecondAPI(configDump);
     }
 
     @Test(description = "Test redeploy API with updated Operation Level Rate-Limits",
@@ -68,28 +76,79 @@ public class RateLimiterXdsTestCase {
         ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
                 null, null, null, "rate_limiter_xds_operation_level_updated_api.yaml", "rate_limiter_xds_policies.yaml");
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
-        Utils.delay(5000, "Could not wait till deploying API.");
+        Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
 
         RateLimiterConfigDump configDump = RateLimiterConfigDump.getConfigDump();
-        Assert.assertTrue(configDump.containsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "GET", "MINUTE", 10000), SHOULD_EXISTS);
-        Assert.assertFalse(configDump.containsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "POST", "MINUTE", 10000), SHOULD_NOT_EXISTS);
-        Assert.assertTrue(configDump.containsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "GET", "MINUTE", 50000), SHOULD_EXISTS);
-        Assert.assertTrue(configDump.containsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "DELETE", "MINUTE", 10000), SHOULD_EXISTS);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "GET", "MINUTE", 10000);
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "POST", "MINUTE", 10000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "GET", "MINUTE", 50000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "DELETE", "MINUTE", 10000);
+        assertSecondAPI(configDump);
     }
 
     @Test(description = "Test redeploy API with changing Rate-Limits policy level as API Level",
             dependsOnMethods = {"testRedeployAPIWithUpdatedOperationLevelRateLimits"})
-    public void testRedeployAPIWithChangingRateLimitPolicyLevelAsAPILevel() {
+    public void testRedeployAPIWithChangingRateLimitPolicyLevelAsAPILevel() throws IOException, CCTestException {
+        // Redeploy the same API with changing operation level rate limits to API level rate limits
+        String apiProjectName = "rate_limiter_xds_api_level_test";
+        ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
+                null, null, null, "rate_limiter_xds_api_level_api.yaml", "rate_limiter_xds_policies.yaml");
+        ApictlUtils.deployAPI(apiProjectName, MG_ENV);
+        Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
+
+        RateLimiterConfigDump configDump = RateLimiterConfigDump.getConfigDump();
+        // Previous operation level rate limit configs of the API should not be in the config dump
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "GET", "MINUTE", 10000);
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "POST", "MINUTE", 10000);
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "GET", "MINUTE", 50000);
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "DELETE", "MINUTE", 10000);
+        // New API level rate limit policy should be there
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test", "ALL", "MINUTE", 50000);
+        assertSecondAPI(configDump);
     }
 
     @Test(description = "Test redeploy API with changing Rate-Limits policy level as Operation Level",
             dependsOnMethods = {"testRedeployAPIWithChangingRateLimitPolicyLevelAsAPILevel"})
-    public void testRedeployAPIWithChangingRateLimitPolicyLevelAsOperationLevel() {
+    public void testRedeployAPIWithChangingRateLimitPolicyLevelAsOperationLevel() throws IOException, CCTestException {
+        // Redeploy the same API with changing API level rate limits to Operation level rate limits
+        String apiProjectName = "rate_limiter_xds_operation_level_test";
+        ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
+                null, null, null, "rate_limiter_xds_operation_level_api.yaml", "rate_limiter_xds_policies.yaml");
+        ApictlUtils.deployAPI(apiProjectName, MG_ENV);
+        Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
+
+        RateLimiterConfigDump configDump = RateLimiterConfigDump.getConfigDump();
+        // Previous API level rate limit config of the API should not be in the config dump
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test", "ALL", "MINUTE", 50000);
+        // New operation level rate limit policies should be there
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "POST", "MINUTE", 10000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "GET", "MINUTE", 20000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "DELETE", "MINUTE", 10000);
+        assertSecondAPI(configDump);
     }
 
     @Test(description = "Test undeploy API with Rate-Limit policies",
             dependsOnMethods = {"testRedeployAPIWithChangingRateLimitPolicyLevelAsOperationLevel"})
-    public void testUndeployAPIWithRateLimitPolicies() {
+    public void testUndeployAPIWithRateLimitPolicies() throws CCTestException, IOException {
+        ApictlUtils.undeployAPI("rate-limiter-xds-test", "5.0.3", MG_ENV, "localhost");
+        Utils.delay(DEPLOY_DELAY, "Could not wait until undeploying the API");
+
+        RateLimiterConfigDump configDump = RateLimiterConfigDump.getConfigDump();
+        // Previous operation level rate limit configs of the API should not be in the config dump
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "GET", "MINUTE", 10000);
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "GET", "MINUTE", 50000);
+        configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet/{petId}", "DELETE", "MINUTE", 10000);
+
+        assertSecondAPI(configDump);
+    }
+
+    private void assertSecondAPI(RateLimiterConfigDump configDump){
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-2-test/pet", "POST",
+                "MINUTE", 10000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-2-test/pet/{petId}", "GET",
+                "MINUTE", 20000);
+        configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-2-test/pet/{petId}", "DELETE",
+                "MINUTE", 10000);
     }
 }
 
@@ -108,12 +167,24 @@ class RateLimiterConfigDump {
     }
 
     private String generateConfigDumpString(String path, String method, String unit, int reqPerUnit) {
-        return String.format("default.org_carbon.super.vhost_localhost.path_%s.method_%s: unit=%s " +
+        return String.format("Default.org_carbon.super.vhost_localhost.path_%s.method_%s: unit=%s " +
                 "requests_per_unit=%d, shadow_mode: false", path, method.toUpperCase(), unit.toUpperCase(), reqPerUnit);
     }
 
-    public boolean containsRateLimitPolicyFor(String path, String method, String unit, int reqPerUnit) {
+    private boolean containsRateLimitPolicyFor(String path, String method, String unit, int reqPerUnit) {
         String expectedDump = generateConfigDumpString(path, method, unit, reqPerUnit);
         return configDumpStr.contains(expectedDump);
+    }
+
+    public void assertContainsRateLimitPolicyFor(String path, String method, String unit, int reqPerUnit) {
+        Assert.assertTrue(containsRateLimitPolicyFor(path, method, unit, reqPerUnit),
+                String.format("Rate-limit config should exists for path %s, method %s with unit %s and count %d\n" +
+                        "config dump:\n%s\n\n", path, method, unit, reqPerUnit, configDumpStr));
+    }
+
+    public void assertNotContainsRateLimitPolicyFor(String path, String method, String unit, int reqPerUnit) {
+        Assert.assertFalse(containsRateLimitPolicyFor(path, method, unit, reqPerUnit),
+                String.format("Rate-limit config should not exists for path %s, method %s with unit %s and count %d\n" +
+                        "config dump:\n%s\n\n", path, method, unit, reqPerUnit, configDumpStr));
     }
 }

@@ -1,7 +1,7 @@
 type: api
 version: v4.0.0
 data:
-  id: 2b547d7c-4f7b-0848-ad6b-05b4960dcbf1
+  id:
   name: rate-limiter-xds-test
   context: /rate-limiter-xds/v5
   version: 5.0.3

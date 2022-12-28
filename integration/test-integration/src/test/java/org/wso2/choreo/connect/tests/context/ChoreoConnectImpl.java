@@ -131,15 +131,21 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
     public void addCcLoggersToEnv() {
         Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
         Logger adapterLogger = LoggerFactory.getLogger("Adapter");
+        Logger rateLimiterLogger = LoggerFactory.getLogger("Rate-Limiter");
         Logger routerLogger = LoggerFactory.getLogger("Router");
+        Logger redisLogger = LoggerFactory.getLogger("Redis");
         Logger mockBackendLogger = LoggerFactory.getLogger("MockBackend");
         Slf4jLogConsumer enforcerLogConsumer = new Slf4jLogConsumer(enforcerLogger);
         Slf4jLogConsumer adapterLogConsumer = new Slf4jLogConsumer(adapterLogger);
+        Slf4jLogConsumer rateLimiterLogConsumer = new Slf4jLogConsumer(rateLimiterLogger);
         Slf4jLogConsumer routerLogConsumer = new Slf4jLogConsumer(routerLogger);
+        Slf4jLogConsumer redisLogConsumer = new Slf4jLogConsumer(redisLogger);
         Slf4jLogConsumer mockBackendLogConsumer = new Slf4jLogConsumer(mockBackendLogger);
         environment.withLogConsumer("enforcer", enforcerLogConsumer)
                 .withLogConsumer("adapter", adapterLogConsumer)
+                .withLogConsumer("rate-limiter", rateLimiterLogConsumer)
                 .withLogConsumer("router", routerLogConsumer)
+                .withLogConsumer("redis", redisLogConsumer)
                 .withLogConsumer("mockBackend", mockBackendLogConsumer);
         if (Boolean.parseBoolean(System.getenv(ENFORCER_DEBUG_ENV))) {
             environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
