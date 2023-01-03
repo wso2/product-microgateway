@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.choreo.connect.discovery.config.enforcer.Analytics;
 import org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader;
 import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
@@ -81,13 +82,10 @@ import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -493,7 +491,7 @@ public class ConfigHolder {
                 RSAKey jwk = new RSAKey.Builder(publicKey)
                         .keyUse(KeyUse.SIGNATURE)
                         .algorithm(getJWKSAlgorithm(jwtGenerator.getSigningAlgorithm()))
-                        .keyID(getJWKSThumbprint(cert))
+                        .keyID(JWTUtil.generateThumbprint("SHA-256", cert, false))
                         .build().toPublicJWK();
                 jwks.add(jwk);
             }
@@ -505,20 +503,7 @@ public class ConfigHolder {
         backendJWKSDto.setJwks(jwks);
         config.setBackendJWKSDto(backendJWKSDto);
     }
-    // TODO: Move this to carbon-apimgt common package
-    private String getJWKSThumbprint(Certificate publicCert) throws CertificateEncodingException,
-            NoSuchAlgorithmException {
-        MessageDigest digestValue;
-        byte[] der = publicCert.getEncoded();
-        digestValue = MessageDigest.getInstance("SHA-256");
-        digestValue.update(der);
-        byte[] digestInBytes = digestValue.digest();
-        String publicCertThumbprint = hexify(digestInBytes);
-        String base64UrlEncodedThumbPrint;
-        base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
-        return base64UrlEncodedThumbPrint;
-    }
+
     private Keypair getSigningKey(List<Keypair> keypairs) {
         for (Keypair keypair : keypairs) {
             if (keypair.getUseForSigning())  {
