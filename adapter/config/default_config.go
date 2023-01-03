@@ -257,6 +257,7 @@ var defaultConfig = &Config{
 					UseForSigning:         true,
 				},
 			},
+			UseKidProperty: false,
 		},
 		Cache: cache{
 			Enabled:     true,

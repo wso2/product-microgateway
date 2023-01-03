@@ -419,6 +419,7 @@ type jwtGenerator struct {
 	ClaimsExtractorImpl  string
 	TokenTTL             int32
 	Keypair              []KeyPair
+	UseKidProperty       bool
 }
 
 // KeyPair represents hthe rsa keypair used for signing JWTs

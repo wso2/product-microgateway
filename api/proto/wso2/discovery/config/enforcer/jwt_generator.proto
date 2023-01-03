@@ -35,4 +35,6 @@ message JWTGenerator {
     int32 token_ttl = 10;
 
     repeated Keypair keypairs = 11;
+
+    bool use_kid_property = 12;
 }

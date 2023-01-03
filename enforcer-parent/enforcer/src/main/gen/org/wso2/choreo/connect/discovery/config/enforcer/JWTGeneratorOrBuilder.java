@@ -126,4 +126,10 @@ public interface JWTGeneratorOrBuilder extends
    */
   org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder getKeypairsOrBuilder(
       int index);
+
+  /**
+   * <code>bool use_kid_property = 12;</code>
+   * @return The useKidProperty.
+   */
+  boolean getUseKidProperty();
 }

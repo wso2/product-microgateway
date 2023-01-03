@@ -182,6 +182,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			ClaimsExtractorImpl:  config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
 			TokenTtl:             config.Enforcer.JwtGenerator.TokenTTL,
 			Keypairs:             keyPairs,
+			UseKidProperty:       config.Enforcer.JwtGenerator.UseKidProperty,
 		},
 		JwtIssuer: &enforcer.JWTIssuer{
 			Enabled:               config.Enforcer.JwtIssuer.Enabled,
