@@ -27,6 +27,10 @@ ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=10500
 ARG MG_USER_HOME=/home/${MG_USER}
 
+ENV PORT=8090
+ENV GRPC_PORT=8091
+ENV LOCAL_CACHE_SIZE_IN_BYTES=1024000
+
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
  --------------------------------- \n\
@@ -43,6 +47,9 @@ RUN \
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 COPY maven/security security
+COPY maven/start-server.sh .
 COPY maven/LICENSE.txt .
 
-ENTRYPOINT ["ratelimit"]
+EXPOSE 8090 8091 6070
+
+ENTRYPOINT ["sh", "start-server.sh"]

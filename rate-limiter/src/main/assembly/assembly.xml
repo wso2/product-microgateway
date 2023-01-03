@@ -35,6 +35,10 @@
             <outputDirectory>security/truststore</outputDirectory>
         </file>
         <file>
+            <source>src/main/resources/start-server.sh</source>
+            <outputDirectory/>
+        </file>
+        <file>
             <source>../resources/license/LICENSE-RATE-LIMITER.txt</source>
             <outputDirectory/>
             <destName>LICENSE.txt</destName>

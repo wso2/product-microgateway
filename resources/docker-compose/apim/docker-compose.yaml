@@ -101,6 +101,8 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
+    depends_on:
+      - redis
     volumes:
       - ../resources/rate-limiter/security:/home/wso2/security
     environment:
@@ -128,8 +130,7 @@ services:
       - GRPC_CLIENT_TLS_CACERT=/home/wso2/security/truststore/mg.pem
       - GRPC_CLIENT_TLS_SAN=localhost
       # xDS config server
-      - CONFIG_TYPE=GRPC_XDS_SOTW
-      - CONFIG_GRPC_XDS_NODE_ID=Default # TODO: (renuka) RATE_LIMITER_LABEL to align with other
+      - RATE_LIMITER_LABEL=Default
       - CONFIG_GRPC_XDS_SERVER_URL=adapter:18001
       - CONFIG_GRPC_XDS_SERVER_USE_TLS=true
       - CONFIG_GRPC_XDS_CLIENT_TLS_KEY=/home/wso2/security/keystore/mg.key
@@ -142,5 +143,7 @@ services:
       - "6070:6070" # debug port
   redis:
     image: redis:6.2.7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
     ports:
       - "6379:6379"
