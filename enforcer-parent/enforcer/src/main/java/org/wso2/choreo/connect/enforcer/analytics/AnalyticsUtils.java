@@ -110,7 +110,7 @@ public class AnalyticsUtils {
             logger.debug("Analytics custom data provider initialized successfully.");
             return analyticsDataProvider;
         } catch (IllegalAccessException | InstantiationException | ClassNotFoundException | InvocationTargetException |
-                NoSuchMethodException e) {
+                 NoSuchMethodException e) {
             logger.error("Error occurred while initializing custom data provider class. Error:{}",
                     e.getMessage());
         }

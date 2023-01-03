@@ -117,7 +117,7 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiVersion(getValueAsString(fieldsMap, MetadataConstants.API_VERSION_KEY));
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));
         api.setOrganizationId(getValueAsString(fieldsMap, MetadataConstants.API_ORGANIZATION_ID));
-        api.setApiContext(getValueAsString(fieldsMap,MetadataConstants.API_CONTEXT_KEY));
+        api.setApiContext(getValueAsString(fieldsMap, MetadataConstants.API_CONTEXT_KEY));
 
         return api;
     }
@@ -218,9 +218,9 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public String getUserName(){
+    public String getUserName() {
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
-        return getValueAsString(fieldsMap,MetadataConstants.API_USER_NAME_KEY);
+        return getValueAsString(fieldsMap, MetadataConstants.API_USER_NAME_KEY);
     }
 
     @Override

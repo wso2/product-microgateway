@@ -45,10 +45,9 @@ import java.util.Map;
  */
 public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
 
-    private static final Logger logger = LogManager.getLogger(ChoreoAnalyticsForWSProvider.class);
     public static final int THROTTLE_CODE_UPPER_BOUND = 900900;
     public static final int THROTTLE_CODE_LOWER_BOUND = 900800;
-
+    private static final Logger logger = LogManager.getLogger(ChoreoAnalyticsForWSProvider.class);
     private WebSocketFrameRequest webSocketFrameRequest;
     private Map<String, String> extAuthMetadata;
 
@@ -217,5 +216,7 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
         return extAuthMetadata.get(MetadataConstants.CLIENT_IP_KEY);
     }
 
-    public String getUserName(){return null;}
+    public String getUserName() {
+        return null;
+    }
 }
