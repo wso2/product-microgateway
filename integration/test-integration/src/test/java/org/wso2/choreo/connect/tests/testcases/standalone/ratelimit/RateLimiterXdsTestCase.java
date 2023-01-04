@@ -78,6 +78,10 @@ public class RateLimiterXdsTestCase {
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
         Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
 
+        // Remove the Operation level policy in "/rate-limiter-xds-test/pet" POST operation and add that policy in
+        // "/rate-limiter-xds-test/pet" GET operation.
+        // Change the policy value in "/rate-limiter-xds-test/pet/{petId}" GET operation from 20000 to 50000
+
         RateLimiterConfigDump configDump = RateLimiterConfigDump.getConfigDump();
         configDump.assertContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "GET", "MINUTE", 10000);
         configDump.assertNotContainsRateLimitPolicyFor("/rate-limiter-xds-test/pet", "POST", "MINUTE", 10000);

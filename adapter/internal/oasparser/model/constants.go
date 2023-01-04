@@ -82,13 +82,6 @@ const (
 	WEBHOOK string = "WEBHOOK"
 )
 
-const (
-	// RateLimitPolicyAPILevel represents API Level rate limit policy
-	RateLimitPolicyAPILevel = "API"
-	// RateLimitPolicyOperationLevel represents Operation Level rate limit policy
-	RateLimitPolicyOperationLevel = "OPERATION"
-)
-
 // Constants to represent errors
 const (
 	AlreadyExists string = "ALREADY_EXISTS"

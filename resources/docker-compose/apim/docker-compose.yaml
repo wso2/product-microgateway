@@ -144,6 +144,6 @@ services:
   redis:
     image: redis:6.2.7-alpine
     healthcheck:
-      test: ["CMD", "redis-cli","ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
     ports:
       - "6379:6379"

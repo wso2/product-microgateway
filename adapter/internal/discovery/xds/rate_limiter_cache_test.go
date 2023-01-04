@@ -22,10 +22,11 @@ import (
 
 	rls_config "github.com/envoyproxy/go-control-plane/ratelimit/config/ratelimit/v3"
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 )
 
-func TestRateLimitUnitsGet(t *testing.T) {
+func TestGetRateLimitUnit(t *testing.T) {
 	tests := []struct {
 		name         string
 		expectsError bool
@@ -65,7 +66,7 @@ func TestRateLimitUnitsGet(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			unit, err := rlUnits.get(test.name)
+			unit, err := getRateLimitUnit(test.name)
 			assert.Equal(t, test.unit, unit)
 			if test.expectsError {
 				assert.Error(t, err)
@@ -106,7 +107,7 @@ func testAddAPILevelRateLimitPolicies(t *testing.T) {
 			// Note: Each test case is depend on the earlier test cases
 			desc:         "Add an API with API Level Rate Limit Policy",
 			apiID:        "vhost1:API2",
-			mgwSwagger:   getDummyAPISwagger("2", mgw.RateLimitPolicyAPILevel, "5000PerMin", "", "", "", ""),
+			mgwSwagger:   getDummyAPISwagger("2", envoyconf.RateLimitPolicyAPILevel, "5000PerMin", "", "", "", ""),
 			policies:     rateLimitPolicies,
 			expectsError: false,
 			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{
@@ -132,7 +133,7 @@ func testAddAPILevelRateLimitPolicies(t *testing.T) {
 			// Note: Each test case is depend on the earlier test cases
 			desc:         "Add an API with invalid API Level Rate Limit policy",
 			apiID:        "vhost1:API3",
-			mgwSwagger:   getDummyAPISwagger("3", mgw.RateLimitPolicyAPILevel, "6080PerMin", "", "", "", ""),
+			mgwSwagger:   getDummyAPISwagger("3", envoyconf.RateLimitPolicyAPILevel, "6080PerMin", "", "", "", ""),
 			policies:     rateLimitPolicies,
 			expectsError: true,
 			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{
@@ -158,9 +159,9 @@ func testAddAPILevelRateLimitPolicies(t *testing.T) {
 			// Note: Each test case is depend on the earlier test cases
 			desc:         "Add an API with no Rate Limit policies",
 			apiID:        "vhost1:API4",
-			mgwSwagger:   getDummyAPISwagger("4", mgw.RateLimitPolicyAPILevel, "", "", "", "", ""),
+			mgwSwagger:   getDummyAPISwagger("4", "", "", "", "", "", ""),
 			policies:     rateLimitPolicies,
-			expectsError: true,
+			expectsError: false,
 			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{
 				"org1": {"vhost1": {
 					"vhost1:API2": {&rls_config.RateLimitDescriptor{
@@ -182,9 +183,9 @@ func testAddAPILevelRateLimitPolicies(t *testing.T) {
 		},
 		{
 			// Note: Each test case is depend on the earlier test cases
-			desc:         "Add an API with Operation LEvel Rate Limit policies",
+			desc:         "Add an API with Operation Level Rate Limit policies",
 			apiID:        "vhost1:API5",
-			mgwSwagger:   getDummyAPISwagger("5", mgw.RateLimitPolicyOperationLevel, "", "100000PerHOUR", "", "", "2000PerMin"),
+			mgwSwagger:   getDummyAPISwagger("5", envoyconf.RateLimitPolicyOperationLevel, "", "100000PerHOUR", "", "", "2000PerMin"),
 			policies:     rateLimitPolicies,
 			expectsError: false,
 			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{

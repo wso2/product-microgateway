@@ -27,26 +27,25 @@ import (
 	gcp_resource "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	rls_config "github.com/envoyproxy/go-control-plane/ratelimit/config/ratelimit/v3"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 )
 
 var rlsPolicyCache *rateLimitPolicyCache
 
-var rlUnits = rateLimitUnits{
-	"SECOND": rls_config.RateLimitUnit_SECOND,
-	"MINUTE": rls_config.RateLimitUnit_MINUTE,
-	"HOUR":   rls_config.RateLimitUnit_HOUR,
-	"DAY":    rls_config.RateLimitUnit_DAY,
-}
-
-type rateLimitUnits map[string]rls_config.RateLimitUnit
-
-func (r rateLimitUnits) get(name string) (rls_config.RateLimitUnit, error) {
-	n := strings.ToUpper(name)
-	if unit, ok := r[n]; ok {
-		return unit, nil
+func getRateLimitUnit(name string) (rls_config.RateLimitUnit, error) {
+	switch strings.ToUpper(name) {
+	case "SECOND":
+		return rls_config.RateLimitUnit_SECOND, nil
+	case "MINUTE":
+		return rls_config.RateLimitUnit_MINUTE, nil
+	case "HOUR":
+		return rls_config.RateLimitUnit_HOUR, nil
+	case "DAY":
+		return rls_config.RateLimitUnit_DAY, nil
+	default:
+		return rls_config.RateLimitUnit_UNKNOWN, fmt.Errorf("invalid rate limit unit %q", name)
 	}
-	return rls_config.RateLimitUnit_UNKNOWN, fmt.Errorf("Invalid rate limit unit %q", name)
 }
 
 type rateLimitPolicyCache struct {
@@ -65,7 +64,7 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 	level := strings.ToUpper(mgwSwagger.RateLimitLevel)
 
 	var rlsConfigs []*rls_config.RateLimitDescriptor
-	if level == mgw.RateLimitPolicyAPILevel {
+	if level == envoyconf.RateLimitPolicyAPILevel {
 		rlPolicyConfig, err := getRateLimitPolicy(policies, mgwSwagger.RateLimitPolicy)
 		if err != nil {
 			loggers.LoggerXds.Errorf("Error generating rate limit configuration for API: %q", apiID)
@@ -85,7 +84,7 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 				},
 			},
 		}
-	} else if level == mgw.RateLimitPolicyOperationLevel {
+	} else if level == envoyconf.RateLimitPolicyOperationLevel {
 		// The map apiOperations is used to keep `Pat:HTTPmethod` unique to make sure the Rate Limiter Config to be consistent (not to have duplicate rate limit policies)
 		// path -> HTTP method
 		apiOperations := make(map[string]map[string]struct{})
@@ -171,7 +170,7 @@ func getRateLimitPolicy(policies map[string]*mgw.APIRateLimitPolicy, policyName 
 		return nil, fmt.Errorf("rate limit policy %q not defined", policyName)
 	}
 
-	unit, err := rlUnits.get(policy.SpanUnit)
+	unit, err := getRateLimitUnit(policy.SpanUnit)
 	if err != nil {
 		return nil, err
 	}
@@ -213,8 +212,8 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 	}
 
 	return &rls_config.RateLimitConfig{
-		Name:        "Default", // TODO: (renuka) configure this
-		Domain:      "Default", // TODO: (renuka) configure this
+		Name:        "Default",
+		Domain:      "Default",
 		Descriptors: orgDescriptors,
 	}
 }
