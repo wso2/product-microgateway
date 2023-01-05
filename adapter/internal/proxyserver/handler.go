@@ -32,22 +32,22 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
-// HTTPGetHandler function handles get requests
+// HTTPGetToGAHandler function handles get requests
 func (s *Server) HTTPGetToGAHandler(w http.ResponseWriter, r *http.Request) {
 	buildRequestToGA(s.client, w, r, http.MethodGet, nil)
 }
 
-// HTTPPostHandler function handles post requests
+// HTTPPostToGAHandler function handles post requests
 func (s *Server) HTTPPostToGAHandler(w http.ResponseWriter, r *http.Request) {
 	buildRequestToGA(s.client, w, r, http.MethodPost, r.Body)
 }
 
-// HTTPatchHandler function handles patch requests
+// HTTPatchToGAHandler function handles patch requests
 func (s *Server) HTTPatchToGAHandler(w http.ResponseWriter, r *http.Request) {
 	buildRequestToGA(s.client, w, r, http.MethodPatch, r.Body)
 }
 
-// HTTPGetForExternalMSHandler function handles get requests sending to external microservices
+// HTTPGetToExternalMSHandler function handles get requests sending to external microservices
 func (s *Server) HTTPGetToExternalMSHandler(msUniqueIdentifier string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		buildRequestForExtMS(s.client, w, r, http.MethodGet, nil, msUniqueIdentifier)
@@ -61,7 +61,7 @@ func (s *Server) HTTPPostToExternalMSHandler(msUniqueIdentifier string) http.Han
 	})
 }
 
-// HTTPPostToExternalMSHandler function handles post requests sending to external microservices
+// HTTPPatchToExternalMSHandler function handles post requests sending to external microservices
 func (s *Server) HTTPPatchToExternalMSHandler(msUniqueIdentifier string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		buildRequestForExtMS(s.client, w, r, http.MethodPatch, r.Body, msUniqueIdentifier)
