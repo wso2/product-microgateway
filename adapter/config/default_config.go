@@ -368,6 +368,8 @@ var defaultConfig = &Config{
 		Enabled:              false,
 		ServiceURL:           "global-adapter:18000",
 		ServiceURLDeprecated: UnassignedAsDeprecated,
+		Username:             "admin",
+		Password:             "admin",
 		OverwriteHostName:    UnassignedAsDeprecated,
 		OverrideHostName:     "",
 		LocalLabel:           "default",
@@ -417,5 +419,11 @@ var defaultConfig = &Config{
 			"port":                   "9411",
 			"endpoint":               "/api/v2/spans",
 		},
+	},
+	LAProxyServer: laProxyServer{
+		Host:     "0.0.0.0",
+		Port:     "9740",
+		Username: "admin",
+		Password: "admin",
 	},
 }
