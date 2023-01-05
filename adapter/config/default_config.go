@@ -420,6 +420,11 @@ var defaultConfig = &Config{
 			"endpoint":               "/api/v2/spans",
 		},
 	},
+	MoesifMicroservice: moesifMicroservice{
+		ServiceURL: "https://moesifms:8000",
+		Username:   "admin",
+		Password:   "admin",
+	},
 	LAProxyServer: laProxyServer{
 		Host:     "0.0.0.0",
 		Port:     "9740",
