@@ -72,13 +72,15 @@ const (
 //	Don't use toml tag for configuration properties as it may affect environment variable based
 //	config resolution.
 type Config struct {
-	Adapter       adapter
-	Enforcer      enforcer
-	Envoy         envoy         `toml:"router"`
-	ControlPlane  controlPlane  `toml:"controlPlane"`
-	GlobalAdapter globalAdapter `toml:"globalAdapter"`
-	Analytics     analytics     `toml:"analytics"`
-	Tracing       tracing
+	Adapter            adapter
+	Enforcer           enforcer
+	Envoy              envoy         `toml:"router"`
+	ControlPlane       controlPlane  `toml:"controlPlane"`
+	GlobalAdapter      globalAdapter `toml:"globalAdapter"`
+	Analytics          analytics     `toml:"analytics"`
+	Tracing            tracing
+	MoesifMicroservice moesifMicroservice `toml:"moesifMicroservice"`
+	LAProxyServer      laProxyServer      `toml:"laProxyServer"`
 }
 
 // Adapter related Configurations
@@ -452,6 +454,19 @@ type tracing struct {
 	ConfigProperties map[string]string
 }
 
+type moesifMicroservice struct {
+	ServiceURL string `toml:"serviceUrl"`
+	Username   string `toml:"username"`
+	Password   string `toml:"password"`
+}
+
+type laProxyServer struct {
+	Host     string `toml:"host"`
+	Port     string `toml:"port"`
+	Username string `toml:"username"`
+	Password string `toml:"password"`
+}
+
 type metrics struct {
 	Enabled bool
 	Type    string
@@ -544,6 +559,8 @@ type globalAdapter struct {
 	ServiceURL string
 	// Deprecated: Use ServiceURL instead.
 	ServiceURLDeprecated string `toml:"serviceUrl"`
+	Username             string `toml:"username"`
+	Password             string `toml:"password"`
 	LocalLabel           string
 	// Deprecated: Use OverrideHostName instead.
 	OverwriteHostName string

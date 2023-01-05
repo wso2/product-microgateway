@@ -254,6 +254,12 @@ func Run(conf *config.Config) {
 		go restserver.StartRestServer(conf)
 	}
 
+	// Proxy server for the LA
+	if true {
+		logger.LoggerMgw.Info("Starting proxy server for Local Adapter... ")
+
+	}
+
 	gaEnabled := conf.GlobalAdapter.Enabled
 	if gaEnabled {
 		go ga.InitGAClient()

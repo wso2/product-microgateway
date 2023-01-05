@@ -47,6 +47,7 @@ const DefaultGatewayName = "Default"
 
 // DefaultGatewayVHost represents the default vhost of default gateway environment if it is not configured
 const DefaultGatewayVHost = "localhost"
+
 // for /testtoken and /health check, if user not configured default env, we have no vhost
 
 const (
@@ -118,6 +119,8 @@ func ReadConfigs() (*Config, error) {
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem(), "GlobalAdapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Enforcer)).Elem(), "Enforcer", false)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Analytics)).Elem(), "Analytics", false)
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.MoesifMicroservice)).Elem(), "MoesifMicroservice", true)
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.LAProxyServer)).Elem(), "LAProxyServer", true)
 	})
 	return adapterConfig, e
 }
