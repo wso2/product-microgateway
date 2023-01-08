@@ -60,7 +60,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		cors,
 		extAauth,
 		lua,
-		// awsLambda,
+		//if AwsLambda filter is enabled, it will insert into this index,
 		router,
 	}
 
@@ -184,6 +184,7 @@ func getAwsLambdaFilter() *hcmv3.HttpFilter {
 	conf, _ := config.ReadConfigs()
 
 	var mode awslambdav3.Config_InvocationMode
+
 	if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == "SYNCHRONOUS" {
 		mode = awslambdav3.Config_SYNCHRONOUS
 	} else {

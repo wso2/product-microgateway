@@ -35,6 +35,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	awslambdav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/aws_lambda/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
@@ -385,6 +386,20 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 	return processEndpoints(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout, endpoint.EndpointCluster.Endpoints[0].Basepath)
 }
 
+// func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
+// 	var epHost string
+// 	var epPort uint32
+// 	var epPath string
+// 	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
+// 	epCluster := &model.EndpointCluster{
+// 		// Endpoints: []model.Endpoint{{
+// 		// 	Host:    "",
+// 		// 	URLType: "http",
+// 		// 	Port:    uint32(443),
+// 		// }},
+// 	}
+// }
+
 // CreateTracingCluster creates a cluster definition for router's tracing server.
 func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
 	var epHost string
@@ -733,6 +748,8 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
 
+	conf, _ := config.ReadConfigs()
+
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
 		// The following are common to all routes and does not get updated per operation
@@ -860,9 +877,36 @@ end`
 		Value:   luaMarshelled.Bytes(),
 	}
 
+	var mode awslambdav3.Config_InvocationMode
+
+	if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == "SYNCHRONOUS" {
+		mode = awslambdav3.Config_SYNCHRONOUS
+	} else {
+		mode = awslambdav3.Config_ASYNCHRONOUS
+	}
+
+	awsLambdaPerFilterConfig := awslambdav3.PerRouteConfig{
+		InvokeConfig: &awslambdav3.Config{
+			//TODO: set arn from swagger
+			Arn:                "arn:aws:lambda:us-east-1:825678434177:function:addressCheck",
+			PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
+			InvocationMode:     mode,
+		},
+	}
+
+	awsLambdaMarshelled := proto.NewBuffer(nil)
+	awsLambdaMarshelled.SetDeterministic(true)
+	_ = awsLambdaMarshelled.Marshal(&awsLambdaPerFilterConfig)
+
+	awsLambdaFilter := &any.Any{
+		TypeUrl: awsLambdaRouteName,
+		Value:   awsLambdaMarshelled.Bytes(),
+	}
+
 	perRouteFilterConfigs := map[string]*any.Any{
 		wellknown.HTTPExternalAuthorization: extAuthzFilter,
 		wellknown.Lua:                       luaFilter,
+		"envoy.filters.http.aws_lambda":     awsLambdaFilter,
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
