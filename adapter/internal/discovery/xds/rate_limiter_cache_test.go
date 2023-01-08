@@ -349,6 +349,15 @@ func testDeleteAPILevelRateLimitPolicies(t *testing.T) {
 				"org1": {"vhost1": {}},
 			},
 		},
+		{
+			desc:  "Delete API in an Org that has no APIs with rate limits",
+			org:   "org4",
+			vHost: "vhost1",
+			apiID: "vhost1:API5",
+			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{
+				"org1": {"vhost1": {}},
+			},
+		},
 	}
 
 	for _, test := range tests {

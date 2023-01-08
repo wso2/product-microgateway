@@ -137,7 +137,7 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 	}
 
 	rateLimit := &rate_limit.RateLimit{
-		Domain:                  "Default",
+		Domain:                  RateLimiterDomain,
 		FailureModeDeny:         conf.Envoy.RateLimit.FailureModeDeny,
 		EnableXRatelimitHeaders: enableXRatelimitHeaders,
 		RateLimitService: &envoy_config_ratelimit_v3.RateLimitServiceConfig{

@@ -733,9 +733,10 @@ func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs 
 
 	vHost, err := ExtractVhostFromAPIIdentifier(apiIdentifier)
 	if err != nil {
-		logger.LoggerXds.Error("Error extracting vhost from apiIdentifier. Continue cleaning maps: ", err)
+		logger.LoggerXds.Error("Error extracting vhost from apiIdentifier. Continue cleaning other maps: ", err)
+	} else {
+		rlsPolicyCache.DeleteAPILevelRateLimitPolicies(organizationID, vHost, apiIdentifier)
 	}
-	rlsPolicyCache.DeleteAPILevelRateLimitPolicies(organizationID, vHost, apiIdentifier)
 
 	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
 	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with

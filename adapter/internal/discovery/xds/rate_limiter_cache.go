@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 
 	gcp_types "github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	gcp_cache "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
@@ -49,11 +50,15 @@ func getRateLimitUnit(name string) (rls_config.RateLimitUnit, error) {
 }
 
 type rateLimitPolicyCache struct {
-	// xdsCache is the snapshot cache for the
+	// xdsCache is the snapshot cache for the rate limiter service
 	xdsCache gcp_cache.SnapshotCache
 
+	// TODO: (renuka) move both 'apiLevelRateLimitPolicies' and 'apiLevelMu' to a new struct when doing the App level rate limiting
+	// So app level rate limits are in a new struct and refer in this struct.
 	// org -> vhost -> API-Identifier (i.e. Vhost:API-UUID) -> Rate Limit Configs
 	apiLevelRateLimitPolicies map[string]map[string]map[string][]*rls_config.RateLimitDescriptor
+	// mutex for API level
+	apiLevelMu sync.RWMutex
 }
 
 // AddAPILevelRateLimitPolicies adds inline Rate Limit policies in APIs to be updated in the Rate Limiter service.
@@ -73,12 +78,12 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 
 		rlsConfigs = []*rls_config.RateLimitDescriptor{
 			{
-				Key:   "path",
+				Key:   envoyconf.DescriptorKeyForPath,
 				Value: mgwSwagger.GetXWso2Basepath(),
 				Descriptors: []*rls_config.RateLimitDescriptor{
 					{
-						Key:       "method",
-						Value:     "ALL",
+						Key:       envoyconf.DescriptorKeyForMethod,
+						Value:     envoyconf.DescriptorValueForAPIMethod,
 						RateLimit: rlPolicyConfig,
 					},
 				},
@@ -123,7 +128,7 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 				}
 
 				rlConf := &rls_config.RateLimitDescriptor{
-					Key:       "method",
+					Key:       envoyconf.DescriptorKeyForMethod,
 					Value:     method,
 					RateLimit: rlPolicyConfig,
 				}
@@ -133,7 +138,7 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 
 			if operationPolicyExists {
 				rlsConfig := &rls_config.RateLimitDescriptor{
-					Key:         "path",
+					Key:         envoyconf.DescriptorKeyForPath,
 					Value:       path,
 					Descriptors: operationRlsConfigs,
 				}
@@ -147,6 +152,8 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 	org := mgwSwagger.OrganizationID
 	vHost := mgwSwagger.VHost
 
+	r.apiLevelMu.Lock()
+	defer r.apiLevelMu.Unlock()
 	if _, ok := r.apiLevelRateLimitPolicies[org]; !ok {
 		r.apiLevelRateLimitPolicies[org] = make(map[string]map[string][]*rls_config.RateLimitDescriptor)
 	}
@@ -161,6 +168,8 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 
 // DeleteAPILevelRateLimitPolicies deletes inline Rate Limit policies added with the API.
 func (r *rateLimitPolicyCache) DeleteAPILevelRateLimitPolicies(org, vHost, apiID string) {
+	r.apiLevelMu.Lock()
+	defer r.apiLevelMu.Unlock()
 	delete(r.apiLevelRateLimitPolicies[org][vHost], apiID)
 }
 
@@ -184,6 +193,9 @@ func getRateLimitPolicy(policies map[string]*mgw.APIRateLimitPolicy, policyName 
 func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config.RateLimitConfig {
 	var orgDescriptors []*rls_config.RateLimitDescriptor
 
+	r.apiLevelMu.RLock()
+	defer r.apiLevelMu.RUnlock()
+
 	// Generate API level rate limit configurations
 	for org, orgPolicies := range r.apiLevelRateLimitPolicies {
 		var vHostDescriptors []*rls_config.RateLimitDescriptor
@@ -197,14 +209,14 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 				}
 			}
 			vHostDescriptor := &rls_config.RateLimitDescriptor{
-				Key:         "vhost",
+				Key:         envoyconf.DescriptorKeyForVhost,
 				Value:       vHost,
 				Descriptors: apiDescriptors,
 			}
 			vHostDescriptors = append(vHostDescriptors, vHostDescriptor)
 		}
 		orgDescriptor := &rls_config.RateLimitDescriptor{
-			Key:         "org",
+			Key:         envoyconf.DescriptorKeyForOrg,
 			Value:       org,
 			Descriptors: vHostDescriptors,
 		}
@@ -212,8 +224,8 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 	}
 
 	return &rls_config.RateLimitConfig{
-		Name:        "Default",
-		Domain:      "Default",
+		Name:        envoyconf.RateLimiterDomain,
+		Domain:      envoyconf.RateLimiterDomain,
 		Descriptors: orgDescriptors,
 	}
 }
