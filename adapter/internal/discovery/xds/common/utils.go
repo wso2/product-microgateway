@@ -24,7 +24,7 @@ import (
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 )
 
-const nodeIDArrayMaxLength int = 40
+const nodeIDArrayMaxLength int = 20
 const instanceIdentifierKey string = "instanceIdentifier"
 
 // NodeQueue struct is used to keep track of the nodes connected via the XDS.
