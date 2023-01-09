@@ -188,7 +188,7 @@ sandboxVhost = "sandbox.host"
   # Cert file path used for the rate-limit service mTLS
   certFilePath = "/home/wso2/security/keystore/mg.pem"
   # Truststore file path used for the rate-limit service mTLS
-  caCertFilePath = "/home/wso2/security/truststore/mg.pem"
+  caCertFilePath = "/home/wso2/security/truststore/rate-limiter.pem"
   # SAN hostname represented in the public cert
   sSLCertSANHostname = ""
 

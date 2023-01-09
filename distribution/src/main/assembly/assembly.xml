@@ -100,6 +100,11 @@
             </outputDirectory>
         </file>
         <file>
+            <source>../resources/security/rate-limiter.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/adapter/security/truststore
+            </outputDirectory>
+        </file>
+        <file>
             <source>../resources/security/mg.key</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer/security/keystore
             </outputDirectory>
@@ -130,12 +135,17 @@
             </outputDirectory>
         </file>
         <file>
-            <source>../resources/security/mg.key</source>
+            <source>../resources/security/rate-limiter.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router/security/truststore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/rate-limiter.key</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/rate-limiter/security/keystore
             </outputDirectory>
         </file>
         <file>
-            <source>../resources/security/mg.pem</source>
+            <source>../resources/security/rate-limiter.pem</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/rate-limiter/security/keystore
             </outputDirectory>
         </file>

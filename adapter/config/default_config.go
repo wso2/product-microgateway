@@ -133,7 +133,7 @@ var defaultConfig = &Config{
 			RequestTimeoutInMillis: 80,
 			KeyFilePath:            "/home/wso2/security/keystore/mg.key",
 			CertFilePath:           "/home/wso2/security/keystore/mg.pem",
-			CaCertFilePath:         "/home/wso2/security/truststore/mg.pem",
+			CaCertFilePath:         "/home/wso2/security/truststore/rate-limiter.pem",
 			SSLCertSANHostname:     "",
 		},
 	},
