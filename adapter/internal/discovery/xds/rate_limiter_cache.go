@@ -253,7 +253,7 @@ func (r *rateLimitPolicyCache) updateXdsCache(label string) bool {
 		return false
 	}
 	loggers.LoggerXds.Infof("New rate limit cache updated for the label: %q version: %q", label, version)
-	loggers.LoggerXds.Trace("Updated rate limit config", rlsConf)
+	loggers.LoggerXds.Debug("Updated rate limit config: ", rlsConf)
 	return true
 }
 
