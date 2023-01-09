@@ -24,7 +24,7 @@ import (
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 )
 
-const nodeIDArrayMaxLength int = 20
+const nodeIDArrayMaxLength int = 40
 const instanceIdentifierKey string = "instanceIdentifier"
 
 // NodeQueue struct is used to keep track of the nodes connected via the XDS.
@@ -36,12 +36,13 @@ type NodeQueue struct {
 // CheckEntryAndSwapToEnd function does the following. Recently accessed entry is removed last.
 // Array should have a maximum length. If the the provided nodeId may or may not be within the array.
 //
-// 1. If the array's maximum length is not reached after adding the new element and the element is not inside the array,
-// 		append the element to the end.
-// 2. If the array is at maximum length and element is not within the array, the new entry should be appended to the end
-//		and the 0th element should be removed.
-// 3. If the array is at the maximum length and element is inside the array, the new element should be appended and the already
-// 		existing entry should be removed from the position.
+//  1. If the array's maximum length is not reached after adding the new element and the element is not inside the array,
+//     append the element to the end.
+//  2. If the array is at maximum length and element is not within the array, the new entry should be appended to the end
+//     and the 0th element should be removed.
+//  3. If the array is at the maximum length and element is inside the array, the new element should be appended and the already
+//     existing entry should be removed from the position.
+//
 // Returns the modified array and true if the entry is a new addition.
 func (nodeQueue *NodeQueue) checkEntryAndMoveToEnd(nodeID string) (isNewAddition bool) {
 	matchedIndex := -1
@@ -88,7 +89,7 @@ func GetNodeIdentifier(request *discovery.DiscoveryRequest) string {
 	metadataMap := request.Node.Metadata.AsMap()
 	nodeIdentifier := request.Node.Id
 	if identifierVal, ok := metadataMap[instanceIdentifierKey]; ok {
-		nodeIdentifier = request.Node.Id + ":" + identifierVal.(string)
+		nodeIdentifier = request.Node.Id + ":" + identifierVal.(string) + ":" + request.GetTypeUrl()
 	}
 	return nodeIdentifier
 }
