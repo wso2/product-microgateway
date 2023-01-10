@@ -62,6 +62,7 @@ type MgwSwagger struct {
 	securityScheme             []SecurityScheme
 	security                   []map[string][]string
 	xWso2ThrottlingTier        string
+	XAmznResourceName          string
 	xWso2AuthHeader            string
 	disableSecurity            bool
 	OrganizationID             string
@@ -81,7 +82,8 @@ type EndpointCluster struct {
 	EndpointPrefix string
 	Endpoints      []Endpoint
 	// EndpointType enum {failover, loadbalance}. if any other value provided, consider as the default value; which is loadbalance
-	EndpointType   string
+	EndpointType string
+	//awsARN....
 	Config         *EndpointConfig
 	SecurityConfig EndpointSecurity
 	// Is http2 protocol enabled
@@ -237,6 +239,11 @@ func (swagger *MgwSwagger) GetDescription() string {
 // GetXWso2ThrottlingTier returns the Throttling tier via the vendor extension.
 func (swagger *MgwSwagger) GetXWso2ThrottlingTier() string {
 	return swagger.xWso2ThrottlingTier
+}
+
+// GetXAmznResourceName returns the amazon resource name (arn) related to Aws Lambda.
+func (swagger *MgwSwagger) GetXAmznResourceName() string {
+	return swagger.XAmznResourceName
 }
 
 // GetDisableSecurity returns the authType via the vendor extension.
@@ -701,6 +708,13 @@ func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
 	tier := ResolveThrottlingTier(swagger.vendorExtensions)
 	if tier != "" {
 		swagger.xWso2ThrottlingTier = tier
+	}
+}
+
+func (swagger *MgwSwagger) setXAmznResourceName() {
+	tier := ResolveAmznResourceName(swagger.vendorExtensions)
+	if tier != "" {
+		swagger.XAmznResourceName = tier
 	}
 }
 

@@ -95,6 +95,18 @@ func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
 	return xTier
 }
 
+// ResolveAmznResourceName extracts the value of x-amzn-resource-name extension.
+// If the property is not availble, an empty string is returned.
+func ResolveAmznResourceName(vendorExtensions map[string]interface{}) string {
+	xTier := ""
+	if x, found := vendorExtensions[constants.XAmznResourceName]; found {
+		if val, ok := x.(string); ok {
+			xTier = val
+		}
+	}
+	return xTier
+}
+
 // ResolveDisableSecurity extracts the value of x-auth-type extension.
 // if the property is not available, false is returned.
 // If the API definition is fed from API manager, then API definition contains
