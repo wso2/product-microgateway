@@ -315,6 +315,7 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 			p := rlPolicies.Data.APIRateLimitPolicies[i]
 			policyMap[p.PolicyName] = &p
 		}
+		loggers.LoggerAPI.Debugf("Number of Rate Limit policies received: %v", len(policyMap))
 		apiProject.RateLimitPolicies = policyMap
 	}
 	return nil

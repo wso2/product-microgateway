@@ -1,6 +1,6 @@
 # Rate Limiter
 
-## Dev Guid
+## Dev Guide
 
 ### Health Check
 
@@ -15,7 +15,7 @@ curl http://localhost:8090/healthcheck
 Execute the following command to get the config dump of the rate limit service.
 
 ```sh
-curl http://localhost:6070/rlconfig
+curl http://localhost:6070/rlconfig -i
 ```
 
 ### Do changes to the Rate Limiter service
@@ -29,4 +29,3 @@ curl http://localhost:6070/rlconfig
     git commit -m <commit_message>
     ```
 4.  Create a pull request on https://github.com/wso2/product-microgateway
-

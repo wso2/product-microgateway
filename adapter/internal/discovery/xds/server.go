@@ -733,7 +733,7 @@ func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs 
 
 	vHost, err := ExtractVhostFromAPIIdentifier(apiIdentifier)
 	if err != nil {
-		logger.LoggerXds.Error("Error extracting vhost from apiIdentifier. Continue cleaning other maps: ", err)
+		logger.LoggerXds.Errorf("Error extracting vhost from apiIdentifier: %q. Continue cleaning other maps: %v", apiIdentifier, err)
 	} else {
 		rlsPolicyCache.DeleteAPILevelRateLimitPolicies(organizationID, vHost, apiIdentifier)
 	}

@@ -128,7 +128,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		logger.LoggerMgw.Fatal("failed to listen: ", err)
+		logger.LoggerMgw.Fatalf("Failed to listen %v: %v", port, err)
 	}
 
 	// register services
@@ -170,7 +170,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 		rlsGrpcServer := grpc.NewServer(grpcOptions...)
 		rlsLis, err := net.Listen("tcp", fmt.Sprintf(":%d", rlsPort))
 		if err != nil {
-			logger.LoggerMgw.Fatal("Failed to listen: ", err)
+			logger.LoggerMgw.Fatalf("Failed to listen %v: %v", port, err)
 		}
 
 		discoveryv3.RegisterAggregatedDiscoveryServiceServer(rlsGrpcServer, rlsServer)
