@@ -42,4 +42,6 @@ type routeCreateParams struct {
 	passRequestPayloadToEnforcer bool
 	isDefaultVersion             bool
 	isSandbox                    bool
+	endpointType                 string
+	amznResourceName             string
 }

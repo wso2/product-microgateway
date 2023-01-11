@@ -747,6 +747,8 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
+	endpointType := params.endpointType
+	arn := params.amznResourceName
 
 	conf, _ := config.ReadConfigs()
 
@@ -877,36 +879,42 @@ end`
 		Value:   luaMarshelled.Bytes(),
 	}
 
-	var mode awslambdav3.Config_InvocationMode
-
-	if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == "SYNCHRONOUS" {
-		mode = awslambdav3.Config_SYNCHRONOUS
-	} else {
-		mode = awslambdav3.Config_ASYNCHRONOUS
-	}
-
-	awsLambdaPerFilterConfig := awslambdav3.PerRouteConfig{
-		InvokeConfig: &awslambdav3.Config{
-			//TODO: set arn from swagger
-			Arn:                "arn:aws:lambda:us-east-1:825678434177:function:addressCheck",
-			PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
-			InvocationMode:     mode,
-		},
-	}
-
-	awsLambdaMarshelled := proto.NewBuffer(nil)
-	awsLambdaMarshelled.SetDeterministic(true)
-	_ = awsLambdaMarshelled.Marshal(&awsLambdaPerFilterConfig)
-
-	awsLambdaFilter := &any.Any{
-		TypeUrl: awsLambdaRouteName,
-		Value:   awsLambdaMarshelled.Bytes(),
-	}
-
 	perRouteFilterConfigs := map[string]*any.Any{
 		wellknown.HTTPExternalAuthorization: extAuthzFilter,
 		wellknown.Lua:                       luaFilter,
-		"envoy.filters.http.aws_lambda":     awsLambdaFilter,
+		//"envoy.filters.http.aws_lambda":     awsLambdaFilter,
+	}
+
+	if endpointType == constants.AwsLambda {
+
+		var mode awslambdav3.Config_InvocationMode
+
+		if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == "SYNCHRONOUS" {
+			mode = awslambdav3.Config_SYNCHRONOUS
+		} else {
+			mode = awslambdav3.Config_ASYNCHRONOUS
+		}
+
+		awsLambdaPerFilterConfig := awslambdav3.PerRouteConfig{
+			InvokeConfig: &awslambdav3.Config{
+				//TODO: set arn from swagger
+				//Arn:                "arn:aws:lambda:us-east-1:825678434177:function:addressCheck",
+				Arn:                arn,
+				PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
+				InvocationMode:     mode,
+			},
+		}
+
+		awsLambdaMarshelled := proto.NewBuffer(nil)
+		awsLambdaMarshelled.SetDeterministic(true)
+		_ = awsLambdaMarshelled.Marshal(&awsLambdaPerFilterConfig)
+
+		awsLambdaFilter := &any.Any{
+			TypeUrl: awsLambdaRouteName,
+			Value:   awsLambdaMarshelled.Bytes(),
+		}
+
+		perRouteFilterConfigs["envoy.filters.http.aws_lambda"] = awsLambdaFilter
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
@@ -1500,6 +1508,8 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 		isDefaultVersion:             swagger.IsDefaultVersion,
 		isSandbox:                    isSandbox,
+		endpointType:                 swagger.EndpointType,
+		amznResourceName:             swagger.XAmznResourceName,
 	}
 
 	if swagger.GetProdEndpoints() != nil {
