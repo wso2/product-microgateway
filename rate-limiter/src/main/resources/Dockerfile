@@ -27,6 +27,24 @@ ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=10500
 ARG MG_USER_HOME=/home/${MG_USER}
 
+ENV HOST=0.0.0.0
+ENV PORT=8090
+ENV GRPC_HOST=0.0.0.0
+ENV GRPC_PORT=8091
+ENV USE_STATSD=false
+ENV LOG_LEVEL=INFO
+ENV LOCAL_CACHE_SIZE_IN_BYTES=1024000
+
+ENV GRPC_SERVER_USE_TLS=true
+ENV GRPC_SERVER_TLS_KEY=/home/wso2/security/keystore/rate-limiter.key
+ENV GRPC_SERVER_TLS_CERT=/home/wso2/security/keystore/rate-limiter.pem
+ENV GRPC_CLIENT_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+
+ENV CONFIG_GRPC_XDS_SERVER_USE_TLS=true
+ENV CONFIG_GRPC_XDS_CLIENT_TLS_KEY=/home/wso2/security/keystore/rate-limiter.key
+ENV CONFIG_GRPC_XDS_CLIENT_TLS_CERT=/home/wso2/security/keystore/rate-limiter.pem
+ENV CONFIG_GRPC_XDS_SERVER_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
  --------------------------------- \n\
@@ -43,6 +61,9 @@ RUN \
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 COPY maven/security security
+COPY maven/start-server.sh .
 COPY maven/LICENSE.txt .
 
-ENTRYPOINT ["ratelimit"]
+EXPOSE 8090 8091 6070
+
+ENTRYPOINT ["sh", "start-server.sh"]

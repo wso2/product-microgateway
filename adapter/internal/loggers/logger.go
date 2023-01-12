@@ -32,38 +32,40 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAPI                  = "github.com/wso2/product-microgateway/adapter/internal/api"
-	pkgAuth                 = "github.com/wso2/product-microgateway/adapter/internal/auth"
-	pkgMgw                  = "github.com/wso2/product-microgateway/adapter/internal/adapter"
-	pkgOasparser            = "github.com/wso2/product-microgateway/adapter/internal/oasparser"
-	pkgInterceptor          = "github.com/wso2/product-microgateway/adapter/internal/interceptor"
-	pkgXds                  = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
-	pkgSync                 = "github.com/wso2/product-microgateway/adapter/internal/synchronizer"
-	pkgInternalMsg          = "github.com/wso2/product-microgateway/adapter/internal/messaging"
-	pkgSvcDiscovery         = "github.com/wso2/product-microgateway/adapter/internal/svcDiscovery"
-	pkgSubscription         = "github.com/wso2/product-microgateway/adapter/internal/subscription"
-	pkgRouterXdsCallbacks   = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
-	pkgEnforcerXdsCallbacks = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
-	pkgGA                   = "github.com/wso2/product-microgateway/adapter/internal/ga"
-	pkgNotifier             = "github.com/wso2/product-microgateway/adapter/internal/notifier"
+	pkgAPI                     = "github.com/wso2/product-microgateway/adapter/internal/api"
+	pkgAuth                    = "github.com/wso2/product-microgateway/adapter/internal/auth"
+	pkgMgw                     = "github.com/wso2/product-microgateway/adapter/internal/adapter"
+	pkgOasparser               = "github.com/wso2/product-microgateway/adapter/internal/oasparser"
+	pkgInterceptor             = "github.com/wso2/product-microgateway/adapter/internal/interceptor"
+	pkgXds                     = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	pkgSync                    = "github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	pkgInternalMsg             = "github.com/wso2/product-microgateway/adapter/internal/messaging"
+	pkgSvcDiscovery            = "github.com/wso2/product-microgateway/adapter/internal/svcDiscovery"
+	pkgSubscription            = "github.com/wso2/product-microgateway/adapter/internal/subscription"
+	pkgRouterXdsCallbacks      = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
+	pkgEnforcerXdsCallbacks    = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
+	pkgRateLimiterXdsCallbacks = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/ratelimitercallbacks"
+	pkgGA                      = "github.com/wso2/product-microgateway/adapter/internal/ga"
+	pkgNotifier                = "github.com/wso2/product-microgateway/adapter/internal/notifier"
 )
 
 // logger package references
 var (
-	LoggerAPI                  *logrus.Logger
-	LoggerAuth                 *logrus.Logger
-	LoggerMgw                  *logrus.Logger
-	LoggerOasparser            *logrus.Logger
-	LoggerInterceptor          *logrus.Logger
-	LoggerXds                  *logrus.Logger
-	LoggerSync                 *logrus.Logger
-	LoggerInternalMsg          *logrus.Logger
-	LoggerSvcDiscovery         *logrus.Logger
-	LoggerSubscription         *logrus.Logger
-	LoggerRouterXdsCallbacks   *logrus.Logger
-	LoggerEnforcerXdsCallbacks *logrus.Logger
-	LoggerGA                   *logrus.Logger
-	LoggerNotifier             *logrus.Logger
+	LoggerAPI                     *logrus.Logger
+	LoggerAuth                    *logrus.Logger
+	LoggerMgw                     *logrus.Logger
+	LoggerOasparser               *logrus.Logger
+	LoggerInterceptor             *logrus.Logger
+	LoggerXds                     *logrus.Logger
+	LoggerSync                    *logrus.Logger
+	LoggerInternalMsg             *logrus.Logger
+	LoggerSvcDiscovery            *logrus.Logger
+	LoggerSubscription            *logrus.Logger
+	LoggerRouterXdsCallbacks      *logrus.Logger
+	LoggerEnforcerXdsCallbacks    *logrus.Logger
+	LoggerRateLimiterXdsCallbacks *logrus.Logger
+	LoggerGA                      *logrus.Logger
+	LoggerNotifier                *logrus.Logger
 )
 
 func init() {
@@ -85,6 +87,7 @@ func UpdateLoggers() {
 	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
 	LoggerRouterXdsCallbacks = logging.InitPackageLogger(pkgRouterXdsCallbacks)
 	LoggerEnforcerXdsCallbacks = logging.InitPackageLogger(pkgEnforcerXdsCallbacks)
+	LoggerRateLimiterXdsCallbacks = logging.InitPackageLogger(pkgRateLimiterXdsCallbacks)
 	LoggerGA = logging.InitPackageLogger(pkgGA)
 	LoggerNotifier = logging.InitPackageLogger(pkgNotifier)
 	logrus.Info("Updated loggers")

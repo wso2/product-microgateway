@@ -1,10 +1,10 @@
 type: api
-version: v4.1.0
+version: v4.0.0
 data:
-  id: 2b547d7c-4f7b-4f31-ad6b-05b4960dc123
-  name: operationLevelRateLimit
-  context: /v2/operationLevelRL
-  version: 1.0.0
+  id:
+  name: rate-limiter-xds-test
+  context: /rate-limiter-xds/v5
+  version: 5.0.3
   rateLimitLevel: OPERATION
   provider: admin
   lifeCycleStatus: PUBLISHED
@@ -70,6 +70,40 @@ data:
   endpointImplementationType: ENDPOINT
   scopes: []
   operations:
+    # Rate limits for SOME methods
+    -
+      id: ""
+      target: /pet
+      verb: GET
+      authType: Application & Application User
+      scopes: []
+      usedProductIds: []
+    -
+      id: ""
+      target: /pet
+      verb: POST
+      authType: Application & Application User
+      scopes: []
+      usedProductIds: []
+      rateLimitPolicy: 10000PerMin
+    # Rate limits for ALL methods
+    -
+      id: ""
+      target: /pet/{petId}
+      verb: GET
+      authType: Application & Application User
+      scopes: []
+      usedProductIds: []
+      rateLimitPolicy: 20000PerMin
+    -
+      id: ""
+      target: /pet/{petId}
+      verb: DELETE
+      authType: Application & Application User
+      scopes: []
+      usedProductIds: []
+      rateLimitPolicy: 10000PerMin
+    # Rate limits for NO methods
     -
       id: ""
       target: /pet/findByStatus
@@ -77,45 +111,6 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: 3PerMin
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-    -
-      id: ""
-      target: /pet/{petId}
-      verb: GET
-      authType: Application & Application User
-      scopes: []
-      usedProductIds: []
-      rateLimitPolicy: 5PerMin
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-    -
-      id: ""
-      target: /pet/{petId}
-      verb: POST
-      authType: Application & Application User
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-    -
-      id: ""
-      target: /pets/findByTags
-      verb: GET
-      authType: Application & Application User
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
   categories: []
   keyManagers:
     - all

@@ -62,6 +62,9 @@ public class ApictlUtils {
             "deploymentEnvironments" + File.separator;
     public static final String API_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator + "apiYaml" +
             File.separator;
+
+    public static final String RATE_LIMIT_POLICIES_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "rateLimitPolicies" + File.separator;
     public static final String MGW_ADAPTER_CERTS_PATH = TestConstant.CC_TEMP_PATH + TestConstant.DOCKER_COMPOSE_DIR
             + File.separator + "resources" + File.separator + "adapter" + File.separator + "security"
             + File.separator + "truststore" + File.separator;
@@ -156,6 +159,27 @@ public class ApictlUtils {
     public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
                                      String interceptorCert, String apiYamlFile)
             throws IOException, CCTestException {
+        createProject(openApiFile, apiProjectName, backendCert, deployEnvYamlFile, interceptorCert, apiYamlFile, null);
+    }
+
+    /**
+     * Create an API project - To be used before deploying an API via the apictl deploy command
+     *
+     * @param openApiFile openAPI file to create the API project from
+     * @param apiProjectName expected name of the project that gets created
+     * @param backendCert name of the backend cert file that should be included in the
+     *                    Endpoint-certificates folder of the API project
+     * @param deployEnvYamlFile deployment_environments.yaml file of API project
+     * @param interceptorCert name of the interceptor cert file that should be included in the
+     *                    Endpoint-certificates/interceptor folder of the API project
+     * @param apiYamlFile name of the api.yaml file
+     * @param rateLimitPoliciesFile name of the rate-limit-policies.yaml file
+     * @throws IOException if the runtime fails to execute the apictl command
+     * @throws CCTestException if apictl was unable to create the project
+     */
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile,
+                                     String interceptorCert, String apiYamlFile, String rateLimitPoliciesFile)
+            throws IOException, CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
         if(openApiFile.startsWith("https://") || openApiFile.startsWith("http://")) {
@@ -198,6 +222,10 @@ public class ApictlUtils {
                     targetDir + BACKEND_CERTS_PATH + interceptorCert,
                     projectPathToCreate + File.separator + ENDPOINT_CERTIFICATES
                             + File.separator + INTERCEPTORS + File.separator + "interceptor.crt");
+        }
+        if (rateLimitPoliciesFile != null) {
+            Utils.copyFile(targetDir + RATE_LIMIT_POLICIES_PATH + rateLimitPoliciesFile,
+                    projectPathToCreate + File.separator + "rate-limit-policies.yaml");
         }
         log.info("Created API project " + apiProjectName);
     }

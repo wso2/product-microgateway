@@ -241,7 +241,7 @@
 
     <profiles>
         <profile>
-            <id>mac-x64</id>
+            <id>mac-amd64</id>
             <activation>
                 <os>
                     <family>mac</family>
@@ -250,6 +250,18 @@
             </activation>
             <properties>
                 <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-arm64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package> <!-- Use same amd64 distribution until arm64 available -->
             </properties>
         </profile>
         <profile>

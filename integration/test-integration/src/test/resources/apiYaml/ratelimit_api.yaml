@@ -6,7 +6,7 @@ data:
   context: /v2/ratelimitService
   version: 1.0.0
   rateLimitLevel: API
-  rateLimitPolicy: $_5PerMin
+  rateLimitPolicy: 5PerMin
   provider: admin
   lifeCycleStatus: PUBLISHED
   responseCachingEnabled: false

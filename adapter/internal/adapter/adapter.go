@@ -30,6 +30,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/common"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
+	ratelimiterCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/ratelimitercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
 	"github.com/wso2/product-microgateway/adapter/internal/messaging"
@@ -69,9 +70,9 @@ var (
 
 	localhost = "0.0.0.0"
 
-	port        uint
-	gatewayPort uint
-	alsPort     uint
+	port    uint
+	rlsPort uint
+	alsPort uint
 
 	mode string
 )
@@ -85,18 +86,18 @@ func init() {
 	flag.BoolVar(&debug, "debug", true, "Use debug logging")
 	flag.BoolVar(&onlyLogging, "onlyLogging", false, "Only demo AccessLogging Service")
 	flag.UintVar(&port, "port", 18000, "Management server port")
-	flag.UintVar(&gatewayPort, "gateway", 18001, "Management server port for HTTP gateway")
+	flag.UintVar(&rlsPort, "rls-port", 18001, "Rate Limiter management server port")
 	flag.UintVar(&alsPort, "als", 18090, "Accesslog server port")
 	flag.StringVar(&mode, "ads", ads, "Management server type (ads, xds, rest)")
 }
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
+func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
 	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
 	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server,
 	enforcerKeyManagerDsSrv wso2_server.Server, enforcerRevokedTokenDsSrv wso2_server.Server,
-	enforcerThrottleDataDsSrv wso2_server.Server, port uint) {
+	enforcerThrottleDataDsSrv wso2_server.Server, port, rlsPort uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 	publicKeyLocation, privateKeyLocation, truststoreLocation := tlsutils.GetKeyLocations()
@@ -127,7 +128,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		logger.LoggerMgw.Fatal("failed to listen: ", err)
+		logger.LoggerMgw.Fatalf("Failed to listen %v: %v", port, err)
 	}
 
 	// register services
@@ -156,9 +157,31 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 		}
 		logger.LoggerMgw.Info("Starting XDS GRPC server.")
 		if err = grpcServer.Serve(lis); err != nil {
-			logger.LoggerMgw.Error(err)
+			logger.LoggerMgw.Error("Error serving xDS gRPC server: ", err)
 		}
 	}()
+
+	if conf.Envoy.RateLimit.Enabled {
+		// It is required a separate gRPC server for the rate limit xDS, since it is the same RPC method
+		// ADS used in both envoy xDS and rate limiter xDS.
+		// According to https://github.com/envoyproxy/ratelimit/pull/368#discussion_r995831078 a separate RPC service is not
+		// defined specifically to the rate limit xDS, instead using the ADS.
+		logger.LoggerMgw.Info("port: ", rlsPort, " rate-limiter management server listening")
+		rlsGrpcServer := grpc.NewServer(grpcOptions...)
+		rlsLis, err := net.Listen("tcp", fmt.Sprintf(":%d", rlsPort))
+		if err != nil {
+			logger.LoggerMgw.Fatalf("Failed to listen %v: %v", port, err)
+		}
+
+		discoveryv3.RegisterAggregatedDiscoveryServiceServer(rlsGrpcServer, rlsServer)
+		go func() {
+			logger.LoggerMgw.Info("Starting Rate Limiter xDS gRPC server.")
+			if err = rlsGrpcServer.Serve(rlsLis); err != nil {
+				logger.LoggerMgw.Error("Error serving Rate Limiter xDS gRPC server: ", err)
+			}
+		}()
+	}
+
 }
 
 // Run starts the XDS server and Rest API server.
@@ -184,6 +207,7 @@ func Run(conf *config.Config) {
 
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()
+	rateLimiterCache := xds.GetRateLimiterCache()
 	enforcerCache := xds.GetEnforcerCache()
 	enforcerSubscriptionCache := xds.GetEnforcerSubscriptionCache()
 	enforcerApplicationCache := xds.GetEnforcerApplicationCache()
@@ -196,6 +220,7 @@ func Run(conf *config.Config) {
 	enforcerThrottleDataCache := xds.GetEnforcerThrottleDataCache()
 
 	srv := xdsv3.NewServer(ctx, cache, &routercb.Callbacks{})
+	rlsSrv := xdsv3.NewServer(ctx, rateLimiterCache, &ratelimiterCallbacks.Callbacks{})
 	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &enforcerCallbacks.Callbacks{})
 	enforcerSdsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionCache, &enforcerCallbacks.Callbacks{})
 	enforcerAppDsSrv := wso2_server.NewServer(ctx, enforcerApplicationCache, &enforcerCallbacks.Callbacks{})
@@ -207,9 +232,9 @@ func Run(conf *config.Config) {
 	enforcerRevokedTokenDsSrv := wso2_server.NewServer(ctx, enforcerRevokedTokenCache, &enforcerCallbacks.Callbacks{})
 	enforcerThrottleDataDsSrv := wso2_server.NewServer(ctx, enforcerThrottleDataCache, &enforcerCallbacks.Callbacks{})
 
-	runManagementServer(conf, srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
+	runManagementServer(conf, srv, rlsSrv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv,
-		enforcerRevokedTokenDsSrv, enforcerThrottleDataDsSrv, port)
+		enforcerRevokedTokenDsSrv, enforcerThrottleDataDsSrv, port, rlsPort)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
@@ -226,6 +251,7 @@ func Run(conf *config.Config) {
 		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
 		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
 		xds.UpdateEnforcerApis(env, apis, "")
+		xds.UpdateRateLimiterPolicies(env)
 	}
 
 	// Adapter REST API

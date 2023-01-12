@@ -185,6 +185,11 @@ func GetXdsCache() envoy_cachev3.SnapshotCache {
 	return cache
 }
 
+// GetRateLimiterCache returns xds server cache for rate limiter service.
+func GetRateLimiterCache() envoy_cachev3.SnapshotCache {
+	return rlsPolicyCache.xdsCache
+}
+
 // GetEnforcerCache returns xds server cache.
 func GetEnforcerCache() wso2_cache.SnapshotCache {
 	return enforcerCache
@@ -319,6 +324,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
 	mgwSwagger.OrganizationID = apiProject.OrganizationID
+	mgwSwagger.VHost = vHost
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
@@ -419,6 +425,15 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	routes, clusters, endpoints := oasParser.GetRoutesClustersEndpoints(mgwSwagger, certMap,
 		interceptCertMap, vHost, organizationID)
+
+	// Rate Limit Policies
+	if conf.Envoy.RateLimit.Enabled {
+		// Add Rate Limit inline policies in API to the cache
+		if err := rlsPolicyCache.AddAPILevelRateLimitPolicies(apiIdentifier, &mgwSwagger, apiProject.RateLimitPolicies); err != nil {
+			logger.LoggerXds.Error("Error while populating API level rate limit policies: ", err)
+			return nil, err
+		}
+	}
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes
@@ -716,6 +731,13 @@ func cleanMapResources(apiIdentifier string, organizationID string, toBeDelEnvs 
 	delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)
 	delete(orgIDOpenAPIEnforcerApisMap[organizationID], apiIdentifier)
 
+	vHost, err := ExtractVhostFromAPIIdentifier(apiIdentifier)
+	if err != nil {
+		logger.LoggerXds.Errorf("Error extracting vhost from apiIdentifier: %q. Continue cleaning other maps: %v", apiIdentifier, err)
+	} else {
+		rlsPolicyCache.DeleteAPILevelRateLimitPolicies(organizationID, vHost, apiIdentifier)
+	}
+
 	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
 	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with
 	//resources that belongs to the remaining APIs
@@ -773,6 +795,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
 		UpdateEnforcerApis(newLabel, apis, "")
+		UpdateRateLimiterPolicies(newLabel)
 		success := UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 		if success {
@@ -786,6 +809,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
 		if !arrayContains(newLabels, oldLabel) {
 			listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(oldLabel)
 			UpdateEnforcerApis(oldLabel, apis, "")
+			UpdateRateLimiterPolicies(oldLabel)
 			UpdateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
@@ -897,6 +921,11 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	logger.LoggerXds.Infof("New Router cache updated for the label: " + label + " version: " + fmt.Sprint(version))
 	return true
+}
+
+// UpdateRateLimiterPolicies update the rate limiter xDS cache with latest rate limit policies
+func UpdateRateLimiterPolicies(label string) {
+	_ = rlsPolicyCache.updateXdsCache(label)
 }
 
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration

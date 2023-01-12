@@ -59,12 +59,12 @@ import (
 
 // Constants relevant to the route related rate-limit configurations
 const (
-	descriptorKeyForOrg               = "org"
-	descriptorKeyForVhost             = "vhost"
-	descriptorKeyForPath              = "path"
-	descriptorKeyForMethod            = "method"
-	descriptorValueForAPIMethod       = "ALL"
-	descriptorValueForOperationMethod = ":method"
+	DescriptorKeyForOrg               = "org"
+	DescriptorKeyForVhost             = "vhost"
+	DescriptorKeyForPath              = "path"
+	DescriptorKeyForMethod            = "method"
+	DescriptorValueForAPIMethod       = "ALL"
+	DescriptorValueForOperationMethod = ":method"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -974,7 +974,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
-								DescriptorKey:   descriptorKeyForOrg,
+								DescriptorKey:   DescriptorKeyForOrg,
 								DescriptorValue: params.organizationID,
 							},
 						},
@@ -982,7 +982,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
-								DescriptorKey:   descriptorKeyForVhost,
+								DescriptorKey:   DescriptorKeyForVhost,
 								DescriptorValue: params.vHost,
 							},
 						},
@@ -990,7 +990,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
-								DescriptorKey:   descriptorKeyForPath,
+								DescriptorKey:   DescriptorKeyForPath,
 								DescriptorValue: basePathForRLService,
 							},
 						},
@@ -1002,8 +1002,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				rateLimit.Actions = append(rateLimit.Actions, &routev3.RateLimit_Action{
 					ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 						GenericKey: &routev3.RateLimit_Action_GenericKey{
-							DescriptorKey:   descriptorKeyForMethod,
-							DescriptorValue: descriptorValueForAPIMethod,
+							DescriptorKey:   DescriptorKeyForMethod,
+							DescriptorValue: DescriptorValueForAPIMethod,
 						},
 					},
 				})
@@ -1013,8 +1013,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_RequestHeaders_{
 							RequestHeaders: &routev3.RateLimit_Action_RequestHeaders{
-								DescriptorKey: descriptorKeyForMethod,
-								HeaderName:    descriptorValueForOperationMethod,
+								DescriptorKey: DescriptorKeyForMethod,
+								HeaderName:    DescriptorValueForOperationMethod,
 							},
 						},
 					},

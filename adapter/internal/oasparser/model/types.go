@@ -57,7 +57,7 @@ const (
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
 	APIYaml            APIYaml
-	RateLimitPolicy    RateLimitPolicy
+	RateLimitPolicies  map[string]*APIRateLimitPolicy
 	APIEnvProps        map[string]synchronizer.APIEnvProps
 	Deployments        []Deployment
 	OpenAPIJsn         []byte
@@ -171,7 +171,7 @@ type OperationYaml struct {
 type APIRateLimitPolicy struct {
 	PolicyName string `json:"policyName,omitempty"`
 	Type       string `json:"type,omitempty"`
-	Count      int    `json:"count,omitempty"`
+	Count      uint32 `json:"count,omitempty"`
 	Unit       string `json:"unit,omitempty"`
 	Span       uint32 `json:"span,omitempty"`
 	SpanUnit   string `json:"spanUnit,omitempty"`
@@ -309,6 +309,14 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 			loggers.LoggerAPI.Errorf("Error occured while parsing rate-limit-policies.yaml. Error: %s", err.Error())
 			return err
 		}
+
+		policyMap := map[string]*APIRateLimitPolicy{}
+		for i := 0; i < len(rlPolicies.Data.APIRateLimitPolicies); i++ {
+			p := rlPolicies.Data.APIRateLimitPolicies[i]
+			policyMap[p.PolicyName] = &p
+		}
+		loggers.LoggerAPI.Debugf("Number of Rate Limit policies received: %v", len(policyMap))
+		apiProject.RateLimitPolicies = policyMap
 	}
 	return nil
 }
