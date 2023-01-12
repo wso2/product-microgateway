@@ -106,7 +106,7 @@ type lastDiscoveryResponse struct {
 // Initialize all watches
 func (values *watches) Init() {
 	// muxed channel needs a buffer to release go-routines populating it
-	values.responses = make(chan cache.Response, 11)
+	values.responses = make(chan cache.Response, 5000)
 	values.cancellations = make(map[string]func())
 	values.nonces = make(map[string]string)
 }
