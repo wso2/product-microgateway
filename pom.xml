@@ -570,6 +570,12 @@
                 <groupId>com.azure</groupId>
                 <artifactId>azure-messaging-eventhubs</artifactId>
                 <version>${azure.messaging.eventhubs.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.woodstox</groupId>
+                        <artifactId>woodstox-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.azure</groupId>
@@ -615,6 +621,18 @@
                 <artifactId>org.jacoco.agent</artifactId>
                 <version>${jacoco.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <!-- upgrades protobuf-java in grpc-protobuf dependency -->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.java.version}</version>
+            </dependency>
+            <!-- upgrades woodstox-core in azure-messaging-eventhubs dependency -->
+            <dependency>
+                <groupId>com.fasterxml.woodstox</groupId>
+                <artifactId>woodstox-core</artifactId>
+                <version>${woodstox.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.tomakehurst</groupId>
@@ -669,7 +687,7 @@
         <slf4j.api.version>1.7.30</slf4j.api.version>
         <json.smart.version>2.4.7</json.smart.version>
         <junit.version>4.13.2</junit.version>
-        <log4j.version>2.17.1</log4j.version>
+        <log4j.version>2.19.0</log4j.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
         <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
@@ -698,7 +716,7 @@
         <awaitility.version>3.1.2</awaitility.version>
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
         <jackson.databind.version>2.14.1</jackson.databind.version>
-        <snakeyaml.version>1.32</snakeyaml.version>
+        <snakeyaml.version>1.33</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
         <javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
@@ -710,6 +728,8 @@
         <org.jetbrains.kotlin.version>1.6.0</org.jetbrains.kotlin.version>
         <protobuf.java.version>3.21.7</protobuf.java.version>
         <directory.maven.plugin.version>1.0</directory.maven.plugin.version>
+        <protobuf.java.version>3.21.12</protobuf.java.version>
+        <woodstox.core.version>6.4</woodstox.core.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.14.1</jackson.annotations.version>
