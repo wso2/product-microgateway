@@ -936,6 +936,8 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	if conf.Enforcer.JwtIssuer.Enabled {
 		routeToken := envoyconf.CreateTokenRoute()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
+	}
+	if conf.Enforcer.JwtGenerator.Enabled {
 		routeJwks := envoyconf.CreateJwksEndpoint()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeJwks)
 	}
