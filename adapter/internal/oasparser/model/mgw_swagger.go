@@ -62,7 +62,6 @@ type MgwSwagger struct {
 	securityScheme             []SecurityScheme
 	security                   []map[string][]string
 	xWso2ThrottlingTier        string
-	XAmznResourceName          string
 	xWso2AuthHeader            string
 	disableSecurity            bool
 	OrganizationID             string
@@ -82,8 +81,7 @@ type EndpointCluster struct {
 	EndpointPrefix string
 	Endpoints      []Endpoint
 	// EndpointType enum {failover, loadbalance}. if any other value provided, consider as the default value; which is loadbalance
-	EndpointType string
-	//awsARN....
+	EndpointType   string
 	Config         *EndpointConfig
 	SecurityConfig EndpointSecurity
 	// Is http2 protocol enabled
@@ -239,11 +237,6 @@ func (swagger *MgwSwagger) GetDescription() string {
 // GetXWso2ThrottlingTier returns the Throttling tier via the vendor extension.
 func (swagger *MgwSwagger) GetXWso2ThrottlingTier() string {
 	return swagger.xWso2ThrottlingTier
-}
-
-// GetXAmznResourceName returns the amazon resource name (arn) related to Aws Lambda.
-func (swagger *MgwSwagger) GetXAmznResourceName() string {
-	return swagger.XAmznResourceName
 }
 
 // GetDisableSecurity returns the authType via the vendor extension.
@@ -711,13 +704,6 @@ func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
 	}
 }
 
-func (swagger *MgwSwagger) setXAmznResourceName() {
-	tier := ResolveAmznResourceName(swagger.vendorExtensions)
-	if tier != "" {
-		swagger.XAmznResourceName = tier
-	}
-}
-
 // SetXWSO2AuthHeader sets the AuthHeader of the API
 func (swagger *MgwSwagger) setXWso2AuthHeader() {
 	authorizationHeader := getXWso2AuthHeader(swagger.vendorExtensions)
@@ -733,7 +719,8 @@ func (swagger *MgwSwagger) setDisableSecurity() {
 // Validate method confirms that the mgwSwagger has all required fields in the required format.
 // This needs to be checked prior to generate router/enforcer related resources.
 func (swagger *MgwSwagger) Validate() error {
-	if swagger.EndpointImplementationType != constants.MockedOASEndpointType {
+	if (swagger.EndpointImplementationType != constants.MockedOASEndpointType) &&
+		(swagger.EndpointType != constants.AwsLambda) {
 		if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
 			(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
 

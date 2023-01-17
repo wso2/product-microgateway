@@ -213,6 +213,37 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			routes = append(routes, routesP...)
 		}
 		return routes, clusters, endpoints, nil
+
+	}
+
+	if mgwSwagger.EndpointType == constants.AwsLambda {
+		for _, resource := range mgwSwagger.GetResources() {
+			amznResourceName := ""
+			for i, operation := range resource.GetOperations() {
+				value := model.ResolveAmznResourceName(operation.GetVendorExtensions())
+				//value, ok := operation.GetVendorExtensions()[constants.XAmznResourceName]
+				//if !ok {
+				//	logger.LoggerOasparser.Errorf("Yasiru: Amazon Resource Name not found!")
+				//}
+
+				if (i != 0) && (amznResourceName != value) {
+					logger.LoggerOasparser.Errorf("Yasiru: All Arns must be the same value.")
+				} else if value == "" {
+					logger.LoggerOasparser.Errorf("Yasiru: Arn cannot be empty.")
+				} else {
+					amznResourceName = value
+				}
+				resource.SetAmznResourceName(amznResourceName)
+				logger.LoggerOasparser.Errorf("Yasiru(Operation loop): Resource : %s - Method: %s - Arn: %s", resource.GetPath(), operation.GetMethod(), amznResourceName)
+			}
+			logger.LoggerOasparser.Errorf("Yasiru(Resource loop): Resource : %s - Arn: %s", resource.GetPath(), amznResourceName)
+			routesX, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, "", "", "", nil, nil, organizationID, false))
+			if err != nil {
+				//TODO: add errorcode
+			}
+
+			routes = append(routes, routesX...)
+		}
 	}
 
 	for _, resource := range mgwSwagger.GetResources() {
@@ -748,7 +779,13 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
 	endpointType := params.endpointType
-	arn := params.amznResourceName
+	amznResourceName := resource.GetAmznResourceName()
+
+	if amznResourceName == "" {
+		logger.LoggerOasparser.Errorf("Yasiru: routes_with_cluster awsLambda arn: %s", amznResourceName)
+	} else {
+		logger.LoggerOasparser.Errorf("Yasiru: arn found: %s", amznResourceName)
+	}
 
 	conf, _ := config.ReadConfigs()
 
@@ -897,9 +934,8 @@ end`
 
 		awsLambdaPerFilterConfig := awslambdav3.PerRouteConfig{
 			InvokeConfig: &awslambdav3.Config{
-				//TODO: set arn from swagger
-				//Arn:                "arn:aws:lambda:us-east-1:825678434177:function:addressCheck",
-				Arn:                arn,
+				//Arn: "arn:aws:lambda:us-east-1:825678434177:function:addressCheck",
+				Arn:                amznResourceName,
 				PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
 				InvocationMode:     mode,
 			},
@@ -1509,7 +1545,6 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		isDefaultVersion:             swagger.IsDefaultVersion,
 		isSandbox:                    isSandbox,
 		endpointType:                 swagger.EndpointType,
-		amznResourceName:             swagger.XAmznResourceName,
 	}
 
 	if swagger.GetProdEndpoints() != nil {

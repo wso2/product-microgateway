@@ -98,13 +98,16 @@ func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
 // ResolveAmznResourceName extracts the value of x-amzn-resource-name extension.
 // If the property is not availble, an empty string is returned.
 func ResolveAmznResourceName(vendorExtensions map[string]interface{}) string {
-	xTier := ""
+	xAmznResourceName := ""
 	if x, found := vendorExtensions[constants.XAmznResourceName]; found {
 		if val, ok := x.(string); ok {
-			xTier = val
+			xAmznResourceName = val
+			logger.LoggerOasparser.Errorf("Yasiru: ResolveAmznResourceName awsLambda arn %s", xAmznResourceName)
 		}
+	} else {
+		logger.LoggerOasparser.Errorf("Yasiru: ResolveAmznResourceName awsLambda arn Not Found")
 	}
-	return xTier
+	return xAmznResourceName
 }
 
 // ResolveDisableSecurity extracts the value of x-auth-type extension.

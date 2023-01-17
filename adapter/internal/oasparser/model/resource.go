@@ -44,6 +44,7 @@ type Resource struct {
 	sandboxEndpoints    *EndpointCluster
 	vendorExtensions    map[string]interface{}
 	hasPolicies         bool
+	amznResourceName    string
 }
 
 // GetProdEndpoints returns the production endpoints object of a given resource.
@@ -92,6 +93,16 @@ func (resource *Resource) GetMethodList() []string {
 // GetOperations returns the array of operations of the resource.
 func (resource *Resource) GetOperations() []*Operation {
 	return resource.methods
+}
+
+// GetAmznResourceName returns the amazon resourse name related to aws lambda endpoint of given resource.
+func (resource *Resource) GetAmznResourceName() string {
+	return resource.amznResourceName
+}
+
+// SetAmznResourceName sets the amazon resource name.
+func (resource *Resource) SetAmznResourceName(amznResourceName string) {
+	resource.amznResourceName = amznResourceName
 }
 
 // HasPolicies returns whether the resource has operations that includes policies.
