@@ -156,6 +156,151 @@
                     }
                 ]
             }
+        },
+        "/auth/sca-initiation-iban-selection/test.{test-variable}": {
+            "post": {
+                "tags": [
+                    "Sca"
+                ],
+                "operationId": "ScaInitiationRequestForIbanSelectionAsync",
+                "consumes": [
+                    "application/json-patch+json",
+                    "application/csp-report",
+                    "application/json",
+                    "text/json",
+                    "application/*+json"
+                ],
+                "produces": [
+                    "text/plain",
+                    "application/json",
+                    "text/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "tpp-redirect-uri",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 2048,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "tpp-nok-redirect-uri",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 2048,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "aspsp-product-code",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-id",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 100,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-id-type",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-corporate-id",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 100,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "psu-corporate-id-type",
+                        "in": "header",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "tpp-registration-number",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "tpp-name",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "aspsp-code",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "request-id",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "name": "Date",
+                        "in": "header",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": ""
+                    },
+                    {
+                        "in": "body",
+                        "name": "model",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/definitions/ScaInitiationForIbanSelectionRequest"
+                        }
+                    },
+                    {
+                        "name": "test-variable",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/ScaInitiationForAccountSelectionResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "mybasic": []
+                    }
+                ]
+            }
         }
     },
     "securityDefinitions": {
