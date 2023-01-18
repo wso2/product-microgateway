@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.choreo.connect.discovery.config.enforcer.Analytics;
 import org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader;
 import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
@@ -545,11 +546,11 @@ public class ConfigHolder {
                 RSAKey jwk = new RSAKey.Builder(publicKey)
                         .keyUse(KeyUse.SIGNATURE)
                         .algorithm(getJWKSAlgorithm(jwtGenerator.getSigningAlgorithm()))
-                        .keyIDFromThumbprint()
+                        .keyID(JWTUtil.generateThumbprint("SHA-256", cert, false))
                         .build().toPublicJWK();
                 jwks.add(jwk);
             }
-        } catch (JOSEException | CertificateException | IOException e) {
+        } catch (JOSEException | CertificateException | IOException | NoSuchAlgorithmException e) {
             String err = "Error in loading additional public certificates for JWKS: " + e;
             logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5401));
         }
