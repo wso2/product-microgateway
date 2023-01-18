@@ -417,19 +417,21 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 	return processEndpoints(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout, endpoint.EndpointCluster.Endpoints[0].Basepath)
 }
 
-// func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
-// 	var epHost string
-// 	var epPort uint32
-// 	var epPath string
-// 	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
-// 	epCluster := &model.EndpointCluster{
-// 		// Endpoints: []model.Endpoint{{
-// 		// 	Host:    "",
-// 		// 	URLType: "http",
-// 		// 	Port:    uint32(443),
-// 		// }},
-// 	}
-// }
+// CreateAwsLambdaCluster creates AWS Lambda cluster configuration.
+func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
+	epPath := "*.amazonaws.com"
+	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
+	epCluster := &model.EndpointCluster{
+		Endpoints: []model.Endpoint{{
+			Host:     "lambda." + conf.Envoy.AwsLambda.AwsRegion + ".amazonaws.com",
+			URLType:  "http",
+			Port:     uint32(443),
+			Basepath: "*.amazonaws.com",
+		}},
+	}
+
+	return processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, epPath)
+}
 
 // CreateTracingCluster creates a cluster definition for router's tracing server.
 func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
