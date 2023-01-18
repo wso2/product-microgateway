@@ -24,6 +24,7 @@ import (
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
@@ -32,6 +33,7 @@ import (
 	wasmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/wasm/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	//rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/proto"
@@ -49,10 +51,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
 	router := getRouterHTTPFilter()
 	lua := getLuaFilter()
-	cors := &hcmv3.HttpFilter{
-		Name:       wellknown.CORS,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
-	}
+	cors := getCorsHTTPFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
@@ -101,12 +100,28 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 	return &filter
 }
 
+// getCorsHTTPFilter gets cors http filter.
+func getCorsHTTPFilter() *hcmv3.HttpFilter {
+
+	corsFilterConf := cors_filter_v3.Cors{}
+	corsFilterTypedConf, err := anypb.New(&corsFilterConf)
+
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marshaling cors filter configs. ", err)
+	}
+
+	filter := hcmv3.HttpFilter{
+		Name:       wellknown.CORS,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: corsFilterTypedConf},
+	}
+
+	return &filter
+}
+
 // UpgradeFilters that are applied in websocket upgrade mode
 func getUpgradeFilters() []*hcmv3.HttpFilter {
-	cors := &hcmv3.HttpFilter{
-		Name:       wellknown.CORS,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
-	}
+
+	cors := getCorsHTTPFilter()
 	extAauth := getExtAuthzHTTPFilter()
 	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
 	router := getRouterHTTPFilter()
