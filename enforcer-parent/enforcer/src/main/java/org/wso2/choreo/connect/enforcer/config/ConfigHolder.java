@@ -517,7 +517,9 @@ public class ConfigHolder {
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
         jwtConfigurationDto.setTtl(jwtGenerator.getTokenTtl());
+        jwtConfigurationDto.setUseKid(jwtGenerator.getUseKidProperty());
         List<Keypair> keypairs = jwtGenerator.getKeypairsList();
+
         // Validation is done at the adapter to ensure that only one signing keypair is available
         Keypair signingKey = getSigningKey(keypairs);
         try {
