@@ -183,6 +183,10 @@ public final class CodegenUtils {
             if (item.startsWith("{") && item.endsWith("}")) {
                 String modifiedItem = replaceSpecialChars(item);
                 modifiedPath = modifiedPath.replace(item, modifiedItem);
+            } else if (item.indexOf("{") > 0 && item.indexOf("}") > 0) {
+                // For special cases where an item can be in "abc.{var}" format
+                String modifiedItem = item.substring(item.indexOf("{"), item.indexOf("}") + 1);
+                modifiedPath = modifiedPath.replace(item, modifiedItem);
             }
         }
         return modifiedPath;
