@@ -1,6 +1,6 @@
       - "5006:5006"
   mockBackend:
-    image: wso2/choreo-connect-mock-backend:1.2.0-m1-SNAPSHOT
+    image: wso2/choreo-connect-mock-backend:1.2.0-m2-SNAPSHOT
     command: java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockServices -tls-enabled -gql-enabled
     ports:
       - "2370:2370"
