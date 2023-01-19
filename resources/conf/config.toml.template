@@ -347,6 +347,8 @@ enabled = true
   claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
   # Token expiry time in seconds
   tokenTTL = 3600
+  # Whether to use kid property or x5t to identify backend JWTs
+  useKidProperty = false
   # JWKS Endpoint calls allowed per a configured time window
     jwksRatelimitQuota = 1000
     # JWKS Endpoint rate limiting time window
