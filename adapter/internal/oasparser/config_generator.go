@@ -68,6 +68,16 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 		}
 	}
 
+	if conf.Envoy.AwsLambda.Enabled {
+		logger.LoggerOasparser.Debugln("Creating global cluster - Aws Lambda")
+		if c, e, err := envoyconf.CreateAwsLambdaCluster(conf); err == nil {
+			clusters = append(clusters, c)
+			endpoints = append(endpoints, e...)
+		} else {
+			logger.LoggerOasparser.Fatal("Failed to initialize aws lambda cluster. ", err)
+		}
+	}
+
 	return clusters, endpoints
 }
 

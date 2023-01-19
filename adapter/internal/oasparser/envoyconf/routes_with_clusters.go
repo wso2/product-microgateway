@@ -237,7 +237,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				logger.LoggerOasparser.Errorf("Yasiru(Operation loop): Resource : %s - Method: %s - Arn: %s", resource.GetPath(), operation.GetMethod(), amznResourceName)
 			}
 			logger.LoggerOasparser.Errorf("Yasiru(Resource loop): Resource : %s - Arn: %s", resource.GetPath(), amznResourceName)
-			routesX, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, "", "", "", nil, nil, organizationID, false))
+			//TODO: interceptor ep
+			routesX, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, "", awslambdaClusterName, awslambdaClusterName, nil, nil, organizationID, false))
 			if err != nil {
 				//TODO: add errorcode
 			}
@@ -419,18 +420,16 @@ func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.Interce
 
 // CreateAwsLambdaCluster creates AWS Lambda cluster configuration.
 func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
-	epPath := "*.amazonaws.com"
 	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
 	epCluster := &model.EndpointCluster{
 		Endpoints: []model.Endpoint{{
-			Host:     "lambda." + conf.Envoy.AwsLambda.AwsRegion + ".amazonaws.com",
-			URLType:  "http",
-			Port:     uint32(443),
-			Basepath: "*.amazonaws.com",
+			Host:    "lambda." + conf.Envoy.AwsLambda.AwsRegion + ".amazonaws.com",
+			URLType: "https",
+			Port:    uint32(443),
 		}},
 	}
 
-	return processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, epPath)
+	return processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, "")
 }
 
 // CreateTracingCluster creates a cluster definition for router's tracing server.
