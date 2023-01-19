@@ -429,7 +429,19 @@ func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.
 		}},
 	}
 
-	return processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, "")
+	cluster, address, err := processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, "")
+	cluster.Metadata = &corev3.Metadata{
+		FilterMetadata: map[string]*structpb.Struct{
+			"com.amazonaws.lambda": {
+				Fields: map[string]*structpb.Value{
+					"egress_gateway": structpb.NewBoolValue(true),
+				},
+			},
+		},
+	}
+
+	//return processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, "")
+	return cluster, address, err
 }
 
 // CreateTracingCluster creates a cluster definition for router's tracing server.
