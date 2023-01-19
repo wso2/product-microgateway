@@ -706,7 +706,7 @@
         <javax.xml.soap.version>1.4.0</javax.xml.soap.version>
         <com.sun.xml.messaging.saaj.version>1.5.3</com.sun.xml.messaging.saaj.version>
         <com.graphql.java.version>5.2.4</com.graphql.java.version>
-        <graphql.java.version>17.3.wso2v1</graphql.java.version>
+        <graphql.java.version>19.2.wso2v2</graphql.java.version>
         <org.jetbrains.kotlin.version>1.6.0</org.jetbrains.kotlin.version>
         <protobuf.java.version>3.21.7</protobuf.java.version>
         <directory.maven.plugin.version>1.0</directory.maven.plugin.version>
