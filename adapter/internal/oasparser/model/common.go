@@ -102,10 +102,8 @@ func ResolveAmznResourceName(vendorExtensions map[string]interface{}) string {
 	if x, found := vendorExtensions[constants.XAmznResourceName]; found {
 		if val, ok := x.(string); ok {
 			xAmznResourceName = val
-			logger.LoggerOasparser.Errorf("Yasiru: ResolveAmznResourceName awsLambda arn %s", xAmznResourceName)
 		}
 	} else {
-		logger.LoggerOasparser.Errorf("Yasiru: ResolveAmznResourceName awsLambda arn Not Found")
 	}
 	return xAmznResourceName
 }

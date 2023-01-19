@@ -221,22 +221,16 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			amznResourceName := ""
 			for i, operation := range resource.GetOperations() {
 				value := model.ResolveAmznResourceName(operation.GetVendorExtensions())
-				//value, ok := operation.GetVendorExtensions()[constants.XAmznResourceName]
-				//if !ok {
-				//	logger.LoggerOasparser.Errorf("Yasiru: Amazon Resource Name not found!")
-				//}
 
 				if (i != 0) && (amznResourceName != value) {
-					logger.LoggerOasparser.Errorf("Yasiru: All Arns must be the same value.")
+					logger.LoggerOasparser.Errorf("All Arns must be the same value.")
 				} else if value == "" {
-					logger.LoggerOasparser.Errorf("Yasiru: Arn cannot be empty.")
+					logger.LoggerOasparser.Errorf("Arn cannot be empty.")
 				} else {
 					amznResourceName = value
 				}
 				resource.SetAmznResourceName(amznResourceName)
-				logger.LoggerOasparser.Errorf("Yasiru(Operation loop): Resource : %s - Method: %s - Arn: %s", resource.GetPath(), operation.GetMethod(), amznResourceName)
 			}
-			logger.LoggerOasparser.Errorf("Yasiru(Resource loop): Resource : %s - Arn: %s", resource.GetPath(), amznResourceName)
 			//TODO: interceptor ep
 			routesX, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, "", awslambdaClusterName, awslambdaClusterName, nil, nil, organizationID, false))
 			if err != nil {
@@ -793,12 +787,6 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	isDefaultVersion := params.isDefaultVersion
 	endpointType := params.endpointType
 	amznResourceName := resource.GetAmznResourceName()
-
-	if amznResourceName == "" {
-		logger.LoggerOasparser.Errorf("Yasiru: routes_with_cluster awsLambda arn: %s", amznResourceName)
-	} else {
-		logger.LoggerOasparser.Errorf("Yasiru: arn found: %s", amznResourceName)
-	}
 
 	conf, _ := config.ReadConfigs()
 
