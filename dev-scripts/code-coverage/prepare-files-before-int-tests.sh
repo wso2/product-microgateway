@@ -24,10 +24,12 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../resources/docker-compose/apim/docker-compose.yaml
   sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
   sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml
+  sed -i "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../resources/docker-compose/docker-compose.yaml
   sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../resources/docker-compose/apim/docker-compose.yaml
   sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG}/g" ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
   sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml
+  sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
 fi
 echo "Preparing code coverage files before integration tests completed successfully..."

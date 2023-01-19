@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.choreo.connect</groupId>
         <artifactId>integration</artifactId>
-        <version>1.2.0-m1-SNAPSHOT</version>
+        <version>1.2.0-m2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -73,6 +73,9 @@
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-gql.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-with-tls-and-network.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
@@ -292,7 +295,7 @@
 
     <profiles>
         <profile>
-            <id>mac-x64</id>
+            <id>mac-amd64</id>
             <activation>
                 <os>
                     <family>mac</family>
@@ -301,6 +304,18 @@
             </activation>
             <properties>
                 <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-arm64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package> <!-- Use same amd64 distribution until arm64 available -->
             </properties>
         </profile>
         <profile>

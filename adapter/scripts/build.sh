@@ -55,7 +55,7 @@ fi
 golint -set_exit_status ./...
 if [ $? -ne 0 ]; then
   echo "INFO: Trying to install golint"
-  go install golang.org/x/lint/golint
+  go install golang.org/x/lint/golint@latest
   golint -set_exit_status ./...
   if [ $? -ne 0 ]; then
     echo "FAILED: golint Failure"

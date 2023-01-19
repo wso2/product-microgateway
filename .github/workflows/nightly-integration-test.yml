@@ -131,3 +131,10 @@ jobs:
 
           # error if one of trivy scan failed
           exit $EXIT_CODE
+      - name: Choreo Connect Chat Notification
+        uses: Co-qn/google-chat-notification@v1
+        with:
+          name: Choreo Connect Ubuntu Nighly Build
+          url: ${{ secrets.NIGHT_BUILD_GCHAT_WEBHOOK }}
+          status: ${{ job.status }}
+        if: ${{ failure() }}
