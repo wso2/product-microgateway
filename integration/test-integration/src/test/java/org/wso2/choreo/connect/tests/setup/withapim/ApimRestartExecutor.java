@@ -47,7 +47,7 @@ public class ApimRestartExecutor {
         apimInstance.startAPIM();
         ccInstance.start();
         Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS)
-                .atMost(3, TimeUnit.MINUTES).until(ccInstance.isHealthy());
+                .atMost(4, TimeUnit.MINUTES).until(ccInstance.isHealthy());
         Assert.assertTrue(ccInstance.checkCCInstanceHealth());
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for " +
                 "resources to be pulled from API Manager");
