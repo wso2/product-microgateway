@@ -17,13 +17,21 @@
 package synchronizer
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 )
 
 func TestMergeDeployedRevisionList(t *testing.T) {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		// This has to be error. For debugging purpose info
+		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+	}
 	input := []*notifier.DeployedAPIRevision{
 		{
 			APIID:      "63c8bf26dbe45c52fe7ed1cf",
@@ -31,7 +39,7 @@ func TestMergeDeployedRevisionList(t *testing.T) {
 			EnvInfo: []notifier.DeployedEnvInfo{
 				{
 					Name:  "dev",
-					VHost: "sandbox.host",
+					VHost: conf.Adapter.SandboxVhost,
 				},
 			},
 		},
@@ -62,8 +70,8 @@ func TestMergeDeployedRevisionList(t *testing.T) {
 			RevisionID: 2,
 			EnvInfo: []notifier.DeployedEnvInfo{
 				{
-					Name:  "sandbox",
-					VHost: "sandbox.host",
+					Name:  conf.Adapter.SandboxEnvName,
+					VHost: conf.Adapter.SandboxVhost,
 				},
 				{
 					Name:  "dev",
