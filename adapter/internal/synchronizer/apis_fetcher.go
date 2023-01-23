@@ -122,6 +122,8 @@ func PushAPIProjects(payload []byte, environments []string) error {
 	// Error nil for successful execution
 	return nil
 }
+
+// MergeDeployedRevisionList merge the deployment information by revision
 func MergeDeployedRevisionList(deployedRevisionList []*notifier.DeployedAPIRevision) []*notifier.DeployedAPIRevision { // Combine env info of same revision id
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
