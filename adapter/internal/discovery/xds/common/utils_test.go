@@ -41,26 +41,26 @@ func TestCheckEntryAndSwapToEnd(t *testing.T) {
 	assert.Equal(t, "node-3", nodeQueue.queue[2], "array element mismatch")
 	assert.False(t, isNewAddition, "isNewAddition flag is not correct.")
 
-	entry = "node-19"
-	nodeQueue.queue = generateNodeArray(20)
+	entry = "node-39"
+	nodeQueue.queue = generateNodeArray(40)
 	isNewAddition = nodeQueue.IsNewNode(entry)
-	assert.Equal(t, 20, len(nodeQueue.queue), "array length mismatch")
-	assert.Equal(t, "node-19", nodeQueue.queue[19], "array element mismatch")
+	assert.Equal(t, 40, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-39", nodeQueue.queue[39], "array element mismatch")
 	assert.False(t, isNewAddition, "isNewAddition flag is not correct.")
 
-	nodeQueue.queue = generateNodeArray(20)
+	nodeQueue.queue = generateNodeArray(40)
 	entry = "node-40"
 	isNewAddition = nodeQueue.IsNewNode(entry)
-	assert.Equal(t, 20, len(nodeQueue.queue), "array length mismatch")
-	assert.Equal(t, "node-40", nodeQueue.queue[19], "array element mismatch")
+	assert.Equal(t, 40, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-40", nodeQueue.queue[39], "array element mismatch")
 	assert.Equal(t, "node-1", nodeQueue.queue[0], "array element mismatch")
 	assert.True(t, isNewAddition, "isNewAddition flag is not correct.")
 
-	nodeQueue.queue = generateNodeArray(20)
+	nodeQueue.queue = generateNodeArray(40)
 	entry = "node-10"
 	isNewAddition = nodeQueue.IsNewNode(entry)
-	assert.Equal(t, 20, len(nodeQueue.queue), "array length mismatch")
-	assert.Equal(t, "node-10", nodeQueue.queue[19], "array element mismatch")
+	assert.Equal(t, 40, len(nodeQueue.queue), "array length mismatch")
+	assert.Equal(t, "node-10", nodeQueue.queue[39], "array element mismatch")
 	assert.Equal(t, "node-11", nodeQueue.queue[10], "array element mismatch")
 	assert.Equal(t, "node-9", nodeQueue.queue[9], "array element mismatch")
 	assert.False(t, isNewAddition, "isNewAddition flag is not correct.")
