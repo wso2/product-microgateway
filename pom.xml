@@ -669,9 +669,9 @@
         <commons.io.version>2.11.0</commons.io.version>
         <envoy.controlplane.api.version>0.1.28</envoy.controlplane.api.version>
         <geronimo.jms11.spec.version>1.1.1.wso2v1</geronimo.jms11.spec.version>
-        <grpc.netty.shaded.version>1.52.1</grpc.netty.shaded.version>
-        <grpc.protobuf.version>1.52.1</grpc.protobuf.version>
-        <grpc.stub.version>1.52.1</grpc.stub.version>
+        <grpc.netty.shaded.version>1.45.1</grpc.netty.shaded.version>
+        <grpc.protobuf.version>1.45.1</grpc.protobuf.version>
+        <grpc.stub.version>1.45.1</grpc.stub.version>
         <gson.version>2.10.1</gson.version>
         <guava.version>31.1-jre</guava.version>
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
