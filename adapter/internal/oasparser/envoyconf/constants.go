@@ -138,3 +138,9 @@ const (
 const (
 	methodRewrite = "method-rewrite"
 )
+
+// Enforcer
+const (
+	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
+	uaexCode                   = "UAEX"
+)
