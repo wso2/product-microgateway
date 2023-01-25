@@ -59,6 +59,7 @@ var defaultConfig = &Config{
 		},
 		ArtifactsDirectory: "/home/wso2/artifacts",
 		SandboxVhost:       "sandbox.host",
+		SandboxEnvName:     "sandbox",
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",

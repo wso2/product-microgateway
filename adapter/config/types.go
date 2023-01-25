@@ -97,6 +97,8 @@ type adapter struct {
 	ArtifactsDirectory string
 	// Sandbox vhost for Choreo that exposes the sandbox endpoint
 	SandboxVhost string
+	// Sandbox environment name for Choreo that exposes the sandbox endpoint
+	SandboxEnvName string
 }
 
 // Envoy Listener Component related configurations.
