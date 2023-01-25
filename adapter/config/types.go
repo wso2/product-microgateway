@@ -459,6 +459,8 @@ type controlPlane struct {
 	SyncApisOnStartUp          bool
 	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
+	DynamicEnvironmentSupport  bool
+	DataPlaneID                string
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters

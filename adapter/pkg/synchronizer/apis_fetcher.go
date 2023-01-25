@@ -49,6 +49,8 @@ const (
 	envPropsFile             string = "env_properties.json"
 	// RuntimeArtifactEndpoint represents the /runtime-artifacts endpoint.
 	RuntimeArtifactEndpoint string = "internal/data/v1/runtime-artifacts"
+	//RetrieveRuntimeArtifactEndpoint represents the RuntimeArtifactEndpoint endpoint with dataplane identifier
+	RetrieveRuntimeArtifactEndpoint string = "internal/data/v1/retrieve-runtime-artifacts"
 	// APIArtifactEndpoint represents the /retrieve-api-artifacts endpoint.
 	APIArtifactEndpoint string = "internal/data/v1/retrieve-api-artifacts"
 	// httpTimeout is for connection timeout of httpClient in seconds
