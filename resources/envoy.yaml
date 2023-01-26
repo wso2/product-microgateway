@@ -9,6 +9,7 @@ layered_runtime:
     - name: deprecation
       static_layer:
         re2.max_program_size.error_level: 1000
+        envoy.reloadable_features.lua_respond_with_send_local_reply: false
     # This value is added to overcome the warning log, and it is not based on any experiment.
     - name: globalMaxConnections
       static_layer:
