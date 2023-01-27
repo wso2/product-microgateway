@@ -1177,7 +1177,7 @@ func CreateTokenRoute() *routev3.Route {
 // CreateJwksEndpoint generates a route for JWKS /.wellknown/jwks endpoint
 func CreateJwksEndpoint() *routev3.Route {
 	conf, _ := config.ReadConfigs()
-	route := createStaticRoute(jwksPath, "/jwks", extAuthzHTTPClusterName)
+	route := createStaticRoute(jwksPath, jwksPathAtEnforcer, extAuthzHTTPClusterName)
 	ratelimitPerRoute := &local_rate_limitv3.LocalRateLimit{
 		StatPrefix: jwksRateLimitStatPrefix,
 		TokenBucket: &typev3.TokenBucket{

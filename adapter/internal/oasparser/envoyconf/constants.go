@@ -49,6 +49,7 @@ const (
 	jwksRateLimitStatPrefix         string = "jwks_rate_limit"
 	jwksRateLimitEnabledRuntimeKey  string = "jwks_ratelimit_enabled"
 	jwksRateLimitEnforcedRuntimeKey string = "jwks_ratelimit_enforced"
+	jwksPathAtEnforcer              string = "/jwks"
 )
 
 const (

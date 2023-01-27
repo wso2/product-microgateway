@@ -250,7 +250,7 @@ var defaultConfig = &Config{
 			GatewayGeneratorImpl: "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl",
 			ClaimsExtractorImpl:  "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
 			TokenTTL:             3600,
-			UseKidProperty:       false,
+			UseKidProperty:       true,
 			Keypair: []KeyPair{
 				{
 					PublicCertificatePath: "/home/wso2/security/truststore/mg.pem",
