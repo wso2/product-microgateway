@@ -194,6 +194,10 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         return null;
     }
 
+    public String getUserName() {
+        return null;
+    }
+
     @Override
     public String getUserAgentHeader() {
         // User agent is not required for fault scenario
