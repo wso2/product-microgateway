@@ -153,6 +153,8 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 // Health endpoint calls are not published
                 || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
                 // already published websocket log entries should not be published to the analytics again.
+                // JWKS endpoint calls should not be published
+                || (AnalyticsConstants.JWKS_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
                 || alreadyPublishedWebsocketHttpLogEntry(logEntry);
     }
 
