@@ -161,7 +161,7 @@ func (values *watches) Cancel() {
 }
 
 // process handles a bi-di stream request
-func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRequest, defaultTypeURL string) error {
+func (s *server) process(stream streamv3.Stream, reqCh <-chan *discovery.DiscoveryRequest, defaultTypeURL string) error {
 	// increment stream count
 	streamID := atomic.AddInt64(&s.streamCount, 1)
 
@@ -172,13 +172,15 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 	streamState := streamv3.NewStreamState(false, map[string]string{})
 	lastDiscoveryResponses := map[string]lastDiscoveryResponse{}
 
+	var node = &core.Node{}
+
 	// a collection of stack allocated watches per request type
 	var values watches
 	values.Init()
 	defer func() {
 		values.Cancel()
 		if s.callbacks != nil {
-			s.callbacks.OnStreamClosed(streamID)
+			s.callbacks.OnStreamClosed(streamID, node)
 		}
 	}()
 
@@ -218,8 +220,6 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 		}
 	}
 
-	// node may only be set on the first discovery request
-	var node = &core.Node{}
 
 	for {
 		select {
@@ -515,7 +515,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 }
 
 // StreamHandler converts a blocking read call to channels and initiates stream processing
-func (s *server) StreamHandler(stream sotw.Stream, typeURL string) error {
+func (s *server) StreamHandler(stream streamv3.Stream, typeURL string) error {
 	// a channel for receiving incoming requests
 	reqCh := make(chan *discovery.DiscoveryRequest)
 	go func() {

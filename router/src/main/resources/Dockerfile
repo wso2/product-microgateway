@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
-FROM envoyproxy/envoy-alpine:v1.20.2
+FROM envoyproxy/envoy:v1.24.1
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
-RUN apk update && apk upgrade --no-cache
+RUN apt-get update && apt-get upgrade -y
 
 ENV LANG=C.UTF-8
 
@@ -34,8 +34,8 @@ ARG MOTD="\n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
 RUN \
-    addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
-    && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
+    groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
+    && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 ENV ROUTER_ADMIN_HOST=0.0.0.0

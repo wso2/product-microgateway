@@ -51,4 +51,5 @@ public class MetadataConstants {
     public static final String CLIENT_IP_KEY = WSO2_METADATA_PREFIX + "client-ip";
 
     public static final String ERROR_CODE_KEY = "ErrorCode";
+    public static final String CHOREO_CONNECT_ENFORCER_REPLY = "choreo-connect-enforcer-reply";
 }
