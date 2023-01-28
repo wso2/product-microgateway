@@ -349,8 +349,8 @@ public class RestAPI implements API {
         // at the gateway level.
         // It is required to check if the resource Path is not null, because when CORS preflight request handling, or
         // generic OPTIONS method call happens, matchedResourcePath becomes null.
-        if (requestContext.getMatchedResourcePath() != null &&
-                requestContext.getMatchedResourcePath().isDisableSecurity()) {
+        if (requestContext.getMatchedResourcePaths() != null && requestContext.getMatchedResourcePaths().size() > 0 &&
+                requestContext.getMatchedResourcePaths().get(0).isDisableSecurity()) {
             return;
         }
 
