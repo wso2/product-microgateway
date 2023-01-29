@@ -180,12 +180,16 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 
 // getLuaFilter gets Lua http filter.
 func getLuaFilter() *hcmv3.HttpFilter {
-	//conf, _ := config.ReadConfigs()
+
 	luaConfig := &luav3.Lua{
-		InlineCode: "function envoy_on_request(request_handle)" +
-			"\nend" +
-			"\nfunction envoy_on_response(response_handle)" +
-			"\nend",
+		DefaultSourceCode: &corev3.DataSource{
+			Specifier: &corev3.DataSource_InlineString{
+				InlineString: "function envoy_on_request(request_handle)" +
+					"\nend" +
+					"\nfunction envoy_on_response(response_handle)" +
+					"\nend",
+			},
+		},
 	}
 	ext, err2 := ptypes.MarshalAny(luaConfig)
 	if err2 != nil {
