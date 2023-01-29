@@ -89,7 +89,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 		RespectExpectedRqTimeout: false,
 	}
 
-	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
+	routeFilterTypedConf, err := anypb.New(&routeFilterConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
 	}
@@ -165,7 +165,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
 	}
 
-	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
+	ext, err2 := anypb.New(extAuthzConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
@@ -191,7 +191,7 @@ func getLuaFilter() *hcmv3.HttpFilter {
 			},
 		},
 	}
-	ext, err2 := ptypes.MarshalAny(luaConfig)
+	ext, err2 := anypb.New(luaConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
