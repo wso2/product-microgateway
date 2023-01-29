@@ -86,11 +86,6 @@ func TestCreateRoute(t *testing.T) {
 	}
 	regexRewriteWithXWso2BasePath := &envoy_type_matcherv3.RegexMatchAndSubstitute{
 		Pattern: &envoy_type_matcherv3.RegexMatcher{
-			EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-				GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-					MaxProgramSize: nil,
-				},
-			},
 			Regex: "^/xWso2BasePath/resourcePath[/]{0,1}",
 		},
 		Substitution: "/basepath/resourcePath",

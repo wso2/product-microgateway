@@ -68,11 +68,6 @@ func generateRouteMatch(routeRegex string) *routev3.RouteMatch {
 	match := &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
 			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-						MaxProgramSize: nil,
-					},
-				},
 				Regex: routeRegex,
 			},
 		},
@@ -152,11 +147,6 @@ func generateHeaderMatcher(headerName, valueRegex string) *routev3.HeaderMatcher
 			StringMatch: &envoy_type_matcherv3.StringMatcher{
 				MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
 					SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
 						Regex: "^" + valueRegex + "$",
 					},
 				},
@@ -173,11 +163,6 @@ func generateRegexMatchAndSubstitute(routePath, endpointBasePath,
 
 	return &envoy_type_matcherv3.RegexMatchAndSubstitute{
 		Pattern: &envoy_type_matcherv3.RegexMatcher{
-			EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-				GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-					MaxProgramSize: nil,
-				},
-			},
 			Regex: routePath,
 		},
 		Substitution: substitutionString,
