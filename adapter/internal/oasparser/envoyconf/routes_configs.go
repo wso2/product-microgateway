@@ -75,8 +75,7 @@ func generateRouteMatch(routeRegex string) *routev3.RouteMatch {
 	return match
 }
 
-func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model.EndpointConfig,
-	corsPolicy *routev3.CorsPolicy) (action *routev3.Route_Route) {
+func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model.EndpointConfig) (action *routev3.Route_Route) {
 
 	config, _ := config.ReadConfigs()
 
@@ -118,7 +117,7 @@ func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model
 		}
 		action.Route.RetryPolicy = commonRetryPolicy
 	}
-	action.Route.Cors = corsPolicy
+
 	return action
 }
 

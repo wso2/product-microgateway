@@ -103,7 +103,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 // getCorsHTTPFilter gets cors http filter.
 func getCorsHTTPFilter() *hcmv3.HttpFilter {
 
-	corsFilterConf := cors_filter_v3.Cors{}
+	corsFilterConf := cors_filter_v3.CorsPolicy{}
 	corsFilterTypedConf, err := anypb.New(&corsFilterConf)
 
 	if err != nil {
