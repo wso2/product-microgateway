@@ -110,7 +110,6 @@ public class DisableSecurityTestCase {
 
         // Set header
         String payload = String.valueOf(new Random().nextLong());
-        // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", tokenPayload);
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
