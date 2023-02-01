@@ -37,7 +37,7 @@ public class APIConstants {
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String END_USER_ANONYMOUS = "anonymous";
     public static final String ANONYMOUS_PREFIX = "anon:";
-
+    public static final String END_USER_UNKNOWN = "unknown";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
     public static final String DEFAULT_ISSUER = "Resident Key Manager";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
