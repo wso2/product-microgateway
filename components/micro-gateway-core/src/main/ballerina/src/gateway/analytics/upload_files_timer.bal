@@ -49,12 +49,18 @@ function searchFilesToUpload() returns (error?) {
                 if (response.statusCode == 201) {
                     printInfo(KEY_UPLOAD_TASK, "Successfully uploaded the file: " + fileName);
                     var result = file:remove(fileLocation + filepath:getPathSeparator() + fileName);
-                } if (response.statusCode == 500 && stringutils:contains(response.getTextPayload().toString(),"Connection refused")) {
-                    printError(KEY_UPLOAD_TASK, "Connection Refused Error occurred while uploading the file. Upload request returned" +
-                    "with status code : " + response.statusCode.toString());
+                } else if (response.statusCode == 500 && stringutils:contains(response.getTextPayload().toString(),
+                "Connection refused")) {
+                    printError(KEY_UPLOAD_TASK, "Connection Refused Error occurred while uploading the file. Upload "
+                    + "request returned with status code : " + response.statusCode.toString());
                     return ();
+                } else if (response.statusCode == 500 && stringutils:contains(response.getTextPayload().toString(),
+                "A duplicate entry found for the file")) {
+                    printInfo(KEY_UPLOAD_TASK, "Removed the file since it is already available in the Database : "
+                    + fileName);
+                    var result = file:remove(fileLocation + filepath:getPathSeparator() + fileName);
                 } else {
-                    printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file. Upload request returned" +
+                    printError(KEY_UPLOAD_TASK, "Error occurred while uploading the file. Upload request returned " +
                     "with status code : " + response.statusCode.toString());
                 }
                 cnt = cnt + 1;
