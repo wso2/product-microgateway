@@ -44,7 +44,7 @@ public class RateLimiterXdsTestCase {
         // Second API
         String apiProjectName = "rate_limiter_xds_2_test";
         ApictlUtils.createProject("rate_limiter_xds_2_openAPI.yaml", apiProjectName,
-                null, null, null, "rate_limiter_xds_2_operation_level_api.yaml", "rate_limiter_xds_policies.yaml");
+                null, null, null, "rate_limiter_xds_2_operation_level_api.yaml");
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
     }
 
@@ -58,7 +58,7 @@ public class RateLimiterXdsTestCase {
         // First API
         String apiProjectName = "rate_limiter_xds_test";
         ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
-                null, null, null, "rate_limiter_xds_operation_level_api.yaml", "rate_limiter_xds_policies.yaml");
+                null, null, null, "rate_limiter_xds_operation_level_api.yaml");
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
         Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
 
@@ -74,7 +74,7 @@ public class RateLimiterXdsTestCase {
     public void testRedeployAPIWithUpdatedOperationLevelRateLimits() throws IOException, CCTestException {
         String apiProjectName = "rate_limiter_xds_updated_test";
         ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
-                null, null, null, "rate_limiter_xds_operation_level_updated_api.yaml", "rate_limiter_xds_policies.yaml");
+                null, null, null, "rate_limiter_xds_operation_level_updated_api.yaml");
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
         Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
 
@@ -96,7 +96,7 @@ public class RateLimiterXdsTestCase {
         // Redeploy the same API with changing operation level rate limits to API level rate limits
         String apiProjectName = "rate_limiter_xds_api_level_test";
         ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
-                null, null, null, "rate_limiter_xds_api_level_api.yaml", "rate_limiter_xds_policies.yaml");
+                null, null, null, "rate_limiter_xds_api_level_api.yaml");
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
         Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
 
@@ -117,7 +117,7 @@ public class RateLimiterXdsTestCase {
         // Redeploy the same API with changing API level rate limits to Operation level rate limits
         String apiProjectName = "rate_limiter_xds_operation_level_test";
         ApictlUtils.createProject("rate_limiter_xds_openAPI.yaml", apiProjectName,
-                null, null, null, "rate_limiter_xds_operation_level_api.yaml", "rate_limiter_xds_policies.yaml");
+                null, null, null, "rate_limiter_xds_operation_level_api.yaml");
         ApictlUtils.deployAPI(apiProjectName, MG_ENV);
         Utils.delay(DEPLOY_DELAY, DEPLOY_DELAY_ERROR_MSG);
 

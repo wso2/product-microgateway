@@ -5,7 +5,6 @@ data:
   name: rate-limiter-xds-test
   context: /rate-limiter-xds/v5
   version: 5.0.3
-  rateLimitLevel: OPERATION
   provider: admin
   lifeCycleStatus: PUBLISHED
   responseCachingEnabled: false
@@ -77,7 +76,10 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: 10000PerMin # Added new Rate-Limit policy
+      # Added new Rate-Limit policy
+      throttlingLimit:
+        requestCount: 10000
+        unit: MINUTE
     -
       id: ""
       target: /pet
@@ -85,6 +87,9 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
+      throttlingLimit:
+        requestCount: -1
+        unit: MINUTE
       # rateLimitPolicy: 10000PerMin - Rate-Limit policy is removed
     -
       id: ""
@@ -93,7 +98,10 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: 50000PerMin # Rate-Limit policy is updated from 20000PerMin to 50000PerMin
+      # Rate-Limit policy is updated from 20000PerMin to 50000PerMin
+      throttlingLimit:
+        requestCount: 50000
+        unit: MINUTE
     -
       id: ""
       target: /pet/{petId}
@@ -101,7 +109,10 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: 10000PerMin # Rate-Limit policy is not changed
+      # Rate-Limit policy is not changed
+      throttlingLimit:
+        requestCount: 10000
+        unit: MINUTE
     -
       id: ""
       target: /pet/findByStatus
@@ -109,6 +120,9 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
+      throttlingLimit:
+        requestCount: -1
+        unit: MINUTE
   categories: []
   keyManagers:
     - all

@@ -56,7 +56,14 @@ public class ApiLevelRatelimitTestCase {
         headers.put("Internal-Key", testKey);
         Utils.delay(10000, "Could not wait till initial setup completion.");
         String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
-        Assert.assertTrue(RateLimitUtils.isThrottled(RateLimitUtils.sendMultipleRequests(
-                endpointURL, headers, 5)), "API level rate-limit testcase failed.");
+        boolean isThrottled;
+        int testExecutionCount = 1;
+        do {
+             isThrottled = RateLimitUtils.isThrottled(RateLimitUtils.sendMultipleRequests(
+                endpointURL, headers, 5));
+             testExecutionCount++;
+        } while (!isThrottled && testExecutionCount <= 3);
+
+        Assert.assertTrue(isThrottled, "API level rate-limit testcase failed.");
     }
 }

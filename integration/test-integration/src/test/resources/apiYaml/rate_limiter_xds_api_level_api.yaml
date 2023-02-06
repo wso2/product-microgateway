@@ -5,8 +5,10 @@ data:
   name: rate-limiter-xds-test
   context: /rate-limiter-xds/v5
   version: 5.0.3
-  rateLimitLevel: API
-  rateLimitPolicy: 50000PerMin
+  apiThrottlingPolicy: 5KPerMinute
+  throttlingLimit:
+    requestCount: 50000
+    unit: MINUTE
   provider: admin
   lifeCycleStatus: PUBLISHED
   responseCachingEnabled: false
