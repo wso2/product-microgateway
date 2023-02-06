@@ -215,7 +215,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 String endUserToken = null;
                 JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().
                         getConfig().getJwtConfigurationDto();
-                if (jwtConfigurationDto.isEnabled()) {
+                if (jwtConfigurationDto.isEnabled() && !requestContext.getMatchedAPI().isDisableBackendJWT()) {
                     JWTInfoDto jwtInfoDto = FilterUtils
                             .generateJWTInfoDto(null, validationInfo, validationInfoDto, requestContext);
                     endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, tokenIdentifier,

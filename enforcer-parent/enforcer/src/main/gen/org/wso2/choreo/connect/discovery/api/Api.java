@@ -211,6 +211,11 @@ private static final long serialVersionUID = 0L;
             apiProvider_ = s;
             break;
           }
+          case 160: {
+
+            disableBackendJWT_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -917,6 +922,17 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int DISABLEBACKENDJWT_FIELD_NUMBER = 20;
+  private boolean disableBackendJWT_;
+  /**
+   * <code>bool disableBackendJWT = 20;</code>
+   * @return The disableBackendJWT.
+   */
+  @java.lang.Override
+  public boolean getDisableBackendJWT() {
+    return disableBackendJWT_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -987,6 +1003,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getApiProviderBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 19, apiProvider_);
+    }
+    if (disableBackendJWT_ != false) {
+      output.writeBool(20, disableBackendJWT_);
     }
     unknownFields.writeTo(output);
   }
@@ -1061,6 +1080,10 @@ private static final long serialVersionUID = 0L;
     if (!getApiProviderBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, apiProvider_);
     }
+    if (disableBackendJWT_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(20, disableBackendJWT_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1123,6 +1146,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getOrganizationId())) return false;
     if (!getApiProvider()
         .equals(other.getApiProvider())) return false;
+    if (getDisableBackendJWT()
+        != other.getDisableBackendJWT()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1185,6 +1210,9 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getOrganizationId().hashCode();
     hash = (37 * hash) + APIPROVIDER_FIELD_NUMBER;
     hash = (53 * hash) + getApiProvider().hashCode();
+    hash = (37 * hash) + DISABLEBACKENDJWT_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getDisableBackendJWT());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1387,6 +1415,8 @@ private static final long serialVersionUID = 0L;
 
       apiProvider_ = "";
 
+      disableBackendJWT_ = false;
+
       return this;
     }
 
@@ -1469,6 +1499,7 @@ private static final long serialVersionUID = 0L;
       result.vhost_ = vhost_;
       result.organizationId_ = organizationId_;
       result.apiProvider_ = apiProvider_;
+      result.disableBackendJWT_ = disableBackendJWT_;
       onBuilt();
       return result;
     }
@@ -1654,6 +1685,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getApiProvider().isEmpty()) {
         apiProvider_ = other.apiProvider_;
         onChanged();
+      }
+      if (other.getDisableBackendJWT() != false) {
+        setDisableBackendJWT(other.getDisableBackendJWT());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3701,6 +3735,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       apiProvider_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean disableBackendJWT_ ;
+    /**
+     * <code>bool disableBackendJWT = 20;</code>
+     * @return The disableBackendJWT.
+     */
+    @java.lang.Override
+    public boolean getDisableBackendJWT() {
+      return disableBackendJWT_;
+    }
+    /**
+     * <code>bool disableBackendJWT = 20;</code>
+     * @param value The disableBackendJWT to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDisableBackendJWT(boolean value) {
+      
+      disableBackendJWT_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool disableBackendJWT = 20;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDisableBackendJWT() {
+      
+      disableBackendJWT_ = false;
       onChanged();
       return this;
     }

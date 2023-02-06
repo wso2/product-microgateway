@@ -51,4 +51,5 @@ message Api {
 	string vhost = 17;
 	string organizationId = 18;
 	string apiProvider = 19;
+	bool disableBackendJWT = 20;
 }

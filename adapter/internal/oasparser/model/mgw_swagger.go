@@ -65,6 +65,7 @@ type MgwSwagger struct {
 	IsProtoTyped        bool
 	RateLimitLevel      string
 	RateLimitPolicy     string
+	DisableBackendJWT   bool
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 }
@@ -249,11 +250,10 @@ func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []SecurityScheme) {
 // defined for the same API and would have the structure given below,
 //
 // security:
-//	- PetstoreAuth:
-// 		- 'write:pets'
-//		- 'read:pets'
-//	- ApiKeyAuth: []
-//
+//   - PetstoreAuth:
+//   - 'write:pets'
+//   - 'read:pets'
+//   - ApiKeyAuth: []
 func (swagger *MgwSwagger) SetSecurity(security []map[string][]string) {
 	swagger.security = security
 }
@@ -806,13 +806,14 @@ func (endpointCluster *EndpointCluster) validateEndpointCluster(endpointName str
 }
 
 // getEndpoints extracts and generate the EndpointCluster Object from any yaml map that has the following structure
-//   endpoint-name:
-// 		urls:
-// 			- <endpoint-URL-1>
-// 			- <endpoint-URL-2>
-//		type: <loadbalance or failover>
-//		advanceEndpointConfig:
-//			<the configs>
+//
+//	  endpoint-name:
+//			urls:
+//				- <endpoint-URL-1>
+//				- <endpoint-URL-2>
+//			type: <loadbalance or failover>
+//			advanceEndpointConfig:
+//				<the configs>
 func (swagger *MgwSwagger) getEndpoints(vendorExtensions map[string]interface{}, endpointName string) (*EndpointCluster, error) {
 
 	// TODO: (VirajSalaka) x-wso2-production-endpoint 's type does not represent http/https, instead it indicates loadbalance and failover
@@ -1049,7 +1050,7 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 	return disableSecurity
 }
 
-//GetOperationInterceptors returns operation interceptors
+// GetOperationInterceptors returns operation interceptors
 func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndpoint, resourceInterceptor InterceptEndpoint, operations []*Operation, extensionName string) map[string]InterceptEndpoint {
 	interceptorOperationMap := make(map[string]InterceptEndpoint)
 
@@ -1075,7 +1076,7 @@ func (swagger *MgwSwagger) GetOperationInterceptors(apiInterceptor InterceptEndp
 
 }
 
-//GetInterceptor returns interceptors
+// GetInterceptor returns interceptors
 func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string, level string) (InterceptEndpoint, error) {
 	var endpointCluster EndpointCluster
 	conf, _ := config.ReadConfigs()
@@ -1207,7 +1208,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 	return nil
 }
 
-//PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
+// PopulateSwaggerFromAPIYaml populates the mgwSwagger object for APIs using API.yaml
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
 func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType string) error {
 
@@ -1220,6 +1221,9 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	swagger.version = data.Version
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
+
+	// Enable/Disable Backend JWTs per api
+	swagger.DisableBackendJWT = data.DisableBackendJWT
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig

@@ -273,4 +273,10 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getApiProviderBytes();
+
+  /**
+   * <code>bool disableBackendJWT = 20;</code>
+   * @return The disableBackendJWT.
+   */
+  boolean getDisableBackendJWT();
 }

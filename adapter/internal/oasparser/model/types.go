@@ -141,6 +141,7 @@ type APIYaml struct {
 		Provider                   string   `json:"provider,omitempty"`
 		RateLimitLevel             string   `json:"rateLimitLevel,omitempty"`
 		RateLimitPolicy            string   `json:"rateLimitPolicy,omitempty"`
+		DisableBackendJWT          bool     `json:"disableBackendJWT,omitempty"`
 		EndpointConfig             struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`

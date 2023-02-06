@@ -278,7 +278,7 @@ public class JWTAuthenticator implements Authenticator {
                     String endUserToken = null;
                     JWTConfigurationDto backendJwtConfig = ConfigHolder.getInstance().getConfig().
                             getJwtConfigurationDto();
-                    if (backendJwtConfig.isEnabled()) {
+                    if (backendJwtConfig.isEnabled() && !requestContext.getMatchedAPI().isDisableBackendJWT()) {
                         JWTInfoDto jwtInfoDto = FilterUtils.generateJWTInfoDto(null, validationInfo,
                                         apiKeyValidationInfoDTO, requestContext);
                         endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, jwtTokenIdentifier,
