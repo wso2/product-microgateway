@@ -26,11 +26,11 @@ import (
 	gzip_compressor "github.com/envoyproxy/go-control-plane/envoy/extensions/compression/gzip/compressor/v3"
 	compressor3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/compressor/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
-	"google.golang.org/protobuf/runtime/protoiface"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -97,7 +97,7 @@ func getCompressorFilter() (*hcmv3.HttpFilter, error) {
 	configRead, _ := config.ReadConfigs()
 	var responseDirectionContentTypes []string
 	var requestDirectionContentTypes []string
-	var libraryConfig protoiface.MessageV1
+	var libraryConfig protoreflect.ProtoMessage
 
 	for _, val := range configRead.Envoy.Filters.Compression.ResponseDirection.ContentType {
 		responseDirectionContentTypes = append(responseDirectionContentTypes, val)
@@ -110,7 +110,7 @@ func getCompressorFilter() (*hcmv3.HttpFilter, error) {
 	if compressionLibrary == "gzip" {
 		libraryConfig = getGzipConfigurations(*configRead)
 	}
-	marshalldConfig, err := ptypes.MarshalAny(libraryConfig)
+	marshalldConfig, err := anypb.New(libraryConfig)
 	if err != nil {
 		return nil, errors.New("Error occurred while marshalling compression library configurations. " + err.Error())
 	}
@@ -149,7 +149,7 @@ func getCompressorFilter() (*hcmv3.HttpFilter, error) {
 			TypedConfig: marshalldConfig,
 		},
 	}
-	compressorConfig, err := ptypes.MarshalAny(conf)
+	compressorConfig, err := anypb.New(conf)
 	if err != nil {
 		return nil, errors.New("Error occurred while marshalling compression filter configurations. " + err.Error())
 	}

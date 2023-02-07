@@ -71,7 +71,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 		AccessLogFormat: logFormat,
 	}
 
-	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
+	accessLogTypedConf, err := anypb.New(accessLogConf)
 	if err != nil {
 		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Error marsheling access log configs. %v", err.Error()),
@@ -131,7 +131,7 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 		AdditionalRequestHeadersToLog:   requestHeaders,
 		AdditionalResponseTrailersToLog: responseTrailers,
 	}
-	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
+	accessLogTypedConf, err := anypb.New(accessLogConf)
 	if err != nil {
 		logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Error marshalling gRPC access log configs. %v", err.Error()),

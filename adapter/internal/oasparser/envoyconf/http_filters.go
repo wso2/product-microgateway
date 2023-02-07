@@ -89,7 +89,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 		RespectExpectedRqTimeout: false,
 	}
 
-	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
+	routeFilterTypedConf, err := anypb.New(&routeFilterConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
 	}
@@ -103,7 +103,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 // getCorsHTTPFilter gets cors http filter.
 func getCorsHTTPFilter() *hcmv3.HttpFilter {
 
-	corsFilterConf := cors_filter_v3.Cors{}
+	corsFilterConf := cors_filter_v3.CorsPolicy{}
 	corsFilterTypedConf, err := anypb.New(&corsFilterConf)
 
 	if err != nil {
@@ -165,7 +165,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
 	}
 
-	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
+	ext, err2 := anypb.New(extAuthzConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
@@ -180,14 +180,18 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 
 // getLuaFilter gets Lua http filter.
 func getLuaFilter() *hcmv3.HttpFilter {
-	//conf, _ := config.ReadConfigs()
+
 	luaConfig := &luav3.Lua{
-		InlineCode: "function envoy_on_request(request_handle)" +
-			"\nend" +
-			"\nfunction envoy_on_response(response_handle)" +
-			"\nend",
+		DefaultSourceCode: &corev3.DataSource{
+			Specifier: &corev3.DataSource_InlineString{
+				InlineString: "function envoy_on_request(request_handle)" +
+					"\nend" +
+					"\nfunction envoy_on_response(response_handle)" +
+					"\nend",
+			},
+		},
 	}
-	ext, err2 := ptypes.MarshalAny(luaConfig)
+	ext, err2 := anypb.New(luaConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}

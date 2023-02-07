@@ -215,8 +215,12 @@ func genExactMatchHeaderFilter(headerName, headerValue string) *access_logv3.Acc
 		HeaderFilter: &access_logv3.HeaderFilter{
 			Header: &envoy_config_route_v3.HeaderMatcher{
 				Name: headerName,
-				HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_ExactMatch{
-					ExactMatch: headerValue,
+				HeaderMatchSpecifier: &envoy_config_route_v3.HeaderMatcher_StringMatch{
+					StringMatch: &envoy_type_matcher_v3.StringMatcher{
+						MatchPattern: &envoy_type_matcher_v3.StringMatcher_Exact{
+							Exact: headerValue,
+						},
+					},
 				},
 			},
 		},

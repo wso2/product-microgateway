@@ -68,11 +68,6 @@ func generateRouteMatch(routeRegex string) *routev3.RouteMatch {
 	match := &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
 			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-						MaxProgramSize: nil,
-					},
-				},
 				Regex: routeRegex,
 			},
 		},
@@ -80,8 +75,7 @@ func generateRouteMatch(routeRegex string) *routev3.RouteMatch {
 	return match
 }
 
-func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model.EndpointConfig,
-	corsPolicy *routev3.CorsPolicy) (action *routev3.Route_Route) {
+func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model.EndpointConfig) (action *routev3.Route_Route) {
 
 	config, _ := config.ReadConfigs()
 
@@ -123,7 +117,7 @@ func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model
 		}
 		action.Route.RetryPolicy = commonRetryPolicy
 	}
-	action.Route.Cors = corsPolicy
+
 	return action
 }
 
@@ -152,11 +146,6 @@ func generateHeaderMatcher(headerName, valueRegex string) *routev3.HeaderMatcher
 			StringMatch: &envoy_type_matcherv3.StringMatcher{
 				MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
 					SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
 						Regex: "^" + valueRegex + "$",
 					},
 				},
@@ -173,11 +162,6 @@ func generateRegexMatchAndSubstitute(routePath, endpointBasePath,
 
 	return &envoy_type_matcherv3.RegexMatchAndSubstitute{
 		Pattern: &envoy_type_matcherv3.RegexMatcher{
-			EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-				GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-					MaxProgramSize: nil,
-				},
-			},
 			Regex: routePath,
 		},
 		Substitution: substitutionString,
@@ -192,22 +176,20 @@ func generateHeaderToAddRouteConfig(policyParams interface{}) (*corev3.HeaderVal
 	var ok bool
 	var headerName, headerValue string
 	if paramsToSetHeader, ok = policyParams.(map[string]interface{}); !ok {
-		return nil, fmt.Errorf("Error while processing policy parameter map. Map: %v", policyParams)
+		return nil, fmt.Errorf("error while processing policy parameter map. Map: %v", policyParams)
 	}
 	if headerName, ok = paramsToSetHeader[constants.HeaderName].(string); !ok || strings.TrimSpace(headerName) == "" {
-		return nil, errors.New("Policy parameter map must include headerName")
+		return nil, errors.New("policy parameter map must include headerName")
 	}
 	if headerValue, ok = paramsToSetHeader[constants.HeaderValue].(string); !ok || strings.TrimSpace(headerValue) == "" {
-		return nil, errors.New("Policy parameter map must include headerValue")
+		return nil, errors.New("policy parameter map must include headerValue")
 	}
 	headerToAdd := corev3.HeaderValueOption{
 		Header: &corev3.HeaderValue{
 			Key:   headerName,
 			Value: headerValue,
 		},
-		Append: &wrapperspb.BoolValue{
-			Value: false,
-		}, // if true the header values are appended to the existing value
+		AppendAction: *corev3.HeaderValueOption_OVERWRITE_IF_EXISTS_OR_ADD.Enum(),
 	}
 	return &headerToAdd, nil
 }
@@ -217,11 +199,11 @@ func generateHeaderToRemoveString(policyParams interface{}) (string, error) {
 	var ok bool
 	var requestHeaderToRemove string
 	if paramsToRemoveHeader, ok = policyParams.(map[string]interface{}); !ok {
-		return "", fmt.Errorf("Error while processing policy parameter map. Map: %v", policyParams)
+		return "", fmt.Errorf("error while processing policy parameter map. Map: %v", policyParams)
 	}
 	if requestHeaderToRemove, ok = paramsToRemoveHeader[constants.HeaderName].(string); !ok ||
 		requestHeaderToRemove == "" {
-		return "", errors.New("Policy parameter map must include headerName")
+		return "", errors.New("policy parameter map must include headerName")
 	}
 	return requestHeaderToRemove, nil
 }
@@ -233,11 +215,11 @@ func generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath st
 	var ok bool
 	var rewritePath string
 	if paramsToSetHeader, ok = policyParams.(map[string]interface{}); !ok {
-		return nil, fmt.Errorf("Error while processing policy parameter map. Map: %v", policyParams)
+		return nil, fmt.Errorf("error while processing policy parameter map. Map: %v", policyParams)
 	}
 	if rewritePath, ok = paramsToSetHeader[constants.RewritePathResourcePath].(string); !ok ||
 		strings.TrimSpace(rewritePath) == "" {
-		return nil, errors.New("Policy parameter map must include rewritePath")
+		return nil, errors.New("policy parameter map must include rewritePath")
 	}
 
 	rewritePathIndexedWrtResourcePath, err := getRewriteRegexFromPathTemplate(resourcePath, rewritePath)
