@@ -317,7 +317,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		mgwSwagger.SetEnvLabelProperties(apiEnvProps, false)
 	}
 
-	if apiYaml.APIThrottlingPolicy == "" {
+	if apiYaml.APIThrottlingPolicy == "" || apiYaml.ThrottlingLimit.Unit == "" {
+		logger.LoggerXds.Debugf("Operation level throttling limits available for the API")
 		mgwSwagger.SetRateLimitPoliciesForOperations(apiYaml.Operations)
 	}
 	mgwSwagger.SetID(apiYaml.ID)

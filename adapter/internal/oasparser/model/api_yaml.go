@@ -83,8 +83,7 @@ func ExtractAPIRateLimitPolicies(apiProject *ProjectAPI, parsedAPIYaml APIYaml) 
 	apiYamlFromProject := apiProject.APIYaml.Data
 
 	policyMap := map[string]*APIRateLimitPolicy{}
-	// revise the if condition
-	if apiYamlFromProject.APIThrottlingPolicy != "" {
+	if apiYamlFromProject.ThrottlingLimit.RequestCount > 0 {
 		throttlingLimit := apiYamlFromProject.ThrottlingLimit
 		rlPolicy := getRateLimitPolicy(throttlingLimit)
 		policyMap[rlPolicy.PolicyName] = &rlPolicy
