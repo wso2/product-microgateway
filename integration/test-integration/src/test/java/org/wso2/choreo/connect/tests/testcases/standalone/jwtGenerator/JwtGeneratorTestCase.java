@@ -31,10 +31,12 @@ import com.nimbusds.jose.jwk.RSAKey;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -53,7 +55,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class JwtGeneratorTestCase {
     private static final String JWT_GENERATOR_ISSUER = "wso2.org/products/am";
-
     private String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
@@ -189,5 +190,16 @@ public class JwtGeneratorTestCase {
             }
         }
         Assert.assertTrue(received429, "JWKS endpoint is not rate limited.");
+    }
+
+    @Test(description = "Test whether JWT can be disabled per API")
+    public void testPerAPIJWT() throws MalformedURLException, CCTestException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        HttpResponse response = HttpsClientRequest
+                .doGet(Utils.getServiceURLHttps("/v2/perapibejwt/jwttoken"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertFalse(response.getData()
+                .contains("token"), "JWT is available when disabled for this api");
     }
 }
