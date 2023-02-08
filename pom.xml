@@ -21,7 +21,7 @@
     <groupId>org.wso2.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.0-m2-SNAPSHOT</version>
+    <version>1.2.0-beta-SNAPSHOT</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -345,11 +345,6 @@
                 <version>${envoy.controlplane.api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus.jose.jwt.version}</version>
@@ -663,68 +658,67 @@
 
         <andes.client.version>3.3.23</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
-        <carbon.apimgt.version>9.26.59</carbon.apimgt.version>
+        <carbon.apimgt.version>9.28.35</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
-        <commons.version>3.9</commons.version>
+        <commons.version>3.12.0</commons.version>
         <commons.io.version>2.11.0</commons.io.version>
-        <envoy.controlplane.api.version>0.1.28</envoy.controlplane.api.version>
+        <envoy.controlplane.api.version>1.0.36</envoy.controlplane.api.version>
         <geronimo.jms11.spec.version>1.1.1.wso2v1</geronimo.jms11.spec.version>
         <grpc.netty.shaded.version>1.45.1</grpc.netty.shaded.version>
         <grpc.protobuf.version>1.45.1</grpc.protobuf.version>
         <grpc.stub.version>1.45.1</grpc.stub.version>
-        <gson.version>2.8.9</gson.version>
-        <guava.version>30.0-jre</guava.version>
+        <gson.version>2.10.1</gson.version>
+        <guava.version>31.1-jre</guava.version>
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
-        <io.netty.version>4.1.86.Final</io.netty.version>
+        <io.netty.version>4.1.87.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
         <apache.tomcat.dependency.version>10.1.4</apache.tomcat.dependency.version>
         <java.websocket.version>1.5.3</java.websocket.version>
-        <slf4j.api.version>1.7.30</slf4j.api.version>
-        <json.smart.version>2.4.7</json.smart.version>
+        <slf4j.api.version>2.0.6</slf4j.api.version>
+        <json.smart.version>2.4.8</json.smart.version>
         <junit.version>4.13.2</junit.version>
         <log4j.version>2.19.0</log4j.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
         <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
-        <nimbus.jose.jwt.version>7.9</nimbus.jose.jwt.version>
+        <nimbus.jose.jwt.version>8.0</nimbus.jose.jwt.version>
         <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
-        <otel.alpha.version>1.18.0-alpha</otel.alpha.version>
-        <otel.version>1.18.0</otel.version>
-        <otel.otlp.version>1.18.0</otel.otlp.version>
-        <shade.plugin.version>3.2.4</shade.plugin.version>
-        <slf4j.version>1.7.21</slf4j.version>
-        <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
-        <testcontainers.version>1.17.5</testcontainers.version>
+        <otel.alpha.version>1.22.0-alpha</otel.alpha.version>
+        <otel.version>1.22.0</otel.version>
+        <otel.otlp.version>1.22.0</otel.otlp.version>
+        <shade.plugin.version>3.4.1</shade.plugin.version>
+        <slf4j.version>2.0.6</slf4j.version>
+        <swagger.v3.models.version>2.2.8</swagger.v3.models.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
         <testng.version>6.11</testng.version>
         <tomcat.annotations.api.version>6.0.53</tomcat.annotations.api.version>
         <toml4j.version>0.7.2</toml4j.version>
-        <analytics.common.version>6.1.59</analytics.common.version>
+        <analytics.common.version>6.1.63</analytics.common.version>
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
-        <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
-        <apictl.version>4.1.0</apictl.version>
-        <apim.version>4.1.0</apim.version>
+        <download.maven.plugin.version>1.6.8</download.maven.plugin.version>
+        <apictl.version>4.2.0-alpha</apictl.version>
+        <apim.version>4.2.0-alpha</apim.version>
         <grpc.healthProbe.version>0.4.15</grpc.healthProbe.version>
-        <analytics.publisher.client.version>1.0.10</analytics.publisher.client.version>
-        <awaitility.version>3.1.2</awaitility.version>
-        <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
+        <analytics.publisher.client.version>1.1.0</analytics.publisher.client.version>
+        <awaitility.version>4.2.0</awaitility.version>
+        <apache.httpcomponents.version>4.5.14</apache.httpcomponents.version>
         <jackson.databind.version>2.14.1</jackson.databind.version>
-        <snakeyaml.version>1.33</snakeyaml.version>
-        <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
-        <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
+        <exec.maven.plugin.version>3.1.0</exec.maven.plugin.version>
+        <googlecode.download.plugin.version>1.6.8</googlecode.download.plugin.version>
         <javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
-        <wiremock.version>2.33.2</wiremock.version>
+        <wiremock.version>2.35.0</wiremock.version>
         <javax.xml.soap.version>1.4.0</javax.xml.soap.version>
         <com.sun.xml.messaging.saaj.version>1.5.3</com.sun.xml.messaging.saaj.version>
         <com.graphql.java.version>5.2.4</com.graphql.java.version>
-        <graphql.java.version>17.3.wso2v1</graphql.java.version>
-        <org.jetbrains.kotlin.version>1.6.0</org.jetbrains.kotlin.version>
+        <graphql.java.version>19.2.wso2v2</graphql.java.version>
+        <org.jetbrains.kotlin.version>1.8.0</org.jetbrains.kotlin.version>
         <protobuf.java.version>3.21.7</protobuf.java.version>
         <directory.maven.plugin.version>1.0</directory.maven.plugin.version>
         <protobuf.java.version>3.21.12</protobuf.java.version>
-        <woodstox.core.version>6.4</woodstox.core.version>
+        <woodstox.core.version>6.5.0</woodstox.core.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.14.1</jackson.annotations.version>
@@ -732,7 +726,7 @@
         <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.5</azure.monitor.opentelemetry.exporter.version>
         <azure.core.http.okhttp.version>1.3.3</azure.core.http.okhttp.version>
         <!-- dependency check plugin properties -->
-        <dependency.check.maven.version>7.4.4</dependency.check.maven.version>
+        <dependency.check.maven.version>8.0.1</dependency.check.maven.version>
         <dependency.check.cvss.threshold.value>4</dependency.check.cvss.threshold.value>
         <!-- -code coverage related properties -->
         <maven.failsafe.plugin.version>2.15</maven.failsafe.plugin.version>

@@ -27,6 +27,7 @@ import (
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
@@ -86,11 +87,6 @@ func TestCreateRoute(t *testing.T) {
 	}
 	regexRewriteWithXWso2BasePath := &envoy_type_matcherv3.RegexMatchAndSubstitute{
 		Pattern: &envoy_type_matcherv3.RegexMatcher{
-			EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-				GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-					MaxProgramSize: nil,
-				},
-			},
 			Regex: "^/xWso2BasePath/resourcePath[/]{0,1}",
 		},
 		Substitution: "/basepath/resourcePath",
@@ -214,8 +210,8 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 		"ExtAuthzPerRouteConfig should not be empty")
 
 	extAuthPerRouteConfig := &extAuthService.ExtAuthzPerRoute{}
-	err = ptypes.UnmarshalAny(routeWithProdEp[0].TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
-		extAuthPerRouteConfig)
+	err = routeWithProdEp[0].TypedPerFilterConfig[wellknown.HTTPExternalAuthorization].UnmarshalTo(extAuthPerRouteConfig)
+
 	assert.Nilf(t, err, "Error while parsing ExtAuthzPerRouteConfig %v", extAuthPerRouteConfig)
 	assert.NotEmpty(t, extAuthPerRouteConfig.GetCheckSettings(), "Check Settings per ext authz route should not be empty")
 	assert.NotEmpty(t, extAuthPerRouteConfig.GetCheckSettings().ContextExtensions,
@@ -648,13 +644,31 @@ func TestGetCorsPolicy(t *testing.T) {
 	routeWithoutCors, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
 		&resourceWithGet, "test-cluster", "", nil, false))
 	assert.Nil(t, err, "Error while creating routeWithoutCors")
-	assert.Nil(t, routeWithoutCors[0].GetRoute().Cors, "Cors Configuration should be null.")
+
+	corsConfig1 := &cors_filter_v3.CorsPolicy{}
+	err = routeWithoutCors[0].GetTypedPerFilterConfig()[wellknown.CORS].UnmarshalTo(corsConfig1)
+
+	assert.Nilf(t, err, "Error while parsing Cors Configuration %v", corsConfig1)
+	assert.Empty(t, corsConfig1.GetAllowHeaders(), "Cors AllowHeaders should be empty.")
+	assert.Empty(t, corsConfig1.GetAllowCredentials(), "Cors AllowCredentials should be empty.")
+	assert.Empty(t, corsConfig1.GetAllowMethods(), "Cors AllowMethods should be empty.")
+	assert.Empty(t, corsConfig1.GetAllowOriginStringMatch(), "Cors AllowOriginStringMatch should be empty.")
+	assert.Empty(t, corsConfig1.GetExposeHeaders(), "Cors ExposeHeaders should be empty.")
 
 	// Route with CORS configuration
 	routeWithCors, err := createRoutes(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
 		&resourceWithGet, "test-cluster", "", corsConfigModel3, false))
 	assert.Nil(t, err, "Error while creating routeWithCors")
-	assert.NotNil(t, routeWithCors[0].GetRoute().Cors, "Cors Configuration should not be null.")
+
+	corsConfig2 := &cors_filter_v3.CorsPolicy{}
+	err = routeWithCors[0].GetTypedPerFilterConfig()[wellknown.CORS].UnmarshalTo(corsConfig2)
+
+	assert.Nilf(t, err, "Error while parsing Cors Configuration %v", corsConfig2)
+	assert.NotEmpty(t, corsConfig2.GetAllowOriginStringMatch(), "Cors AllowOriginStringMatch should not be empty.")
+	assert.NotEmpty(t, corsConfig2.GetAllowMethods(), "Cors AllowMethods should not be empty.")
+	assert.Empty(t, corsConfig2.GetAllowHeaders(), "Cors AllowHeaders should be empty.")
+	assert.Empty(t, corsConfig2.GetExposeHeaders(), "Cors ExposeHeaders should be empty.")
+	assert.Empty(t, corsConfig2.GetAllowCredentials(), "Cors AllowCredentials should be empty.")
 }
 
 func generateRouteCreateParamsForUnitTests(title string, apiType string, vhost string, xWso2Basepath string, version string, endpointBasepath string,

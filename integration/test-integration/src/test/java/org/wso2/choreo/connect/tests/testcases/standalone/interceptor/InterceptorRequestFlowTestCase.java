@@ -52,17 +52,21 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         String interceptorRespBody = "<student><name>Foo</name><age type=\"Y\">16</age></student>";
 
         // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, expectedBody}
-        return new Object[][]{
+        return new Object[][] {
                 // non-empty body from interceptor - means update request to backend
-                {clientReqBody, interceptorRespBody, false, interceptorRespBody},
-                // empty request from client and non-empty body from interceptor - means update request to backend
-                {"", interceptorRespBody, false, interceptorRespBody},
-                // empty response body from interceptor - means update request to backend as empty
-                {clientReqBody, "", false, ""},
-                // null response body from interceptor (i.e. {"body": null}) - means do not update request to backend
-                {clientReqBody, null, false, clientReqBody},
-                // no response from interceptor (i.e. {}) - means do not update request to backend
-                {clientReqBody, null, true, clientReqBody}
+                { clientReqBody, interceptorRespBody, false, interceptorRespBody },
+                // empty request from client and non-empty body from interceptor - means update
+                // request to backend
+                { "", interceptorRespBody, false, interceptorRespBody },
+                // empty response body from interceptor - means update request to backend as
+                // empty
+                { clientReqBody, "", false, "" },
+                // null response body from interceptor (i.e. {"body": null}) - means do not
+                // update request to backend
+                { clientReqBody, null, false, clientReqBody },
+                // no response from interceptor (i.e. {}) - means do not update request to
+                // backend
+                { clientReqBody, null, true, clientReqBody }
         };
     }
 
@@ -71,25 +75,27 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         String clientReqBody = "{\"name\": \"foo\", \"age\": 16}";
         String interceptorRespBody = "{\"message\": \"This is direct responded\"}";
 
-        // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, clientRespBody}
-        return new Object[][]{
+        // {clientReqBody, interceptorRespBody, isOmitInterceptorRespBody, expected
+        // clientRespBody}
+        return new Object[][] {
                 // non-empty body from interceptor - means update request to client
-                {clientReqBody, interceptorRespBody, false, interceptorRespBody},
-                // empty request from client and non-empty body from interceptor - means update request to client
-                {"", interceptorRespBody, false, interceptorRespBody},
-                // empty response body from interceptor - means update request to client as empty
-                {clientReqBody, "", false, ""},
-                // null response body from interceptor (i.e. {"body": null}) - means do not update request to client
-                {clientReqBody, null, false, ""},
-                // no response from interceptor (i.e. {}) - means do not update request to client
-                {clientReqBody, null, true, ""}
+                { clientReqBody, interceptorRespBody, false, interceptorRespBody },
+                // empty request from client and non-empty body from interceptor - means update
+                // request to client
+                { "", interceptorRespBody, false, interceptorRespBody },
+                // empty response body from interceptor - means update request to client as
+                // empty
+                { clientReqBody, "", false, "" },
+                // null response body from interceptor (i.e. {"body": null}) - means do not
+                // update request to client
+                { clientReqBody, null, false, "" },
+                // no response from interceptor (i.e. {}) - means do not update request to
+                // client
+                { clientReqBody, null, true, "" }
         };
     }
 
-    @Test(
-            description = "Test request body and headers to backend service with request flow interception",
-            dataProvider = "requestBodyProvider"
-    )
+    @Test(description = "Test request body and headers to backend service with request flow interception", dataProvider = "requestBodyProvider")
     public void testRequestToBackendServiceInRequestFlowInterception(
             String clientReqBody, String interceptorRespBody, boolean isOmitInterceptorRespBody, String expectedBody)
             throws Exception {
@@ -140,7 +146,8 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         Assert.assertFalse(respHeaders.containsKey("foo-remove"), "Failed to remove header");
         Assert.assertEquals(respHeaders.get("foo-add"), "Header_newly_added", "Failed to add new header");
         Assert.assertEquals(respHeaders.get("foo-update"), "Header_Updated", "Failed to replace header");
-        Assert.assertEquals(respHeaders.get("foo-update-not-exist"), "Header_Updated_New_Val", "Failed to replace header");
+        Assert.assertEquals(respHeaders.get("foo-update-not-exist"), "Header_Updated_New_Val",
+                "Failed to replace header");
         Assert.assertEquals(respHeaders.get("content-type"), "application/xml", "Failed to replace header");
         Assert.assertEquals(respHeaders.get("foo-keep"), "Header_to_be_kept", "Failed to keep original header");
 
@@ -152,10 +159,7 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         Assert.assertEquals(response.getData(), expectedBody);
     }
 
-    @Test(
-            description = "Direct respond when response interception is enabled",
-            dataProvider = "directRespondRequestBodyProvider"
-    )
+    @Test(description = "Direct respond when response interception is enabled", dataProvider = "directRespondRequestBodyProvider")
     public void directRespondWhenResponseInterceptionEnabled(
             String clientReqBody, String interceptorRespBody, boolean isOmitInterceptorRespBody, String clientRespBody)
             throws Exception {
@@ -173,7 +177,11 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         // only headersToAdd is considered when direct respond
         Map<String, String> headersToAdd = new HashMap<>();
         headersToAdd.put("foo-add", "Header_newly_added");
-        headersToAdd.put("content-type", "application/json");
+
+        if (!StringUtils.isEmpty(interceptorRespBody)) {
+            headersToAdd.put("content-type", "application/json");
+        }
+
         interceptorRespBodyJSON.put("headersToAdd", headersToAdd);
         interceptorRespBodyJSON.put("headersToReplace", Collections.singletonMap("foo-ignored", "Header_not_added"));
         setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
@@ -183,7 +191,8 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         headers.put("foo-client-header", "Header_discard_when_respond");
         headers.put("content-type", "application/json");
-        // this is not an echo server, so if request goes to backend it will respond with different payload.
+        // this is not an echo server, so if request goes to backend it will respond
+        // with different payload.
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
                 basePath + "/pet/findByStatus/resp-intercept-enabled"), clientReqBody, headers);
 
@@ -202,8 +211,11 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         Assert.assertFalse(respHeaders.containsKey("foo-ignored"), "Should only support add headers");
         Assert.assertEquals(respHeaders.get("foo-add"), "Header_newly_added",
                 "Failed to add new header");
-        Assert.assertEquals(respHeaders.get("content-type"), "application/json",
-                "Failed to replace header");
+
+        if (!StringUtils.isEmpty(clientRespBody)) {
+            Assert.assertEquals(respHeaders.get("content-type"), "application/json",
+                    "Failed to replace header");
+        }
         // test body
         Assert.assertEquals(response.getData(), clientRespBody);
     }
@@ -211,16 +223,13 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
     @DataProvider(name = "directRespondProvider")
     public Object[][] directRespondProvider() {
         // {interceptorRespBody}
-        return new Object[][]{
-                {"UPDATED BODY"},
-                {""},
+        return new Object[][] {
+                { "UPDATED BODY" },
+                { "" },
         };
     }
 
-    @Test(
-            description = "Test direct respond with different response code",
-            dataProvider = "directRespondProvider"
-    )
+    @Test(description = "Test direct respond with different response code", dataProvider = "directRespondProvider")
     public void testDirectRespondWithResponseCode(String interceptorRespBody) throws Exception {
         // setting response body of interceptor service
         JSONObject interceptorRespBodyJSON = new JSONObject();
@@ -249,9 +258,9 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
     @DataProvider(name = "dynamicEndpointDataProvider")
     public Object[][] dynamicEndpointDataProvider() {
         // {dynamicEpName, expectedResponse}
-        return new Object[][]{
-                {"myDynamicEndpoint", "UPDATED BODY"},
-                {"myDynamicEndpoint2", ResponseConstants.DYNAMIC_EP_RESPONSE},
+        return new Object[][] {
+                { "myDynamicEndpoint", "UPDATED BODY" },
+                { "myDynamicEndpoint2", ResponseConstants.DYNAMIC_EP_RESPONSE },
         };
     }
 
@@ -261,7 +270,8 @@ public class InterceptorRequestFlowTestCase extends InterceptorBaseTestCase {
         JSONObject interceptorRespBodyJSON = new JSONObject();
         // test updating body is also work with dynamic endpoint
         interceptorRespBodyJSON.put("body", Base64.getEncoder().encodeToString("UPDATED BODY".getBytes()));
-        interceptorRespBodyJSON.put("headersToReplace", Collections.singletonMap("x-wso2-cluster-header", "foo-invalid-attempt"));
+        interceptorRespBodyJSON.put("headersToReplace",
+                Collections.singletonMap("x-wso2-cluster-header", "foo-invalid-attempt"));
         interceptorRespBodyJSON.put("dynamicEndpoint", Collections.singletonMap("endpointName", dynamicEpName));
         setResponseOfInterceptor(interceptorRespBodyJSON.toString(), true);
 

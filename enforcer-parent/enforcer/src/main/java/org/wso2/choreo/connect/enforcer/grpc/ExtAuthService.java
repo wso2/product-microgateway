@@ -37,6 +37,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
 import org.wso2.choreo.connect.enforcer.deniedresponse.DeniedResponsePreparer;
 import org.wso2.choreo.connect.enforcer.jmx.JMXUtils;
@@ -137,10 +138,11 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             Struct.Builder metadataStructBuilder = Struct.newBuilder();
             if (responseObject.getMetaDataMap() != null) {
                 responseObject.getMetaDataMap().forEach((key, value) ->
-                        metadataStructBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+                        addMetadata(metadataStructBuilder, key, value));
             }
-            metadataStructBuilder.putFields("correlationID",
-                    Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build());
+
+            addMetadata(metadataStructBuilder, "correlationID", responseObject.getCorrelationID());
+            addMetadata(metadataStructBuilder, MetadataConstants.CHOREO_CONNECT_ENFORCER_REPLY, "Ok");
 
             return checkResponseBuilder
                     .setDynamicMetadata(metadataStructBuilder.build())
@@ -179,9 +181,14 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             Struct.Builder structBuilder = Struct.newBuilder();
             if (responseObject.getMetaDataMap() != null) {
                 responseObject.getMetaDataMap().forEach((key, value) ->
-                        structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+                        addMetadata(structBuilder, key, value));
             }
-            addAccessLogMetadata(structBuilder, responseObject.getRequestPath());
+            
+            //Adds original request path header without params as a metadata for access logging.
+            addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME, 
+            responseObject.getRequestPath().split("\\?")[0]);
+
+            addMetadata(structBuilder, MetadataConstants.CHOREO_CONNECT_ENFORCER_REPLY, "Ok");
 
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build())
@@ -244,14 +251,13 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     }
 
     /**
-     * Adds original request path header without params as a metadata for access
-     * logging.
+     * Adds a given key and value as a metadata
      * 
      * @param structBuilder
-     * @param requestPath
+     * @param key
+     * @param value
      */
-    private void addAccessLogMetadata(Struct.Builder structBuilder, String requestPath) {
-        structBuilder.putFields(RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
-                Value.newBuilder().setStringValue(requestPath.split("\\?")[0]).build());
+    private void addMetadata(Struct.Builder structBuilder, String key, String value) {
+        structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build());
     }
 }

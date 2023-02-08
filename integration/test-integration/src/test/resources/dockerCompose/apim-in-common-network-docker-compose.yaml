@@ -4,7 +4,7 @@ networks:
     name: apim_and_cc
 services:
   apim:
-    image: wso2/wso2am:4.1.0-alpine
+    image: wso2am/wso2am:4.2.0-alpha-alpine
     user: root
     ports:
       - "9764:9764"
@@ -14,7 +14,7 @@ services:
       - PROFILE_NAME=control-plane
     volumes:
       - ./conf/deployment.toml:/home/wso2carbon/wso2-config-volume/repository/conf/deployment.toml
-      - ./database:/home/wso2carbon/wso2am-4.1.0/repository/database:rw
+      - ./database:/home/wso2carbon/wso2am-4.2.0-alpha/repository/database:rw
     networks:
       - apim_and_cc
   
