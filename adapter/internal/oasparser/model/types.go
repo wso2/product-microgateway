@@ -127,21 +127,20 @@ type EndpointCertificate struct {
 type APIYaml struct {
 	ApimMeta
 	Data struct {
-		ID                         string   `json:"Id,omitempty"`
-		Name                       string   `json:"name,omitempty"`
-		Context                    string   `json:"context,omitempty"`
-		Version                    string   `json:"version,omitempty"`
-		RevisionID                 int      `json:"revisionId,omitempty"`
-		APIType                    string   `json:"type,omitempty"`
-		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
-		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
-		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
-		SecurityScheme             []string `json:"securityScheme,omitempty"`
-		OrganizationID             string   `json:"organizationId,omitempty"`
-		Provider                   string   `json:"provider,omitempty"`
-		RateLimitPolicy            string   `json:"rateLimitPolicy,omitempty"`
-		APIThrottlingPolicy        string   `json:"apiThrottlingPolicy,omitempty"`
-		ThrottlingLimit            ThrottlingLimit
+		ID                         string          `json:"Id,omitempty"`
+		Name                       string          `json:"name,omitempty"`
+		Context                    string          `json:"context,omitempty"`
+		Version                    string          `json:"version,omitempty"`
+		RevisionID                 int             `json:"revisionId,omitempty"`
+		APIType                    string          `json:"type,omitempty"`
+		LifeCycleStatus            string          `json:"lifeCycleStatus,omitempty"`
+		EndpointImplementationType string          `json:"endpointImplementationType,omitempty"`
+		AuthorizationHeader        string          `json:"authorizationHeader,omitempty"`
+		SecurityScheme             []string        `json:"securityScheme,omitempty"`
+		OrganizationID             string          `json:"organizationId,omitempty"`
+		Provider                   string          `json:"provider,omitempty"`
+		RateLimitPolicy            string          `json:"rateLimitPolicy,omitempty"`
+		ThrottlingLimit            ThrottlingLimit `json:"throttlingLimit,omitempty"`
 		EndpointConfig             struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
@@ -162,10 +161,10 @@ type APIYaml struct {
 
 // OperationYaml holds attributes of APIM operations
 type OperationYaml struct {
-	ID              string `json:"id,omitempty"`
-	Target          string `json:"target,omitempty"`
-	Verb            string `json:"verb,omitempty"`
-	ThrottlingLimit ThrottlingLimit
+	ID              string          `json:"id,omitempty"`
+	Target          string          `json:"target,omitempty"`
+	Verb            string          `json:"verb,omitempty"`
+	ThrottlingLimit ThrottlingLimit `json:"throttlingLimit,omitempty"`
 }
 
 // ThrottlingLimit details

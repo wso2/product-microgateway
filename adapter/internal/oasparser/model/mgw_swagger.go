@@ -1224,14 +1224,16 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
 
-	if data.APIThrottlingPolicy != "" || data.ThrottlingLimit.Unit != "" {
-		logger.LoggerOasparser.Debugf("API level throttling limit found. Request count: %v, Unit: %v",
-			data.ThrottlingLimit.RequestCount, data.ThrottlingLimit.Unit)
-		swagger.RateLimitLevel = "API"
-		swagger.RateLimitPolicy = GetRLPolicyName(data.ThrottlingLimit.RequestCount, data.ThrottlingLimit.Unit)
-	} else if data.APIType == HTTP {
-		logger.LoggerOasparser.Debugf("Operation level Throttling limit found.")
-		swagger.RateLimitLevel = "OPERATION"
+	if data.APIType != WS {
+		if data.ThrottlingLimit.Unit != "" {
+			logger.LoggerOasparser.Debugf("API level throttling limit found. Request count: %v, Unit: %v",
+				data.ThrottlingLimit.RequestCount, data.ThrottlingLimit.Unit)
+			swagger.RateLimitLevel = "API"
+			swagger.RateLimitPolicy = GetRLPolicyName(data.ThrottlingLimit.RequestCount, data.ThrottlingLimit.Unit)
+		} else {
+			logger.LoggerOasparser.Debugf("Operation level Throttling limit found.")
+			swagger.RateLimitLevel = "OPERATION"
+		}
 	}
 
 	if endpointConfig.ImplementationStatus == prototypedAPI {

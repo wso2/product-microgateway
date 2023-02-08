@@ -24,6 +24,8 @@ import (
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // VerifyMandatoryFields check and pupulates the mandatory fields if null
@@ -83,7 +85,7 @@ func ExtractAPIRateLimitPolicies(apiProject *ProjectAPI, parsedAPIYaml APIYaml) 
 	apiYamlFromProject := apiProject.APIYaml.Data
 
 	policyMap := map[string]*APIRateLimitPolicy{}
-	if apiYamlFromProject.ThrottlingLimit.RequestCount > 0 {
+	if apiYamlFromProject.ThrottlingLimit.Unit != "" {
 		throttlingLimit := apiYamlFromProject.ThrottlingLimit
 		rlPolicy := getRateLimitPolicy(throttlingLimit)
 		policyMap[rlPolicy.PolicyName] = &rlPolicy
@@ -119,7 +121,8 @@ func getRateLimitPolicy(throttlingLimit ThrottlingLimit) APIRateLimitPolicy {
 
 // GetRLPolicyName from throttlingLimit fields
 func GetRLPolicyName(requestCount int, unit string) string {
-	return strconv.Itoa(requestCount) + "Per" + strings.Title(strings.ToLower(unit))
+	caser := cases.Title(language.English)
+	return strconv.Itoa(requestCount) + "Per" + caser.String(strings.ToLower(unit))
 }
 
 // PopulateEndpointsInfo this will map sandbox and prod endpoint
