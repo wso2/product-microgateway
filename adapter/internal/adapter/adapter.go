@@ -334,7 +334,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	// Get API details.
 	if apiUUIDList == nil {
-		if conf.ControlPlane.DynamicEnvironmentSupport {
+		if conf.ControlPlane.DynamicEnvironments.Enabled {
 			queryParamMap = common.PopulateQueryParamForDataPlaneID(queryParamMap)
 			adapter.GetAPIs(c, nil, envs, sync.RetrieveRuntimeArtifactEndpoint, true, nil, queryParamMap)
 		} else {

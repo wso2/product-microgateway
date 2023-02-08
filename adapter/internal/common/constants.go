@@ -48,6 +48,6 @@ func PopulateQueryParamForDataPlaneID(queryParamMap map[string]string) map[strin
 		queryParamMap = make(map[string]string)
 	}
 	conf, _ := config.ReadConfigs()
-	queryParamMap[dataPlaneID] = conf.ControlPlane.DataPlaneID
+	queryParamMap[dataPlaneID] = conf.ControlPlane.DynamicEnvironments.DataPlaneID
 	return queryParamMap
 }
