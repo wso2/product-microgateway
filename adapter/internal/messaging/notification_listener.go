@@ -149,7 +149,9 @@ func handleKeyManagerEvents(data []byte) {
 		return
 	}
 	for i := range xds.KeyManagerList {
-		if strings.EqualFold(keyManagerEvent.Name, xds.KeyManagerList[i].Name) && strings.EqualFold(keyManagerEvent.Organization, xds.KeyManagerList[i].Organization) {
+		if strings.EqualFold(keyManagerEvent.Name, xds.KeyManagerList[i].Name) &&
+			strings.EqualFold(keyManagerEvent.Organization, xds.KeyManagerList[i].Organization) {
+
 			isFound = true
 			indexOfKeymanager = i
 			break
