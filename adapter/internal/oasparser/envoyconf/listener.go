@@ -35,6 +35,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // CreateRoutesConfigForRds generates the default RouteConfiguration.
@@ -131,7 +132,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		}
 	}
 
-	pbst, err := ptypes.MarshalAny(manager)
+	pbst, err := anypb.New(manager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
 	}
@@ -205,7 +206,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			}
 		}
 
-		marshalledTLSFilter, err := ptypes.MarshalAny(tlsFilter)
+		marshalledTLSFilter, err := anypb.New(tlsFilter)
 		if err != nil {
 			logger.LoggerOasparser.Fatal("Error while Marshalling the downstream TLS Context for the configuration.")
 		}
@@ -279,7 +280,7 @@ func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*rou
 	return virtualHosts
 }
 
-//TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
+// TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
 func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (*tlsv3.Secret, error) {
 	var secret tlsv3.Secret
 	tlsCert := generateTLSCert(privateKeyPath, pulicKeyPath)
@@ -330,7 +331,7 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 		CollectorEndpointVersion: envoy_config_trace_v3.ZipkinConfig_HTTP_JSON,
 	}
 
-	typedConf, err := ptypes.MarshalAny(providerConf)
+	typedConf, err := anypb.New(providerConf)
 	if err != nil {
 		return nil, err
 	}

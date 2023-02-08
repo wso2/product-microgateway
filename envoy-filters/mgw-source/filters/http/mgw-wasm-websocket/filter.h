@@ -10,6 +10,7 @@
 #define X_REQUEST_ID "x-request-id"
 #define INITIAL_APIM_ERROR_CODE "initialAPIMErrorCode"
 #define THROTTLE_CONDITION_EXPIRE_TIMESTAMP "ThrottleConditionExpireTimestamp"
+#define EXT_AUTHZ_DURATION "ext_authz_duration"
 
 #define STATUS_HEADER ":status"
 #define STATUS_101 "101"

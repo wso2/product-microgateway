@@ -35,6 +35,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
@@ -885,9 +886,12 @@ end`
 		Value:   luaMarshelled.Bytes(),
 	}
 
+	corsFilter, _ := anypb.New(corsPolicy)
+
 	perRouteFilterConfigs := map[string]*any.Any{
 		wellknown.HTTPExternalAuthorization: extAuthzFilter,
 		wellknown.Lua:                       luaFilter,
+		wellknown.CORS:                      corsFilter,
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
@@ -1009,8 +1013,8 @@ end`
 				metadataValue := operation.GetMethod() + "_to_" + newMethod
 				match2.DynamicMetadata = generateMetadataMatcherForInternalRoutes(metadataValue)
 
-				action1 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
-				action2 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
+				action1 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
+				action2 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
 
 				// Create route1 for current method.
 				// Do not add policies to route config. Send via enforcer
@@ -1033,7 +1037,7 @@ end`
 			} else {
 				logger.LoggerOasparser.Debug("Creating routes for resource with policies", resourcePath, operation.GetMethod())
 				// create route for current method. Add policies to route config. Send via enforcer
-				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
+				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
 				match := generateRouteMatch(routePath)
 				match.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
 				match.DynamicMetadata = generateMetadataMatcherForExternalRoutes()
@@ -1057,7 +1061,7 @@ end`
 		}
 		match := generateRouteMatch(routePath)
 		match.Headers = generateHTTPMethodMatcher(methodRegex, params.isSandbox, sandClusterName)
-		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy)
+		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
 		action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 
 		route := generateRouteConfig(xWso2Basepath, match, action, nil, decorator, perRouteFilterConfigs,
@@ -1436,7 +1440,7 @@ func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 	return upgradeConfig
 }
 
-func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
+func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 
 	if corsConfig == nil || !corsConfig.Enabled {
 		return nil
@@ -1452,11 +1456,6 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		regexMatcher := &envoy_type_matcherv3.StringMatcher{
 			MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
 				SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-							MaxProgramSize: nil,
-						},
-					},
 					Regex: formattedString,
 				},
 			},
@@ -1464,7 +1463,7 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		stringMatcherArray = append(stringMatcherArray, regexMatcher)
 	}
 
-	corsPolicy := &routev3.CorsPolicy{
+	corsPolicy := &cors_filter_v3.CorsPolicy{
 		AllowCredentials: &wrapperspb.BoolValue{
 			Value: corsConfig.AccessControlAllowCredentials,
 		},

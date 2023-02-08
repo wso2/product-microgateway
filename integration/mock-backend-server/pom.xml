@@ -21,7 +21,7 @@
     <parent>
         <artifactId>integration</artifactId>
         <groupId>org.wso2.choreo.connect</groupId>
-        <version>1.2.0-m2-SNAPSHOT</version>
+        <version>1.2.0-beta-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

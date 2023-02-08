@@ -30,9 +30,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /pet/:
+  /echo-full:
     x-wso2-disable-security: true
-    get:
+    post:
       summary: Finds Pet
       operationId: findPets
       tags:
@@ -50,8 +50,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /store/inventory:
-    get:
+  /echo:
+    post:
       summary: Finds Pets by inventory
       operationId: findPetsByInventory
       x-wso2-disable-security: true
