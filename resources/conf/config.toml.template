@@ -351,6 +351,8 @@ enabled = true
   jwksRatelimitQuota = 1000
   # JWKS Endpoint rate limiting time window
   jwksRatelimitTimeWindowInSeconds = 10
+  # Whether to use kid or x5t parameter to identify JWT verification key
+  useKidProperty = true
   # Key-Certificate pairs used for JWT Generation. Multiple Certificates could be added to generate multiple JWK
   # Entries. This is to do certificate rotation.
   [[enforcer.jwtGenerator.keypair]]
