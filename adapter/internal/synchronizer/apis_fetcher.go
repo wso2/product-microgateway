@@ -27,6 +27,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -114,13 +115,46 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
-			deploymentList = append(deploymentList, deployedRevisionList...)
+			deploymentList = append(deploymentList, MergeDeployedRevisionList(deployedRevisionList)...)
 		}
 	}
 	notifier.SendRevisionUpdate(deploymentList)
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(deploymentList))
 	// Error nil for successful execution
 	return nil
+}
+
+// MergeDeployedRevisionList merge the deployment information by revision
+func MergeDeployedRevisionList(deployedRevisionList []*notifier.DeployedAPIRevision) []*notifier.DeployedAPIRevision { // Combine env info of same revision id
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		// This has to be error. For debugging purpose info
+		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+	}
+	revisionDeploymentMap := map[string]*notifier.DeployedAPIRevision{}
+	for _, revision := range deployedRevisionList {
+		var updatedEnvInfo []notifier.DeployedEnvInfo
+		for _, env := range revision.EnvInfo {
+			if env.VHost == conf.Adapter.SandboxVhost {
+				env.Name = conf.Adapter.SandboxEnvName
+			}
+			updatedEnvInfo = append(updatedEnvInfo, env)
+		}
+		revision.EnvInfo = updatedEnvInfo
+		mapKey := revision.APIID + strconv.Itoa(revision.RevisionID)
+		revisionDeployment, exists := revisionDeploymentMap[mapKey]
+		if exists {
+			revisionDeployment.EnvInfo = append(revisionDeployment.EnvInfo, revision.EnvInfo...)
+			revisionDeploymentMap[mapKey] = revisionDeployment
+		} else {
+			revisionDeploymentMap[mapKey] = revision
+		}
+	}
+	var deploymentList []*notifier.DeployedAPIRevision
+	for _, revision := range revisionDeploymentMap {
+		deploymentList = append(deploymentList, revision)
+	}
+	return deploymentList
 }
 
 // FetchAPIsFromControlPlane method pulls API data for a given APIs according to a

@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Analytics Data Provider of Microgateway
+ * Analytics Data Provider of Microgateway.
  */
 public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     private static final Logger logger = LogManager.getLogger(APIFactory.class);
@@ -113,6 +113,7 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiVersion(getValueAsString(fieldsMap, MetadataConstants.API_VERSION_KEY));
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));
         api.setOrganizationId(getValueAsString(fieldsMap, MetadataConstants.API_ORGANIZATION_ID));
+        api.setApiContext(getValueAsString(fieldsMap, MetadataConstants.API_CONTEXT_KEY));
 
         return api;
     }
@@ -209,6 +210,12 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public String getUserAgentHeader() {
         return logEntry.getRequest().getUserAgent();
+    }
+
+    @Override
+    public String getUserName() {
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
+        return getValueAsString(fieldsMap, MetadataConstants.API_USER_NAME_KEY);
     }
 
     @Override

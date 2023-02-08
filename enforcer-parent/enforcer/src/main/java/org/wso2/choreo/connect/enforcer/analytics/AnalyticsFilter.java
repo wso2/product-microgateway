@@ -146,6 +146,12 @@ public class AnalyticsFilter {
 
             requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
                     requestContext.getMatchedAPI().getOrganizationId());
+            // Adding UserName and the APIContext
+            String endUserName = requestContext.getAuthenticationContext().getUsername();
+            requestContext.addMetadataToMap(MetadataConstants.API_USER_NAME_KEY,
+                    endUserName == null ? APIConstants.END_USER_UNKNOWN : endUserName);
+            requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
+                    requestContext.getMatchedAPI().getBasePath());
         } finally {
             if (Utils.tracingEnabled()) {
                 analyticsSpanScope.close();
