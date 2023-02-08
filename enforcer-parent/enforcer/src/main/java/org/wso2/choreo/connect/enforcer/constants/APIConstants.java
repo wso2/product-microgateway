@@ -264,7 +264,7 @@ public class APIConstants {
         public static class KeyManagerEvent {
 
             public static final String EVENT_TYPE = "event_type";
-            public static final String KEY_MANAGER_CONFIGURATION = "key_manager_configuration";
+            public static final String KEY_MANAGER_CONFIGURATION = "KEY_MANAGER_CONFIGURATION";
             public static final String ACTION = "action";
             public static final String NAME = "name";
             public static final String ENABLED = "enabled";

@@ -340,7 +340,7 @@ func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
 	configuration := string(configList)
 	if err == nil {
 		newKeyManager := &keymgt.KeyManagerConfig{
-			Name:          keyManager.Name,
+			Name:          keyManager.Organization + "_" + keyManager.Name,
 			Type:          keyManager.Type,
 			Enabled:       keyManager.Enabled,
 			TenantDomain:  keyManager.TenantDomain,
