@@ -53,6 +53,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	router := getRouterHTTPFilter()
 	lua := getLuaFilter()
 	cors := getCorsHTTPFilter()
+	localRateLimit := getHTTPLocalRateLimitFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
