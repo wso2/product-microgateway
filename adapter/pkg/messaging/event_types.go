@@ -104,25 +104,22 @@ type Event struct {
 
 // APIEvent for struct API events
 type APIEvent struct {
-	APIID               int                        `json:"apiId"`
-	UUID                string                     `json:"uuid"`
-	GatewayLabels       []string                   `json:"gatewayLabels"`
-	EnvToDataPlaneIDMap GatewayEnvToDataPlaneIDMap `json:"envToDataPlaneIdMap"`
-	APIVersion          string                     `json:"apiVersion"`
-	APIContext          string                     `json:"apiContext"`
-	APIName             string                     `json:"apiName"`
-	APIProvider         string                     `json:"apiProvider"`
-	APIStatus           string                     `json:"apiStatus"`
-	APIType             string                     `json:"apiType"`
+	APIID               int               `json:"apiId"`
+	UUID                string            `json:"uuid"`
+	GatewayLabels       []string          `json:"gatewayLabels"`
+	EnvToDataPlaneIDMap map[string]string `json:"envToDataPlaneIdMap"`
+	APIVersion          string            `json:"apiVersion"`
+	APIContext          string            `json:"apiContext"`
+	APIName             string            `json:"apiName"`
+	APIProvider         string            `json:"apiProvider"`
+	APIStatus           string            `json:"apiStatus"`
+	APIType             string            `json:"apiType"`
 	Event
 	// TODO: (VirajSalaka) Remove this when the event is fixed from APIM side
 	Version string `json:"version"`
 	Context string `json:"context"`
 	Name    string `json:"name"`
 }
-
-// GatewayEnvToDataPlaneIDMap is used to represent gateway environment to data-plane ID mapping in APIEvent
-type GatewayEnvToDataPlaneIDMap map[string]string
 
 // ApplicationRegistrationEvent for struct application registration events
 type ApplicationRegistrationEvent struct {
