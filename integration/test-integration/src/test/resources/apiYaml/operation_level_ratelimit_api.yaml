@@ -5,7 +5,6 @@ data:
   name: operationLevelRateLimit
   context: /v2/operationLevelRL
   version: 1.0.0
-  rateLimitLevel: OPERATION
   provider: admin
   lifeCycleStatus: PUBLISHED
   responseCachingEnabled: false
@@ -77,7 +76,9 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: 3PerMin
+      throttlingLimit:
+        requestCount: 3
+        unit: MINUTE
       operationPolicies:
         request: []
         response: []
@@ -89,7 +90,9 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      rateLimitPolicy: 5PerMin
+      throttlingLimit:
+        requestCount: 3
+        unit: MINUTE
       operationPolicies:
         request: []
         response: []
@@ -101,6 +104,9 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
+      throttlingLimit:
+        requestCount: -1
+        unit: MINUTE
       operationPolicies:
         request: []
         response: []
@@ -112,6 +118,9 @@ data:
       authType: Application & Application User
       scopes: []
       usedProductIds: []
+      throttlingLimit:
+        requestCount: -1
+        unit: MINUTE
       operationPolicies:
         request: []
         response: []

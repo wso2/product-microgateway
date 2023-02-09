@@ -127,20 +127,20 @@ type EndpointCertificate struct {
 type APIYaml struct {
 	ApimMeta
 	Data struct {
-		ID                         string   `json:"Id,omitempty"`
-		Name                       string   `json:"name,omitempty"`
-		Context                    string   `json:"context,omitempty"`
-		Version                    string   `json:"version,omitempty"`
-		RevisionID                 int      `json:"revisionId,omitempty"`
-		APIType                    string   `json:"type,omitempty"`
-		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
-		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
-		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
-		SecurityScheme             []string `json:"securityScheme,omitempty"`
-		OrganizationID             string   `json:"organizationId,omitempty"`
-		Provider                   string   `json:"provider,omitempty"`
-		RateLimitLevel             string   `json:"rateLimitLevel,omitempty"`
-		RateLimitPolicy            string   `json:"rateLimitPolicy,omitempty"`
+		ID                         string          `json:"Id,omitempty"`
+		Name                       string          `json:"name,omitempty"`
+		Context                    string          `json:"context,omitempty"`
+		Version                    string          `json:"version,omitempty"`
+		RevisionID                 int             `json:"revisionId,omitempty"`
+		APIType                    string          `json:"type,omitempty"`
+		LifeCycleStatus            string          `json:"lifeCycleStatus,omitempty"`
+		EndpointImplementationType string          `json:"endpointImplementationType,omitempty"`
+		AuthorizationHeader        string          `json:"authorizationHeader,omitempty"`
+		SecurityScheme             []string        `json:"securityScheme,omitempty"`
+		OrganizationID             string          `json:"organizationId,omitempty"`
+		Provider                   string          `json:"provider,omitempty"`
+		RateLimitPolicy            string          `json:"rateLimitPolicy,omitempty"`
+		ThrottlingLimit            ThrottlingLimit `json:"throttlingLimit,omitempty"`
 		EndpointConfig             struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
@@ -161,10 +161,16 @@ type APIYaml struct {
 
 // OperationYaml holds attributes of APIM operations
 type OperationYaml struct {
-	ID              string `json:"id,omitempty"`
-	Target          string `json:"target,omitempty"`
-	Verb            string `json:"verb,omitempty"`
-	RateLimitPolicy string `json:"rateLimitPolicy,omitempty"`
+	ID              string          `json:"id,omitempty"`
+	Target          string          `json:"target,omitempty"`
+	Verb            string          `json:"verb,omitempty"`
+	ThrottlingLimit ThrottlingLimit `json:"throttlingLimit,omitempty"`
+}
+
+// ThrottlingLimit details
+type ThrottlingLimit struct {
+	RequestCount int    `json:"requestCount,omitempty"`
+	Unit         string `json:"unit,omitempty"`
 }
 
 // APIRateLimitPolicy holds policy details relevant to the rate limiting
@@ -296,27 +302,10 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.APIYaml = apiYaml
 		ExtractAPIInformation(apiProject, apiYaml)
-	} else if strings.Contains(fileName, rateLimitPoliciesFile) {
-		loggers.LoggerAPI.Debugf("fileName : %v available for the API project.", fileName)
-		rlPoliciesJsn, conversionErr := utills.ToJSON(fileContent)
-		if conversionErr != nil {
-			loggers.LoggerAPI.Errorf("Error occured rate limit policies file to json. Error: %s", conversionErr.Error())
-			return conversionErr
+		conf, _ := config.ReadConfigs()
+		if conf.Envoy.RateLimit.Enabled {
+			ExtractAPIRateLimitPolicies(apiProject, apiYaml)
 		}
-		var rlPolicies RateLimitPolicy
-		err := json.Unmarshal(rlPoliciesJsn, &rlPolicies)
-		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while parsing rate-limit-policies.yaml. Error: %s", err.Error())
-			return err
-		}
-
-		policyMap := map[string]*APIRateLimitPolicy{}
-		for i := 0; i < len(rlPolicies.Data.APIRateLimitPolicies); i++ {
-			p := rlPolicies.Data.APIRateLimitPolicies[i]
-			policyMap[p.PolicyName] = &p
-		}
-		loggers.LoggerAPI.Debugf("Number of Rate Limit policies received: %v", len(policyMap))
-		apiProject.RateLimitPolicies = policyMap
 	}
 	return nil
 }
