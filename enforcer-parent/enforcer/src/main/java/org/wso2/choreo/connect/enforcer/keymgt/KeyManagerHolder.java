@@ -50,7 +50,7 @@ import java.util.Map;
  */
 public class KeyManagerHolder {
 
-    private static final Logger logger = LogManager.getLogger(ConfigHolder.class);
+    private static final Logger logger = LogManager.getLogger(KeyManagerHolder.class);
 
     private static final String X509 = "X.509";
     private static KeyManagerHolder instance;

@@ -163,6 +163,7 @@ type KeyManager struct {
 	Type          string `json:"type"`
 	Enabled       bool   `json:"enabled"`
 	TenantDomain  string `json:"tenantDomain,omitempty"`
+	Organization  string `json:"organization,omitempty"`
 	Configuration map[string]interface{}
 	// Configuration KeyManagerConfig `json:"configuration"`
 }
