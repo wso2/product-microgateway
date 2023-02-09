@@ -33,6 +33,7 @@ const (
 	httpConManagerStartPrefix  string = "ingress_http"
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
+	corsFilterName             string = "type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"
@@ -137,4 +138,10 @@ const (
 // metadata keys
 const (
 	methodRewrite = "method-rewrite"
+)
+
+// Enforcer
+const (
+	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
+	uaexCode                   = "UAEX"
 )

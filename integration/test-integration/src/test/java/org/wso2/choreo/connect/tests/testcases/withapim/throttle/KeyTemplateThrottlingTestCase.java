@@ -29,11 +29,14 @@ import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
+import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
+import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,10 +51,11 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
     private String apiId;
     private String applicationId;
     private String endpointURL;
+    private String subClaim;
     private final long limitNoThrottle = 20L;
     private final long limit5Req = 5L;
     private final static String keyTemplate = "$userId:$apiContext:$apiVersion:$customProperty.fooKey";
-    private final static String siddhiQuery = "FROM\n" +
+    private String siddhiQuery = "FROM\n" +
             "  RequestStream\n" +
             "SELECT\n" +
             "  userId,\n" +
@@ -94,6 +98,8 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders.put(TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER, TestConstant.ENABLE_ENFORCER_CUSTOM_FILTER);
 
+        SignedJWTInfo signedJWTInfo = JWTUtils.getSignedJwt(accessToken);
+        subClaim = signedJWTInfo.getJwtClaimsSet().getSubject();
         endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
@@ -115,6 +121,7 @@ public class KeyTemplateThrottlingTestCase extends ThrottlingBaseTestCase{
                 "Request was throttled unexpectedly in Unlimited API tier");
 
         // Create custom throttle policy using key templates
+        siddhiQuery = siddhiQuery.replace("admin", subClaim);
         CustomRuleDTO customRuleDTO = DtoFactory.createCustomThrottlePolicyDTO(customThrottlePolicyName,
                 "Custom throttle policy to throttle requests based on custom properties",
                 true, siddhiQuery, keyTemplate);

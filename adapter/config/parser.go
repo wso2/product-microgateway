@@ -46,8 +46,8 @@ var (
 const DefaultGatewayName = "Default"
 
 // DefaultGatewayVHost represents the default vhost of default gateway environment if it is not configured
+// For /testtoken and /health check, if user not configured default env, we have no vhost
 const DefaultGatewayVHost = "localhost"
-// for /testtoken and /health check, if user not configured default env, we have no vhost
 
 const (
 	// The environtmental variable which represents the path of the distribution in host machine.

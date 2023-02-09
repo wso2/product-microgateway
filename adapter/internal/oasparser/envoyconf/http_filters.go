@@ -24,6 +24,7 @@ import (
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
@@ -32,6 +33,7 @@ import (
 	wasmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/wasm/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	//rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/proto"
@@ -49,10 +51,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
 	router := getRouterHTTPFilter()
 	lua := getLuaFilter()
-	cors := &hcmv3.HttpFilter{
-		Name:       wellknown.CORS,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
-	}
+	cors := getCorsHTTPFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
@@ -90,7 +89,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 		RespectExpectedRqTimeout: false,
 	}
 
-	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
+	routeFilterTypedConf, err := anypb.New(&routeFilterConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
 	}
@@ -101,12 +100,28 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 	return &filter
 }
 
+// getCorsHTTPFilter gets cors http filter.
+func getCorsHTTPFilter() *hcmv3.HttpFilter {
+
+	corsFilterConf := cors_filter_v3.CorsPolicy{}
+	corsFilterTypedConf, err := anypb.New(&corsFilterConf)
+
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marshaling cors filter configs. ", err)
+	}
+
+	filter := hcmv3.HttpFilter{
+		Name:       wellknown.CORS,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: corsFilterTypedConf},
+	}
+
+	return &filter
+}
+
 // UpgradeFilters that are applied in websocket upgrade mode
 func getUpgradeFilters() []*hcmv3.HttpFilter {
-	cors := &hcmv3.HttpFilter{
-		Name:       wellknown.CORS,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
-	}
+
+	cors := getCorsHTTPFilter()
 	extAauth := getExtAuthzHTTPFilter()
 	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
 	router := getRouterHTTPFilter()
@@ -150,7 +165,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
 	}
 
-	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
+	ext, err2 := anypb.New(extAuthzConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
@@ -165,14 +180,18 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 
 // getLuaFilter gets Lua http filter.
 func getLuaFilter() *hcmv3.HttpFilter {
-	//conf, _ := config.ReadConfigs()
+
 	luaConfig := &luav3.Lua{
-		InlineCode: "function envoy_on_request(request_handle)" +
-			"\nend" +
-			"\nfunction envoy_on_response(response_handle)" +
-			"\nend",
+		DefaultSourceCode: &corev3.DataSource{
+			Specifier: &corev3.DataSource_InlineString{
+				InlineString: "function envoy_on_request(request_handle)" +
+					"\nend" +
+					"\nfunction envoy_on_response(response_handle)" +
+					"\nend",
+			},
+		},
 	}
-	ext, err2 := ptypes.MarshalAny(luaConfig)
+	ext, err2 := anypb.New(luaConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
