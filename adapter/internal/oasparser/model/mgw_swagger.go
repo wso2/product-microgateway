@@ -1231,7 +1231,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			swagger.RateLimitLevel = "API"
 			swagger.RateLimitPolicy = GetRLPolicyName(data.ThrottlingLimit.RequestCount, data.ThrottlingLimit.Unit)
 		} else {
-			logger.LoggerOasparser.Debugf("Operation level Throttling limit found.")
+			logger.LoggerOasparser.Debug("API level throttling limit not found. Setting throttling policy level as 'Operation Level'")
 			swagger.RateLimitLevel = "OPERATION"
 		}
 	}
