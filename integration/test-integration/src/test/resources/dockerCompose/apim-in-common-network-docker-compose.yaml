@@ -4,7 +4,7 @@ networks:
     name: apim_and_cc
 services:
   apim:
-    image: wso2am/wso2am:4.2.0-alpha-alpine
+    image: wso2am/wso2am:4.2.0-beta-alpine
     user: root
     ports:
       - "9764:9764"

@@ -30,6 +30,8 @@ public class MetadataConstants {
     public static final String API_NAME_KEY = WSO2_METADATA_PREFIX + "api-name";
     public static final String API_VERSION_KEY = WSO2_METADATA_PREFIX + "api-version";
     public static final String API_TYPE_KEY = WSO2_METADATA_PREFIX + "api-type";
+    public static final String API_USER_NAME_KEY = WSO2_METADATA_PREFIX + "username";
+    public static final String API_CONTEXT_KEY = WSO2_METADATA_PREFIX + "api-context";
     public static final String IS_MOCK_API = WSO2_METADATA_PREFIX + "is-mock-api";
     public static final String API_CREATOR_TENANT_DOMAIN_KEY = WSO2_METADATA_PREFIX + "api-creator-tenant-domain";
     public static final String API_ORGANIZATION_ID = WSO2_METADATA_PREFIX + "api-organization-id";
