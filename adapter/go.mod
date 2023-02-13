@@ -26,6 +26,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/net v0.4.0
+	golang.org/x/text v0.5.0
 	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6
 	google.golang.org/grpc v1.52.0
 	google.golang.org/protobuf v1.28.1
@@ -61,5 +62,5 @@ require (
 	go.mongodb.org/mongo-driver v1.7.5 // indirect
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88 // indirect
 	golang.org/x/sys v0.3.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
