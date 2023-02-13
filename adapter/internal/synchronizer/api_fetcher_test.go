@@ -64,8 +64,8 @@ func TestMergeDeployedRevisionList(t *testing.T) {
 			},
 		},
 	}
-	expectedOutput := []*notifier.DeployedAPIRevision{
-		{
+	expectedOutput := map[string]*notifier.DeployedAPIRevision{
+		"63c8bf26dbe45c52fe7ed1cf": {
 			APIID:      "63c8bf26dbe45c52fe7ed1cf",
 			RevisionID: 2,
 			EnvInfo: []notifier.DeployedEnvInfo{
@@ -79,7 +79,7 @@ func TestMergeDeployedRevisionList(t *testing.T) {
 				},
 			},
 		},
-		{
+		"63c8bf26dbe45c52fe7ed1c3": {
 			APIID:      "63c8bf26dbe45c52fe7ed1c3",
 			RevisionID: 2,
 			EnvInfo: []notifier.DeployedEnvInfo{
@@ -91,6 +91,16 @@ func TestMergeDeployedRevisionList(t *testing.T) {
 		},
 	}
 	deploymentList := MergeDeployedRevisionList(input)
-	isMatch := reflect.DeepEqual(expectedOutput, deploymentList)
-	assert.Equal(t, true, isMatch, "Processing deployed revision list failed")
+
+	if len(deploymentList) != 2 {
+		t.Errorf("Expected length of deployment list is 2, but got %d", len(deploymentList))
+	}
+
+	for _, deploymentListItem := range deploymentList {
+		assert.NotNil(t, expectedOutput[deploymentListItem.APIID], "APIID not found in expected output")
+		assert.Equal(t, expectedOutput[deploymentListItem.APIID].APIID, deploymentListItem.APIID, "APIID mismatch")
+		assert.Equal(t, expectedOutput[deploymentListItem.APIID].RevisionID, deploymentListItem.RevisionID, "RevisionID mismatch")
+		assert.Equal(t, len(expectedOutput[deploymentListItem.APIID].EnvInfo), len(deploymentListItem.EnvInfo), "EnvInfo length mismatch")
+		assert.Equal(t, reflect.DeepEqual(expectedOutput[deploymentListItem.APIID].EnvInfo, deploymentListItem.EnvInfo), true, "EnvInfo mismatch")
+	}
 }
