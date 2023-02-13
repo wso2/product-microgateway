@@ -104,15 +104,16 @@ type Event struct {
 
 // APIEvent for struct API events
 type APIEvent struct {
-	APIID         int      `json:"apiId"`
-	UUID          string   `json:"uuid"`
-	GatewayLabels []string `json:"gatewayLabels"`
-	APIVersion    string   `json:"apiVersion"`
-	APIContext    string   `json:"apiContext"`
-	APIName       string   `json:"apiName"`
-	APIProvider   string   `json:"apiProvider"`
-	APIStatus     string   `json:"apiStatus"`
-	APIType       string   `json:"apiType"`
+	APIID               int               `json:"apiId"`
+	UUID                string            `json:"uuid"`
+	GatewayLabels       []string          `json:"gatewayLabels"`
+	EnvToDataPlaneIDMap map[string]string `json:"envToDataPlaneIdMap"`
+	APIVersion          string            `json:"apiVersion"`
+	APIContext          string            `json:"apiContext"`
+	APIName             string            `json:"apiName"`
+	APIProvider         string            `json:"apiProvider"`
+	APIStatus           string            `json:"apiStatus"`
+	APIType             string            `json:"apiType"`
 	Event
 	// TODO: (VirajSalaka) Remove this when the event is fixed from APIM side
 	Version string `json:"version"`

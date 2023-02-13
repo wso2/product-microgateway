@@ -230,7 +230,7 @@ func handleAPIEvents(data []byte, eventType string) {
 
 	// Per each revision, synchronization should happen.
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
-		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
+		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels, apiEvent.EnvToDataPlaneIDMap)
 	}
 
 	for _, env := range apiEvent.GatewayLabels {

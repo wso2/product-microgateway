@@ -461,11 +461,17 @@ type controlPlane struct {
 	SyncApisOnStartUp          bool
 	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
+	DynamicEnvironments        dynamicEnvironments
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
 	BrokerConnectionParameters brokerConnectionParameters
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
+}
+
+type dynamicEnvironments struct {
+	Enabled     bool
+	DataPlaneID string
 }
 
 type requestWorkerPool struct {

@@ -160,7 +160,7 @@ func MergeDeployedRevisionList(deployedRevisionList []*notifier.DeployedAPIRevis
 // given API ID and a list of environments that API has been deployed to.
 // updatedAPIID is the corresponding ID of the API in the form of an UUID
 // updatedEnvs contains the list of environments the API deployed to.
-func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
+func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToDpMap map[string]string) {
 	// Read configurations and derive the eventHub details
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
@@ -168,26 +168,37 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
-	//finalEnvs contains the actual envrionments that the adapter should update
+	//finalEnvs contains the actual environments that the adapter should update
 	var finalEnvs []string
-	if len(configuredEnvs) > 0 {
-		// If the configuration file contains environment list, then check if then check if the
-		// affected environments are present in the provided configs. If so, add that environment
-		// to the finalEnvs slice
-		for _, updatedEnv := range updatedEnvs {
-			for _, configuredEnv := range configuredEnvs {
-				if updatedEnv == configuredEnv {
-					finalEnvs = append(finalEnvs, updatedEnv)
-				}
+
+	// if the dynamic environment support feature enabled, finalEnvs should be the envs in envToDpMap,
+	// whose data plane ID matches with the data Plane ID defined in the gateway configs
+	if conf.ControlPlane.DynamicEnvironments.Enabled {
+		for gwEnv, dpID := range envToDpMap {
+			if strings.EqualFold(conf.ControlPlane.DynamicEnvironments.DataPlaneID, dpID) {
+				finalEnvs = append(finalEnvs, gwEnv)
 			}
 		}
 	} else {
-		// If the labels are not configured, publish the APIS to the default environment
-		finalEnvs = []string{config.DefaultGatewayName}
+		if len(configuredEnvs) > 0 {
+			// If the configuration file contains environment list, then check if then check if the
+			// affected environments are present in the provided configs. If so, add that environment
+			// to the finalEnvs slice
+			for _, updatedEnv := range updatedEnvs {
+				for _, configuredEnv := range configuredEnvs {
+					if updatedEnv == configuredEnv {
+						finalEnvs = append(finalEnvs, updatedEnv)
+					}
+				}
+			}
+		} else {
+			// If the labels are not configured, publish the APIS to the default environment
+			finalEnvs = []string{config.DefaultGatewayName}
+		}
 	}
 
 	if len(finalEnvs) == 0 {
-		// If the finalEnvs is empty -> it means, the configured envrionments  does not contains the affected/updated
+		// If the finalEnvs is empty -> it means, the configured environments  does not contain the affected/updated
 		// environments. If that's the case, then APIs should not be fetched from the adapter.
 		return
 	}
