@@ -33,6 +33,7 @@ const (
 	httpConManagerStartPrefix  string = "ingress_http"
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
+	localRateLimitPerRouteName string = "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
 	corsFilterName             string = "type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
@@ -41,6 +42,15 @@ const (
 	mgwWebSocketWASMFilterRoot string = "mgw_WASM_websocket_root"
 	mgwWebSocketWASM           string = "/home/wso2/wasm/websocket/mgw-websocket.wasm"
 	compressorFilterName       string = "envoy.filters.http.compressor"
+	localRatelimitFilterName   string = "envoy.filters.http.local_ratelimit"
+)
+
+const (
+	localRateLimitStatPrefix        string = "http_local_rate_limiter"
+	jwksRateLimitStatPrefix         string = "jwks_rate_limit"
+	jwksRateLimitEnabledRuntimeKey  string = "jwks_ratelimit_enabled"
+	jwksRateLimitEnforcedRuntimeKey string = "jwks_ratelimit_enforced"
+	jwksPathAtEnforcer              string = "/jwks"
 )
 
 const (

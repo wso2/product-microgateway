@@ -125,6 +125,11 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Keypair.parser(), extensionRegistry));
             break;
           }
+          case 96: {
+
+            useKidProperty_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -472,6 +477,17 @@ private static final long serialVersionUID = 0L;
     return keypairs_.get(index);
   }
 
+  public static final int USE_KID_PROPERTY_FIELD_NUMBER = 12;
+  private boolean useKidProperty_;
+  /**
+   * <code>bool use_kid_property = 12;</code>
+   * @return The useKidProperty.
+   */
+  @java.lang.Override
+  public boolean getUseKidProperty() {
+    return useKidProperty_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -518,6 +534,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < keypairs_.size(); i++) {
       output.writeMessage(11, keypairs_.get(i));
+    }
+    if (useKidProperty_ != false) {
+      output.writeBool(12, useKidProperty_);
     }
     unknownFields.writeTo(output);
   }
@@ -566,6 +585,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(11, keypairs_.get(i));
     }
+    if (useKidProperty_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(12, useKidProperty_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -603,6 +626,8 @@ private static final long serialVersionUID = 0L;
         != other.getTokenTtl()) return false;
     if (!getKeypairsList()
         .equals(other.getKeypairsList())) return false;
+    if (getUseKidProperty()
+        != other.getUseKidProperty()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -641,6 +666,9 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + KEYPAIRS_FIELD_NUMBER;
       hash = (53 * hash) + getKeypairsList().hashCode();
     }
+    hash = (37 * hash) + USE_KID_PROPERTY_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getUseKidProperty());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -805,6 +833,8 @@ private static final long serialVersionUID = 0L;
       } else {
         keypairsBuilder_.clear();
       }
+      useKidProperty_ = false;
+
       return this;
     }
 
@@ -851,6 +881,7 @@ private static final long serialVersionUID = 0L;
       } else {
         result.keypairs_ = keypairsBuilder_.build();
       }
+      result.useKidProperty_ = useKidProperty_;
       onBuilt();
       return result;
     }
@@ -960,6 +991,9 @@ private static final long serialVersionUID = 0L;
             keypairsBuilder_.addAllMessages(other.keypairs_);
           }
         }
+      }
+      if (other.getUseKidProperty() != false) {
+        setUseKidProperty(other.getUseKidProperty());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1809,6 +1843,37 @@ private static final long serialVersionUID = 0L;
         keypairs_ = null;
       }
       return keypairsBuilder_;
+    }
+
+    private boolean useKidProperty_ ;
+    /**
+     * <code>bool use_kid_property = 12;</code>
+     * @return The useKidProperty.
+     */
+    @java.lang.Override
+    public boolean getUseKidProperty() {
+      return useKidProperty_;
+    }
+    /**
+     * <code>bool use_kid_property = 12;</code>
+     * @param value The useKidProperty to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUseKidProperty(boolean value) {
+      
+      useKidProperty_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool use_kid_property = 12;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearUseKidProperty() {
+      
+      useKidProperty_ = false;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
