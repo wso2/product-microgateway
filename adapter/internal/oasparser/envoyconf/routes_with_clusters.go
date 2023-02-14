@@ -1001,7 +1001,7 @@ end`
 				logger.LoggerOasparser.Debug("Creating two routes to support method rewrite for %s %s. New method: %s",
 					resourcePath, operation.GetMethod(), newMethod)
 				match1 := generateRouteMatch(routePath)
-				match1.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
+				match1.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox, sandClusterName)
 				match2 := generateRouteMatch(routePath)
 				match2.Headers = generateHTTPMethodMatcher(newMethod, params.isSandbox, sandClusterName)
 
@@ -1039,7 +1039,7 @@ end`
 				// create route for current method. Add policies to route config. Send via enforcer
 				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
 				match := generateRouteMatch(routePath)
-				match.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
+				match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox, sandClusterName)
 				match.DynamicMetadata = generateMetadataMatcherForExternalRoutes()
 				if pathRewriteConfig != nil {
 					action.Route.RegexRewrite = pathRewriteConfig
@@ -1056,11 +1056,8 @@ end`
 		logger.LoggerOasparser.Debug("Creating routes for resource that has no policies")
 		// No policies defined for the resource. Therefore, create one route for all operations.
 		methodRegex := strings.Join(resourceMethods, "|")
-		if !strings.Contains(methodRegex, "OPTIONS") {
-			methodRegex = methodRegex + "|OPTIONS"
-		}
 		match := generateRouteMatch(routePath)
-		match.Headers = generateHTTPMethodMatcher(methodRegex, params.isSandbox, sandClusterName)
+		match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(methodRegex), params.isSandbox, sandClusterName)
 		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
 		action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 
@@ -1704,4 +1701,11 @@ func createInterceptorResourceClusters(mgwSwagger model.MgwSwagger, interceptorC
 		}
 	}
 	return clusters, endpoints, &operationalReqInterceptors, &operationalRespInterceptorVal
+}
+
+func includeOptionsMethod(methodRegex string) string {
+	if !strings.Contains(methodRegex, "OPTIONS") {
+		return methodRegex + "|OPTIONS"
+	}
+	return methodRegex
 }

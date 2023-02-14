@@ -669,7 +669,7 @@
         <grpc.stub.version>1.45.1</grpc.stub.version>
         <gson.version>2.10.1</gson.version>
         <guava.version>31.1-jre</guava.version>
-        <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
+        <io.fabric8.docker.plugin.version>0.41.0</io.fabric8.docker.plugin.version>
         <io.netty.version>4.1.87.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
         <apache.tomcat.dependency.version>10.1.4</apache.tomcat.dependency.version>
