@@ -1,9 +1,0 @@
-[submodule "envoy-filters/envoy"]
-	path = envoy-filters/envoy
-	url = https://github.com/envoyproxy/envoy.git
-[submodule "rate-limiter/rate-limiter-service"]
-	# This should be removed once the PR https://github.com/envoyproxy/ratelimit/pull/373 is merged to upstream
-	# The branch 'choreo' is protected not to force push or delete https://github.com/renuka-fernando/ratelimit/settings/branches
-	path = rate-limiter/rate-limiter-service
-	url = https://github.com/renuka-fernando/ratelimit.git
-	branch = choreo

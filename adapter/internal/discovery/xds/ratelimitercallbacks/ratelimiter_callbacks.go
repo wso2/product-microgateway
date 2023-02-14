@@ -20,6 +20,7 @@ package ratelimitercallbacks
 import (
 	"context"
 
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds/common"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -45,7 +46,7 @@ func (cb *Callbacks) OnStreamOpen(_ context.Context, id int64, typ string) error
 }
 
 // OnStreamClosed prints debug logs
-func (cb *Callbacks) OnStreamClosed(id int64) {
+func (cb *Callbacks) OnStreamClosed(id int64, node *core.Node) {
 	logger.LoggerRateLimiterXdsCallbacks.Debugf("stream %d closed\n", id)
 }
 
@@ -92,7 +93,7 @@ func (cb *Callbacks) OnDeltaStreamOpen(_ context.Context, id int64, typ string) 
 }
 
 // OnDeltaStreamClosed is unused.
-func (cb *Callbacks) OnDeltaStreamClosed(id int64) {
+func (cb *Callbacks) OnDeltaStreamClosed(id int64, node *core.Node) {
 }
 
 // OnStreamDeltaResponse is unused.

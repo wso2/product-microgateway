@@ -178,7 +178,7 @@ func (s *server) process(stream streamv3.Stream, reqCh <-chan *discovery.Discove
 	defer func() {
 		values.Cancel()
 		if s.callbacks != nil {
-			s.callbacks.OnStreamClosed(streamID)
+			s.callbacks.OnStreamClosed(streamID, &core.Node{})
 		}
 	}()
 
