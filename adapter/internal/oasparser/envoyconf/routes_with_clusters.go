@@ -1001,7 +1001,8 @@ end`
 				logger.LoggerOasparser.Debug("Creating two routes to support method rewrite for %s %s. New method: %s",
 					resourcePath, operation.GetMethod(), newMethod)
 				match1 := generateRouteMatch(routePath)
-				match1.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox, sandClusterName)
+				match1.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox,
+					sandClusterName)
 				match2 := generateRouteMatch(routePath)
 				match2.Headers = generateHTTPMethodMatcher(newMethod, params.isSandbox, sandClusterName)
 
@@ -1018,8 +1019,8 @@ end`
 
 				// Create route1 for current method.
 				// Do not add policies to route config. Send via enforcer
-				route1 := generateRouteConfig(xWso2Basepath+operation.GetMethod(), match1, action1, nil, decorator, perRouteFilterConfigs,
-					nil, nil, nil, nil)
+				route1 := generateRouteConfig(xWso2Basepath+"-"+operation.GetMethod(), match1, action1, nil, decorator,
+					perRouteFilterConfigs, nil, nil, nil, nil)
 
 				// Create route2 for new method.
 				// Add all policies to route config. Do not send via enforcer.
@@ -1029,8 +1030,9 @@ end`
 					action2.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 				}
 				configToSkipEnforcer := generateFilterConfigToSkipEnforcer()
-				route2 := generateRouteConfig(xWso2Basepath, match2, action2, nil, decorator, configToSkipEnforcer,
-					requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd, responseHeadersToRemove)
+				route2 := generateRouteConfig(xWso2Basepath+"-"+metadataValue, match2, action2, nil, decorator,
+					configToSkipEnforcer, requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd,
+					responseHeadersToRemove)
 
 				routes = append(routes, route1)
 				routes = append(routes, route2)
@@ -1039,7 +1041,8 @@ end`
 				// create route for current method. Add policies to route config. Send via enforcer
 				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
 				match := generateRouteMatch(routePath)
-				match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox, sandClusterName)
+				match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox,
+					sandClusterName)
 				match.DynamicMetadata = generateMetadataMatcherForExternalRoutes()
 				if pathRewriteConfig != nil {
 					action.Route.RegexRewrite = pathRewriteConfig
