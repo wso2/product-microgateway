@@ -116,6 +116,43 @@ public class AnalyticsFilter {
         return analyticsFilter;
     }
 
+    public static Map<String, String> getAnalyticsConfigProperties() {
+        return analyticsConfigProperties;
+    }
+
+    public static AnalyticsCustomDataProvider getAnalyticsCustomDataProvider() {
+        return analyticsDataProvider;
+    }
+
+    private static AnalyticsEventPublisher loadAnalyticsPublisher(String className, boolean isChoreoDeployment) {
+
+        // For the choreo deployment, class name need not to be provided.
+        if (StringUtils.isEmpty(className)) {
+            logger.debug("Proceeding with default analytics publisher.");
+            if (isChoreoDeployment) {
+                return new DefaultAnalyticsEventPublisher(AnalyticsConstants.CHOREO_RESPONSE_SCHEMA,
+                        AnalyticsConstants.CHOREO_FAULT_SCHEMA);
+            }
+            return new DefaultAnalyticsEventPublisher();
+        }
+
+        try {
+            Class<AnalyticsEventPublisher> clazz = (Class<AnalyticsEventPublisher>) Class.forName(className);
+            Constructor<AnalyticsEventPublisher> constructor = clazz.getConstructor();
+            AnalyticsEventPublisher publisher = constructor.newInstance();
+            logger.info("Proceeding with the custom analytics publisher implementation: " + className);
+            return publisher;
+        } catch (ClassNotFoundException e) {
+            logger.error("Error while loading the custom analytics publisher class.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5105), e);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+                 | NoSuchMethodException e) {
+            logger.error("Error while generating AnalyticsEventPublisherInstance from the class",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5106), e);
+        }
+        return null;
+    }
+
     public void handleGRPCLogMsg(StreamAccessLogsMessage message) {
         if (publisher != null) {
             publisher.handleGRPCLogMsg(message);
@@ -132,14 +169,6 @@ public class AnalyticsFilter {
             logger.error("Cannot publish the analytics event as analytics publisher is null.",
                     ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5102));
         }
-    }
-
-    public static Map<String, String> getAnalyticsConfigProperties() {
-        return analyticsConfigProperties;
-    }
-
-    public static AnalyticsCustomDataProvider getAnalyticsCustomDataProvider() {
-        return analyticsDataProvider;
     }
 
     public void handleSuccessRequest(RequestContext requestContext) {
@@ -274,35 +303,6 @@ public class AnalyticsFilter {
                 Utils.finishSpan(analyticsSpan);
             }
         }
-    }
-
-    private static AnalyticsEventPublisher loadAnalyticsPublisher(String className, boolean isChoreoDeployment) {
-
-        // For the choreo deployment, class name need not to be provided.
-        if (StringUtils.isEmpty(className)) {
-            logger.debug("Proceeding with default analytics publisher.");
-            if (isChoreoDeployment) {
-                return new DefaultAnalyticsEventPublisher(AnalyticsConstants.CHOREO_RESPONSE_SCHEMA,
-                        AnalyticsConstants.CHOREO_FAULT_SCHEMA);
-            }
-            return new DefaultAnalyticsEventPublisher();
-        }
-
-        try {
-            Class<AnalyticsEventPublisher> clazz = (Class<AnalyticsEventPublisher>) Class.forName(className);
-            Constructor<AnalyticsEventPublisher> constructor = clazz.getConstructor();
-            AnalyticsEventPublisher publisher = constructor.newInstance();
-            logger.info("Proceeding with the custom analytics publisher implementation: " + className);
-            return publisher;
-        } catch (ClassNotFoundException e) {
-            logger.error("Error while loading the custom analytics publisher class.",
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5105), e);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                 | NoSuchMethodException e) {
-            logger.error("Error while generating AnalyticsEventPublisherInstance from the class",
-                    ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5106), e);
-        }
-        return null;
     }
 
     // TODO: (RajithRoshan) Avoid Code duplication and process the map entries while initial env variable based

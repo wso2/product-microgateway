@@ -24,23 +24,21 @@ package org.wso2.choreo.connect.enforcer.analytics;
 public class AnalyticsConstants {
 
     public static final String PUBLISHER_IMPL_CONFIG_KEY = "publisherImpl";
-    protected static final String IS_CHOREO_DEPLOYMENT_CONFIG_KEY = "isChoreoDeployment";
-    protected static final String TYPE_CONFIG_KEY = "type";
-    protected static final String PUBLISHER_REPORTER_CLASS_CONFIG_KEY = "publisher.reporter.class";
     public static final String AUTH_URL_CONFIG_KEY = "authURL";
     public static final String AUTH_TOKEN_CONFIG_KEY = "authToken";
-    
     public static final String MOESIF_MS_USERNAME_CONFIG_KEY = "moesifMSAuthUsername";
     public static final String MOESIF_MS_PWD_CONFIG_KEY = "moesifMSAuthPwd";
     public static final String MOESIF_MS_FQDN_KEY = "moesifProtocolWithFQDN";
     public static final String MOESIF_MS_VERSION_KEY = "moesifMSVersioning";
-    
     public static final String RESPONSE_SCHEMA = "RESPONSE";
     public static final String ERROR_SCHEMA = "ERROR";
+    protected static final String IS_CHOREO_DEPLOYMENT_CONFIG_KEY = "isChoreoDeployment";
+    protected static final String TYPE_CONFIG_KEY = "type";
+    protected static final String PUBLISHER_REPORTER_CLASS_CONFIG_KEY = "publisher.reporter.class";
     protected static final String CHOREO_RESPONSE_SCHEMA = "CHOREO_RESPONSE";
     protected static final String CHOREO_FAULT_SCHEMA = "CHOREO_ERROR";
 
     protected static final String ELK_TYPE = "elk";
-    protected static final String DEFAULT_ELK_PUBLISHER_REPORTER_CLASS 
+    protected static final String DEFAULT_ELK_PUBLISHER_REPORTER_CLASS
             = "org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter";
 }
