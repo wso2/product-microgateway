@@ -31,7 +31,7 @@ public final class JWTGeneratorProto {
       "\n2wso2/discovery/config/enforcer/jwt_gen" +
       "erator.proto\022\036wso2.discovery.config.enfo" +
       "rcer\032,wso2/discovery/config/enforcer/key" +
-      "pair.proto\"\264\002\n\014JWTGenerator\022\016\n\006enable\030\001 " +
+      "pair.proto\"\316\002\n\014JWTGenerator\022\016\n\006enable\030\001 " +
       "\001(\010\022\020\n\010encoding\030\002 \001(\t\022\025\n\rclaim_dialect\030\003" +
       " \001(\t\022\027\n\017convert_dialect\030\004 \001(\010\022\016\n\006header\030" +
       "\005 \001(\t\022\031\n\021signing_algorithm\030\006 \001(\t\022\032\n\022enab" +
@@ -39,11 +39,11 @@ public final class JWTGeneratorProto {
       "r_impl\030\010 \001(\t\022\035\n\025claims_extractor_impl\030\t " +
       "\001(\t\022\021\n\ttoken_ttl\030\n \001(\005\0229\n\010keypairs\030\013 \003(\013" +
       "2\'.wso2.discovery.config.enforcer.Keypai" +
-      "rB\230\001\n1org.wso2.choreo.connect.discovery." +
-      "config.enforcerB\021JWTGeneratorProtoP\001ZNgi" +
-      "thub.com/envoyproxy/go-control-plane/wso" +
-      "2/discovery/config/enforcer;enforcerb\006pr" +
-      "oto3"
+      "r\022\030\n\020use_kid_property\030\014 \001(\010B\230\001\n1org.wso2" +
+      ".choreo.connect.discovery.config.enforce" +
+      "rB\021JWTGeneratorProtoP\001ZNgithub.com/envoy" +
+      "proxy/go-control-plane/wso2/discovery/co" +
+      "nfig/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -55,7 +55,7 @@ public final class JWTGeneratorProto {
     internal_static_wso2_discovery_config_enforcer_JWTGenerator_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_JWTGenerator_descriptor,
-        new java.lang.String[] { "Enable", "Encoding", "ClaimDialect", "ConvertDialect", "Header", "SigningAlgorithm", "EnableUserClaims", "GatewayGeneratorImpl", "ClaimsExtractorImpl", "TokenTtl", "Keypairs", });
+        new java.lang.String[] { "Enable", "Encoding", "ClaimDialect", "ConvertDialect", "Header", "SigningAlgorithm", "EnableUserClaims", "GatewayGeneratorImpl", "ClaimsExtractorImpl", "TokenTtl", "Keypairs", "UseKidProperty", });
     org.wso2.choreo.connect.discovery.config.enforcer.KeyPairProto.getDescriptor();
   }
 

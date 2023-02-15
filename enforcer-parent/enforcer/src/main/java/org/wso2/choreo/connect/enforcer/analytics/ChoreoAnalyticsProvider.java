@@ -117,7 +117,7 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiVersion(getValueAsString(fieldsMap, MetadataConstants.API_VERSION_KEY));
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));
         api.setOrganizationId(getValueAsString(fieldsMap, MetadataConstants.API_ORGANIZATION_ID));
-
+        api.setApiContext(getValueAsString(fieldsMap, MetadataConstants.API_CONTEXT_KEY));
         return api;
     }
 
@@ -230,6 +230,11 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         return this.customProperties;
     }
 
+    @Override
+    public String getUserName() {
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
+        return getValueAsString(fieldsMap, MetadataConstants.API_USER_NAME_KEY);
+    }
 
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
         if (fieldsMap == null || !fieldsMap.containsKey(key)) {

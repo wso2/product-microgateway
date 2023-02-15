@@ -245,4 +245,9 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         }
         return this.customProperties;
     }
+
+    @Override
+    public String getUserName() {
+        return null;
+    }
 }
