@@ -162,7 +162,7 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 signedJWTInfo = JWTUtils.getSignedJwt(jwtToken);
             } catch (ParseException | IllegalArgumentException e) {
-                log.error("Failed to decode the token header. {}", e.getMessage());
+                log.debug("Failed to decode the token header. {}", e.getMessage());
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Not a JWT token. Failed to decode the token header", e);
