@@ -18,20 +18,22 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.apipolicy;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
+import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +46,9 @@ public class APIPolicyPerOperationTestCase {
     private static final String RESPONSE_HEADER_VALUE = "response-header-value";
     private static final String RESPONSE_HEADER_BY_POLICY = "response-header-by-policy"; // All lower case
     private static final String RESPONSE_HEADER_BY_POLICY_VALUE = "Response-Header-By-Policy-value";
+    private static final String ORIGIN_HEADER = "Origin";
+    private static final String ACCESS_CONTROL_REQUEST_HEADERS_HEADER = "Access-Control-Request-Headers";
+    private static final String ACCESS_CONTROL_REQUEST_METHOD_HEADER = "Access-Control-Request-Method";
 
     private String jwtTokenProd;
     private static final String basePath = "/api-policy-per-operation";
@@ -205,6 +210,22 @@ public class APIPolicyPerOperationTestCase {
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/pets/pet890.pets/hello-shops/abcd-shops/shop1234");
         Assert.assertEquals(echoResponse.getData(), "Hello World!");
         assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test CORS Options call when all API Policies together")
+    public void testAllPoliciesTogetherWithOptionsCall() throws MalformedURLException, CCTestException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(ORIGIN_HEADER, "https://wso2am:9443");
+        headers.put(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
+        headers.put(ACCESS_CONTROL_REQUEST_HEADERS_HEADER, "internal-key");
+        HttpResponse httpResponse = HttpsClientRequest.doOptions(
+                Utils.getServiceURLHttps(endpointWithCaptureGroups + queryParams), headers);
+        // CORS is disabled in the config TOML file of the test cases, hence testing the CORS fail scenario.
+        Assert.assertNotNull(httpResponse);
+        Assert.assertEquals(httpResponse.getResponseCode(), HttpStatus.SC_NO_CONTENT);
+        Assert.assertNotNull(httpResponse.getHeaders());
+        Assert.assertNotNull(httpResponse.getHeaders().get("allow"), "HTTP header 'allow' not found for CORS failure request");
+        Assert.assertTrue(httpResponse.getHeaders().get("allow").contains("POST"), "POST value not found in 'allow' header");
     }
 
     @Test(description = "Test HTTP method rewrite and check if query params exists")
