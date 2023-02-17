@@ -284,6 +284,11 @@
                 <version>${swagger.v3.parser.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${swagger.v3.models.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
                 <version>${swagger.models.version}</version>
