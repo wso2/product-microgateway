@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Certificate;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
@@ -43,15 +44,19 @@ import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.graphql.GraphQLPayloadUtils;
 import org.wso2.choreo.connect.enforcer.graphql.GraphQLQueryAnalysisFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
+import org.wso2.choreo.connect.enforcer.security.mtls.MtlsUtils;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -85,6 +90,9 @@ public class GraphQLAPI implements API {
         Map<String, List<String>> securityScopesMap = new HashMap<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
+        Map<String, String> mtlsCertificateTiers = new HashMap<>();
+        String mutualSSL = api.getMutualSSL();
+        boolean applicationSecurity = api.getApplicationSecurity();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -137,6 +145,18 @@ public class GraphQLAPI implements API {
                 resources.add(resConfig);
             }
         }
+
+        KeyStore trustStore;
+        try {
+            trustStore = MtlsUtils.createTrustStore(api.getClientCertificatesList());
+        } catch (KeyStoreException e) {
+            throw new SecurityException(e);
+        }
+
+        for (Certificate certificate : api.getClientCertificatesList()) {
+            mtlsCertificateTiers.put(certificate.getAlias(), certificate.getTier());
+        }
+
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry registry = schemaParser.parse(api.getGraphQLSchema());
         GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
@@ -149,7 +169,9 @@ public class GraphQLAPI implements API {
                 .apiSecurity(securityScopesMap).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).endpoints(endpoints).resources(resources)
-                .securitySchemeDefinitions(securitySchemeDefinitions).graphQLSchemaDTO(graphQLSchemaDTO).build();
+                .securitySchemeDefinitions(securitySchemeDefinitions).graphQLSchemaDTO(graphQLSchemaDTO)
+                .trustStore(trustStore).mtlsCertificateTiers(mtlsCertificateTiers).mutualSSL(mutualSSL)
+                .applicationSecurity(applicationSecurity).build();
         initFilters();
         return basePath;
     }
@@ -271,6 +293,15 @@ public class GraphQLAPI implements API {
         }
 
         Utils.removeCommonAuthHeaders(requestContext);
+
+        // Remove mTLS certificate header
+        MutualSSLDto mtlsInfo = ConfigHolder.getInstance().getConfig().getMtlsInfo();
+        String certificateHeaderName = FilterUtils.getCertificateHeaderName();
+        if (!mtlsInfo.isEnableOutboundCertificateHeader()) {
+            requestContext.getRemoveHeaders().add(certificateHeaderName);
+        }
+        // mTLS Certificate Header should not be included in the throttle publishing event.
+        requestContext.getProtectedHeaders().add(certificateHeaderName);
     }
 
     private void loadCustomFilters(APIConfig apiConfig) {
