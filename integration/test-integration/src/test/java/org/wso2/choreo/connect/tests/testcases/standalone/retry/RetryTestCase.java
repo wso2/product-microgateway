@@ -56,16 +56,6 @@ public class RetryTestCase {
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
-
-        Map<String, String> sandHeaders = new HashMap<>();
-        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-two"), sandHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
-                "Response message mismatch.");
     }
 
     @Test(description = "Test Resource Level retry for Production and Sandbox endpoints")
@@ -80,15 +70,6 @@ public class RetryTestCase {
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
 
-        Map<String, String> sandHeaders = new HashMap<>();
-        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-three"), sandHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
-                "Response message mismatch.");
     }
 
     @Test(description = "Invoke endpoint that requires more retries than configured for API or Resource")

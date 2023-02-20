@@ -53,15 +53,13 @@ public class BackendSecurityTestCase extends ApimBaseTest {
     private static final String API_VERSION = "1.0.0";
 
     private String prodAccessToken;
-    private String sandAccessToken;
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
         super.initWithSuperTenant();
         JSONObject prodEndpoints = new JSONObject();
         prodEndpoints.put("url", new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
-        JSONObject sandEndpoints = new JSONObject();
-        sandEndpoints.put("url", new URL(Utils.getDockerMockService2URLHttp(TestConstant.MOCK_BACKEND_BASEPATH)).toString());
+
 
         JSONObject epsecurity = new JSONObject();
         epsecurity.put("type", "BASIC");
@@ -76,7 +74,6 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         JSONObject endpointConfig = new JSONObject();
         endpointConfig.put("endpoint_type", "http");
         endpointConfig.put("production_endpoints", prodEndpoints);
-        endpointConfig.put("sandbox_endpoints", sandEndpoints);
         endpointConfig.put("endpoint_security", epSecurity);
 
         APIOperationsDTO apiOperation = new APIOperationsDTO();
@@ -109,8 +106,6 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         prodAccessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 appWithConsumerKey.getConsumerKey(), appWithConsumerKey.getConsumerSecret(),
                 new String[]{}, user, storeRestClient);
-        sandAccessToken = StoreUtils.generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId, user,
-                storeRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME * 2, "Interrupted when waiting for the " +
                 "subscription to be deployed");
     }
@@ -128,21 +123,6 @@ public class BackendSecurityTestCase extends ApimBaseTest {
         Assert.assertTrue(respHeaders.containsKey("authorization"), "Backend did not receive auth header");
         Assert.assertEquals(respHeaders.get("authorization"), "Basic YWRtaW46YWRtaW4=",
                 "backend basic auth header is incorrect");
-    }
-
-    @Test(description = "test env variables is working")
-    public void testBasicAuthBackendForSecuredResourceFromEnv() throws CCTestException, MalformedURLException {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + sandAccessToken);
-        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/echo");
-        HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint);
-
-        // test headers
-        Map<String, String> respHeaders = response.getHeaders();
-        Assert.assertTrue(respHeaders.containsKey("authorization"), "Backend did not receive auth header");
-        Assert.assertEquals(respHeaders.get("authorization"), "Basic am9objpsb2Nr",
-                "backend basic auth header is incorrect " + sandAccessToken);
     }
 
     @Test(description = "test non secured resource with backend basic auth")
