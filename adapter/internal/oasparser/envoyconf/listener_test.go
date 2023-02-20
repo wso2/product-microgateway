@@ -21,9 +21,11 @@ import (
 	"testing"
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	envoy_config_trace_v3 "github.com/envoyproxy/go-control-plane/envoy/config/trace/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 )
 
@@ -97,6 +99,85 @@ func TestCreateRoutesConfigForRds(t *testing.T) {
 	if rConfig.Validate() != nil {
 		t.Errorf("rConfig Validation failed")
 	}
+}
+
+func TestGetTracingOTLPForSuccessPath(t *testing.T) {
+
+	conf, _ := config.ReadConfigs()
+	conf.Tracing.Enabled = true
+	conf.Tracing.Type = "otlp"
+	conf.Tracing.ConfigProperties = map[string]string{
+		"endpoint":               "localhost:55680",
+		"maxPathLength":          "512",
+		"host":                   "localhost",
+		"port":                   "55680",
+		"instrumentationName":    "CHOREO-CONNECT",
+		"maximumTracesPerSecond": "2",
+		"connectionTimeout":      "10",
+	}
+	config.SetDefaultConfig()
+	config.SetConfig(conf)
+
+	tracing, err := getTracingOTLP(conf)
+	assert.Nil(t, err, "Error should be nil")
+	assert.NotNil(t, tracing, "Tracing should not be nil")
+
+	assert.Equal(t, "envoy.tracers.opentelemetry", tracing.GetProvider().Name, "Name should be envoy.tracers.opentelemetry")
+	assert.Equal(t, uint32(512), tracing.GetMaxPathTagLength().GetValue(),
+		"MaxPathTagLength should be 512")
+
+	opConf := &envoy_config_trace_v3.OpenTelemetryConfig{}
+	err = tracing.GetProvider().GetTypedConfig().UnmarshalTo(opConf)
+	assert.Nilf(t, err, "Error while parsing Open Telemetry Config %v", opConf)
+	assert.Equal(t, tracerServiceNameRouter, opConf.GetServiceName(), "Service Name should be "+tracerServiceNameRouter)
+	assert.Equal(t, int64(10), opConf.GetGrpcService().GetTimeout().GetSeconds(), "Timeout should be 10 seconds.")
+	assert.Equal(t, tracingClusterName, opConf.GetGrpcService().GetEnvoyGrpc().GetClusterName(),
+		"Tracing cluster name should be "+tracingClusterName)
+}
+
+func TestGetTracingOTLPForInvalidMaxPath(t *testing.T) {
+
+	conf, _ := config.ReadConfigs()
+	conf.Tracing.Enabled = true
+	conf.Tracing.Type = "otlp"
+	conf.Tracing.ConfigProperties = map[string]string{
+		"endpoint": "localhost:55680",
+	}
+	config.SetDefaultConfig()
+	config.SetConfig(conf)
+
+	tracing, err := getTracingOTLP(conf)
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.EqualErrorf(t, err, "invalid max path length provided for tracing endpoint",
+		"Error should be invalid max path length provided for tracing endpoint")
+	assert.Nil(t, tracing, "Tracing should be nil")
+}
+
+func TestGetTracingOTLPForInvalidTimeout(t *testing.T) {
+
+	conf, _ := config.ReadConfigs()
+	conf.Tracing.Enabled = true
+	conf.Tracing.Type = "otlp"
+	conf.Tracing.ConfigProperties = map[string]string{
+		"maxPathLength":          "512",
+		"maximumTracesPerSecond": "2",
+		"connectionTimeout":      "10s",
+	}
+	config.SetDefaultConfig()
+	config.SetConfig(conf)
+
+	tracing, err := getTracingOTLP(conf)
+	assert.Nil(t, err, "Error should be nil")
+	assert.NotNil(t, tracing, "Tracing should not be nil")
+
+	assert.Equal(t, "envoy.tracers.opentelemetry", tracing.GetProvider().Name, "Name should be envoy.tracers.opentelemetry")
+	assert.Equal(t, uint32(512), tracing.GetMaxPathTagLength().GetValue(),
+		"MaxPathTagLength should be 512")
+
+	opConf := &envoy_config_trace_v3.OpenTelemetryConfig{}
+	err = tracing.GetProvider().GetTypedConfig().UnmarshalTo(opConf)
+	assert.Nilf(t, err, "Error while parsing Open Telemetry Config %v", opConf)
+	assert.Equal(t, int64(20), opConf.GetGrpcService().GetTimeout().GetSeconds(), "Timeout should be 20 seconds.")
 }
 
 // Create some routes to perform unit tests
