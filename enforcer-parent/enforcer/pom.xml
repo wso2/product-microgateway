@@ -283,17 +283,6 @@
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>download-grpc-health-probe-arm64</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v${grpc.healthProbe.version}/grpc_health_probe-linux-arm64</url>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
