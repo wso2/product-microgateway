@@ -37,10 +37,6 @@
             <outputDirectory/>
         </file>
         <file>
-            <source>target/adapter-linux-arm64</source>
-            <outputDirectory/>
-        </file>
-        <file>
             <source>../resources/security/mg.key</source>
             <outputDirectory>security/keystore</outputDirectory>
         </file>
@@ -58,10 +54,6 @@
         </file>
         <file>
             <source>target/grpc_health_probe-linux-amd64</source>
-            <outputDirectory/>
-        </file>
-        <file>
-            <source>target/grpc_health_probe-linux-arm64</source>
             <outputDirectory/>
         </file>
         <file>
