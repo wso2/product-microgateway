@@ -388,7 +388,11 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
-	newLabels = environments
+	if conf.ControlPlane.DynamicEnvironments.Enabled {
+		newLabels = conf.ControlPlane.EnvironmentLabels
+	} else {
+		newLabels = environments
+	}
 	logger.LoggerXds.Infof("Added/Updated the content for Organization : %v under OpenAPI Key : %v", organizationID, apiIdentifier)
 	logger.LoggerXds.Debugf("Newly added labels for Organization : %v for the OpenAPI Key : %v are %v", organizationID, apiIdentifier, newLabels)
 	oldLabels, _ := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
@@ -401,7 +405,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		openAPIEnvoyMap[apiIdentifier] = newLabels
 		orgIDOpenAPIEnvoyMap[organizationID] = openAPIEnvoyMap
 	}
-	updateVhostInternalMaps(apiYaml.ID, apiYaml.Name, apiYaml.Version, vHost, newLabels)
+	updateVhostInternalMaps(apiYaml.ID, apiYaml.Name, apiYaml.Version, vHost, environments)
 
 	// create cert map for API
 	certMap := make(map[string][]byte)
