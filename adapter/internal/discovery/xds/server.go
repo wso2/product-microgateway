@@ -295,7 +295,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
 
-	if apiYaml.APIType == constants.HTTP {
+	if apiYaml.APIType == constants.HTTP || apiYaml.APIType == constants.GRAPHQL || apiYaml.APIType == constants.SOAP {
 		// avoid the following for AsyncAPI types
 		// the following will be used for APIM specific security config.
 		// it will enable folowing securities globally for the API, overriding swagger securities.
@@ -323,6 +323,10 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 			}
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth, isYamlMutualssl, isYamlMutualsslMandatory, isYamlOauthBasicAuthAPIKeyMandatory)
+	}
+
+	if apiYaml.APIType == constants.HTTP {
+		// Support API Policies only for HTTP APIs.
 		err = mgwSwagger.SetOperationPolicies(apiProject)
 		if err != nil {
 			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{

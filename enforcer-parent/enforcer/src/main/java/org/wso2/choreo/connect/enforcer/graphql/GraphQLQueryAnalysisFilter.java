@@ -93,7 +93,7 @@ public class GraphQLQueryAnalysisFilter implements Filter {
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(requestContext, GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP,
                     GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, responseDTO.getErrorList().toString());
-            logger.error("Requested query's depth has exceeded. API : {}, version : {}, Error : {}",
+            logger.debug("Requested query's depth has exceeded. API : {}, version : {}, Error : {}",
                     requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
                     responseDTO.getErrorList().toString(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR,
                             7301));
@@ -120,7 +120,7 @@ public class GraphQLQueryAnalysisFilter implements Filter {
         if (responseDTO != null && !responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(requestContext, GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX,
                     GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, responseDTO.getErrorList().toString());
-            logger.error("Requested query's complexity has exceeded. API : {}, version : {}, Error: {}",
+            logger.debug("Requested query's complexity has exceeded. API : {}, version : {}, Error: {}",
                     requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
                     responseDTO.getErrorList().toString(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR,
                             7303));
