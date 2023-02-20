@@ -210,7 +210,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					Severity:  logging.MAJOR,
 					ErrorCode: 2230,
 				})
-				return nil, nil, nil, fmt.Errorf("Error while creating routes for Websocket API. %v", err)
+				return nil, nil, nil, fmt.Errorf("error while creating routes for Websocket API. %v", err)
 			}
 			routes = append(routes, routesP...)
 		}
@@ -227,7 +227,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				Severity:  logging.MAJOR,
 				ErrorCode: 2233,
 			})
-			return nil, nil, nil, fmt.Errorf("Error while creating routes for GraphQL API : %s version : %s. %v", apiTitle, apiVersion, err)
+			return nil, nil, nil, fmt.Errorf("error while creating routes for GraphQL API : %s version : %s. %v", apiTitle, apiVersion, err)
 		}
 		routes = append(routes, routesP...)
 		return routes, clusters, endpoints, nil
@@ -364,7 +364,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				Severity:  logging.MAJOR,
 				ErrorCode: 2231,
 			})
-			return nil, nil, nil, fmt.Errorf("Error while creating routes. %v", err)
+			return nil, nil, nil, fmt.Errorf("error while creating routes. %v", err)
 		}
 		if apiLevelBasePathSand != "" || isResourceBasePathSandAvailable {
 			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
@@ -377,7 +377,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					Severity:  logging.MAJOR,
 					ErrorCode: 2232,
 				})
-				return nil, nil, nil, fmt.Errorf("Error while creating sandbox routes. %v", err)
+				return nil, nil, nil, fmt.Errorf("error while creating sandbox routes. %v", err)
 			}
 			// Sandbox route should be appended before to prod route to have the expected header based sandbox routing.
 			routes = append(routes, routeS...)
@@ -435,6 +435,10 @@ func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Ad
 	epCluster.Endpoints[0].Host = epHost
 	epCluster.Endpoints[0].Port = epPort
 	epCluster.Endpoints[0].Basepath = epPath
+
+	if conf.Tracing.Type == TracerTypeOtlp {
+		epCluster.HTTP2BackendEnabled = true
+	}
 
 	return processEndpoints(tracingClusterName, epCluster, nil, epTimeout, epPath)
 }
@@ -920,7 +924,7 @@ end`
 						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
 					requestHeaderToAdd, err := generateHeaderToAddRouteConfig(requestPolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					requestHeadersToAdd = append(requestHeadersToAdd, requestHeaderToAdd)
@@ -930,7 +934,7 @@ end`
 						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
 					requestHeaderToRemove, err := generateHeaderToRemoveString(requestPolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					requestHeadersToRemove = append(requestHeadersToRemove, requestHeaderToRemove)
@@ -941,7 +945,7 @@ end`
 					regexRewrite, err := generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath,
 						requestPolicy.Parameters)
 					if err != nil {
-						errMsg := fmt.Sprintf("Error adding request policy %s to operation %s of resource %s. %v",
+						errMsg := fmt.Sprintf("error adding request policy %s to operation %s of resource %s. %v",
 							constants.ActionRewritePath, operation.GetMethod(), resourcePath, err)
 						logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
 							Message:   errMsg,
@@ -979,7 +983,7 @@ end`
 						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
 					responseHeaderToAdd, err := generateHeaderToAddRouteConfig(responsePolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding response policy %s to operation %s of resource %s."+
 							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					responseHeadersToAdd = append(responseHeadersToAdd, responseHeaderToAdd)
@@ -989,7 +993,7 @@ end`
 						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
 					responseHeaderToRemove, err := generateHeaderToRemoveString(responsePolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding response policy %s to operation %s of resource %s."+
 							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					responseHeadersToRemove = append(responseHeadersToRemove, responseHeaderToRemove)
@@ -1379,7 +1383,7 @@ func isMethodRewrite(resourcePath, method string, policyParams interface{}) (isM
 	var paramsToRewriteMethod map[string]interface{}
 	var ok bool
 	if paramsToRewriteMethod, ok = policyParams.(map[string]interface{}); !ok {
-		return false, fmt.Errorf("Error while processing policy parameter map for "+
+		return false, fmt.Errorf("error while processing policy parameter map for "+
 			"request policy %s to operation %s of resource %s. Map: %v",
 			constants.ActionRewriteMethod, method, resourcePath, policyParams)
 	}
@@ -1404,20 +1408,20 @@ func getRewriteMethod(resourcePath, method string, policyParams interface{}) (re
 	var paramsToRewriteMethod map[string]interface{}
 	var ok bool
 	if paramsToRewriteMethod, ok = policyParams.(map[string]interface{}); !ok {
-		return "", fmt.Errorf("Error while processing policy parameter map for "+
+		return "", fmt.Errorf("error while processing policy parameter map for "+
 			"request policy %s to operation %s of resource %s. Map: %v",
 			constants.ActionRewriteMethod, method, resourcePath, policyParams)
 	}
 
 	updatedMethod, exists := paramsToRewriteMethod[constants.UpdatedMethod]
 	if !exists {
-		return "", fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+		return "", fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 			" Policy parameter updatedMethod not found",
 			constants.ActionRewriteMethod, method, resourcePath)
 	}
 	updatedMethodString, isString := updatedMethod.(string)
 	if !isString {
-		return "", fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+		return "", fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 			" Policy parameter updatedMethod is in incorrect format", constants.ActionRewriteMethod,
 			method, resourcePath)
 	}
