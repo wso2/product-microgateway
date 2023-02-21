@@ -508,7 +508,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
             <dependency>
@@ -674,7 +674,7 @@
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
         <apache.tomcat.dependency.version>10.1.4</apache.tomcat.dependency.version>
         <java.websocket.version>1.5.3</java.websocket.version>
-        <slf4j.api.version>2.0.6</slf4j.api.version>
+        <slf4j.api.version>1.7.36</slf4j.api.version>
         <json.smart.version>2.4.8</json.smart.version>
         <junit.version>4.13.2</junit.version>
         <log4j.version>2.19.0</log4j.version>

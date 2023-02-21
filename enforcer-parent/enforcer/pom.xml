@@ -157,7 +157,7 @@
                             <exclude>org.apache.logging:*</exclude>
                             <exclude>log4j:*</exclude>
                             <exclude>org.slf4j:slf4j-log4j12</exclude>
-                            <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>
+                            <exclude>org.apache.logging.log4j:log4j-slf4j2-impl</exclude>
                             <exclude>org.apache.logging.log4j:log4j-api</exclude>
                             <exclude>org.apache.logging.log4j:log4j-core</exclude>
                             <exclude>org.apache.logging.log4j:log4j-jcl</exclude>
@@ -192,7 +192,7 @@
                                 org.apache.logging.log4j, org.json.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j-impl
+                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j2-impl
                             </includeArtifactIds>
                         </configuration>
                     </execution>
@@ -517,7 +517,7 @@
         <!-- slf4j binding -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
