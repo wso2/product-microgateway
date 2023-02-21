@@ -256,7 +256,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	var mgwSwagger mgw.MgwSwagger
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
-	var routerLabels []string // size of the routerLabels will always be 1
+	var routerLabels []string // size of the routerLabels will always be 1 in choreo
 	apiYaml := apiProject.APIYaml.Data
 
 	// handle panic
@@ -388,6 +388,9 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	//routerLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
+	// When the dynamicEnvironments support is enabled, it will be setting the xds cache under the
+	// common label(global label for gateway), which is obtained from conf.ControlPlane.EnvironmentLabels and
+	// it will always be in size 1 for choreo.
 	if conf.ControlPlane.DynamicEnvironments.Enabled {
 		routerLabels = conf.ControlPlane.EnvironmentLabels
 	} else {
@@ -709,6 +712,10 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 
 	existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 
+	// when the dynamicEnvironment support is enabled, toBeDelEnvs should always set as the
+	// common label (which will be set in conf.ControlPlane.EnvironmentLabels), if the deployment of particular
+	// API is exists in orgIDOpenAPIEnvoyMap
+	// Note: In this case orgIDOpenAPIEnvoyMap eventually has same label for all the entries (APIs).
 	if conf.ControlPlane.DynamicEnvironments.Enabled {
 		if len(existingLabels) == 1 {
 			toBeDelEnvs = existingLabels
