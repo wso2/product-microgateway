@@ -256,7 +256,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	var mgwSwagger mgw.MgwSwagger
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
-	var newLabels []string
+	var routerLabels []string // size of the routerLabels will always be 1
 	apiYaml := apiProject.APIYaml.Data
 
 	// handle panic
@@ -385,24 +385,24 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 
 	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
 	// TODO: commented the following line as the implementation is not supported yet.
-	//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+	//routerLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
 	if conf.ControlPlane.DynamicEnvironments.Enabled {
-		newLabels = conf.ControlPlane.EnvironmentLabels
+		routerLabels = conf.ControlPlane.EnvironmentLabels
 	} else {
-		newLabels = environments
+		routerLabels = environments
 	}
 	logger.LoggerXds.Infof("Added/Updated the content for Organization : %v under OpenAPI Key : %v", organizationID, apiIdentifier)
-	logger.LoggerXds.Debugf("Newly added labels for Organization : %v for the OpenAPI Key : %v are %v", organizationID, apiIdentifier, newLabels)
+	logger.LoggerXds.Debugf("Newly added labels for Organization : %v for the OpenAPI Key : %v are %v", organizationID, apiIdentifier, routerLabels)
 	oldLabels, _ := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 
 	if _, ok := orgIDOpenAPIEnvoyMap[organizationID]; ok {
-		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = newLabels
+		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = routerLabels
 	} else {
 		openAPIEnvoyMap := make(map[string][]string)
-		openAPIEnvoyMap[apiIdentifier] = newLabels
+		openAPIEnvoyMap[apiIdentifier] = routerLabels
 		orgIDOpenAPIEnvoyMap[organizationID] = openAPIEnvoyMap
 	}
 	updateVhostInternalMaps(apiYaml.ID, apiYaml.Name, apiYaml.Version, vHost, environments)
@@ -475,7 +475,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	}
 
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
-	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, routerLabels)
 	if revisionStatus {
 		// send updated revision to control plane
 		deployedRevision = notifier.UpdateDeployedRevisions(apiYaml.ID, apiYaml.RevisionID, environments,
@@ -703,9 +703,19 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 		logger.LoggerXds.Infof("Unable to delete API: %v from Organization: %v. API Does not exist.", apiIdentifier, organizationID)
 		return errors.New(mgw.NotFound)
 	}
+	toBeDelEnvs := make([]string, 0, len(environments))
+	toBeKeptEnvs := make([]string, 0, len(environments))
+	conf, _ := config.ReadConfigs()
 
 	existingLabels := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
-	toBeDelEnvs, toBeKeptEnvs := getEnvironmentsToBeDeleted(existingLabels, environments)
+
+	if conf.ControlPlane.DynamicEnvironments.Enabled {
+		if len(existingLabels) == 1 {
+			toBeDelEnvs = existingLabels
+		}
+	} else {
+		toBeDelEnvs, toBeKeptEnvs = getEnvironmentsToBeDeleted(existingLabels, environments)
+	}
 
 	for _, val := range toBeDelEnvs {
 		isAllowedToDelete := arrayContains(existingLabels, val)
