@@ -16,9 +16,11 @@
 # -----------------------------------------------------------------------
 
 ENFORCER_PORT="${ENFORCER_PORT:-8081}"
+ENFORCER_SERVER_NAME="${ENFORCER_SERVER_NAME:-enforcer}"
 grpc_health_probe -addr "127.0.0.1:${ENFORCER_PORT}" \
     -tls \
     -tls-ca-cert "${ENFORCER_PUBLIC_CERT_PATH}" \
     -tls-client-cert "${ENFORCER_PUBLIC_CERT_PATH}" \
     -tls-client-key "${ENFORCER_PRIVATE_KEY_PATH}" \
+    -tls-server-name ${ENFORCER_SERVER_NAME} \
     -connect-timeout=3s
