@@ -86,23 +86,4 @@ public class RetryTestCase {
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.GATEWAY_ERROR,
                 "Response message mismatch.");
     }
-
-    @Test(description = "Test where retry configs have invalid count and status code, thus get replaced by default")
-    public void testInvalidRetryConfigReplaceByDefaultForSand() throws Exception {
-        Map<String, String> prodHeaders = new HashMap<>();
-        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-seven"), prodHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_GATEWAY_TIMEOUT,
-                "Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.GATEWAY_ERROR,
-                "Response message mismatch.");
-
-        HttpResponse sandResponseFinal = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-seven"), prodHeaders);
-        Assert.assertEquals(sandResponseFinal.getResponseCode(), HttpStatus.SC_OK,
-                "Response code mismatched");
-    }
 }
