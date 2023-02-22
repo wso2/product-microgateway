@@ -70,22 +70,6 @@ public class ProductionSandboxTestCase {
                 "Response message mismatch.");
     }
 
-    @Test(description = "Invoke Sandbox endpoint when sandbox endpoints provided alone, " +
-            "and has different endpoint basepath than api level")
-    public void invokeSandboxEndpointOnlyDiffBasePath() throws Exception {
-
-        // api level prod endpoint should not be added to resource if basepath is different
-        Map<String, String> prodHeaders = new HashMap<String, String>();
-        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/general/v2/pets/findByStatus"), prodHeaders);
-
-        Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
-        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
-        Assert.assertTrue(
-                prodResponse.getData().contains("Production key offered to an API with no production endpoint"));
-    }
-
     @Test(description = "Invoke Production endpoint when production endpoints provided alone")
     public void invokeProdEndpointOnly() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();

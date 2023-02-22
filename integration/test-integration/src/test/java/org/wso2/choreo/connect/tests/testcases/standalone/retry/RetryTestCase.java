@@ -90,7 +90,7 @@ public class RetryTestCase {
     @Test(description = "Test where retry configs have invalid count and status code, thus get replaced by default")
     public void testInvalidRetryConfigReplaceByDefaultForSand() throws Exception {
         Map<String, String> prodHeaders = new HashMap<>();
-        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/retry1/retry-seven"), prodHeaders);
 

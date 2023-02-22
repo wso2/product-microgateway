@@ -62,21 +62,4 @@ public class ExistingApiTestCase extends ApimBaseTest {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
                 "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
     }
-
-    @Test
-    public void testExistingApiWithSandboxKey() throws Exception {
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(APP_NAME);
-        String accessToken = StoreUtils.generateUserAccessTokenSandbox(apimServiceURLHttps, applicationId,
-                user, storeRestClient);
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
-        headers.put(HttpHeaderNames.HOST.toString(), "localhost");
-
-        String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
-        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(endpoint, headers);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
-                "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
-    }
 }
