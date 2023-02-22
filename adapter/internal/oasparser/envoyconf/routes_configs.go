@@ -81,25 +81,33 @@ func generateRouteMatch(routeRegex string) *routev3.RouteMatch {
 }
 
 func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model.EndpointConfig,
-	corsPolicy *routev3.CorsPolicy) (action *routev3.Route_Route) {
+	corsPolicy *routev3.CorsPolicy, endpointType string) (action *routev3.Route_Route) {
 
 	config, _ := config.ReadConfigs()
 
 	action = &routev3.Route_Route{
 		Route: &routev3.RouteAction{
-			HostRewriteSpecifier: &routev3.RouteAction_AutoHostRewrite{
-				AutoHostRewrite: &wrapperspb.BoolValue{
-					Value: true,
-				},
-			},
 			UpgradeConfigs:    getUpgradeConfig(apiType),
 			MaxStreamDuration: getMaxStreamDuration(apiType),
 			Timeout:           durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteTimeoutInSeconds) * time.Second),
 			IdleTimeout:       durationpb.New(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
-			ClusterSpecifier: &routev3.RouteAction_ClusterHeader{
-				ClusterHeader: clusterHeaderName,
-			},
 		},
+	}
+
+	if endpointType == constants.AwsLambda {
+		action.Route.ClusterSpecifier = &routev3.RouteAction_Cluster{
+			Cluster: "wso2_lambda_egress_gateway",
+		}
+
+	} else {
+		action.Route.HostRewriteSpecifier = &routev3.RouteAction_AutoHostRewrite{
+			AutoHostRewrite: &wrapperspb.BoolValue{
+				Value: true,
+			},
+		}
+		action.Route.ClusterSpecifier = &routev3.RouteAction_ClusterHeader{
+			ClusterHeader: clusterHeaderName,
+		}
 	}
 
 	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
