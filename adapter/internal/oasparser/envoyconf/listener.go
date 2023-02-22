@@ -131,6 +131,10 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		}
 	}
 
+	if conf.Envoy.AwsLambda.Enabled {
+		manager.StripMatchingHostPort = true
+	}
+
 	pbst, err := ptypes.MarshalAny(manager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
