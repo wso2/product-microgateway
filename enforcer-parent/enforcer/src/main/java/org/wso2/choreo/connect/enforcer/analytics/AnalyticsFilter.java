@@ -88,10 +88,11 @@ public class AnalyticsFilter {
                 publisherConfig.put(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY,
                         AnalyticsConstants.DEFAULT_ELK_PUBLISHER_REPORTER_CLASS);
             }
-            if (analyticsConfigProperties.containsKey(
-                    org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants.DATA_PROVIDER_CLASS_PROPERTY)) {
-                this.analyticsDataProvider = AnalyticsUtils.getCustomAnalyticsDataProvider();
-            }
+        }
+
+        if (analyticsConfigProperties.containsKey(
+                org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants.DATA_PROVIDER_CLASS_PROPERTY)) {
+            analyticsDataProvider = AnalyticsUtils.getCustomAnalyticsDataProvider();
         }
 
         publisher = loadAnalyticsPublisher(customAnalyticsPublisher, isChoreoDeployment);

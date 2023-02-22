@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategor
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
-import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
@@ -100,17 +99,17 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
 
     @Override
     public void init(Map<String, String> configuration) {
-        boolean elkEnabled = org.wso2.choreo.connect.enforcer.analytics.AnalyticsConstants.ELK_TYPE
-                .equalsIgnoreCase(ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getType());
-        if (!elkEnabled && (StringUtils.isEmpty(configuration.get(AnalyticsConstants.AUTH_URL_CONFIG_KEY))
-                || StringUtils.isEmpty(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY))) {
-            logger.error(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
-                    AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY +
-                    "  are not provided. Hence assigning default values");
+        
+        String authUrlKey = configuration.get(AnalyticsConstants.AUTH_URL_CONFIG_KEY);
+        String authTokenKey = configuration.get(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY);
+
+        if ((StringUtils.isEmpty(authUrlKey) || StringUtils.isEmpty(authTokenKey))) {
+            logger.warn(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
+                    AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY + "  are not provided. Hence assigning default values");
             configuration.put(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY, "");
             configuration.put(AnalyticsConstants.AUTH_URL_CONFIG_KEY, "https://localhost:8080");
-            return;
         }
+
         Map<String, String> publisherConfig = new HashMap<>(2);
         for (Map.Entry<String, String> entry : configuration.entrySet()) {
             if (AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY.equals(entry.getKey())) {
