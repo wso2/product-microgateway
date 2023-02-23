@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.wso2.choreo.connect.enforcer.analytics.AnalyticsConstants.ERROR_SCHEMA;
+import static org.wso2.choreo.connect.enforcer.analytics.AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY;
 import static org.wso2.choreo.connect.enforcer.analytics.AnalyticsConstants.RESPONSE_SCHEMA;
 import static org.wso2.choreo.connect.enforcer.constants.MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY;
 
@@ -93,21 +94,22 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
 
     @Override
     public void handleWebsocketFrameRequest(WebSocketFrameRequest webSocketFrameRequest) {
-        AnalyticsDataProvider  provider = new ChoreoAnalyticsForWSProvider(webSocketFrameRequest);
+        AnalyticsDataProvider provider = new ChoreoAnalyticsForWSProvider(webSocketFrameRequest);
         collectDataToPublish(provider);
     }
 
     @Override
     public void init(Map<String, String> configuration) {
-        
-        String authUrlKey = configuration.get(AnalyticsConstants.AUTH_URL_CONFIG_KEY);
-        String authTokenKey = configuration.get(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY);
 
-        if ((StringUtils.isEmpty(authUrlKey) || StringUtils.isEmpty(authTokenKey))) {
-            logger.warn(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
-                    AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY + "  are not provided. Hence assigning default values");
-            configuration.put(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY, "");
-            configuration.put(AnalyticsConstants.AUTH_URL_CONFIG_KEY, "https://localhost:8080");
+        if (StringUtils.isEmpty(configuration.get(PUBLISHER_REPORTER_CLASS_CONFIG_KEY))) {
+
+            if ((StringUtils.isEmpty(configuration.get(AnalyticsConstants.AUTH_URL_CONFIG_KEY)) ||
+                    StringUtils.isEmpty(configuration.get(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY)))) {
+                logger.error(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
+                        AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY +
+                        "  are not provided under analytics configurations.");
+                return;
+            }
         }
 
         Map<String, String> publisherConfig = new HashMap<>(2);
