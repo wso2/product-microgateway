@@ -1,11 +1,11 @@
 
-This product is licensed by WSO2 Inc. under Apache License 2.0. The license
+This product is licensed by WSO2 LLC. under Apache License 2.0. The license
 can be downloaded from the following locations:
 	http://www.apache.org/licenses/LICENSE-2.0.html
 	http://www.apache.org/licenses/LICENSE-2.0.txt
 
 This product also contains software under different licenses. This table below
-all the contained libraries (jar files) and the license under which they are 
+all the contained libraries (jar files) and the license under which they are
 provided to you.
 
 At the bottom of this file is a table that shows what each license indicated
@@ -14,196 +14,177 @@ below is and where the actual text of the license can be found.
 
 Name                                                                                                Type           License
 _________________________________________________________________________________________________________________________________________________
-opentelemetry-extension-trace-propagators-1.6.0.jar                                                 jar            apache2
-org.wso2.choreo.connect.enforcer.commons-1.1.0.jar                                            bundle         apache2
+grpc-netty-shaded-1.45.1.jar                                                                        jar            apache2
 jackson-dataformat-xml-2.12.1.jar                                                                   bundle         apache2
-netty-handler-4.1.71.Final.jar                                                                      bundle         apache2
-swagger-annotations-1.5.22.jar                                                                      bundle         apache2
+org.wso2.carbon.apimgt.common.analytics-9.28.75.jar                                                 bundle         apache2
+slf4j-simple-2.0.6.jar                                                                              bundle         mit
 XmlSchema-1.4.7.wso2v6.jar                                                                          bundle         apache2
 qpid-proton-j-extensions-1.2.3.jar                                                                  jar            mit
 azure-core-1.14.0.jar                                                                               jar            mit
-graphql-java-17.3.jar                                                                               bundle         mit
-swagger-parser-v3-2.0.12.jar                                                                        jar            apache2
+httpclient-4.5.14.jar                                                                               jar            apache2
+saaj-impl-1.5.3.jar                                                                                 bundle         edl1
 commons-pool-1.5.6.jar                                                                              bundle         apache2
 mina-filter-ssl-1.1.7-wso2v4.jar                                                                    bundle         apache2
-json-schema-core-1.2.8.jar                                                                          bundle         apache2 + lgpl3
-kotlin-stdlib-1.3.72.jar                                                                            jar            apache2
+kotlin-stdlib-1.8.0.jar                                                                             jar            apache2
+httpmime-4.5.10.jar                                                                                 jar            apache2
 jsr305-3.0.2.jar                                                                                    bundle         apache2
-netty-resolver-4.1.71.Final.jar                                                                     bundle         apache2
-org.wso2.carbon.apimgt.common.analytics-9.20.74.jar                                                 bundle         apache2
-swagger-parser-1.0.44.jar                                                                           jar            apache2
+ua-parser-1.5.2.wso2v1.jar                                                                          bundle         apache2
+guava-31.1-jre.jar                                                                                  bundle         apache2
+opentelemetry-sdk-logs-1.22.0-alpha.jar                                                             jar            apache2
+jakarta.xml.soap-api-1.4.2.jar                                                                      bundle         edl1
 disruptor-3.4.2.wso2v1.jar                                                                          bundle         apache2
-nimbus-jose-jwt-7.3.0.wso2v1.jar                                                                    bundle         apache2
-httpclient-4.5.13.jar                                                                               jar            apache2
-jackson-annotations-2.12.4.jar                                                                      bundle         apache2
+org.wso2.am.analytics.publisher.client-1.1.3.jar                                                    bundle         apache2
+antlr4-runtime-4.9.3.jar                                                                            bundle         antlr3
+commons-lang3-3.12.0.jar                                                                            bundle         apache2
 XmlSchema-1.4.7.jar                                                                                 bundle         apache2
 neethi-2.0.4.jar                                                                                    bundle         apache2
 libthrift-0.14.1.jar                                                                                bundle         apache2
+java-dataloader-3.2.0.jar                                                                           bundle         apache2
 kotlin-stdlib-common-1.3.70.jar                                                                     jar            apache2
-antlr4-runtime-4.9.2.jar                                                                            bundle         antlr3
 commons-lang-2.6.jar                                                                                bundle         apache2
 jackson-datatype-jsr310-2.12.1.jar                                                                  bundle         apache2
 jackson-module-jaxb-annotations-2.12.1.jar                                                          bundle         apache2
-swagger-parser-2.0.12.jar                                                                           jar            apache2
-opentelemetry-context-1.6.0.jar                                                                     jar            apache2
+netty-buffer-4.1.87.Final.jar                                                                       bundle         apache2
 opentracing-util-0.33.0.jar                                                                         jar            apache2
-commons-fileupload-1.3.1.wso2v1.jar                                                                 bundle         apache2
-protobuf-java-3.19.2.jar                                                                            bundle         bsd3
-swagger-parser-v2-converter-2.0.12.jar                                                              jar            apache2
-swagger-core-1.5.22.jar                                                                             bundle         apache2
-joda-time-2.9.7.jar                                                                                 bundle         apache2
-json-smart-2.4.7.jar                                                                                bundle         apache2
+jackson-databind-2.14.1.jar                                                                         bundle         apache2
+jackson-annotations-2.14.1.jar                                                                      bundle         apache2
+opentelemetry-sdk-common-1.22.0.jar                                                                 jar            apache2
+opentelemetry-extension-trace-propagators-1.22.0.jar                                                jar            apache2
+log4j-api-2.19.0.jar                                                                                bundle         apache2
 jaeger-thrift-1.6.0.jar                                                                             jar            apache2
-accessors-smart-2.4.7.jar                                                                           bundle         apache2
 j2objc-annotations-1.3.jar                                                                          jar            apache2
 geronimo-ws-metadata_2.0_spec-1.1.2.jar                                                             bundle         apache2
-org.wso2.carbon.databridge.commons-6.1.45.jar                                                       bundle         apache2
-grpc-stub-1.32.1.jar                                                                                jar            apache2
-wstx-asl-3.2.9.jar                                                                                  jar            apache2
+opentelemetry-exporter-otlp-common-1.22.0.jar                                                       jar            apache2
+opentelemetry-sdk-extension-autoconfigure-spi-1.22.0.jar                                            jar            apache2
 reactor-core-3.4.3.jar                                                                              bundle         apache2
+opentelemetry-semconv-1.22.0-alpha.jar                                                              jar            apache2
 proton-j-0.33.4.jar                                                                                 bundle         apache2
+andes-client-3.3.23.jar                                                                             bundle         apache2
 hamcrest-core-1.3.jar                                                                               jar            bsd2
+opentelemetry-sdk-metrics-1.22.0.jar                                                                jar            apache2
 mina-core-1.1.7-wso2v4.jar                                                                          bundle         apache2
 axiom-api-1.2.11.jar                                                                                bundle         apache2
-axis2-kernel-1.6.1-wso2v76.jar                                                                      bundle         apache2
-swagger-parser-core-2.0.12.jar                                                                      jar            apache2
 jaeger-client-1.6.0.jar                                                                             jar            apache2
 okhttp-4.8.1.jar                                                                                    jar            apache2
-netty-tcnative-classes-2.0.46.Final.jar                                                             bundle         apache2
-org.wso2.am.analytics.publisher.client-1.0.4.jar                                                    bundle         apache2
-netty-buffer-4.1.71.Final.jar                                                                       bundle         apache2
-grpc-api-1.32.1.jar                                                                                 jar            apache2
+nimbus-jose-jwt-7.9.0.wso2v1.jar                                                                    bundle         apache2
 toml4j-0.7.2.jar                                                                                    jar            mit
 commons-codec-1.14.jar                                                                              bundle         apache2
-grpc-protobuf-1.43.2.jar                                                                            jar            apache2
 axiom-impl-1.2.11.jar                                                                               bundle         apache2
 geronimo-javamail_1.4_spec-1.6.jar                                                                  bundle         apache2
+grpc-core-1.45.1.jar                                                                                jar            apache2
 azure-monitor-opentelemetry-exporter-1.0.0-beta.5.jar                                               jar            mit
-grpc-protobuf-lite-1.43.2.jar                                                                       jar            apache2
-opentelemetry-api-metrics-1.6.0-alpha.jar                                                           jar            apache2
-org.wso2.carbon.databridge.commons.binary-6.1.45.jar                                                bundle         apache2
-reactive-streams-1.0.2.jar                                                                          bundle         ccpd
-java-dataloader-3.1.0.jar                                                                           jar            apache2
+tomcat-annotations-api-10.1.4.jar                                                                   bundle         apache2
+opentelemetry-sdk-1.22.0.jar                                                                        jar            apache2
 jaxen-1.1.1.jar                                                                                     jar            apache2
-mailapi-1.4.3.jar                                                                                   bundle         cddl&gpl
-opentelemetry-exporter-zipkin-1.6.0.jar                                                             jar            apache2
-libphonenumber-8.0.0.jar                                                                            bundle         apache2
-commons-io-2.7.jar                                                                                  bundle         apache2
-ua-parser-1.3.0.wso2v2.jar                                                                          bundle         apache2
-guava-30.0-jre.jar                                                                                  bundle         apache2
+org.wso2.carbon.apimgt.common.gateway-9.28.75.jar                                                   bundle         apache2
+axis2-transport-base-1.6.1-wso2v85.jar                                                              bundle         apache2
+netty-resolver-4.1.87.Final.jar                                                                     bundle         apache2
+grpc-protobuf-lite-1.45.1.jar                                                                       jar            apache2
 commons-codec-1.11.jar                                                                              bundle         apache2
-jackson-databind-2.13.2.1.jar                                                                       bundle         apache2
-tomcat-embed-core-8.5.46.jar                                                                        jar            apache2
-org.wso2.carbon.apimgt.common.gateway-9.20.74.jar                                                   bundle         apache2
-grpc-context-1.32.1.jar                                                                             jar            apache2
+grpc-protobuf-1.45.1.jar                                                                            jar            apache2
+reactive-streams-1.0.3.jar                                                                          bundle         ccpd
+netty-handler-4.1.87.Final.jar                                                                      bundle         apache2
 listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar                                      jar            apache2
-cal10n-api-0.7.4.jar                                                                                bundle         mit
+log4j-core-2.19.0.jar                                                                               bundle         apache2
+log4j-jcl-2.19.0.jar                                                                                bundle         apache2
 azure-messaging-eventhubs-5.6.0.jar                                                                 jar            mit
 zipkin-sender-okhttp3-2.16.3.jar                                                                    bundle         apache2
 jakarta.activation-api-1.2.1.jar                                                                    bundle         edl1
+json-simple-1.1.1.jar                                                                               bundle         apache2
+javax.xml.soap-api-1.4.0.jar                                                                        bundle         cddl1 + gpl1
 javax.jms-api-2.0.1.jar                                                                             bundle         cddl1
-swagger-compat-spec-parser-1.0.44.jar                                                               jar            apache2
+netty-transport-native-unix-common-4.1.87.Final.jar                                                 bundle         apache2
 servlet-api-2.3.jar                                                                                 jar            cddl1 + gpl1
-jaxb-api-2.3.0.jar                                                                                  bundle         cddl1
+jakarta.activation-1.2.2.jar                                                                        bundle         edl1
 feign-core-11.0.jar                                                                                 bundle         apache2
-error_prone_annotations-2.3.4.jar                                                                   jar            apache2
 okio-2.7.0.jar                                                                                      jar            apache2
 jaeger-core-1.6.0.jar                                                                               jar            apache2
 pax-logging-api-1.10.1.jar                                                                          bundle         apache2
+netty-codec-http-4.1.87.Final.jar                                                                   bundle         apache2
+stax-ex-1.8.3.jar                                                                                   bundle         edl1
 geronimo-jms_1.1_spec-1.1.1.wso2v1.jar                                                              bundle         apache2
-snakeyaml-1.26.jar                                                                                  bundle         apache2
+Java-WebSocket-1.5.3.jar                                                                            bundle         mit
+org.wso2.carbon.databridge.commons.binary-6.1.63.jar                                                bundle         apache2
 opentracing-noop-0.33.0.jar                                                                         jar            apache2
-nimbus-jose-jwt-7.9.jar                                                                             bundle         apache2
-btf-1.2.jar                                                                                         bundle         apache2 + lgpl3
-rhino-1.7R4.jar                                                                                     jar            mpl20
-Java-WebSocket-1.5.1.jar                                                                            bundle         mit
-jackson-core-2.13.2.jar                                                                             bundle         apache2
+perfmark-api-0.23.0.jar                                                                             jar            apache2
 annotations-13.0.jar                                                                                jar            apache2
 zipkin-reporter-2.16.3.jar                                                                          bundle         apache2
+protobuf-java-3.21.12.jar                                                                           bundle         bsd3
 stax2-api-4.2.1.jar                                                                                 bundle         bsd
 geronimo-stax-api_1.0_spec-1.0.1.jar                                                                bundle         apache2
+error_prone_annotations-2.10.0.jar                                                                  jar            apache2
 wsdl4j-1.6.2.jar                                                                                    jar            cpl1
+opentelemetry-api-1.22.0.jar                                                                        jar            apache2
 failureaccess-1.0.1.jar                                                                             bundle         apache2
 asm-9.1.jar                                                                                         bundle         bsd3
 log4j-slf4j-impl-2.17.1.jar                                                                         bundle         apache2
-axis2-transport-base-1.6.1-wso2v76.jar                                                              bundle         apache2
-jackson-coreutils-1.6.jar                                                                           bundle         apache2 + lgpl3
-netty-codec-http2-4.1.71.Final.jar                                                                  bundle         apache2
-opentelemetry-sdk-1.6.0.jar                                                                         jar            apache2
 feign-slf4j-11.0.jar                                                                                bundle         apache2
 jcip-annotations-1.0-1.jar                                                                          jar            apache2
-log4j-jcl-2.17.1.jar                                                                                bundle         apache2
-slf4j-ext-1.6.3.jar                                                                                 bundle         mit
-log4j-core-2.17.1.jar                                                                               bundle         apache2
 jsr311-api-1.0.jar                                                                                  bundle         cddl1
+accessors-smart-2.4.8.jar                                                                           bundle         apache2
 feign-gson-11.0.jar                                                                                 bundle         apache2
+axis2-kernel-1.6.1-wso2v85.jar                                                                      bundle         apache2
 azure-core-http-okhttp-1.3.3.jar                                                                    jar            mit
-log4j-1.2.16.jar                                                                                    bundle         apache2
 validation-api-1.1.0.Final.jar                                                                      bundle         apache2
 geronimo-jta_1.1_spec-1.1.jar                                                                       jar            apache2
 netty-tcnative-boringssl-static-2.0.36.Final.jar                                                    jar            apache2
 junit-4.13.2.jar                                                                                    jar            apache2
+org.wso2.choreo.connect.enforcer.commons-1.2.0-beta.jar                                             bundle         apache2
 proto-google-common-protos-2.0.1.jar                                                                jar            apache2
+opentelemetry-exporter-zipkin-1.22.0.jar                                                            jar            apache2
 woden-api-1.0M9.jar                                                                                 bundle         apache2
-netty-codec-4.1.71.Final.jar                                                                        bundle         apache2
-swagger-models-1.5.22.jar                                                                           bundle         apache2
-uri-template-0.9.jar                                                                                bundle         apache2 + lgpl3
-woodstox-core-6.2.3.jar                                                                             bundle         apache2
+netty-transport-4.1.87.Final.jar                                                                    bundle         apache2
+org.wso2.carbon.databridge.commons-6.1.63.jar                                                       bundle         apache2
 azure-core-amqp-2.0.3.jar                                                                           jar            mit
-grpc-netty-shaded-1.32.1.jar                                                                        jar            apache2
-andes-client-3.3.12.jar                                                                             bundle         apache2
-api-0.1.28.jar                                                                                      jar            apache2
 opentelemetry-exporter-jaeger-thrift-1.6.0.jar                                                      jar            apache2
 commons-cli-1.0.jar                                                                                 jar            apache2
 woden-impl-commons-1.0M9.jar                                                                        bundle         apache2
+netty-common-4.1.87.Final.jar                                                                       bundle         apache2
+gson-2.10.1.jar                                                                                     bundle         apache2
 jaeger-tracerresolver-1.6.0.jar                                                                     jar            apache2
 json-3.0.0.wso2v1.jar                                                                               bundle         apache2
 geronimo-activation_1.1_spec-1.0.2.jar                                                              bundle         apache2
-animal-sniffer-annotations-1.18.jar                                                                 jar            mit
+opentelemetry-exporter-otlp-1.22.0.jar                                                              jar            apache2
+opentelemetry-context-1.22.0.jar                                                                    jar            apache2
+grpc-context-1.45.1.jar                                                                             jar            apache2
 annotations-api-6.0.53.jar                                                                          jar            apache2
-jopt-simple-5.0.3.jar                                                                               bundle         mit
-org.wso2.carbon.apimgt.common.jms-9.20.74.jar                                                       bundle         apache2
 woden-impl-dom-1.0M9.jar                                                                            bundle         apache2
+tomcat-embed-core-10.1.4.jar                                                                        bundle         apache2
 json-20140107.jar                                                                                   jar            apache2
-httpcore-4.4.13.jar                                                                                 jar            apache2
 zipkin-2.23.2.jar                                                                                   bundle         apache2
-netty-common-4.1.71.Final.jar                                                                       bundle         apache2
-swagger-models-2.0.8.jar                                                                            bundle         apache2
 jline-0.9.94.jar                                                                                    jar            bsd
-swagger-annotations-2.0.8.jar                                                                       bundle         apache2
-slf4j-api-1.6.3.jar                                                                                 bundle         mit
-opentelemetry-sdk-common-1.6.0.jar                                                                  jar            apache2
+animal-sniffer-annotations-1.19.jar                                                                 jar            mit
 opentracing-api-0.33.0.jar                                                                          jar            apache2
+org.wso2.carbon.apimgt.common.jms-9.28.75.jar                                                       bundle         apache2
+commons-io-2.11.0.jar                                                                               bundle         apache2
+swagger-models-2.2.8.jar                                                                            bundle         apache2
+checker-qual-3.12.0.jar                                                                             bundle         mit
 applicationinsights-core-2.6.3.jar                                                                  jar            mit
-log4j-api-2.17.1.jar                                                                                bundle         apache2
 commons-pool-1.5.6.wso2v1.jar                                                                       bundle         apache2
+log4j-slf4j2-impl-2.19.0.jar                                                                        bundle         apache2
 javax.annotation-api-1.3.2.jar                                                                      bundle         cddl1
-commons-httpclient-3.1.jar                                                                          jar            apache2
-tomcat-annotations-api-8.5.46.jar                                                                   jar            apache2
-json-patch-1.6.jar                                                                                  bundle         apache2 + lgpl3
 commons-logging-1.1.1.jar                                                                           jar            apache2
-graphQL-17.3.wso2v1.jar                                                                             bundle         mit
-netty-transport-4.1.71.Final.jar                                                                    bundle         apache2
-json-schema-validator-2.2.8.jar                                                                     bundle         apache2 + lgpl3
+netty-codec-4.1.87.Final.jar                                                                        bundle         apache2
+graphQL-19.2.wso2v2.jar                                                                             bundle         apache2
+json-smart-2.4.8.jar                                                                                bundle         apache2
 org.wso2.securevault-1.1.3.jar                                                                      bundle         apache2
-opentelemetry-api-1.6.0.jar                                                                         jar            apache2
-perfmark-api-0.19.0.jar                                                                             jar            apache2
-msg-simple-1.1.jar                                                                                  bundle         apache2 + lgpl3
-activation-1.1.jar                                                                                  jar            cddl1
-opentelemetry-sdk-trace-1.6.0.jar                                                                   jar            apache2
-gson-2.8.6.jar                                                                                      bundle         apache2
-swagger-core-2.0.8.jar                                                                              bundle         apache2
-grpc-core-1.32.1.jar                                                                                jar            apache2
-commons-lang3-3.9.jar                                                                               bundle         apache2
-opentelemetry-semconv-1.6.0-alpha.jar                                                               jar            apache2
-jackson-dataformat-yaml-2.9.8.jar                                                                   bundle         apache2
-checker-qual-3.5.0.jar                                                                              bundle         mit
-json-simple-1.1.wso2v1.jar                                                                          bundle         apache2
+graphql-java-19.2.jar                                                                               bundle         mit
+org.jacoco.agent-0.8.8-runtime.jar                                                                  jar            epl2
+feign-httpclient-11.0.jar                                                                           bundle         apache2
+nimbus-jose-jwt-8.0.jar                                                                             bundle         apache2
+slf4j-api-1.7.36.jar                                                                                bundle         mit
+opentelemetry-api-logs-1.22.0-alpha.jar                                                             jar            apache2
+grpc-api-1.45.1.jar                                                                                 jar            apache2
+opentelemetry-exporter-common-1.22.0.jar                                                            jar            apache2
+netty-codec-http2-4.1.87.Final.jar                                                                  bundle         apache2
+jackson-core-2.14.1.jar                                                                             bundle         apache2
+grpc-stub-1.45.1.jar                                                                                jar            apache2
 commons-logging-1.2.jar                                                                             bundle         apache2
 jakarta.xml.bind-api-2.3.2.jar                                                                      bundle         edl1
+api-1.0.36.jar                                                                                      jar            apache2
+opentelemetry-sdk-trace-1.22.0.jar                                                                  jar            apache2
+httpcore-4.4.16.jar                                                                                 jar            apache2
 annotations-4.1.1.4.jar                                                                             jar            apache2
-netty-codec-http-4.1.71.Final.jar                                                                   bundle         apache2
-log4j-1.2.17.wso2v1.jar                                                                             bundle         apache2
 opentracing-tracerresolver-0.1.8.jar                                                                jar            apache2
 
 
@@ -213,27 +194,23 @@ apache2        Apache License Version 2.0
                http://www.apache.org/licenses/LICENSE-2.0.html
 mit            MIT License
                http://www.opensource.org/licenses/mit-license.php
-lgpl3          Lesser General Public License Version 3
-               https://opensource.org/licenses/lgpl-3.0.html
+edl1           Eclipse Distribution License Version 1.0
+               http://www.eclipse.org/org/documents/edl-v10.php
 antlr3         ANTLR 3 License
                http://www.antlr.org/license.html
-bsd3           Berkeley License - 3
-               http://opensource.org/licenses/BSD-3-Clause
 bsd2           Berkeley License - 2
                https://opensource.org/licenses/BSD-2-Clause
 ccpd           Creative Commons Public Domain
                http://creativecommons.org/licenses/publicdomain
-cddl&gpl       CDDL and GPL
-               https://glassfish.dev.java.net/public/CDDL+GPL.html
-edl1           Eclipse Distribution License Version 1.0
-               http://www.eclipse.org/org/documents/edl-v10.php
 cddl1          Common Development and Distribution License
                http://www.opensource.org/licenses/cddl1.php
 gpl1           General Public License Version 1.0
                https://www.gnu.org/licenses/old-licenses/gpl-1.0.html
-mpl20          Mozilla Public License Version 2.0
-               http://www.mozilla.org/MPL/2.0/
+bsd3           Berkeley License - 3
+               http://opensource.org/licenses/BSD-3-Clause
 bsd            Berkeley License
                http://www.opensource.org/licenses/bsd-license.php
 cpl1           Common Public License Version 1.0
                http://opensource.org/licenses/cpl1.0.php
+epl2           Eclipse Public License Version 2.0
+               https://www.eclipse.org/legal/epl-2.0/

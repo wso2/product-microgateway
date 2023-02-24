@@ -1,11 +1,11 @@
 
-This product is licensed by WSO2 Inc. under Apache License 2.0. The license
+This product is licensed by WSO2 LLC. under Apache License 2.0. The license
 can be downloaded from the following locations:
 	http://www.apache.org/licenses/LICENSE-2.0.html
 	http://www.apache.org/licenses/LICENSE-2.0.txt
 
 This product also contains software under different licenses. This table below
-all the contained libraries (jar files) and the license under which they are 
+all the contained libraries (jar files) and the license under which they are
 provided to you.
 
 At the bottom of this file is a table that shows what each license indicated
