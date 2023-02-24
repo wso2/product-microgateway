@@ -20,6 +20,9 @@ package org.wso2.choreo.connect.enforcer.analytics;
 
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
@@ -27,10 +30,14 @@ import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Common Utility functions
  */
 public class AnalyticsUtils {
+    private static final Logger logger = LogManager.getLogger(AnalyticsUtils.class);
 
     public static String getAPIId(RequestContext requestContext) {
         return requestContext.getMatchedAPI().getUuid();
@@ -87,5 +94,26 @@ public class AnalyticsUtils {
                 Boolean.parseBoolean(logEntry.getCommonProperties().getMetadata()
                         .getFilterMetadataMap().get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
                         .get(MetadataConstants.IS_MOCK_API).getStringValue());
+    }
+
+    /**
+     * Sets custom analytics data provider instance
+     *
+     * @return instance of AnalyticsCustomDataProvider class
+     */
+    public static AnalyticsCustomDataProvider getCustomAnalyticsDataProvider() {
+        try {
+            Class<?> c = Class.forName(AnalyticsFilter.getAnalyticsConfigProperties()
+                    .get(AnalyticsConstants.DATA_PROVIDER_CLASS_PROPERTY));
+            Constructor<?> cons = c.getConstructor();
+            AnalyticsCustomDataProvider analyticsDataProvider = (AnalyticsCustomDataProvider) cons.newInstance();
+            logger.debug("Analytics custom data provider initialized successfully.");
+            return analyticsDataProvider;
+        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException | InvocationTargetException |
+                NoSuchMethodException e) {
+            logger.error("Error occurred while initializing custom data provider class. Error:{}",
+                    e.getMessage());
+        }
+        return null;
     }
 }

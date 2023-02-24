@@ -14,10 +14,11 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM alpine:3.15.4
+FROM alpine:3.17.2
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apk update && apk upgrade --no-cache
+RUN apk add --no-cache tzdata
 
 ENV LANG=C.UTF-8
 
@@ -57,5 +58,7 @@ COPY maven/conf/log_config.toml conf/
 COPY maven/adapter-linux-amd64 adapter
 COPY maven/check_health.sh .
 COPY maven/LICENSE.txt .
+
+EXPOSE 18000 9843 6060
 
 CMD ./adapter

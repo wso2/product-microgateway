@@ -127,6 +127,10 @@
         <classes>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketScopeTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.soap.SOAPApisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLBasicTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLQueryAnalysisTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.graphql.GraphQLScopeTestCase"/>
         </classes>
     </test>
 
@@ -140,6 +144,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.apikey.CreateStateInternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.websocket.WebSocketTimeoutTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.KeyTemplateThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.GzipCompressionTestCase"/>
         </classes>
     </test>
 

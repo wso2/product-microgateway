@@ -8,6 +8,26 @@
     maxRouteTimeoutInSeconds = 300
     routeIdleTimeoutInSeconds = 15
 
+[router.filters]
+  [router.filters.compression]
+    enabled = true
+    library = "gzip"
+  [router.filters.compression.requestDirection]
+    enabled = false
+    minimumContentLength = 30
+    contentType = ["text/html","application/json"]
+  [router.filters.compression.responseDirection]
+    enabled = true
+    minimumContentLength = 30
+    contentType = ["text/html","application/json"]
+    enableForEtagHeader = true
+  [router.filters.compression.libraryProperties]
+    memoryLevel = 3
+    windowBits = 12
+    compressionLevel = 9
+    compressionStrategy = "defaultStrategy"
+    chunkSize = 4096
+
 [enforcer]
 [enforcer.security]
 [enforcer.security.authHeader]

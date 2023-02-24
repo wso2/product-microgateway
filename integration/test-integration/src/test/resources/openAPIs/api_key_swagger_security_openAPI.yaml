@@ -35,6 +35,8 @@ paths:
           description: Pet not found
       security:
         - APIKeyAuth: []
+        - APIKeyAuth2: []
+        - APIKeyAuth3: []
   '/pet/findByTags':
     get:
       summary: Finds one pet by tags
@@ -123,6 +125,14 @@ securityDefinitions:
     scopes:
       'read:pets2': read your pets
       'write:pets2': modify pets in your account
+  APIKeyAuth2:
+    type: apiKey
+    name: X-APIKEY
+    in: header
+  APIKeyAuth3:
+    type: apiKey
+    name: X-ApiKey-Q
+    in: query
 definitions:
   Pet:
     type: object

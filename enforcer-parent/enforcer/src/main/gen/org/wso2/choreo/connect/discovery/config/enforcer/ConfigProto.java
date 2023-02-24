@@ -46,7 +46,7 @@ public final class ConfigProto {
       ",wso2/discovery/config/enforcer/tracing." +
       "proto\032,wso2/discovery/config/enforcer/me" +
       "trics.proto\032)wso2/discovery/config/enfor" +
-      "cer/soap.proto\"\225\007\n\006Config\022:\n\010security\030\001 " +
+      "cer/soap.proto\"\262\007\n\006Config\022:\n\010security\030\001 " +
       "\001(\0132(.wso2.discovery.config.enforcer.Sec" +
       "urity\022;\n\010keystore\030\002 \001(\0132).wso2.discovery" +
       ".config.enforcer.CertStore\022=\n\ntruststore" +
@@ -69,11 +69,11 @@ public final class ConfigProto {
       "y.config.enforcer.Metrics\0227\n\007filters\030\016 \003" +
       "(\0132&.wso2.discovery.config.enforcer.Filt" +
       "er\0222\n\004soap\030\017 \001(\0132$.wso2.discovery.config" +
-      ".enforcer.SoapB\222\001\n1org.wso2.choreo.conne" +
-      "ct.discovery.config.enforcerB\013ConfigProt" +
-      "oP\001ZNgithub.com/envoyproxy/go-control-pl" +
-      "ane/wso2/discovery/config/enforcer;enfor" +
-      "cerb\006proto3"
+      ".enforcer.Soap\022\033\n\023controlPlaneEnabled\030\020 " +
+      "\001(\010B\222\001\n1org.wso2.choreo.connect.discover" +
+      "y.config.enforcerB\013ConfigProtoP\001ZNgithub" +
+      ".com/envoyproxy/go-control-plane/wso2/di" +
+      "scovery/config/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -98,7 +98,7 @@ public final class ConfigProto {
     internal_static_wso2_discovery_config_enforcer_Config_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Config_descriptor,
-        new java.lang.String[] { "Security", "Keystore", "Truststore", "AuthService", "JwtGenerator", "Throttling", "Cache", "JwtIssuer", "Analytics", "Management", "RestServer", "Tracing", "Metrics", "Filters", "Soap", });
+        new java.lang.String[] { "Security", "Keystore", "Truststore", "AuthService", "JwtGenerator", "Throttling", "Cache", "JwtIssuer", "Analytics", "Management", "RestServer", "Tracing", "Metrics", "Filters", "Soap", "ControlPlaneEnabled", });
     org.wso2.choreo.connect.discovery.config.enforcer.CertStoreProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.ServiceProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorProto.getDescriptor();

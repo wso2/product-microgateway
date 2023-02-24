@@ -34,7 +34,7 @@ public class ApimStartupExecutor {
     void startAPIM() throws Exception {
         apimInstance = ApimInstance.createNewInstance();
         apimInstance.startAPIM();
-        Awaitility.await().pollDelay(2, TimeUnit.MINUTES).pollInterval(15, TimeUnit.SECONDS)
+        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(10, TimeUnit.SECONDS)
                 .atMost(4, TimeUnit.MINUTES).until(isAPIMServerStarted());
     }
 

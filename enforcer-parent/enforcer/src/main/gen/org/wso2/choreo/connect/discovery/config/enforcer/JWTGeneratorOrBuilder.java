@@ -98,32 +98,38 @@ public interface JWTGeneratorOrBuilder extends
       getClaimsExtractorImplBytes();
 
   /**
-   * <code>string public_certificate_path = 10;</code>
-   * @return The publicCertificatePath.
-   */
-  java.lang.String getPublicCertificatePath();
-  /**
-   * <code>string public_certificate_path = 10;</code>
-   * @return The bytes for publicCertificatePath.
-   */
-  com.google.protobuf.ByteString
-      getPublicCertificatePathBytes();
-
-  /**
-   * <code>string private_key_path = 11;</code>
-   * @return The privateKeyPath.
-   */
-  java.lang.String getPrivateKeyPath();
-  /**
-   * <code>string private_key_path = 11;</code>
-   * @return The bytes for privateKeyPath.
-   */
-  com.google.protobuf.ByteString
-      getPrivateKeyPathBytes();
-
-  /**
-   * <code>int32 token_ttl = 12;</code>
+   * <code>int32 token_ttl = 10;</code>
    * @return The tokenTtl.
    */
   int getTokenTtl();
+
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+   */
+  java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Keypair> 
+      getKeypairsList();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Keypair getKeypairs(int index);
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+   */
+  int getKeypairsCount();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder> 
+      getKeypairsOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Keypair keypairs = 11;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.KeypairOrBuilder getKeypairsOrBuilder(
+      int index);
+
+  /**
+   * <code>bool use_kid_property = 12;</code>
+   * @return The useKidProperty.
+   */
+  boolean getUseKidProperty();
 }

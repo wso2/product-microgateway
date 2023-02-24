@@ -63,10 +63,6 @@
             <outputDirectory>/</outputDirectory>
         </file>
         <file>
-            <source>target/grpc_health_probe-linux-arm64</source>
-            <outputDirectory>/</outputDirectory>
-        </file>
-        <file>
             <source>../../resources/license/LICENSE-ENFORCER.txt</source>
             <outputDirectory/>
             <destName>LICENSE.txt</destName>

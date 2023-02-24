@@ -1,0 +1,18 @@
+{
+  "name": "GraphQLScopeAPI",
+  "version": "1.0.0",
+  "context": "gqlScope",
+  "type": "GRAPHQL",
+  "description": "This GraphQL API is used to cover scope related test cases relevant to the GraphQL APIs.",
+  "tiersCollection": "Unlimited",
+  "operationsDTOS": [],
+  "endpoint": {
+    "endpoint_type": "http",
+    "production_endpoints": {
+      "url": "http://mockBackend:2320/gql"
+    },
+    "sandbox_endpoints": {
+      "url": "http://mockBackend:2320/gql"
+    }
+  }
+}

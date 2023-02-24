@@ -18,10 +18,19 @@
 
 package org.wso2.choreo.connect.tests.util;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpHeaders;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Locale;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.Header;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +38,14 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.wso2.am.integration.clients.admin.api.dto.ConditionalGroupDTO;
+import org.wso2.am.integration.clients.admin.api.dto.HeaderConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.IPConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.JWTClaimsConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.QueryParameterConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
+import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.choreo.connect.mockbackend.Constants;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -44,12 +61,21 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import static org.wso2.choreo.connect.tests.util.ApictlUtils.API_PROJECTS_PATH;
 
 /**
  * Utility class for test integration common functions.
@@ -242,6 +268,31 @@ public class Utils {
         }
     }
 
+    public static void zip(final String dirPathToZip, final String folderName) throws IOException {
+        Path zipFile = Files.createFile(Paths.get(dirPathToZip + ".zip"));
+        Path sourceDirPath = Paths.get(dirPathToZip);
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile),
+                StandardCharsets.UTF_8); Stream<Path> paths = Files.walk(sourceDirPath)) {
+            paths
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+
+                        ZipEntry zipEntry = new ZipEntry(
+                                // example: dir/petstore.zip/petstore/api.yaml
+                                // to get the correct structure when decompressed.
+                                folderName + File.separator + sourceDirPath.relativize(path));
+                        try {
+                            zipOutputStream.putNextEntry(zipEntry);
+                            Files.copy(path, zipOutputStream);
+                            zipOutputStream.closeEntry();
+                        } catch (IOException e) {
+                            log.error("Error while creating zip for {}", sourceDirPath);
+                        }
+                    });
+        }
+        deleteFolder(new File(dirPathToZip));
+    }
+
     /**
      * Return the system property value of os.name. System.getProperty("os.name").
      *
@@ -283,6 +334,15 @@ public class Utils {
     }
 
     /**
+     * Encode a byte array to base64 format
+     *
+     * @param value The value to be encoded.
+     */
+    public static String encodeValueToBase64(byte[] value) {
+        return Base64.getEncoder().encodeToString(value);
+    }
+
+    /**
      * Invoke an API
      *
      * @param token      The token to be sent with the request header.
@@ -290,11 +350,9 @@ public class Utils {
      */
     public static HttpResponse invokeApi(String token, String requestUrl) throws Exception {
         Map<String, String> headers = new HashMap<>();
-        //invoke api with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
-        HttpResponse response = HttpClientRequest
-                .doGet(requestUrl, headers);
-        return response;
+        return HttpClientRequest.retryGetRequestUntilDeployed(
+                Utils.getServiceURLHttps(requestUrl), headers);
     }
 
     /**
@@ -456,6 +514,23 @@ public class Utils {
     }
 
     /**
+     * Copies a file with existing attribute values
+     *
+     * @param sourceLocation current location of the file
+     * @param destLocation   destination location path of the file
+     * @throws CCTestException if error happens while copying the file
+     */
+    public static void copyFileWithAttributes(String sourceLocation, String destLocation) throws CCTestException {
+        try {
+            Path sourcePath = Paths.get(sourceLocation);
+            Path destPath = Paths.get(destLocation);
+            Files.copy(sourcePath,destPath,StandardCopyOption.COPY_ATTRIBUTES);
+        } catch (IOException e) {
+            throw new CCTestException("error while copying file. ", e);
+        }
+    }
+
+    /**
      * Delay the program for a given time period
      *
      * @param sourceLocation folder location.
@@ -489,6 +564,81 @@ public class Utils {
         }
     }
 
+    /**
+     * Creates a set of conditional groups with a list of conditions
+     *
+     * @param limit Throttle limit of the conditional group.
+     * @return Created list of conditional group DTO
+     */
+    public static List<ConditionalGroupDTO> createConditionalGroups(ThrottleLimitDTO limit, String throttledIP,
+                                                                    String throttledHeader, String throttledQueryParam,
+                                                                    String throttledQueryParamValue,
+                                                                    String throttledClaim) {
+        List<ConditionalGroupDTO> conditionalGroups = new ArrayList<>();
+
+        // create an IP condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> ipGrp = new ArrayList<>();
+        IPConditionDTO ipConditionDTO = DtoFactory.createIPConditionDTO(IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC,
+                throttledIP, null, null);
+        ThrottleConditionDTO ipCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.IPCONDITION, false, null, ipConditionDTO,
+                        null, null);
+        ipGrp.add(ipCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "IP conditional group", ipGrp, limit));
+
+        // create a header condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> headerGrp = new ArrayList<>();
+        HeaderConditionDTO headerConditionDTO =
+                DtoFactory.createHeaderConditionDTO(HttpHeaders.USER_AGENT.toLowerCase(Locale.ROOT), throttledHeader);
+        ThrottleConditionDTO headerCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.HEADERCONDITION, false, headerConditionDTO,
+                        null, null, null);
+        headerGrp.add(headerCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "Header conditional group", headerGrp, limit));
+
+        // create a query parameter condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> queryGrp = new ArrayList<>();
+        QueryParameterConditionDTO queryParameterConditionDTO =
+                DtoFactory.createQueryParameterConditionDTO(throttledQueryParam, throttledQueryParamValue);
+        ThrottleConditionDTO queryParameterCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION, false, null, null,
+                        null, queryParameterConditionDTO);
+        queryGrp.add(queryParameterCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "Query param conditional group", queryGrp, limit));
+
+        // create a JWT claims condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> claimGrp = new ArrayList<>();
+        String claimUrl = "http://wso2.org/claims/applicationname";
+        JWTClaimsConditionDTO jwtClaimsConditionDTO =
+                DtoFactory.createJWTClaimsConditionDTO(claimUrl, throttledClaim);
+        ThrottleConditionDTO jwtClaimsCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION, false, null, null,
+                        jwtClaimsConditionDTO, null);
+        claimGrp.add(jwtClaimsCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "JWT Claim conditional group", claimGrp, limit));
+
+        return conditionalGroups;
+    }
+
+    /**
+     * Gives the GraphQL schema path used in the sample GraphQL project
+     *
+     * @return File path of the GraphQL schema file
+     */
+    public static String getGraphQLSchemaPath() {
+        String samplesDirPath = Utils.getCCSamplesDirPath();
+        return samplesDirPath + API_PROJECTS_PATH + "SampleGraphQLApi" + File.separator +
+                "Definitions" + File.separator + "schema.graphql";
+    }
+
+    public static String getDockerMockGraphQLServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://mockBackend:" + TestConstant.MOCK_GRAPHQL_SERVER_PORT), servicePath).toString();
+    }
+
     public static String convertYamlToJson(String yamlString) {
         Yaml yaml= new Yaml();
         Object obj = yaml.load(yamlString);
@@ -507,6 +657,17 @@ public class Utils {
         return headersCaseInsensitive;
     }
 
+    /**
+     * Gives jacoco aggregate.exec file containing path relevant to the Enforcer
+     *
+     * @return jacoco aggregate.exec file path
+     */
+    public static String getEnforcerCodeCovExecPath() {
+        return File.separator + TestConstant.ENFORCER_PARENT_DIR_NAME + File.separator + TestConstant.ENFORCER_DIR_NAME
+                + File.separator + TestConstant.TARGET_DIR_NAME + File.separator +
+                TestConstant.CODECOV_AGGREGATE_REPORT_DIR_NAME + File.separator + TestConstant.JACOCO_EXEC_NAME;
+    }
+
     public static String getTargetDirPath() {
         File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
@@ -523,6 +684,23 @@ public class Utils {
                 getLocation().getPath());
         return targetClassesDir.getParentFile().getParentFile().getParentFile().getParentFile().toString()
                 + File.separator + "samples";
+    }
+
+    /**
+     * @param responseHeaders HTTP response headers list
+     * @param requiredHeader  header name as a string
+     * @return the required HTTP header (if not found, null will be returned)
+     */
+    public static String pickHeader(Map<String, String> responseHeaders, String requiredHeader) {
+        if (requiredHeader == null) {
+            return null;
+        }
+        for (String headerName : responseHeaders.keySet()) {
+            if (requiredHeader.equalsIgnoreCase(headerName)) {
+                return headerName;
+            }
+        }
+        return null;
     }
 
     public static String getAdapterServiceURLHttps(String servicePath) throws MalformedURLException {

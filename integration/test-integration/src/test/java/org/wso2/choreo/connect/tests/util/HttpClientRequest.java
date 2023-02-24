@@ -152,6 +152,34 @@ public class HttpClientRequest {
     }
 
     /**
+     * Sends an HTTP DELETE request to a url with body.
+     *
+     * @param endpoint - The endpoint of the resource
+     * @param body     - Message payload
+     * @param headers  - HTTP request headers map
+     * @return HttpResponse
+     * @throws IOException If an error occurs while sending the DELETE request
+     */
+    public static HttpResponse doDelete(String endpoint, String body, Map<String, String> headers)
+            throws IOException {
+        HttpURLConnection urlConnection = null;
+        try {
+            urlConnection = getURLConnection(endpoint);
+            setHeadersAndMethod(urlConnection, headers, TestConstant.HTTP_METHOD_DELETE);
+            try (OutputStream out = urlConnection.getOutputStream()) {
+                Writer writer = new OutputStreamWriter(out, TestConstant.CHARSET_NAME);
+                writer.write(body);
+                writer.close();
+            }
+            return buildResponse(urlConnection);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+    }
+
+    /**
      * Sends an HTTP OPTIONS request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")

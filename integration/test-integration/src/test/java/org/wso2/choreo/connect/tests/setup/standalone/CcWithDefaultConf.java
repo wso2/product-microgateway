@@ -49,6 +49,7 @@ public class CcWithDefaultConf {
                 .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH +
                         "openAPI_startup_zipped.zip")
                 .withStartupAPI(Utils.getTargetDirPath() + ApictlUtils.API_PROJECTS_PATH + "openAPI_startup")
+                .markInitialCCStartup(true)
                 .build();
         ccInstance.start();
         Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
@@ -56,6 +57,7 @@ public class CcWithDefaultConf {
 
         ApictlUtils.createProject( "trailing_slash_openAPI.yaml", "trailing_slash");
         ApictlUtils.createProject( "all_http_methods_for_wildcard_openAPI.yaml", "all_http_methods_for_wildcard_openAPI");
+        ApictlUtils.createProject( "no_basepath_openAPI.yaml", "no_basepath");
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore");
         ApictlUtils.createProject("prod_sand_diff_endpoints_openAPI.yaml", "prod_sand_diff_endpoints");
         ApictlUtils.createProject("prod_sand_clusters_openAPI.yaml", "prod_sand_clusters");
@@ -81,6 +83,7 @@ public class CcWithDefaultConf {
 
         ApictlUtils.deployAPI("petstore", "test");
         ApictlUtils.deployAPI("trailing_slash", "test");
+        ApictlUtils.deployAPI("no_basepath", "test");
         ApictlUtils.deployAPI("all_http_methods_for_wildcard_openAPI", "test");
         ApictlUtils.deployAPI("prod_and_sand_petstore", "test");
         ApictlUtils.deployAPI("prod_sand_diff_endpoints", "test");

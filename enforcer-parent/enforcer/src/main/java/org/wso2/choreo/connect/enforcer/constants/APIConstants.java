@@ -38,11 +38,12 @@ public class APIConstants {
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String END_USER_ANONYMOUS = "anonymous";
+    public static final String END_USER_UNKNOWN = "unknown";
     public static final String ANONYMOUS_PREFIX = "anon:";
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
-    public static final String DEFAULT_ISSUER = "Resident Key Manager";
-    public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
+    public static final String PUBLISHER_CERTIFICATE_ALIAS = "publisher_certificate_alias";
+    public static final String APIKEY_CERTIFICATE_ALIAS = "apikey_certificate_alias";
     public static final String WSO2_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
@@ -89,7 +90,7 @@ public class APIConstants {
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal Server Error";
 
     //headers and values
-    public static final String CONTENT_TYPE_HEADER = "Content-type";
+    public static final String CONTENT_TYPE_HEADER = "content-type";
     public static final String SOAP_ACTION_HEADER_NAME = "soapaction";
     public static final String ACCEPT_HEADER = "accept";
     public static final String PREFER_HEADER = "prefer";
@@ -99,6 +100,7 @@ public class APIConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE_TEXT_XML = "text/xml";
     public static final String CONTENT_TYPE_SOAP_XML = "application/soap+xml";
+    public static final String APPLICATION_GRAPHQL = "application/graphql";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String PATH_HEADER = ":path";
     public static final String UPGRADE_HEADER = "upgrade";
@@ -201,8 +203,6 @@ public class APIConstants {
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
         public static final String PERMITTED_IP = "permittedIP";
         public static final String PERMITTED_REFERER = "permittedReferer";
-        public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
-        public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String PARAM_SEPARATOR = "&";
         public static final String PARAM_VALUE_SEPARATOR = "=";
@@ -232,6 +232,12 @@ public class APIConstants {
         public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
         public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
         public static final String APIM_PUBLISHER_ISSUER = "APIM Publisher";
+        public static final String APIM_APIKEY_ISSUER = "APIM APIkey";
+
+        // APIM_APIKEY_ISSUER_URL is intentionally different from the Resident Key Manager
+        // to avoid conflicts with the access token issuer configs.
+        public static final String APIM_APIKEY_ISSUER_URL = "https://host:9443/apikey";
+        
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
 
@@ -403,16 +409,10 @@ public class APIConstants {
      */
     public static class ApiType {
         public static final String WEB_SOCKET = "WS";
+        public static final String GRAPHQL = "GRAPHQL";
         public static final String REST = "HTTP";
     }
 
-    /**
-     * Holds values for mocked APIs
-     */
-    public static class MockApiConstants {
-        public static final String HEADER = "header";
-        public static final String QUERY = "query";
-    }
 
     /**
      * Holds values for optionality.

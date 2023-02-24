@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
@@ -31,6 +32,7 @@ import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
 import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
@@ -43,6 +45,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -59,18 +62,17 @@ public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
     private static AnalyticsEventPublisher publisher;
+    private static Map<String, String> analyticsConfigProperties;
+    private static AnalyticsCustomDataProvider analyticsDataProvider;
 
     private AnalyticsFilter() {
-        Map<String, String> configuration =
-                ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties();
-        boolean isChoreoDeployment = configuration.containsKey(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
-                && configuration.get(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
-                .toLowerCase().equals("true");
-        String customAnalyticsPublisher =
-                ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties()
-                        .get(AnalyticsConstants.PUBLISHER_IMPL_CONFIG_KEY);
+        analyticsConfigProperties = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties();
+        boolean isChoreoDeployment = analyticsConfigProperties
+                .containsKey(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY) &&
+                Boolean.valueOf(analyticsConfigProperties.get(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY));
+        String customAnalyticsPublisher = analyticsConfigProperties.get(AnalyticsConstants.PUBLISHER_IMPL_CONFIG_KEY);
         Map<String, String> publisherConfig = new HashMap<>(2);
-        for (Map.Entry<String, String> entry : configuration.entrySet()) {
+        for (Map.Entry<String, String> entry : analyticsConfigProperties.entrySet()) {
             // We are always expecting <String, String> Map as configuration.
             publisherConfig.put(entry.getKey(), getEnvValue(entry.getValue()).toString());
         }
@@ -82,9 +84,13 @@ public class AnalyticsFilter {
             publisherConfig.remove(AnalyticsConstants.AUTH_URL_CONFIG_KEY);
             publisherConfig.remove(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY);
             // Add default elk publisher class config
-            if (!configuration.containsKey(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY)) {
+            if (!analyticsConfigProperties.containsKey(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY)) {
                 publisherConfig.put(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY,
                         AnalyticsConstants.DEFAULT_ELK_PUBLISHER_REPORTER_CLASS);
+            }
+            if (analyticsConfigProperties.containsKey(
+                    org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants.DATA_PROVIDER_CLASS_PROPERTY)) {
+                this.analyticsDataProvider = AnalyticsUtils.getCustomAnalyticsDataProvider();
             }
         }
 
@@ -121,6 +127,14 @@ public class AnalyticsFilter {
             logger.error("Cannot publish the analytics event as analytics publisher is null.",
                     ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5102));
         }
+    }
+
+    public static Map<String, String> getAnalyticsConfigProperties() {
+        return analyticsConfigProperties;
+    }
+
+    public static AnalyticsCustomDataProvider getAnalyticsCustomDataProvider() {
+        return analyticsDataProvider;
     }
 
     public void handleSuccessRequest(RequestContext requestContext) {
@@ -168,8 +182,12 @@ public class AnalyticsFilter {
                     ConfigHolder.getInstance().getEnvVarConfig().getEnforcerRegionId());
 
             // As in the matched API, only the resources under the matched resource template are selected.
+            ArrayList<String> resourceTemplate = new ArrayList<>();
+            for (ResourceConfig resourceConfig : requestContext.getMatchedResourcePaths()) {
+                resourceTemplate.add(resourceConfig.getPath());
+            }
             requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
-                    requestContext.getMatchedResourcePath().getPath());
+                    String.join(",", resourceTemplate));
 
             requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
 
@@ -178,6 +196,13 @@ public class AnalyticsFilter {
             requestContext.addMetadataToMap(MetadataConstants.CLIENT_IP_KEY, requestContext.getClientIp());
             requestContext.addMetadataToMap(MetadataConstants.USER_AGENT_KEY,
                     AnalyticsUtils.setDefaultIfNull(requestContext.getHeaders().get("user-agent")));
+
+            // Adding UserName and the APIContext
+            String endUserName = authContext.getUsername();
+            requestContext.addMetadataToMap(MetadataConstants.API_USER_NAME_KEY,
+                    endUserName == null ? APIConstants.END_USER_UNKNOWN : endUserName);
+            requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
+                    requestContext.getMatchedAPI().getBasePath());
         } finally {
             if (Utils.tracingEnabled()) {
                 analyticsSpanScope.close();
@@ -268,7 +293,7 @@ public class AnalyticsFilter {
             logger.error("Error while loading the custom analytics publisher class.",
                     ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 5105), e);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                | NoSuchMethodException e) {
+                 | NoSuchMethodException e) {
             logger.error("Error while generating AnalyticsEventPublisherInstance from the class",
                     ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5106), e);
         }

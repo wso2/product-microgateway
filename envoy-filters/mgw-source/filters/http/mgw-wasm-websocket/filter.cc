@@ -119,6 +119,8 @@ FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
         sscanf(std::string(p.second).c_str(), "%d", &timestamp);
         this->throttle_period_ = timestamp;
         LOG_TRACE(std::string("Throttle Period is till ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
+      } else if (std::string(p.first) == EXT_AUTHZ_DURATION) {
+        LOG_TRACE(std::string("Ext Authz Duration Ignored!!!"));
       } else {
         // The above metadata is only required for determining throttling state in the start. Hence they are not
         // required to stored in metadata separately. Everything else will be stored under metadata.

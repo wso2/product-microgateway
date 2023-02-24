@@ -20,12 +20,15 @@
 package envoyconf
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	awslambdav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/aws_lambda/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	local_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	wasm_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/wasm/v3"
@@ -33,12 +36,14 @@ import (
 	wasmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/wasm/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	//rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 
 	//mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
 	"github.com/golang/protobuf/ptypes/any"
@@ -46,29 +51,43 @@ import (
 
 // getHTTPFilters generates httpFilter configuration
 func getHTTPFilters() []*hcmv3.HttpFilter {
-	conf, _ := config.ReadConfigs()
 	extAauth := getExtAuthzHTTPFilter()
 	router := getRouterHTTPFilter()
 	lua := getLuaFilter()
 	awsLambda := getAwsLambdaFilter()
-	cors := &hcmv3.HttpFilter{
-		Name:       wellknown.CORS,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
-	}
+	cors := getCorsHTTPFilter()
+	localRateLimit := getHTTPLocalRateLimitFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
+		localRateLimit,
 		extAauth,
 		lua,
 		//if AwsLambda filter is enabled, it will insert into this index,
 		router,
 	}
 
+	conf, _ := config.ReadConfigs()
+
 	if conf.Envoy.AwsLambda.Enabled {
 		httpFilters = append(httpFilters[:3], httpFilters[2:]...)
 		httpFilters[3] = awsLambda
 	}
 
+	if conf.Envoy.Filters.Compression.Enabled {
+		compressionFilter, err := getCompressorFilter()
+		if err != nil {
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while creating the compression filter: %v", err.Error()),
+				Severity:  logging.MINOR,
+				ErrorCode: 2234,
+			})
+			return httpFilters
+		}
+		httpFilters = httpFilters[:len(httpFilters)-1]
+		httpFilters = append(httpFilters, compressionFilter)
+		httpFilters = append(httpFilters, router)
+	}
 	return httpFilters
 }
 
@@ -84,7 +103,7 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 		RespectExpectedRqTimeout: false,
 	}
 
-	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
+	routeFilterTypedConf, err := anypb.New(&routeFilterConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
 	}
@@ -95,12 +114,28 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 	return &filter
 }
 
+// getCorsHTTPFilter gets cors http filter.
+func getCorsHTTPFilter() *hcmv3.HttpFilter {
+
+	corsFilterConf := cors_filter_v3.CorsPolicy{}
+	corsFilterTypedConf, err := anypb.New(&corsFilterConf)
+
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marshaling cors filter configs. ", err)
+	}
+
+	filter := hcmv3.HttpFilter{
+		Name:       wellknown.CORS,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: corsFilterTypedConf},
+	}
+
+	return &filter
+}
+
 // UpgradeFilters that are applied in websocket upgrade mode
 func getUpgradeFilters() []*hcmv3.HttpFilter {
-	cors := &hcmv3.HttpFilter{
-		Name:       wellknown.CORS,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
-	}
+
+	cors := getCorsHTTPFilter()
 	extAauth := getExtAuthzHTTPFilter()
 	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
 	router := getRouterHTTPFilter()
@@ -136,15 +171,15 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		},
 	}
 
-	// configures envoy to handle request body
-	if conf.Envoy.PayloadPassingToEnforcer.PassRequestPayload {
-		extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
-			MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
-			AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
-			PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
-		}
+	// configures envoy to handle request body and GraphQL APIs require below configs to pass request
+	// payload to the enforcer.
+	extAuthzConfig.WithRequestBody = &ext_authv3.BufferSettings{
+		MaxRequestBytes:     conf.Envoy.PayloadPassingToEnforcer.MaxRequestBytes,
+		AllowPartialMessage: conf.Envoy.PayloadPassingToEnforcer.AllowPartialMessage,
+		PackAsBytes:         conf.Envoy.PayloadPassingToEnforcer.PackAsBytes,
 	}
-	ext, err2 := ptypes.MarshalAny(extAuthzConfig)
+
+	ext, err2 := anypb.New(extAuthzConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
@@ -159,14 +194,18 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 
 // getLuaFilter gets Lua http filter.
 func getLuaFilter() *hcmv3.HttpFilter {
-	//conf, _ := config.ReadConfigs()
+
 	luaConfig := &luav3.Lua{
-		InlineCode: "function envoy_on_request(request_handle)" +
-			"\nend" +
-			"\nfunction envoy_on_response(response_handle)" +
-			"\nend",
+		DefaultSourceCode: &corev3.DataSource{
+			Specifier: &corev3.DataSource_InlineString{
+				InlineString: "function envoy_on_request(request_handle)" +
+					"\nend" +
+					"\nfunction envoy_on_response(response_handle)" +
+					"\nend",
+			},
+		},
 	}
-	ext, err2 := ptypes.MarshalAny(luaConfig)
+	ext, err2 := anypb.New(luaConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
@@ -207,6 +246,24 @@ func getAwsLambdaFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &awsLambdaFilter
+}
+
+// getHTTPLocalRateLimitFilter returns the local rate limit filter which is used for JWKS endpoint specifically.
+func getHTTPLocalRateLimitFilter() *hcmv3.HttpFilter {
+	localRateLimitConfig := &local_ratelimit_v3.LocalRateLimit{
+		StatPrefix: localRateLimitStatPrefix,
+	}
+	marshalledRateLimitConfig, err := ptypes.MarshalAny(localRateLimitConfig)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while generating the local rate limit filter.", err)
+	}
+	localRateLimitFilter := &hcmv3.HttpFilter{
+		Name: localRatelimitFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: marshalledRateLimitConfig,
+		},
+	}
+	return localRateLimitFilter
 }
 
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {

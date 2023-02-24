@@ -43,11 +43,13 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.TrailingSlashTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.AllHttpMethodsForWildcardTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.NoBasepathEndpointTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.router.EnvoyHttpFilterTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.BackendSecurityTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopeTest"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopesAsArrayTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.InternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.CustomAuthHeaderTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.QSGAndSwaggerTestCase"/>
@@ -89,6 +91,7 @@
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>
 
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsGraphQLTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeoutTestCase"/>
@@ -124,6 +127,8 @@
     <test name="cc-with-multiple-env" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithMultipleEnv"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.APIKeyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.SubscriptionValidationTestCase"/>
         </classes>
     </test>
     <test name="cc-with-source-control" preserve-order="true" parallel="false">

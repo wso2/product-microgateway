@@ -51,6 +51,16 @@
             <outputDirectory/>
             <destName>LICENSE.txt</destName>
         </file>
+        <file>
+            <source>src/main/resources/envoy.yaml.template</source>
+            <outputDirectory/>
+            <destName>envoy.yaml.template</destName>
+        </file>
+        <file>
+            <source>src/main/resources/docker-entrypoint.sh</source>
+            <outputDirectory/>
+            <destName>docker-entrypoint.sh</destName>
+        </file>
     </files>
     <fileSets>
         <fileSet>

@@ -112,7 +112,7 @@ public class AuthFilter implements Filter {
             Authenticator mtlsAuthenticator = new MTLSAuthenticator();
             authenticators.add(mtlsAuthenticator);
         }
-        
+
         if (isOAuthProtected) {
             Authenticator jwtAuthenticator = new JWTAuthenticator();
             authenticators.add(jwtAuthenticator);
@@ -126,7 +126,7 @@ public class AuthFilter implements Filter {
         Authenticator authenticator = new InternalAPIKeyAuthenticator(
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         authenticators.add(authenticator);
-    
+
         Authenticator unsecuredAPIAuthenticator = new UnsecuredAPIAuthenticator();
         authenticators.add(unsecuredAPIAuthenticator);
 
@@ -176,9 +176,10 @@ public class AuthFilter implements Filter {
                 if (isMutualSSLMandatory && authenticator.getName()
                         .contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
                     authenticated = false;
-                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} ",
-                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
-                            requestContext.getMatchedAPI().getVersion());
+                    log.debug("mTLS authentication was failed for the request: {} , API: {}:{} APIUUID: {} ",
+                            requestContext.getMatchedResourcePaths().get(0).getPath(),
+                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                            requestContext.getMatchedAPI().getUuid());
                     break;
                 }
                 // Check if the failed authentication is a mandatory application level security
@@ -194,8 +195,8 @@ public class AuthFilter implements Filter {
         if (!canAuthenticated) {
             FilterUtils.setUnauthenticatedErrorToContext(requestContext);
         }
-        log.error(
-                "None of the authenticators were able to authenticate the request: " + requestContext.getRequestPath(),
+        log.debug("None of the authenticators were able to authenticate the request: {}",
+                requestContext.getRequestPathTemplate(),
                 ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6600));
         //set WWW_AUTHENTICATE header to error response
         requestContext.addOrModifyHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
@@ -206,7 +207,7 @@ public class AuthFilter implements Filter {
 
     private AuthenticationResponse authenticate(Authenticator authenticator, RequestContext requestContext) {
         try {
-            AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
+            AuthenticationContext authenticate = authenticator.authenticate(requestContext);
             requestContext.setAuthenticationContext(authenticate);
             if (authenticator.getName().contains(APIConstants.API_SECURITY_MUTUAL_SSL_NAME)) {
                 // This section is for mTLS authentication
@@ -214,20 +215,25 @@ public class AuthFilter implements Filter {
                     updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                     // set backend security
                     EndpointSecurityUtils.addEndpointSecurity(requestContext);
-                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{} ",
-                            requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI().getName(),
-                            requestContext.getMatchedAPI().getVersion());
+                    log.debug("mTLS authentication was passed for the request: {} , API: {}:{}, APIUUID: {} ",
+                            requestContext.getMatchedResourcePaths().get(0).getPath(),
+                            requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                            requestContext.getMatchedAPI().getUuid());
                     return new AuthenticationResponse(true, isMutualSSLMandatory, true);
                 } else {
                     if (isMutualSSLMandatory) {
-                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{} ",
-                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
-                                        .getName(), requestContext.getMatchedAPI().getVersion());
+                        log.debug("Mandatory mTLS authentication was failed for the request: {} , API: {}:{}, " +
+                                        "APIUUID: {} ",
+                                requestContext.getMatchedResourcePaths().get(0).getPath(),
+                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                                requestContext.getMatchedAPI().getUuid());
                         return new AuthenticationResponse(false, true, false);
                     } else {
-                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{} ",
-                                requestContext.getMatchedResourcePath().getPath(), requestContext.getMatchedAPI()
-                                        .getName(), requestContext.getMatchedAPI().getVersion());
+                        log.debug("Optional mTLS authentication was failed for the request: {} , API: {}:{}, " +
+                                        "APIUUID: {} ",
+                                requestContext.getMatchedResourcePaths().get(0).getPath(),
+                                requestContext.getMatchedAPI().getName(), requestContext.getMatchedAPI().getVersion(),
+                                requestContext.getMatchedAPI().getUuid());
                         return new AuthenticationResponse(false, false, true);
                     }
                 }
@@ -250,10 +256,10 @@ public class AuthFilter implements Filter {
     /**
      * Update the cluster header based on the keyType and authenticate the token against its respective endpoint
      * environment.
-     * 
-     * @param requestContext request Context 
-     * @param authContext authentication context
-     * @throws APISecurityException if the environment and 
+     *
+     * @param requestContext request Context
+     * @param authContext    authentication context
+     * @throws APISecurityException if the environment and
      */
     private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
             throws APISecurityException {
@@ -300,43 +306,31 @@ public class AuthFilter implements Filter {
     }
 
     private void addRouterHttpHeaders(RequestContext requestContext, String keyType) {
-        // for both HTTP and WS
-        if (requestContext.getMatchedAPI().getEndpoints().containsKey(keyType)) {
-            addAPILevelRetryConfigHeaders(requestContext, keyType);
-            addAPILevelTimeoutHeaders(requestContext, keyType);
-        }
-
-        ResourceConfig resourceConfig = requestContext.getMatchedResourcePath();
+        // requestContext.getMatchedResourcePaths() will only have one element for non GraphQL APIs.
+        // Also, GraphQL APIs doesn't have resource level endpoint configs
+        ResourceConfig resourceConfig = requestContext.getMatchedResourcePaths().get(0);
         // In websockets case, the endpoints object becomes null. Hence it would result
         // in a NPE, if it is not checked.
         if (resourceConfig.getEndpoints() != null &&
                 resourceConfig.getEndpoints().containsKey(keyType)) {
             EndpointCluster endpointCluster = resourceConfig.getEndpoints().get(keyType);
-
-            // Apply resource level retry headers
-            if (endpointCluster.getRetryConfig() != null) {
-                addRetryConfigHeaders(requestContext, endpointCluster.getRetryConfig());
-            }
-            // Apply resource level timeout headers
-            if (endpointCluster.getRouteTimeoutInMillis() != null) {
-                addTimeoutHeaders(requestContext, endpointCluster.getRouteTimeoutInMillis());
-            }
+            addRetryAndTimeoutConfigHeaders(requestContext, endpointCluster);
+            handleEmptyPathHeader(requestContext, endpointCluster.getBasePath());
+        } else if (requestContext.getMatchedAPI().getEndpoints().containsKey(keyType)) {
+            EndpointCluster endpointCluster = requestContext.getMatchedAPI().getEndpoints().get(keyType);
+            addRetryAndTimeoutConfigHeaders(requestContext, endpointCluster);
+            handleEmptyPathHeader(requestContext, endpointCluster.getBasePath());
         }
     }
 
-    private void addAPILevelRetryConfigHeaders(RequestContext requestContext, String keyType) {
-        RetryConfig apiLevelRetryConfig =
-                requestContext.getMatchedAPI().getEndpoints().get(keyType).getRetryConfig();
-        if (apiLevelRetryConfig != null) {
-            addRetryConfigHeaders(requestContext, apiLevelRetryConfig);
+    private void addRetryAndTimeoutConfigHeaders(RequestContext requestContext, EndpointCluster endpointCluster) {
+        RetryConfig retryConfig = endpointCluster.getRetryConfig();
+        if (retryConfig != null) {
+            addRetryConfigHeaders(requestContext, retryConfig);
         }
-    }
-
-    private void addAPILevelTimeoutHeaders(RequestContext requestContext, String keyType) {
-        Integer apiLevelTimeout =
-                requestContext.getMatchedAPI().getEndpoints().get(keyType).getRouteTimeoutInMillis();
-        if (apiLevelTimeout != null) {
-            addTimeoutHeaders(requestContext, apiLevelTimeout);
+        Integer timeout = endpointCluster.getRouteTimeoutInMillis();
+        if (timeout != null) {
+            addTimeoutHeaders(requestContext, timeout);
         }
     }
 
@@ -365,5 +359,27 @@ public class AuthFilter implements Filter {
                 Objects.toString(authContext.getRawToken(), ""));
         requestContext.addMetadataToMap(InterceptorConstants.AuthContextFields.KEY_TYPE,
                 Objects.toString(authContext.getKeyType(), ""));
+    }
+
+    /**
+     * This will fix sending upstream an empty path header issue.
+     *
+     * @param requestContext request context
+     * @param basePath       endpoint basepath
+     */
+    private void handleEmptyPathHeader(RequestContext requestContext, String basePath) {
+        if (StringUtils.isNotBlank(basePath)) {
+            return;
+        }
+        // remaining path after removing the context and the version from the invoked path.
+        String remainingPath = StringUtils.removeStartIgnoreCase(requestContext.getHeaders()
+                .get(APIConstants.PATH_HEADER).split("\\?")[0], requestContext.getMatchedAPI().getBasePath());
+        // if the :path will be empty after applying the route's substitution, then we have to add a "/" forcefully
+        // to avoid :path being empty.
+        if (StringUtils.isBlank(remainingPath)) {
+            String[] splittedPath = requestContext.getHeaders().get(APIConstants.PATH_HEADER).split("\\?");
+            String newPath = splittedPath.length > 1 ? splittedPath[0] + "/?" + splittedPath[1] : splittedPath[0] + "/";
+            requestContext.addOrModifyHeaders(APIConstants.PATH_HEADER, newPath);
+        }
     }
 }

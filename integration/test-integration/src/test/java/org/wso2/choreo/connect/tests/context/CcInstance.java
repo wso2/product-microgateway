@@ -49,15 +49,23 @@ public class CcInstance extends ChoreoConnectImpl {
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, String gitServiceFile,
                        boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl, List<String> startupAPIs,
                        boolean isInterceptorCertRequired, String enforcerTrustCertsDir, String volumeMountDir,
-                       boolean isClientCertValidationRequired
-                       )
-            throws IOException, CCTestException {
-        createTmpMgwSetup();
+                       boolean isClientCertValidationRequired, boolean isInitialStartup
+                       ) throws IOException, CCTestException {
+        boolean isCodeCovAllowedToSkip = true;
+        String codeCoverageEnabled = System.getProperty("is_code_coverage_enabled");
+        if (codeCoverageEnabled != null) {
+            String codeCovProperty = codeCoverageEnabled;
+            isCodeCovAllowedToSkip = Boolean.valueOf(codeCovProperty);
+        }
+        createTmpMgwSetup(isInitialStartup, isCodeCovAllowedToSkip);
         String targetDir = Utils.getTargetDirPath();
         if (!StringUtils.isEmpty(confFileName)) {
             Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
                             + File.separator + confFileName,
                     ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.CONFIG_TOML_PATH);
+        }
+        if(!isCodeCovAllowedToSkip) {
+            addCodeCovExec();
         }
         if (withCustomJwtTransformer && withAnalyticsMetricImpl) {
             addCustomJwtTransformer();
@@ -126,6 +134,7 @@ public class CcInstance extends ChoreoConnectImpl {
         boolean withAnalyticsMetricImpl = false;
         boolean isInterceptorCertRequired = false;
         boolean isClientCertValidationRequired = false;
+        boolean isInitialStartUp = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -179,12 +188,17 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
 
+        // to indicate Choreo-Connect initial startup during the integration tests
+        public Builder markInitialCCStartup(boolean isInitialStartUp) {
+            this.isInitialStartUp = isInitialStartUp;
+            return this;
+        }
+
         public CcInstance build() throws IOException, CCTestException {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
                     this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.enforcerTrustCertsDir,
-                    this.volumeMountDir, this.isClientCertValidationRequired
-            );
+                    this.volumeMountDir, this.isClientCertValidationRequired, this.isInitialStartUp);
             return instance;
         }
     }

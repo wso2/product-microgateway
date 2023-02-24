@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -43,10 +44,7 @@ public class EnvoyHttpFilterTestCase {
 
     @Test(description = "Test to invoke resource protected with scopes with correct jwt")
     public void checkHeadersSentToBackend() throws Exception {
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(
-                Utils.getServiceURLHttps("/v2/standard/headers"), headers);
+        HttpResponse response = Utils.invokeApi(jwtTokenProd,"/v2/standard/headers");
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
 
@@ -70,11 +68,107 @@ public class EnvoyHttpFilterTestCase {
 
         // Response headers received by the client
         Map<String, String> headersToClient = response.getHeaders();
-        Assert.assertEquals(headersToClient.size(), 4, "Unexpected number of headers received by the client");
+        Assert.assertEquals(headersToClient.size(), 5, "Unexpected number of headers received by the client");
 
         Assert.assertNotNull(headersToClient.get("date"));      // = Fri, 15 Apr 2022 05:10:41 GMT
         Assert.assertNotNull(headersToClient.get("server"));    // = envoy
         Assert.assertNotNull(headersToClient.get("content-length"));
         Assert.assertNotNull(headersToClient.get("content-type"));
+        Assert.assertNotNull(headersToClient.get("vary"));     // header comes due to compression filter to indicate data compression capability
+    }
+
+    /*
+     * Related to https://github.com/wso2/product-microgateway/issues/3009
+     */
+    @Test(description = "Confirm header case change - router to backend")
+    public void confirmHeaderCaseChange_RouterToBackend() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+
+        // Add custom headers
+        headers.put("X-Header-One", "X-Header-One-Value");
+        headers.put("x-header-two", "x-header-two-value");
+        headers.put("X-HEADER-THREE", "X-HEADER-THREE-VALUE");
+
+        HttpResponse response = HttpsClientRequest.retryGetRequestUntilDeployed(
+                Utils.getServiceURLHttps("/v2/standard/headers"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        JSONObject headersSentToBackend = new JSONObject(response.getData());
+        // Headers that were originally sent by the client
+        Assert.assertFalse(headersSentToBackend.has("X-Header-One"), "X-Header-One sent to the backend");
+        Assert.assertFalse(headersSentToBackend.has("x-header-two"), "x-header-two sent to the backend");
+        Assert.assertFalse(headersSentToBackend.has("X-HEADER-THREE"), "X-HEADER-THREE sent to the backend");
+
+        // Headers received by the backend
+        // Has got converted to first letter upper case, remaining letters lowercase
+        Assert.assertTrue(headersSentToBackend.has("X-header-one"), "X-header-one not sent to the backend");
+        Assert.assertTrue(headersSentToBackend.has("X-header-two"), "X-header-two not sent to the backend");
+        Assert.assertTrue(headersSentToBackend.has("X-header-three"), "X-header-three not sent to the backend");
+
+        // Case of the value has not changed
+        Assert.assertEquals(headersSentToBackend.get("X-header-one"), "X-Header-One-Value",
+                "X-header-one header value has changed");
+        Assert.assertEquals(headersSentToBackend.get("X-header-two"), "x-header-two-value",
+                "X-header-two header value has changed");
+        Assert.assertEquals(headersSentToBackend.get("X-header-three"), "X-HEADER-THREE-VALUE",
+                "X-header-three header value has changed");
+    }
+
+    /*
+     * Related to https://github.com/wso2/product-microgateway/issues/3009
+     */
+    @Test(description = "Confirm header case change - backend to client")
+    public void confirmHeaderCaseChange_BackendToClient() throws Exception {
+        HttpResponse response = Utils.invokeApi(jwtTokenProd, "/v2/standard/headers-from-backend");
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
+
+        Map<String, String> headersToClient = response.getHeaders();
+        // Headers that were originally sent by the backend
+        Assert.assertFalse(headersToClient.containsKey("X-Header-One"), "X-Header-One sent to the client");
+        Assert.assertTrue(headersToClient.containsKey("x-header-two"), "x-header-two not sent to the client");
+        Assert.assertFalse(headersToClient.containsKey("X-HEADER-THREE"), "X-HEADER-THREE sent to the client");
+
+        // Headers received by the client
+        // Has got converted to all lowercase letters
+        Assert.assertTrue(headersToClient.containsKey("x-header-one"), "x-header-one not sent to the client");
+        Assert.assertTrue(headersToClient.containsKey("x-header-two"), "x-header-two not sent to the client");
+        Assert.assertTrue(headersToClient.containsKey("x-header-three"), "x-header-three not sent to the client");
+
+        // Case of the value has not changed
+        Assert.assertEquals(headersToClient.get("x-header-one"), "X-Header-One-Value",
+                "X-header-one header value has changed");
+        Assert.assertEquals(headersToClient.get("x-header-two"), "x-header-two-value",
+                "X-header-two header value has changed");
+        Assert.assertEquals(headersToClient.get("x-header-three"), "X-HEADER-THREE-VALUE",
+                "X-header-three header value has changed");
+    }
+
+    @Test(description = "Confirm that the case of the query parameters have not changed - router to backend")
+    public void confirmQueryParamCaseUnchanged() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        EchoResponse response = Utils.invokeEchoGet("/v2/standard", "/echo-full?"
+                        + "param1=value1&"
+                        + "PARAM2=VALUE2&"
+                        + "QueryParam3=QueryValue3",
+                headers, jwtTokenProd);
+
+        // Query params received by the backend
+        Map<String, String> queryParams = response.getQuery();
+        Assert.assertNotEquals(queryParams.size(), 0);
+
+        // Case not changed
+        Assert.assertTrue(queryParams.containsKey("param1"), "param1 not sent to the client");
+        Assert.assertTrue(queryParams.containsKey("PARAM2"), "PARAM2 not sent to the client");
+        Assert.assertTrue(queryParams.containsKey("QueryParam3"), "QueryParam3 not sent to the client");
+
+        Assert.assertEquals(queryParams.get("param1"), "value1",
+                "param1 value has changed");
+        Assert.assertEquals(queryParams.get("PARAM2"), "VALUE2",
+                "PARAM2 value has changed");
+        Assert.assertEquals(queryParams.get("QueryParam3"), "QueryValue3",
+                "QueryParam3 value has changed");
     }
 }

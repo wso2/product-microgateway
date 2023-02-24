@@ -22,9 +22,13 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.commons.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.models.API;
@@ -55,9 +59,10 @@ public class KeyValidator {
      *
      * @param validationContext the token validation context
      * @return true is the scopes are valid
-     * @throws EnforcerException if key validation information not set
+     * @throws EnforcerException throws if token validation fails.
+     * this will indicate the message body for the error response
      */
-    public static boolean validateScopes(TokenValidationContext validationContext) throws EnforcerException {
+    public static boolean validateScopes(TokenValidationContext validationContext) throws APISecurityException {
 
         if (validationContext.isCacheHit()) {
             return true;
@@ -65,7 +70,11 @@ public class KeyValidator {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
         if (apiKeyValidationInfoDTO == null) {
-            throw new EnforcerException("Key Validation information not set");
+            log.error("Error while validating scopes. Key validation information has not been set.",
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6603));
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while validating scopes. Key validation information has not been set");
         }
         String[] scopes;
         Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
@@ -82,35 +91,49 @@ public class KeyValidator {
             }
         }
 
-        ResourceConfig matchedResource = validationContext.getMatchingResourceConfig();
-        boolean scopesValidated = false;
-        if (matchedResource.getSecuritySchemas().entrySet().size() > 0) {
-            for (Map.Entry<String, List<String>> pair : matchedResource.getSecuritySchemas().entrySet()) {
-                boolean validate = false;
-                if (pair.getValue() != null && pair.getValue().size() > 0) {
-                    scopesValidated = false;
-                    for (String scope : pair.getValue()) {
-                        if (scopesSet.contains(scope)) {
-                            scopesValidated = true;
-                            validate = true;
-                            break;
+        List<ResourceConfig> matchedResources;
+        // when it is a graphQL api multiple matching resources will be returned.
+        matchedResources = validationContext.getMatchingResourceConfigs();
+
+        boolean allScopesValidated = true;
+        // failedResourcePath - used to identify resource paths with failed scope validation.
+        String failedResourcePath = "";
+        for (ResourceConfig matchedResource : matchedResources) {
+            // needToValidate - indicate there are scopes for the resource
+            // which indicates resource has scopes which needs to be validated against the token
+            boolean needToValidate = false;
+            // scopesValidated - indicate scope has validated
+            boolean scopesValidated = false;
+            String resourcePath = matchedResource.getPath();
+            if (matchedResource.getSecuritySchemas().entrySet().size() > 0) {
+                for (Map.Entry<String, List<String>> pair : matchedResource.getSecuritySchemas().entrySet()) {
+                    if (pair.getValue() != null && pair.getValue().size() > 0) {
+                        needToValidate = true; // Resource has scopes, hence token scopes requires scope validation
+                        for (String scope : pair.getValue()) {
+                            if (scopesSet.contains(scope)) {
+                                scopesValidated = true;
+                                break;
+                            }
                         }
+                        break;
                     }
-                } else {
-                    scopesValidated = true;
-                }
-                if (validate) {
-                    break;
                 }
             }
-        } else {
-            scopesValidated = true;
+            if (needToValidate && !scopesValidated) {
+                allScopesValidated = false;
+                failedResourcePath = resourcePath;
+                break;
+            }
         }
-        if (!scopesValidated) {
+        if (!allScopesValidated) {
             apiKeyValidationInfoDTO.setAuthorized(false);
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+            String message = "User is NOT authorized to access the Resource: " + failedResourcePath
+                    + ". Scope validation failed.";
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                    APISecurityConstants.INVALID_SCOPE, message);
         }
-        return scopesValidated;
+        return true;
     }
 
     /**

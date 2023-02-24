@@ -18,14 +18,12 @@
 
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
-import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
@@ -120,7 +118,7 @@ public abstract class APIKeyHandler implements Authenticator {
                     .getIfPresent(tokenIdentifier) != null &&
                     apiKey.equals(CacheProvider.getInvalidGatewayAPIKeyCache().getIfPresent(tokenIdentifier));
             if (isInvalidInternalAPIKey || isInvalidAPIKey) {
-                log.error("API key found in cache for invalid API keys. " + FilterUtils.getMaskedToken(splitToken[0]),
+                log.debug("API key found in cache for invalid API keys. " + FilterUtils.getMaskedToken(splitToken[0]),
                         ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6601));
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -133,7 +131,7 @@ public abstract class APIKeyHandler implements Authenticator {
     /**
      * Handles API key if it's not found in the cache.
      *
-     * @param jwsHeader  JWS header for the API key
+     * @param alias      Certificate alias used to verify the JWT signature
      * @param signedJWT  Signed JWT for the API key
      * @param splitToken API key segments.
      * @param payload    API key payload
@@ -141,15 +139,10 @@ public abstract class APIKeyHandler implements Authenticator {
      * @return verification status if API key not found in the cache
      * @throws APISecurityException if the given API key is not in the cache and able to verify
      */
-    public boolean verifyTokenWhenNotInCache(JWSHeader jwsHeader, SignedJWT signedJWT, String[] splitToken,
+    public boolean verifyTokenWhenNotInCache(String alias, SignedJWT signedJWT, String[] splitToken,
                                              JWTClaimsSet payload, String apiKeyType) throws APISecurityException {
         boolean isVerified = false;
         log.debug("{} not found in the cache.", apiKeyType);
-
-        String alias = "";
-        if (jwsHeader != null && StringUtils.isNotEmpty(jwsHeader.getKeyID())) {
-            alias = jwsHeader.getKeyID();
-        }
 
         try {
             isVerified = JWTUtils.verifyTokenSignature(signedJWT, alias) && !isJwtTokenExpired(payload, apiKeyType);

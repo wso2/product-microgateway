@@ -34,4 +34,7 @@ public class JwtConstants {
     public static final String DROPINS_FOLDER = "/home/wso2/lib/dropins/";
     public static final String JAR = ".jar";
     public static final String CLASS = ".class";
+    public static final String RS256 = "SHA256withRSA";
+    public static final String RS384 = "SHA384withRSA";
+    public static final String RS512 = "SHA512withRSA";
 }

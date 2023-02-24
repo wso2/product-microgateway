@@ -46,8 +46,8 @@ var (
 const DefaultGatewayName = "Default"
 
 // DefaultGatewayVHost represents the default vhost of default gateway environment if it is not configured
+// For /testtoken and /health check, if user not configured default env, we have no vhost
 const DefaultGatewayVHost = "localhost"
-// for /testtoken and /health check, if user not configured default env, we have no vhost
 
 const (
 	// The environtmental variable which represents the path of the distribution in host machine.
@@ -102,6 +102,16 @@ func ReadConfigs() (*Config, error) {
 		}
 
 		adapterConfig.resolveDeprecatedProperties()
+		if adapterConfig.Enforcer.JwtGenerator.Enabled {
+			invalidConfigError := adapterConfig.resolveJWTGeneratorConfig()
+			if invalidConfigError != nil {
+				loggerConfig.ErrorC(logging.ErrorDetails{
+					Message:   fmt.Sprintf("Error parsing the configurations: %s", invalidConfigError.Error()),
+					Severity:  logging.BLOCKER,
+					ErrorCode: 1003,
+				})
+			}
+		}
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem(), "Router", true)
@@ -227,6 +237,33 @@ func (config *Config) resolveDeprecatedProperties() {
 		config.Enforcer.JwtGenerator.Enabled = config.Enforcer.JwtGenerator.Enable
 	}
 
+}
+
+func (config *Config) resolveJWTGeneratorConfig() error {
+	KeyPairs := config.Enforcer.JwtGenerator.Keypair
+	signingCount := 0
+	for i, keypair := range KeyPairs {
+		if keypair.UseForSigning {
+			signingCount++
+			if keypair.PrivateKeyPath == "" {
+				return fmt.Errorf("private key path has not been set for backend JWT")
+			}
+			if keypair.PublicCertificatePath == "" {
+				return fmt.Errorf("public certificate path has not been set for backend JWT")
+			}
+		} else {
+			// Removing non signing private key paths from config
+			config.Enforcer.JwtGenerator.Keypair[i].PrivateKeyPath = ""
+		}
+	}
+	if signingCount > 1 {
+		return fmt.Errorf("only one keypair should be set to be used for signing the backend JWT")
+	}
+
+	if signingCount == 0 {
+		return fmt.Errorf("atleast one keypair should be set to be used for signing the backend JWT")
+	}
+	return nil
 }
 
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {

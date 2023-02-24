@@ -216,4 +216,9 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
     public String getEndUserIP() {
         return extAuthMetadata.get(MetadataConstants.CLIENT_IP_KEY);
     }
+
+    @Override
+    public String getUserName() {
+        return extAuthMetadata.get(MetadataConstants.API_USER_NAME_KEY);
+    }
 }

@@ -45,7 +45,7 @@ export cc_test_test_uintarray2=-50
 export CC_Adapter_Server_Enabled=string
 
 go clean -testcache
-# go test -race -coverprofile=./target/coverage.txt -covermode=atomic ./...
+# go test -race -coverprofile=./target/coverage.out -covermode=atomic ./...
 # if [ $? -ne 0 ]; then 
 #   echo "FAILED: Unit tests failure"
 #   exit 1
@@ -54,7 +54,7 @@ go clean -testcache
 golint -set_exit_status ./...
 if [ $? -ne 0 ]; then
   echo "INFO: Trying to install golint"
-  go install golang.org/x/lint/golint
+  go install golang.org/x/lint/golint@latest
   golint -set_exit_status ./...
   if [ $? -ne 0 ]; then
     echo "FAILED: golint Failure"
@@ -76,9 +76,3 @@ if [ $? -ne 0 ]; then
   echo "FAILED: Build failure for GOARCH=amd64"
   exit 1
 fi 
-
-GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -v -o target/adapter-linux-arm64 github.com/wso2/product-microgateway/adapter/cmd/adapter
-if [ $? -ne 0 ]; then 
-  echo "FAILED: Build failure for GOARCH=arm64"
-  exit 1
-fi  

@@ -35,3 +35,7 @@ spec:
       port: 9095
       targetPort: 9095
       protocol: TCP
+    - name: "http-router"
+      port: 9090
+      targetPort: 9090
+      protocol: TCP

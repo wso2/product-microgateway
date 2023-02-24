@@ -36,11 +36,14 @@ import (
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	awslambdav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/aws_lambda/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	upstreams_http_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -208,7 +211,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					Severity:  logging.MAJOR,
 					ErrorCode: 2230,
 				})
-				return nil, nil, nil, fmt.Errorf("Error while creating routes for Websocket API. %v", err)
+				return nil, nil, nil, fmt.Errorf("error while creating routes for Websocket API. %v", err)
 			}
 			routes = append(routes, routesP...)
 		}
@@ -239,6 +242,22 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 
 			routes = append(routes, routesX...)
 		}
+	}
+
+	if mgwSwagger.GetAPIType() == constants.GRAPHQL {
+		routesP, err := createRoutes(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelBasePathProd, apiLevelClusterNameProd,
+			apiLevelClusterNameSand, nil, nil, organizationID, false))
+		if err != nil {
+			logger.LoggerXds.ErrorC(logging.ErrorDetails{
+				Message: fmt.Sprintf("Error while creating routes for GraphQL API : %s version : %s. Error: %s",
+					apiTitle, apiVersion, err.Error()),
+				Severity:  logging.MAJOR,
+				ErrorCode: 2233,
+			})
+			return nil, nil, nil, fmt.Errorf("error while creating routes for GraphQL API : %s version : %s. %v", apiTitle, apiVersion, err)
+		}
+		routes = append(routes, routesP...)
+		return routes, clusters, endpoints, nil
 	}
 
 	for _, resource := range mgwSwagger.GetResources() {
@@ -372,7 +391,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				Severity:  logging.MAJOR,
 				ErrorCode: 2231,
 			})
-			return nil, nil, nil, fmt.Errorf("Error while creating routes. %v", err)
+			return nil, nil, nil, fmt.Errorf("error while creating routes. %v", err)
 		}
 		if apiLevelBasePathSand != "" || isResourceBasePathSandAvailable {
 			logger.LoggerOasparser.Debugf("Creating sandbox route for : %v:%v:%v - %v", apiTitle, apiVersion, resource.GetPath(), resourceBasePathSand)
@@ -385,7 +404,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					Severity:  logging.MAJOR,
 					ErrorCode: 2232,
 				})
-				return nil, nil, nil, fmt.Errorf("Error while creating sandbox routes. %v", err)
+				return nil, nil, nil, fmt.Errorf("error while creating sandbox routes. %v", err)
 			}
 			// Sandbox route should be appended before to prod route to have the expected header based sandbox routing.
 			routes = append(routes, routeS...)
@@ -469,6 +488,10 @@ func CreateTracingCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Ad
 	epCluster.Endpoints[0].Host = epHost
 	epCluster.Endpoints[0].Port = epPort
 	epCluster.Endpoints[0].Basepath = epPath
+
+	if conf.Tracing.Type == TracerTypeOtlp {
+		epCluster.HTTP2BackendEnabled = true
+	}
 
 	return processEndpoints(tracingClusterName, epCluster, nil, epTimeout, epPath)
 }
@@ -775,8 +798,6 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
 	resource := params.resource
-	resourcePath := resource.GetPath()
-	resourceMethods := resource.GetMethodList()
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	prodRouteConfig := params.prodRouteConfig
@@ -799,6 +820,15 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	basePath := strings.TrimSuffix(xWso2Basepath, "/")
 	if isDefaultVersion {
 		basePath = getDefaultVersionBasepath(basePath, version)
+	}
+
+	resourcePath := ""
+	var resourceMethods []string
+	if params.apiType == constants.GRAPHQL {
+		resourceMethods = []string{"POST"}
+	} else {
+		resourcePath = resource.GetPath()
+		resourceMethods = resource.GetMethodList()
 	}
 	routePath := generateRoutePath(basePath, resourcePath)
 
@@ -917,9 +947,12 @@ end`
 		Value:   luaMarshelled.Bytes(),
 	}
 
+	corsFilter, _ := anypb.New(corsPolicy)
+
 	perRouteFilterConfigs := map[string]*any.Any{
 		wellknown.HTTPExternalAuthorization: extAuthzFilter,
 		wellknown.Lua:                       luaFilter,
+		wellknown.CORS:                      corsFilter,
 		//"envoy.filters.http.aws_lambda":     awsLambdaFilter,
 	}
 
@@ -956,7 +989,7 @@ end`
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 
-	if resource.HasPolicies() {
+	if resource != nil && resource.HasPolicies() {
 		logger.LoggerOasparser.Debug("Start creating routes for resource with policies")
 
 		// Policies are per operation (HTTP method). Therefore, create route per HTTP method.
@@ -980,7 +1013,7 @@ end`
 						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
 					requestHeaderToAdd, err := generateHeaderToAddRouteConfig(requestPolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					requestHeadersToAdd = append(requestHeadersToAdd, requestHeaderToAdd)
@@ -990,7 +1023,7 @@ end`
 						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
 					requestHeaderToRemove, err := generateHeaderToRemoveString(requestPolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 							" %v", requestPolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					requestHeadersToRemove = append(requestHeadersToRemove, requestHeaderToRemove)
@@ -1001,7 +1034,7 @@ end`
 					regexRewrite, err := generateRewritePathRouteConfig(routePath, resourcePath, endpointBasepath,
 						requestPolicy.Parameters)
 					if err != nil {
-						errMsg := fmt.Sprintf("Error adding request policy %s to operation %s of resource %s. %v",
+						errMsg := fmt.Sprintf("error adding request policy %s to operation %s of resource %s. %v",
 							constants.ActionRewritePath, operation.GetMethod(), resourcePath, err)
 						logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
 							Message:   errMsg,
@@ -1039,7 +1072,7 @@ end`
 						constants.ActionHeaderAdd, resourcePath, operation.GetMethod())
 					responseHeaderToAdd, err := generateHeaderToAddRouteConfig(responsePolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding response policy %s to operation %s of resource %s."+
 							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					responseHeadersToAdd = append(responseHeadersToAdd, responseHeaderToAdd)
@@ -1049,7 +1082,7 @@ end`
 						constants.ActionHeaderRemove, resourcePath, operation.GetMethod())
 					responseHeaderToRemove, err := generateHeaderToRemoveString(responsePolicy.Parameters)
 					if err != nil {
-						return nil, fmt.Errorf("Error adding response policy %s to operation %s of resource %s."+
+						return nil, fmt.Errorf("error adding response policy %s to operation %s of resource %s."+
 							" %v", responsePolicy.Action, operation.GetMethod(), resourcePath, err)
 					}
 					responseHeadersToRemove = append(responseHeadersToRemove, responseHeaderToRemove)
@@ -1061,7 +1094,8 @@ end`
 				logger.LoggerOasparser.Debug("Creating two routes to support method rewrite for %s %s. New method: %s",
 					resourcePath, operation.GetMethod(), newMethod)
 				match1 := generateRouteMatch(routePath)
-				match1.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
+				match1.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox,
+					sandClusterName)
 				match2 := generateRouteMatch(routePath)
 				match2.Headers = generateHTTPMethodMatcher(newMethod, params.isSandbox, sandClusterName)
 
@@ -1073,13 +1107,13 @@ end`
 				metadataValue := operation.GetMethod() + "_to_" + newMethod
 				match2.DynamicMetadata = generateMetadataMatcherForInternalRoutes(metadataValue)
 
-				action1 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy, endpointType)
-				action2 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy, endpointType)
+				action1 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
+				action2 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
 
 				// Create route1 for current method.
 				// Do not add policies to route config. Send via enforcer
-				route1 := generateRouteConfig(xWso2Basepath+operation.GetMethod(), match1, action1, nil, decorator, perRouteFilterConfigs,
-					nil, nil, nil, nil)
+				route1 := generateRouteConfig(xWso2Basepath+"-"+operation.GetMethod(), match1, action1, nil, decorator,
+					perRouteFilterConfigs, nil, nil, nil, nil)
 
 				// Create route2 for new method.
 				// Add all policies to route config. Do not send via enforcer.
@@ -1089,17 +1123,19 @@ end`
 					action2.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 				}
 				configToSkipEnforcer := generateFilterConfigToSkipEnforcer()
-				route2 := generateRouteConfig(xWso2Basepath, match2, action2, nil, decorator, configToSkipEnforcer,
-					requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd, responseHeadersToRemove)
+				route2 := generateRouteConfig(xWso2Basepath+"-"+metadataValue, match2, action2, nil, decorator,
+					configToSkipEnforcer, requestHeadersToAdd, requestHeadersToRemove, responseHeadersToAdd,
+					responseHeadersToRemove)
 
 				routes = append(routes, route1)
 				routes = append(routes, route2)
 			} else {
 				logger.LoggerOasparser.Debug("Creating routes for resource with policies", resourcePath, operation.GetMethod())
 				// create route for current method. Add policies to route config. Send via enforcer
-				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy, endpointType)
+				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
 				match := generateRouteMatch(routePath)
-				match.Headers = generateHTTPMethodMatcher(operation.GetMethod(), params.isSandbox, sandClusterName)
+				match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox,
+					sandClusterName)
 				match.DynamicMetadata = generateMetadataMatcherForExternalRoutes()
 				if pathRewriteConfig != nil {
 					action.Route.RegexRewrite = pathRewriteConfig
@@ -1116,12 +1152,9 @@ end`
 		logger.LoggerOasparser.Debug("Creating routes for resource that has no policies")
 		// No policies defined for the resource. Therefore, create one route for all operations.
 		methodRegex := strings.Join(resourceMethods, "|")
-		if !strings.Contains(methodRegex, "OPTIONS") {
-			methodRegex = methodRegex + "|OPTIONS"
-		}
 		match := generateRouteMatch(routePath)
-		match.Headers = generateHTTPMethodMatcher(methodRegex, params.isSandbox, sandClusterName)
-		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, corsPolicy, endpointType)
+		match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(methodRegex), params.isSandbox, sandClusterName)
+		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
 		action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 
 		route := generateRouteConfig(xWso2Basepath, match, action, nil, decorator, perRouteFilterConfigs,
@@ -1182,8 +1215,7 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 	return interceptor.GetInterceptor(templateValues, templateString)
 }
 
-// CreateTokenRoute generates a route for the jwt /testkey endpoint
-func CreateTokenRoute() *routev3.Route {
+func createStaticRoute(path string, pathSubstitute string, clusterName string) *routev3.Route {
 	var (
 		router    routev3.Route
 		action    *routev3.Route_Route
@@ -1193,58 +1225,36 @@ func CreateTokenRoute() *routev3.Route {
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_Path{
-			Path: testKeyPath,
+			Path: path,
 		},
 	}
-
 	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
 		AutoHostRewrite: &wrapperspb.BoolValue{
 			Value: true,
 		},
 	}
-
 	decorator = &routev3.Decorator{
-		Operation: testKeyPath,
+		Operation: path,
 	}
-
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
 			Disabled: true,
 		},
 	}
-
-	b := proto.NewBuffer(nil)
-	b.SetDeterministic(true)
-	_ = b.Marshal(&perFilterConfig)
-	filter := &any.Any{
-		TypeUrl: extAuthzPerRouteName,
-		Value:   b.Bytes(),
-	}
+	filter := marshalFilterConfig(&perFilterConfig)
 
 	action = &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
-			RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
-				Pattern: &envoy_type_matcherv3.RegexMatcher{
-					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-							MaxProgramSize: nil,
-						},
-					},
-					Regex: testKeyPath,
-				},
-				Substitution: "/",
-			},
+			PrefixRewrite:        pathSubstitute,
 		},
 	}
-
-	directClusterSpecifier := &routev3.RouteAction_Cluster{
-		Cluster: "token_cluster",
+	action.Route.ClusterSpecifier = &routev3.RouteAction_Cluster{
+		Cluster: clusterName,
 	}
-	action.Route.ClusterSpecifier = directClusterSpecifier
 
 	router = routev3.Route{
-		Name:      testKeyPath, //Categorize routes with same base path
+		Name:      path, //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
 		Metadata:  nil,
@@ -1254,6 +1264,60 @@ func CreateTokenRoute() *routev3.Route {
 		},
 	}
 	return &router
+}
+
+// CreateTokenRoute generates a route for the jwt /testkey endpoint
+func CreateTokenRoute() *routev3.Route {
+	return createStaticRoute(testKeyPath, "/testkey", extAuthzHTTPClusterName)
+}
+
+// CreateJwksEndpoint generates a route for JWKS /.wellknown/jwks endpoint
+func CreateJwksEndpoint() *routev3.Route {
+	conf, _ := config.ReadConfigs()
+	route := createStaticRoute(jwksPath, jwksPathAtEnforcer, extAuthzHTTPClusterName)
+	ratelimitPerRoute := &local_rate_limitv3.LocalRateLimit{
+		StatPrefix: jwksRateLimitStatPrefix,
+		TokenBucket: &typev3.TokenBucket{
+			MaxTokens:     conf.Enforcer.JwtGenerator.JwksRatelimitQuota,
+			TokensPerFill: &wrapperspb.UInt32Value{Value: conf.Enforcer.JwtGenerator.JwksRatelimitQuota},
+			FillInterval:  durationpb.New(time.Duration(conf.Enforcer.JwtGenerator.JwksRatelimitTimeWindowInSeconds) * time.Second)},
+		FilterEnabled: &corev3.RuntimeFractionalPercent{
+			DefaultValue: &typev3.FractionalPercent{
+				Numerator:   100,
+				Denominator: typev3.FractionalPercent_HUNDRED,
+			},
+			RuntimeKey: jwksRateLimitEnabledRuntimeKey,
+		},
+		FilterEnforced: &corev3.RuntimeFractionalPercent{
+			DefaultValue: &typev3.FractionalPercent{
+				Numerator:   100,
+				Denominator: typev3.FractionalPercent_HUNDRED,
+			},
+			RuntimeKey: jwksRateLimitEnforcedRuntimeKey,
+		},
+	}
+	buffer := proto.NewBuffer(nil)
+	buffer.SetDeterministic(true)
+	_ = buffer.Marshal(ratelimitPerRoute)
+
+	currentFilterMap := route.GetTypedPerFilterConfig()
+	currentFilterMap[localRatelimitFilterName] = &any.Any{
+		TypeUrl: localRateLimitPerRouteName,
+		Value:   buffer.Bytes(),
+	}
+	route.TypedPerFilterConfig = currentFilterMap
+	return route
+}
+
+func marshalFilterConfig(perFilterConfig *extAuthService.ExtAuthzPerRoute) *anypb.Any {
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+	return filter
 }
 
 // CreateHealthEndpoint generates a route for the jwt /health endpoint
@@ -1281,13 +1345,7 @@ func CreateHealthEndpoint() *routev3.Route {
 		},
 	}
 
-	b := proto.NewBuffer(nil)
-	b.SetDeterministic(true)
-	_ = b.Marshal(&perFilterConfig)
-	filter := &any.Any{
-		TypeUrl: extAuthzPerRouteName,
-		Value:   b.Bytes(),
-	}
+	filter := marshalFilterConfig(&perFilterConfig)
 
 	router = routev3.Route{
 		Name:  healthPath, //Categorize routes with same base path
@@ -1414,7 +1472,7 @@ func isMethodRewrite(resourcePath, method string, policyParams interface{}) (isM
 	var paramsToRewriteMethod map[string]interface{}
 	var ok bool
 	if paramsToRewriteMethod, ok = policyParams.(map[string]interface{}); !ok {
-		return false, fmt.Errorf("Error while processing policy parameter map for "+
+		return false, fmt.Errorf("error while processing policy parameter map for "+
 			"request policy %s to operation %s of resource %s. Map: %v",
 			constants.ActionRewriteMethod, method, resourcePath, policyParams)
 	}
@@ -1439,20 +1497,20 @@ func getRewriteMethod(resourcePath, method string, policyParams interface{}) (re
 	var paramsToRewriteMethod map[string]interface{}
 	var ok bool
 	if paramsToRewriteMethod, ok = policyParams.(map[string]interface{}); !ok {
-		return "", fmt.Errorf("Error while processing policy parameter map for "+
+		return "", fmt.Errorf("error while processing policy parameter map for "+
 			"request policy %s to operation %s of resource %s. Map: %v",
 			constants.ActionRewriteMethod, method, resourcePath, policyParams)
 	}
 
 	updatedMethod, exists := paramsToRewriteMethod[constants.UpdatedMethod]
 	if !exists {
-		return "", fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+		return "", fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 			" Policy parameter updatedMethod not found",
 			constants.ActionRewriteMethod, method, resourcePath)
 	}
 	updatedMethodString, isString := updatedMethod.(string)
 	if !isString {
-		return "", fmt.Errorf("Error adding request policy %s to operation %s of resource %s."+
+		return "", fmt.Errorf("error adding request policy %s to operation %s of resource %s."+
 			" Policy parameter updatedMethod is in incorrect format", constants.ActionRewriteMethod,
 			method, resourcePath)
 	}
@@ -1475,7 +1533,7 @@ func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 	return upgradeConfig
 }
 
-func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
+func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 
 	if corsConfig == nil || !corsConfig.Enabled {
 		return nil
@@ -1491,11 +1549,6 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		regexMatcher := &envoy_type_matcherv3.StringMatcher{
 			MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
 				SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-							MaxProgramSize: nil,
-						},
-					},
 					Regex: formattedString,
 				},
 			},
@@ -1503,7 +1556,7 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		stringMatcherArray = append(stringMatcherArray, regexMatcher)
 	}
 
-	corsPolicy := &routev3.CorsPolicy{
+	corsPolicy := &cors_filter_v3.CorsPolicy{
 		AllowCredentials: &wrapperspb.BoolValue{
 			Value: corsConfig.AccessControlAllowCredentials,
 		},
@@ -1745,4 +1798,11 @@ func createInterceptorResourceClusters(mgwSwagger model.MgwSwagger, interceptorC
 		}
 	}
 	return clusters, endpoints, &operationalReqInterceptors, &operationalRespInterceptorVal
+}
+
+func includeOptionsMethod(methodRegex string) string {
+	if !strings.Contains(methodRegex, "OPTIONS") {
+		return methodRegex + "|OPTIONS"
+	}
+	return methodRegex
 }

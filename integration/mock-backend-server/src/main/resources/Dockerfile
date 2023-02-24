@@ -21,5 +21,5 @@ WORKDIR /home/app
 EXPOSE 23823
 
 COPY maven/ lib/
-
+COPY schema.graphql /tmp
 CMD java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockServices

@@ -18,12 +18,21 @@
 
 package org.wso2.choreo.connect.enforcer.config;
 
+import com.nimbusds.jose.Algorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.X509CertUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.choreo.connect.discovery.config.enforcer.Analytics;
 import org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader;
 import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
@@ -34,6 +43,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.Filter;
 import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
+import org.wso2.choreo.connect.discovery.config.enforcer.Keypair;
 import org.wso2.choreo.connect.discovery.config.enforcer.Management;
 import org.wso2.choreo.connect.discovery.config.enforcer.Metrics;
 import org.wso2.choreo.connect.discovery.config.enforcer.MutualSSL;
@@ -46,6 +56,8 @@ import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
 import org.wso2.choreo.connect.discovery.config.enforcer.Tracing;
 import org.wso2.choreo.connect.enforcer.commons.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.commons.logging.ErrorDetails;
+import org.wso2.choreo.connect.enforcer.commons.logging.LoggingConstants;
 import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
@@ -67,6 +79,9 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
+import org.wso2.choreo.connect.enforcer.jmx.MBeanRegistrator;
+import org.wso2.choreo.connect.enforcer.jwks.BackendJWKSDto;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -80,6 +95,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,7 +104,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Configuration holder class for Microgateway.
@@ -105,6 +124,7 @@ public class ConfigHolder {
     private KeyStore opaKeyStore = null;
     private TrustManagerFactory trustManagerFactory = null;
     private ArrayList<ExtendedTokenIssuerDto> configIssuerList;
+    private boolean controlPlaneEnabled;
 
     private static final String dtoPackageName = EnforcerConfig.class.getPackageName();
     private static final String apimDTOPackageName = "org.wso2.carbon.apimgt";
@@ -144,6 +164,8 @@ public class ConfigHolder {
 
         // Read jwt token configuration
         populateJWTIssuerConfiguration(config.getSecurity().getTokenServiceList());
+
+        controlPlaneEnabled = config.getControlPlaneEnabled();
 
         // Read throttle publisher configurations
         populateThrottlingConfig(config.getThrottling());
@@ -228,6 +250,8 @@ public class ConfigHolder {
         authDto.setMaxMessageSize(cdsAuth.getMaxMessageSize());
 
         ThreadPoolConfig threadPool = new ThreadPoolConfig();
+        MBeanRegistrator.registerMBean(threadPool);
+
         threadPool.setCoreSize(cdsAuth.getThreadPool().getCoreSize());
         threadPool.setKeepAliveTime(cdsAuth.getThreadPool().getKeepAliveTime());
         threadPool.setMaxSize(cdsAuth.getThreadPool().getMaxSize());
@@ -263,9 +287,11 @@ public class ConfigHolder {
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias.isBlank()) {
                 if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(jwtIssuer.getName())) {
-                    certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+                    certificateAlias = APIConstants.PUBLISHER_CERTIFICATE_ALIAS;
                 } else if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(jwtIssuer.getName())) {
                     certificateAlias = APIConstants.WSO2_PUBLIC_CERTIFICATE_ALIAS;
+                } else if (APIConstants.KeyManager.APIM_APIKEY_ISSUER.equals(jwtIssuer.getName())) {
+                    certificateAlias = APIConstants.APIKEY_CERTIFICATE_ALIAS;
                 }
             }
             issuerDto.setCertificateAlias(certificateAlias);
@@ -286,7 +312,16 @@ public class ConfigHolder {
             issuerDto.setName(jwtIssuer.getName());
             issuerDto.setConsumerKeyClaim(jwtIssuer.getConsumerKeyClaim());
             issuerDto.setValidateSubscriptions(jwtIssuer.getValidateSubscription());
-            config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
+            if (APIConstants.KeyManager.APIM_APIKEY_ISSUER.equals(jwtIssuer.getName())) {
+                // Both API key and Internal key issuers are referred by issuer "name" instead of "issuer"
+                // since the "iss" value present in both are same as oauth tokens. Thus, we override the
+                // "issuer" in issuerDto to avoid conflicts (in case a user sets the same "issuer"
+                // to Resident Key Manager and any of the other issuers).
+                issuerDto.setIssuer(APIConstants.KeyManager.APIM_APIKEY_ISSUER_URL);
+                config.getIssuersMap().put(APIConstants.KeyManager.APIM_APIKEY_ISSUER_URL, issuerDto);
+            } else {
+                config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
+            }
             configIssuerList.add(issuerDto);
         }
     }
@@ -362,14 +397,55 @@ public class ConfigHolder {
 
     private void loadTrustStore() {
         try {
+
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null);
-            String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
-            TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
+
+            if (getEnvVarConfig().isTrustDefaultCerts()) {
+                loadDefaultCertsToTrustStore();
+            }
+            loadTrustedCertsToTrustStore();
+
             trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(trustStore);
+
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             logger.error("Error in loading certs to the trust store.", e);
+        }
+    }
+
+    private void loadTrustedCertsToTrustStore() throws IOException {
+        String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
+        TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
+    }
+
+    private void loadDefaultCertsToTrustStore() throws NoSuchAlgorithmException, KeyStoreException {
+        TrustManagerFactory tmf = TrustManagerFactory
+                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        // Using null here initialises the TMF with the default trust store.
+        tmf.init((KeyStore) null);
+
+        // Get hold of the default trust manager
+        X509TrustManager defaultTm = null;
+        for (TrustManager tm : tmf.getTrustManagers()) {
+            if (tm instanceof X509TrustManager) {
+                defaultTm = (X509TrustManager) tm;
+                break;
+            }
+        }
+
+        // Get the certs from defaultTm and add them to our trustStore
+        if (defaultTm != null) {
+            X509Certificate[] trustedCerts = defaultTm.getAcceptedIssuers();
+            Arrays.stream(trustedCerts)
+                    .forEach(cert -> {
+                        try {
+                            trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
+                                    cert);
+                        } catch (KeyStoreException e) {
+                            logger.error("Error while adding default trusted ca cert", e);
+                        }
+                    });
         }
     }
 
@@ -442,13 +518,64 @@ public class ConfigHolder {
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
         jwtConfigurationDto.setTtl(jwtGenerator.getTokenTtl());
+        jwtConfigurationDto.setUseKid(jwtGenerator.getUseKidProperty());
+        List<Keypair> keypairs = jwtGenerator.getKeypairsList();
+
+        // Validation is done at the adapter to ensure that only one signing keypair is available
+        Keypair signingKey = getSigningKey(keypairs);
         try {
-            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
-            jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
+            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(signingKey.getPublicCertificatePath()));
+            jwtConfigurationDto.setPrivateKey(JWTUtils.getPrivateKey(signingKey.getPrivateKeyPath()));
         } catch (EnforcerException | CertificateException | IOException e) {
-            logger.error("Error in loading public cert or private key", e);
+            String err = "Error in loading keypair for Backend JWTs: " + e;
+            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5400));
         }
         config.setJwtConfigurationDto(jwtConfigurationDto);
+        populateBackendJWKSConfiguration(jwtGenerator);
+    }
+
+    private void populateBackendJWKSConfiguration(JWTGenerator jwtGenerator) {
+        BackendJWKSDto backendJWKSDto = new BackendJWKSDto();
+        List<Keypair> keypairs = jwtGenerator.getKeypairsList();
+        ArrayList<JWK> jwks = new ArrayList<>();
+        try {
+            for (Keypair keypair : keypairs) {
+                X509Certificate cert = X509CertUtils
+                        .parse(TLSUtils.getCertificate(keypair.getPublicCertificatePath()).getEncoded());
+                RSAPublicKey publicKey = RSAKey.parse(cert).toRSAPublicKey();
+                RSAKey jwk = new RSAKey.Builder(publicKey)
+                        .keyUse(KeyUse.SIGNATURE)
+                        .algorithm(getJWKSAlgorithm(jwtGenerator.getSigningAlgorithm()))
+                        .keyID(JWTUtil.generateThumbprint("SHA-256", cert, false))
+                        .build().toPublicJWK();
+                jwks.add(jwk);
+            }
+        } catch (JOSEException | CertificateException | IOException | NoSuchAlgorithmException e) {
+            String err = "Error in loading additional public certificates for JWKS: " + e;
+            logger.error(err, ErrorDetails.errorLog(LoggingConstants.Severity.CRITICAL, 5401));
+        }
+        backendJWKSDto.setJwks(jwks);
+        config.setBackendJWKSDto(backendJWKSDto);
+    }
+
+    private Keypair getSigningKey(List<Keypair> keypairs) {
+        for (Keypair keypair : keypairs) {
+            if (keypair.getUseForSigning())  {
+                return keypair;
+            }
+        }
+        return null;
+    }
+
+    private Algorithm getJWKSAlgorithm(String alg) {
+        switch (alg) {
+            case JwtConstants.RS384:
+                return JWSAlgorithm.RS384;
+            case JwtConstants.RS512:
+                return JWSAlgorithm.RS512;
+            default:
+                return JWSAlgorithm.RS256;
+        }
     }
 
     private void populateCacheConfigs(Cache cache) {
@@ -458,7 +585,6 @@ public class ConfigHolder {
         cacheDto.setExpiryTime(cache.getExpiryTime());
         config.setCacheDto(cacheDto);
     }
-
     private void populateAnalyticsConfig(Analytics analyticsConfig) {
 
         AnalyticsReceiverConfigDTO serverConfig = new AnalyticsReceiverConfigDTO();
@@ -649,5 +775,9 @@ public class ConfigHolder {
 
     public void setConfigIssuerList(ArrayList<ExtendedTokenIssuerDto> configIssuerList) {
         this.configIssuerList = configIssuerList;
+    }
+
+    public boolean isControlPlaneEnabled() {
+        return controlPlaneEnabled;
     }
 }

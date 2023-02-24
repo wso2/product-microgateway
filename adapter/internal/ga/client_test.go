@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/assert"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -36,7 +35,7 @@ func TestAddAPIToChannel(t *testing.T) {
 		OrganizationUUID: "choreoTest",
 	}
 	var pbArray []*anypb.Any
-	pb, _ := ptypes.MarshalAny(api)
+	pb, _ := anypb.New(api)
 	pbArray = append(pbArray, pb)
 	testDiscoveryResponse := &discovery.DiscoveryResponse{
 		Resources: pbArray,
@@ -83,9 +82,9 @@ func TestFetchAPIsFromGA(t *testing.T) {
 	}
 
 	var pbArrayStartup []*anypb.Any
-	pbAPI1, _ := ptypes.MarshalAny(api1)
-	pbAPI2, _ := ptypes.MarshalAny(api2)
-	pbAPI3, _ := ptypes.MarshalAny(api3)
+	pbAPI1, _ := anypb.New(api1)
+	pbAPI2, _ := anypb.New(api2)
+	pbAPI3, _ := anypb.New(api3)
 	pbArrayStartup = append(pbArrayStartup, pbAPI1, pbAPI2, pbAPI3)
 
 	testDiscoveryResponseStartup := &discovery.DiscoveryResponse{

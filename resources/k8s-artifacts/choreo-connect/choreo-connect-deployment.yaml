@@ -40,7 +40,7 @@ spec:
             - mountPath: /home/wso2/conf/log4j2.properties
               subPath: log4j2.properties
               name: log4j2-vol
-          image: wso2/choreo-connect-enforcer:1.2.0-m1-SNAPSHOT
+          image: wso2/choreo-connect-enforcer:1.2.0-beta
           imagePullPolicy: IfNotPresent
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -65,8 +65,6 @@ spec:
               value: "3"
             - name: JAVA_OPTS
               value: "-Dhttpclient.hostnameVerifier=AllowAll -Xms512m -Xmx512m -XX:MaxRAMFraction=2"
-            - name: apim_admin_pwd
-              value: "admin"
             - name: enforcer_admin_pwd
               value: "admin"
             - name: tm_admin_pwd
@@ -106,7 +104,7 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/choreo-connect-router:1.2.0-m1-SNAPSHOT
+          image: wso2/choreo-connect-router:1.2.0-beta
           imagePullPolicy: IfNotPresent
           env:
             - name: ROUTER_ADMIN_HOST

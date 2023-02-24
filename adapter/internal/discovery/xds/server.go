@@ -226,12 +226,12 @@ func GetEnforcerKeyManagerCache() wso2_cache.SnapshotCache {
 	return enforcerKeyManagerCache
 }
 
-//GetEnforcerRevokedTokenCache return token cache
+// GetEnforcerRevokedTokenCache return token cache
 func GetEnforcerRevokedTokenCache() wso2_cache.SnapshotCache {
 	return enforcerRevokedTokensCache
 }
 
-//GetEnforcerThrottleDataCache return throttle data cache
+// GetEnforcerThrottleDataCache return throttle data cache
 func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
 	return enforcerThrottleDataCache
 }
@@ -295,7 +295,7 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
 
-	if apiYaml.APIType == constants.HTTP {
+	if apiYaml.APIType == constants.HTTP || apiYaml.APIType == constants.GRAPHQL || apiYaml.APIType == constants.SOAP {
 		// avoid the following for AsyncAPI types
 		// the following will be used for APIM specific security config.
 		// it will enable folowing securities globally for the API, overriding swagger securities.
@@ -323,6 +323,10 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 			}
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth, isYamlMutualssl, isYamlMutualsslMandatory, isYamlOauthBasicAuthAPIKeyMandatory)
+	}
+
+	if apiYaml.APIType == constants.HTTP {
+		// Support API Policies only for HTTP APIs.
 		err = mgwSwagger.SetOperationPolicies(apiProject)
 		if err != nil {
 			logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
@@ -333,6 +337,10 @@ func UpdateAPI(vHost string, apiProject model.ProjectAPI, environments []string)
 			})
 			return nil, err
 		}
+	}
+
+	if apiYaml.APIType == constants.GRAPHQL {
+		mgwSwagger.GraphQLComplexities = apiProject.GraphQLComplexities
 	}
 	mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
@@ -928,13 +936,15 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			ErrorCode: 1412,
 		})
 	}
-	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
 	systemHost := conf.Envoy.SystemHost
-	if enableJwtIssuer {
+	if conf.Enforcer.JwtIssuer.Enabled {
 		routeToken := envoyconf.CreateTokenRoute()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
 	}
-
+	if conf.Enforcer.JwtGenerator.Enabled {
+		routeJwks := envoyconf.CreateJwksEndpoint()
+		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeJwks)
+	}
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
 	vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeHealth)
@@ -968,7 +978,7 @@ func GenerateGlobalClusters(label string) {
 	envoyEndpointConfigMap[label] = endpoints
 }
 
-//use UpdateXdsCacheWithLock to avoid race conditions
+// use UpdateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) bool {
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.

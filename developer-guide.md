@@ -17,6 +17,7 @@ maven plugin would fail to create the new docker images)
 
 - `mvn clean install` (make sure java-11 is set because the enforcer pom contains
  java-11 as the source)
+  - For first build, you will need to run `mvn clean install -P Release` to build all components. Building the router takes considerable time. Unless the routers filters are changed you may use  this [bypass method](https://docs.google.com/document/d/1LsuBld86bG02zK3CqDarvsei2lcq3mbYbj8U2ACa7f8/edit)
   - For ARM-based processors, specify the platform using `--platform` flag before the 
   `adoptopenjdk/openjdk11:jre-11.0.11_9-alpine` base image name. This should be done in
   docker files relevant to the enforcer and mock-backend server.

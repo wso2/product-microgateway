@@ -1,0 +1,25 @@
+# The query type, represents all of the entry points into the GraphQL API
+type Query {
+    hello: String
+    hero: [Hero]
+    address: [Address]
+}
+
+# The mutation type, represents all updates to the data
+type Mutation {
+    createHero(name: String, age: Int): Hero
+}
+
+# Represents Address details
+type Address{
+    planet: String
+    village: String
+}
+
+# Represents hero details
+type Hero{
+    id: ID
+    name: String
+    age: Int
+    location: Address
+}

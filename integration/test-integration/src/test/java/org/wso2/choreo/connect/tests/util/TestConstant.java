@@ -201,8 +201,10 @@ public class TestConstant {
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9764;
     public static final int MOCK_BACKEND_HTTP2_CLEAR_TEXT_SERVER_PORT = 2350;
     public static final int MOCK_BACKEND_HTTP2_SECURED_SERVER_PORT = 2351;
+    public final static int MOCK_GRAPHQL_SERVER_PORT = 2320;
 
     public static final String MOCK_BACKEND_BASEPATH = "/v2";
+    public static final String MOCK_GRAPHQL_BASEPATH = "/gql";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
@@ -226,15 +228,22 @@ public class TestConstant {
     public static final String DOCKER_COMPOSE_YAML_PATH = File.separator + "docker-compose.yaml";
     public static final String CA_CERTS_FILE = File.separator + "ca-certificates.crt";
 
+    public static final String ENFORCER_DIR_NAME = "enforcer";
     public static final String ROUTER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "router"
             + SECURITY_DIR + File.separator + "truststore";
-    public static final String ENFORCER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + "enforcer"
+    public static final String ENFORCER_TRUSTSTORE_DIR = RESOURCES_DIR + File.separator + ENFORCER_DIR_NAME
             + SECURITY_DIR + File.separator + "truststore";
     public static final String DOCKER_COMPOSE_CC_DIR = DOCKER_COMPOSE_DIR + File.separator + "choreo-connect";
     public static final String DROPINS_FOLDER_PATH = DOCKER_COMPOSE_DIR + RESOURCES_DIR
-            + File.separator + "enforcer" + File.separator + "dropins";
+            + File.separator + ENFORCER_DIR_NAME + File.separator + "dropins";
     public static final String STARTUP_APIS_DIR = RESOURCES_DIR + File.separator
             + "adapter" + File.separator + "artifacts" + File.separator + "apis";
+    public static final String JACOCO_EXEC_NAME = "aggregate.exec";
+    public static final String ENFORCER_PARENT_DIR_NAME = "enforcer-parent";
+    public static final String TARGET_DIR_NAME = "target";
+    public static final String CODECOV_AGGREGATE_REPORT_DIR_NAME = "coverage-aggregate-reports";
+
+
 
     public static final String HEALTH_ENDPOINT_RESPONSE = "{\"status\": \"healthy\"}";
 
@@ -325,6 +334,7 @@ public class TestConstant {
 
     public static final class API_TYPES {
         public static final String SOAP = "SOAP";
+        public static final String GRAPHQL = "GRAPHQL";
     }
 
     public static final class SOAP_ENVELOPES {

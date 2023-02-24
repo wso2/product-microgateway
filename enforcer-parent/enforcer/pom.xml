@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.choreo.connect</groupId>
         <artifactId>enforcer-parent</artifactId>
-        <version>1.2.0-m1-SNAPSHOT</version>
+        <version>1.2.1-beta2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -157,7 +157,7 @@
                             <exclude>org.apache.logging:*</exclude>
                             <exclude>log4j:*</exclude>
                             <exclude>org.slf4j:slf4j-log4j12</exclude>
-                            <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>
+                            <exclude>org.apache.logging.log4j:log4j-slf4j2-impl</exclude>
                             <exclude>org.apache.logging.log4j:log4j-api</exclude>
                             <exclude>org.apache.logging.log4j:log4j-core</exclude>
                             <exclude>org.apache.logging.log4j:log4j-jcl</exclude>
@@ -192,8 +192,42 @@
                                 org.apache.logging.log4j, org.json.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j-impl
+                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j2-impl
                             </includeArtifactIds>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-dependencies-for-code-coverage</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.code.coverage}</skip>
+                            <outputDirectory>${project.build.directory}/</outputDirectory>
+                            <includeGroupIds>
+                                org.jacoco
+                            </includeGroupIds>
+                            <includeArtifactIds>
+                                org.jacoco.agent
+                            </includeArtifactIds>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.code.coverage}</skip>
+                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-before-int-tests.sh
+                            </executable>
                         </configuration>
                     </execution>
                 </executions>
@@ -227,7 +261,7 @@
                 <executions>
                     <execution>
                         <id>docker-build</id>
-                        <phase>package</phase>
+                        <phase>install</phase>
                         <goals>
                             <goal>build</goal>
                         </goals>
@@ -249,15 +283,85 @@
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <skip>${skip.code.coverage}</skip>
+                </configuration>
+                <executions>
                     <execution>
-                        <id>download-grpc-health-probe-arm64</id>
-                        <phase>generate-resources</phase>
+                        <id>default-prepare-agent</id>
                         <goals>
-                            <goal>wget</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <url>https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v${grpc.healthProbe.version}/grpc_health_probe-linux-arm64</url>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-prepare-agent-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report-integration</id>
+                        <goals>
+                            <goal>report-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>merge-results</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${session.executionRootDirectory}</directory>
+                                    <includes>
+                                        <include>**/*.exec</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                            <destFile>${project.build.directory}/coverage-aggregate-reports/aggregate.exec</destFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{surefireArgLine}</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven.failsafe.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>@{failsafeArgLine}</argLine>
                         </configuration>
                     </execution>
                 </executions>
@@ -319,10 +423,6 @@
                     <artifactId>jackson-annotations</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
@@ -417,7 +517,11 @@
         <!-- slf4j binding -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
@@ -482,6 +586,10 @@
             <artifactId>opentelemetry-extension-trace-propagators</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer.commons</artifactId>
             <version>${project.parent.version}</version>
@@ -496,6 +604,12 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <version>${jacoco.version}</version>
+            <classifier>runtime</classifier>
+        </dependency>
+        <dependency>
             <groupId>javax.xml.soap</groupId>
             <artifactId>javax.xml.soap-api</artifactId>
         </dependency>
@@ -503,5 +617,10 @@
             <groupId>com.sun.xml.messaging.saaj</groupId>
             <artifactId>saaj-impl</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+        </dependency>
     </dependencies>
+
 </project>

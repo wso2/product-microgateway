@@ -25,6 +25,7 @@ public class EndpointCluster {
     private List<String> urls;
     private RetryConfig retryConfig;
     private Integer routeTimeoutInMillis;
+    private String basePath;
 
     /**
      * @return URLs of the cluster
@@ -66,5 +67,19 @@ public class EndpointCluster {
      */
     public void setRouteTimeoutInMillis(Integer routeTimeoutInMillis) {
         this.routeTimeoutInMillis = routeTimeoutInMillis;
+    }
+
+    /**
+     * @return basepath of the backend endpoint
+     */
+    public String getBasePath() {
+        return basePath;
+    }
+
+    /**
+     * @param basePath of the backend endpoint
+     */
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
     }
 }

@@ -18,5 +18,25 @@
     "apiName": "KeyTemplateThrottlingAPI",
     "appName": "KeyTemplateThrottlingApp",
     "tier": "Unlimited"
+  },
+  {
+    "apiName": "GraphQLBasicAPI",
+    "appName": "GraphQLBasicApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "GraphQLThrottlingAPI",
+    "appName": "GraphQLThrottlingApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "GraphQLScopeAPI",
+    "appName": "GraphQLScopeApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "CompressionTestAPI",
+    "appName": "CompressionTestApp",
+    "tier": "Unlimited"
   }
 ]

@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * Specific implementation for a WebSocket API type APIs. Contains 2 filter chains to process initial HTTP request and
- * websocket frame data.
+ * WebSocket frame data.
  */
 public class WebSocketAPI implements API {
 
@@ -130,7 +130,8 @@ public class WebSocketAPI implements API {
         }
         for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = RestAPI.buildResource(operation, res.getPath(), apiSecurity);
+                ResourceConfig resConfig = Utils.buildResource(operation, res.getPath(), apiSecurity);
+                resConfig.setPolicyConfig(Utils.genPolicyConfig(operation.getPolicies()));
                 resConfig.setTier(api.getTier());
                 resources.add(resConfig);
             }
@@ -153,6 +154,7 @@ public class WebSocketAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         responseObject.setRequestPath(requestContext.getRequestPath());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
+        Utils.removeCommonAuthHeaders(requestContext);
         if (executeFilterChain(requestContext)) {
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
@@ -219,7 +221,6 @@ public class WebSocketAPI implements API {
         }
         return true;
     }
-
 
     public List<Filter> getUpgradeFilters() {
         return upgradeFilters;

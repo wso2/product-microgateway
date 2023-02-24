@@ -1,11 +1,16 @@
 
-  gitlab:
-    image: "gitlab/gitlab-ce:14.7.3-ce.0"
-    restart: always
+  gitea:
+    image: gitea/gitea:1.17.1
+    hostname: gitea
     environment:
-      GITLAB_OMNIBUS_CONFIG: |
-        gitlab_rails["initial_root_password"] = "svcAdmin"
-        gitlab_rails['monitoring_whitelist'] = ['0.0.0.0/0']
+      - USER_UID=1000
+      - USER_GID=1000
+      - LOCAL_ROOT_URL=http://gitea/
+      - ROOT_URL=http://gitea/
+    restart: always
+    volumes:
+      - ./gitea/gitea/gitea.db:/data/gitea/gitea.db
+      - ./gitea/gitea/conf/app.ini:/data/gitea/conf/app.ini
     ports:
-      - "8285:80"
+      - "8285:8285"
 

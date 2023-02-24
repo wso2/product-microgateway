@@ -25,7 +25,8 @@ import (
 // This uses singleton pattern where creating a single channel for communication
 //
 // To get a instance of the channel for a data publisher go routine
-//  `publisher := NewSender()`
+//
+//	`publisher := NewSender()`
 //
 // Create a receiver channel in worker go routine
 // receiver := NewReceiver()
@@ -67,8 +68,9 @@ const (
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
 // Note :
-// 		Don't use toml tag for configuration properties as it may affect environment variable based
-// 		config resolution.
+//
+//	Don't use toml tag for configuration properties as it may affect environment variable based
+//	config resolution.
 type Config struct {
 	Adapter       adapter
 	Enforcer      enforcer
@@ -117,6 +119,7 @@ type envoy struct {
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
 	AwsLambda                        awsLambda
 	UseRemoteAddress                 bool
+	Filters                          filters
 }
 
 type connectionTimeouts struct {
@@ -124,6 +127,31 @@ type connectionTimeouts struct {
 	RequestHeadersTimeoutInSeconds time.Duration // default disabled
 	StreamIdleTimeoutInSeconds     time.Duration // Default 5 mins
 	IdleTimeoutInSeconds           time.Duration // default 1hr
+}
+
+type filters struct {
+	Compression compression
+}
+
+type compression struct {
+	Enabled           bool
+	Library           string
+	RequestDirection  requestDirection
+	ResponseDirection responseDirection
+	LibraryProperties map[string]interface{}
+}
+
+type requestDirection struct {
+	Enabled              bool
+	MinimumContentLength int
+	ContentType          []string
+}
+
+type responseDirection struct {
+	Enabled              bool
+	MinimumContentLength int
+	ContentType          []string
+	EnableForEtagHeader  bool
 }
 
 type connection struct {
@@ -388,19 +416,28 @@ type binaryAgent struct {
 
 type jwtGenerator struct {
 	// Deprecated: Use Enabled instead
-	Enable                bool
-	Enabled               bool
-	Encoding              string
-	ClaimDialect          string
-	ConvertDialect        bool
-	Header                string
-	SigningAlgorithm      string
-	EnableUserClaims      bool
-	GatewayGeneratorImpl  string
-	ClaimsExtractorImpl   string
-	PublicCertificatePath string
+	Enable                           bool
+	Enabled                          bool
+	Encoding                         string
+	ClaimDialect                     string
+	ConvertDialect                   bool
+	Header                           string
+	SigningAlgorithm                 string
+	EnableUserClaims                 bool
+	GatewayGeneratorImpl             string
+	ClaimsExtractorImpl              string
+	TokenTTL                         int32
+	UseKidProperty                   bool
+	Keypair                          []KeyPair
+	JwksRatelimitQuota               uint32
+	JwksRatelimitTimeWindowInSeconds uint32
+}
+
+// KeyPair represents hthe rsa keypair used for signing JWTs
+type KeyPair struct {
 	PrivateKeyPath        string
-	TokenTTL              int32
+	PublicCertificatePath string
+	UseForSigning         bool
 }
 
 type claimMapping struct {
@@ -436,12 +473,20 @@ type analyticsAdapter struct {
 	BufferFlushInterval time.Duration
 	BufferSizeBytes     uint32
 	GRPCRequestTimeout  time.Duration
+	CustomProperties    analyticsCustomProperties
 }
 
 type analyticsEnforcer struct {
 	// TODO: (VirajSalaka) convert it to map[string]{}interface
 	ConfigProperties map[string]string
 	LogReceiver      authService
+}
+
+type analyticsCustomProperties struct {
+	Enabled          bool
+	RequestHeaders   []string
+	ResponseHeaders  []string
+	ResponseTrailers []string
 }
 
 type authHeader struct {

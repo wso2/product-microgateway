@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.choreo.connect</groupId>
         <artifactId>integration</artifactId>
-        <version>1.2.0-m1-SNAPSHOT</version>
+        <version>1.2.1-beta2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -39,12 +39,15 @@
                         <jwt_transformer_jar>
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
+                        <root_pom_path>${ccBaseDir}</root_pom_path>
+                        <is_code_coverage_enabled>${skip.code.coverage}</is_code_coverage_enabled>
                         <apictl_version>${apictl.version}</apictl_version>
                         <!-- allowRestrictedHeaders enabled for allowing to send host header with requests, for testing vhost feature -->
                         <sun.net.http.allowRestrictedHeaders>true</sun.net.http.allowRestrictedHeaders>
+                        <jacoco-agent.destfile>**/jacoco.exec</jacoco-agent.destfile>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
-<!--                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>-->
+                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>
                         <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemProperties>
@@ -55,9 +58,6 @@
                             </value>
                         </property>
                     </systemProperties>
-                    <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.wso2.choreo.connect:org.wso2.choreo.connect.enforcer</classpathDependencyExclude>
-                    </classpathDependencyExcludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -73,8 +73,11 @@
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
-                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/backend-service-gql.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-with-tls-and-network.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                                 <replaceregexp file="src/test/resources/dockerCompose/backend-service-tls-with-opa-server.yaml" match="wso2\/choreo-connect\-mock\-backend\:.*" replace="wso2/choreo-connect-mock-backend:${project.version}" byline="true" />
                             </target>
@@ -103,30 +106,46 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
-                    <images>
-                        <image>
-                            <alias>choreo-connect-backend</alias>
-                            <name>testcontainers/ryuk:${ryuk.image.version}</name>
-                        </image>
-                    </images>
+                    <skip>${skip.code.coverage}</skip>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>docker-test-container-pull</id>
-                        <phase>generate-resources</phase>
                         <goals>
-                            <goal>start</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                     <execution>
-                        <id>docker-test-container-remove</id>
-                        <phase>post-integration-test</phase>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>stop</goal>
+                            <goal>report-aggregate</goal>
                         </goals>
+                        <configuration>
+                            <dataFileIncludes>
+                                <dataFileInclude>**/choreo-connect-temp/docker-compose/resources/enforcer/dropins/aggregate.exec</dataFileInclude>
+                            </dataFileIncludes>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.15</version>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>@{failsafeArgLine}</argLine>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -144,6 +163,23 @@
                             <url>https://github.com/wso2/product-apim-tooling/releases/download/v${apictl.version}/${apictl.package}</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>after-integration-tests</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.code.coverage}</skip>
+                            <executable>${ccBaseDir}/dev-scripts/code-coverage/prepare-files-after-int-tests.sh</executable>
                         </configuration>
                     </execution>
                 </executions>
@@ -251,11 +287,15 @@
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>
         <profile>
-            <id>mac-x64</id>
+            <id>mac-amd64</id>
             <activation>
                 <os>
                     <family>mac</family>
@@ -264,6 +304,18 @@
             </activation>
             <properties>
                 <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-arm64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package> <!-- Use same amd64 distribution until arm64 available -->
             </properties>
         </profile>
         <profile>

@@ -21,6 +21,7 @@ package org.wso2.choreo.connect.mockbackend;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +32,7 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,9 +41,13 @@ import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Utils {
     private static final Logger log = LogManager.getLogger(Utils.class.getName());
@@ -56,6 +62,31 @@ public class Utils {
         exchange.sendResponseHeaders(respCode, response.length);
         exchange.getResponseBody().write(response);
         exchange.close();
+    }
+
+    // sends gzip compressed response
+    public static void sendGzipCompression(HttpExchange exchange) throws IOException {
+        Headers requestHeaders = exchange.getRequestHeaders();
+        EchoResponse echoResponse = new EchoResponse();
+        String payloadString;
+        if (!requestHeaders.containsKey("Accept-Encoding")) {
+            echoResponse.setData("Invalid request received");
+            respondWithBodyAndClose(HttpURLConnection.HTTP_BAD_REQUEST, echoResponse.getData().getBytes(), exchange);
+            return;
+        }
+        InputStream is = exchange.getRequestBody();
+        StringBuilder sb = new StringBuilder();
+        for (int ch; (ch = is.read()) != -1; ) {
+            sb.append((char) ch);
+        }
+        payloadString = sb.toString();
+        exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_ENCODING.toString(), "gzip");
+        if (requestHeaders.containsKey("Content-Encoding") && requestHeaders.get("Content-Encoding").toString().contains("gzip")) {
+            respondWithBodyAndClose(HttpURLConnection.HTTP_OK, Base64.getDecoder().decode(payloadString), exchange);
+            return;
+        }
+        byte[] bytes = convertToGZip(payloadString.getBytes(UTF_8));
+        respondWithBodyAndClose(HttpURLConnection.HTTP_OK, bytes, exchange);
     }
 
     // echo request body, request headers in echo response payload
@@ -137,6 +168,16 @@ public class Utils {
         exchange.getResponseBody().write(response);
     }
 
+    public static void send200OK(HttpExchange exchange, byte[] response, Map<String, String> headers) throws IOException {
+        exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
+        headers.forEach(
+                (key, value) -> exchange.getResponseHeaders().set(key, value)
+        );
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
+    }
+
     public static TrustManager[] getTrustManagers() throws Exception {
         InputStream inputStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("mg.pem");
@@ -174,5 +215,14 @@ public class Utils {
             }
         }
         return resultStringBuilder.toString();
+    }
+
+    private static byte[] convertToGZip(byte[] data) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
+            gzipOutputStream.write(data);
+            gzipOutputStream.finish();
+            return byteArrayOutputStream.toByteArray();
+        }
     }
 }

@@ -229,6 +229,45 @@ soapErrorInXMLEnabled = false
   # If enabled, request body will send as raw bytes, otherwise it will be a UTF-8 string request body.
   packAsBytes = false
 
+# Configurations relevant to the router filters
+[router.filters]
+  # Configurations relevant to the compression filter
+  [router.filters.compression]
+    # Enable/Disable compression filter for the router
+    enabled = true
+    # Defines compression library used in the filter
+    library = "gzip"
+  # Configurations relevant to the compression filter's request direction (router's upstream request)
+  [router.filters.compression.requestDirection]
+    # Enable/Disable request direction compression
+    enabled = false
+    # Minimum byte amount considered before applying the compression
+    minimumContentLength = 30
+    # Content types to consider for the compression
+    contentType = ["application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"]
+  # Configurations relevant to the compression filter's response direction (router's downstream request)
+  [router.filters.compression.responseDirection]
+    # Enable/Disable request direction compression
+    enabled = true
+    # Minimum byte amount considered before applying the compression
+    minimumContentLength = 30
+    # Content types to consider for the compression
+    contentType = ["application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"]
+    # Enable/Disable the compression if there is an Etag header
+    enableForEtagHeader = true
+  # Configurations relevant to the compression library
+  [router.filters.compression.libraryProperties]
+    # controls the amount of internal memory used by zlib (value range is 1 to 9)
+    memoryLevel = 3
+    # base two logarithmic of the compressor's window size (value range is 9 to 15)
+    windowBits = 12
+    # zlib compression level (higher values provide better compression level. Value range is 0 to 9)
+    compressionLevel = 9
+    # zlib compression strategy (values: defaultStrategy, gzipFiltered, gzipHuffmanOnly, gzipRle, gzipFixed)
+    compressionStrategy = "defaultStrategy"
+    # zlib's next output buffer
+    chunkSize = 4096
+
 [enforcer] # --------------------------------------------------------
 
 # If Custom Filters needs to be engaged, mention them here with position.
@@ -306,12 +345,20 @@ enabled = true
   gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
   # Custom Claim Retriever to add custom claims into JWT
   claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
-  # Public certificate for generated JWT
-  publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
-  # Private key path used for JWT generation
-  privateKeyPath = "/home/wso2/security/keystore/mg.key"
   # Token expiry time in seconds
   tokenTTL = 3600
+  # JWKS Endpoint calls allowed per a configured time window
+  jwksRatelimitQuota = 1000
+  # JWKS Endpoint rate limiting time window
+  jwksRatelimitTimeWindowInSeconds = 10
+  # Whether to use kid or x5t parameter to identify JWT verification key
+  useKidProperty = true
+  # Key-Certificate pairs used for JWT Generation. Multiple Certificates could be added to generate multiple JWK
+  # Entries. This is to do certificate rotation.
+  [[enforcer.jwtGenerator.keypair]]
+    publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+    privateKeyPath = "/home/wso2/security/keystore/mg.key"
+    useForSigning = true
 
 # The issuer configuration required to generate token at Choreo Connect
 [enforcer.jwtIssuer]
@@ -359,7 +406,7 @@ enabled = true
   enableOutboundCertificateHeader = false
 
 # JWT token authorization configurations. You can provide multiple JWT issuers
-# Issuer 1
+# Issuer 1 - Resident Key Manager Issuer for Access tokens
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
   name = "Resident Key Manager"
@@ -375,7 +422,7 @@ enabled = true
   # Certificate Filepath within Enforcer
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
-# Issuer 2
+# Issuer 2 - Issuer for Enforcer test key
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
   name = "MGW"
@@ -391,14 +438,25 @@ enabled = true
   # Certificate Filepath within Enforcer
   certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
-# Issuer 3
+# Issuer 3 - Issuer for API Manager Internal Key
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
   name = "APIM Publisher"
   issuer = "https://localhost:9443/publisher"
   validateSubscription = true
   # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
-  certificateAlias = ""
+  certificateAlias = "publisher_certificate_alias"
+  # Certificate Filepath within Enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Issuer 4 - Issuer for API Manager API Key
+[[enforcer.security.tokenService]]
+  # Provide unique name for the JWT issuer
+  name = "APIM APIkey"
+  issuer = "https://localhost:9443/publisher"
+  validateSubscription = true
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
+  certificateAlias = "apikey_certificate_alias"
   # Certificate Filepath within Enforcer
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
@@ -539,6 +597,15 @@ enabled = true
     bufferSizeBytes = 16384
     # gRPC connection timeout for access log service
     gRPCRequestTimeout = "20s"
+  [analytics.adapter.customProperties]
+    # Enable/Disable analytics custom properties in Choreo Connect
+    enabled = true
+    # Request headers required to pass from Router to the Enforcer. Accept, User-Agent headers are available by default.
+    requestHeaders = []
+    # Response headers required to pass from Router to the Enforcer. Content-length, Content-type, Date headers are available by default.
+    responseHeaders = []
+    # Response trailers required to pass from Router to the Enforcer
+    responseTrailers = []
 
   # Enforcer related configurations
   [analytics.enforcer]
@@ -546,6 +613,8 @@ enabled = true
       # Overrides default analytics publisher reporter class
       # "publisher.reporter.class" = "org.wso2.am.analytics.publisher.sample.reporter.CustomReporter"
       # Authentication endpoint for Choreo Analytics Publishing (This is not used when the type is "elk")
+      # Fully qualified class name relevant to the custom analytics data handling
+      #"publisher.custom.data.provider.class" = "org.wso2.carbon.apimgt.gateway.sample.publisher.CustomDataProvider"
       authURL = "$env{analytics_authURL}"
       # Authentication token for Choreo Analytics Publishing (This is not used when the type is "elk")
       authToken = "$env{analytics_authToken}"
@@ -615,6 +684,21 @@ enabled = true
   # [tracing.configProperties]
   #   connectionString = ""
   #   # Instrumentation Name
+  #   instrumentationName = "CHOREO-CONNECT"
+  #   # Maximum number of sampled traces per second string
+  #   maximumTracesPerSecond = "2"
+
+  # type = "otlp"
+  # [tracing.configProperties]
+  #   # maximum length of the request path to extract and include in the HttpUrl tag.
+  #   maxPathLength = "256"
+  #   # remote url for publishing traces. i.e - New Relic otlp url.
+  #   connectionString = "https://otlp.nr-data.net"
+  #   # auth header name
+  #   authHeaderName = "api-key"
+  #   # auth header value
+  #   authHeaderValue = "845e16b6cfba0ea5e95e3NRALe8f478ae6d3c97f"
+  #   # library Name to be tagged in traces (`otel.library.name`).
   #   instrumentationName = "CHOREO-CONNECT"
   #   # Maximum number of sampled traces per second string
   #   maximumTracesPerSecond = "2"

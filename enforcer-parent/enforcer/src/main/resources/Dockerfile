@@ -14,14 +14,46 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/openjdk11:jre-11.0.14.1_1-alpine
+FROM alpine:3.17.2
+
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+
+RUN apk add --no-cache fontconfig libretls musl-locales musl-locales-lang ttf-dejavu tzdata zlib \
+    && rm -rf /var/cache/apk/*
+
+ENV JAVA_VERSION jdk-11.0.18+10
+
+ENV JAVA_HOME /opt/java/openjdk
+ENV PATH $JAVA_HOME/bin:$PATH
+
+RUN set -eux; \
+    ARCH="$(apk --print-arch)"; \
+    case "${ARCH}" in \
+       aarch64|amd64|x86_64) \
+         ESUM='81e51ec2da61b227c522881313c7e2a090b29d6cc4171b5e1db3f3d17d863e44'; \
+         BINARY_URL='https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.18%2B10/OpenJDK11U-jre_x64_alpine-linux_hotspot_11.0.18_10.tar.gz'; \
+         ;; \
+       *) \
+         echo "Unsupported arch: ${ARCH}"; \
+         exit 1; \
+         ;; \
+    esac; \
+	  wget -O /tmp/openjdk.tar.gz ${BINARY_URL}; \
+	  echo "${ESUM} */tmp/openjdk.tar.gz" | sha256sum -c -; \
+	  mkdir -p "$JAVA_HOME"; \
+	  tar --extract \
+	      --file /tmp/openjdk.tar.gz \
+	      --directory "$JAVA_HOME" \
+	      --strip-components 1 \
+	      --no-same-owner \
+	  ; \
+    rm -f /tmp/openjdk.tar.gz ${JAVA_HOME}/src.zip;
+
+# https://github.com/micrometer-metrics/micrometer/issues/2776
+RUN apk --no-cache add gcompat
+ENV LD_PRELOAD=/lib/libgcompat.so.0
+
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
-
-RUN apk update && apk upgrade --no-cache
-
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
-
-ENV LANG=C.UTF-8
 
 ARG MG_USER=wso2
 ARG MG_USER_ID=10500
@@ -75,5 +107,7 @@ COPY maven/LICENSE.txt .
 #todo add applicationinsights.json file and point it to the appInsightsAgent jar
 #Add the agent using JVM arg -javaagent:/home/wso2/conf/applicationinsights-agent-3.1.1.jar
 #Add the config file using System property -Dapplicationinsights.configuration.file=/home/wso2/conf/applicationinsights.json
+
+EXPOSE 8081 9001
 
 CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer

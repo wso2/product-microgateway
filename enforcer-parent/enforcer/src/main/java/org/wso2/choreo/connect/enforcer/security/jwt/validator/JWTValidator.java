@@ -42,6 +42,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,7 +70,7 @@ public class JWTValidator {
         }
         jwtValidationInfo.setValid(false);
         jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-        logger.error("No matching issuer found for the token with issuer : " + issuer);
+        logger.info("No matching issuer found for the token with issuer : " + issuer);
         return jwtValidationInfo;
     }
 
@@ -168,8 +169,13 @@ public class JWTValidator {
         jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
         jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
         if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null) {
-            jwtValidationInfo.setScopes(Arrays.asList(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
-                    .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
+            if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) instanceof List) {
+                jwtValidationInfo.setScopes(jwtClaimsSet.getStringListClaim(APIConstants.JwtTokenConstants.SCOPE));
+            } else {
+                jwtValidationInfo.setScopes(Arrays.asList(
+                        jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
+                                .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
+            }
         }
     }
 

@@ -29,6 +29,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.server.AuthServer;
 import org.wso2.choreo.connect.enforcer.tracing.exporters.AzureExporter;
 import org.wso2.choreo.connect.enforcer.tracing.exporters.JaegerExporter;
+import org.wso2.choreo.connect.enforcer.tracing.exporters.OTLPExporter;
 import org.wso2.choreo.connect.enforcer.tracing.exporters.ZipkinExporter;
 
 import java.util.HashMap;
@@ -81,6 +82,8 @@ public class TracerFactory {
             sdk = JaegerExporter.getInstance().initSdk(properties);
         } else if (TracingConstants.ZIPKIN_TRACE_EXPORTER.equalsIgnoreCase(exporterType)) {
             sdk = ZipkinExporter.getInstance().initSdk(properties);
+        } else if (TracingConstants.OTLP_TRACE_EXPORTER.equalsIgnoreCase(exporterType)) {
+            sdk = OTLPExporter.getInstance().initSdk(properties);
         } else {
             throw new TracingException("Tracer exporter type: " + exporterType + "not found!");
         }

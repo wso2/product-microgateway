@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.throttle;
 
+import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -205,12 +206,12 @@ public class ThrottleDataHolder {
     /**
      * Checks if a request is blocked by given blocking keys.
      *
-     * @param apiBlockingKey blocking key for API blocking
-     * @param applicationBlockingKey blocking key for Application blocking
-     * @param userBlockingKey blocking key for User blocking
-     * @param ipBlockingKey blocking key for IP blocking
+     * @param apiBlockingKey          blocking key for API blocking
+     * @param applicationBlockingKey  blocking key for Application blocking
+     * @param userBlockingKey         blocking key for User blocking
+     * @param ipBlockingKey           blocking key for IP blocking
      * @param subscriptionBlockingKey blocking key for Subscription blocking
-     * @param apiTenantDomain tenant domain of the current request
+     * @param apiTenantDomain         tenant domain of the current request
      * @return {@code true} if request is blocked by any of the conditions, {@code false} otherwise
      */
     public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
@@ -221,6 +222,7 @@ public class ThrottleDataHolder {
                 || blockedConditions.containsKey(subscriptionBlockingKey)
                 || isIpLevelBlocked(apiTenantDomain, ipBlockingKey));
     }
+
     /**
      * This method will check given key in throttle data Map. A key is considered throttled if,
      * <ol>
@@ -364,7 +366,7 @@ public class ThrottleDataHolder {
             }
             if (conf.isJwtClaimConditionsEnabled()
                     && (claimConditions != null && !claimConditions.getValues().isEmpty())) {
-                Map<String, String> c = ThrottleUtils.getJWTClaims(req.getAuthenticationContext().getCallerToken());
+                JSONObject c = ThrottleUtils.getJWTClaims(req.getAuthenticationContext().getCallerToken());
                 if (c == null || !isJwtClaimPresent(c, claimConditions)) {
                     isThrottled = false;
                 }
@@ -387,7 +389,7 @@ public class ThrottleDataHolder {
      * @return throttle {@link Decision}
      */
     public Decision isThrottledByCustomPolicy(String userID, String resourceKey, String apiContext, String apiVersion,
-                                             String appTenant, String apiTenant, int appId, String clientIp,
+                                              String appTenant, String apiTenant, int appId, String clientIp,
                                               String customPropertyString) {
         Decision decision = new Decision();
         if (keyTemplates.size() > 0) {
@@ -407,7 +409,7 @@ public class ThrottleDataHolder {
                 // If custom throttle properties exist, populate the key template with custom properties.
                 if (!customPropertyString.equals("null")) {
                     String[] customPropertyList = customPropertyString.split(" ");
-                    for (String customProperty: customPropertyList) {
+                    for (String customProperty : customPropertyList) {
                         String[] propertyPair = customProperty.split("=");
                         if (propertyPair.length == 2) {
                             key = key.replaceAll("\\$customProperty." + propertyPair[0], propertyPair[1]);
@@ -501,7 +503,7 @@ public class ThrottleDataHolder {
 
         for (Map.Entry<String, String> entry : conditions.getValues().entrySet()) {
             if (headers != null) {
-                String value = headers.get(entry.getKey());
+                String value = headers.get(StringUtils.lowerCase(entry.getKey()));
 
                 if (StringUtils.isEmpty(value)) {
                     status = false;
@@ -520,11 +522,11 @@ public class ThrottleDataHolder {
         return status;
     }
 
-    private boolean isJwtClaimPresent(Map<String, String> claims, ThrottleCondition.JWTClaimConditions conditions) {
+    private boolean isJwtClaimPresent(JSONObject claims, ThrottleCondition.JWTClaimConditions conditions) {
         boolean status = true;
 
         for (Map.Entry<String, String> jwtClaim : conditions.getValues().entrySet()) {
-            String value = claims.get(jwtClaim.getKey());
+            String value = claims.getAsString(jwtClaim.getKey());
             if (value == null) {
                 status = false;
                 break;

@@ -21,7 +21,7 @@ package org.wso2.choreo.connect.enforcer.config.dto;
 /**
  * Holds the configurations related to threading of gRPC netty server.
  */
-public class ThreadPoolConfig {
+public class ThreadPoolConfig implements ThreadPoolConfigMBean {
     private int coreSize;
     private int maxSize;
     private int keepAliveTime;

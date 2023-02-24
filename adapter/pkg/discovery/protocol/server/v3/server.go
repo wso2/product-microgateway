@@ -85,7 +85,7 @@ type server struct {
 	delta envoy_delta.Server
 }
 
-func (s *server) StreamHandler(stream envoy_sotw.Stream, typeURL string) error {
+func (s *server) StreamHandler(stream streamv3.Stream, typeURL string) error {
 	return s.sotw.StreamHandler(stream, typeURL)
 }
 

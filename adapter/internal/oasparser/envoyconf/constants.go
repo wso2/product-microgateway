@@ -21,6 +21,7 @@ const (
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
+	extAuthzHTTPClusterName string = "ext_authz_http_cluster"
 	awslambdaClusterName    string = "wso2_lambda_egress_gateway"
 )
 
@@ -34,6 +35,8 @@ const (
 	httpConManagerStartPrefix  string = "ingress_http"
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
+	localRateLimitPerRouteName string = "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
+	corsFilterName             string = "type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors"
 	awsLambdaRouteName         string = "type.googleapis.com/envoy.extensions.filters.http.aws_lambda.v3.PerRouteConfig"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
@@ -41,6 +44,16 @@ const (
 	mgwWASMVmRuntime           string = "envoy.wasm.runtime.v8"
 	mgwWebSocketWASMFilterRoot string = "mgw_WASM_websocket_root"
 	mgwWebSocketWASM           string = "/home/wso2/wasm/websocket/mgw-websocket.wasm"
+	compressorFilterName       string = "envoy.filters.http.compressor"
+	localRatelimitFilterName   string = "envoy.filters.http.local_ratelimit"
+)
+
+const (
+	localRateLimitStatPrefix        string = "http_local_rate_limiter"
+	jwksRateLimitStatPrefix         string = "jwks_rate_limit"
+	jwksRateLimitEnabledRuntimeKey  string = "jwks_ratelimit_enabled"
+	jwksRateLimitEnforcedRuntimeKey string = "jwks_ratelimit_enforced"
+	jwksPathAtEnforcer              string = "/jwks"
 )
 
 const (
@@ -51,7 +64,7 @@ const (
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
 
-//cluster prefixes
+// cluster prefixes
 const (
 	xWso2EPClustersConfigNamePrefix     string = "xwso2cluster"
 	requestInterceptClustersNamePrefix  string = "reqInterceptor"
@@ -101,6 +114,7 @@ const (
 	healthPath  string = "/health"
 	testKeyPath string = "/testkey"
 	readyPath   string = "/ready"
+	jwksPath    string = "/.wellknown/jwks"
 )
 
 const (
@@ -115,13 +129,17 @@ const (
 
 // tracing configuration constants
 const (
-	tracerHost          = "host"
-	tracerPort          = "port"
-	tracerMaxPathLength = "maxPathLength"
-	tracerEndpoint      = "endpoint"
-	tracerNameZipkin    = "envoy.tracers.zipkin"
+	tracerHost              = "host"
+	tracerPort              = "port"
+	tracerMaxPathLength     = "maxPathLength"
+	tracerEndpoint          = "endpoint"
+	tracerNameZipkin        = "envoy.tracers.zipkin"
+	tracerNameOpenTelemetry = "envoy.tracers.opentelemetry"
+	tracerConnectionTimeout = "connectionTimeout"
+	tracerServiceNameRouter = "choreo_connect_router"
 	// Azure tracer's name
 	TracerTypeAzure = "azure"
+	TracerTypeOtlp  = "otlp"
 )
 
 // Constants used for SOAP APIs
@@ -137,4 +155,10 @@ const (
 // metadata keys
 const (
 	methodRewrite = "method-rewrite"
+)
+
+// Enforcer
+const (
+	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
+	uaexCode                   = "UAEX"
 )

@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.tests.apim.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -30,6 +31,8 @@ import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.WorkflowResponseDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
@@ -118,7 +121,7 @@ public class PublisherUtils {
 
     /**
      * Updates the OpenAPI definition of an already created REST API
-     * 
+     *
      * @param apiId ID of the API to update the OpenAPI definition
      * @param openAPIFileName Name of the OpenAPI file. ex. scopes_openAPI.yaml
      * @param publisherRestClient An instance of RestAPIPublisherImpl
@@ -258,6 +261,54 @@ public class PublisherUtils {
             }
         }
         return apiId;
+    }
+
+    /**
+     * creates a GraphQL API using a given GraphQL schema definition file.
+     *
+     * @param apiRequest          An APIRequest object
+     * @param publisherRestClient Instance of RestAPIPublisherImpl
+     * @return ID of the created API
+     * @throws ApiException If importWSDLSchemaDefinition fails
+     * @throws IOException  If WSDL definition file read fails
+     */
+    public static String createGraphQLApiFromSchema(APIRequest apiRequest, RestAPIPublisherImpl publisherRestClient,
+                                                    String policyName) throws ApiException, IOException {
+        File file = new File(Utils.getGraphQLSchemaPath());
+        GraphQLValidationResponseDTO responseApiDto = publisherRestClient.validateGraphqlSchemaDefinition(file);
+        GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = responseApiDto.getGraphQLInfo();
+        String arrayToJson = new ObjectMapper().writeValueAsString(graphQLInfo.getOperations());
+        JSONArray operations = new JSONArray(arrayToJson);
+
+        JSONObject apiJson = new JSONObject();
+        apiJson.put("name", apiRequest.getName());
+        apiJson.put("context", apiRequest.getContext());
+        apiJson.put("version", apiRequest.getVersion());
+        apiJson.put("operations", operations);
+        apiJson.put("provider", "");
+        apiJson.put("type", "GRAPHQL");
+        ArrayList<String> policies = new ArrayList<String>();
+        policies.add(policyName);
+        JSONObject endpoints = new JSONObject();
+        endpoints.put("url", new URL(Utils.getDockerMockGraphQLServiceURLHttp(TestConstant.MOCK_GRAPHQL_BASEPATH))
+                .toString());
+        JSONObject endpointConfig = new JSONObject();
+        endpointConfig.put("endpoint_type", "http");
+        endpointConfig.put("production_endpoints", endpoints);
+        endpointConfig.put("sandbox_endpoints", endpoints);
+        apiJson.put("endpointConfig", endpointConfig);
+        apiJson.put("policies", policies);
+
+        if(apiRequest.getSecurityScheme() != null && apiRequest.getSecurityScheme().size() > 0) {
+            ArrayList<String> securitySchemes = new ArrayList<>();
+            for (String securityScheme : apiRequest.getSecurityScheme()){
+                securitySchemes.add(securityScheme);
+            }
+            apiJson.put("securityScheme", securitySchemes);
+        }
+        APIDTO apidto = publisherRestClient.importGraphqlSchemaDefinition(file, apiJson.toString());
+        log.info("API Created. " + getAPIIdentifierStringFromAPIRequest(apiRequest));
+        return apidto.getId();
     }
 
     /**
