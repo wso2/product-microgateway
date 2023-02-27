@@ -13,7 +13,7 @@ data:
   isRevision: false
   revisionId: 0
   enableSchemaValidation: false
-  disableBackendJWT: true
+  enableBackendJWT: false
   type: HTTP
   transport:
     - http

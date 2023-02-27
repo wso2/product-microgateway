@@ -39,7 +39,7 @@ public class APIConfig {
     private String organizationId;
     private String uuid;
     private String apiProvider;
-    private boolean disableBackendJWT;
+    private boolean enableBackendJWT;
     private Map<String, List<String>> apiSecurity = new HashMap<>();
     private String tier;
     private boolean disableSecurity = false;
@@ -198,8 +198,8 @@ public class APIConfig {
      * Returns whether or not the backend JWT should be disabled
      * @return True if backend JWT should not be included, False if it should
      */
-    public boolean isDisableBackendJWT() {
-        return disableBackendJWT;
+    public boolean isEnableBackendJWT() {
+        return enableBackendJWT;
     }
 
     /**
@@ -225,7 +225,7 @@ public class APIConfig {
         private String apiProvider;
         private List<ResourceConfig> resources = new ArrayList<>();
 
-        private boolean disableBackendJWT;
+        private boolean enableBackendJWT;
 
         public Builder(String name) {
             this.name = name;
@@ -311,8 +311,8 @@ public class APIConfig {
             return this;
         }
 
-        public Builder disableBackendJWT(boolean disableBackendJWT) {
-            this.disableBackendJWT = disableBackendJWT;
+        public Builder enableBackendJWT(boolean enableBackendJWT) {
+            this.enableBackendJWT = enableBackendJWT;
             return this;
         }
 
@@ -335,7 +335,7 @@ public class APIConfig {
             apiConfig.uuid = this.uuid;
             apiConfig.securitySchemeDefinitions = this.securitySchemeDefinitions;
             apiConfig.apiProvider = this.apiProvider;
-            apiConfig.disableBackendJWT = this.disableBackendJWT;
+            apiConfig.enableBackendJWT = this.enableBackendJWT;
 
             return apiConfig;
         }

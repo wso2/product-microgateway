@@ -65,7 +65,7 @@ type MgwSwagger struct {
 	IsProtoTyped        bool
 	RateLimitLevel      string
 	RateLimitPolicy     string
-	DisableBackendJWT   bool
+	EnableBackendJWT    bool
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 }
@@ -1223,7 +1223,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	swagger.xWso2Basepath = data.Context + "/" + swagger.version
 
 	// Enable/Disable Backend JWTs per api
-	swagger.DisableBackendJWT = data.DisableBackendJWT
+	swagger.EnableBackendJWT = data.EnableBackendJWT
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig

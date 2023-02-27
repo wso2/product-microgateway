@@ -192,14 +192,20 @@ public class JwtGeneratorTestCase {
         Assert.assertTrue(received429, "JWKS endpoint is not rate limited.");
     }
 
-    @Test(description = "Test whether JWT can be disabled per API")
+    @Test(description = "Test whether JWT can be enabled/disabled per API")
     public void testPerAPIJWT() throws MalformedURLException, CCTestException {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        // Test whether it can be disabled
         HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/v2/perapibejwt/jwttoken"), headers);
         Assert.assertNotNull(response);
         Assert.assertFalse(response.getData()
                 .contains("token"), "JWT is available when disabled for this api");
+        // Test whether it can be enabled
+        response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/standard/jwttoken") , headers);
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.getData().contains("token"),"JWT isn't available by default");
     }
 }

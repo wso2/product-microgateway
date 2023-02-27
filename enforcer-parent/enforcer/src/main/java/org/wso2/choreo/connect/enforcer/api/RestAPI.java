@@ -149,7 +149,7 @@ public class RestAPI implements API {
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
                 .endpoints(endpoints).endpointSecurity(endpointSecurity)
                 .organizationId(api.getOrganizationId()).apiProvider(api.getApiProvider())
-                .disableBackendJWT(api.getDisableBackendJWT()).build();
+                .enableBackendJWT(api.getEnableBackendJWT()).build();
 
         initFilters();
         return basePath;

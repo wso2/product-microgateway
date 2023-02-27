@@ -275,8 +275,8 @@ public interface ApiOrBuilder extends
       getApiProviderBytes();
 
   /**
-   * <code>bool disableBackendJWT = 20;</code>
-   * @return The disableBackendJWT.
+   * <code>bool enableBackendJWT = 20;</code>
+   * @return The enableBackendJWT.
    */
-  boolean getDisableBackendJWT();
+  boolean getEnableBackendJWT();
 }
