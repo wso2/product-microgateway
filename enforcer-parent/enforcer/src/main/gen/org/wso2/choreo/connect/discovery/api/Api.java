@@ -38,6 +38,7 @@ private static final long serialVersionUID = 0L;
     mutualSSL_ = "";
     graphQLSchema_ = "";
     graphqlComplexityInfo_ = java.util.Collections.emptyList();
+    endpointType_ = "";
   }
 
   @java.lang.Override
@@ -246,6 +247,12 @@ private static final long serialVersionUID = 0L;
             }
             graphqlComplexityInfo_.add(
                 input.readMessage(org.wso2.choreo.connect.discovery.api.GraphqlComplexity.parser(), extensionRegistry));
+            break;
+          }
+          case 202: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            endpointType_ = s;
             break;
           }
           default: {
@@ -1100,6 +1107,44 @@ private static final long serialVersionUID = 0L;
     return graphqlComplexityInfo_.get(index);
   }
 
+  public static final int ENDPOINTTYPE_FIELD_NUMBER = 25;
+  private volatile java.lang.Object endpointType_;
+  /**
+   * <code>string endpointType = 25;</code>
+   * @return The endpointType.
+   */
+  @java.lang.Override
+  public java.lang.String getEndpointType() {
+    java.lang.Object ref = endpointType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      endpointType_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string endpointType = 25;</code>
+   * @return The bytes for endpointType.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getEndpointTypeBytes() {
+    java.lang.Object ref = endpointType_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      endpointType_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1185,6 +1230,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < graphqlComplexityInfo_.size(); i++) {
       output.writeMessage(24, graphqlComplexityInfo_.get(i));
+    }
+    if (!getEndpointTypeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 25, endpointType_);
     }
     unknownFields.writeTo(output);
   }
@@ -1278,6 +1326,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(24, graphqlComplexityInfo_.get(i));
     }
+    if (!getEndpointTypeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, endpointType_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1350,6 +1401,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getGraphQLSchema())) return false;
     if (!getGraphqlComplexityInfoList()
         .equals(other.getGraphqlComplexityInfoList())) return false;
+    if (!getEndpointType()
+        .equals(other.getEndpointType())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1428,6 +1481,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + GRAPHQLCOMPLEXITYINFO_FIELD_NUMBER;
       hash = (53 * hash) + getGraphqlComplexityInfoList().hashCode();
     }
+    hash = (37 * hash) + ENDPOINTTYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getEndpointType().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1650,6 +1705,8 @@ private static final long serialVersionUID = 0L;
       } else {
         graphqlComplexityInfoBuilder_.clear();
       }
+      endpointType_ = "";
+
       return this;
     }
 
@@ -1753,6 +1810,7 @@ private static final long serialVersionUID = 0L;
       } else {
         result.graphqlComplexityInfo_ = graphqlComplexityInfoBuilder_.build();
       }
+      result.endpointType_ = endpointType_;
       onBuilt();
       return result;
     }
@@ -2000,6 +2058,10 @@ private static final long serialVersionUID = 0L;
             graphqlComplexityInfoBuilder_.addAllMessages(other.graphqlComplexityInfo_);
           }
         }
+      }
+      if (!other.getEndpointType().isEmpty()) {
+        endpointType_ = other.endpointType_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -4667,6 +4729,82 @@ private static final long serialVersionUID = 0L;
         graphqlComplexityInfo_ = null;
       }
       return graphqlComplexityInfoBuilder_;
+    }
+
+    private java.lang.Object endpointType_ = "";
+    /**
+     * <code>string endpointType = 25;</code>
+     * @return The endpointType.
+     */
+    public java.lang.String getEndpointType() {
+      java.lang.Object ref = endpointType_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        endpointType_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string endpointType = 25;</code>
+     * @return The bytes for endpointType.
+     */
+    public com.google.protobuf.ByteString
+        getEndpointTypeBytes() {
+      java.lang.Object ref = endpointType_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        endpointType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string endpointType = 25;</code>
+     * @param value The endpointType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEndpointType(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      endpointType_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string endpointType = 25;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEndpointType() {
+      
+      endpointType_ = getDefaultInstance().getEndpointType();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string endpointType = 25;</code>
+     * @param value The bytes for endpointType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEndpointTypeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      endpointType_ = value;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

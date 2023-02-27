@@ -148,7 +148,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		manager.StripMatchingHostPort = true
 	}
 
-	pbst, err := ptypes.MarshalAny(manager)
+	pbst, err := anypb.New(manager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
 	}

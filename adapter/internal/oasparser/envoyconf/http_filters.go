@@ -235,7 +235,7 @@ func getAwsLambdaFilter() *hcmv3.HttpFilter {
 		PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
 		InvocationMode:     mode,
 	}
-	ext, err2 := ptypes.MarshalAny(awsLambdaConfig)
+	ext, err2 := anypb.New(awsLambdaConfig)
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}

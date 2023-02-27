@@ -164,7 +164,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                         .setHeader(HeaderValue.newBuilder().setKey(APIConstants.PATH_HEADER).setValue(constructedPath)
                                 .build()).build();
-//                okResponseBuilder.addHeaders(headerValueOption);
+                    okResponseBuilder.addHeaders(headerValueOption);
             }
 
             if (responseObject.getHeaderMap() != null) {
@@ -172,8 +172,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();
-//                            okResponseBuilder.addHeaders(headerValueOption);
-                        }
+                            if (!(headerValueOption.getHeader().getValue().equals("wso2_lambda_egress_gateway"))) {
+                                okResponseBuilder.addHeaders(headerValueOption);
+                            }
+                }
                 );
             }
             okResponseBuilder.addAllHeadersToRemove(responseObject.getRemoveHeaderMap());

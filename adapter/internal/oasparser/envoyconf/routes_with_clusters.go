@@ -1598,7 +1598,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 		isDefaultVersion:             swagger.IsDefaultVersion,
 		isSandbox:                    isSandbox,
-		endpointType:                 swagger.EndpointType,
+		endpointType:                 swagger.GetEndpointType(),
 	}
 
 	if swagger.GetProdEndpoints() != nil {

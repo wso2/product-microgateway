@@ -50,6 +50,7 @@ public class APIConfig {
     private String mutualSSL;
     private boolean applicationSecurity;
     private GraphQLSchemaDTO graphQLSchemaDTO;
+    private String endpointType;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -247,6 +248,15 @@ public class APIConfig {
     }
 
     /**
+     * Corresponding API's EndpointType is returned.
+     *
+     * @return EndpointType.
+     */
+    public String getEndpointType() {
+        return endpointType;
+    }
+
+    /**
      * Implements builder pattern to build an API Config object.
      */
     public static class Builder {
@@ -273,6 +283,7 @@ public class APIConfig {
         private String mutualSSL;
         private boolean applicationSecurity;
         private GraphQLSchemaDTO graphQLSchemaDTO;
+        private String endpointType;
 
         public Builder(String name) {
             this.name = name;
@@ -382,6 +393,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder endpointType(String endpointType) {
+            this.endpointType = endpointType;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -406,6 +422,7 @@ public class APIConfig {
             apiConfig.mutualSSL = this.mutualSSL;
             apiConfig.applicationSecurity = this.applicationSecurity;
             apiConfig.graphQLSchemaDTO = this.graphQLSchemaDTO;
+            apiConfig.endpointType = this.endpointType;
             return apiConfig;
         }
     }

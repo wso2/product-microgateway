@@ -91,6 +91,7 @@ public class RestAPI implements API {
         Map<String, String> mtlsCertificateTiers = new HashMap<>();
         String mutualSSL = api.getMutualSSL();
         boolean applicationSecurity = api.getApplicationSecurity();
+        String endpointType = api.getEndpointType();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -179,7 +180,7 @@ public class RestAPI implements API {
                 .endpoints(endpoints).endpointSecurity(endpointSecurity).mockedApi(api.getIsMockedApi())
                 .trustStore(trustStore).organizationId(api.getOrganizationId())
                 .mtlsCertificateTiers(mtlsCertificateTiers).mutualSSL(mutualSSL)
-                .applicationSecurity(applicationSecurity).build();
+                .applicationSecurity(applicationSecurity).endpointType(endpointType).build();
 
         initFilters();
         return basePath;
@@ -350,7 +351,8 @@ public class RestAPI implements API {
         // It is required to check if the resource Path is not null, because when CORS preflight request handling, or
         // generic OPTIONS method call happens, matchedResourcePath becomes null.
         if (requestContext.getMatchedResourcePaths() != null && requestContext.getMatchedResourcePaths().size() > 0 &&
-                requestContext.getMatchedResourcePaths().get(0).isDisableSecurity()) {
+                requestContext.getMatchedResourcePaths().get(0).isDisableSecurity() &&
+                !this.apiConfig.getEndpointType().equals("awslambda")) {
             return;
         }
 

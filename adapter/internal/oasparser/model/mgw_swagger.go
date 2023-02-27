@@ -342,6 +342,11 @@ func (swagger *MgwSwagger) GetXWSO2ApplicationSecurity() bool {
 	return swagger.xWso2ApplicationSecurity
 }
 
+// GetEndpointType returns the EndpointType of the API
+func (swagger *MgwSwagger) GetEndpointType() string {
+	return swagger.EndpointType
+}
+
 // SetOperationPolicies this will merge operation level policies provided in api yaml
 func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) (err error) {
 	for _, resource := range swagger.resources {
