@@ -649,6 +649,11 @@
                 <artifactId>kotlin-stdlib</artifactId>
                 <version>${org.jetbrains.kotlin.version}</version>
             </dependency>
+            <dependency>
+                <groupId>jaxen</groupId>
+                <artifactId>jaxen</artifactId>
+                <version>${jaxen.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -656,7 +661,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <andes.client.version>3.3.23</andes.client.version>
+        <andes.client.version>3.3.24</andes.client.version>
+        <jaxen.version>2.0.0</jaxen.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
         <carbon.apimgt.version>9.28.75</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
