@@ -468,6 +468,12 @@
                 <artifactId>org.wso2.am.integration.common.test.utils</artifactId>
                 <version>${apim.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>libthrift.wso2</groupId>
+                        <artifactId>libthrift</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.analytics.publisher</groupId>
