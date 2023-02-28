@@ -126,10 +126,10 @@ type EndpointCertificate struct {
 // Therefore, the params are defined to support json.Unmarshal()
 type APIYaml struct {
 	ApimMeta
-	Data APIData `json:"data"`
+	Data apiData `json:"data"`
 }
 
-type APIData struct {
+type apiData struct {
 	ID                         string               `json:"Id,omitempty"`
 	Name                       string               `json:"name,omitempty"`
 	Context                    string               `json:"context,omitempty"`
@@ -145,10 +145,10 @@ type APIData struct {
 	RateLimitLevel             string               `json:"rateLimitLevel,omitempty"`
 	RateLimitPolicy            string               `json:"rateLimitPolicy,omitempty"`
 	EnableBackendJWT           bool                 `json:"enableBackendJWT,omitempty"`
-	EndpointConfig             EndpointConfigStruct `json:"endpointConfig,omitempty"`
+	EndpointConfig             endpointConfigStruct `json:"endpointConfig,omitempty"`
 	Operations                 []OperationYaml      `json:"Operations,omitempty"`
 }
-type EndpointConfigStruct struct {
+type endpointConfigStruct struct {
 	EndpointType                 string              `json:"endpoint_type,omitempty"`
 	LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
 	LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
@@ -358,7 +358,7 @@ func parseDeployments(data []byte) ([]Deployment, error) {
 
 func createDefaultAPIYaml() APIYaml {
 	return APIYaml{
-		Data: APIData{
+		Data: apiData{
 			EnableBackendJWT: true,
 		},
 	}
