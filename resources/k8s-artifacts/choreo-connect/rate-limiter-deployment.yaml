@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------
-# Copyright (c) 2023, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+# Copyright (c) 2023, WSO2 LLC. (http://wso2.com) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,19 +19,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rate-limiter-deployment
+  name: choreo-connect-rate-limiter
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rate-limiter-deployment
+      app: choreo-connect-rate-limiter
   template:
     metadata:
       labels:
-        app: rate-limiter-deployment
+        app: choreo-connect-rate-limiter
     spec:
       containers:
-        - name: rate-limiter-deployment
+        - name: choreo-connect-rate-limiter
           image: wso2/choreo-connect-rate-limiter:1.1.0-m1-SNAPSHOT
           imagePullPolicy: IfNotPresent
           volumeMounts:
