@@ -590,7 +590,7 @@
                 <version>${javax.validation.api.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.graphql-java</groupId>
+                <groupId>com.graphql-java-kickstart</groupId>
                 <artifactId>graphql-java-tools</artifactId>
                 <version>${com.graphql.java.version}</version>
             </dependency>
@@ -729,7 +729,7 @@
         <wiremock.version>2.35.0</wiremock.version>
         <javax.xml.soap.version>1.4.0</javax.xml.soap.version>
         <com.sun.xml.messaging.saaj.version>1.5.3</com.sun.xml.messaging.saaj.version>
-        <com.graphql.java.version>5.2.4</com.graphql.java.version>
+        <com.graphql.java.version>13.0.2</com.graphql.java.version>
         <graphql.java.version>19.2.wso2v2</graphql.java.version>
         <org.jetbrains.kotlin.version>1.8.0</org.jetbrains.kotlin.version>
         <protobuf.java.version>3.21.7</protobuf.java.version>
