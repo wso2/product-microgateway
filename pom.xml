@@ -654,13 +654,18 @@
                 <artifactId>jaxen</artifactId>
                 <version>${jaxen.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${common.fileupload.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+        <common.fileupload.version>1.5</common.fileupload.version>
         <andes.client.version>3.3.24</andes.client.version>
         <jaxen.version>2.0.0</jaxen.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
