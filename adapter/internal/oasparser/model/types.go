@@ -144,6 +144,7 @@ type apiData struct {
 	Provider                   string               `json:"provider,omitempty"`
 	RateLimitLevel             string               `json:"rateLimitLevel,omitempty"`
 	RateLimitPolicy            string               `json:"rateLimitPolicy,omitempty"`
+	ThrottlingLimit            ThrottlingLimit      `json:"throttlingLimit,omitempty"`
 	EnableBackendJWT           bool                 `json:"enableBackendJWT,omitempty"`
 	EndpointConfig             endpointConfigStruct `json:"endpointConfig,omitempty"`
 	Operations                 []OperationYaml      `json:"Operations,omitempty"`
@@ -165,10 +166,16 @@ type endpointConfigStruct struct {
 
 // OperationYaml holds attributes of APIM operations
 type OperationYaml struct {
-	ID              string `json:"id,omitempty"`
-	Target          string `json:"target,omitempty"`
-	Verb            string `json:"verb,omitempty"`
-	RateLimitPolicy string `json:"rateLimitPolicy,omitempty"`
+	ID              string          `json:"id,omitempty"`
+	Target          string          `json:"target,omitempty"`
+	Verb            string          `json:"verb,omitempty"`
+	ThrottlingLimit ThrottlingLimit `json:"throttlingLimit,omitempty"`
+}
+
+// ThrottlingLimit details
+type ThrottlingLimit struct {
+	RequestCount int    `json:"requestCount,omitempty"`
+	Unit         string `json:"unit,omitempty"`
 }
 
 // APIRateLimitPolicy holds policy details relevant to the rate limiting
@@ -300,27 +307,10 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.APIYaml = apiYaml
 		ExtractAPIInformation(apiProject, apiYaml)
-	} else if strings.Contains(fileName, rateLimitPoliciesFile) {
-		loggers.LoggerAPI.Debugf("fileName : %v available for the API project.", fileName)
-		rlPoliciesJsn, conversionErr := utills.ToJSON(fileContent)
-		if conversionErr != nil {
-			loggers.LoggerAPI.Errorf("Error occured rate limit policies file to json. Error: %s", conversionErr.Error())
-			return conversionErr
+		conf, _ := config.ReadConfigs()
+		if conf.Envoy.RateLimit.Enabled {
+			ExtractAPIRateLimitPolicies(apiProject, apiYaml)
 		}
-		var rlPolicies RateLimitPolicy
-		err := json.Unmarshal(rlPoliciesJsn, &rlPolicies)
-		if err != nil {
-			loggers.LoggerAPI.Errorf("Error occured while parsing rate-limit-policies.yaml. Error: %s", err.Error())
-			return err
-		}
-
-		policyMap := map[string]*APIRateLimitPolicy{}
-		for i := 0; i < len(rlPolicies.Data.APIRateLimitPolicies); i++ {
-			p := rlPolicies.Data.APIRateLimitPolicies[i]
-			policyMap[p.PolicyName] = &p
-		}
-		loggers.LoggerAPI.Debugf("Number of Rate Limit policies received: %v", len(policyMap))
-		apiProject.RateLimitPolicies = policyMap
 	}
 	return nil
 }

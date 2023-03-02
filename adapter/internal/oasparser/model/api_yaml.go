@@ -20,9 +20,12 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // VerifyMandatoryFields check and pupulates the mandatory fields if null
@@ -74,6 +77,52 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiYaml.Data.LifeCycleStatus)
 	// organization ID would remain empty string if unassigned
 	apiProject.OrganizationID = apiYaml.Data.OrganizationID
+}
+
+// ExtractAPIRateLimitPolicies reads the values in api.yaml/api.json and populates and identifies the
+// available rate-limit policies
+func ExtractAPIRateLimitPolicies(apiProject *ProjectAPI, parsedAPIYaml APIYaml) {
+	apiYamlFromProject := apiProject.APIYaml.Data
+
+	policyMap := map[string]*APIRateLimitPolicy{}
+	if apiYamlFromProject.ThrottlingLimit.Unit != "" {
+		throttlingLimit := apiYamlFromProject.ThrottlingLimit
+		rlPolicy := getRateLimitPolicy(throttlingLimit)
+		policyMap[rlPolicy.PolicyName] = &rlPolicy
+		apiProject.RateLimitPolicies = policyMap
+		loggers.LoggerAPI.Debugf("API level Rate Limit policies processed")
+		return
+	}
+	for _, operation := range apiYamlFromProject.Operations {
+		policyName := GetRLPolicyName(operation.ThrottlingLimit.RequestCount, operation.ThrottlingLimit.Unit)
+		_, ok := policyMap[policyName]
+		if !ok {
+			throttlingLimit := operation.ThrottlingLimit
+			rlPolicy := getRateLimitPolicy(throttlingLimit)
+			policyMap[rlPolicy.PolicyName] = &rlPolicy
+		}
+	}
+	loggers.LoggerAPI.Debugf("Number of Rate Limit policies received: %v", len(policyMap))
+	apiProject.RateLimitPolicies = policyMap
+	return
+}
+
+func getRateLimitPolicy(throttlingLimit ThrottlingLimit) APIRateLimitPolicy {
+	var rlPolicy APIRateLimitPolicy
+	policyName := GetRLPolicyName(throttlingLimit.RequestCount, throttlingLimit.Unit)
+	var rlType string = "REQUEST_COUNT"
+	rlPolicy.PolicyName = policyName
+	rlPolicy.Count = uint32(throttlingLimit.RequestCount)
+	rlPolicy.Type = rlType
+	rlPolicy.Span = 1
+	rlPolicy.SpanUnit = throttlingLimit.Unit
+	return rlPolicy
+}
+
+// GetRLPolicyName from throttlingLimit fields
+func GetRLPolicyName(requestCount int, unit string) string {
+	caser := cases.Title(language.English)
+	return strconv.Itoa(requestCount) + "Per" + caser.String(strings.ToLower(unit))
 }
 
 // PopulateEndpointsInfo this will map sandbox and prod endpoint

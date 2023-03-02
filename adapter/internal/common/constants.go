@@ -25,6 +25,8 @@ const (
 	organizationID string = "organizationId"
 	// OrganizationID query parameter value used when the global adapter is enabled and it is a shared gateway.
 	commonOrganizationIDValue string = "ALL"
+	// DataPlaneId query parameter key.
+	dataPlaneID string = "dataPlaneId"
 )
 
 // PopulateQueryParamForOrganizationID add the query parameter "organizationId" with the value of "ALL"
@@ -37,5 +39,15 @@ func PopulateQueryParamForOrganizationID(queryParamMap map[string]string) map[st
 	if conf.GlobalAdapter.Enabled {
 		queryParamMap[organizationID] = commonOrganizationIDValue
 	}
+	return queryParamMap
+}
+
+// PopulateQueryParamForDataPlaneID add the query parameter "dataPlaneId" with the corresponding value in the config
+func PopulateQueryParamForDataPlaneID(queryParamMap map[string]string) map[string]string {
+	if queryParamMap == nil {
+		queryParamMap = make(map[string]string)
+	}
+	conf, _ := config.ReadConfigs()
+	queryParamMap[dataPlaneID] = conf.ControlPlane.DynamicEnvironments.DataPlaneID
 	return queryParamMap
 }

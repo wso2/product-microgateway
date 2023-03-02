@@ -28,49 +28,8 @@
     <packaging>pom</packaging>
     <name>Choreo Connect - Rate Limiter</name>
 
-    <profiles>
-        <profile>
-            <id>Windows</id>
-            <activation>
-                <os>
-                    <family>Windows</family>
-                </os>
-            </activation>
-            <properties>
-                <script.extension>bat</script.extension>
-            </properties>
-        </profile>
-        <profile>
-            <id>unix</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <properties>
-                <script.extension>sh</script.extension>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
         <plugins>
-            <plugin>
-                <artifactId>exec-maven-plugin</artifactId>
-                <groupId>org.codehaus.mojo</groupId>
-                <executions>
-                    <execution>
-                        <id>build-project</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>${project.basedir}/scripts/build.${script.extension}</executable>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>

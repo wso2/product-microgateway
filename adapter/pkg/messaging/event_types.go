@@ -104,15 +104,16 @@ type Event struct {
 
 // APIEvent for struct API events
 type APIEvent struct {
-	APIID         int      `json:"apiId"`
-	UUID          string   `json:"uuid"`
-	GatewayLabels []string `json:"gatewayLabels"`
-	APIVersion    string   `json:"apiVersion"`
-	APIContext    string   `json:"apiContext"`
-	APIName       string   `json:"apiName"`
-	APIProvider   string   `json:"apiProvider"`
-	APIStatus     string   `json:"apiStatus"`
-	APIType       string   `json:"apiType"`
+	APIID               int               `json:"apiId"`
+	UUID                string            `json:"uuid"`
+	GatewayLabels       []string          `json:"gatewayLabels"`
+	EnvToDataPlaneIDMap map[string]string `json:"envToDataPlaneIdMap"`
+	APIVersion          string            `json:"apiVersion"`
+	APIContext          string            `json:"apiContext"`
+	APIName             string            `json:"apiName"`
+	APIProvider         string            `json:"apiProvider"`
+	APIStatus           string            `json:"apiStatus"`
+	APIType             string            `json:"apiType"`
 	Event
 	// TODO: (VirajSalaka) Remove this when the event is fixed from APIM side
 	Version string `json:"version"`
@@ -192,26 +193,15 @@ type SubscriptionPolicyEvent struct {
 
 // KeyManagerEvent for struct
 type KeyManagerEvent struct {
-	ServerURL                  string   `json:"ServerURL"`
-	ValidationEnable           bool     `json:"validation_enable"`
-	ClaimMappings              []Claim  `json:"Claim"`
-	GrantTypes                 []string `json:"grant_types"`
-	EncryptPersistedTokens     bool     `json:"OAuthConfigurations.EncryptPersistedTokens"`
-	EnableOauthAppCreation     bool     `json:"enable_oauth_app_creation"`
-	ValidityPeriod             string   `json:"VALIDITY_PERIOD"`
-	CertificateValue           string   `json:"certificate_value"`
-	EnableTokenGeneration      bool     `json:"enable_token_generation"`
-	Issuer                     string   `json:"issuer"`
-	EnableMapOauthConsumerApps bool     `json:"enable_map_oauth_consumer_apps"`
-	EnableTokenHash            bool     `json:"enable_token_hash"`
-	SelfValidateJwt            bool     `json:"self_validate_jwt"`
-	RevokeEndpoint             string   `json:"revoke_endpoint"`
-	EnableTokenEncryption      bool     `json:"enable_token_encryption"`
-	RevokeURL                  string   `json:"RevokeURL"`
-	TokenURL                   string   `json:"TokenURL"`
-	TokenFormatString          string   `json:"token_format_string"`
-	CertificateType            string   `json:"certificate_type"`
-	TokenEndpoint              string   `json:"token_endpoint"`
+	Name           string `json:"name"`
+	Enabled        bool   `json:"enabled"`
+	Value          string `json:"value"`
+	Action         string `json:"action"`
+	TenantDomain   string `json:"tenantDomain"`
+	Organization   string `json:"organization"`
+	KeyManagerType string `json:"keyManagerType"`
+	TokenType      string `json:"tokenType"`
+	Type           string `json:"type"`
 }
 
 // Claim for struct

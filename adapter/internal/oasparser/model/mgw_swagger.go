@@ -435,7 +435,7 @@ func createOperationRateLimitDataMap(apiYamlOperations []OperationYaml) map[stri
 	m := make(map[string]string)
 	for _, operation := range apiYamlOperations {
 		keyValue := operation.Target + operation.Verb
-		m[keyValue] = operation.RateLimitPolicy
+		m[keyValue] = GetRLPolicyName(operation.ThrottlingLimit.RequestCount, operation.ThrottlingLimit.Unit)
 	}
 	return m
 }
@@ -1228,9 +1228,16 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
 
-	swagger.RateLimitLevel = data.RateLimitLevel
-	if swagger.RateLimitLevel == "API" {
-		swagger.RateLimitPolicy = data.RateLimitPolicy
+	if data.APIType != WS {
+		if data.ThrottlingLimit.Unit != "" {
+			logger.LoggerOasparser.Debugf("API level throttling limit found. Request count: %v, Unit: %v",
+				data.ThrottlingLimit.RequestCount, data.ThrottlingLimit.Unit)
+			swagger.RateLimitLevel = "API"
+			swagger.RateLimitPolicy = GetRLPolicyName(data.ThrottlingLimit.RequestCount, data.ThrottlingLimit.Unit)
+		} else {
+			logger.LoggerOasparser.Debug("API level throttling limit not found. Setting throttling policy level as 'Operation Level'")
+			swagger.RateLimitLevel = "OPERATION"
+		}
 	}
 
 	if endpointConfig.ImplementationStatus == prototypedAPI {

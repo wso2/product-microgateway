@@ -31,7 +31,7 @@ import (
 
 // constants related to key manager events
 const (
-	keyManagerConfigEvent = "key_manager_configuration"
+	keyManagerConfigEvent = "KEY_MANAGER_CONFIGURATION"
 	actionAdd             = "add"
 	actionUpdate          = "update"
 	actionDelete          = "delete"

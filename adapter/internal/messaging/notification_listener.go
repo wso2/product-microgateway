@@ -30,6 +30,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
@@ -55,6 +56,7 @@ const (
 	policyUpdate                = "POLICY_UPDATE"
 	policyDelete                = "POLICY_DELETE"
 	blockedStatus               = "BLOCKED"
+	keyManagerConfig            = "KEY_MANAGER_CONFIGURATION"
 )
 
 // var variables
@@ -126,9 +128,77 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 		handleSubscriptionEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, policyEventType) {
 		handlePolicyEvents(decodedByte, eventType)
+	} else if strings.Contains(eventType, keyManagerConfig) {
+		handleKeyManagerEvents(decodedByte)
 	}
 	// other events will ignore including HEALTH_CHECK event
 	return nil
+}
+
+// handleKeyManagerEvents to process Key Manager related events
+func handleKeyManagerEvents(data []byte) {
+	var (
+		indexOfKeymanager int
+		isFound           bool
+	)
+	var keyManagerEvent msg.KeyManagerEvent
+	var kmConfigMap map[string]interface{}
+	keyMgtEventErr := json.Unmarshal([]byte(string(data)), &keyManagerEvent)
+	if keyMgtEventErr != nil {
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Key Manager event data %v", keyMgtEventErr)
+		return
+	}
+	for i := range xds.KeyManagerList {
+		if strings.EqualFold(keyManagerEvent.Name, xds.KeyManagerList[i].Name) &&
+			strings.EqualFold(keyManagerEvent.Organization, xds.KeyManagerList[i].Organization) {
+
+			isFound = true
+			indexOfKeymanager = i
+			break
+		}
+	}
+	var decodedByte, err = base64.StdEncoding.DecodeString(keyManagerEvent.Value)
+
+	if err != nil {
+		if _, ok := err.(base64.CorruptInputError); ok {
+			logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
+		}
+
+		logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v", err)
+		return
+	}
+
+	if isFound && strings.EqualFold(actionDelete, keyManagerEvent.Action) {
+		logger.LoggerInternalMsg.Infof("Found KM %s to be deleted index %d", keyManagerEvent.Name, indexOfKeymanager)
+		if isFound {
+			xds.KeyManagerList[indexOfKeymanager] = xds.KeyManagerList[len(xds.KeyManagerList)-1]
+			xds.KeyManagerList = xds.KeyManagerList[:len(xds.KeyManagerList)-1]
+		}
+		xds.GenerateAndUpdateKeyManagerList()
+	} else if decodedByte != nil {
+		logger.LoggerInternalMsg.Infof("decoded stream %s", string(decodedByte))
+		kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+		if kmConfigMapErr != nil {
+			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr)
+			return
+		}
+
+		if strings.EqualFold(actionAdd, keyManagerEvent.Action) ||
+			strings.EqualFold(actionUpdate, keyManagerEvent.Action) {
+			keyManager := eventhubTypes.KeyManager{Name: keyManagerEvent.Name,
+				Type: keyManagerEvent.Type, Enabled: keyManagerEvent.Enabled,
+				TenantDomain: keyManagerEvent.TenantDomain, Organization: keyManagerEvent.Organization,
+				Configuration: kmConfigMap}
+			logger.LoggerInternalMsg.Infof("data %v", keyManager.Configuration)
+
+			if isFound {
+				xds.KeyManagerList[indexOfKeymanager] = keyManager
+			} else {
+				xds.KeyManagerList = append(xds.KeyManagerList, keyManager)
+			}
+			xds.GenerateAndUpdateKeyManagerList()
+		}
+	}
 }
 
 // handleAPIEvents to process api related data
@@ -160,7 +230,7 @@ func handleAPIEvents(data []byte, eventType string) {
 
 	// Per each revision, synchronization should happen.
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
-		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
+		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels, apiEvent.EnvToDataPlaneIDMap)
 	}
 
 	for _, env := range apiEvent.GatewayLabels {

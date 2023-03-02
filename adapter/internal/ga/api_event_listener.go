@@ -24,7 +24,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 )
 
-//handleAPIEventsFromGA handles the API events from GA that are coming through the channel
+// handleAPIEventsFromGA handles the API events from GA that are coming through the channel
 func handleAPIEventsFromGA(channel chan APIEvent) {
 	for event := range channel {
 		logger.LoggerGA.Infof("Received Event: %v", event)
@@ -42,7 +42,7 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 			continue
 		}
 
-		go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs)
+		go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs, nil)
 
 		// TODO: (VirajSalaka) temporarily removed.
 		// for _, env := range configuredEnvs {
