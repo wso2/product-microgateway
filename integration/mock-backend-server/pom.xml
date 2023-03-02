@@ -63,7 +63,7 @@
             <artifactId>wiremock-jre8</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.graphql-java</groupId>
+            <groupId>com.graphql-java-kickstart</groupId>
             <artifactId>graphql-java-tools</artifactId>
         </dependency>
         <dependency>
