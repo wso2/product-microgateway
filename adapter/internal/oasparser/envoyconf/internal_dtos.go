@@ -33,7 +33,6 @@ type routeCreateParams struct {
 	resourcePathParam   string
 	resourceMethods     []string
 	prodClusterName     string
-	sandClusterName     string
 	prodRouteConfig     *model.EndpointConfig
 	sandRouteConfig     *model.EndpointConfig
 	AuthHeader          string
