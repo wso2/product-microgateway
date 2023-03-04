@@ -97,7 +97,7 @@ func TestCreateRoutesConfigForRds(t *testing.T) {
 	}
 }
 
-// Create some routes to perform unit tests
+//Create some routes to perform unit tests
 func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 	//cors configuration
 	corsConfigModel3 := &model.CorsConfig{
@@ -107,11 +107,11 @@ func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 	}
 
 	route1 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"GET"}, "test-cluster", corsConfigModel3))
+		"/testPath", []string{"GET"}, "test-cluster", "", corsConfigModel3))
 	route2 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"POST"}, "test-cluster", corsConfigModel3))
+		"/testPath", []string{"POST"}, "test-cluster", "", corsConfigModel3))
 	route3 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"PUT"}, "test-cluster", corsConfigModel3))
+		"/testPath", []string{"PUT"}, "test-cluster", "", corsConfigModel3))
 
 	routes := []*routev3.Route{route1, route2, route3}
 
