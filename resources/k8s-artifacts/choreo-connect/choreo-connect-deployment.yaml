@@ -191,7 +191,4 @@ spec:
         - name: log4j2-vol
           configMap:
             name: log4j2
-        - name: logconfig-toml-vol
-          configMap:
-            name: logconfig-toml
       restartPolicy: Always

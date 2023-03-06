@@ -315,7 +315,7 @@
                 </os>
             </activation>
             <properties>
-                <apictl.package>apictl-${apictl.version}-darwin-arm64.tar.gz</apictl.package> <!-- Use same amd64 distribution until arm64 available -->
+                <apictl.package>apictl-${apictl.version}-darwin-arm64.tar.gz</apictl.package>
             </properties>
         </profile>
         <profile>
