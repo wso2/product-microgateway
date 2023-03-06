@@ -188,9 +188,6 @@ spec:
         - name: enforcer-keystore-vol
           secret:
             secretName: enforcer-keystore
-        - name: config-toml-vol
-          configMap:
-            name: config-toml
         - name: log4j2-vol
           configMap:
             name: log4j2
