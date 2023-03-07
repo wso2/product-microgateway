@@ -43,10 +43,6 @@
             <outputDirectory>wasm/websocket</outputDirectory>
         </file>
         <file>
-            <source>../resources/security/ca-certificates.crt</source>
-            <outputDirectory>security/truststore</outputDirectory>
-        </file>
-        <file>
             <source>../resources/license/LICENSE-ROUTER.txt</source>
             <outputDirectory/>
             <destName>LICENSE.txt</destName>
