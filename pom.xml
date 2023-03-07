@@ -678,10 +678,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <common.fileupload.version>1.5</common.fileupload.version>
         <jline.version>2.11</jline.version>
-        <andes.client.version>3.3.24</andes.client.version>
+        <andes.client.version>3.3.25</andes.client.version>
         <jaxen.version>2.0.0</jaxen.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
-        <carbon.apimgt.version>9.28.75</carbon.apimgt.version>
+        <carbon.apimgt.version>9.28.112</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.12.0</commons.version>
         <commons.io.version>2.11.0</commons.io.version>
@@ -722,7 +722,7 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.8</download.maven.plugin.version>
-        <apictl.version>4.2.0-beta</apictl.version>
+        <apictl.version>4.2.0</apictl.version>
         <apim.version>4.2.0-beta</apim.version>
         <grpc.healthProbe.version>0.4.15</grpc.healthProbe.version>
         <analytics.publisher.client.version>1.1.3</analytics.publisher.client.version>
