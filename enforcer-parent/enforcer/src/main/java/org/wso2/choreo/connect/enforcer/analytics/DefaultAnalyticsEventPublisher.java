@@ -150,12 +150,12 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 && logEntry.getResponse().getResponseCodeDetails()
                 .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)
                 // Token endpoint calls needs to be removed as well
-                || (AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
+                || (AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getCommonProperties().getRouteName()))
                 // Health endpoint calls are not published
-                || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
+                || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getCommonProperties().getRouteName()))
                 // already published websocket log entries should not be published to the analytics again.
                 // JWKS endpoint calls should not be published
-                || (AnalyticsConstants.JWKS_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
+                || (AnalyticsConstants.JWKS_ENDPOINT_PATH.equals(logEntry.getCommonProperties().getRouteName()))
                 || alreadyPublishedWebsocketHttpLogEntry(logEntry);
     }
 

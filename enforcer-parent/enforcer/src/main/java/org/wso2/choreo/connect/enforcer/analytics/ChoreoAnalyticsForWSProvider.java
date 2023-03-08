@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.ExtendedAPI;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
@@ -102,19 +103,25 @@ public class ChoreoAnalyticsForWSProvider implements AnalyticsDataProvider {
     @Override
     public API getApi() throws DataNotFoundException {
 
-        API api = new API();
+        ExtendedAPI api = new ExtendedAPI();
 
         String apiVersion = extAuthMetadata.get(MetadataConstants.API_VERSION_KEY);
         String apiName = extAuthMetadata.get(MetadataConstants.API_NAME_KEY);
         String apiId = extAuthMetadata.get(MetadataConstants.API_ID_KEY);
         String apiCreator = extAuthMetadata.get(MetadataConstants.API_CREATOR_KEY);
         String apiCreatorTenantDomain = extAuthMetadata.get(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY);
+        String apiContext = extAuthMetadata.get(MetadataConstants.API_CONTEXT_KEY);
+        String org = extAuthMetadata.get(MetadataConstants.API_ORGANIZATION_ID);
+
         api.setApiType(APIConstants.ApiType.WEB_SOCKET);
         api.setApiId(apiId);
         api.setApiName(apiName);
         api.setApiVersion(apiVersion);
         api.setApiCreatorTenantDomain(apiCreatorTenantDomain);
         api.setApiCreator(apiCreator);
+        api.setOrganizationId(org);
+        api.setApiContext(apiContext);
+
         return api;
     }
 
