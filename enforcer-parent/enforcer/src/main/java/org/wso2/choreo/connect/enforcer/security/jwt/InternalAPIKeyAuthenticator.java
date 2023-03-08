@@ -214,7 +214,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     // Generate or get backend JWT
                     JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().
                             getConfig().getJwtConfigurationDto();
-                    if (jwtConfigurationDto.isEnabled()) {
+                    if (jwtConfigurationDto.isEnabled() && requestContext.getMatchedAPI().isEnableBackendJWT()) {
                         JWTValidationInfo validationInfo = new JWTValidationInfo();
                         validationInfo.setUser(payload.getSubject());
                         JWTInfoDto jwtInfoDto = FilterUtils

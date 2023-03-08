@@ -126,37 +126,42 @@ type EndpointCertificate struct {
 // Therefore, the params are defined to support json.Unmarshal()
 type APIYaml struct {
 	ApimMeta
-	Data struct {
-		ID                         string          `json:"Id,omitempty"`
-		Name                       string          `json:"name,omitempty"`
-		Context                    string          `json:"context,omitempty"`
-		Version                    string          `json:"version,omitempty"`
-		RevisionID                 int             `json:"revisionId,omitempty"`
-		APIType                    string          `json:"type,omitempty"`
-		LifeCycleStatus            string          `json:"lifeCycleStatus,omitempty"`
-		EndpointImplementationType string          `json:"endpointImplementationType,omitempty"`
-		AuthorizationHeader        string          `json:"authorizationHeader,omitempty"`
-		SecurityScheme             []string        `json:"securityScheme,omitempty"`
-		OrganizationID             string          `json:"organizationId,omitempty"`
-		Provider                   string          `json:"provider,omitempty"`
-		RateLimitPolicy            string          `json:"rateLimitPolicy,omitempty"`
-		ThrottlingLimit            ThrottlingLimit `json:"throttlingLimit,omitempty"`
-		EndpointConfig             struct {
-			EndpointType                 string              `json:"endpoint_type,omitempty"`
-			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
-			LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
-			LoadBalanceSessionTimeOut    string              `json:"sessionTimeOut,omitempty"`
-			APIEndpointSecurity          APIEndpointSecurity `json:"endpoint_security,omitempty"`
-			RawProdEndpoints             interface{}         `json:"production_endpoints,omitempty"`
-			ProductionEndpoints          []EndpointInfo
-			ProductionFailoverEndpoints  []EndpointInfo `json:"production_failovers,omitempty"`
-			RawSandboxEndpoints          interface{}    `json:"sandbox_endpoints,omitempty"`
-			SandBoxEndpoints             []EndpointInfo
-			SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
-			ImplementationStatus         string         `json:"implementation_status,omitempty"`
-		} `json:"endpointConfig,omitempty"`
-		Operations []OperationYaml `json:"Operations,omitempty"`
-	} `json:"data"`
+	Data apiData `json:"data"`
+}
+
+type apiData struct {
+	ID                         string               `json:"Id,omitempty"`
+	Name                       string               `json:"name,omitempty"`
+	Context                    string               `json:"context,omitempty"`
+	Version                    string               `json:"version,omitempty"`
+	RevisionID                 int                  `json:"revisionId,omitempty"`
+	APIType                    string               `json:"type,omitempty"`
+	LifeCycleStatus            string               `json:"lifeCycleStatus,omitempty"`
+	EndpointImplementationType string               `json:"endpointImplementationType,omitempty"`
+	AuthorizationHeader        string               `json:"authorizationHeader,omitempty"`
+	SecurityScheme             []string             `json:"securityScheme,omitempty"`
+	OrganizationID             string               `json:"organizationId,omitempty"`
+	Provider                   string               `json:"provider,omitempty"`
+	RateLimitLevel             string               `json:"rateLimitLevel,omitempty"`
+	RateLimitPolicy            string               `json:"rateLimitPolicy,omitempty"`
+	ThrottlingLimit            ThrottlingLimit      `json:"throttlingLimit,omitempty"`
+	EnableBackendJWT           bool                 `json:"enableBackendJWT,omitempty"`
+	EndpointConfig             endpointConfigStruct `json:"endpointConfig,omitempty"`
+	Operations                 []OperationYaml      `json:"Operations,omitempty"`
+}
+type endpointConfigStruct struct {
+	EndpointType                 string              `json:"endpoint_type,omitempty"`
+	LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
+	LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
+	LoadBalanceSessionTimeOut    string              `json:"sessionTimeOut,omitempty"`
+	APIEndpointSecurity          APIEndpointSecurity `json:"endpoint_security,omitempty"`
+	RawProdEndpoints             interface{}         `json:"production_endpoints,omitempty"`
+	ProductionEndpoints          []EndpointInfo
+	ProductionFailoverEndpoints  []EndpointInfo `json:"production_failovers,omitempty"`
+	RawSandboxEndpoints          interface{}    `json:"sandbox_endpoints,omitempty"`
+	SandBoxEndpoints             []EndpointInfo
+	SandboxFailoverEndpoints     []EndpointInfo `json:"sandbox_failovers,omitempty"`
+	ImplementationStatus         string         `json:"implementation_status,omitempty"`
 }
 
 // OperationYaml holds attributes of APIM operations
@@ -280,7 +285,7 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 			loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
 			return conversionErr
 		}
-		var apiYaml APIYaml
+		apiYaml := createDefaultAPIYaml()
 		err = json.Unmarshal(apiJsn, &apiYaml)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", err.Error())
@@ -339,4 +344,12 @@ func parseDeployments(data []byte) ([]Deployment, error) {
 		deployments = append(deployments, deployment)
 	}
 	return deployments, nil
+}
+
+func createDefaultAPIYaml() APIYaml {
+	return APIYaml{
+		Data: apiData{
+			EnableBackendJWT: true,
+		},
+	}
 }

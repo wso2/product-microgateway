@@ -27,12 +27,15 @@ import java.util.concurrent.TimeUnit;
 
 public class CcWithJwtConfig {
     CcInstance ccInstance;
+    private static String MG_ENV = "test";
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         ApictlUtils.createProject( "global_cors_openAPI.yaml", "global_cors_petstore");
         ApictlUtils.createProject( "timeout_global_openAPI.yaml", "timeout_global");
         ApictlUtils.createProject( "timeout_endpoint_openAPI.yaml", "timeout_endpoint");
+        ApictlUtils.createProject("per_api_jwt_openAPI.yaml", "per_api_jwt",
+                 null, null, null, "per_api_jwt.yaml");
 
         ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").build();
         ccInstance.start();
@@ -40,11 +43,11 @@ public class CcWithJwtConfig {
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
 
-        ApictlUtils.deployAPI("petstore", "test");
-        ApictlUtils.deployAPI("global_cors_petstore", "test");
-        ApictlUtils.deployAPI("timeout_global", "test");
-        ApictlUtils.deployAPI("timeout_endpoint", "test");
-
+        ApictlUtils.deployAPI("petstore", MG_ENV);
+        ApictlUtils.deployAPI("global_cors_petstore", MG_ENV);
+        ApictlUtils.deployAPI("timeout_global", MG_ENV);
+        ApictlUtils.deployAPI("timeout_endpoint", MG_ENV);
+        ApictlUtils.deployAPI("per_api_jwt", MG_ENV);
         TimeUnit.SECONDS.sleep(5);
     }
 
