@@ -17,11 +17,13 @@ Below diagram shows the test setup.
 ![picture](images/diagram.png)
 
 | Name                          | EC2 Instance Type | vCPU | Mem(GiB) |
-| ----------------------------- | ----------------- | ---- | -------- |
+| ----------------------------- |-------------------| ---- | -------- |
 | Apache JMeter Client          | c5.large          | 2    | 4        |
 | Apache JMeter Server 01       | c5.xlarge         | 4    | 8        |
 | Apache JMeter Server 02       | c5.xlarge         | 4    | 8        |
-| AWS EKS cluster (three nodes) | c5.xlarge         | 4    | 8        |
+| AWS EKS cluster (three nodes) | c6i.xlarge        | 4    | 8        |
+
+> For better throughput and performance, it is able to use computer optimized nodes for the cluster. For this test we have used c6i.xlarge EC2 instances.
 
 We executed tests for different numbers of concurrent users and message sizes (payloads).
 
@@ -45,7 +47,7 @@ The following are the test parameters.
 The duration of each test is **900 seconds**. The warm-up period is **300 seconds**.
 The measurement results are collected after the warm-up period.
 
-[AWS EKS cluster with **c5.xlarge** Amazon EC2 instances](https://aws.amazon.com/eks/?nc2=type_a) were used to deploy WSO2 Choreo Connect.
+[AWS EKS cluster with **c6i.xlarge** Amazon EC2 instances](https://aws.amazon.com/eks/?nc2=type_a) were used to deploy WSO2 Choreo Connect.
 When doing below test scenarios, `--cpus` option is provided as 2 and concurrency level for the router provided as 4. Replica count for the
 Choreo Connect deployment was one. Below table includes configuration details relevant to the Choreo Connect deployment.
 
@@ -114,28 +116,27 @@ The following is the summary of performance test results collected for the measu
 
 |Concurrent Users|Message Size (Bytes)|Total requests|Average Response Time (ms)|Throughput (Requests/sec)|Error %|Error Count|Little's law verification|90th Percentile of Response Time (ms)|95th Percentile of Response Time (ms)|99th Percentile of Response Time (ms)|
 |----------------|--------------------|--------------|--------------------------|-------------------------|-------|-----------|-------------------------|-------------------------------------|-------------------------------------|-------------------------------------|
-|10              |50B                 |2465235       |3                         |2738.5                   |0      |0          |8.2155                   |4                                    |5                                    |16                                   |
-|50              |50B                 |3612288       |11                        |4012.5                   |0      |0          |44.1375                  |29                                   |35                                   |43                                   |
-|100             |50B                 |4221994       |20                        |4689.8                   |0      |0          |93.796                   |44                                   |49                                   |65                                   |
-|200             |50B                 |4715766       |37                        |5238.6                   |0      |0          |193.8282                 |59                                   |66                                   |84                                   |
-|500             |50B                 |4921820       |90                        |5466.4                   |0      |0          |491.976                  |126                                  |143                                  |171                                  |
-|1000            |50B                 |4617754       |194                       |5127.7                   |0      |0          |994.7738                 |252                                  |269                                  |300                                  |
-|10              |1KiB                |2474194       |3                         |2748.4                   |0      |0          |8.2452                   |4                                    |5                                    |15                                   |
-|50              |1KiB                |3608191       |11                        |4008.2                   |0      |0          |44.0902                  |29                                   |35                                   |42                                   |
-|100             |1KiB                |4187712       |20                        |4656.9                   |0      |0          |93.138                   |44                                   |50                                   |68                                   |
-|200             |1KiB                |4722928       |37                        |5246.3                   |0      |0          |194.1131                 |60                                   |67                                   |87                                   |
-|500             |1KiB                |4962712       |90                        |5512.1                   |0      |0          |496.089                  |126                                  |143                                  |172                                  |
-|1000            |1KiB                |4379559       |204                       |4862.5                   |0      |0          |991.95                   |260                                  |276                                  |306                                  |
-|10              |10KiB               |2292961       |3                         |2547                     |0      |0          |7.641                    |4                                    |5                                    |10                                   |
-|50              |10KiB               |3292426       |13                        |3657.4                   |0      |0          |47.5462                  |26                                   |31                                   |40                                   |
-|100             |10KiB               |3726912       |23                        |4136.9                   |0      |0          |95.1487                  |44                                   |51                                   |68                                   |
-|200             |10KiB               |3823400       |46                        |4246.9                   |0      |0          |195.3574                 |72                                   |81                                   |100                                  |
-|500             |10KiB               |4213767       |106                       |4688.7                   |0      |0          |497.0022                 |155                                  |173                                  |206                                  |
-|1000            |10KiB               |3773976       |237                       |4188.4                   |0      |0          |992.6508                 |301                                  |322                                  |365                                  |
-|10              |100KiB              |1137663       |7                         |1263.8                   |0      |0          |8.8466                   |11                                   |12                                   |15                                   |
-|50              |100KiB              |1312758       |33                        |1458.3                   |0      |0          |48.1239                  |60                                   |71                                   |93                                   |
-|100             |100KiB              |1310828       |68                        |1456                     |0      |0          |99.008                   |127                                  |150                                  |198                                  |
-|200             |100KiB              |1291683       |138                       |1434.8                   |0      |0          |198.0024                 |246                                  |282                                  |362                                  |
-|500             |100KiB              |1260706       |356                       |1400.2                   |0      |0          |498.4712                 |469                                  |516                                  |681                                  |
-|1000            |100KiB              |1280531       |701                       |1420.4                   |0      |0          |995.7004                 |827                                  |927                                  |1402                                 |
-
+|10              |50B                 |3057387       |2.86                      |3393.33                  |0      |0          |9.70                     |3                                    |4                                    |18                                   |
+|50              |50B                 |4683200       |9.53                      |5193.08                  |0      |0          |49.49                    |22                                   |32                                   |38                                   |
+|100             |50B                 |5083655       |17.62                     |5641.29                  |0      |0          |99.40                    |38                                   |43                                   |54                                   |
+|200             |50B                 |5402601       |33.24                     |5995.48                  |0      |0          |199.29                   |57                                   |64                                   |80                                   |
+|500             |50B                 |5289304       |85.03                     |5865.37                  |0      |0          |498.73                   |115                                  |129                                  |164                                  |
+|1000            |50B                 |4967924       |181.26                    |5482.02                  |0      |0          |993.67                   |228                                  |251                                  |277                                  |
+|10              |1KiB                |3052933       |2.87                      |3385.21                  |0      |0          |9.72                     |3                                    |4                                    |17                                   |
+|50              |1KiB                |4479198       |9.96                      |4971.6                   |0      |0          |49.52                    |26                                   |34                                   |40                                   |
+|100             |1KiB                |5049299       |17.75                     |5597.31                  |0      |0          |99.35                    |38                                   |43                                   |54                                   |
+|200             |1KiB                |5527835       |32.49                     |6129.22                  |0      |0          |199.14                   |56                                   |65                                   |85                                   |
+|500             |1KiB                |5332405       |84.32                     |5911.65                  |0      |0          |498.47                   |110                                  |120                                  |152                                  |
+|1000            |1KiB                |4966629       |181.23                    |5502.79                  |0      |0          |997.27                   |235                                  |255                                  |283                                  |
+|10              |10KiB               |2902065       |3.01                      |3220.43                  |0      |0          |9.69                     |4                                    |4                                    |10                                   |
+|50              |10KiB               |4176029       |10.68                     |4630.91                  |0      |0          |49.46                    |23                                   |29                                   |36                                   |
+|100             |10KiB               |4601055       |19.45                     |5106.83                  |0      |0          |99.33                    |37                                   |42                                   |54                                   |
+|200             |10KiB               |4668818       |38.45                     |5179.92                  |0      |0          |199.17                   |62                                   |68                                   |80                                   |
+|500             |10KiB               |4369813       |102.92                    |4847.29                  |0      |0          |498.88                   |151                                  |166                                  |187                                  |
+|1000            |10KiB               |4282270       |210.37                    |4733.29                  |0      |0          |995.74                   |267                                  |281                                  |309                                  |
+|10              |100KiB              |1474497       |5.92                      |1636.62                  |0      |0          |9.69                     |8                                    |9                                    |13                                   |
+|50              |100KiB              |1952292       |22.82                     |2166.6                   |0      |0          |49.44                    |37                                   |43                                   |56                                   |
+|100             |100KiB              |1894368       |47.28                     |2102.73                  |0      |0          |99.42                    |83                                   |96                                   |125                                  |
+|200             |100KiB              |1877891       |95.64                     |2083.4                   |0      |0          |199.26                   |187                                  |226                                  |291                                  |
+|500             |100KiB              |1796616       |250.55                    |1991.32                  |0      |0          |498.93                   |397                                  |439                                  |535                                  |
+|1000            |100KiB              |1788542       |503.43                    |1969.33                  |0      |0          |991.42                   |655                                  |715                                  |855                                  |
