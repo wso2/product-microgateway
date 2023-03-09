@@ -60,9 +60,11 @@ public class MetricsUtils {
                     && logEntry.getResponse().getResponseCodeDetails()
                     .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)
                     // Token endpoint calls needs to be removed as well
-                    || (AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
+                    || (AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getCommonProperties().getRouteName()))
                     // Health endpoint calls are not published
-                    || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))) {
+                    || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getCommonProperties().getRouteName()))
+                    // JWKS endpoint calls should not be published
+                    || (AnalyticsConstants.JWKS_ENDPOINT_PATH.equals(logEntry.getCommonProperties().getRouteName()))) {
                 LOGGER.debug("Metric is ignored as it is already published by the enforcer.");
                 publishMetrics(metricsExporter, latencies);
                 continue;
