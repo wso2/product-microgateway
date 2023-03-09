@@ -64,7 +64,7 @@ spec:
             - name: XDS_MAX_RETRIES
               value: "3"
             - name: JAVA_OPTS
-              value: "-Dhttpclient.hostnameVerifier=AllowAll -Xms512m -Xmx512m -XX:MaxRAMFraction=2"
+              value: "-Dhttpclient.hostnameVerifier=AllowAll -Xms512m -Xmx512m"
             - name: enforcer_admin_pwd
               value: "admin"
             - name: tm_admin_pwd
