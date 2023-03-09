@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------
-# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+# Copyright (c) 2023, WSO2 LLC. (http://wso2.com) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,28 +14,29 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Service for adapter
+# service for rate-limiter
 
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: choreo-connect-adapter
-  name: adapter
+    app: choreo-connect-rate-limiter
+  name: rate-limiter
 spec:
   type: ClusterIP
+  clusterIP: None
   selector:
-    app: choreo-connect-adapter
+    app: choreo-connect-rate-limiter
   ports:
-    - name: "http-adaptermanagementserver"
-      port: 18000
-      targetPort: 18000
+    - name: "rate-limiter-port"
+      port: 8090
+      targetPort: 8090
       protocol: TCP
-    - name: "https-adapter"
-      port: 9843
-      targetPort: 9843
+    - name: "rate-limiter-grpc-port"
+      port: 8091
+      targetPort: 8091
       protocol: TCP
-    - name: "https-rate-limiter"
-      port: 18001
-      targetPort: 18001
+    - name: "rate-limiter-debug-port"
+      port: 6070
+      targetPort: 6070
       protocol: TCP

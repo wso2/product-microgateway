@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------
-# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+# Copyright (c) 2023, WSO2 LLC. (http://wso2.com) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,28 +14,20 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Service for adapter
+# service for redis
 
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: choreo-connect-adapter
-  name: adapter
+    app: redis-deployment
+  name: redis
 spec:
   type: ClusterIP
   selector:
-    app: choreo-connect-adapter
+    app: redis-deployment
   ports:
-    - name: "http-adaptermanagementserver"
-      port: 18000
-      targetPort: 18000
-      protocol: TCP
-    - name: "https-adapter"
-      port: 9843
-      targetPort: 9843
-      protocol: TCP
-    - name: "https-rate-limiter"
-      port: 18001
-      targetPort: 18001
+    - name: "redis-port"
+      port: 6379
+      targetPort: 6379
       protocol: TCP

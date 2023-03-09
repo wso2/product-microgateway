@@ -1,0 +1,120 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2023, WSO2 LLC. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Deployment for rate-limiter
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: choreo-connect-rate-limiter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: choreo-connect-rate-limiter
+  template:
+    metadata:
+      labels:
+        app: choreo-connect-rate-limiter
+    spec:
+      containers:
+        - name: choreo-connect-rate-limiter
+          image: wso2/choreo-connect-rate-limiter:1.1.0-m1-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /home/wso2/security/truststore
+              name: rate-limiter-truststore-vol
+            - mountPath: /home/wso2/security/keystore
+              name: rate-limiter-keystore-vol
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "8090"
+            - name: USE_STATSD
+              value: "false"
+            - name: LOG_LEVEL
+              value: "DEBUG"
+            - name: LOCAL_CACHE_SIZE_IN_BYTES
+              value: "1024000"
+            - name: LIMIT_RESPONSE_HEADERS_ENABLED
+              value: "false"
+            # Redis
+            - name: REDIS_SOCKET_TYPE
+              value: "tcp"
+            - name: REDIS_URL
+              value: "redis:6379"
+            - name: REDIS_PIPELINE_WINDOW
+              value: "0.2ms"
+            - name: REDIS_PIPELINE_LIMIT
+              value: "0"
+            - name: REDIS_TLS
+              value: "false"
+            - name: REDIS_TLS_CLIENT_CERT
+              value: ""
+            - name: REDIS_TLS_CLIENT_KEY
+              value: ""
+            - name: REDIS_TLS_CACERT
+              value: ""
+            # gRPC server
+            - name: GRPC_HOST
+              value: "0.0.0.0"
+            - name: GRPC_PORT
+              value: "8091"
+            - name: GRPC_SERVER_USE_TLS
+              value: "true"
+            - name: GRPC_SERVER_TLS_KEY
+              value: "/home/wso2/security/keystore/rate-limiter.key"
+            - name: GRPC_SERVER_TLS_CERT
+              value: "/home/wso2/security/keystore/rate-limiter.pem"
+            - name: GRPC_CLIENT_TLS_CACERT
+              value: "/home/wso2/security/truststore/mg.pem"
+            - name: GRPC_CLIENT_TLS_SAN
+              value: "localhost"
+            # xDS config server
+            - name: RATE_LIMITER_LABEL
+              value: "Default"
+            - name: CONFIG_GRPC_XDS_SERVER_URL
+              value: "adapter:18001"
+            - name: CONFIG_GRPC_XDS_SERVER_USE_TLS
+              value: "true"
+            - name: CONFIG_GRPC_XDS_CLIENT_TLS_KEY
+              value: "/home/wso2/security/keystore/rate-limiter.key"
+            - name: CONFIG_GRPC_XDS_CLIENT_TLS_CERT
+              value: "/home/wso2/security/keystore/rate-limiter.pem"
+            - name: CONFIG_GRPC_XDS_SERVER_TLS_CACERT
+              value: "/home/wso2/security/truststore/mg.pem"
+            - name: CONFIG_GRPC_XDS_SERVER_TLS_SAN
+              value: "localhost"
+          resources:
+            requests:
+              memory: "1000Mi"
+              cpu: "1000m"
+            limits:
+              memory: "1000Mi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 8090
+            - containerPort: 8091
+            - containerPort: 6070
+      volumes:
+        - name: rate-limiter-truststore-vol
+          secret:
+            secretName: rate-limiter-truststore
+        - name: rate-limiter-keystore-vol
+          secret:
+            secretName: rate-limiter-keystore
+      restartPolicy: Always
