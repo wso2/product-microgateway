@@ -483,12 +483,6 @@
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-exporter-jaeger-thrift</artifactId>
                 <version>${jaeger.exporter.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.thrift</groupId>
-                        <artifactId>libthrift</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
