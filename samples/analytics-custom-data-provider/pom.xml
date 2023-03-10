@@ -36,10 +36,6 @@
 
     <repositories>
         <repository>
-            <id>local-maven-repo</id>
-            <url>file:///Users/lahirud/.m2/repository</url>
-        </repository>
-        <repository>
             <id>wso2-nexus</id>
             <name>WSO2 internal Repository</name>
             <url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
@@ -82,6 +78,6 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
 <!--        org.wso2.carbon.apimgt component version-->
-        <carbon.apimgt.version>9.28.75</carbon.apimgt.version>
+        <carbon.apimgt.version>9.28.112</carbon.apimgt.version>
     </properties>
 </project>
