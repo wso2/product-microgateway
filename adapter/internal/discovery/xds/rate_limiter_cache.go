@@ -145,6 +145,20 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 				rlsConfigs = append(rlsConfigs, rlsConfig)
 			}
 		}
+	} else if level == envoyconf.RateLimitDisabled {
+		rlsConfigs = []*rls_config.RateLimitDescriptor{
+			{
+				Key:   envoyconf.DescriptorKeyForPath,
+				Value: mgwSwagger.GetXWso2Basepath(),
+				Descriptors: []*rls_config.RateLimitDescriptor{
+					{
+						Key:       envoyconf.DescriptorKeyForMethod,
+						Value:     envoyconf.DescriptorValueForAPIMethod,
+						RateLimit: nil,
+					},
+				},
+			},
+		}
 	} else {
 		return fmt.Errorf("invalid rate limit policy level: %q", level)
 	}

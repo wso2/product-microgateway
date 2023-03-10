@@ -140,4 +140,5 @@ const (
 	RateLimiterDomain                    = "Default"
 	RateLimitPolicyOperationLevel string = "OPERATION"
 	RateLimitPolicyAPILevel       string = "API"
+	RateLimitDisabled             string = "UNLIMITED"
 )
