@@ -35,5 +35,5 @@ fi
 echo "Preparing code coverage files before integration tests completed successfully..."
 
 # Temporary use wso2 RC image for integration tests. This have to be removed.
-docker pull wso2am/wso2am:4.2.0-rc1-alpine
-docker tag wso2am/wso2am:4.2.0-rc1-alpine wso2/wso2am:4.2.0
+docker pull wso2am/wso2am:4.2.0-alpine
+docker tag wso2am/wso2am:4.2.0-alpine wso2/wso2am:4.2.0
