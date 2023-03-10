@@ -2,7 +2,7 @@
 
 [![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/job/products/job/product-microgateway/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![License](https://img.shields.io/badge/slack-microgateway-blueviolet)](https://join.slack.com/t/wso2-apim/shared_invite/enQtNzEzMzk5Njc5MzM0LTgwODI3NmQ1MjI0ZDQyMGNmZGI4ZjdkZmI1ZWZmMjNkY2E0NmY3ZmExYjkxYThjNzNkOTU2NWJmYzM4YzZiOWU)
+[![Discord](https://img.shields.io/badge/Discord-7289DA?logo=discord&logoColor=white)](https://discord.com/invite/Xa5VubmThw)
 
 Choreo Connect is a cloud-native, open-source, and developer-centric API gateway proxy. It provides first-class support for K8s while facilitating an array of API management quality of services (QoS), such as message security rate-limiting, observability, and message mediation.
 
@@ -31,7 +31,7 @@ Let's host our first API on Choreo Connect. We will be exposing the publicly ava
 1. First download the latest CLI tool(APICTL) and the Choreo Connect distributions
 and extract them to a folder of your choice.
    
-    * [CLI (APICTL - v4.1.x)](https://github.com/wso2/product-apim-tooling/releases/)
+    * [CLI (APICTL - v4.2.x)](https://github.com/wso2/product-apim-tooling/releases/)
     * [Choreo Connect Distribution](https://github.com/wso2/product-microgateway/releases/)
     
       CLI tool extracted location will be referred as `CLI_HOME` and Choreo Connect distribution extracted location would be referred as `CC_HOME`.

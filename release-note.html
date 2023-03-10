@@ -17,83 +17,89 @@
   ~  under the License.
   -->
 
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
-    <meta content="text/html; charset=iso-8859-1" http-equiv="content-type"/>
-    <title>Choreo Connect 1.1.0 - 3rd April 2022</title>
+    <meta content="text/html; charset=iso-8859-1" http-equiv="content-type" />
+    <title>Choreo Connect 1.2.0 - 11th March 2023</title>
 </head>
+
 <body>
-<div id="main-content">
-    <div>
-        <h1>Choreo Connect 1.1.0 is Released.</h1>
-        <p>Choreo Connect is a cloud-native, open-source, and developer-centric API gateway. It provides first-class support for
-            Kubernetes while facilitating an array of API management quality of services (QoS), such as message
-            security rate-limiting, observability, and message mediation. It is powered by Envoy Proxy!</p>
-        <p>Choreo Connect 1.1.0 is also compatible with WSO2 API Manager 4.1.0.</p>
-        <h1>What's new in 1.1.0</h1>
-        <h2>New Features</h2>
-        <ul>
-            <li>Mock API implementation support considering API definition.</li>
-            <li>API Policy support with WSO2 API-M.</li>
-            <li>Request payload passing from router to enforcer.</li>
-            <li>Git integration support.</li>
-            <li>Open Policy Agent (OPA) validation.</li>
-            <li>Default versioned APIs.</li>
-            <li>Analytics publishing and rate limitting for WebSocket APIs.</li>
-        </ul>
-        <p>
-            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue%20is%3Aclosed%20label%3A%22Type%2FNew%20Feature%22%20project%3Awso2%2Fproduct-microgateway%2F15">More
-                about 1.1.0 New Features</a></p>
-        <h2>Improvements</h2>
-        <ul>
-            <li>API policy version support.</li>
-            <li>Improved WebSocket API handling.</li>
-            <li>Configurable DNS refresh rate.</li>
-            <li>Log correlation in enforcer.</li>
-            <li>Operation level interceptor support.</li>
-        </ul>
-        <p>
-            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue%20is%3Aclosed%20label%3AType%2FImprovement%20project%3Awso2%2Fproduct-microgateway%2F15">More
-                about 1.1.0 Improvements</a></p>
-        <h2>Bug fixes</h2>
-        <p>
-            <a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue%20is%3Aclosed%20label%3AType%2FBug%20project%3Awso2%2Fproduct-microgateway%2F15">Bug
-                fixes</a></p>
-        <h2>Known Issues</h2>
-        <p><a href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aopen+-label%3Aballerina-mgw+">Open
-            Issues</a></p>
-        <h2>Try it</h2>
-        <p>
-            <a href="https://apim.docs.wso2.com/en/4.0.0/deploy-and-publish/deploy-on-gateway/choreo-connect/getting-started/quick-start-guide-docker-with-apim/"
-               rel="nofollow">Quick start guide</a></p>
-        <h2>How To Contribute</h2>
-        <p>Your feedback is most welcome!</p>
-        <h3>Contributing Code</h3>
-        <p>Read through the project <a href="https://github.com/wso2/product-microgateway/blob/master/CONTRIBUTING.md">Contribution
-            Guidelines</a> to learn how to contribute with code.</p>
-        <h3>User Forum</h3>
-        <p>If you have any questions regarding the product you can use our <a
-                href="https://stackoverflow.com/questions/tagged/wso2-am" rel="nofollow">StackOverflow</a> forum to
-            raise them.</p>
-        <h3>Slack Channels</h3>
-        <p>Join us via <a
-                href="https://join.slack.com/t/wso2-apim/shared_invite/enQtNzEzMzk5Njc5MzM0LTgwODI3NmQ1MjI0ZDQyMGNmZGI4ZjdkZmI1ZWZmMjNkY2E0NmY3ZmExYjkxYThjNzNkOTU2NWJmYzM4YzZiOWU?src=sidebar"
-                rel="nofollow">this</a> to our <a href="https://wso2-apim.slack.com"
-                                                  rel="nofollow">wso2-apim.slack.com</a> for even better communication.
-            You can talk to our developers directly regarding any issues, concerns about the product. We encourage you
-            to start discussions or join any ongoing discussions with the team, via our slack channels.</p>
-        <h3>Reporting Issues</h3>
-        <p>We encourage you to report issues, documentation faults, and feature requests regarding Choreo Connect
-            through the <a href="https://github.com/wso2/product-microgateway/issues">Github Issues</a>.</p>
-        <p>And please be advised that security issues must be reported to <a href="mailto:security@wso2.com">security@wso2.com</a>,
-            not as a GitHub issue, in order to reach the proper audience. We strongly advise following the <a
+    <div id="main-content">
+        <div>
+            <h1>Choreo Connect 1.2.0 is Released.</h1>
+            <p>Choreo Connect is a cloud-native, open-source, and developer-centric API gateway. It provides first-class
+                support for
+                Kubernetes while facilitating an array of API management quality of services (QoS), such as message
+                security rate-limiting, observability, and message mediation. It is powered by Envoy Proxy!</p>
+            <p>Choreo Connect 1.2.0 is also compatible with WSO2 API Manager 4.2.0.</p>
+            <h1>What's new in 1.2.0</h1>
+            <h2>New Features</h2>
+            <ul>
+                <li>GraphQL API support</li>
+                <li>HTTP2 support</li>
+                <li>SOAP APIs support</li>
+                <li>Open Telemetry support</li>
+                <li>Mutual SSL authentication for APIs</li>
+                <li>Support Operation Level API Policies</li>
+                <li>JWKS Endpoint for the Enforcer</li>
+                <li>Compression Filter for Choreo Connect</li>
+            </ul>
+            <p>
+                <a
+                    href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+label%3A%22Type%2FNew+Feature%22+milestone%3A1.2.0-m1+">More
+                    about 1.2.0 New Features</a>
+            </p>
+            <h2>Improvements and Bug Fixes</h2>
+            <p>
+                <a
+                    href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue%20label%3AType%2FImprovement%20is%3Aclosed%20project%3Awso2%2Fproduct-microgateway%2F16">Improvements</a>
+            </p>
+            <p>
+                <a
+                    href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aclosed+project%3Awso2%2Fproduct-microgateway%2F16+label%3AType%2FBug+">Bug
+                    fixes</a>
+            </p>
+            <h2>Known Issues</h2>
+            <p><a
+                    href="https://github.com/wso2/product-microgateway/issues?q=is%3Aissue+is%3Aopen+-label%3Aballerina-mgw+">Open
+                    Issues</a></p>
+            <h2>Try it</h2>
+            <p>
+                <a href="https://apim.docs.wso2.com/en/4.2.0/deploy-and-publish/deploy-on-gateway/choreo-connect/getting-started/quick-start-guide-docker-with-apim/"
+                    rel="nofollow">Quick start guide</a>
+            </p>
+            <h2>How To Contribute</h2>
+            <p>Your feedback is most welcome!</p>
+            <h3>Contributing Code</h3>
+            <p>Read through the project <a
+                    href="https://github.com/wso2/product-microgateway/blob/master/CONTRIBUTING.md">Contribution
+                    Guidelines</a> to learn how to contribute with code.</p>
+            <h3>User Forum</h3>
+            <p>If you have any questions regarding the product you can use our <a
+                    href="https://stackoverflow.com/questions/tagged/wso2-am" rel="nofollow">StackOverflow</a> forum to
+                raise them.</p>
+            <h3>Slack Channels</h3>
+            <p>Join us via <a
+                    href="https://join.slack.com/t/wso2-apim/shared_invite/enQtNzEzMzk5Njc5MzM0LTgwODI3NmQ1MjI0ZDQyMGNmZGI4ZjdkZmI1ZWZmMjNkY2E0NmY3ZmExYjkxYThjNzNkOTU2NWJmYzM4YzZiOWU?src=sidebar"
+                    rel="nofollow">this</a> to our WSO2 Discord account for even better communication. You can talk to
+                our developers directly
+                regarding any issues, concerns about the product. We encourage you to start discussions or join any
+                ongoing
+                discussions with the team, via Discord.</p>
+            <h3>Reporting Issues</h3>
+            <p>We encourage you to report issues, documentation faults, and feature requests regarding Choreo Connect
+                through the <a href="https://github.com/wso2/product-microgateway/issues">Github Issues</a>.</p>
+            <p>And please be advised that security issues must be reported to <a
+                    href="mailto:security@wso2.com">security@wso2.com</a>,
+                not as a GitHub issue, in order to reach the proper audience. We strongly advise following the <a
                     href="https://docs.wso2.com/display/Security/WSO2+Security+Vulnerability+Reporting+Guidelines"
                     rel="nofollow">WSO2 Security Vulnerability Reporting Guidelines</a> when reporting the security
-            issues.</p>
-        <p><strong>--Choreo Connect Team--</strong></p></div>
-</div>
+                issues.</p>
+            <p><strong>--Choreo Connect Team--</strong></p>
+        </div>
+    </div>
 </body>
+
 </html>
