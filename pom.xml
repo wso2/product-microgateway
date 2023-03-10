@@ -228,6 +228,12 @@
                 <groupId>org.wso2.andes.wso2</groupId>
                 <artifactId>andes-client</artifactId>
                 <version>${andes.client.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>
@@ -379,6 +385,16 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
                 <version>${carbon.apimgt.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-text</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>dom4j</groupId>
+                        <artifactId>dom4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -390,6 +406,12 @@
                 <artifactId>org.wso2.am.integration.common.test.utils</artifactId>
                 <version>${apim.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am.analytics.publisher</groupId>
@@ -441,6 +463,12 @@
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-exporter-jaeger-thrift</artifactId>
                 <version>${jaeger.exporter.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.thrift</groupId>
+                        <artifactId>libthrift</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>

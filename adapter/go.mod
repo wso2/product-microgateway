@@ -64,3 +64,5 @@ require (
 	golang.org/x/sys v0.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+exclude golang.org/x/crypto c6db032c6c884ccc62755e1abf1214e99b8cea5f
