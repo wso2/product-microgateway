@@ -524,6 +524,11 @@
                 <version>${azure.core.http.okhttp.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin-stdlib.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
@@ -619,6 +624,7 @@
         <protobuf.java.version>3.21.7</protobuf.java.version>
         <apache.tomcat.dependency.version>10.1.4</apache.tomcat.dependency.version>
         <libthrift.version>0.14.0</libthrift.version>
+        <kotlin-stdlib.version>1.6.0</kotlin-stdlib.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.14.1</jackson.annotations.version>
