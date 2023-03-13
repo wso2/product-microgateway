@@ -522,12 +522,6 @@
                 <groupId>com.azure</groupId>
                 <artifactId>azure-core-http-okhttp</artifactId>
                 <version>${azure.core.http.okhttp.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-stdlib</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
