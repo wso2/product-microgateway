@@ -171,7 +171,7 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
 }
 service apiKeyService on apiSecureListener {
     @http:ResourceConfig {
-        methods:["GET"],
+        methods:["GET", "POST"],
         path: "/*",
         auth: {
             enabled: true,
