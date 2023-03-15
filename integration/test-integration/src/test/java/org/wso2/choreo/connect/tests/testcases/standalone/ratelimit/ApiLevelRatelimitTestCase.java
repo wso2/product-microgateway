@@ -21,6 +21,7 @@ package org.wso2.choreo.connect.tests.testcases.standalone.ratelimit;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -58,12 +59,15 @@ public class ApiLevelRatelimitTestCase {
         String endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
         boolean isThrottled;
         int testExecutionCount = 1;
+        HttpResponse response;
         do {
-             isThrottled = RateLimitUtils.isThrottled(RateLimitUtils.sendMultipleRequests(
-                endpointURL, headers, 5));
+             response = RateLimitUtils.sendMultipleRequests(endpointURL, headers, 3);
+             isThrottled = RateLimitUtils.isThrottled(response);
              testExecutionCount++;
         } while (!isThrottled && testExecutionCount <= 3);
 
         Assert.assertTrue(isThrottled, "API level rate-limit testcase failed.");
+        Assert.assertFalse(response.getHeaders().containsKey("x-envoy-ratelimited"),
+                "x-envoy-ratelimited header should not be present in the response.");
     }
 }
