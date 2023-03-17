@@ -33,7 +33,7 @@ fi
 
 # EULA License
 read -p "Please enter EULA license version (Ex: 3.2): " EULA_VERSION
-mkdir temp
+mkdir -p temp
 wget "https://wso2.com/license/wso2-update/${EULA_VERSION}/LICENSE.txt" -O temp/LICENSE.txt
 chmod 644 temp/LICENSE.txt
 
@@ -98,5 +98,9 @@ wget "https://raw.githubusercontent.com/wso2/product-microgateway/${CC_GIT_TAG}/
 touch ./updates/product.txt
 echo "choreo-connect-"$CC_VERSION >> ./updates/product.txt
 
-rm -rf ../temp
+cd ..
+zip -r "choreo-connect-${CC_VERSION}.zip" "choreo-connect-${CC_VERSION}"
+rm -rf "choreo-connect-${CC_VERSION}"
+rm -rf temp
+
 echo "Choreo Connect folder structure prepared successfully!"

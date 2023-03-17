@@ -101,3 +101,17 @@ These values are not required to start script execution.
 ## Script starting method
 
 You can start the script with `./directory-structure-maker.sh` command.
+
+## Test the distribution
+
+Build the docker images by executing the following command.
+
+```sh
+./docker-image-builder.sh -d choreo-connect-1.2.0 -r wso2 -t 1.2.0-u2
+```
+
+For help execute the following.
+
+```sh
+./docker-image-builder.sh -h
+```
