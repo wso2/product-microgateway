@@ -29,21 +29,12 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
-            <version>${carbon.apimgt.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
             <version>${carbon.apimgt.version}</version>
         </dependency>
     </dependencies>
 
     <repositories>
-        <repository>
-            <id>local-maven-repo</id>
-            <url>file:///Users/lahirud/.m2/repository</url>
-        </repository>
         <repository>
             <id>wso2-nexus</id>
             <name>WSO2 internal Repository</name>
@@ -87,6 +78,6 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
 <!--        org.wso2.carbon.apimgt component version-->
-        <carbon.apimgt.version>9.26.49</carbon.apimgt.version>
+        <carbon.apimgt.version>9.28.112</carbon.apimgt.version>
     </properties>
 </project>

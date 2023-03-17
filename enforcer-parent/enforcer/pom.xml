@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.choreo.connect</groupId>
         <artifactId>enforcer-parent</artifactId>
-        <version>1.2.1-beta2-SNAPSHOT</version>
+        <version>1.2.0-rc2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -449,6 +449,14 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>

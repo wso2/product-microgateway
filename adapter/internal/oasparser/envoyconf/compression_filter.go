@@ -164,10 +164,16 @@ func getCompressorFilter() (*hcmv3.HttpFilter, error) {
 }
 
 func getUInt32Value(s interface{}) (uint32, error) {
-	if v, ok := s.(int64); ok {
+
+	switch v := s.(type) {
+	case int:
 		return uint32(v), nil
+	case int64:
+		return uint32(v), nil
+	default:
+		return 0, fmt.Errorf("error occurred while processing gzip configuration value: %v", v)
 	}
-	return 0, errors.New("error occurred while processing gzip configuration value")
+
 }
 
 func getGzipCompressionLevel(v uint32) gzip_compressor.Gzip_CompressionLevel {

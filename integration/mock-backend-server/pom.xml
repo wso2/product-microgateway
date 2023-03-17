@@ -21,7 +21,7 @@
     <parent>
         <artifactId>integration</artifactId>
         <groupId>org.wso2.choreo.connect</groupId>
-        <version>1.2.1-beta2-SNAPSHOT</version>
+        <version>1.2.0-rc2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -63,7 +63,7 @@
             <artifactId>wiremock-jre8</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.graphql-java</groupId>
+            <groupId>com.graphql-java-kickstart</groupId>
             <artifactId>graphql-java-tools</artifactId>
         </dependency>
         <dependency>

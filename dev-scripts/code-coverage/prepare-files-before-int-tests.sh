@@ -33,3 +33,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' "s/JAVA_OPTS.*/JAVA_OPTS=\${JAVA_OPTS} ${JAVA_AGENT_ARG} -Dhttpclient.hostnameVerifier=AllowAll/g"  ../../integration/test-integration/src/test/resources/dockerCompose/cc-cacert-mounted-mtls.yaml
 fi
 echo "Preparing code coverage files before integration tests completed successfully..."
+
+# Temporary use wso2 RC image for integration tests. This have to be removed.
+docker pull wso2am/wso2am:4.2.0-alpine
+docker tag wso2am/wso2am:4.2.0-alpine wso2/wso2am:4.2.0

@@ -80,18 +80,16 @@ public class AnalyticsFilter {
         boolean elkEnabled = AnalyticsConstants.ELK_TYPE
                 .equalsIgnoreCase(ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getType());
         if (elkEnabled) {
-            // Remove Choreo pulisher related configs
-            publisherConfig.remove(AnalyticsConstants.AUTH_URL_CONFIG_KEY);
-            publisherConfig.remove(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY);
             // Add default elk publisher class config
             if (!analyticsConfigProperties.containsKey(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY)) {
                 publisherConfig.put(AnalyticsConstants.PUBLISHER_REPORTER_CLASS_CONFIG_KEY,
                         AnalyticsConstants.DEFAULT_ELK_PUBLISHER_REPORTER_CLASS);
             }
-            if (analyticsConfigProperties.containsKey(
-                    org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants.DATA_PROVIDER_CLASS_PROPERTY)) {
-                this.analyticsDataProvider = AnalyticsUtils.getCustomAnalyticsDataProvider();
-            }
+        }
+
+        if (analyticsConfigProperties.containsKey(
+                org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants.DATA_PROVIDER_CLASS_PROPERTY)) {
+            analyticsDataProvider = AnalyticsUtils.getCustomAnalyticsDataProvider();
         }
 
         publisher = loadAnalyticsPublisher(customAnalyticsPublisher, isChoreoDeployment);

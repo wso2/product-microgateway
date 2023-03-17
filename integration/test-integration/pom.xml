@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.choreo.connect</groupId>
         <artifactId>integration</artifactId>
-        <version>1.2.1-beta2-SNAPSHOT</version>
+        <version>1.2.0-rc2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -160,7 +160,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://github.com/wso2/product-apim-tooling/releases/download/v${apictl.version}/${apictl.package}</url>
+                            <url>https://github.com/wso2/product-apim-tooling/releases/download/v${apictl.version}-rc1/${apictl.package}</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
@@ -303,7 +303,7 @@
                 </os>
             </activation>
             <properties>
-                <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package>
+                <apictl.package>apictl-${apictl.version}-darwin-amd64.tar.gz</apictl.package>
             </properties>
         </profile>
         <profile>
@@ -315,7 +315,7 @@
                 </os>
             </activation>
             <properties>
-                <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package> <!-- Use same amd64 distribution until arm64 available -->
+                <apictl.package>apictl-${apictl.version}-darwin-arm64.tar.gz</apictl.package>
             </properties>
         </profile>
         <profile>
@@ -328,7 +328,7 @@
                 </os>
             </activation>
             <properties>
-                <apictl.package>apictl-${apictl.version}-linux-x64.tar.gz</apictl.package>
+                <apictl.package>apictl-${apictl.version}-linux-amd64.tar.gz</apictl.package>
             </properties>
         </profile>
         <profile>
@@ -341,7 +341,7 @@
                 </os>
             </activation>
             <properties>
-                <apictl.package>apictl-${apictl.version}-linux-x64.tar.gz</apictl.package>
+                <apictl.package>apictl-${apictl.version}-linux-arm64.tar.gz</apictl.package>
             </properties>
         </profile>
         <profile>
