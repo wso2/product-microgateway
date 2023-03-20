@@ -19,6 +19,17 @@
   securedListenerPort = 9095
   systemHost = "localhost"
 
+[router.ratelimit]
+  enabled = true
+  host = "rate-limiter"
+  port = 8091
+  requestTimeoutInMillis= 80
+  failureModeDeny = false
+  keyFilePath = "/home/wso2/security/keystore/mg.key"
+  certFilePath = "/home/wso2/security/keystore/mg.pem"
+  caCertFilePath = "/home/wso2/security/truststore/rate-limiter.pem"
+  sSLCertSANHostname = ""
+
 [router.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"
