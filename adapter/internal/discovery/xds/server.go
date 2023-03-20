@@ -441,6 +441,10 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 			logger.LoggerXds.Error("Error while populating API level rate limit policies: ", err)
 			return nil, err
 		}
+
+		if mgwSwagger.RateLimitLevel == envoyconf.RateLimitDisabled {
+			rlsPolicyCache.DeleteAPILevelRateLimitPolicies(mgwSwagger.OrganizationID, mgwSwagger.VHost, apiIdentifier)
+		}
 	}
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
@@ -608,63 +612,6 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 			delete(apiToVhostsMap, apiNameVersionHashedID)
 		} else {
 			delete(apiToVhostsMap[apiNameVersionHashedID], vhost)
-		}
-	}
-	return nil
-}
-
-// DeleteAPIsWithUUID deletes an API, its resources and updates the caches of given environments
-func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationID string) error {
-
-	mutexForInternalMapUpdate.Lock()
-	defer mutexForInternalMapUpdate.Unlock()
-
-	vhosts, found := apiToVhostsMap[uuid]
-	if !found {
-		logger.LoggerXds.Infof("Unable to delete API with UUID %v from Organization %v. API does not exist.", uuid, organizationID)
-		return errors.New(mgw.NotFound)
-	}
-
-	if vhost == "" {
-		// vhost is not defined, delete all vhosts
-		logger.LoggerXds.Infof("No vhost is specified for the API with UUID %v in Organizaion %v deleting from all vhosts", uuid, organizationID)
-		deletedVhosts := make(map[string]struct{})
-		for vh := range vhosts {
-			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, uuid)
-			// TODO: (renuka) optimize to update cache only once after updating all maps
-			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
-				// Update apiToVhostsMap with already deleted vhosts in the loop
-				logger.LoggerXds.Errorf("Error deleting API: %v of organization: %v", apiIdentifier, organizationID)
-				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v in organization: %v",
-					apiIdentifier, organizationID)
-				remainingVhosts := make(map[string]struct{})
-				for v := range vhosts {
-					if _, ok := deletedVhosts[v]; ok {
-						remainingVhosts[v] = void
-					}
-				}
-				apiToVhostsMap[uuid] = remainingVhosts
-				return err
-			}
-			deletedVhosts[vh] = void
-		}
-		delete(apiToVhostsMap, uuid)
-		return nil
-	}
-
-	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, uuid)
-	if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
-		return err
-	}
-
-	if _, ok := vhosts[vhost]; ok {
-		if len(vhosts) == 1 {
-			// if this is the final vhost delete map entry
-			logger.LoggerXds.Debugf("The API with UUID %v is not exists with any vhost. Hence clean vhost entry from the map 'apiToVhostsMap'",
-				uuid)
-			delete(apiToVhostsMap, uuid)
-		} else {
-			delete(apiToVhostsMap[uuid], vhost)
 		}
 	}
 	return nil

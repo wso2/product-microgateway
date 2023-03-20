@@ -85,6 +85,7 @@ func testAddAPILevelRateLimitPolicies(t *testing.T) {
 		"5000PerMin":    {PolicyName: "5000PerMin", Count: 5000, SpanUnit: "MINUTE"},
 		"2000PerMin":    {PolicyName: "2000PerMin", Count: 2000, SpanUnit: "MINUTE"},
 		"100000PerHOUR": {PolicyName: "100000PerHOUR", Count: 100000, SpanUnit: "HOUR"},
+		"UNLIMITED":     {PolicyName: "UNLIMITED", Count: -1, SpanUnit: "MINUTE"},
 	}
 
 	tests := []struct {
@@ -157,9 +158,9 @@ func testAddAPILevelRateLimitPolicies(t *testing.T) {
 		},
 		{
 			// Note: Each test case is depend on the earlier test cases
-			desc:         "Add an API with no Rate Limit policies",
+			desc:         "Add an API with no Rate Limit policies (Unlimited)",
 			apiID:        "vhost1:API4",
-			mgwSwagger:   getDummyAPISwagger("4", "", "", "", "", "", ""),
+			mgwSwagger:   getDummyAPISwagger("4", envoyconf.RateLimitDisabled, "UNLIMITED", "", "", "", ""),
 			policies:     rateLimitPolicies,
 			expectsError: false,
 			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{
@@ -351,9 +352,9 @@ func testDeleteAPILevelRateLimitPolicies(t *testing.T) {
 		},
 		{
 			desc:  "Delete API in an Org that has no APIs with rate limits",
-			org:   "org4",
+			org:   "org1",
 			vHost: "vhost1",
-			apiID: "vhost1:API5",
+			apiID: "vhost1:API4",
 			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{
 				"org1": {"vhost1": {}},
 			},

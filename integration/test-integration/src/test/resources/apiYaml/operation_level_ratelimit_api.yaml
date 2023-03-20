@@ -83,20 +83,8 @@ data:
         request: []
         response: []
         fault: []
-    -
-      id: ""
-      target: /pet/{petId}
-      verb: GET
-      authType: Application & Application User
-      scopes: []
-      usedProductIds: []
-      throttlingLimit:
-        requestCount: 3
-        unit: MINUTE
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
+    # By placing this POST operation before the GET /pet/{petId} covers the applying of
+    # UNLIMITED throttling policy in combination with other throttling policies.
     -
       id: ""
       target: /pet/{petId}
@@ -106,6 +94,20 @@ data:
       usedProductIds: []
       throttlingLimit:
         requestCount: -1
+        unit: MINUTE
+      operationPolicies:
+        request: []
+        response: []
+        fault: []
+    -
+      id: ""
+      target: /pet/{petId}
+      verb: GET
+      authType: Application & Application User
+      scopes: []
+      usedProductIds: []
+      throttlingLimit:
+        requestCount: 3
         unit: MINUTE
       operationPolicies:
         request: []

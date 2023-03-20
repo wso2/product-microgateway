@@ -63,7 +63,7 @@ type rateLimitPolicyCache struct {
 
 // AddAPILevelRateLimitPolicies adds inline Rate Limit policies in APIs to be updated in the Rate Limiter service.
 func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwagger *mgw.MgwSwagger, policies map[string]*mgw.APIRateLimitPolicy) error {
-	if mgwSwagger.RateLimitLevel == "" {
+	if mgwSwagger.RateLimitLevel == "" || mgwSwagger.RateLimitLevel == envoyconf.RateLimitDisabled {
 		return nil
 	}
 	level := strings.ToUpper(mgwSwagger.RateLimitLevel)
@@ -145,20 +145,6 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 				rlsConfigs = append(rlsConfigs, rlsConfig)
 			}
 		}
-	} else if level == envoyconf.RateLimitDisabled {
-		rlsConfigs = []*rls_config.RateLimitDescriptor{
-			{
-				Key:   envoyconf.DescriptorKeyForPath,
-				Value: mgwSwagger.GetXWso2Basepath(),
-				Descriptors: []*rls_config.RateLimitDescriptor{
-					{
-						Key:       envoyconf.DescriptorKeyForMethod,
-						Value:     envoyconf.DescriptorValueForAPIMethod,
-						RateLimit: nil,
-					},
-				},
-			},
-		}
 	} else {
 		return fmt.Errorf("invalid rate limit policy level: %q", level)
 	}
@@ -200,7 +186,7 @@ func getRateLimitPolicy(policies map[string]*mgw.APIRateLimitPolicy, policyName 
 
 	return &rls_config.RateLimitPolicy{
 		Unit:            unit,
-		RequestsPerUnit: policy.Count,
+		RequestsPerUnit: (uint32(policy.Count)),
 	}, nil
 }
 
