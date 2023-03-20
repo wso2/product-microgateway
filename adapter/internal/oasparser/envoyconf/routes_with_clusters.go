@@ -807,7 +807,11 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
 	endpointType := params.endpointType
-	amznResourceName := resource.GetAmznResourceName()
+	amznResourceName := ""
+
+	if resource != nil {
+		amznResourceName = resource.GetAmznResourceName()
+	}
 
 	conf, _ := config.ReadConfigs()
 
