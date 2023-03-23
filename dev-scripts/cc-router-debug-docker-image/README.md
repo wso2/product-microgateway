@@ -18,8 +18,8 @@ Following are some sample values.
 
 ```sh
 export ENVOY_REPO=./envoy
-export ENVOY_TAG=v1.20.2
-export CC_BASE_IMAGE=wso2/choreo-connect-router:1.1.0
+export ENVOY_TAG=v1.24.1
+export CC_BASE_IMAGE=wso2/choreo-connect-router:1.2.0
 export CC_PROFILE_IMAGE="" # use default image name
 export ENVOY_DOCKER_IMAGE="" # do not build an envoy docker image
 ```

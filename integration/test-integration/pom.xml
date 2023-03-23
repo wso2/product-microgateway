@@ -160,7 +160,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://github.com/wso2/product-apim-tooling/releases/download/v${apictl.version}-rc1/${apictl.package}</url>
+                            <url>https://github.com/wso2/product-apim-tooling/releases/download/v${apictl.version}/${apictl.package}</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>

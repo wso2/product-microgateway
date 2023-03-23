@@ -94,10 +94,24 @@ choreo-connect-1.1.0
 
 These values are not required to start script execution.
 
-1. Choreo-Connect version (Ex: 1.1.0)
-2. Architecture type used for the Choreo Connect images
-3. Choreo-Connect local repository path (to copy the dockerfiles)
+1. Choreo-Connect version (Ex: 1.2.0)
+2. GitHub tag in case if you want to point RC release
+3. Latest EULA license version
 
 ## Script starting method
 
 You can start the script with `./directory-structure-maker.sh` command.
+
+## Test the distribution
+
+Build the docker images by executing the following command.
+
+```sh
+./docker-image-builder.sh -d choreo-connect-1.2.0 -r wso2 -t 1.2.0-u2
+```
+
+For help execute the following.
+
+```sh
+./docker-image-builder.sh -h
+```
