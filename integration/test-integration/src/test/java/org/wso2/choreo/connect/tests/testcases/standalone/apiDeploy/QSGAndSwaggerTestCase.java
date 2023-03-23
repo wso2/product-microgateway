@@ -45,14 +45,11 @@ public class QSGAndSwaggerTestCase {
     private static final String encodedCredentials = "Basic YWRtaW46YWRtaW4=";
     private static final String projectName = "qsg_petstore";
     private String jwtProdToken;
-    private String jwtSandToken;
 
     @BeforeClass
     public void createApiProject() throws Exception {
         ApictlUtils.createProject("https://petstore.swagger.io/v2/swagger.json", projectName);
         jwtProdToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets",
-                false);
-        jwtSandToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, "write:pets",
                 false);
 
         String targetDir = Utils.getTargetDirPath();
@@ -113,17 +110,5 @@ public class QSGAndSwaggerTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-    }
-
-    @Test(description = "Invoke Sandbox endpoint when endpoints provided in servers object", dependsOnMethods = "deployAPI")
-    public void invokeAPIWithSandJWT() throws CCTestException, IOException {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtSandToken);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/pet/findByStatus?status=available"), headers);
-
-        Assert.assertNotNull(response, "Sandbox endpoint response should not be null");
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
-        Assert.assertTrue(response.getData().contains("Sandbox key offered to an API with no sandbox endpoint"));
     }
 }

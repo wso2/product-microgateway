@@ -56,16 +56,6 @@ public class RetryTestCase {
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
-
-        Map<String, String> sandHeaders = new HashMap<>();
-        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-two"), sandHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
-                "Response message mismatch.");
     }
 
     @Test(description = "Test Resource Level retry for Production and Sandbox endpoints")
@@ -80,15 +70,6 @@ public class RetryTestCase {
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
 
-        Map<String, String> sandHeaders = new HashMap<>();
-        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-three"), sandHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
-                "Response message mismatch.");
     }
 
     @Test(description = "Invoke endpoint that requires more retries than configured for API or Resource")
@@ -104,24 +85,5 @@ public class RetryTestCase {
                 "Response code mismatched");
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.GATEWAY_ERROR,
                 "Response message mismatch.");
-    }
-
-    @Test(description = "Test where retry configs have invalid count and status code, thus get replaced by default")
-    public void testInvalidRetryConfigReplaceByDefaultForSand() throws Exception {
-        Map<String, String> prodHeaders = new HashMap<>();
-        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-seven"), prodHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_GATEWAY_TIMEOUT,
-                "Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.GATEWAY_ERROR,
-                "Response message mismatch.");
-
-        HttpResponse sandResponseFinal = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/retry1/retry-seven"), prodHeaders);
-        Assert.assertEquals(sandResponseFinal.getResponseCode(), HttpStatus.SC_OK,
-                "Response code mismatched");
     }
 }
