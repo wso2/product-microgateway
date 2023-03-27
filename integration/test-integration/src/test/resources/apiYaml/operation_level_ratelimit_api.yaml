@@ -125,6 +125,17 @@ data:
         request: []
         response: []
         fault: []
+    #  To make sure that even without operation level throttle-limit, the API is processed as expected.
+    - id: ""
+      target: /pets/resourceWithoutRateLimit
+      verb: GET
+      authType: Application & Application User
+      scopes: [ ]
+      usedProductIds: [ ]
+      operationPolicies:
+        request: [ ]
+        response: [ ]
+        fault: [ ]
   categories: []
   keyManagers:
     - all

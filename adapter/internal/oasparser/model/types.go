@@ -309,7 +309,7 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		ExtractAPIInformation(apiProject, apiYaml)
 		conf, _ := config.ReadConfigs()
 		if conf.Envoy.RateLimit.Enabled {
-			ExtractAPIRateLimitPolicies(apiProject, apiYaml)
+			ExtractAPIRateLimitPolicies(apiProject)
 		}
 	}
 	return nil
