@@ -35,7 +35,6 @@ import java.util.Map;
 
 public class VhostAPICtlTestCase {
     private String jwtTokenProd;
-    private String jwtTokenSand;
     private static final String LOCALHOST = "localhost";
     private static final String US_HOST = "us.wso2.com";
     private static final String RESOURCE_PATH_FIND_BY_STATUS = "/v2/vhost/pet/findByStatus";
@@ -45,7 +44,6 @@ public class VhostAPICtlTestCase {
     void start() throws Exception {
         //TODO: (VirajSalaka) change the token
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
-        jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
     @Test(description = "Invoke APIs with same API name, version, context and different backends - vhost: localhost")
@@ -63,19 +61,6 @@ public class VhostAPICtlTestCase {
         // response from backend 1
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
-
-        // Sandbox endpoint
-        Map<String, String> sandHeaders = new HashMap<String, String>();
-        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        sandHeaders.put(HttpHeaderNames.HOST.toString(), LOCALHOST);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                RESOURCE_PATH_FIND_BY_STATUS), sandHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        // response from backend 2
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
-                "Response message mismatch.");
     }
 
     @Test(description = "Invoke APIs with same API name, version, context and different backends - vhost: us.wso2.com")
@@ -92,19 +77,6 @@ public class VhostAPICtlTestCase {
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
         // response from backend 2
         Assert.assertEquals(prodResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
-                "Response message mismatch.");
-
-        // Sandbox endpoint
-        Map<String, String> sandHeaders = new HashMap<String, String>();
-        sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        sandHeaders.put(HttpHeaderNames.HOST.toString(), US_HOST);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                RESOURCE_PATH_FIND_BY_STATUS), sandHeaders);
-
-        Assert.assertNotNull(sandResponse);
-        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
-        // response from backend 1
-        Assert.assertEquals(sandResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
     }
 

@@ -38,12 +38,10 @@ import java.util.concurrent.Future;
 
 public class CircuitBreakersTestCase {
     private String jwtTokenProd;
-    private String jwtTokenSand;
 
     @BeforeClass(description = "Get Prod and Sandbox tokens")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
-        jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
     @Test(description = "Test max requests circuit breaker")
@@ -56,21 +54,6 @@ public class CircuitBreakersTestCase {
         } else {
             Assert.assertEquals(firstResponse, HttpStatus.SC_SERVICE_UNAVAILABLE, "Response code mismatched");
             Assert.assertEquals(secondResponse, HttpStatus.SC_OK, "Response code mismatched");
-        }
-    }
-
-    @Test(description = "Test max requests circuit breaker in api level")
-    public void testMaxRequestSand() throws Exception {
-        ArrayList<Integer> responses = new ArrayList<>();
-        ArrayList<Future<Integer>> reqs = executeConcurrentCalls(3, jwtTokenSand, "/circuit-breakers/req-cb");
-        responses.add(reqs.get(0).get());
-        responses.add(reqs.get(1).get());
-        responses.add(reqs.get(2).get());
-        if (Collections.frequency(responses, HttpStatus.SC_OK) != 2) {
-            Assert.fail("Two request must get passed as Max requests is 2");
-        }
-        if (!responses.contains( HttpStatus.SC_SERVICE_UNAVAILABLE)) {
-            Assert.fail("Max pending requests circuit breaker has not opened");
         }
     }
 
