@@ -81,7 +81,7 @@ func ExtractAPIInformation(apiProject *ProjectAPI, apiYaml APIYaml) {
 
 // ExtractAPIRateLimitPolicies reads the values in api.yaml/api.json and populates and identifies the
 // available rate-limit policies
-func ExtractAPIRateLimitPolicies(apiProject *ProjectAPI, parsedAPIYaml APIYaml) {
+func ExtractAPIRateLimitPolicies(apiProject *ProjectAPI) {
 	apiYamlFromProject := apiProject.APIYaml.Data
 
 	policyMap := map[string]*APIRateLimitPolicy{}
@@ -94,6 +94,11 @@ func ExtractAPIRateLimitPolicies(apiProject *ProjectAPI, parsedAPIYaml APIYaml) 
 		return
 	}
 	for _, operation := range apiYamlFromProject.Operations {
+		// If the throttlingLimit is not available, still this would not be a null value. Hence we need to check if the
+		// populated nested value (unit) is empty.
+		if operation.ThrottlingLimit.Unit == "" {
+			continue
+		}
 		policyName := GetRLPolicyName(operation.ThrottlingLimit.RequestCount, operation.ThrottlingLimit.Unit)
 		_, ok := policyMap[policyName]
 		if !ok {
@@ -104,7 +109,6 @@ func ExtractAPIRateLimitPolicies(apiProject *ProjectAPI, parsedAPIYaml APIYaml) 
 	}
 	loggers.LoggerAPI.Debugf("Number of Rate Limit policies received: %v", len(policyMap))
 	apiProject.RateLimitPolicies = policyMap
-	return
 }
 
 func getRateLimitPolicy(throttlingLimit ThrottlingLimit) APIRateLimitPolicy {
