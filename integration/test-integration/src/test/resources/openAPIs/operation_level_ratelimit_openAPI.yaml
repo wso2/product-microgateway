@@ -160,6 +160,24 @@ paths:
         - petstore_auth:
             - 'write:pets'
             - 'read:pets'
+  /pets/resourceWithoutRateLimit:
+    get:
+      summary: Finds Pets by tags
+      operationId: findPetsByTags
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
 securityDefinitions:
   api_key:
     type: apiKey

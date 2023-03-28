@@ -435,6 +435,9 @@ func createOperationRateLimitDataMap(apiYamlOperations []OperationYaml) map[stri
 	m := make(map[string]string)
 	for _, operation := range apiYamlOperations {
 		keyValue := operation.Target + operation.Verb
+		if operation.ThrottlingLimit.Unit == "" && operation.ThrottlingLimit.RequestCount == 0 {
+			continue
+		}
 		m[keyValue] = GetRLPolicyName(operation.ThrottlingLimit.RequestCount, operation.ThrottlingLimit.Unit)
 	}
 	return m
