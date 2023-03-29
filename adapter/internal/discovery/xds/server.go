@@ -442,7 +442,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 			return nil, err
 		}
 
-		if mgwSwagger.RateLimitLevel == envoyconf.RateLimitDisabled {
+		if mgwSwagger.RateLimitLevel == envoyconf.Unlimited {
 			rlsPolicyCache.DeleteAPILevelRateLimitPolicies(mgwSwagger.OrganizationID, mgwSwagger.VHost, apiIdentifier)
 		}
 	}

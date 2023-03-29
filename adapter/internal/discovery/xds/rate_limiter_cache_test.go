@@ -160,7 +160,7 @@ func testAddAPILevelRateLimitPolicies(t *testing.T) {
 			// Note: Each test case is depend on the earlier test cases
 			desc:         "Add an API with no Rate Limit policies (Unlimited)",
 			apiID:        "vhost1:API4",
-			mgwSwagger:   getDummyAPISwagger("4", envoyconf.RateLimitDisabled, "UNLIMITED", "", "", "", ""),
+			mgwSwagger:   getDummyAPISwagger("4", envoyconf.Unlimited, "UNLIMITED", "", "", "", ""),
 			policies:     rateLimitPolicies,
 			expectsError: false,
 			apiLevelRateLimitPolicies: map[string]map[string]map[string][]*rls_config.RateLimitDescriptor{

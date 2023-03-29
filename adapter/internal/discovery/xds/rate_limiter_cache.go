@@ -63,7 +63,7 @@ type rateLimitPolicyCache struct {
 
 // AddAPILevelRateLimitPolicies adds inline Rate Limit policies in APIs to be updated in the Rate Limiter service.
 func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwagger *mgw.MgwSwagger, policies map[string]*mgw.APIRateLimitPolicy) error {
-	if mgwSwagger.RateLimitLevel == "" || mgwSwagger.RateLimitLevel == envoyconf.RateLimitDisabled {
+	if mgwSwagger.RateLimitLevel == "" || mgwSwagger.RateLimitLevel == envoyconf.Unlimited {
 		return nil
 	}
 	level := strings.ToUpper(mgwSwagger.RateLimitLevel)
