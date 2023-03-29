@@ -142,8 +142,6 @@ type apiData struct {
 	SecurityScheme             []string             `json:"securityScheme,omitempty"`
 	OrganizationID             string               `json:"organizationId,omitempty"`
 	Provider                   string               `json:"provider,omitempty"`
-	RateLimitLevel             string               `json:"rateLimitLevel,omitempty"`
-	RateLimitPolicy            string               `json:"rateLimitPolicy,omitempty"`
 	ThrottlingLimit            ThrottlingLimit      `json:"throttlingLimit,omitempty"`
 	EnableBackendJWT           bool                 `json:"enableBackendJWT,omitempty"`
 	EndpointConfig             endpointConfigStruct `json:"endpointConfig,omitempty"`
@@ -186,14 +184,6 @@ type APIRateLimitPolicy struct {
 	Unit       string `json:"unit,omitempty"`
 	Span       uint32 `json:"span,omitempty"`
 	SpanUnit   string `json:"spanUnit,omitempty"`
-}
-
-// RateLimitPolicy contains all the fields in the rate-limit_policies.yaml file
-type RateLimitPolicy struct {
-	ApimMeta
-	Data struct {
-		APIRateLimitPolicies []APIRateLimitPolicy
-	}
 }
 
 // EndpointInfo holds config values regards to the endpoint
