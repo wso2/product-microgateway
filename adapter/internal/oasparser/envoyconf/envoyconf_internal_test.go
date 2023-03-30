@@ -558,9 +558,9 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 		"validation context certificate mismatch")
 	assert.Equal(t, defaultCACertPath, upstreamTLSContextWithoutCerts.CommonTlsContext.GetValidationContext().GetTrustedCa().GetFilename(),
 		"validation context certificate filepath mismatch")
-	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchSubjectAltNames(),
+	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames(),
 		"Subject Alternative Names Should not be empty.")
-	assert.Equal(t, "abc.com", upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchSubjectAltNames()[0].GetExact(),
+	assert.Equal(t, "abc.com", upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchTypedSubjectAltNames()[0].Matcher.GetExact(),
 		"Upstream SAN mismatch.")
 }
 

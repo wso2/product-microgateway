@@ -401,10 +401,13 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 	upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
 		ValidationContext: &tlsv3.CertificateValidationContext{
 			TrustedCa: trustedCASrc,
-			MatchSubjectAltNames: []*envoy_type_matcherv3.StringMatcher{
+			MatchTypedSubjectAltNames: []*tlsv3.SubjectAltNameMatcher{
 				{
-					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
-						Exact: sslCertSanHostName,
+					SanType: tlsv3.SubjectAltNameMatcher_DNS,
+					Matcher: &envoy_type_matcherv3.StringMatcher{
+						MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+							Exact: sslCertSanHostName,
+						},
 					},
 				},
 			},
@@ -652,9 +655,11 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		},
 	}
 
+	sanType := tlsv3.SubjectAltNameMatcher_IP_ADDRESS
 	// Sni should be assigned when there is a hostname
 	if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
 		upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
+		sanType = tlsv3.SubjectAltNameMatcher_DNS
 	}
 
 	if !conf.Envoy.Upstream.TLS.DisableSslVerification {
@@ -683,14 +688,17 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 
 	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSslVerification {
 		addressString := address.GetSocketAddress().GetAddress()
-		subjectAltNames := []*envoy_type_matcherv3.StringMatcher{
+		subjectAltNames := []*tlsv3.SubjectAltNameMatcher{
 			{
-				MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
-					Exact: addressString,
+				SanType: sanType,
+				Matcher: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+						Exact: addressString,
+					},
 				},
 			},
 		}
-		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchSubjectAltNames = subjectAltNames
+		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchTypedSubjectAltNames = subjectAltNames
 	}
 	return upstreamTLSContext
 }
