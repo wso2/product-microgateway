@@ -33,6 +33,7 @@ const (
 	fileAccessLogName          string = "envoy.access_loggers.file"
 	grpcAccessLogName          string = "envoy.http_grpc_access_log"
 	httpConManagerStartPrefix  string = "ingress_http"
+	corsFilterName             string = "type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors"
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
 	localRateLimitPerRouteName string = "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
@@ -140,4 +141,10 @@ const (
 	RateLimiterDomain                    = "Default"
 	RateLimitPolicyOperationLevel string = "OPERATION"
 	RateLimitPolicyAPILevel       string = "API"
+)
+
+// Enforcer
+const (
+	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
+	uaexCode                   = "UAEX"
 )

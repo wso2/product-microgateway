@@ -49,4 +49,7 @@ public class MetadataConstants {
     public static final String DESTINATION = WSO2_METADATA_PREFIX + "destination";
 
     public static final String ERROR_CODE_KEY = "ErrorCode";
+
+    public static final String CHOREO_CONNECT_ENFORCER_REPLY = "choreo-connect-enforcer-reply";
+    public static final String CHOREO_CONNECT_ENFORCER_REPLY_OK = "Ok";
 }
