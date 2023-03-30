@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org).
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -56,12 +56,12 @@ public class APILevelWithoutRateLimitTestCase {
         headers.put("Internal-Key", testKey);
     }
 
-    @Test(description = "Test rate-limiting headers with envoy rate-limit service")
+    @Test(description = "Test rate-limiting disabled scenario")
     public void testRateLimitingHeadersWithEnvoyRateLimitService() throws Exception {
         HttpResponse response = HTTPSClientUtils.doGet(endpointURL, headers);
         Map<String,String> responseHeadersMap = response.getHeaders();
-        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-limit"), "x-ratelimit-limit available");
-        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-reset"), "x-ratelimit-reset available");
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-limit"), "x-ratelimit-limit header available");
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-reset"), "x-ratelimit-reset header available");
         Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-remaining"), "x-ratelimit-remaining header available");
     }
 }
