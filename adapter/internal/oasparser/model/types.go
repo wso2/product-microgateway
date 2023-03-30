@@ -180,7 +180,7 @@ type ThrottlingLimit struct {
 type APIRateLimitPolicy struct {
 	PolicyName string `json:"policyName,omitempty"`
 	Type       string `json:"type,omitempty"`
-	Count      uint32 `json:"count,omitempty"`
+	Count      int    `json:"count,omitempty"`
 	Unit       string `json:"unit,omitempty"`
 	Span       uint32 `json:"span,omitempty"`
 	SpanUnit   string `json:"spanUnit,omitempty"`

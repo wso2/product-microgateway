@@ -80,9 +80,12 @@ public class OperationLevelRatelimitTestCase {
     }
 
     @Test(description = "Test an operation without defining envoy rate-limits")
-    public void testResourceWithoutEnvoyRateLimits() throws Exception {
+    public void testOperationWithoutEnvoyRateLimits() throws Exception {
         String endpointURL = Utils.getServiceURLHttps("/v2/operationLevelRL/pets/findByTags");
-        Assert.assertFalse(RateLimitUtils.isThrottled(RateLimitUtils.sendMultipleRequests(
-                endpointURL, headers, 10)), "Rate-limit applied to a rate-limit level undefined operation.");
+        HttpResponse response = HttpsClientRequest.doGet(endpointURL, headers);
+        Map<String,String> responseHeadersMap = response.getHeaders();
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-limit"), "x-ratelimit-limit header available");
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-reset"), "x-ratelimit-reset header available");
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-remaining"), "x-ratelimit-remaining header available");
     }
 }

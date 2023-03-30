@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ func TestExtractAPIRateLimitPolicies(t *testing.T) {
 	assert.Equal(t, 1, len(apiProjectWithOperationLimit.RateLimitPolicies))
 	assert.Equal(t, policyName, apiProjectWithOperationLimit.RateLimitPolicies[policyName].PolicyName)
 	assert.Equal(t, "REQUEST_COUNT", apiProjectWithOperationLimit.RateLimitPolicies[policyName].Type)
-	assert.Equal(t, uint32(10), apiProjectWithOperationLimit.RateLimitPolicies[policyName].Count)
+	assert.Equal(t, 10, apiProjectWithOperationLimit.RateLimitPolicies[policyName].Count)
 	assert.Equal(t, "MINUTE", apiProjectWithOperationLimit.RateLimitPolicies[policyName].SpanUnit)
 	assert.Equal(t, uint32(1), apiProjectWithOperationLimit.RateLimitPolicies[policyName].Span)
 
@@ -89,7 +89,7 @@ func TestExtractAPIRateLimitPolicies(t *testing.T) {
 	assert.Equal(t, 1, len(apiProjectWithOperationLimit.RateLimitPolicies))
 	assert.Equal(t, policyName, apiProjectWithOperationLimit.RateLimitPolicies[apiPolicyName].PolicyName)
 	assert.Equal(t, "REQUEST_COUNT", apiProjectWithOperationLimit.RateLimitPolicies[apiPolicyName].Type)
-	assert.Equal(t, uint32(10), apiProjectWithOperationLimit.RateLimitPolicies[apiPolicyName].Count)
+	assert.Equal(t, 10, apiProjectWithOperationLimit.RateLimitPolicies[apiPolicyName].Count)
 	assert.Equal(t, "MINUTE", apiProjectWithOperationLimit.RateLimitPolicies[apiPolicyName].SpanUnit)
 	assert.Equal(t, uint32(1), apiProjectWithOperationLimit.RateLimitPolicies[apiPolicyName].Span)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.org).
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -23,7 +23,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.test.utils.http.HTTPSClientUtils;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
-import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.common.model.API;
 import org.wso2.choreo.connect.tests.common.model.ApplicationDTO;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -33,7 +32,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ApiLevelRatelimitTestCase {
+public class APILevelWithoutRateLimitTestCase {
     private String testKey;
     private String endpointURL;
     private Map<String, String> headers = new HashMap<>();
@@ -41,8 +40,8 @@ public class ApiLevelRatelimitTestCase {
     @BeforeClass
     public void createApiProject() throws Exception {
         API api = new API();
-        api.setName("ratelimit");
-        api.setContext("v2/ratelimitService");
+        api.setName("apiLevelWithoutRatelimit");
+        api.setContext("v2/apiLevelWithoutRateLimit");
         api.setVersion("1.0.0");
         api.setProvider("admin");
 
@@ -53,37 +52,16 @@ public class ApiLevelRatelimitTestCase {
 
         testKey = TokenUtil.getJWT(api, applicationDto, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
                 3600, null, true);
-        endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps("/v2/apiLevelWithoutRateLimit/pet/3");
         headers.put("Internal-Key", testKey);
     }
 
-    @Test(description = "Test rate-limiting with envoy rate-limit service")
-    public void testRateLimitsWithEnvoyRateLimitService() throws Exception {
-        Utils.delay(10000, "Could not wait till initial setup completion.");
-        boolean isThrottled;
-        int testExecutionCount = 1;
-        HttpResponse response;
-        do {
-             response = RateLimitUtils.sendMultipleRequests(endpointURL, headers, 3);
-             isThrottled = RateLimitUtils.isThrottled(response);
-             testExecutionCount++;
-        } while (!isThrottled && testExecutionCount <= 3);
-
-        Assert.assertTrue(isThrottled, "API level rate-limit testcase failed.");
-        Assert.assertFalse(response.getHeaders().containsKey("x-envoy-ratelimited"),
-                "x-envoy-ratelimited header should not be present in the response.");
-    }
-
-    @Test(description = "Test rate-limiting headers with envoy rate-limit service", dependsOnMethods =
-            {"testRateLimitsWithEnvoyRateLimitService"})
+    @Test(description = "Test rate-limiting disabled scenario")
     public void testRateLimitingHeadersWithEnvoyRateLimitService() throws Exception {
         HttpResponse response = HTTPSClientUtils.doGet(endpointURL, headers);
         Map<String,String> responseHeadersMap = response.getHeaders();
-        Assert.assertTrue(responseHeadersMap.containsKey("x-ratelimit-limit"), "x-ratelimit-limit header " +
-                "not available");
-        Assert.assertTrue(responseHeadersMap.containsKey("x-ratelimit-reset"), "x-ratelimit-reset header " +
-                "not available");
-        Assert.assertTrue(responseHeadersMap.containsKey("x-ratelimit-remaining"), "x-ratelimit-remaining header " +
-                "not available");
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-limit"), "x-ratelimit-limit header available");
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-reset"), "x-ratelimit-reset header available");
+        Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-remaining"), "x-ratelimit-remaining header available");
     }
 }

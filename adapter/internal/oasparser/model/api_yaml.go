@@ -116,7 +116,7 @@ func getRateLimitPolicy(throttlingLimit ThrottlingLimit) APIRateLimitPolicy {
 	policyName := GetRLPolicyName(throttlingLimit.RequestCount, throttlingLimit.Unit)
 	var rlType string = "REQUEST_COUNT"
 	rlPolicy.PolicyName = policyName
-	rlPolicy.Count = uint32(throttlingLimit.RequestCount)
+	rlPolicy.Count = throttlingLimit.RequestCount
 	rlPolicy.Type = rlType
 	rlPolicy.Span = 1
 	rlPolicy.SpanUnit = throttlingLimit.Unit
@@ -125,6 +125,9 @@ func getRateLimitPolicy(throttlingLimit ThrottlingLimit) APIRateLimitPolicy {
 
 // GetRLPolicyName from throttlingLimit fields
 func GetRLPolicyName(requestCount int, unit string) string {
+	if requestCount == -1 {
+		return ""
+	}
 	caser := cases.Title(language.English)
 	return strconv.Itoa(requestCount) + "Per" + caser.String(strings.ToLower(unit))
 }

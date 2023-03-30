@@ -1,10 +1,13 @@
 type: api
 version: v4.1.0
 data:
-  id: 2b547d7c-4f7b-4f31-ad6b-05b4960dc123
-  name: operationLevelRateLimit
-  context: /v2/operationLevelRL
+  id: 2b547d7c-4f7b-4f31-ad6b-05b4960dccc
+  name: apiLevelWithoutRatelimit
+  context: /v2/apiLevelWithoutRateLimit
   version: 1.0.0
+  throttlingLimit:
+    requestCount: -1
+    unit: MINUTE
   provider: admin
   lifeCycleStatus: PUBLISHED
   responseCachingEnabled: false
@@ -71,73 +74,15 @@ data:
   operations:
     -
       id: ""
-      target: /pet/findByStatus
-      verb: GET
-      authType: Application & Application User
-      scopes: []
-      usedProductIds: []
-      throttlingLimit:
-        requestCount: 3
-        unit: MINUTE
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-    # By placing this POST operation before the GET /pet/{petId} covers the applying of
-    # UNLIMITED throttling policy in combination with other throttling policies.
-    -
-      id: ""
-      target: /pet/{petId}
-      verb: POST
-      authType: Application & Application User
-      scopes: []
-      usedProductIds: []
-      throttlingLimit:
-        requestCount: -1
-        unit: MINUTE
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-    -
-      id: ""
       target: /pet/{petId}
       verb: GET
       authType: Application & Application User
       scopes: []
       usedProductIds: []
-      throttlingLimit:
-        requestCount: 3
-        unit: MINUTE
       operationPolicies:
         request: []
         response: []
         fault: []
-    -
-      id: ""
-      target: /pets/findByTags
-      verb: GET
-      authType: Application & Application User
-      scopes: []
-      usedProductIds: []
-      throttlingLimit:
-        requestCount: -1
-        unit: MINUTE
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
-    #  To make sure that even without operation level throttle-limit, the API is processed as expected.
-    - id: ""
-      target: /pets/resourceWithoutRateLimit
-      verb: GET
-      authType: Application & Application User
-      scopes: [ ]
-      usedProductIds: [ ]
-      operationPolicies:
-        request: [ ]
-        response: [ ]
-        fault: [ ]
   categories: []
   keyManagers:
     - all

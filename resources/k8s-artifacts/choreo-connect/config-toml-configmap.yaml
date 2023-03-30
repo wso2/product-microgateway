@@ -58,6 +58,9 @@ data:
       verifyHostName = true
       disableSslVerification = false
 
+    [router.ratelimit]
+      enabled = true
+
     [enforcer]
     [enforcer.jwtIssuer]
       enabled = true
@@ -103,4 +106,3 @@ data:
 
     [enforcer.metrics]
       enabled = false
-
