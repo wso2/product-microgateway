@@ -34,6 +34,7 @@ import (
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
@@ -400,16 +401,19 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 	upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
 		ValidationContext: &tlsv3.CertificateValidationContext{
 			TrustedCa: trustedCASrc,
-			MatchSubjectAltNames: []*envoy_type_matcherv3.StringMatcher{
+			MatchTypedSubjectAltNames: []*tlsv3.SubjectAltNameMatcher{
 				{
-					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
-						Exact: sslCertSanHostName,
+					SanType: tlsv3.SubjectAltNameMatcher_DNS,
+					Matcher: &envoy_type_matcherv3.StringMatcher{
+						MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+							Exact: sslCertSanHostName,
+						},
 					},
 				},
 			},
 		},
 	}
-	marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
+	marshalledTLSContext, err := anypb.New(upstreamTLSContext)
 	if err != nil {
 		return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
 	}
@@ -515,7 +519,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			}
 
 			upstreamtlsContext := createUpstreamTLSContext(epCert, address)
-			marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
+			marshalledTLSContext, err := anypb.New(upstreamtlsContext)
 			if err != nil {
 				return nil, nil, errors.New("internal Error while marshalling the upstream TLS Context")
 			}
@@ -651,9 +655,11 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		},
 	}
 
+	sanType := tlsv3.SubjectAltNameMatcher_IP_ADDRESS
 	// Sni should be assigned when there is a hostname
 	if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
 		upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
+		sanType = tlsv3.SubjectAltNameMatcher_DNS
 	}
 
 	if !conf.Envoy.Upstream.TLS.DisableSslVerification {
@@ -682,14 +688,17 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 
 	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSslVerification {
 		addressString := address.GetSocketAddress().GetAddress()
-		subjectAltNames := []*envoy_type_matcherv3.StringMatcher{
+		subjectAltNames := []*tlsv3.SubjectAltNameMatcher{
 			{
-				MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
-					Exact: addressString,
+				SanType: sanType,
+				Matcher: &envoy_type_matcherv3.StringMatcher{
+					MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+						Exact: addressString,
+					},
 				},
 			},
 		}
-		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchSubjectAltNames = subjectAltNames
+		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchTypedSubjectAltNames = subjectAltNames
 	}
 	return upstreamTLSContext
 }
@@ -756,11 +765,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			StringMatch: &envoy_type_matcherv3.StringMatcher{
 				MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
 					SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
 						Regex: "^(" + methodRegex + ")$",
 					},
 				},
@@ -773,11 +777,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
 			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-						MaxProgramSize: nil,
-					},
-				},
 				Regex: routePath,
 			},
 		},
@@ -887,11 +886,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
 				RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
 					Pattern: &envoy_type_matcherv3.RegexMatcher{
-						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-								MaxProgramSize: nil,
-							},
-						},
 						Regex: pathRegex,
 					},
 					Substitution: substitutionString,
@@ -997,9 +991,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		action.Route.RetryPolicy = commonRetryPolicy
 	}
 
-	if corsPolicy != nil {
-		action.Route.Cors = corsPolicy
-	}
+	corsFilter, _ := anypb.New(corsPolicy)
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 	router = routev3.Route{
@@ -1011,6 +1003,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: extAuthzFilter,
 			wellknown.Lua:                       luaFilter,
+			wellknown.CORS:                      corsFilter,
 		},
 	}
 	return &router
@@ -1381,7 +1374,7 @@ func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 	return upgradeConfig
 }
 
-func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
+func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 
 	if corsConfig == nil || !corsConfig.Enabled {
 		return nil
@@ -1392,11 +1385,6 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		regexMatcher := &envoy_type_matcherv3.StringMatcher{
 			MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
 				SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-							MaxProgramSize: nil,
-						},
-					},
 					// adds escape character when necessary
 					Regex: regexp.QuoteMeta(origin),
 				},
@@ -1405,7 +1393,7 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		stringMatcherArray = append(stringMatcherArray, regexMatcher)
 	}
 
-	corsPolicy := &routev3.CorsPolicy{
+	corsPolicy := &cors_filter_v3.CorsPolicy{
 		AllowCredentials: &wrapperspb.BoolValue{
 			Value: corsConfig.AccessControlAllowCredentials,
 		},

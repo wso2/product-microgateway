@@ -21,6 +21,8 @@ import (
 	"testing"
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 )
@@ -117,7 +119,11 @@ func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 
 	// check cors after creating routes
 	for _, r := range routes {
-		assert.NotNil(t, r.GetRoute().Cors, "Cors Configuration should not be null.")
+		corsConfig := &cors_filter_v3.CorsPolicy{}
+		err := r.GetTypedPerFilterConfig()[wellknown.CORS].UnmarshalTo(corsConfig)
+		assert.Nilf(t, err, "Error while parsing Cors Configuration %v", corsConfig)
+		assert.NotEmpty(t, corsConfig.GetAllowMethods(), "Cors AllowMethods should not be empty.")
+		assert.NotEmpty(t, corsConfig.GetAllowOriginStringMatch(), "Cors AllowOriginStringMatch should not be empty.")
 	}
 
 	return routes

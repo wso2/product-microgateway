@@ -32,6 +32,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -127,7 +128,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		}
 	}
 
-	pbst, err := ptypes.MarshalAny(manager)
+	pbst, err := anypb.New(manager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
 	}
@@ -176,7 +177,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			},
 		}
 
-		marshalledTLSFilter, err := ptypes.MarshalAny(tlsFilter)
+		marshalledTLSFilter, err := anypb.New(tlsFilter)
 		if err != nil {
 			logger.LoggerOasparser.Fatal("Error while Marshalling the downstream TLS Context for the configuration.")
 		}
@@ -301,7 +302,7 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 		CollectorEndpointVersion: envoy_config_trace_v3.ZipkinConfig_HTTP_JSON,
 	}
 
-	typedConf, err := ptypes.MarshalAny(providerConf)
+	typedConf, err := anypb.New(providerConf)
 	if err != nil {
 		return nil, err
 	}

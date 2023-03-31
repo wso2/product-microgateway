@@ -22,9 +22,9 @@ import (
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 var (
@@ -79,7 +79,7 @@ func updateCertsForServiceMesh(organizationID string) {
 			upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACert,
 				svcdiscovery.MeshServiceKey, svcdiscovery.MeshServiceCert)
 
-			marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
+			marshalledTLSContext, err := anypb.New(upstreamTLSContext)
 			if err != nil {
 				logger.LoggerXds.Error("Internal Error while marshalling the upstream TLS Context.")
 			} else {
