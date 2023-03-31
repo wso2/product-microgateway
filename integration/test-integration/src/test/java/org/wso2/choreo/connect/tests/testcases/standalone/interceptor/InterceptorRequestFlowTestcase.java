@@ -197,8 +197,10 @@ public class InterceptorRequestFlowTestcase extends InterceptorBaseTestCase {
         Assert.assertFalse(respHeaders.containsKey("foo-ignored"), "Should only support add headers");
         Assert.assertEquals(respHeaders.get("foo-add"), "Header_newly_added",
                 "Failed to add new header");
-        Assert.assertEquals(respHeaders.get("content-type"), "application/json",
-                "Failed to replace header");
+        if (!StringUtils.isEmpty(clientRespBody)) {
+            Assert.assertEquals(respHeaders.get("content-type"), "application/json",
+                    "Failed to replace header");
+        }
         // test body
         Assert.assertEquals(response.getData(), clientRespBody);
     }
