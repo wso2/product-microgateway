@@ -101,4 +101,11 @@ const (
 	UmsdrCode = 102516
 	// UmsdrMessage upstream request reached max stream duration error message
 	UmsdrMessage = "Upstream request reached max stream duration"
+
+	// RlMessage Rate limit message
+	RlMessage = "Message throttled out"
+	// RlCode API level rate limit error code
+	RlCode = 900800
+	// RlDescription API level rate limit error message
+	RlDescription = "API/Resource limit exceeded"
 )
