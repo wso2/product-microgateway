@@ -79,6 +79,11 @@ func TestCreateRouteswithClustersGraphQLProdSand(t *testing.T) {
 	testCreateRouteWithClustersGraphQL(t, apiYamlFilePath)
 }
 
+func TestCreateRoutesWithClustersAwsLambda(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/awslambda_api.yaml"
+	testCreateRoutesWithClustersAwsLambda(t, apiYamlFilePath)
+}
+
 // commonTestForCreateRoutesWithClusters
 // withExtensions - if definition has endpoints x-wso2 extension
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string, withExtensions bool) {
@@ -416,6 +421,28 @@ func testCreateRoutesWithClustersWebsocketWithEnvProps(t *testing.T, apiYamlFile
 	assert.Equal(t, sandBoxClusterPort, uint32(443), "Sandbox cluster port mismatch")
 	assert.Equal(t, 2, len(routes), "Number of routes incorrect")
 
+}
+
+func testCreateRoutesWithClustersAwsLambda(t *testing.T, apiYamlFilePath string) {
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiYaml, err := model.NewAPIYaml(apiYamlByteArr)
+	assert.Nil(t, err, "Error occurred while processing api.yaml")
+	mgwSwagger := model.MgwSwagger{}
+
+	res1Get := model.NewOperation("Get", nil, nil)
+	res1Post := model.NewOperation("Post", nil, nil)
+
+	res := model.CreateDummyResourceForAwsLambdaTests([]*model.Operation{res1Get, res1Post}, "arn:aws:lambda:us-east-1:825678434177:function:addressCheck")
+	mgwSwagger = *model.CreateDummyMgwSwaggerForAWSLambdaTests([]*model.Resource{&res})
+
+	err = mgwSwagger.PopulateFromAPIYaml(apiYaml)
+	assert.Nil(t, err, "Error while populating api.yaml file")
+
+	routes, clusters, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+
+	assert.Equal(t, 2, len(routes), "Number of routes incorrect")
+	assert.Equal(t, 0, len(clusters), "Number of production clusters created is incorrect.")
 }
 
 func TestCreateHealthEndpoint(t *testing.T) {

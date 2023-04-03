@@ -127,6 +127,15 @@ func CreateMinimalDummyResourceForTests(path string, methods []*Operation, id st
 	}
 }
 
+// CreateDummyResourceForAwsLambdaTests create a resource object with amazon resource name(arn)
+// which could be used for unit tests.
+func CreateDummyResourceForAwsLambdaTests(methods []*Operation, amznResourceName string) Resource {
+	return Resource{
+		methods:          methods,
+		amznResourceName: amznResourceName,
+	}
+}
+
 // Custom sort implementation to sort the Resources based on the resource path
 type byPath []*Resource
 
