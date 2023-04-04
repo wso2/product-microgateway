@@ -194,6 +194,12 @@
                 <groupId>io.swagger.parser.v3</groupId>
                 <artifactId>swagger-parser</artifactId>
                 <version>${swagger.v3.parser.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.mail</groupId>
+                        <artifactId>mailapi</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.json.wso2</groupId>
@@ -233,6 +239,10 @@
                     <exclusion>
                         <groupId>log4j</groupId>
                         <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.geronimo.specs</groupId>
+                        <artifactId>geronimo-javamail_1.4_spec</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
