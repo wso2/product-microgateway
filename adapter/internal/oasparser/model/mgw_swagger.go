@@ -68,6 +68,8 @@ type MgwSwagger struct {
 	EnableBackendJWT    bool
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
+	// DeploymentType could be either "PRODUCTION" or "SANDBOX"
+	DeploymentType string
 }
 
 // EndpointCluster represent an upstream cluster
@@ -448,8 +450,10 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 	var productionUrls []Endpoint
 	var sandboxUrls []Endpoint
 
+	conf, _ := config.ReadConfigs()
+
 	if isChoreoSandbox {
-		if envProps.APIConfigs.SandboxEndpointChoreo != "" {
+		if envProps.APIConfigs.SandboxEndpointChoreo != "" && !conf.ControlPlane.DynamicEnvironments.Enabled {
 			logger.LoggerOasparser.Infof("SandboxEndpointChoreo is found in env properties for %v : %v",
 				swagger.title, swagger.version)
 			endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.SandboxEndpointChoreo)

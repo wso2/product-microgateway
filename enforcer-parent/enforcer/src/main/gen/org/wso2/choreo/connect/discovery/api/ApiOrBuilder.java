@@ -279,4 +279,16 @@ public interface ApiOrBuilder extends
    * @return The enableBackendJWT.
    */
   boolean getEnableBackendJWT();
+
+  /**
+   * <code>string deploymentType = 21;</code>
+   * @return The deploymentType.
+   */
+  java.lang.String getDeploymentType();
+  /**
+   * <code>string deploymentType = 21;</code>
+   * @return The bytes for deploymentType.
+   */
+  com.google.protobuf.ByteString
+      getDeploymentTypeBytes();
 }

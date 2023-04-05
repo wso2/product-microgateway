@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
@@ -192,7 +193,6 @@ public class JWTAuthenticator implements Authenticator {
                 if (validationInfo.isValid()) {
                     // Check if the token has access to the gateway configured environment.
                     checkTokenEnv(claims);
-
                     // Validate subscriptions
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
                     EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
@@ -238,6 +238,9 @@ public class JWTAuthenticator implements Authenticator {
                                             "User is NOT authorized to access the Resource. "
                                                     + "API Subscription validation failed.");
                                 }
+                                // Check if the token has access to the gateway configured environment.
+                                checkTokenEnvAgainstDeploymentType(apiKeyValidationInfoDTO.getType(),
+                                        requestContext.getMatchedAPI());
                             }
                         } else {
                             // In this case, the application related properties are populated so that analytics
@@ -294,6 +297,9 @@ public class JWTAuthenticator implements Authenticator {
                     if (claims.getClaim("keytype") != null) {
                         authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                     }
+                    // Check if the token has access to the gateway configured environment.
+                    checkTokenEnvAgainstDeploymentType(requestContext.getAuthenticationContext().getKeyType(),
+                            requestContext.getMatchedAPI());
                     return authenticationContext;
                 } else {
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -331,13 +337,44 @@ public class JWTAuthenticator implements Authenticator {
                     break;
                 } else {
                     // None of the elements were equal to choreoGatewayEnv
-                    log.debug("The access token does not have access to the environment {}.", choreoGatewayEnv);
+                    log.info("The access token does not have access to the environment {}.", choreoGatewayEnv);
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                             APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
                             APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
                 }
             }
         }
+    }
+
+    /**
+     * checkTokenEnvAgainstDeploymentType checks if the keyType claim is matched with the deploymentType of the
+     * requestContext's matchedAPIConfig.
+     *
+     * @param keyType    keyType resolved for the access token
+     * @param matchedAPI API config matched for the request
+     * @throws APISecurityException if the keyType is not matched with the deploymentType
+     */
+    private void checkTokenEnvAgainstDeploymentType(String keyType, APIConfig matchedAPI)
+            throws APISecurityException {
+        if (keyType == null) {
+            keyType = APIConstants.JwtTokenConstants.SANDBOX_KEY_TYPE;
+        }
+
+        if (keyType.equalsIgnoreCase(matchedAPI.getDeploymentType())) {
+            return;
+        }
+
+        if (System.getenv("DEPLOYMENT_TYPE_ENFORCED") != null
+                && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
+                && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
+            return;
+        }
+
+        log.info("The access token does not have access to the {} type API deployment",
+                matchedAPI.getDeploymentType());
+        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
     }
 
     private void updateApplicationNameForSubscriptionDisabledKM(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,

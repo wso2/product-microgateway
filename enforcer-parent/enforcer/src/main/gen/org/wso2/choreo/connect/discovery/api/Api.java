@@ -35,6 +35,7 @@ private static final long serialVersionUID = 0L;
     vhost_ = "";
     organizationId_ = "";
     apiProvider_ = "";
+    deploymentType_ = "";
   }
 
   @java.lang.Override
@@ -214,6 +215,12 @@ private static final long serialVersionUID = 0L;
           case 160: {
 
             enableBackendJWT_ = input.readBool();
+            break;
+          }
+          case 170: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            deploymentType_ = s;
             break;
           }
           default: {
@@ -933,6 +940,44 @@ private static final long serialVersionUID = 0L;
     return enableBackendJWT_;
   }
 
+  public static final int DEPLOYMENTTYPE_FIELD_NUMBER = 21;
+  private volatile java.lang.Object deploymentType_;
+  /**
+   * <code>string deploymentType = 21;</code>
+   * @return The deploymentType.
+   */
+  @java.lang.Override
+  public java.lang.String getDeploymentType() {
+    java.lang.Object ref = deploymentType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      deploymentType_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string deploymentType = 21;</code>
+   * @return The bytes for deploymentType.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDeploymentTypeBytes() {
+    java.lang.Object ref = deploymentType_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      deploymentType_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1006,6 +1051,9 @@ private static final long serialVersionUID = 0L;
     }
     if (enableBackendJWT_ != false) {
       output.writeBool(20, enableBackendJWT_);
+    }
+    if (!getDeploymentTypeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 21, deploymentType_);
     }
     unknownFields.writeTo(output);
   }
@@ -1084,6 +1132,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(20, enableBackendJWT_);
     }
+    if (!getDeploymentTypeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, deploymentType_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1148,6 +1199,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getApiProvider())) return false;
     if (getEnableBackendJWT()
         != other.getEnableBackendJWT()) return false;
+    if (!getDeploymentType()
+        .equals(other.getDeploymentType())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1213,6 +1266,8 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + ENABLEBACKENDJWT_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getEnableBackendJWT());
+    hash = (37 * hash) + DEPLOYMENTTYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getDeploymentType().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1417,6 +1472,8 @@ private static final long serialVersionUID = 0L;
 
       enableBackendJWT_ = false;
 
+      deploymentType_ = "";
+
       return this;
     }
 
@@ -1500,6 +1557,7 @@ private static final long serialVersionUID = 0L;
       result.organizationId_ = organizationId_;
       result.apiProvider_ = apiProvider_;
       result.enableBackendJWT_ = enableBackendJWT_;
+      result.deploymentType_ = deploymentType_;
       onBuilt();
       return result;
     }
@@ -1688,6 +1746,10 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getEnableBackendJWT() != false) {
         setEnableBackendJWT(other.getEnableBackendJWT());
+      }
+      if (!other.getDeploymentType().isEmpty()) {
+        deploymentType_ = other.deploymentType_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3766,6 +3828,82 @@ private static final long serialVersionUID = 0L;
     public Builder clearEnableBackendJWT() {
       
       enableBackendJWT_ = false;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object deploymentType_ = "";
+    /**
+     * <code>string deploymentType = 21;</code>
+     * @return The deploymentType.
+     */
+    public java.lang.String getDeploymentType() {
+      java.lang.Object ref = deploymentType_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        deploymentType_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string deploymentType = 21;</code>
+     * @return The bytes for deploymentType.
+     */
+    public com.google.protobuf.ByteString
+        getDeploymentTypeBytes() {
+      java.lang.Object ref = deploymentType_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        deploymentType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string deploymentType = 21;</code>
+     * @param value The deploymentType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDeploymentType(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      deploymentType_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string deploymentType = 21;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDeploymentType() {
+      
+      deploymentType_ = getDefaultInstance().getDeploymentType();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string deploymentType = 21;</code>
+     * @param value The bytes for deploymentType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDeploymentTypeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      deploymentType_ = value;
       onChanged();
       return this;
     }

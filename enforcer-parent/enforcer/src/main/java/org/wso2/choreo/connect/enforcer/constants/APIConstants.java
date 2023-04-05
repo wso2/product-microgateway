@@ -179,6 +179,8 @@ public class APIConstants {
         public static final String PARAM_VALUE_SEPARATOR = "=";
         public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
         public static final String ENV_NAME_PREFIX = "choreo:environment:";
+        public static final String PRODUCTION_KEY_TYPE = "PRODUCTION";
+        public static final String SANDBOX_KEY_TYPE = "SANDBOX";
 
     }
 

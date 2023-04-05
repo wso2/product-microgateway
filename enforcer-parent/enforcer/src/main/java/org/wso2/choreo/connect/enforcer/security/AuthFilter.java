@@ -30,7 +30,6 @@ import org.wso2.choreo.connect.enforcer.commons.model.RetryConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
@@ -149,7 +148,7 @@ public class AuthFilter implements Filter {
             AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
             requestContext.setAuthenticationContext(authenticate);
             if (authenticate.isAuthenticated()) {
-                updateClusterHeaderAndCheckEnv(requestContext, authenticate);
+                updateClusterHeaderAndCheckEnv(requestContext);
                 // set backend security
                 EndpointSecurityUtils.addEndpointSecurity(requestContext);
                 return new AuthenticationResponse(true, false,
@@ -165,45 +164,18 @@ public class AuthFilter implements Filter {
 
 
     /**
-     * Update the cluster header based on the keyType and authenticate the token against its respective endpoint
-     * environment.
+     * Update the cluster header and advanced endpoint config related headers
      * 
      * @param requestContext request Context 
-     * @param authContext authentication context
-     * @throws APISecurityException if the environment and 
+     * @throws APISecurityException if the environment and
      */
-    private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
+    private void updateClusterHeaderAndCheckEnv(RequestContext requestContext)
             throws APISecurityException {
-        String keyType = authContext.getKeyType();
-        if (StringUtils.isEmpty(authContext.getKeyType())) {
-            keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
-        }
-
-        if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) &&
-                !StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
-            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
-                    requestContext.getProdClusterHeader());
-            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
-            addRouterHttpHeaders(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
-        } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) &&
-                !StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
-            requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
-                    requestContext.getSandClusterHeader());
-            requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
-            addRouterHttpHeaders(requestContext, APIConstants.API_KEY_TYPE_SANDBOX);
-        } else {
-            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Production key offered to an API with no production endpoint");
-            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Sandbox key offered to an API with no sandbox endpoint");
-            }
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid key type.");
-        }
+        requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
+                requestContext.getProdClusterHeader());
+        requestContext.getRemoveHeaders().remove(AdapterConstants.CLUSTER_HEADER);
+        // This is for endpoint retry configs. In choreo, API can only have production endpoints.
+        addRouterHttpHeaders(requestContext, APIConstants.API_KEY_TYPE_PRODUCTION);
     }
 
     private String getAuthenticatorsChallengeString() {

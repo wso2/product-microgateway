@@ -64,6 +64,7 @@ type GatewayLabel struct {
 	Name              string `json:"name"`
 	Vhost             string `json:"vhost"`
 	DeployedTimeStamp int64  `json:"deployedTimeStamp"`
+	DeploymentType    string `json:"deploymentType"`
 }
 
 // APIConfigs represents env properties belongs to the API
