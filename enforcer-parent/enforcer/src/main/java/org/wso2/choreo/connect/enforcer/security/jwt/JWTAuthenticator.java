@@ -82,7 +82,7 @@ public class JWTAuthenticator implements Authenticator {
 
     private final String choreoGatewayEnv;
 
-    public JWTAuthenticator(ConcurrentHashMap<String, JWKSet> jwksMap) {
+    public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
         this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
@@ -90,7 +90,7 @@ public class JWTAuthenticator implements Authenticator {
         }
         this.choreoGatewayEnv = APIConstants.JwtTokenConstants.ENV_NAME_PREFIX
                 + ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
-        this.jwtValidator = new JWTValidator(jwksMap);
+        this.jwtValidator = new JWTValidator();
     }
 
     @Override

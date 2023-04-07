@@ -55,11 +55,9 @@ public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
     private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
-    private final ConcurrentHashMap<String, JWKSet> jwksMap;
+    private static final ConcurrentHashMap<String, JWKSet> jwksMap = new ConcurrentHashMap<>();
 
-    public JWTValidator(ConcurrentHashMap<String, JWKSet> jwksMap) {
-        this.jwksMap = jwksMap;
-    }
+    public JWTValidator() {}
 
 
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws EnforcerException {

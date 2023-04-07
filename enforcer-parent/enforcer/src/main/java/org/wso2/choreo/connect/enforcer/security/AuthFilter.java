@@ -98,7 +98,7 @@ public class AuthFilter implements Filter {
 
         // TODO: Set authenticators for isMutualSSLProtected, isBasicAuthProtected
         if (isOAuthProtected) {
-            Authenticator jwtAuthenticator = new JWTAuthenticator(jwksMap);
+            Authenticator jwtAuthenticator = new JWTAuthenticator();
             authenticators.add(jwtAuthenticator);
         }
 
