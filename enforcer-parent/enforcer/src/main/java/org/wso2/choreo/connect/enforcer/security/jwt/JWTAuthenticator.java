@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import io.opentelemetry.context.Scope;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -74,13 +76,13 @@ import java.util.UUID;
 public class JWTAuthenticator implements Authenticator {
 
     private static final Logger log = LogManager.getLogger(JWTAuthenticator.class);
-    private final JWTValidator jwtValidator = new JWTValidator();
+    private final JWTValidator jwtValidator;
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
 
     private final String choreoGatewayEnv;
 
-    public JWTAuthenticator() {
+    public JWTAuthenticator(ConcurrentHashMap<String, JWKSet> jwksMap) {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
         this.isGatewayTokenCacheEnabled = enforcerConfig.getCacheDto().isEnabled();
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
@@ -88,7 +90,9 @@ public class JWTAuthenticator implements Authenticator {
         }
         this.choreoGatewayEnv = APIConstants.JwtTokenConstants.ENV_NAME_PREFIX
                 + ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
+        this.jwtValidator = new JWTValidator(jwksMap);
     }
+
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         if (isJWTEnabled(requestContext)) {

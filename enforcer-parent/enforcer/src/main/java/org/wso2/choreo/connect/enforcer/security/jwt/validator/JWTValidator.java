@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Class responsible to validate jwt. This should validate the JWT signature, expiry time.
@@ -54,8 +55,10 @@ public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
     private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
+    private final ConcurrentHashMap<String, JWKSet> jwksMap;
 
-    public JWTValidator() {
+    public JWTValidator(ConcurrentHashMap<String, JWKSet> jwksMap) {
+        this.jwksMap = jwksMap;
     }
 
 
@@ -116,15 +119,22 @@ public class JWTValidator {
         try {
             String certificateAlias = tokenIssuer.getCertificateAlias();
             String keyID = signedJWT.getHeader().getKeyID();
+            String jwksUrl = tokenIssuer.getJwksConfigurationDTO().getUrl();
             if (StringUtils.isNotEmpty(keyID)) {
                 if (tokenIssuer.getJwksConfigurationDTO().isEnabled() && StringUtils
-                        .isNotEmpty(tokenIssuer.getJwksConfigurationDTO().getUrl())) {
-                    // Check JWKSet Available in Cache
+                        .isNotEmpty(jwksUrl)) {
+                    // Check JWKSet Available in Cache 
                     if (jwkSet == null) {
-                        jwkSet = retrieveJWKSet(tokenIssuer);
+                        if (jwksMap.containsKey(jwksUrl)) {
+                            jwkSet = jwksMap.get(jwksUrl);
+                        } else {
+                            jwkSet = retrieveJWKSet(tokenIssuer);
+                            jwksMap.put(jwksUrl, jwkSet);
+                        }
                     }
                     if (jwkSet.getKeyByKeyId(keyID) == null) {
                         jwkSet = retrieveJWKSet(tokenIssuer);
+                        jwksMap.put(jwksUrl, jwkSet);
                     }
                     if (jwkSet.getKeyByKeyId(keyID) instanceof RSAKey) {
                         RSAKey keyByKeyId = (RSAKey) jwkSet.getKeyByKeyId(keyID);

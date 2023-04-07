@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.security;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,6 +47,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -53,6 +55,8 @@ import java.util.Objects;
 public class AuthFilter implements Filter {
     private List<Authenticator> authenticators = new ArrayList<>();
     private static final Logger log = LogManager.getLogger(AuthFilter.class);
+
+    private static ConcurrentHashMap<String, JWKSet> jwksMap = new ConcurrentHashMap<>();
 
     @Override
     public void init(APIConfig apiConfig, Map<String, String> configProperties) {
@@ -94,7 +98,7 @@ public class AuthFilter implements Filter {
 
         // TODO: Set authenticators for isMutualSSLProtected, isBasicAuthProtected
         if (isOAuthProtected) {
-            Authenticator jwtAuthenticator = new JWTAuthenticator();
+            Authenticator jwtAuthenticator = new JWTAuthenticator(jwksMap);
             authenticators.add(jwtAuthenticator);
         }
 
