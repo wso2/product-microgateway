@@ -74,7 +74,7 @@ import java.util.UUID;
 public class JWTAuthenticator implements Authenticator {
 
     private static final Logger log = LogManager.getLogger(JWTAuthenticator.class);
-    private final JWTValidator jwtValidator;
+    private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
 
@@ -88,7 +88,6 @@ public class JWTAuthenticator implements Authenticator {
         }
         this.choreoGatewayEnv = APIConstants.JwtTokenConstants.ENV_NAME_PREFIX
                 + ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
-        this.jwtValidator = new JWTValidator();
     }
 
     @Override
