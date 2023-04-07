@@ -17,7 +17,6 @@
  */
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
-import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import io.opentelemetry.context.Scope;
@@ -67,7 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
