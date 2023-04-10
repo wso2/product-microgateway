@@ -167,14 +167,6 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 				},
 			},
 		},
-		ResponseHeadersToAdd: []*corev3.HeaderValueOption{
-			{
-				Header: &corev3.HeaderValue{
-					Key:   xRateLimitEnforcedHeader,
-					Value: xRateLimitEnforcedValue,
-				},
-			},
-		},
 	}
 	ext, err2 := anypb.New(rateLimit)
 	if err2 != nil {

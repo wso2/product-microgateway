@@ -149,9 +149,3 @@ const (
 	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
 	uaexCode                   = "UAEX"
 )
-
-// Ratelimit related constants
-const (
-	xRateLimitEnforcedHeader string = "x-ratelimit-enforced"
-	xRateLimitEnforcedValue  string = "true"
-)

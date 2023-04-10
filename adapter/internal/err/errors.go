@@ -107,5 +107,5 @@ const (
 	// RlCode API level rate limit error code
 	RlCode = 900800
 	// RlDescription API level rate limit error message
-	RlDescription = "API/Resource limit exceeded"
+	RlDescription = "Allowed request limit for the API/Resource, exceeded"
 )

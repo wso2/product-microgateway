@@ -85,8 +85,8 @@ public class ApiLevelRatelimitTestCase {
         Assert.assertEquals(responsePayloadMap.get("message"), "Message throttled out",
                 "Error message should be Message throttled out");
         Assert.assertTrue(responsePayloadMap.containsKey("description"), "Error description should be present");
-        Assert.assertEquals(responsePayloadMap.get("description"), "API/Resource limit exceeded",
-                "Error description should be API/Resource limit exceeded");
+        Assert.assertEquals(responsePayloadMap.get("description"), "Allowed request limit for the API/Resource, " +
+                        "exceeded", "Error description should be API/Resource limit exceeded");
     }
 
     @Test(description = "Test rate-limiting headers with envoy rate-limit service", dependsOnMethods =
