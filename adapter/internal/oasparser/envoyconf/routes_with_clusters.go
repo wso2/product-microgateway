@@ -226,9 +226,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				value := model.ResolveAmznResourceName(operation.GetVendorExtensions())
 
 				if (i != 0) && (amznResourceName != value) {
-					logger.LoggerOasparser.Errorf("All Arns must be the same value.")
+					logger.LoggerOasparser.Errorf("All ARNs must be the same value.")
 				} else if value == "" {
-					logger.LoggerOasparser.Errorf("Arn cannot be empty.")
+					logger.LoggerOasparser.Errorf("ARN cannot be empty.")
 				} else {
 					amznResourceName = value
 				}
@@ -237,7 +237,13 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			//TODO: interceptor ep
 			routesX, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, "", awslambdaClusterName, awslambdaClusterName, nil, nil, organizationID, false))
 			if err != nil {
-				//TODO: add errorcode
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error while creating routes for AWS Lambda API : %s version : %s. Error: %s",
+						apiTitle, apiVersion, err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 2239,
+				})
+				return nil, nil, nil, fmt.Errorf("error while creating routes for AWS Lambda API : %s version : %s. %v", apiTitle, apiVersion, err)
 			}
 
 			routes = append(routes, routesX...)
@@ -437,7 +443,7 @@ func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.
 	epCluster := &model.EndpointCluster{
 		Endpoints: []model.Endpoint{{
 			Host:    "lambda." + conf.Envoy.AwsLambda.AwsRegion + ".amazonaws.com",
-			URLType: "https",
+			URLType: httpsURLType,
 			Port:    uint32(443),
 		}},
 	}
@@ -453,7 +459,6 @@ func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.
 		},
 	}
 
-	//return processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, "")
 	return cluster, address, err
 }
 
@@ -957,7 +962,6 @@ end`
 		wellknown.HTTPExternalAuthorization: extAuthzFilter,
 		wellknown.Lua:                       luaFilter,
 		wellknown.CORS:                      corsFilter,
-		//"envoy.filters.http.aws_lambda":     awsLambdaFilter,
 	}
 
 	if endpointType == constants.AwsLambda {
@@ -972,7 +976,6 @@ end`
 
 		awsLambdaPerFilterConfig := awslambdav3.PerRouteConfig{
 			InvokeConfig: &awslambdav3.Config{
-				//Arn: "arn:aws:lambda:us-east-1:825678434177:function:addressCheck",
 				Arn:                amznResourceName,
 				PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
 				InvocationMode:     mode,
