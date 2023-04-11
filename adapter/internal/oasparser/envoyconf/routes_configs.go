@@ -90,7 +90,7 @@ func generateRouteAction(apiType string, prodRouteConfig, sandRouteConfig *model
 
 	if endpointType == constants.AwsLambda {
 		action.Route.ClusterSpecifier = &routev3.RouteAction_Cluster{
-			Cluster: "wso2_lambda_egress_gateway",
+			Cluster: awslambdaClusterName,
 		}
 
 	} else {
