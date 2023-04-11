@@ -150,7 +150,7 @@ var defaultConfig = &Config{
 			Enabled:            false,
 			AwsRegion:          "",
 			PayloadPassthrough: true,
-			InvocationMode:     "SYNCHRONOUS",
+			InvocationMode:     "synchrounus",
 		},
 		Filters: filters{
 			Compression: compression{
