@@ -252,12 +252,13 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (*notifier.DeployedAPIRevision, error) {
+func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*synchronizer.GatewayLabel) (*notifier.DeployedAPIRevision, error) {
 	var mgwSwagger mgw.MgwSwagger
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
 	var routerLabels []string // size of the routerLabels will always be 1 in choreo
 	apiYaml := apiProject.APIYaml.Data
+	conf, _ := config.ReadConfigs()
 
 	// handle panic
 	defer func() {
@@ -266,14 +267,21 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		}
 	}()
 
-	if len(environments) == 0 {
-		environments = []string{config.DefaultGatewayName}
+	// If number of environments is zero, then the API would be deployed to the default Environment under systemHost
+	if len(deployedEnvironments) == 0 {
+		deployedEnvironments = []*synchronizer.GatewayLabel{
+			{
+				Name:           config.DefaultGatewayName,
+				Vhost:          conf.Envoy.SystemHost,
+				DeploymentType: "PRODUCTION",
+			},
+		}
 	}
 
 	var apiEnvProps synchronizer.APIEnvProps
 
 	// TODO(amali) under the assumption vhost has one environment at the moment
-	if apiEnvPropsV, found := apiProject.APIEnvProps[environments[0]]; found {
+	if apiEnvPropsV, found := apiProject.APIEnvProps[deployedEnvironments[0].Name]; found {
 		apiEnvProps = apiEnvPropsV
 	}
 
@@ -309,7 +317,6 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
 
-	conf, _ := config.ReadConfigs()
 	if vHost == conf.Adapter.SandboxVhost {
 		// Set the Choreo sandbox endpoint as the main endpoint
 		mgwSwagger.SetEnvLabelProperties(apiEnvProps, true)
@@ -326,6 +333,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 	mgwSwagger.SetVersion(apiYaml.Version)
 	mgwSwagger.OrganizationID = apiProject.OrganizationID
 	mgwSwagger.VHost = vHost
+	// Number of environments will always be 1 in Choreo
+	mgwSwagger.DeploymentType = deployedEnvironments[0].DeploymentType
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
@@ -383,6 +392,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		orgIDAPIMgwSwaggerMap[organizationID] = mgwSwaggerMap
 	}
 
+	environments := []string{deployedEnvironments[0].Name}
 	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
 	// TODO: commented the following line as the implementation is not supported yet.
 	//routerLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
@@ -492,22 +502,6 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		startConsulServiceDiscovery(organizationID) //consul service discovery starting point
 	}
 	return deployedRevision, nil
-}
-
-// GetAllEnvironments returns all the environments merging new environments with already deployed environments
-// of the given vhost of the API
-func GetAllEnvironments(apiUUID, vhost string, newEnvironments []string) []string {
-	// allEnvironments represent all the environments the API should be deployed
-	allEnvironments := newEnvironments
-	if existingEnvs, exists := apiUUIDToGatewayToVhosts[apiUUID]; exists {
-		for env, vh := range existingEnvs {
-			// update allEnvironments with already existing environments
-			if vh == vhost && !arrayContains(allEnvironments, env) {
-				allEnvironments = append(allEnvironments, env)
-			}
-		}
-	}
-	return allEnvironments
 }
 
 // GetVhostOfAPI returns the vhost of API deployed in the given gateway environment

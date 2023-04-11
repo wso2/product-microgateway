@@ -34,6 +34,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -93,9 +94,10 @@ func PushAPIProjects(payload []byte, environments []string) error {
 			return err
 		}
 
-		vhostToEnvsMap := make(map[string][]string)
-		for _, environment := range deployment.Environments {
-			vhostToEnvsMap[environment.Vhost] = append(vhostToEnvsMap[environment.Vhost], environment.Name)
+		vhostToEnvsMap := make(map[string][]*synchronizer.GatewayLabel)
+		for index := range deployment.Environments {
+			env := deployment.Environments[index]
+			vhostToEnvsMap[env.Vhost] = append(vhostToEnvsMap[env.Vhost], &env)
 		}
 
 		logger.LoggerSync.Infof("Start deploying api from file (API_ID:REVISION_ID).zip : %v", file.Name)

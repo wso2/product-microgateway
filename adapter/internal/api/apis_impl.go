@@ -210,10 +210,13 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 			return errors.New(mgw.AlreadyExists)
 		}
 	}
-	vhostToEnvsMap := make(map[string][]string)
+	vhostToEnvsMap := make(map[string][]*synchronizer.GatewayLabel)
 	for _, environment := range apiProject.Deployments {
 		vhostToEnvsMap[environment.DeploymentVhost] =
-			append(vhostToEnvsMap[environment.DeploymentVhost], environment.DeploymentEnvironment)
+			append(vhostToEnvsMap[environment.DeploymentVhost], &synchronizer.GatewayLabel{
+				Name:  environment.DeploymentEnvironment,
+				Vhost: environment.DeploymentVhost,
+			})
 	}
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
@@ -230,7 +233,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 // and updates the xds servers based upon the content.
 func ApplyAPIProjectFromAPIM(
 	payload []byte,
-	vhostToEnvsMap map[string][]string,
+	vhostToEnvsMap map[string][]*synchronizer.GatewayLabel,
 	apiEnvs map[string]map[string]synchronizer.APIEnvProps,
 ) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
@@ -259,19 +262,25 @@ func ApplyAPIProjectFromAPIM(
 	conf, _ := config.ReadConfigs()
 	currentEnv := conf.ControlPlane.EnvironmentLabels[0] // assumption - adapter has only one environment
 
-	if apiEnvs[apiProject.APIYaml.Data.ID][currentEnv].APIConfigs.SandboxEndpointChoreo != "" {
-		vhostToEnvsMap[conf.Adapter.SandboxVhost] = []string{currentEnv}
+	if apiEnvs[apiProject.APIYaml.Data.ID][currentEnv].APIConfigs.SandboxEndpointChoreo != "" &&
+		!conf.ControlPlane.DynamicEnvironments.Enabled {
+		vhostToEnvsMap[conf.Adapter.SandboxVhost] = []*synchronizer.GatewayLabel{
+			{
+				Name:           currentEnv,
+				Vhost:          conf.Adapter.SandboxVhost,
+				DeploymentType: "SANDBOX",
+			},
+		}
 	}
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
 
 		// allEnvironments represent all the environments the API should be deployed
-		allEnvironments := xds.GetAllEnvironments(apiYaml.ID, vhost, environments)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
-			allEnvironments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
+			environments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		// first update the API for vhost
-		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, allEnvironments)
+		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, environments)
 		if err != nil {
 			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}

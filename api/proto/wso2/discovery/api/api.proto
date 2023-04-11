@@ -52,4 +52,5 @@ message Api {
 	string organizationId = 18;
 	string apiProvider = 19;
 	bool enableBackendJWT = 20;
+	string deploymentType = 21;
 }

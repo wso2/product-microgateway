@@ -36,19 +36,9 @@ public class EndpointSecurityUtils {
      */
     public static void addEndpointSecurity(RequestContext requestContext) {
         SecurityInfo securityInfo = null;
-        String keyType = "";
-        if (requestContext.getAuthenticationContext() != null) {
-            keyType = requestContext.getAuthenticationContext().getKeyType();
-        }
-        if (requestContext.getMatchedAPI().getEndpointSecurity() != null) {
-            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType)) {
-                securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
-                        getProductionSecurityInfo();
-            } else {
-                securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
-                        getSandBoxSecurityInfo();
-            }
-        }
+        // Endpoint can only have production endpoints.
+        securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
+                getProductionSecurityInfo();
         if (securityInfo != null && securityInfo.isEnabled() &&
                 APIConstants.AUTHORIZATION_HEADER_BASIC.
                         equalsIgnoreCase(securityInfo.getSecurityType())) {

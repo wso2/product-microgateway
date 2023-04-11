@@ -161,17 +161,7 @@ public class AnalyticsFilter {
     }
 
     private String resolveEndpoint(RequestContext requestContext) {
-        AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        // KeyType could be sandbox only if the keytype is set fetched from the Eventhub
-        if (authContext != null && authContext.getKeyType() != null
-                && authContext.getKeyType().equals(APIConstants.API_KEY_TYPE_SANDBOX)) {
-            // keyType is sandbox but the sandbox endpoints are null this will result in authentication failure.
-            // Hence null scenario is impossible to occur.
-            return requestContext.getMatchedAPI().getEndpoints().containsKey(APIConstants.API_KEY_TYPE_SANDBOX) ?
-                    requestContext.getMatchedAPI().getEndpoints().get(APIConstants.API_KEY_TYPE_SANDBOX)
-                            .getUrls().get(0) : "";
-        }
-        // This does not cause problems at the moment Since the current microgateway supports only one URL
+        // RESTAPI can only have production endpoints
         return requestContext.getMatchedAPI().getEndpoints().get(APIConstants.API_KEY_TYPE_PRODUCTION)
                 .getUrls().get(0);
     }

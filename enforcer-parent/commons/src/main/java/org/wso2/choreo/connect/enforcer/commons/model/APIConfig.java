@@ -17,6 +17,8 @@
  */
 package org.wso2.choreo.connect.enforcer.commons.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +46,7 @@ public class APIConfig {
     private String tier;
     private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
+    private String deploymentType;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -202,6 +205,10 @@ public class APIConfig {
         return enableBackendJWT;
     }
 
+    public String getDeploymentType() {
+        return deploymentType;
+    }
+
     /**
      * Implements builder pattern to build an API Config object.
      */
@@ -224,6 +231,7 @@ public class APIConfig {
         private boolean disableSecurity = false;
         private String apiProvider;
         private List<ResourceConfig> resources = new ArrayList<>();
+        private String deploymentType = "PRODUCTION";
 
         private boolean enableBackendJWT;
 
@@ -316,6 +324,13 @@ public class APIConfig {
             return this;
         }
 
+        public Builder deploymentType(String deploymentType) {
+            if (!StringUtils.isEmpty(deploymentType)) {
+                this.deploymentType = deploymentType;
+            }
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -336,7 +351,7 @@ public class APIConfig {
             apiConfig.securitySchemeDefinitions = this.securitySchemeDefinitions;
             apiConfig.apiProvider = this.apiProvider;
             apiConfig.enableBackendJWT = this.enableBackendJWT;
-
+            apiConfig.deploymentType = this.deploymentType;
             return apiConfig;
         }
     }

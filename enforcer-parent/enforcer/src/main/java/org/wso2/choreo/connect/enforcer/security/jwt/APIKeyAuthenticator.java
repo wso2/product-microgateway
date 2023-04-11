@@ -232,7 +232,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                 }
-                log.debug("Analytics data processing for API Key (jiti) {} was successful", tokenIdentifier);
+                log.debug("Analytics data processing for API Key (jti) {} was successful", tokenIdentifier);
                 return authenticationContext;
 
             }

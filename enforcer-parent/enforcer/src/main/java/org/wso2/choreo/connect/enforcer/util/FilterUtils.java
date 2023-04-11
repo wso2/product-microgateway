@@ -193,11 +193,8 @@ public class FilterUtils {
         authContext.setAuthenticated(true);
         authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
         authContext.setApiKey(clientIP);
-        if (!StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-        } else {
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
-        }
+        authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+
         // Setting end user as anonymous
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
         // TODO: (VirajSalaka) clientIP for applicationUUID?
