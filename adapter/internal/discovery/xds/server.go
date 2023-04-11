@@ -271,7 +271,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	if len(deployedEnvironments) == 0 {
 		deployedEnvironments = []*synchronizer.GatewayLabel{
 			{
-				Name:           "Default",
+				Name:           config.DefaultGatewayName,
 				Vhost:          conf.Envoy.SystemHost,
 				DeploymentType: "PRODUCTION",
 			},

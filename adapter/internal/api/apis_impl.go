@@ -263,7 +263,7 @@ func ApplyAPIProjectFromAPIM(
 	currentEnv := conf.ControlPlane.EnvironmentLabels[0] // assumption - adapter has only one environment
 
 	if apiEnvs[apiProject.APIYaml.Data.ID][currentEnv].APIConfigs.SandboxEndpointChoreo != "" &&
-		conf.ControlPlane.DynamicEnvironments.Enabled {
+		!conf.ControlPlane.DynamicEnvironments.Enabled {
 		vhostToEnvsMap[conf.Adapter.SandboxVhost] = []*synchronizer.GatewayLabel{
 			{
 				Name:           currentEnv,
