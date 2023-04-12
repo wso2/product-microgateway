@@ -121,7 +121,8 @@ public class JWTValidator {
             if (StringUtils.isNotEmpty(keyID)) {
                 if (tokenIssuer.getJwksConfigurationDTO().isEnabled() && StringUtils
                         .isNotEmpty(jwksUrl)) {
-                    // Check JWKSet Available in Cache 
+                    // Check JWKSet Available in Cache
+                    // jwkSet is maintained to reduce the performance impact of using a concurrent hashmap
                     if (jwkSet == null) {
                         if (jwksMap.containsKey(jwksUrl)) {
                             jwkSet = jwksMap.get(jwksUrl);
