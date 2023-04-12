@@ -18,6 +18,8 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.ratelimit;
 
+import com.google.gson.Gson;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -72,6 +74,19 @@ public class ApiLevelRatelimitTestCase {
         Assert.assertTrue(isThrottled, "API level rate-limit testcase failed.");
         Assert.assertFalse(response.getHeaders().containsKey("x-envoy-ratelimited"),
                 "x-envoy-ratelimited header should not be present in the response.");
+        Assert.assertEquals(response.getResponseCode(), 429,
+                "Status code should be 429 when the request is throttled.");
+        Assert.assertNotNull(response.getData(), "response should not be null");
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responsePayloadMap = objectMapper.readValue(response.getData(), Map.class);
+        Assert.assertTrue(responsePayloadMap.containsKey("code"), "Error code should be present");
+        Assert.assertEquals(responsePayloadMap.get("code"), "900800", "Error code should be 900800");
+        Assert.assertTrue(responsePayloadMap.containsKey("message"), "Error message should be present");
+        Assert.assertEquals(responsePayloadMap.get("message"), "Message throttled out",
+                "Error message should be Message throttled out");
+        Assert.assertTrue(responsePayloadMap.containsKey("description"), "Error description should be present");
+        Assert.assertEquals(responsePayloadMap.get("description"), "Allowed request limit for the API/Resource, " +
+                        "exceeded", "Error description should be API/Resource limit exceeded");
     }
 
     @Test(description = "Test rate-limiting headers with envoy rate-limit service", dependsOnMethods =

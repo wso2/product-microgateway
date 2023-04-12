@@ -46,6 +46,7 @@ func getErrorResponseMappers() []*hcmv3.ResponseMapper {
 		genErrorResponseMapper(500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
 		genErrorResponseMapper(500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
 		genErrorResponseMapper(500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
+		genErrorResponseMapper(429, err.RlCode, err.RlMessage, err.RlDescription, "RL"),
 		genExtAuthResponseMapper(genExtAuthFilters(), uint32(500), int32(err.UaexCode), err.UaexMessage, err.UaexDecription),
 	}
 }
