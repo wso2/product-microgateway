@@ -80,8 +80,10 @@ sandboxVhost = "sandbox.host"
   clusterTimeoutInSeconds = 20
   # The timeout for response coming from enforcer to route per API request
   enforcerResponseTimeoutInSeconds = 20
-  # System hostname for system API resources (eg: /testkey and /health)
+  # System hostname for system API resources (eg: /ready and /health)
   systemHost = "localhost"
+  # Hostname for API Resources exposed within the cluster (eg: /.wellknown/jwks and /testkey)
+  internalServiceHost = "localhost"
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]

@@ -72,7 +72,8 @@ var defaultConfig = &Config{
 			KeyPath:  "/home/wso2/security/keystore/mg.key",
 			CertPath: "/home/wso2/security/keystore/mg.pem",
 		},
-		SystemHost: "localhost",
+		SystemHost:          "localhost",
+		InternalServiceHost: "",
 		Cors: globalCors{
 			Enabled:      true,
 			AllowOrigins: []string{"*"},
