@@ -25,7 +25,11 @@ type pkg struct {
 type accessLog struct {
 	Enable  bool
 	LogFile string
-	Format  string
+	// ReservedLogFormat is reserved for Choreo Gateway Access Logs Observability feature. Changes to this may
+	// break the functionality in the observability feature.
+	ReservedLogFormat string
+	// SecondaryLogFormat can be used by dev to log properties for debug purposes
+	SecondaryLogFormat string
 }
 
 // LogConfig represents the configurations related to adapter logs and envoy access logs.
@@ -53,9 +57,13 @@ func getDefaultLogConfig() *LogConfig {
 		AccessLogs: &accessLog{
 			Enable:  false,
 			LogFile: "/dev/stdout",
-			Format: "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%' %RESPONSE_CODE% " +
-				"%RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%" +
-				"'%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n",
+			ReservedLogFormat: "[%START_TIME%]' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
+				"'%REQ(:AUTHORITY)%' '%REQ(:METHOD)%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%' " +
+				"'%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' " +
+				"'%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' " +
+				"'%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%' '%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%' '%REQUEST_DURATION%' " +
+				"'%RESPONSE_DURATION%' '",
+			SecondaryLogFormat: "",
 		},
 	}
 	adapterLogConfig.Rotation.MaxSize = 10

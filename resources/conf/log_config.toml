@@ -26,5 +26,7 @@ logLevel = "INFO"
 
 [accessLogs]
 enable = false
-logfile = "/tmp/envoy.access.log" # This file will be created inside router container.
-format = "[%START_TIME%]' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' '%REQ(:AUTHORITY)%' '%REQ(:METHOD)%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%' '%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' '%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%' '%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%' '%REQUEST_DURATION%' '%RESPONSE_DURATION%\n"
+logfile = "/dev/stdout" # This file will be created inside router container.
+# Log format that is append after "reservedLogFormat". This can be used by dev for debug purpose.
+# For example: secondaryLogFormat = "'%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%'"
+secondaryLogFormat = ""
