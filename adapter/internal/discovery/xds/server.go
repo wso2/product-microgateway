@@ -816,15 +816,18 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 	systemHost := conf.Envoy.SystemHost
-
+	internalServiceHost := conf.Envoy.InternalServiceHost
+	if internalServiceHost == "" {
+		internalServiceHost = systemHost
+	}
 	// Add testkey and JWKS endpoints
 	if conf.Enforcer.JwtIssuer.Enabled {
 		routeToken := envoyconf.CreateTokenRoute()
-		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
+		vhostToRouteArrayMap[internalServiceHost] = append(vhostToRouteArrayMap[internalServiceHost], routeToken)
 	}
 	if conf.Enforcer.JwtGenerator.Enabled {
 		routeJwks := envoyconf.CreateJwksEndpoint()
-		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeJwks)
+		vhostToRouteArrayMap[internalServiceHost] = append(vhostToRouteArrayMap[internalServiceHost], routeJwks)
 	}
 
 	// Add health endpoint

@@ -111,6 +111,7 @@ type envoy struct {
 	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
 	KeyStore                         keystore
 	SystemHost                       string `default:"localhost"`
+	InternalServiceHost              string
 	Cors                             globalCors
 	Upstream                         envoyUpstream
 	Connection                       connection
