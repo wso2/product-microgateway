@@ -90,6 +90,7 @@ public class JWTAuthenticator implements Authenticator {
         this.choreoGatewayEnv = APIConstants.JwtTokenConstants.ENV_NAME_PREFIX
                 + ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
     }
+
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         if (isJWTEnabled(requestContext)) {
