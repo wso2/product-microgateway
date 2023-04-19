@@ -18,6 +18,8 @@
 package envoyconf
 
 import (
+	"strings"
+
 	config_access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	file_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
@@ -46,7 +48,8 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 			Format: &corev3.SubstitutionFormatString_TextFormatSource{
 				TextFormatSource: &corev3.DataSource{
 					Specifier: &corev3.DataSource_InlineString{
-						InlineString: logConf.AccessLogs.Format,
+						InlineString: logConf.AccessLogs.ReservedLogFormat +
+							strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n",
 					},
 				},
 			},

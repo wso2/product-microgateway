@@ -180,7 +180,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         addMetadata(structBuilder, key, value));
             }
             addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
-                    responseObject.getRequestPath().split("\\?")[0]);
+                    responseObject.getRequestPath());
+            addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_HOST_DATA_NAME,
+                    request.getAttributes().getRequest().getHttp().getHost());
 
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
