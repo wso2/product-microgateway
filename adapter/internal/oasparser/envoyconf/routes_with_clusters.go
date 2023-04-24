@@ -226,15 +226,15 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				value := model.ResolveAmznResourceName(operation.GetVendorExtensions())
 
 				if (i != 0) && (amznResourceName != value) {
-					logger.LoggerOasparser.Errorf("All ARNs must be the same value.")
+					logger.LoggerOasparser.Errorf("ARNs in all the operations of the same resource path should have the same value")
 				} else if value == "" {
-					logger.LoggerOasparser.Errorf("ARN cannot be empty.")
+					logger.LoggerOasparser.Errorf("ARN cannot be empty")
 				} else {
 					amznResourceName = value
 				}
 				resource.SetAmznResourceName(amznResourceName)
 			}
-			//TODO: interceptor ep
+
 			routesX, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, "", awslambdaClusterName, awslambdaClusterName, nil, nil, organizationID, false))
 			if err != nil {
 				logger.LoggerXds.ErrorC(logging.ErrorDetails{
