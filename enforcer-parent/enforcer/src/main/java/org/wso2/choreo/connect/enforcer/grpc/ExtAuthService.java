@@ -169,12 +169,13 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
+                            if (("wso2_lambda_egress_gateway".equals(value)) && "x-wso2-cluster-header".equals(key)) {
+                                return;
+                            }
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();
-                            if (!(headerValueOption.getHeader().getValue().equals("wso2_lambda_egress_gateway"))) {
                                 okResponseBuilder.addHeaders(headerValueOption);
-                            }
                 }
                 );
             }
