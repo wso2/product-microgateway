@@ -70,6 +70,7 @@ type MgwSwagger struct {
 	APIProvider string
 	// DeploymentType could be either "PRODUCTION" or "SANDBOX"
 	DeploymentType string
+	EnvironmentID  string
 }
 
 // EndpointCluster represent an upstream cluster

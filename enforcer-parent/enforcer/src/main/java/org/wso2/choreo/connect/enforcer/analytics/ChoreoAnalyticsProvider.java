@@ -114,6 +114,7 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));
         api.setOrganizationId(getValueAsString(fieldsMap, MetadataConstants.API_ORGANIZATION_ID));
         api.setApiContext(getValueAsString(fieldsMap, MetadataConstants.API_CONTEXT_KEY));
+        api.setEnvironmentId(getValueAsString(fieldsMap, MetadataConstants.API_ENVIRONMENT_ID));
 
         return api;
     }

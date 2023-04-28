@@ -63,6 +63,7 @@ type APIDeployment struct {
 type GatewayLabel struct {
 	Name              string `json:"name"`
 	Vhost             string `json:"vhost"`
+	ID                string `json:"id"`
 	DeployedTimeStamp int64  `json:"deployedTimeStamp"`
 	DeploymentType    string `json:"deploymentType"`
 }

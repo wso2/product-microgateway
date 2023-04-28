@@ -123,6 +123,8 @@ public class AnalyticsFilter {
                     requestContext.getMatchedAPI().getBasePath());
             requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
                     tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
+            requestContext.addMetadataToMap(MetadataConstants.API_ENVIRONMENT_ID,
+                    requestContext.getMatchedAPI().getEnvironmentId());
 
             // Default Value would be PRODUCTION
             requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,

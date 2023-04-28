@@ -583,7 +583,7 @@
         <andes.client.version>3.3.12</andes.client.version>
         <azure.messaging.eventhubs.version>5.6.0</azure.messaging.eventhubs.version>
         <woodstox-core.version>6.4.0</woodstox-core.version>
-        <carbon.apimgt.version>9.0.369.6</carbon.apimgt.version>
+        <carbon.apimgt.version>9.0.369.7</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.12.0</commons.version>
         <commons.io.version>2.7</commons.io.version>
@@ -626,7 +626,7 @@
         <apictl.version>4.0.0</apictl.version>
         <apim.version>4.0.0</apim.version>
         <grpc.healthProbe.version>0.4.17</grpc.healthProbe.version>
-        <analytics.publisher.client.version>1.2.2</analytics.publisher.client.version>
+        <analytics.publisher.client.version>1.2.4</analytics.publisher.client.version>
         <awaitility.version>4.2.0</awaitility.version>
         <apache.httpcomponents.version>4.5.14</apache.httpcomponents.version>
         <jackson.databind.version>2.14.1</jackson.databind.version>
