@@ -48,6 +48,8 @@ public class APIConfig {
     private List<ResourceConfig> resources = new ArrayList<>();
     private String deploymentType;
 
+    private String environmentId;
+
     /**
      * getApiType returns the API type. This could be one of the following.
      * HTTP, WS, WEBHOOK
@@ -124,6 +126,10 @@ public class APIConfig {
      */
     public String getVhost() {
         return vhost;
+    }
+
+    public String getEnvironmentId() {
+        return environmentId;
     }
 
     /**
@@ -233,6 +239,8 @@ public class APIConfig {
         private List<ResourceConfig> resources = new ArrayList<>();
         private String deploymentType = "PRODUCTION";
 
+        private String environmentId;
+
         private boolean enableBackendJWT;
 
         public Builder(String name) {
@@ -331,6 +339,13 @@ public class APIConfig {
             return this;
         }
 
+        public Builder environmentId(String environmentId) {
+            if (!StringUtils.isEmpty(environmentId)) {
+                this.environmentId = environmentId;
+            }
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -352,6 +367,7 @@ public class APIConfig {
             apiConfig.apiProvider = this.apiProvider;
             apiConfig.enableBackendJWT = this.enableBackendJWT;
             apiConfig.deploymentType = this.deploymentType;
+            apiConfig.environmentId = this.environmentId;
             return apiConfig;
         }
     }

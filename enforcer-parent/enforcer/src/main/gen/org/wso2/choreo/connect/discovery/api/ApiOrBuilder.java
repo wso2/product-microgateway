@@ -291,4 +291,16 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getDeploymentTypeBytes();
+
+  /**
+   * <code>string environmentId = 22;</code>
+   * @return The environmentId.
+   */
+  java.lang.String getEnvironmentId();
+  /**
+   * <code>string environmentId = 22;</code>
+   * @return The bytes for environmentId.
+   */
+  com.google.protobuf.ByteString
+      getEnvironmentIdBytes();
 }

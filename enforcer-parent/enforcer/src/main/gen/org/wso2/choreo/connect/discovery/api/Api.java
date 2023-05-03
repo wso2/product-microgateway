@@ -36,6 +36,7 @@ private static final long serialVersionUID = 0L;
     organizationId_ = "";
     apiProvider_ = "";
     deploymentType_ = "";
+    environmentId_ = "";
   }
 
   @java.lang.Override
@@ -221,6 +222,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             deploymentType_ = s;
+            break;
+          }
+          case 178: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            environmentId_ = s;
             break;
           }
           default: {
@@ -978,6 +985,44 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int ENVIRONMENTID_FIELD_NUMBER = 22;
+  private volatile java.lang.Object environmentId_;
+  /**
+   * <code>string environmentId = 22;</code>
+   * @return The environmentId.
+   */
+  @java.lang.Override
+  public java.lang.String getEnvironmentId() {
+    java.lang.Object ref = environmentId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      environmentId_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string environmentId = 22;</code>
+   * @return The bytes for environmentId.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getEnvironmentIdBytes() {
+    java.lang.Object ref = environmentId_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      environmentId_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1054,6 +1099,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getDeploymentTypeBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 21, deploymentType_);
+    }
+    if (!getEnvironmentIdBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 22, environmentId_);
     }
     unknownFields.writeTo(output);
   }
@@ -1135,6 +1183,9 @@ private static final long serialVersionUID = 0L;
     if (!getDeploymentTypeBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, deploymentType_);
     }
+    if (!getEnvironmentIdBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, environmentId_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1201,6 +1252,8 @@ private static final long serialVersionUID = 0L;
         != other.getEnableBackendJWT()) return false;
     if (!getDeploymentType()
         .equals(other.getDeploymentType())) return false;
+    if (!getEnvironmentId()
+        .equals(other.getEnvironmentId())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1268,6 +1321,8 @@ private static final long serialVersionUID = 0L;
         getEnableBackendJWT());
     hash = (37 * hash) + DEPLOYMENTTYPE_FIELD_NUMBER;
     hash = (53 * hash) + getDeploymentType().hashCode();
+    hash = (37 * hash) + ENVIRONMENTID_FIELD_NUMBER;
+    hash = (53 * hash) + getEnvironmentId().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1474,6 +1529,8 @@ private static final long serialVersionUID = 0L;
 
       deploymentType_ = "";
 
+      environmentId_ = "";
+
       return this;
     }
 
@@ -1558,6 +1615,7 @@ private static final long serialVersionUID = 0L;
       result.apiProvider_ = apiProvider_;
       result.enableBackendJWT_ = enableBackendJWT_;
       result.deploymentType_ = deploymentType_;
+      result.environmentId_ = environmentId_;
       onBuilt();
       return result;
     }
@@ -1749,6 +1807,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getDeploymentType().isEmpty()) {
         deploymentType_ = other.deploymentType_;
+        onChanged();
+      }
+      if (!other.getEnvironmentId().isEmpty()) {
+        environmentId_ = other.environmentId_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -3904,6 +3966,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       deploymentType_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object environmentId_ = "";
+    /**
+     * <code>string environmentId = 22;</code>
+     * @return The environmentId.
+     */
+    public java.lang.String getEnvironmentId() {
+      java.lang.Object ref = environmentId_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentId_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string environmentId = 22;</code>
+     * @return The bytes for environmentId.
+     */
+    public com.google.protobuf.ByteString
+        getEnvironmentIdBytes() {
+      java.lang.Object ref = environmentId_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string environmentId = 22;</code>
+     * @param value The environmentId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEnvironmentId(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      environmentId_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string environmentId = 22;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEnvironmentId() {
+      
+      environmentId_ = getDefaultInstance().getEnvironmentId();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string environmentId = 22;</code>
+     * @param value The bytes for environmentId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEnvironmentIdBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      environmentId_ = value;
       onChanged();
       return this;
     }

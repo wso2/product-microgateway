@@ -34,6 +34,7 @@ public class MetadataConstants {
     public static final String API_TYPE_KEY = WSO2_METADATA_PREFIX + "api-type";
     public static final String API_CREATOR_TENANT_DOMAIN_KEY = WSO2_METADATA_PREFIX + "api-creator-tenant-domain";
     public static final String API_ORGANIZATION_ID = WSO2_METADATA_PREFIX + "api-organization-id";
+    public static final String API_ENVIRONMENT_ID = WSO2_METADATA_PREFIX + "api-environment-id";
 
     public static final String APP_ID_KEY = WSO2_METADATA_PREFIX + "application-id";
     public static final String APP_UUID_KEY = WSO2_METADATA_PREFIX + "application-uuid";
