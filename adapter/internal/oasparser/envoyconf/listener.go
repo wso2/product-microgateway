@@ -218,6 +218,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			}
 		}
 
+		tlsFilter.CommonTlsContext.AlpnProtocols = []string{"h2", "http/1.1"}
 		marshalledTLSFilter, err := anypb.New(tlsFilter)
 		if err != nil {
 			logger.LoggerOasparser.Fatal("Error while Marshalling the downstream TLS Context for the configuration.")
