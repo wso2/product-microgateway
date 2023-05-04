@@ -471,8 +471,9 @@ type controlPlane struct {
 }
 
 type dynamicEnvironments struct {
-	Enabled     bool
-	DataPlaneID string
+	Enabled                  bool
+	DataPlaneID              string
+	GatewayAccessibilityType string
 }
 
 type requestWorkerPool struct {

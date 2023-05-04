@@ -42,7 +42,7 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 			continue
 		}
 
-		go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs, nil)
+		go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs, nil, nil)
 
 		// TODO: (VirajSalaka) temporarily removed.
 		// for _, env := range configuredEnvs {

@@ -27,6 +27,8 @@ const (
 	commonOrganizationIDValue string = "ALL"
 	// DataPlaneId query parameter key.
 	dataPlaneID string = "dataPlaneId"
+	// gatewayAccessibilityType query parameter key
+	gatewayAccessibilityType string = "gatewayAccessibilityType"
 )
 
 // PopulateQueryParamForOrganizationID add the query parameter "organizationId" with the value of "ALL"
@@ -42,12 +44,14 @@ func PopulateQueryParamForOrganizationID(queryParamMap map[string]string) map[st
 	return queryParamMap
 }
 
-// PopulateQueryParamForDataPlaneID add the query parameter "dataPlaneId" with the corresponding value in the config
-func PopulateQueryParamForDataPlaneID(queryParamMap map[string]string) map[string]string {
+// PopulateQueryParamForDataPlane add the query parameters "dataPlaneId" and "gatewayAccessibilityType"
+// with the corresponding values provided in the config
+func PopulateQueryParamForDataPlane(queryParamMap map[string]string) map[string]string {
 	if queryParamMap == nil {
 		queryParamMap = make(map[string]string)
 	}
 	conf, _ := config.ReadConfigs()
 	queryParamMap[dataPlaneID] = conf.ControlPlane.DynamicEnvironments.DataPlaneID
+	queryParamMap[gatewayAccessibilityType] = conf.ControlPlane.DynamicEnvironments.GatewayAccessibilityType
 	return queryParamMap
 }

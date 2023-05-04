@@ -307,8 +307,9 @@ var defaultConfig = &Config{
 		Password:             "$env{cp_admin_pwd}",
 		EnvironmentLabels:    []string{"Default"},
 		DynamicEnvironments: dynamicEnvironments{
-			Enabled:     false,
-			DataPlaneID: "$env{data_plane_id}",
+			Enabled:                  false,
+			DataPlaneID:              "$env{data_plane_id}",
+			GatewayAccessibilityType: DefaultGatewayAccessibilityType,
 		},
 		RetryInterval:       5,
 		SkipSSLVerification: false,

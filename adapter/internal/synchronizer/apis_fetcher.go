@@ -162,7 +162,8 @@ func MergeDeployedRevisionList(deployedRevisionList []*notifier.DeployedAPIRevis
 // given API ID and a list of environments that API has been deployed to.
 // updatedAPIID is the corresponding ID of the API in the form of an UUID
 // updatedEnvs contains the list of environments the API deployed to.
-func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToDpMap map[string]string) {
+func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToDpMap map[string]string,
+	envToGwAccessibilityTypeMap map[string]string) {
 	// Read configurations and derive the eventHub details
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
@@ -177,7 +178,12 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 	// whose data plane ID matches with the data Plane ID defined in the gateway configs
 	if conf.ControlPlane.DynamicEnvironments.Enabled {
 		for gwEnv, dpID := range envToDpMap {
-			if strings.EqualFold(conf.ControlPlane.DynamicEnvironments.DataPlaneID, dpID) {
+			// following if condition checks whether the environment corresponds to the configured data-plane and
+			// gateway accessibility type (internal or external).
+			// it assumes that the envToDpMap and envToGwAccessibilityTypeMap are identical in gateway environments.
+			if strings.EqualFold(conf.ControlPlane.DynamicEnvironments.DataPlaneID, dpID) &&
+				strings.EqualFold(conf.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
+					envToGwAccessibilityTypeMap[gwEnv]) {
 				finalEnvs = append(finalEnvs, gwEnv)
 			}
 		}

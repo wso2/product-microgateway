@@ -462,10 +462,11 @@ enabled = true
   # Send revision update success message
   sendRevisionUpdate = false
   # Configs related to the dynamic environment support
-  # When enabled, CC will decide which apis to be deployed using the dataPlaneID
+  # When enabled, CC will decide which apis to be deployed using the combination of dataPlaneID and gatewayAccessibilityType
   [controlPlane.dynamicEnvironments]
     enabled = false
     dataPlaneID = "$env{data_plane_id}"
+    gatewayAccessibilityType = "$env{gateway_accessibility_type}"
   # Message broker connection URL of the control plane
   [controlPlane.brokerConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
