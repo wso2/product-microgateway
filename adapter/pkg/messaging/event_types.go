@@ -108,7 +108,7 @@ type APIEvent struct {
 	UUID                             string            `json:"uuid"`
 	GatewayLabels                    []string          `json:"gatewayLabels"`
 	EnvToDataPlaneIDMap              map[string]string `json:"envToDataPlaneIdMap"`
-	EnvToGatewayAccessibilityTypeMap map[string]string `json:"envToGatewayAccessibilityTypeMap"`
+	EnvToGatewayAccessibilityTypeMap map[string]string `json:"gatewayAccessibilityMap"`
 	APIVersion                       string            `json:"apiVersion"`
 	APIContext                       string            `json:"apiContext"`
 	APIName                          string            `json:"apiName"`
