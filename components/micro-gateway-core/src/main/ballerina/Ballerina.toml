@@ -24,7 +24,7 @@ target = "java8"
     path = "../../../target/lib/dependencies/nimbus-jose-jwt-8.8.jar"
 
     [[platform.libraries]]
-    path = "../../../target/lib/dependencies/json-smart-2.3.jar"
+    path = "../../../target/lib/dependencies/json-smart-2.4.10.jar"
 
     [[platform.libraries]]
     path = "../../../target/lib/dependencies/asm-1.0.2.jar"
