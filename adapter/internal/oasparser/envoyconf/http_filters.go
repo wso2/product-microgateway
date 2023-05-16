@@ -63,16 +63,11 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		localRateLimit,
 		extAauth,
 		lua,
-		//if AwsLambda filter is enabled, it will insert into this index,
+		awsLambda,
 		router,
 	}
 
 	conf, _ := config.ReadConfigs()
-
-	if conf.Envoy.AwsLambda.Enabled {
-		httpFilters = append(httpFilters[:3], httpFilters[2:]...)
-		httpFilters[3] = awsLambda
-	}
 
 	if conf.Envoy.Filters.Compression.Enabled {
 		compressionFilter, err := getCompressorFilter()

@@ -115,7 +115,8 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		HttpProtocolOptions: &corev3.Http1ProtocolOptions{
 			EnableTrailers: config.GetWireLogConfig().LogTrailersEnabled,
 		},
-		UseRemoteAddress: &wrappers.BoolValue{Value: conf.Envoy.UseRemoteAddress},
+		UseRemoteAddress:      &wrappers.BoolValue{Value: conf.Envoy.UseRemoteAddress},
+		StripMatchingHostPort: true,
 	}
 
 	if len(accessLogs) > 0 {
@@ -142,10 +143,6 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 				conf.Tracing.Enabled = false
 			}
 		}
-	}
-
-	if conf.Envoy.AwsLambda.Enabled {
-		manager.StripMatchingHostPort = true
 	}
 
 	pbst, err := anypb.New(manager)
