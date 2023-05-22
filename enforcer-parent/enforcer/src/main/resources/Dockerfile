@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM alpine:3.17.2
+FROM alpine:3.18.0
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 

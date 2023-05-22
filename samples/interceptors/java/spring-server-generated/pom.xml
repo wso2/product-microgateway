@@ -10,7 +10,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <springfox-version>3.0.0</springfox-version>
-        <org.json.version>20210307</org.json.version>
+        <org.json.version>20230227</org.json.version>
         <java.xml.bind.version>2.3.0</java.xml.bind.version>
         <joschi.jackson.datatype.version>2.6.4</joschi.jackson.datatype.version>
     </properties>
