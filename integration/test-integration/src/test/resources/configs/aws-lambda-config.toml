@@ -1,0 +1,5 @@
+[router.awsLambda]
+enabled = true
+awsRegion = "us-east-1"
+payloadPassthrough = true
+invocationMode = "SYNCHRONOUS"

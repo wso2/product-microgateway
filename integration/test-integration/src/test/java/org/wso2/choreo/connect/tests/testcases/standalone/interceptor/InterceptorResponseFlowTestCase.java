@@ -191,6 +191,6 @@ public class InterceptorResponseFlowTestCase extends InterceptorBaseTestCase {
 
         // test error code
         JSONObject respJSON = new JSONObject(response.getData());
-        Assert.assertEquals(respJSON.getString("code"), "103501", "Error code mismatched for base64 decode error");
+        Assert.assertEquals(respJSON.getString("code"), "103501", "Error code mi.smatched for base64 decode error");
     }
 }

@@ -137,4 +137,10 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.SourceWatcherTestCase"/>
         </classes>
     </test>
+    <test name="aws-lambda-support" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithAwsLambdaBackend"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.awsLambda.AwsLambdaSupportTestCase"/>
+        </classes>
+    </test>
 </suite>
