@@ -20,6 +20,7 @@ package ga
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -191,6 +192,14 @@ func nack(errorMessage string) {
 
 func getAdapterNode() *core.Node {
 	config, _ := config.ReadConfigs()
+	if config.ControlPlane.DynamicEnvironments.Enabled {
+		return &core.Node{
+			Id: fmt.Sprintf("%s-%s-%s",
+				config.ControlPlane.DynamicEnvironments.DataPlaneID,
+				config.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
+				config.GlobalAdapter.LocalLabel),
+		}
+	}
 	return &core.Node{
 		Id: config.GlobalAdapter.LocalLabel,
 	}
