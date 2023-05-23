@@ -168,5 +168,8 @@ public class APISecurityConstants {
 
     public static final int DEFAULT_MAX_VALID_KEYS = 250;
     public static final int DEFAULT_MAX_INVALID_KEYS = 100;
+
+    public static final int API_AUTH_INVALID_AUDIENCE = 901104;
+    public static final String API_AUTH_INVALID_AUDIENCE_MESSAGE = "Invalid audience in the api key";
 }
 

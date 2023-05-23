@@ -119,6 +119,8 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 String tokenIdentifier = payload.getJWTID();
 
                 checkInRevokedMap(tokenIdentifier, splitToken);
+                String deploymentType = requestContext.getMatchedAPI().getDeploymentType();
+                compareAudience(payload.getAudience(),deploymentType);
 
                 String apiVersion = requestContext.getMatchedAPI().getVersion();
                 String apiContext = requestContext.getMatchedAPI().getBasePath();
