@@ -20,6 +20,7 @@ package adapter
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -341,7 +342,12 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			adapter.GetAPIs(c, nil, envs, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
 		}
 	} else {
-		adapter.GetAPIs(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList, queryParamMap)
+		if conf.ControlPlane.DynamicEnvironments.Enabled {
+			queryParamMap = common.PopulateQueryParamForDataPlane(queryParamMap)
+			adapter.GetAPIs(c, nil, nil, sync.RetrieveRuntimeArtifactEndpoint, true, apiUUIDList, queryParamMap)
+		} else {
+			adapter.GetAPIs(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList, queryParamMap)
+		}
 	}
 	for i := 0; i < 1; i++ {
 		data := <-c
@@ -379,7 +385,8 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 func FetchAPIUUIDsFromGlobalAdapter() {
 	logger.LoggerMgw.Info("Fetching APIs at Local Adapter startup...")
 	apiEventsAtStartup := ga.FetchAPIsFromGA()
-	logger.LoggerMgw.Debugf("apiEventsAtStartup : %v", apiEventsAtStartup)
+	b, _ := json.Marshal(apiEventsAtStartup)
+	logger.LoggerMgw.Debugf("apiEventsAtStartup : %s", string(b))
 	conf, _ := config.ReadConfigs()
 	envs := conf.ControlPlane.EnvironmentLabels
 	initialAPIUUIDListMap := make(map[string]int)
