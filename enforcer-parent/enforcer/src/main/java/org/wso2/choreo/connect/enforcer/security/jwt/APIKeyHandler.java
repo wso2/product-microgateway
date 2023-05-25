@@ -104,7 +104,7 @@ public abstract class APIKeyHandler implements Authenticator {
         if (tokenAudience != null && tokenAudience.size() > 0 &&
                 !StringUtils.isEmpty(deploymentType)) {
             if (!tokenAudience.get(0).toLowerCase().contains(deploymentType.toLowerCase())) {
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                             APISecurityConstants.API_AUTH_INVALID_AUDIENCE,
                             APISecurityConstants.API_AUTH_INVALID_AUDIENCE_MESSAGE
                             );
