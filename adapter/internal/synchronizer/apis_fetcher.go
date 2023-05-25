@@ -216,12 +216,17 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 	var queryParamMap map[string]string
 	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, sync.RuntimeArtifactEndpoint, true, nil, queryParamMap)
-	for {
+
+	retryCounter := 0
+	retryLimit := 10
+	receivedArtifact := false
+	for retryCounter < retryLimit {
 		data := <-c
 		logger.LoggerSync.Debugf("Receiving data for the API: %q", updatedAPIID)
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerSync.Infof("Pushing data to router and enforcer for the API %q", updatedAPIID)
+			receivedArtifact = true
 			err := PushAPIProjects(data.Resp, finalEnvs)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while pushing API data for the API %q: %v ", updatedAPIID, err)
@@ -234,6 +239,13 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane for the API %q: %v. Hence retrying..", updatedAPIID, data.Err)
 			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
+			retryCounter++
 		}
+	}
+
+	if !receivedArtifact {
+		// This logs statement is used to trigger the alert if the API is not fetched from the control plane.
+		logger.LoggerSync.Errorf("Stop retrying to fetch data from control plane for the API %q: for environments %v as no artifact received after %d retries.",
+			updatedAPIID, finalEnvs, retryLimit)
 	}
 }
