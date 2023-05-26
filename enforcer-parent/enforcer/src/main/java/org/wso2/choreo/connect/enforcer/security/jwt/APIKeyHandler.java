@@ -39,6 +39,8 @@ import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHol
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
+import java.util.List;
+
 /**
  * An abstract class which can be used to handle API keys.
  */
@@ -88,6 +90,25 @@ public abstract class APIKeyHandler implements Authenticator {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+    }
+
+    /**
+     * Compares the audience claim with the deployment type of the API.
+     *
+     * @param tokenAudience list of intended audience of the API Key
+     * @param deploymentType Deployment type of the API
+     * @throws APISecurityException The comparison b/w the audience vs deployment type is invalid
+     */
+    public void compareAudience(List<String> tokenAudience, String deploymentType) throws APISecurityException {
+        if (tokenAudience != null && tokenAudience.size() > 0 &&
+                !StringUtils.isEmpty(deploymentType)) {
+            if (!tokenAudience.get(0).toLowerCase().contains(deploymentType.toLowerCase())) {
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                            APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE
+                            );
+            }
         }
     }
 
