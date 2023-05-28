@@ -34,15 +34,25 @@ func handleAPIEventsFromGA(channel chan APIEvent) {
 			configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 		}
 		if !event.IsDeployEvent {
-			xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, configuredEnvs, event.RevisionUUID)
+			if conf.ControlPlane.DynamicEnvironments.Enabled {
+				xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, []string{event.DeployedEnv}, event.RevisionUUID)
+			} else {
+				xds.DeleteAPIWithAPIMEvent(event.APIUUID, event.OrganizationUUID, configuredEnvs, event.RevisionUUID)
+			}
 			// TODO: (VirajSalaka) Temporarily removed.
 			// for _, env := range configuredEnvs {
 			// 	xds.DeleteAPIAndReturnList(event.APIUUID, event.OrganizationUUID, env)
 			// }
 			continue
 		}
-
-		go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs, nil, nil)
+		if conf.ControlPlane.DynamicEnvironments.Enabled {
+			go synchronizer.FetchAPIsFromControlPlane(event.APIUUID,
+				[]string{event.DeployedEnv},
+				map[string]string{event.DeployedEnv: conf.ControlPlane.DynamicEnvironments.DataPlaneID},
+				map[string]string{event.DeployedEnv: conf.ControlPlane.DynamicEnvironments.GatewayAccessibilityType})
+		} else {
+			go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs, nil, nil)
+		}
 
 		// TODO: (VirajSalaka) temporarily removed.
 		// for _, env := range configuredEnvs {
