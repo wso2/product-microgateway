@@ -42,9 +42,13 @@ import (
 )
 
 var (
-	// apiRevision Map keeps apiUUID -> revisionUUID. This is used only for the communication between global adapter and adapter
+	// apiRevisionMap keeps apiUUID -> revisionUUID. This is used only for the communication between global adapter and adapter
 	// The purpose here is to identify if the certain API's revision is already added to the XDS cache.
-	apiRevisionMap    map[string]*ga_model.Api
+	apiRevisionMap map[string]*ga_model.Api
+	// apiEnvRevisionMap keeps apiUUID -> deployedEnv -> revisionUUID mapping. This is used only for the communication
+	// between global adapter and adapter.
+	// The purpose here is to identify if the certain API's, certain environment's deployed revision is already added
+	// to the XDS cache, when sotw response received from GA.
 	apiEnvRevisionMap = make(map[string]map[string]*ga_model.Api)
 	// Last Acknowledged Response from the global adapter
 	lastAckedResponse *discovery.DiscoveryResponse
@@ -159,7 +163,8 @@ func watchAPIs() {
 		} else {
 			lastReceivedResponse = discoveryResponse
 			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
-			if conf.GlobalAdapter.Enabled && conf.ControlPlane.DynamicEnvironments.Enabled {
+			// ToDO: (VajiraPrabuddhaka) remove this check once the dynamic environment changes are fully rolled out
+			if conf.ControlPlane.DynamicEnvironments.Enabled {
 				addAPIWithEnvToChannel(discoveryResponse)
 			} else {
 				addAPIToChannel(discoveryResponse)
@@ -312,12 +317,12 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 	var removedAPIEnvMap = make(map[string]map[string]*ga_model.Api)
 
 	if !isFirstResponse {
-		for k, v := range apiEnvRevisionMap {
+		for apiUUID, envToRevisionMap := range apiEnvRevisionMap {
 			cp := make(map[string]*ga_model.Api)
-			for l, w := range v {
+			for l, w := range envToRevisionMap {
 				cp[l] = w
 			}
-			removedAPIEnvMap[k] = cp
+			removedAPIEnvMap[apiUUID] = cp
 		}
 	}
 
@@ -338,7 +343,9 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 			if currentGAAPI.RevisionUUID == api.RevisionUUID {
 				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID: %s in "+
 					"environment: %s are equal", currentGAAPI.RevisionUUID, currentGAAPI.DeployedEnv)
-				delete(removedAPIEnvMap[api.ApiUUID], api.DeployedEnv)
+				if _, found := removedAPIEnvMap[api.ApiUUID]; found {
+					delete(removedAPIEnvMap[api.ApiUUID], api.DeployedEnv)
+				}
 				continue
 			}
 		}
@@ -382,7 +389,9 @@ func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
 				DeployedEnv:      envName,
 			}
 			GAAPIChannel <- event
-			delete(apiEnvRevisionMap[apiID], envName)
+			if _, found := apiEnvRevisionMap[apiID]; found {
+				delete(apiEnvRevisionMap[apiID], envName)
+			}
 			logger.LoggerGA.Infof("API Undeploy event is added to the channel. API_ID: %s, Environment: %s",
 				apiID, envName)
 		}
