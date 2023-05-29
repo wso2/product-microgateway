@@ -52,6 +52,8 @@ var (
 	initialAPIEventArray []*APIEvent
 	// isFirstResponse to keep track of the first discovery response received.
 	isFirstResponse bool
+	// gaAPIChannelStart is used to block the GAAPIChannel consuming until the startup is completed.
+	gaAPIChannelStart chan bool
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
 	// validation performed on successfully recieved response.
@@ -84,6 +86,7 @@ func init() {
 	lastAckedResponse = &discovery.DiscoveryResponse{}
 	connectionFaultChannel = make(chan bool)
 	GAAPIChannel = make(chan APIEvent, 10)
+	gaAPIChannelStart = make(chan bool)
 	isFirstResponse = true
 }
 
@@ -225,6 +228,11 @@ func InitGAClient() {
 		}
 		conn = initializeAndWatch()
 	}
+}
+
+// StartConsumeGAAPIChannel starts consuming API events from GAAPIChannel, once the conditions are met
+func StartConsumeGAAPIChannel() {
+	gaAPIChannelStart <- true
 }
 
 func addAPIToChannel(resp *discovery.DiscoveryResponse) {
