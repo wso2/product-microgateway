@@ -22,8 +22,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"strconv"
-	"strings"
 	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -44,15 +42,22 @@ import (
 )
 
 var (
-	// apiRevision Map keeps apiUUID -> revisionUUID. This is used only for the communication between global adapter and adapter
+	// apiRevisionMap keeps apiUUID -> revisionUUID. This is used only for the communication between global adapter and adapter
 	// The purpose here is to identify if the certain API's revision is already added to the XDS cache.
 	apiRevisionMap map[string]*ga_model.Api
+	// apiEnvRevisionMap keeps apiUUID -> deployedEnv -> revisionUUID mapping. This is used only for the communication
+	// between global adapter and adapter.
+	// The purpose here is to identify if the certain API's, certain environment's deployed revision is already added
+	// to the XDS cache, when sotw response received from GA.
+	apiEnvRevisionMap = make(map[string]map[string]*ga_model.Api)
 	// Last Acknowledged Response from the global adapter
 	lastAckedResponse *discovery.DiscoveryResponse
 	// initialAPIEventArray is the array where the api events
 	initialAPIEventArray []*APIEvent
 	// isFirstResponse to keep track of the first discovery response received.
 	isFirstResponse bool
+	// gaAPIChannelStart is used to block the GAAPIChannel consuming until the startup is completed.
+	gaAPIChannelStart chan bool
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
 	// validation performed on successfully recieved response.
@@ -77,6 +82,7 @@ type APIEvent struct {
 	RevisionUUID     string
 	IsDeployEvent    bool
 	OrganizationUUID string
+	DeployedEnv      string
 }
 
 func init() {
@@ -84,6 +90,7 @@ func init() {
 	lastAckedResponse = &discovery.DiscoveryResponse{}
 	connectionFaultChannel = make(chan bool)
 	GAAPIChannel = make(chan APIEvent, 10)
+	gaAPIChannelStart = make(chan bool)
 	isFirstResponse = true
 }
 
@@ -131,6 +138,7 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 }
 
 func watchAPIs() {
+	conf, _ := config.ReadConfigs()
 	for {
 		discoveryResponse, err := xdsStream.Recv()
 		if err == io.EOF {
@@ -155,7 +163,12 @@ func watchAPIs() {
 		} else {
 			lastReceivedResponse = discoveryResponse
 			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
-			addAPIToChannel(discoveryResponse)
+			// ToDO: (VajiraPrabuddhaka) remove this check once the dynamic environment changes are fully rolled out
+			if conf.ControlPlane.DynamicEnvironments.Enabled {
+				addAPIWithEnvToChannel(discoveryResponse)
+			} else {
+				addAPIToChannel(discoveryResponse)
+			}
 			ack()
 		}
 	}
@@ -222,6 +235,11 @@ func InitGAClient() {
 	}
 }
 
+// StartConsumeGAAPIChannel starts consuming API events from GAAPIChannel, once the conditions are met
+func StartConsumeGAAPIChannel() {
+	gaAPIChannelStart <- true
+}
+
 func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 	// To keep track of the APIs needs to be deleted.
 
@@ -246,14 +264,10 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 
 		currentGAAPI, apiFound := apiRevisionMap[api.ApiUUID]
 		if apiFound {
-			delete(removedAPIMap, api.ApiUUID)
-			// TODO: Remove this temporary preprocessing of revisionId after GA changes are deployed.
-			// 1. X -> return X
-			// 2. X_t where t < T -> return X
-			// 3. X_t where t >= T -> return X_t
-			api.RevisionUUID = preprocessRevisionID(api.RevisionUUID, currentGAAPI.RevisionUUID)
 			if currentGAAPI.RevisionUUID == api.RevisionUUID {
-				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID is equal: %v\n", currentGAAPI.RevisionUUID)
+				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID is equal: %v\n",
+					currentGAAPI.RevisionUUID)
+				delete(removedAPIMap, api.ApiUUID)
 				continue
 			}
 		}
@@ -262,6 +276,7 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 			RevisionUUID:     api.RevisionUUID,
 			IsDeployEvent:    true,
 			OrganizationUUID: api.OrganizationUUID,
+			DeployedEnv:      api.DeployedEnv,
 		}
 
 		// If it is the first response, the GA would not send it via the channel. Rather
@@ -288,10 +303,99 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 			IsDeployEvent:    false,
 			OrganizationUUID: gaAPI.OrganizationUUID,
 			RevisionUUID:     gaAPI.RevisionUUID,
+			DeployedEnv:      gaAPI.DeployedEnv,
 		}
 		GAAPIChannel <- event
 		delete(apiRevisionMap, apiEntry)
 		logger.LoggerGA.Infof("API Undeploy event is added to the channel. : %s", apiEntry)
+	}
+}
+
+func addAPIWithEnvToChannel(resp *discovery.DiscoveryResponse) {
+
+	// removedAPIEnvMap is used To keep track of the APIs needs to be deleted.
+	var removedAPIEnvMap = make(map[string]map[string]*ga_model.Api)
+
+	if !isFirstResponse {
+		for apiUUID, envToRevisionMap := range apiEnvRevisionMap {
+			cp := make(map[string]*ga_model.Api)
+			for l, w := range envToRevisionMap {
+				cp[l] = w
+			}
+			removedAPIEnvMap[apiUUID] = cp
+		}
+	}
+
+	var startupAPIEventArray []*APIEvent
+	// Even if there are no resources available within ga, an empty but non-nil array would be set
+	startupAPIEventArray = make([]*APIEvent, 0)
+	for _, res := range resp.Resources {
+		api := &ga_model.Api{}
+		err := ptypes.UnmarshalAny(res, api)
+
+		if err != nil {
+			logger.LoggerGA.Errorf("Error while unmarshalling: %s\n", err.Error())
+			continue
+		}
+
+		currentGAAPI, apiFound := apiEnvRevisionMap[api.ApiUUID][api.DeployedEnv]
+		if apiFound {
+			if currentGAAPI.RevisionUUID == api.RevisionUUID {
+				logger.LoggerGA.Debugf("Current GA API revision ID and API event revision ID: %s in "+
+					"environment: %s are equal", currentGAAPI.RevisionUUID, currentGAAPI.DeployedEnv)
+				if _, found := removedAPIEnvMap[api.ApiUUID]; found {
+					delete(removedAPIEnvMap[api.ApiUUID], api.DeployedEnv)
+				}
+				continue
+			}
+		}
+		event := APIEvent{
+			APIUUID:          api.ApiUUID,
+			RevisionUUID:     api.RevisionUUID,
+			IsDeployEvent:    true,
+			OrganizationUUID: api.OrganizationUUID,
+			DeployedEnv:      api.DeployedEnv,
+		}
+
+		// If it is the first response, the GA would not send it via the channel. Rather
+		// it appends to an array and let the apis_fetcher collect those data.
+		if isFirstResponse {
+			startupAPIEventArray = append(startupAPIEventArray, &event)
+		} else {
+			GAAPIChannel <- event
+		}
+		if _, found := apiEnvRevisionMap[api.ApiUUID]; !found {
+			apiEnvRevisionMap[api.ApiUUID] = make(map[string]*ga_model.Api)
+		}
+		apiEnvRevisionMap[api.ApiUUID][api.DeployedEnv] = api
+		logger.LoggerGA.Infof("API Deploy event is added to the channel. %s : %s : %s", api.ApiUUID,
+			api.RevisionUUID, api.DeployedEnv)
+	}
+
+	// If it is the first response, it does not contain any remove events.
+	if isFirstResponse {
+		initialAPIEventArray = startupAPIEventArray
+		isFirstResponse = false
+		return
+	}
+
+	for apiID, envAPI := range removedAPIEnvMap {
+		for envName, gaAPI := range envAPI {
+			event := APIEvent{
+				APIUUID:          apiID,
+				IsDeployEvent:    false,
+				OrganizationUUID: gaAPI.OrganizationUUID,
+				RevisionUUID:     gaAPI.RevisionUUID,
+				DeployedEnv:      envName,
+			}
+			GAAPIChannel <- event
+			if _, found := apiEnvRevisionMap[apiID]; found {
+				delete(apiEnvRevisionMap[apiID], envName)
+			}
+			logger.LoggerGA.Infof("API Undeploy event is added to the channel. API_ID: %s, Environment: %s",
+				apiID, envName)
+		}
+
 	}
 }
 
@@ -339,25 +443,4 @@ func FetchAPIsFromGA() []*APIEvent {
 		}
 		time.Sleep(1 * time.Second)
 	}
-}
-
-func preprocessRevisionID(revisionID string, currentRevisionID string) string {
-	currentRevisionIDSplitted := strings.Split(currentRevisionID, "_")
-	if len(currentRevisionIDSplitted) == 2 {
-		logger.LoggerGA.Debugf("Current revision id contains a timestamp. Skipping preprocessing for current revision id: revision id: %v:%v\n", currentRevisionID, revisionID)
-		return revisionID
-	}
-	revisionIDSplitted := strings.Split(revisionID, "_")
-	if len(revisionIDSplitted) == 2 {
-		timestamp, err := strconv.Atoi(revisionIDSplitted[1])
-		if err != nil {
-			logger.LoggerGA.Debugf("Revision Id associated timestamp conversion to integer failed: %v\n", err)
-		}
-		// Timestamp is set to 2022/09/29 23:59:59 IST. Add related timestamp based on deployment date and time.
-		if timestamp < 1664476199000 {
-			logger.LoggerGA.Debugf("Revision timestamp less than the hard coded timestamp for revision id: %v\n", revisionIDSplitted[0])
-			return revisionIDSplitted[0]
-		}
-	}
-	return revisionID
 }
