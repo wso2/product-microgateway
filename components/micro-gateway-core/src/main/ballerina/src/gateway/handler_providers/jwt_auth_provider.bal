@@ -183,7 +183,8 @@ public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, b
         if (errorcode is ()) {
             setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
         }
-        return prepareError("Subscriptions validation failed.");
+        printInfo(KEY_JWT_AUTH_PROVIDER, "Subscriptions validation failed.");
+        return false;
     }
 }
 
