@@ -408,4 +408,5 @@ func FetchAPIUUIDsFromGlobalAdapter() {
 	} else {
 		fetchAPIsOnStartUp(conf, apiUUIDList)
 	}
+	ga.StartConsumeGAAPIChannel()
 }
