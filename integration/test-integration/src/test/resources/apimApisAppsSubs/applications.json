@@ -8,6 +8,10 @@
     "throttleTier": "Unlimited"
   },
   {
+    "appName": "SubscriptionThrottlingApp-ratelimit",
+    "throttleTier": "Unlimited"
+  },
+  {
     "appName": "BlockedApiApp",
     "throttleTier": "Unlimited"
   },

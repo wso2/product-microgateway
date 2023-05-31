@@ -301,6 +301,13 @@ public class JWTAuthenticator implements Authenticator {
                     // Check if the token has access to the gateway configured environment.
                     checkTokenEnvAgainstDeploymentType(requestContext.getAuthenticationContext().getKeyType(),
                             requestContext.getMatchedAPI());
+                    if (!"Unlimited".equals(authenticationContext.getTier())) {
+                        // For subscription rate limiting, it is required to populate dynamic metadata
+                        String subscriptionId = authenticationContext.getApiUUID() + ":" +
+                                authenticationContext.getApplicationUUID();
+                        requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
+                        requestContext.addMetadataToMap("ratelimit:usage-policy", authenticationContext.getTier());
+                    }
                     return authenticationContext;
                 } else {
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),

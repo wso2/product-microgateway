@@ -1,0 +1,188 @@
+version: "3.7"
+networks:
+  cc_internal:
+    name: cc_internal
+  apim_and_cc:
+    external:
+      name: apim_and_cc
+services:
+  router:
+    image: wso2/choreo-connect-router:1.1.0-m1-SNAPSHOT
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    environment:
+      - ROUTER_ADMIN_HOST=0.0.0.0
+      - ROUTER_ADMIN_PORT=9000
+      - ROUTER_CLUSTER=default_cluster
+      - ROUTER_LABEL=Default
+      - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
+      - ADAPTER_HOST=adapter
+      - ADAPTER_PORT=18000
+      - ADAPTER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
+      - ENFORCER_HOST=enforcer
+      - ENFORCER_PORT=8081
+      - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
+      - CONCURRENCY=2
+    volumes:
+      - ../resources/router/security:/home/wso2/security
+    ports:
+      - "9095:9095"
+      - "9000:9000"
+      - "9090:9090"
+    networks:
+      - cc_internal
+  adapter:
+    image: wso2/choreo-connect-adapter:1.1.0-m1-SNAPSHOT
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 384M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    volumes:
+      - ../resources/adapter/security:/home/wso2/security
+      - ./conf/log_config.toml:/home/wso2/conf/log_config.toml
+      - ./conf/config.toml:/home/wso2/conf/config.toml
+    environment:
+      - ADAPTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
+      - cp_admin_pwd=admin
+      - adapter_admin_pwd=admin
+      - api_848184930b1d317a4204aab4c52bc3dec38abcc7_sand_basic_username="john"
+      - api_848184930b1d317a4204aab4c52bc3dec38abcc7_sand_basic_password=lock
+    ports:
+      - "18000:18000"
+      - "9843:9843"
+    networks:
+      - cc_internal
+      - apim_and_cc
+  rate-limiter:
+    image: wso2/choreo-connect-rate-limiter:1.1.0-m1-SNAPSHOT
+    networks:
+      - cc_internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    depends_on:
+      - redis
+    volumes:
+      - ../resources/rate-limiter/security:/home/wso2/security
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8090
+      - USE_STATSD=false
+      - LOG_LEVEL=DEBUG
+      - LOCAL_CACHE_SIZE_IN_BYTES=1024000
+      - LIMIT_RESPONSE_HEADERS_ENABLED=false
+      # Redis
+      - REDIS_SOCKET_TYPE=tcp
+      - REDIS_URL=redis:6379
+      - REDIS_PIPELINE_WINDOW=0.2ms
+      - REDIS_PIPELINE_LIMIT=0
+      - REDIS_TLS=false
+      - REDIS_TLS_CLIENT_CERT=""
+      - REDIS_TLS_CLIENT_KEY=""
+      - REDIS_TLS_CACERT=""
+      # gRPC server
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=8091
+      - GRPC_SERVER_USE_TLS=true
+      - GRPC_SERVER_TLS_KEY=/home/wso2/security/keystore/rate-limiter.key
+      - GRPC_SERVER_TLS_CERT=/home/wso2/security/keystore/rate-limiter.pem
+      - GRPC_CLIENT_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+      - GRPC_CLIENT_TLS_SAN=localhost
+      # xDS config server
+      - RATE_LIMITER_LABEL=Default
+      - CONFIG_GRPC_XDS_SERVER_URL=adapter:18001
+      - CONFIG_GRPC_XDS_SERVER_USE_TLS=true
+      - CONFIG_GRPC_XDS_CLIENT_TLS_KEY=/home/wso2/security/keystore/rate-limiter.key
+      - CONFIG_GRPC_XDS_CLIENT_TLS_CERT=/home/wso2/security/keystore/rate-limiter.pem
+      - CONFIG_GRPC_XDS_SERVER_TLS_CACERT=/home/wso2/security/truststore/mg.pem
+      - CONFIG_GRPC_XDS_SERVER_TLS_SAN=localhost
+    ports:
+      - "8090:8090"
+      - "8091:8091"
+      - "6070:6070" # debug port
+  redis:
+    image: redis:6.2.7-alpine
+    networks:
+      - cc_internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+    ports:
+      - "6379:6379"
+  enforcer:
+    image: wso2/choreo-connect-enforcer:1.1.0-m1-SNAPSHOT
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 384M
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    volumes:
+      - ../resources/enforcer/security:/home/wso2/security
+      - ./conf/log4j2.properties:/home/wso2/conf/log4j2.properties
+      - ../resources/enforcer/dropins:/home/wso2/lib/dropins
+    environment:
+      - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
+      - TRUSTED_CA_CERTS_PATH=/home/wso2/security/truststore
+      - ADAPTER_HOST_NAME=adapter
+      - ADAPTER_HOST=adapter
+      - ADAPTER_XDS_PORT=18000
+      - ENFORCER_LABEL=Default
+      - ENFORCER_REGION=UNKNOWN
+      - XDS_MAX_MSG_SIZE=4194304
+      - XDS_MAX_RETRIES=3
+      - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll -Xms256m -Xmx256m
+      - apim_admin_pwd=admin
+      - enforcer_admin_pwd=admin
+      - tm_admin_pwd=admin
+      - analytics_authURL=https://localhost:8080
+      - analytics_authToken=
+    networks:
+      - cc_internal
+      - apim_and_cc
+    ports:
+      - "8081:8081"
+      - "9001:9001"

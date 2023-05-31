@@ -1040,6 +1040,12 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 		logger.LoggerXds.Error(err)
 	}
 	enforcerSubscriptionPolicyMap[label] = subscriptionPolicyList
+
+	conf, _ := config.ReadConfigs()
+	for _, env := range conf.ControlPlane.EnvironmentLabels {
+		// To update subscription rate limit policies
+		UpdateRateLimiterPolicies(env)
+	}
 	logger.LoggerXds.Infof("New Subscription Policy cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 

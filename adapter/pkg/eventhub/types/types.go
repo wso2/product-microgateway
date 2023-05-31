@@ -111,17 +111,31 @@ type ApplicationPolicyList struct {
 
 // SubscriptionPolicy for struct list of SubscriptionPolicy
 type SubscriptionPolicy struct {
-	ID                   int32  `json:"id" json:"policyId"`
-	TenantID             int32  `json:"tenantId"`
-	Name                 string `json:"name"`
-	QuotaType            string `json:"quotaType"`
-	GraphQLMaxComplexity int32  `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int32  `json:"graphQLMaxDepth"`
-	RateLimitCount       int32  `json:"rateLimitCount"`
-	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
-	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
-	TenantDomain         string `json:"tenanDomain,omitempty"`
-	TimeStamp            int64  `json:"timeStamp,omitempty"`
+	ID                   int32                     `json:"id" json:"policyId"`
+	TenantID             int32                     `json:"tenantId"`
+	Name                 string                    `json:"name"`
+	QuotaType            string                    `json:"quotaType"`
+	GraphQLMaxComplexity int32                     `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int32                     `json:"graphQLMaxDepth"`
+	RateLimitCount       int32                     `json:"rateLimitCount"`
+	RateLimitTimeUnit    string                    `json:"rateLimitTimeUnit"`
+	StopOnQuotaReach     bool                      `json:"stopOnQuotaReach"`
+	TenantDomain         string                    `json:"tenanDomain,omitempty"`
+	TimeStamp            int64                     `json:"timeStamp,omitempty"`
+	DefaultLimit         *SubscriptionDefaultLimit `json:"defaultLimit,omitempty"`
+}
+
+// SubscriptionDefaultLimit is used to parse the json called DefaultLimit within SubscriptionPolicy
+type SubscriptionDefaultLimit struct {
+	QuotaType    string                    `json:"quotaType,omitempty"`
+	RequestCount *SubscriptionRequestCount `json:"requestCount,omitempty"`
+}
+
+// SubscriptionRequestCount is used to parse the json called RequestCount within SubscriptionPolicy -> Default Limit
+type SubscriptionRequestCount struct {
+	RequestCount int32  `json:"requestCount"`
+	TimeUnit     string `json:"timeUnit"`
+	UnitTime     int32  `json:"unitTime"`
 }
 
 // SubscriptionPolicyList for struct list of SubscriptionPolicy
