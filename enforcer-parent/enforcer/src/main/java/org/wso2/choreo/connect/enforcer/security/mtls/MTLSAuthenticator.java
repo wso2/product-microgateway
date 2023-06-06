@@ -125,6 +125,12 @@ public class MTLSAuthenticator implements Authenticator {
             authenticationContext.setApiName(apiName);
             authenticationContext.setApiUUID(apiUUID);
             authenticationContext.setApiVersion(apiVersion);
+            // Set the key type based on the cluster header, the same way handled in UnauthenticatedAPIAuthenticator.
+            if (!StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
+                authenticationContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            } else {
+                authenticationContext.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+            }
 
             return authenticationContext;
         } finally {
