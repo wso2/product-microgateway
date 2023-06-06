@@ -40,7 +40,6 @@ import (
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	upstreams "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
-	metadatav3 "github.com/envoyproxy/go-control-plane/envoy/type/metadata/v3"
 	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
@@ -57,21 +56,6 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
-)
-
-// Constants relevant to the route related rate-limit configurations
-const (
-	DescriptorKeyForOrg               = "org"
-	DescriptorKeyForVhost             = "vhost"
-	DescriptorKeyForPath              = "path"
-	DescriptorKeyForMethod            = "method"
-	DescriptorValueForAPIMethod       = "ALL"
-	DescriptorValueForOperationMethod = ":method"
-	DescriptorKeyForSubscription      = "subscription"
-	DescriptorKeyForPolicy            = "policy"
-
-	descriptorMetadataKeyForSubscription = "ratelimit:subscription"
-	descriptorMetadataKeyForUsagePolicy  = "ratelimit:usage-policy"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -960,51 +944,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				rateLimit.Actions = append(rateLimit.Actions, operationLevelRateLimitActions...)
 			}
 			action.Route.RateLimits = []*routev3.RateLimit{&rateLimit}
-		}
-
-		if config.Envoy.RateLimit.Enabled {
-			action.Route.RateLimits = append(action.Route.RateLimits, &routev3.RateLimit{
-				Actions: []*routev3.RateLimit_Action{
-					{
-						ActionSpecifier: &routev3.RateLimit_Action_Metadata{
-							Metadata: &routev3.RateLimit_Action_MetaData{
-								DescriptorKey: DescriptorKeyForSubscription,
-								MetadataKey: &metadatav3.MetadataKey{
-									Key: extAuthzFilterName,
-									Path: []*metadatav3.MetadataKey_PathSegment{
-										{
-											Segment: &metadatav3.MetadataKey_PathSegment_Key{
-												Key: descriptorMetadataKeyForSubscription,
-											},
-										},
-									},
-								},
-								Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
-								SkipIfAbsent: true,
-							},
-						},
-					},
-					{
-						ActionSpecifier: &routev3.RateLimit_Action_Metadata{
-							Metadata: &routev3.RateLimit_Action_MetaData{
-								DescriptorKey: DescriptorKeyForPolicy,
-								MetadataKey: &metadatav3.MetadataKey{
-									Key: extAuthzFilterName,
-									Path: []*metadatav3.MetadataKey_PathSegment{
-										{
-											Segment: &metadatav3.MetadataKey_PathSegment_Key{
-												Key: descriptorMetadataKeyForUsagePolicy,
-											},
-										},
-									},
-								},
-								Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
-								SkipIfAbsent: true,
-							},
-						},
-					},
-				},
-			})
 		}
 	} else {
 		action = &routev3.Route_Route{

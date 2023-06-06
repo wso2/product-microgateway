@@ -29,6 +29,7 @@ import (
 	envoy_config_trace_v3 "github.com/envoyproxy/go-control-plane/envoy/config/trace/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
+	metadatav3 "github.com/envoyproxy/go-control-plane/envoy/type/metadata/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -245,6 +246,53 @@ func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*rou
 			Name:    vhost,
 			Domains: []string{vhost, fmt.Sprint(vhost, ":*")},
 			Routes:  routes,
+		}
+		conf, _ := config.ReadConfigs()
+		if conf.Envoy.RateLimit.Enabled {
+			virtualHost.RateLimits = []*routev3.RateLimit{
+				{
+					Actions: []*routev3.RateLimit_Action{
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForSubscription,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForSubscription,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForPolicy,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForUsagePolicy,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+					},
+				},
+			}
 		}
 		virtualHosts = append(virtualHosts, virtualHost)
 	}

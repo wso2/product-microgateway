@@ -30,7 +30,6 @@ import (
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
-	metadatav3 "github.com/envoyproxy/go-control-plane/envoy/type/metadata/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -122,50 +121,6 @@ func TestCreateRoute(t *testing.T) {
 			UpgradeConfigs:       UpgradeConfigsDisabled,
 			Timeout:              TimeOutConfig,
 			IdleTimeout:          IdleTimeOutConfig,
-			RateLimits: []*routev3.RateLimit{
-				{
-					Actions: []*routev3.RateLimit_Action{
-						{
-							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
-								Metadata: &routev3.RateLimit_Action_MetaData{
-									DescriptorKey: "subscription",
-									MetadataKey: &metadatav3.MetadataKey{
-										Key: extAuthzFilterName,
-										Path: []*metadatav3.MetadataKey_PathSegment{
-											{
-												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:subscription",
-												},
-											},
-										},
-									},
-									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
-									SkipIfAbsent: true,
-								},
-							},
-						},
-						{
-							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
-								Metadata: &routev3.RateLimit_Action_MetaData{
-									DescriptorKey: "policy",
-									MetadataKey: &metadatav3.MetadataKey{
-										Key: extAuthzFilterName,
-										Path: []*metadatav3.MetadataKey_PathSegment{
-											{
-												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:usage-policy",
-												},
-											},
-										},
-									},
-									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
-									SkipIfAbsent: true,
-								},
-							},
-						},
-					},
-				},
-			},
 		},
 	}
 
