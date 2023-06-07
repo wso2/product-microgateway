@@ -162,7 +162,8 @@ func watchAPIs() {
 			nack(errStatus.Message())
 		} else {
 			lastReceivedResponse = discoveryResponse
-			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
+			logger.LoggerGA.Debugf("Discovery response is received : %s, size: %d", discoveryResponse.VersionInfo,
+				len(discoveryResponse.Resources))
 			// ToDO: (VajiraPrabuddhaka) remove this check once the dynamic environment changes are fully rolled out
 			if conf.ControlPlane.DynamicEnvironments.Enabled {
 				addAPIWithEnvToChannel(discoveryResponse)
