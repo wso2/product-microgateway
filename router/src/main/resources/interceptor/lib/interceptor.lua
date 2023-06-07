@@ -260,6 +260,8 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
             return
         end
 
+        headers["x-amz-function-error"] = "foo"
+        
         direct_respond(handle, headers, decoded_body, shared_info)
     end
 end

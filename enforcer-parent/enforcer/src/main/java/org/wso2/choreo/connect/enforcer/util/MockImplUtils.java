@@ -203,7 +203,7 @@ public class MockImplUtils {
             }
         }
         headerMap.put(APIConstants.CONTENT_TYPE_HEADER, mediaType);
-        headerMap.put("x-amz-function-error", "test");
+        headerMap.put("x-amz-function-error", "foo");
         responseObject.setHeaderMap(headerMap);
         responseObject.setResponseContent(content);
     }

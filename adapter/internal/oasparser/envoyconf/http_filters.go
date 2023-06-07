@@ -62,8 +62,8 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		cors,
 		localRateLimit,
 		extAauth,
-		awsLambda,
 		lua,
+		awsLambda,
 		router,
 	}
 
