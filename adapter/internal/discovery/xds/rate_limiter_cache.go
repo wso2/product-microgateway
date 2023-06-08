@@ -322,7 +322,7 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 			Value:     policy.Name,
 			RateLimit: &rlPolicyConfig,
 		}
-		loggers.LoggerXds.Infof("Rate limit added : %v", policy)
+		loggers.LoggerXds.Infof("Subscription level rate limit policy is added to the cache map: %v", policy)
 	}
 	return nil
 }
