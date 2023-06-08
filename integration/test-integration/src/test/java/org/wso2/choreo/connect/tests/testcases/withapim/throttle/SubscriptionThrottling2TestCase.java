@@ -44,8 +44,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
-    private static final String APPLICATION_NAME = "SubscriptionThrottlingApp";
+public class SubscriptionThrottling2TestCase extends ThrottlingBaseTestCase {
+    private static final String APPLICATION_NAME = "SubscriptionThrottlingApp-ratelimit";
 
     private SubscriptionThrottlePolicyDTO requestCountPolicyDTO;
     private final Map<String, String> requestHeaders = new HashMap<>();
@@ -55,29 +55,15 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
     String applicationId;
     String subscriptionId;
 
+    String apiName = "SubscriptionThrottlingAPI2";
+    String apiContext = "subscriptionThrottlingAPI2";
+
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {
         super.initWithSuperTenant();
 
-        // create the application throttling policy DTO with request count limit
+        // policy is already created from subscription throttling test case
         String policyName = "15PerMin";
-        String policyTimeUnit = "min";
-        Integer policyUnitTime = 1;
-        String policyDispName = "15PerMin";
-        String policyDesc = "This is a test subscription throttle policy";
-        RequestCountLimitDTO reqCountLimit =
-                DtoFactory.createRequestCountLimitDTO(policyTimeUnit, policyUnitTime, requestCount);
-        ThrottleLimitDTO defaultLimit =
-                DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, reqCountLimit, null);
-        requestCountPolicyDTO = DtoFactory
-                .createSubscriptionThrottlePolicyDTO(policyName, policyDispName, policyDesc, false, defaultLimit,-1,
-                        -1, 100, "min", new ArrayList<>(),
-                        true, "", 0);
-        // Add the subscription throttling policy
-        ApiResponse<SubscriptionThrottlePolicyDTO> addedPolicy =
-                adminRestClient.addSubscriptionThrottlingPolicy(requestCountPolicyDTO);
-        Assert.assertEquals(addedPolicy.getStatusCode(), HttpStatus.SC_CREATED);
-        requestCountPolicyDTO = addedPolicy.getData();
 
         // Get App ID
         applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
@@ -89,11 +75,11 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         requestHeaders.put(HttpHeaders.CONTENT_TYPE, "application/json");
 
             // Cannot create before defining the policy in this class. Policy name must be included in api.
-        apiId = createThrottleApi(policyName, TestConstant.API_TIER.UNLIMITED,
+        apiId = createThrottleApi(apiName, apiContext, policyName, TestConstant.API_TIER.UNLIMITED,
                 TestConstant.API_TIER.UNLIMITED);
 
         // get a predefined api request
-        endpointURL = getThrottleAPIEndpoint();
+        endpointURL = getThrottleAPIEndpoint(apiContext);
 
         subscriptionId = StoreUtils.subscribeToAPI(apiId, applicationId, policyName, storeRestClient);
         // this is to wait until policy deployment is complete in case it didn't complete already
@@ -109,8 +95,8 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
     @Test(description = "Test Subscription throttling for self-contained token")
     public void testSubscriptionLevelThrottlingSelfContainedToken() throws Exception {
         API api = new API();
-        api.setName(super.SAMPLE_API_NAME);
-        api.setContext("/" + super.SAMPLE_API_CONTEXT + "/" + super.SAMPLE_API_VERSION);
+        api.setName(apiName);
+        api.setContext("/" + apiContext + "/" + super.SAMPLE_API_VERSION);
 
         api.setVersion(super.SAMPLE_API_VERSION);
         api.setProvider("admin");

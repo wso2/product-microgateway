@@ -247,6 +247,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
      * @param value         Metadata value
      */
     private void addMetadata(Struct.Builder structBuilder, String key, String value) {
+        // Otherwise it could result in a NPE
+        if (value == null) {
+            return;
+        }
         structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build());
     }
 }

@@ -51,7 +51,13 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
 
     protected String createThrottleApi(String tiers, String apiTier, String resTier) throws MalformedURLException,
             APIManagerIntegrationTestException, CCTestException {
-        APIRequest apiRequest = new APIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
+        return createThrottleApi(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, tiers, apiTier, resTier);
+    }
+
+    protected String createThrottleApi(String apiName, String apiContext, String tiers, String apiTier,
+                                       String resTier) throws MalformedURLException,
+            APIManagerIntegrationTestException, CCTestException {
+        APIRequest apiRequest = new APIRequest(apiName, apiContext,
                 new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
         apiRequest.setProvider(user.getUserName());
         apiRequest.setVersion(SAMPLE_API_VERSION);
@@ -73,7 +79,11 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
     }
 
     protected String getThrottleAPIEndpoint() throws MalformedURLException {
-        return Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
+        return getThrottleAPIEndpoint(SAMPLE_API_CONTEXT);
+    }
+
+    protected String getThrottleAPIEndpoint(String apiContext) throws MalformedURLException {
+        return Utils.getServiceURLHttps(apiContext + "/1.0.0/pet/findByStatus");
     }
 
     public static boolean isThrottled(String endpointURL, Map<String, String> headers, Map<String, String> queryParams,

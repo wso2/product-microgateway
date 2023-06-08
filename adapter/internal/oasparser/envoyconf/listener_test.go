@@ -94,8 +94,9 @@ func TestCreateRoutesConfigForRds(t *testing.T) {
 	rConfig := CreateRoutesConfigForRds(vHosts)
 
 	assert.NotNil(t, rConfig, "CreateRoutesConfigForRds is failed")
-	if rConfig.Validate() != nil {
-		t.Errorf("rConfig Validation failed")
+	err := rConfig.Validate()
+	if err != nil {
+		t.Errorf("rConfig Validation failed " + err.Error())
 	}
 }
 

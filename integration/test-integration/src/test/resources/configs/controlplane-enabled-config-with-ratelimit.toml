@@ -1,0 +1,59 @@
+[router]
+
+[router.ratelimit]
+    enabled = true
+[router.cors]
+    enabled = false
+
+[enforcer]
+[enforcer.jwtGenerator]
+    enable = true
+
+[enforcer.throttling]
+    enableGlobalEventPublishing = false
+    enableHeaderConditions = true
+    enableQueryParamConditions = true
+    enableJwtClaimConditions = true
+    jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
+
+[[enforcer.security.tokenService]]
+  name = "Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
+  jwksURL = ""
+  validateSubscription = true
+  consumerKeyClaim = "azp"
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Issuer 2
+[[enforcer.security.tokenService]]
+  name = "MGW"
+  issuer = "https://localhost:9095/testkey"
+  certificateAlias = "mgw"
+  jwksURL = ""
+  validateSubscription = false
+  consumerKeyClaim = ""
+  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+# Issuer 3
+[[enforcer.security.tokenService]]
+  name = "APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  validateSubscription = true
+  certificateAlias = ""
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+[controlPlane]
+    enabled = true
+    skipSSLVerification=true
+[controlPlane.brokerConnectionParameters]
+    eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='250'&connectdelay='10'"]
+
+[analytics]
+    enabled = true
+
+[analytics.enforcer]
+[analytics.enforcer.configProperties]
+    authURL = "$env{analytics_authURL}"
+    authToken = "$env{analytics_authToken}"
+    "publisher.reporter.class" = "org.wso2.choreo.connect.tests.CustomMetricReporter"

@@ -86,6 +86,14 @@
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
         </classes>
     </test>
+    <test name="subscription-throttling-with-ratelimiter" parallel="false">
+        <classes>
+            <!-- Restart choreo connect setup with rate limiter service and check if subscription ratelimit works-->
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutorWithRatelimit"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottling2TestCase"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
+        </classes>
+    </test>
     <test name="cc-specific-tests-with-apim" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutorTwo"/>
