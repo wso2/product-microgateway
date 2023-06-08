@@ -149,18 +149,3 @@ const (
 	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
 	uaexCode                   = "UAEX"
 )
-
-// Constants relevant to the route related rate-limit configurations
-const (
-	DescriptorKeyForOrg               = "org"
-	DescriptorKeyForVhost             = "vhost"
-	DescriptorKeyForPath              = "path"
-	DescriptorKeyForMethod            = "method"
-	DescriptorValueForAPIMethod       = "ALL"
-	DescriptorValueForOperationMethod = ":method"
-	DescriptorKeyForSubscription      = "subscription"
-	DescriptorKeyForPolicy            = "policy"
-
-	descriptorMetadataKeyForSubscription = "ratelimit:subscription"
-	descriptorMetadataKeyForUsagePolicy  = "ratelimit:usage-policy"
-)
