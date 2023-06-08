@@ -75,7 +75,9 @@ type rateLimitPolicyCache struct {
 	// So app level rate limits are in a new struct and refer in this struct.
 	// org -> vhost -> API-Identifier (i.e. Vhost:API-UUID) -> Rate Limit Configs
 	apiLevelRateLimitPolicies map[string]map[string]map[string][]*rls_config.RateLimitDescriptor
-	metadataBasedPolicies     map[string]map[string]*rls_config.RateLimitDescriptor
+	// metadataBasedPolicies is used to store the rate limit policies which are based on dynamic metadata.
+	// rate limit type (eg: subscription) -> policy name (eg: Gold, Silver) -> Rate Limit Config
+	metadataBasedPolicies map[string]map[string]*rls_config.RateLimitDescriptor
 	// mutex for API level
 	apiLevelMu sync.RWMutex
 }
