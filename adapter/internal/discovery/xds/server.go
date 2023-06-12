@@ -32,6 +32,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 
@@ -87,6 +88,8 @@ var (
 	orgIDvHostBasepathMap       map[string]map[string]string               // organizationID -> Vhost:basepath -> Vhost:API_UUID
 
 	reverseAPINameVersionMap map[string]string
+
+	orgIDLatestAPIVersionMap map[string]map[string]map[string]string // organizationID -> Vhost:APIName -> Version Range -> Latest API Version
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -155,6 +158,8 @@ func init() {
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 	envoyClusterConfigMap = make(map[string][]*clusterv3.Cluster)
 	envoyEndpointConfigMap = make(map[string][]*corev3.Address)
+
+	orgIDLatestAPIVersionMap = make(map[string]map[string]map[string]string)
 
 	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
 	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map
@@ -249,6 +254,42 @@ func DeployReadinessAPI(envs []string) {
 		UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
 		UpdateEnforcerApis(env, apis, "")
 	}
+}
+
+func ValidateAndGetVersionComponents(version string) (string, string, string, error) {
+	versionComponents := strings.Split(version, ".")
+	// TODO: chathurangas: Update this function to accept versions without patch version component
+
+	// If the versionComponents length is less than 3, return error
+	if len(versionComponents) < 3 {
+		logger.LoggerXds.Errorf("API version validation failed for API Version: %v", version)
+		return "", "", "", errors.New("Invalid version format")
+	}
+
+	majorVersion := versionComponents[0]
+	minorVersion := versionComponents[1]
+	patchVersion := versionComponents[2]
+	return majorVersion, minorVersion, patchVersion, nil
+}
+
+func GetMajorMinorVersionRangeRegex(version string) string {
+	majorVersion, minorVersion, patchVersion, _ := ValidateAndGetVersionComponents(version)
+	return "v(" + majorVersion + "(\\." + minorVersion + "(\\." + patchVersion + ")?)?)+"
+}
+
+func GetMinorVersionRangeRegex(version string) string {
+	majorVersion, minorVersion, patchVersion, _ := ValidateAndGetVersionComponents(version)
+	return "v(" + majorVersion + "." + minorVersion + "(\\." + patchVersion + ")?)+"
+}
+
+func GetMajorVersionRange(version string) string {
+	majorVersion, _, _, _ := ValidateAndGetVersionComponents(version)
+	return "v" + majorVersion
+}
+
+func GetMinorVersionRange(version string) string {
+	majorVersion, minorVersion, _, _ := ValidateAndGetVersionComponents(version)
+	return "v" + majorVersion + "." + minorVersion
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
@@ -464,6 +505,90 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		routesMap := make(map[string][]*routev3.Route)
 		routesMap[apiIdentifier] = routes
 		orgIDOpenAPIRoutesMap[organizationID] = routesMap
+	}
+
+	apiName := mgwSwagger.GetTitle()
+	apiVersion := mgwSwagger.GetVersion()
+	apiRangeIdentifier := GenerateIdentifierForAPIWithoutVersion(vHost, apiName)
+
+	// Check the major and minor version ranges of the current API
+	existingMajorRangeLatestVersion, isMajorRangeRegexAvailable :=
+		orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier][GetMajorVersionRange(apiVersion)]
+	existingMinorRangeLatestVersion, isMinorRangeRegexAvailable :=
+		orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier][GetMinorVersionRange(apiVersion)]
+
+	// Check whether the current API is the latest version in the major and minor version ranges
+	isLatestMajorVersion := !isMajorRangeRegexAvailable || existingMajorRangeLatestVersion < apiVersion
+	isLatestMinorVersion := !isMinorRangeRegexAvailable || existingMinorRangeLatestVersion < apiVersion
+
+	// Remove the existing regexes from the path specifier when latest major and/or minor version is available
+	if (isMajorRangeRegexAvailable || isMinorRangeRegexAvailable) && (isLatestMajorVersion || isLatestMinorVersion) {
+		// Organization's all apis
+		for apiUUID, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
+			// API's all versions in the same vHost
+			if swagger.GetTitle() == apiName && swagger.GetVHost() == vHost {
+				if isMajorRangeRegexAvailable && swagger.GetVersion() == existingMajorRangeLatestVersion ||
+					isMinorRangeRegexAvailable && swagger.GetVersion() == existingMinorRangeLatestVersion {
+					for _, route := range orgIDOpenAPIRoutesMap[organizationID][apiUUID] {
+						regex := route.GetMatch().GetSafeRegex().GetRegex()
+						if isMinorRangeRegexAvailable && swagger.GetVersion() == existingMinorRangeLatestVersion && isLatestMinorVersion {
+							regex = strings.ReplaceAll(regex, GetMinorVersionRangeRegex(existingMinorRangeLatestVersion), existingMinorRangeLatestVersion)
+							regex = strings.ReplaceAll(regex, GetMajorMinorVersionRangeRegex(existingMajorRangeLatestVersion), existingMajorRangeLatestVersion)
+						}
+						if isMajorRangeRegexAvailable && swagger.GetVersion() == existingMajorRangeLatestVersion && isLatestMajorVersion {
+							regex = strings.ReplaceAll(regex, GetMajorMinorVersionRangeRegex(existingMajorRangeLatestVersion), GetMinorVersionRangeRegex(existingMajorRangeLatestVersion))
+						}
+						pathSpecifier := &routev3.RouteMatch_SafeRegex{
+							SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+								Regex: regex,
+							},
+						}
+						route.Match.PathSpecifier = pathSpecifier
+					}
+				}
+			}
+		}
+	}
+
+	if isLatestMajorVersion || isLatestMinorVersion {
+		// Update local memory map with the latest version ranges
+		if _, ok := orgIDLatestAPIVersionMap[organizationID]; !ok {
+			latestVersions := make(map[string]string)
+			latestVersions[GetMajorVersionRange(apiVersion)] = apiVersion
+			latestVersions[GetMinorVersionRange(apiVersion)] = apiVersion
+			apiVersionMap := make(map[string]map[string]string)
+			apiVersionMap[apiRangeIdentifier] = latestVersions
+			orgIDLatestAPIVersionMap[organizationID] = apiVersionMap
+		} else {
+			if _, ok := orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier]; !ok {
+				latestVersions := make(map[string]string)
+				latestVersions[GetMajorVersionRange(apiVersion)] = apiVersion
+				latestVersions[GetMinorVersionRange(apiVersion)] = apiVersion
+				orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier] = latestVersions
+			} else {
+				if isLatestMajorVersion {
+					orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier][GetMajorVersionRange(apiVersion)] = apiVersion
+				}
+				orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier][GetMinorVersionRange(apiVersion)] = apiVersion
+			}
+		}
+		// Add the major and/or minor version range matching regexes to the path specifier when
+		// latest major and/or minor version is available
+		for _, route := range orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] {
+			regex := route.GetMatch().GetSafeRegex().GetRegex()
+			if isLatestMajorVersion {
+				regex = strings.ReplaceAll(regex, apiVersion, GetMajorMinorVersionRangeRegex(apiVersion))
+			}
+			if isLatestMinorVersion {
+				regex = strings.ReplaceAll(regex, apiVersion, GetMinorVersionRangeRegex(apiVersion))
+			}
+			pathSpecifier := &routev3.RouteMatch_SafeRegex{
+				SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+					Regex: regex,
+				},
+			}
+			route.Match.PathSpecifier = pathSpecifier
+		}
 	}
 
 	if _, ok := orgIDOpenAPIClustersMap[organizationID]; ok {
@@ -1125,6 +1250,11 @@ func IsAPIExist(vhost, uuid, organizationID string) (exists bool) {
 // GenerateIdentifierForAPI generates an identifier unique to the API
 func GenerateIdentifierForAPI(vhost, name, version string) string {
 	return fmt.Sprint(vhost, apiKeyFieldSeparator, name, apiKeyFieldSeparator, version)
+}
+
+// GenerateIdentifierForAPIWithoutVersion generates an identifier unique to the API despite of the version
+func GenerateIdentifierForAPIWithoutVersion(vhost, name string) string {
+	return fmt.Sprint(vhost, apiKeyFieldSeparator, name)
 }
 
 // GenerateIdentifierForAPIWithUUID generates an identifier unique to the API
