@@ -260,7 +260,7 @@ func DeployReadinessAPI(envs []string) {
 func ValidateAndGetVersionComponents(version string) (string, string, string, error) {
 	versionComponents := strings.Split(version, ".")
 
-	// If the versionComponents length is less than 3, return error
+	// If the versionComponents length is less than 2, return error
 	if len(versionComponents) < 2 {
 		logger.LoggerXds.Errorf("API version validation failed for API Version: %v", version)
 		return "", "", "", errors.New("Invalid version format")
