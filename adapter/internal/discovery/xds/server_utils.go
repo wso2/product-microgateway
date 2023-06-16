@@ -131,8 +131,8 @@ func ValidateAndGetVersionComponents(version string) (*SemVersion, error) {
 }
 
 // GetMajorMinorVersionRangeRegex generates major and minor version compatible range regex for the given version
-func GetMajorMinorVersionRangeRegex(version string) string {
-	semVersion, _ := ValidateAndGetVersionComponents(version)
+func GetMajorMinorVersionRangeRegex(semVersion SemVersion) string {
+	version := semVersion.Version
 	majorVersion := strconv.Itoa(semVersion.Major)
 	minorVersion := strconv.Itoa(semVersion.Minor)
 	if semVersion.Patch == nil {
@@ -143,8 +143,8 @@ func GetMajorMinorVersionRangeRegex(version string) string {
 }
 
 // GetMinorVersionRangeRegex generates minor version compatible range regex for the given version
-func GetMinorVersionRangeRegex(version string) string {
-	semVersion, _ := ValidateAndGetVersionComponents(version)
+func GetMinorVersionRangeRegex(semVersion SemVersion) string {
+	version := semVersion.Version
 	if semVersion.Patch == nil {
 		return "(v" + version + "|" + version + ")"
 	}
@@ -155,13 +155,40 @@ func GetMinorVersionRangeRegex(version string) string {
 }
 
 // GetMajorVersionRange generates major version range for the given version
-func GetMajorVersionRange(version string) string {
-	semVersion, _ := ValidateAndGetVersionComponents(version)
+func GetMajorVersionRange(semVersion SemVersion) string {
 	return "v" + strconv.Itoa(semVersion.Major)
 }
 
 // GetMinorVersionRange generates minor version range for the given version
-func GetMinorVersionRange(version string) string {
-	semVersion, _ := ValidateAndGetVersionComponents(version)
+func GetMinorVersionRange(semVersion SemVersion) string {
 	return "v" + strconv.Itoa(semVersion.Major) + "." + strconv.Itoa(semVersion.Minor)
+}
+
+// CompareSemanticVersions compares two semantic versions and returns true
+// if `version` is greater or equal than `baseVersion`
+func CompareSemanticVersions(baseVersion, version SemVersion) bool {
+	if baseVersion.Major < version.Major {
+		return true
+	} else if baseVersion.Major > version.Major {
+		return false
+	} else {
+		if baseVersion.Minor < version.Minor {
+			return true
+		} else if baseVersion.Minor > version.Minor {
+			return false
+		} else {
+			if baseVersion.Patch != nil && version.Patch != nil {
+				if *baseVersion.Patch < *version.Patch {
+					return true
+				} else if *baseVersion.Patch > *version.Patch {
+					return false
+				}
+			} else if baseVersion.Patch == nil && version.Patch != nil {
+				return true
+			} else if baseVersion.Patch != nil && version.Patch == nil {
+				return false
+			}
+		}
+	}
+	return true
 }
