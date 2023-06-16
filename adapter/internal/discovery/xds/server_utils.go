@@ -17,6 +17,10 @@
 package xds
 
 import (
+	"errors"
+	"strconv"
+	"strings"
+
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
@@ -80,4 +84,84 @@ func updateVhostInternalMaps(uuid, name, version, vHost string, gwEnvs []string)
 		envToVhostMap[env] = vHost
 	}
 	apiUUIDToGatewayToVhosts[uuid] = envToVhostMap
+}
+
+// ValidateAndGetVersionComponents validates version string and extracts version components
+func ValidateAndGetVersionComponents(version string) (*SemVersion, error) {
+	versionComponents := strings.Split(version, ".")
+
+	// If the versionComponents length is less than 2, return error
+	if len(versionComponents) < 2 {
+		logger.LoggerXds.Errorf("API version validation failed for API Version: %v", version)
+		return nil, errors.New("Invalid version format")
+	}
+
+	majorVersion, majorVersionConvErr := strconv.Atoi(versionComponents[0])
+	minorVersion, minorVersionConvErr := strconv.Atoi(versionComponents[1])
+	if majorVersionConvErr != nil {
+		logger.LoggerXds.Errorf("API major version should be an integer in API Version: %v", version, majorVersionConvErr)
+		return nil, errors.New("Invalid version format")
+	}
+
+	if minorVersionConvErr != nil {
+		logger.LoggerXds.Errorf("API minor version should be an integer in API Version: %v", version, minorVersionConvErr)
+		return nil, errors.New("Invalid version format")
+	}
+
+	if len(versionComponents) == 2 {
+		return &SemVersion{
+			Version: version,
+			Major:   majorVersion,
+			Minor:   minorVersion,
+			Patch:   nil,
+		}, nil
+	}
+
+	patchVersion, patchVersionConvErr := strconv.Atoi(versionComponents[2])
+	if patchVersionConvErr != nil {
+		logger.LoggerXds.Errorf("API patch version should be an integer in API Version: %v", version, patchVersionConvErr)
+		return nil, errors.New("Invalid version format")
+	}
+	return &SemVersion{
+		Version: version,
+		Major:   majorVersion,
+		Minor:   minorVersion,
+		Patch:   &patchVersion,
+	}, nil
+}
+
+// GetMajorMinorVersionRangeRegex generates major and minor version compatible range regex for the given version
+func GetMajorMinorVersionRangeRegex(version string) string {
+	semVersion, _ := ValidateAndGetVersionComponents(version)
+	majorVersion := strconv.Itoa(semVersion.Major)
+	minorVersion := strconv.Itoa(semVersion.Minor)
+	if semVersion.Patch == nil {
+		return "(v" + majorVersion + "(\\." + minorVersion + ")?|" + version + ")"
+	}
+	patchVersion := strconv.Itoa(*semVersion.Patch)
+	return "(v" + majorVersion + "(\\." + minorVersion + "(\\." + patchVersion + ")?)?|" + version + ")"
+}
+
+// GetMinorVersionRangeRegex generates minor version compatible range regex for the given version
+func GetMinorVersionRangeRegex(version string) string {
+	semVersion, _ := ValidateAndGetVersionComponents(version)
+	if semVersion.Patch == nil {
+		return "(v" + version + "|" + version + ")"
+	}
+	majorVersion := strconv.Itoa(semVersion.Major)
+	minorVersion := strconv.Itoa(semVersion.Minor)
+	patchVersion := strconv.Itoa(*semVersion.Patch)
+	return "(v" + majorVersion + "\\." + minorVersion + "(\\." + patchVersion + ")?|" + version + ")"
+}
+
+// GetMajorVersionRange generates major version range for the given version
+func GetMajorVersionRange(version string) string {
+	semVersion, _ := ValidateAndGetVersionComponents(version)
+	return "v" + strconv.Itoa(semVersion.Major)
+}
+
+// GetMinorVersionRange generates minor version range for the given version
+func GetMinorVersionRange(version string) string {
+	semVersion, _ := ValidateAndGetVersionComponents(version)
+	return "v" + strconv.Itoa(semVersion.Major) + "." + strconv.Itoa(semVersion.Minor)
 }

@@ -127,6 +127,13 @@ const (
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
 
+type SemVersion struct {
+	Version string
+	Major   int
+	Minor   int
+	Patch   *int
+}
+
 // ID uses the node ID field
 func (IDHash) ID(node *corev3.Node) string {
 	if node == nil {
@@ -254,55 +261,6 @@ func DeployReadinessAPI(envs []string) {
 		UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
 		UpdateEnforcerApis(env, apis, "")
 	}
-}
-
-// ValidateAndGetVersionComponents validates version string and extracts version components
-func ValidateAndGetVersionComponents(version string) (string, string, string, error) {
-	versionComponents := strings.Split(version, ".")
-
-	// If the versionComponents length is less than 2, return error
-	if len(versionComponents) < 2 {
-		logger.LoggerXds.Errorf("API version validation failed for API Version: %v", version)
-		return "", "", "", errors.New("Invalid version format")
-	}
-
-	majorVersion := versionComponents[0]
-	minorVersion := versionComponents[1]
-	if len(versionComponents) == 2 {
-		return majorVersion, minorVersion, "", nil
-	}
-	patchVersion := versionComponents[2]
-	return majorVersion, minorVersion, patchVersion, nil
-}
-
-// GetMajorMinorVersionRangeRegex generates major and minor version compatible range regex for the given version
-func GetMajorMinorVersionRangeRegex(version string) string {
-	majorVersion, minorVersion, patchVersion, _ := ValidateAndGetVersionComponents(version)
-	if patchVersion == "" {
-		return "(v" + majorVersion + "(\\." + minorVersion + ")?|" + version + ")"
-	}
-	return "(v" + majorVersion + "(\\." + minorVersion + "(\\." + patchVersion + ")?)?|" + version + ")"
-}
-
-// GetMinorVersionRangeRegex generates minor version compatible range regex for the given version
-func GetMinorVersionRangeRegex(version string) string {
-	majorVersion, minorVersion, patchVersion, _ := ValidateAndGetVersionComponents(version)
-	if patchVersion == "" {
-		return "(v" + version + "|" + version + ")"
-	}
-	return "(v" + majorVersion + "\\." + minorVersion + "(\\." + patchVersion + ")?|" + version + ")"
-}
-
-// GetMajorVersionRange generates major version range for the given version
-func GetMajorVersionRange(version string) string {
-	majorVersion, _, _, _ := ValidateAndGetVersionComponents(version)
-	return "v" + majorVersion
-}
-
-// GetMinorVersionRange generates minor version range for the given version
-func GetMinorVersionRange(version string) string {
-	majorVersion, minorVersion, _, _ := ValidateAndGetVersionComponents(version)
-	return "v" + majorVersion + "." + minorVersion
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
@@ -526,7 +484,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 
 	isIntelligentRoutingEnabled := conf.Adapter.IsIntelligentRoutingEnabled
 	if isIntelligentRoutingEnabled {
-		_, _, _, err = ValidateAndGetVersionComponents(apiVersion)
+		_, err = ValidateAndGetVersionComponents(apiVersion)
 		if err == nil {
 			// Check the major and minor version ranges of the current API
 			existingMajorRangeLatestVersion, isMajorRangeRegexAvailable :=
