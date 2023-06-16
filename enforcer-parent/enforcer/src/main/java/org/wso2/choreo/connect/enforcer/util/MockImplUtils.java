@@ -203,7 +203,12 @@ public class MockImplUtils {
             }
         }
         headerMap.put(APIConstants.CONTENT_TYPE_HEADER, mediaType);
-        headerMap.put("x-amz-function-error", "foo");
+
+        // added 'x-amz-function-error' header in request to prevent unintended API body manipulation of MockAPIs
+        // when AWS Lambda filter in the filter chain.
+        // https://github.com/wso2/product-microgateway/issues/3379
+        headerMap.put("x-amz-function-error", "Choreo-Connect: Added this header in MockAPI request.");
+
         responseObject.setHeaderMap(headerMap);
         responseObject.setResponseContent(content);
     }
