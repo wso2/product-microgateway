@@ -59,7 +59,7 @@ func getDefaultLogConfig() *LogConfig {
 			LogFile: "/dev/stdout",
 			// Following default value of "ReservedLogFormat" is document in log_config.toml for references.
 			// Update log_config.toml if any changes are done here.
-			ReservedLogFormat: "[%START_TIME%]' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
+			ReservedLogFormat: "[%START_TIME%]' '%ROUTE_NAME%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
 				"'%REQ(:AUTHORITY)%' '%REQ(:METHOD)%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%' " +
 				"'%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' " +
 				"'%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' " +
