@@ -759,7 +759,7 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 
 // deleteAPI deletes an API, its resources and updates the caches of given environments
 func deleteAPI(apiIdentifier string, environments []string, organizationID string) error {
-	_, exists := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
+	api, exists := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API: %v from Organization: %v. API Does not exist.", apiIdentifier, organizationID)
 		return errors.New(mgw.NotFound)
@@ -780,6 +780,137 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 		}
 	} else {
 		toBeDelEnvs, toBeKeptEnvs = getEnvironmentsToBeDeleted(existingLabels, environments)
+	}
+
+	// Update the intelligent routing if the deleting API is the latest version of the API range
+	// and the API range has other versions
+	apiRangeIdentifier := GenerateIdentifierForAPIWithoutVersion(api.GetVHost(), api.GetTitle())
+	if latestAPIVersionMap, ok := orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier]; ok {
+		deletingApiSemVersion, _ := ValidateAndGetVersionComponents(api.GetVersion())
+		if deletingApiSemVersion != nil {
+			majorVersionRange := GetMajorVersionRange(*deletingApiSemVersion)
+			newLatestMajorRangeApiUuid := ""
+			if deletingApisMajorRangeLatestApiSemVersion, ok := latestAPIVersionMap[majorVersionRange]; ok {
+				if deletingApisMajorRangeLatestApiSemVersion.Version == api.GetVersion() {
+					newLatestMajorRangeApi := &SemVersion{
+						Version: "",
+						Major:   deletingApiSemVersion.Major,
+						Minor:   0,
+						Patch:   nil,
+					}
+					for apiUUID, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
+						// Iterate all the API versions other than the deleting API itself
+						if swagger.GetTitle() == api.GetTitle() && apiUUID != apiIdentifier {
+							currentApiSemVersion, _ := ValidateAndGetVersionComponents(swagger.GetVersion())
+							if currentApiSemVersion != nil {
+								if currentApiSemVersion.Major == deletingApiSemVersion.Major {
+									if CompareSemanticVersions(*newLatestMajorRangeApi, *currentApiSemVersion) {
+										newLatestMajorRangeApi = currentApiSemVersion
+										newLatestMajorRangeApiUuid = apiUUID
+									}
+								}
+							}
+						}
+					}
+					if newLatestMajorRangeApiUuid != "" {
+						orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier][majorVersionRange] = *newLatestMajorRangeApi
+						for _, route := range orgIDOpenAPIRoutesMap[organizationID][newLatestMajorRangeApiUuid] {
+							regex := route.GetMatch().GetSafeRegex().GetRegex()
+							regexRewritePattern := route.GetRoute().GetRegexRewrite().GetPattern().GetRegex()
+							// Remove any available minor version range regexes and apply the minor range regex
+							regex = strings.ReplaceAll(
+								regex,
+								GetMinorVersionRangeRegex(*newLatestMajorRangeApi),
+								newLatestMajorRangeApi.Version,
+							)
+							regexRewritePattern = strings.ReplaceAll(
+								regexRewritePattern,
+								GetMinorVersionRangeRegex(*newLatestMajorRangeApi),
+								newLatestMajorRangeApi.Version,
+							)
+							regex = strings.ReplaceAll(
+								regex,
+								newLatestMajorRangeApi.Version,
+								GetMajorMinorVersionRangeRegex(*newLatestMajorRangeApi),
+							)
+							regexRewritePattern = strings.ReplaceAll(
+								regexRewritePattern,
+								newLatestMajorRangeApi.Version,
+								GetMajorMinorVersionRangeRegex(*newLatestMajorRangeApi),
+							)
+							pathSpecifier := &routev3.RouteMatch_SafeRegex{
+								SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+									Regex: regex,
+								},
+							}
+							route.Match.PathSpecifier = pathSpecifier
+							action := &routev3.Route_Route{}
+							action = route.Action.(*routev3.Route_Route)
+							action.Route.RegexRewrite.Pattern.Regex = regexRewritePattern
+							route.Action = action
+						}
+					} else {
+						delete(orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier], majorVersionRange)
+					}
+				}
+			}
+			minorVersionRange := GetMinorVersionRange(*deletingApiSemVersion)
+			if deletingApisMinorRangeLatestApi, ok := latestAPIVersionMap[minorVersionRange]; ok {
+				if deletingApisMinorRangeLatestApi.Version == api.GetVersion() {
+					newLatestMinorRangeApi := &SemVersion{
+						Version: "",
+						Major:   deletingApiSemVersion.Major,
+						Minor:   deletingApiSemVersion.Minor,
+						Patch:   nil,
+					}
+					newLatestMinorRangeApiUuid := ""
+					for apiUUID, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
+						// Iterate all the API versions other than the deleting API itself
+						if swagger.GetTitle() == api.GetTitle() && apiUUID != apiIdentifier {
+							currentApiSemVersion, _ := ValidateAndGetVersionComponents(swagger.GetVersion())
+							if currentApiSemVersion != nil {
+								if currentApiSemVersion.Major == deletingApiSemVersion.Major &&
+									currentApiSemVersion.Minor == deletingApiSemVersion.Minor {
+									if CompareSemanticVersions(*newLatestMinorRangeApi, *currentApiSemVersion) {
+										newLatestMinorRangeApi = currentApiSemVersion
+										newLatestMinorRangeApiUuid = apiUUID
+									}
+								}
+							}
+						}
+					}
+					if newLatestMinorRangeApiUuid != "" && newLatestMinorRangeApiUuid != newLatestMajorRangeApiUuid {
+						orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier][minorVersionRange] = *newLatestMinorRangeApi
+						for _, route := range orgIDOpenAPIRoutesMap[organizationID][newLatestMinorRangeApiUuid] {
+							regex := route.GetMatch().GetSafeRegex().GetRegex()
+							regex = strings.ReplaceAll(
+								regex,
+								newLatestMinorRangeApi.Version,
+								GetMinorVersionRangeRegex(*newLatestMinorRangeApi),
+							)
+							pathSpecifier := &routev3.RouteMatch_SafeRegex{
+								SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+									Regex: regex,
+								},
+							}
+							regexRewritePattern := route.GetRoute().GetRegexRewrite().GetPattern().GetRegex()
+							regexRewritePattern = strings.ReplaceAll(
+								regexRewritePattern,
+								newLatestMinorRangeApi.Version,
+								GetMinorVersionRangeRegex(*newLatestMinorRangeApi),
+							)
+							route.Match.PathSpecifier = pathSpecifier
+							action := &routev3.Route_Route{}
+							action = route.Action.(*routev3.Route_Route)
+							action.Route.RegexRewrite.Pattern.Regex = regexRewritePattern
+							route.Action = action
+						}
+					} else {
+						delete(orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier], minorVersionRange)
+					}
+				}
+			}
+		}
 	}
 
 	for _, val := range toBeDelEnvs {
