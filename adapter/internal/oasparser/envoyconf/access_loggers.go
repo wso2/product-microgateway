@@ -108,6 +108,7 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 				Timeout: ptypes.DurationProto(conf.Analytics.Adapter.GRPCRequestTimeout),
 			},
 		},
+		AdditionalRequestHeadersToLog: []string{"x-original-gw-url"},
 	}
 	accessLogTypedConf, err := anypb.New(accessLogConf)
 	if err != nil {
