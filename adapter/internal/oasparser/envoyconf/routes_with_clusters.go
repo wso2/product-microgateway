@@ -883,6 +883,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if strings.HasSuffix(resourcePath, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
 	}
+	basePath = GetUpdatedRegexToMatchDots(basePath)
 	pathRegex := "^" + basePath + resourceRegex
 
 	if xWso2Basepath != "" {
@@ -1397,6 +1398,12 @@ func basepathConsistent(basePath string) string {
 	return modifiedBasePath
 }
 
+// GetUpdatedRegexToMatchDots returns the regex to match the "." character in an existing regex.
+func GetUpdatedRegexToMatchDots(regex string) string {
+	// Match "." character in the regex by replacing it with "\\."
+	return strings.ReplaceAll(regex, ".", "\\.")
+}
+
 // generateRegex generates regex for the resources which have path paramaters
 // such that the envoy configuration can use it as a route.
 // If path has path parameters ({id}), append a regex pattern (pathParaRegex).
@@ -1406,6 +1413,7 @@ func basepathConsistent(basePath string) string {
 func generateRegex(fullpath string) string {
 	endRegex := "(\\?([^/]+))?"
 	newPath := generatePathRegexSegment(fullpath)
+	newPath = GetUpdatedRegexToMatchDots(newPath)
 	return "^" + newPath + endRegex + "$"
 }
 
