@@ -88,8 +88,8 @@ const (
 	// clusterHeaderName denotes the constant used for header based routing decisions.
 	clusterHeaderName string = "x-wso2-cluster-header"
 	// upstreamServiceTimeHeader the header which is used to denote the upstream service time
-	// gatewayUrlHeaderName is the header used to get the gateway url
-	gatewayUrlHeaderName      string = "x-original-gw-url"
+	// gatewayURLHeaderName is the header used to get the gateway url
+	gatewayURLHeaderName      string = "x-original-gw-url"
 	upstreamServiceTimeHeader string = "x-envoy-upstream-service-time"
 	// xWso2requestInterceptor used to provide request interceptor details for api and resource level
 	xWso2requestInterceptor string = "x-wso2-request-interceptor"
