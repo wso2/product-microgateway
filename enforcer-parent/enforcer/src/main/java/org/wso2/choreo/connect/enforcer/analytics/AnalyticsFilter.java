@@ -155,6 +155,11 @@ public class AnalyticsFilter {
                     endUserName == null ? APIConstants.END_USER_UNKNOWN : endUserName);
             requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
                     requestContext.getMatchedAPI().getBasePath());
+
+            // Adding Gateway URL
+            String gatewayUrl = requestContext.getHeaders().get("x-original-gw-url");
+            requestContext.addMetadataToMap(MetadataConstants.GATEWAY_URL,
+                    gatewayUrl);
         } finally {
             if (Utils.tracingEnabled()) {
                 analyticsSpanScope.close();

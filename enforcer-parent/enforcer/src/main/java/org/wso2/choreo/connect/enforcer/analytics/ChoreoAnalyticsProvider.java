@@ -227,7 +227,8 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Map<String, Object> getProperties() {
         Map map = new HashMap();
-        String gwURL = logEntry.getRequest().getRequestHeadersMap().get(AnalyticsConstants.X_ORIGINAL_GW_URL);
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
+        String gwURL = getValueAsString(fieldsMap, MetadataConstants.GATEWAY_URL);
         map.put(AnalyticsConstants.X_ORIGINAL_GW_URL, gwURL);
         return map;
     }
