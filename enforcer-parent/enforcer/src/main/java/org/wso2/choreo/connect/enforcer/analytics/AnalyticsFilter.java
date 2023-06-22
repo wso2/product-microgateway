@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants.GATEWAY_URL;
+
 /**
  * This is the filter is for Analytics.
  * If the request is failed at enforcer (due to throttling, authentication failures) the analytics event is
@@ -155,6 +157,11 @@ public class AnalyticsFilter {
                     endUserName == null ? APIConstants.END_USER_UNKNOWN : endUserName);
             requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
                     requestContext.getMatchedAPI().getBasePath());
+
+            // Adding Gateway URL
+            String gatewayUrl = requestContext.getHeaders().get(GATEWAY_URL);
+            requestContext.addMetadataToMap(MetadataConstants.GATEWAY_URL,
+                    gatewayUrl);
         } finally {
             if (Utils.tracingEnabled()) {
                 analyticsSpanScope.close();

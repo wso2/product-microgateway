@@ -40,6 +40,9 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Generate FaultDTO for the errors generated from enforcer.
  */
@@ -211,5 +214,13 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         logger.error("Internal Error: End User IPAddress is not required for fault events");
         // EndUserIP is not required for fault event type
         return null;
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        Map map = new HashMap();
+        String gwURL = requestContext.getHeaders().get(AnalyticsConstants.GATEWAY_URL);
+        map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
+        return map;
     }
 }
