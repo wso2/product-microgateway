@@ -229,7 +229,7 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         Map map = new HashMap();
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         String gwURL = getValueAsString(fieldsMap, MetadataConstants.GATEWAY_URL);
-        map.put(AnalyticsConstants.X_ORIGINAL_GW_URL, gwURL);
+        map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
         return map;
     }
 
