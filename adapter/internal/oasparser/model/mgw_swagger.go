@@ -69,8 +69,9 @@ type MgwSwagger struct {
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 	// DeploymentType could be either "PRODUCTION" or "SANDBOX"
-	DeploymentType string
-	EnvironmentID  string
+	DeploymentType  string
+	EnvironmentID   string
+	EnvironmentName string
 }
 
 // EndpointCluster represent an upstream cluster
