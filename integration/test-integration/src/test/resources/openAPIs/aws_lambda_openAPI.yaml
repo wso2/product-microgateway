@@ -8,7 +8,7 @@ servers:
 security:
   -
     default: []
-x-wso2-disable-security: true
+x-wso2-disable-security: false
 paths:
   /*:
     get:

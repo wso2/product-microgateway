@@ -33,7 +33,6 @@ import javax.net.ssl.SSLParameters;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class MockInterceptorServer extends Thread {
@@ -176,8 +175,6 @@ public class MockInterceptorServer extends Thread {
                     }
 
                     byte[] response = requestFlowResponseBody.getBytes();
-                    String str = new String(response, StandardCharsets.UTF_8);
-                    log.info("ResponseOut :"+str);
                     exchange.getResponseHeaders().set(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2023, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -22,17 +22,13 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Mock HTTP server for testing Open API tests.
@@ -43,10 +39,6 @@ public class EchoService extends Thread {
     private HttpServer httpServer;
     private final int backendServerPort;
     private boolean secured = false;
-//    private boolean mtlsEnabled = false;
-//    private int retryCountEndpointTwo = 0;
-//    private int retryCountEndpointThree = 0;
-//    private int retryCountEndpointFour = 0;
 
     public EchoService(int port) {
         this.backendServerPort = port;

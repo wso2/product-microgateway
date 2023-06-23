@@ -36,13 +36,13 @@ public class AwsLambdaSupportTestCase {
 
         JSONObject respJSON = new JSONObject(response.getData());
         JSONObject respHeaders = respJSON.getJSONObject("headers");
-        Assert.assertTrue(respHeaders.has("Authorization"),"Missing Authorization header");
-        Assert.assertTrue(respHeaders.has("X-amz-date"),"Missing X-Amz-Date header");
+        Assert.assertTrue(respHeaders.has("Authorization"), "Missing Authorization header");
+        Assert.assertTrue(respHeaders.has("X-amz-date"), "Missing X-Amz-Date header");
 
         String expectedPath = "/2015-03-31/functions/arn:aws:lambda:us-east-1:123456789:function:testFunc/invocations";
         String actualPath = respJSON.getString("path");
 
-        Assert.assertEquals(actualPath,expectedPath,"Path mismatched");
+        Assert.assertEquals(actualPath,expectedPath, "Path mismatched");
 
     }
 
@@ -58,12 +58,12 @@ public class AwsLambdaSupportTestCase {
 
         JSONObject respJSON = new JSONObject(response.getData());
         JSONObject respHeaders = respJSON.getJSONObject("headers");
-        Assert.assertTrue(respHeaders.has("Authorization"),"Missing Authorization header");
-        Assert.assertTrue(respHeaders.has("X-amz-date"),"Missing X-Amz-Date header");
+        Assert.assertTrue(respHeaders.has("Authorization"), "Missing Authorization header");
+        Assert.assertTrue(respHeaders.has("X-amz-date"), "Missing X-Amz-Date header");
 
         String expectedPath = "/2015-03-31/functions/arn:aws:lambda:us-east-1:987654321:function:testOrder/invocations";
         String actualPath = respJSON.getString("path");
 
-        Assert.assertEquals(actualPath,expectedPath,"Path mismatched");
+        Assert.assertEquals(actualPath,expectedPath, "Path mismatched");
     }
 }
