@@ -54,4 +54,5 @@ message Api {
 	bool enableBackendJWT = 20;
 	string deploymentType = 21;
 	string environmentId = 22;
+	string environmentName = 23;
 }

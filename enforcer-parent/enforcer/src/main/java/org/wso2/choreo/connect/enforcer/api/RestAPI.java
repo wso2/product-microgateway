@@ -150,7 +150,9 @@ public class RestAPI implements API {
                 .endpoints(endpoints).endpointSecurity(endpointSecurity)
                 .organizationId(api.getOrganizationId()).apiProvider(api.getApiProvider())
                 .enableBackendJWT(api.getEnableBackendJWT())
-                .deploymentType(api.getDeploymentType()).environmentId(api.getEnvironmentId()).build();
+                .deploymentType(api.getDeploymentType())
+                .environmentId(api.getEnvironmentId())
+                .environmentName(api.getEnvironmentName()).build();
 
         initFilters();
         return basePath;
