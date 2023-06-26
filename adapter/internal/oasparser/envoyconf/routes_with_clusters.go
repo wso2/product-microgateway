@@ -991,7 +991,7 @@ end`
 			Value:   awsLambdaMarshelled.Bytes(),
 		}
 
-		perRouteFilterConfigs["envoy.filters.http.aws_lambda"] = awsLambdaFilter
+		perRouteFilterConfigs[awsLambdaFilterName] = awsLambdaFilter
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
