@@ -162,3 +162,9 @@ const (
 	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
 	uaexCode                   = "UAEX"
 )
+
+// Aws Lambda Invocation Mode
+const (
+	invocationModeSynchronous  = "SYNCHRONOUS"
+	invocationModeAsynchronous = "ASYNCHRONOUS"
+)

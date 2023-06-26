@@ -219,7 +219,7 @@ func getAwsLambdaFilter() *hcmv3.HttpFilter {
 
 	var mode awslambdav3.Config_InvocationMode
 
-	if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == "SYNCHRONOUS" {
+	if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == invocationModeSynchronous {
 		mode = awslambdav3.Config_SYNCHRONOUS
 	} else {
 		mode = awslambdav3.Config_ASYNCHRONOUS

@@ -73,4 +73,10 @@ public class Constants {
     public static final String PROP_CON_FACTORY = "connectionfactory.TopicConnectionFactory";
     public static final String DEFAULT_DESTINATION_TYPE = "Topic";
     public static final String DEFAULT_CON_FACTORY_JNDI_NAME = "TopicConnectionFactory";
+
+    // aws lambda properties
+    public static final String X_WSO2_CLUSTER_HEADER = "x-wso2-cluster-header";
+    public static final String AWS_LAMBDA_CLUSTER_NAME = "wso2_lambda_egress_gateway";
+    public static final String AWS_LAMBDA_ENDPOINT_TYPE = "awslambda";
+    public static final String AMZ_FUNCTION_ERROR_HEADER = "x-amz-function-error";
 }

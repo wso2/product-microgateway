@@ -43,6 +43,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.MutualSSLDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.interceptor.MediationPolicyFilter;
@@ -352,7 +353,7 @@ public class RestAPI implements API {
         // generic OPTIONS method call happens, matchedResourcePath becomes null.
         if (requestContext.getMatchedResourcePaths() != null && requestContext.getMatchedResourcePaths().size() > 0 &&
                 requestContext.getMatchedResourcePaths().get(0).isDisableSecurity() &&
-                !this.apiConfig.getEndpointType().equals("awslambda")) {
+                !this.apiConfig.getEndpointType().equals(Constants.AWS_LAMBDA_ENDPOINT_TYPE)) {
             return;
         }
 

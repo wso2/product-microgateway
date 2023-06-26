@@ -226,9 +226,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				value := model.ResolveAmznResourceName(operation.GetVendorExtensions())
 
 				if (i != 0) && (amznResourceName != value) {
-					logger.LoggerOasparser.Errorf("ARNs in all the operations of the same resource path should have the same value")
+					logger.LoggerOasparser.Errorf("ARNs in all the operations of the same resource path should have the same value. | APIID: %v API Title: %v API version: %v", mgwSwagger.GetID(), apiTitle, apiVersion)
 				} else if value == "" {
-					logger.LoggerOasparser.Errorf("ARN cannot be empty")
+					logger.LoggerOasparser.Errorf("ARN cannot be empty. | APIID: %v API Title: %v API version: %v", mgwSwagger.GetID(), apiTitle, apiVersion)
 				} else {
 					amznResourceName = value
 				}
@@ -968,7 +968,7 @@ end`
 
 		var mode awslambdav3.Config_InvocationMode
 
-		if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == "SYNCHRONOUS" {
+		if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == invocationModeSynchronous {
 			mode = awslambdav3.Config_SYNCHRONOUS
 		} else {
 			mode = awslambdav3.Config_ASYNCHRONOUS

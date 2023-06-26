@@ -35,10 +35,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
-import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
-import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
-import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
+import org.wso2.choreo.connect.enforcer.constants.*;
 import org.wso2.choreo.connect.enforcer.deniedresponse.DeniedResponsePreparer;
 import org.wso2.choreo.connect.enforcer.jmx.JMXUtils;
 import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
@@ -169,7 +166,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
-                            if (("wso2_lambda_egress_gateway".equals(value)) && "x-wso2-cluster-header".equals(key)) {
+                            if ((Constants.AWS_LAMBDA_CLUSTER_NAME.equals(value)) && Constants.X_WSO2_CLUSTER_HEADER.equals(key)) {
                                 return;
                             }
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
