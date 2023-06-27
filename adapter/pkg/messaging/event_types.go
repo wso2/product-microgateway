@@ -104,22 +104,30 @@ type Event struct {
 
 // APIEvent for struct API events
 type APIEvent struct {
-	APIID                            int               `json:"apiId"`
-	UUID                             string            `json:"uuid"`
-	GatewayLabels                    []string          `json:"gatewayLabels"`
-	EnvToDataPlaneIDMap              map[string]string `json:"envToDataPlaneIdMap"`
-	EnvToGatewayAccessibilityTypeMap map[string]string `json:"gatewayAccessibilityMap"`
-	APIVersion                       string            `json:"apiVersion"`
-	APIContext                       string            `json:"apiContext"`
-	APIName                          string            `json:"apiName"`
-	APIProvider                      string            `json:"apiProvider"`
-	APIStatus                        string            `json:"apiStatus"`
-	APIType                          string            `json:"apiType"`
+	APIID                            int                           `json:"apiId"`
+	UUID                             string                        `json:"uuid"`
+	GatewayLabels                    []string                      `json:"gatewayLabels"`
+	EnvToDataPlaneIDMap              map[string]string             `json:"envToDataPlaneIdMap"`
+	EnvToGatewayAccessibilityTypeMap map[string]string             `json:"gatewayAccessibilityMap"`
+	EnvDetails                       map[string]EnvironmentDetails `json:"envDetails"`
+	APIVersion                       string                        `json:"apiVersion"`
+	APIContext                       string                        `json:"apiContext"`
+	APIName                          string                        `json:"apiName"`
+	APIProvider                      string                        `json:"apiProvider"`
+	APIStatus                        string                        `json:"apiStatus"`
+	APIType                          string                        `json:"apiType"`
 	Event
 	// TODO: (VirajSalaka) Remove this when the event is fixed from APIM side
 	Version string `json:"version"`
 	Context string `json:"context"`
 	Name    string `json:"name"`
+}
+
+// EnvironmentDetails for struct APIM gateway environment details
+type EnvironmentDetails struct {
+	Vhost                    string `json:"vhost"`
+	DataPlaneID              string `json:"dataPlaneID"`
+	GatewayAccessibilityType string `json:"gatewayAccessibilityType"`
 }
 
 // ApplicationRegistrationEvent for struct application registration events
