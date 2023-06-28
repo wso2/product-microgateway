@@ -103,7 +103,6 @@ func ResolveAmznResourceName(vendorExtensions map[string]interface{}) string {
 		if val, ok := x.(string); ok {
 			xAmznResourceName = val
 		}
-	} else {
 	}
 	return xAmznResourceName
 }

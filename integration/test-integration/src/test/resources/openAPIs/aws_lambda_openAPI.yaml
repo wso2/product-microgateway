@@ -67,20 +67,6 @@ paths:
         security-types:
           - oauth2
         optional: false
-    patch:
-      responses:
-        "200":
-          description: OK
-      security:
-        -
-          default: []
-      x-auth-type: Application & Application User
-      x-throttling-tier: Unlimited
-      x-amzn-resource-name: arn:aws:lambda:us-east-1:123456789:function:testFunc
-      x-wso2-application-security:
-        security-types:
-          - oauth2
-        optional: false
   /order:
     get:
       responses:

@@ -16,19 +16,19 @@ import java.util.Map;
 public class AwsLambdaSupportTestCase {
 
     protected String jwtTokenProd;
+    Map<String, String> headers = new HashMap<>();
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
                 null, false);
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
     }
 
     @Test(description = "Test invoke Aws Lambda API 1")
     public void testInvokeAwsLambda1() throws Exception {
 
-        Map<String, String> headers = new HashMap<>();
         //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/awsLambda/1.0.0/"), headers);
         Assert.assertNotNull(response);
@@ -48,9 +48,7 @@ public class AwsLambdaSupportTestCase {
 
     @Test (description = "Test invoke Aws Lambda API 2")
     public void testInvokeAwsLambda2() throws Exception {
-        Map<String, String> headers = new HashMap<>();
         //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps("/awsLambda/1.0.0/order"), headers);
         Assert.assertNotNull(response);

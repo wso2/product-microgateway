@@ -17,7 +17,7 @@
 
 package model
 
-//CreateDummyMgwSwaggerForAWSLambdaTests creates a dummy MgwSwagger struct to be used for aws lambda unit tests
+// CreateDummyMgwSwaggerForAWSLambdaTests creates a dummy MgwSwagger struct to be used for aws lambda unit tests
 func CreateDummyMgwSwaggerForAWSLambdaTests(resources []*Resource) *MgwSwagger {
 	return &MgwSwagger{
 		resources: resources,

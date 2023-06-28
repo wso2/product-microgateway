@@ -119,18 +119,6 @@ data:
         request: []
         response: []
         fault: []
-    -
-      id: ""
-      target: /*
-      verb: PATCH
-      authType: Application & Application User
-      throttlingPolicy: Unlimited
-      scopes: []
-      usedProductIds: []
-      operationPolicies:
-        request: []
-        response: []
-        fault: []
   categories: []
   keyManagers:
     - all

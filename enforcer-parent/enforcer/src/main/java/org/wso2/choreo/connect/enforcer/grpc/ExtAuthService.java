@@ -177,7 +177,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();
-                                okResponseBuilder.addHeaders(headerValueOption);
+                            okResponseBuilder.addHeaders(headerValueOption);
                 }
                 );
             }
