@@ -227,6 +227,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 
 				if (i != 0) && (amznResourceName != value) {
 					logger.LoggerOasparser.Errorf("ARNs in all the operations of the same resource path should have the same value. | APIID: %v API Title: %v API version: %v", mgwSwagger.GetID(), apiTitle, apiVersion)
+					return nil, nil, nil, fmt.Errorf("error while creating routes for AWS Lambda API : %s version : %s", apiTitle, apiVersion)
 				} else if value == "" {
 					logger.LoggerOasparser.Errorf("ARN cannot be empty. | APIID: %v API Title: %v API version: %v", mgwSwagger.GetID(), apiTitle, apiVersion)
 				} else {
