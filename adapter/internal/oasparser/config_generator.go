@@ -68,6 +68,14 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 		}
 	}
 
+	logger.LoggerOasparser.Debug("Creating global cluster - Aws Lambda")
+	if c, e, err := envoyconf.CreateAwsLambdaCluster(conf); err == nil {
+		clusters = append(clusters, c)
+		endpoints = append(endpoints, e...)
+	} else {
+		logger.LoggerOasparser.Fatal("Failed to initialize aws lambda cluster. ", err)
+	}
+
 	return clusters, endpoints
 }
 
@@ -224,6 +232,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, vhost string) *api.Api {
 		ApplicationSecurity:   mgwSwagger.GetXWSO2ApplicationSecurity(),
 		GraphQLSchema:         mgwSwagger.GraphQLSchema,
 		GraphqlComplexityInfo: mgwSwagger.GraphQLComplexities.Data.List,
+		EndpointType:          mgwSwagger.GetEndpointType(),
 	}
 }
 

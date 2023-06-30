@@ -58,4 +58,5 @@ message Api {
 	bool applicationSecurity = 22;
 	string graphQLSchema = 23;
 	repeated GraphqlComplexity graphqlComplexityInfo = 24;
+	string endpointType = 25;
 }

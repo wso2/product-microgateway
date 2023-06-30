@@ -146,6 +146,12 @@ var defaultConfig = &Config{
 			AllowPartialMessage: false,
 			PackAsBytes:         false,
 		},
+		AwsLambda: awsLambda{
+			Enabled:            false,
+			AwsRegion:          "",
+			PayloadPassthrough: true,
+			InvocationMode:     "synchrounus",
+		},
 		Filters: filters{
 			Compression: compression{
 				Enabled: true,

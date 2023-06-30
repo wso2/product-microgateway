@@ -117,6 +117,7 @@ type envoy struct {
 	Downstream                       envoyDownstream
 	Connection                       connection
 	PayloadPassingToEnforcer         payloadPassingToEnforcer
+	AwsLambda                        awsLambda
 	UseRemoteAddress                 bool
 	Filters                          filters
 }
@@ -246,6 +247,14 @@ type payloadPassingToEnforcer struct {
 	MaxRequestBytes     uint32
 	AllowPartialMessage bool
 	PackAsBytes         bool
+}
+
+// Configurations related to Aws lmabda endpoint support
+type awsLambda struct {
+	Enabled            bool
+	AwsRegion          string
+	PayloadPassthrough bool
+	InvocationMode     string
 }
 
 // Envoy Upstream Related Configurations

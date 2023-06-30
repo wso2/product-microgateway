@@ -22,11 +22,13 @@ const (
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
 	extAuthzHTTPClusterName string = "ext_authz_http_cluster"
+	awslambdaClusterName    string = "wso2_lambda_egress_gateway"
 )
 
 const (
 	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
 	luaFilterName              string = "envoy.filters.http.lua"
+	awsLambdaFilterName        string = "envoy.filters.http.aws_lambda"
 	transportSocketName        string = "envoy.transport_sockets.tls"
 	fileAccessLogName          string = "envoy.access_loggers.file"
 	grpcAccessLogName          string = "envoy.http_grpc_access_log"
@@ -35,6 +37,7 @@ const (
 	luaPerRouteName            string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
 	localRateLimitPerRouteName string = "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
 	corsFilterName             string = "type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors"
+	awsLambdaRouteName         string = "type.googleapis.com/envoy.extensions.filters.http.aws_lambda.v3.PerRouteConfig"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"
@@ -158,4 +161,10 @@ const (
 const (
 	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
 	uaexCode                   = "UAEX"
+)
+
+// Aws Lambda Invocation Mode
+const (
+	invocationModeSynchronous  = "SYNCHRONOUS"
+	invocationModeAsynchronous = "ASYNCHRONOUS"
 )

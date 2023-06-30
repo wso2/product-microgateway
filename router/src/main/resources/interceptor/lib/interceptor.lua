@@ -260,6 +260,11 @@ local function handle_direct_respond(handle, interceptor_response_body, shared_i
             return
         end
 
+        -- added 'x-amz-function-error' header in request to prevent unintended API body manipulation of interceptor use cases
+        -- when AWS Lambda filter in the filter chain.
+        -- https://github.com/wso2/product-microgateway/issues/3379
+        headers["x-amz-function-error"] = "Choreo-Connect: Added this header in direct respond"
+        
         direct_respond(handle, headers, decoded_body, shared_info)
     end
 end
@@ -481,8 +486,13 @@ function interceptor.handle_response_interceptor(response_handle, intercept_serv
         -- error thrown, exiting
         return
     end
-    
+
     modify_headers(response_handle, interceptor_response_body)
+
+    -- removing 'x-amz-function-error' added previously into request to prevent API body manipulation
+    -- when AWS Lambda filter in the filter chain.
+    -- https://github.com/wso2/product-microgateway/issues/3379
+    response_handle:headers():remove("x-amz-function-error")
 
     utils.wire_log_headers(response_handle, " << response headers << ", wire_log_config.log_headers_enabled)
     utils.wire_log_body(response_handle, " << response body << ", wire_log_config.log_body_enabled)

@@ -335,3 +335,22 @@ func TestGetAuthorityHeader(t *testing.T) {
 		assert.Equal(t, authHeader, item.authorityHeader, item.message)
 	}
 }
+
+func TestGetEndpointType(t *testing.T) {
+	type getEndpointTypeTestItem struct {
+		mgwSwagger MgwSwagger
+		result     string
+		message    string
+	}
+	dataItems := []getEndpointTypeTestItem{
+		{
+			mgwSwagger: MgwSwagger{EndpointType: "awslambda"},
+			result:     "awslambda",
+			message:    "invalid endpoint type",
+		},
+	}
+	for _, item := range dataItems {
+		resultEndpointType := item.mgwSwagger.GetEndpointType()
+		assert.Equal(t, item.result, resultEndpointType, item.message)
+	}
+}

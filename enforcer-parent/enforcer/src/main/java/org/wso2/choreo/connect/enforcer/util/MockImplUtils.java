@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.MockedHeaderConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.MockedResponseConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 
 import java.util.Arrays;
@@ -203,6 +204,12 @@ public class MockImplUtils {
             }
         }
         headerMap.put(APIConstants.CONTENT_TYPE_HEADER, mediaType);
+
+        // added 'x-amz-function-error' header in request to prevent unintended API body manipulation of MockAPIs
+        // when AWS Lambda filter in the filter chain.
+        // https://github.com/wso2/product-microgateway/issues/3379
+        headerMap.put(Constants.AMZ_FUNCTION_ERROR_HEADER, "Choreo-Connect: Added this header in MockAPI request.");
+
         responseObject.setHeaderMap(headerMap);
         responseObject.setResponseContent(content);
     }

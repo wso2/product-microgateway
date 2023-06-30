@@ -44,4 +44,6 @@ public class Constants {
     public static final int MOCK_BACKEND_HTTP2_SERVER_CLEAR_TEXT_PORT = 2350;
     public static final int MOCK_BACKEND_HTTP2_SERVER_SECURED_PORT = 2351;
     public static final int MOCK_GRAPHQL_SERVER_PORT = 2320;
+
+    public static final int ECHO_SERVICE_SERVER_PORT = 443;
 }

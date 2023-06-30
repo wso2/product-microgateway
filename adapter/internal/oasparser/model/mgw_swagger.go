@@ -342,6 +342,11 @@ func (swagger *MgwSwagger) GetXWSO2ApplicationSecurity() bool {
 	return swagger.xWso2ApplicationSecurity
 }
 
+// GetEndpointType returns the EndpointType of the API
+func (swagger *MgwSwagger) GetEndpointType() string {
+	return swagger.EndpointType
+}
+
 // SetOperationPolicies this will merge operation level policies provided in api yaml
 func (swagger *MgwSwagger) SetOperationPolicies(apiProject ProjectAPI) (err error) {
 	for _, resource := range swagger.resources {
@@ -721,7 +726,8 @@ func (swagger *MgwSwagger) setDisableSecurity() {
 // Validate method confirms that the mgwSwagger has all required fields in the required format.
 // This needs to be checked prior to generate router/enforcer related resources.
 func (swagger *MgwSwagger) Validate() error {
-	if swagger.EndpointImplementationType != constants.MockedOASEndpointType {
+	if (swagger.EndpointImplementationType != constants.MockedOASEndpointType) &&
+		(swagger.EndpointType != constants.AwsLambda) {
 		if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
 			(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
 

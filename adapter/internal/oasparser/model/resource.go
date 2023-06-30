@@ -44,6 +44,7 @@ type Resource struct {
 	sandboxEndpoints    *EndpointCluster
 	vendorExtensions    map[string]interface{}
 	hasPolicies         bool
+	amznResourceName    string
 }
 
 // GetProdEndpoints returns the production endpoints object of a given resource.
@@ -94,6 +95,16 @@ func (resource *Resource) GetOperations() []*Operation {
 	return resource.methods
 }
 
+// GetAmznResourceName returns the amazon resourse name related to aws lambda endpoint of given resource.
+func (resource *Resource) GetAmznResourceName() string {
+	return resource.amznResourceName
+}
+
+// SetAmznResourceName sets the amazon resource name.
+func (resource *Resource) SetAmznResourceName(amznResourceName string) {
+	resource.amznResourceName = amznResourceName
+}
+
 // HasPolicies returns whether the resource has operations that includes policies.
 func (resource *Resource) HasPolicies() bool {
 	return resource.hasPolicies
@@ -113,6 +124,15 @@ func CreateMinimalDummyResourceForTests(path string, methods []*Operation, id st
 		iD:                  id,
 		productionEndpoints: prodEndpints,
 		sandboxEndpoints:    sandboxEndpints,
+	}
+}
+
+// CreateDummyResourceForAwsLambdaTests create a resource object with amazon resource name(arn)
+// which could be used for unit tests.
+func CreateDummyResourceForAwsLambdaTests(methods []*Operation, amznResourceName string) Resource {
+	return Resource{
+		methods:          methods,
+		amznResourceName: amznResourceName,
 	}
 }
 

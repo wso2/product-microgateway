@@ -229,6 +229,15 @@ soapErrorInXMLEnabled = false
   # If enabled, request body will send as raw bytes, otherwise it will be a UTF-8 string request body.
   packAsBytes = false
 
+# Configs for invoke api with Aws lambda endpoint
+[router.awsLambda]
+  # Sets the AWS Regions related to respective lambda endpoint
+  awsRegion = "us-east-1"
+  # Whether to transform the request (headers and body) to a JSON payload or pass it as is.
+  payloadPassthrough = true
+  # Sets the invocation mode to SYNCHRONOUS or ASYNCHRONOUS
+  invocationMode = "SYNCHRONOUS"
+
 # Configurations relevant to the router filters
 [router.filters]
   # Configurations relevant to the compression filter

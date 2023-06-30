@@ -58,6 +58,8 @@ type APIYaml struct {
 		} `json:"corsConfiguration,omitempty"`
 		EndpointConfig struct {
 			EndpointType                 string              `json:"endpoint_type,omitempty"`
+			AccessMethod                 string              `json:"access_method,omitempty"`
+			AmazonRegion                 string              `json:"amznRegion"`
 			LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`
 			LoadBalanceSessionManagement string              `json:"sessionManagement,omitempty"`
 			LoadBalanceSessionTimeOut    string              `json:"sessionTimeOut,omitempty"`
@@ -198,6 +200,7 @@ func (apiYaml *APIYaml) ValidateMandatoryFields() error {
 	}
 
 	if apiYaml.Data.EndpointImplementationType != constants.MockedOASEndpointType &&
+		apiYaml.Data.EndpointConfig.EndpointType != constants.AwsLambda &&
 		len(apiYaml.Data.EndpointConfig.ProductionEndpoints) < 1 &&
 		len(apiYaml.Data.EndpointConfig.SandBoxEndpoints) < 1 {
 		errMsg = errMsg + "API production and sandbox endpoints "

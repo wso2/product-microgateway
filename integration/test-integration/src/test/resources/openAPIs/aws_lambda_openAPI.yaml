@@ -1,0 +1,118 @@
+openapi: 3.0.1
+info:
+  title: AwsLambda
+  version: 1.0.0
+servers:
+  -
+    url: /
+security:
+  -
+    default: []
+x-wso2-disable-security: false
+paths:
+  /*:
+    get:
+      responses:
+        "200":
+          description: OK
+      security:
+        -
+          default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-amzn-resource-name: arn:aws:lambda:us-east-1:123456789:function:testFunc
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+    put:
+      responses:
+        "200":
+          description: OK
+      security:
+        -
+          default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-amzn-resource-name: arn:aws:lambda:us-east-1:123456789:function:testFunc
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+    post:
+      responses:
+        "200":
+          description: OK
+      security:
+        -
+          default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-amzn-resource-name: arn:aws:lambda:us-east-1:123456789:function:testFunc
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+    delete:
+      responses:
+        "200":
+          description: OK
+      security:
+        -
+          default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-amzn-resource-name: arn:aws:lambda:us-east-1:123456789:function:testFunc
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+  /order:
+    get:
+      responses:
+        "200":
+          description: OK
+      security:
+        - default: [ ]
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-amzn-resource-name: arn:aws:lambda:us-east-1:987654321:function:testOrder
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://test.com
+          scopes: {}
+x-wso2-auth-header: Authorization
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+    - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+    - authorization
+    - Access-Control-Allow-Origin
+    - Content-Type
+    - SOAPAction
+    - apikey
+    - Internal-Key
+  accessControlAllowMethods:
+    - GET
+    - PUT
+    - POST
+    - DELETE
+    - PATCH
+    - OPTIONS
+x-wso2-basePath: /awsLambda/1.0.0
+x-wso2-transports:
+  - http
+  - https
+x-wso2-response-cache:
+  enabled: false
+  cacheTimeoutInSeconds: 300

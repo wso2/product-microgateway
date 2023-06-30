@@ -21,9 +21,11 @@ package envoyconf
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	awslambdav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/aws_lambda/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	local_ratelimit_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
@@ -52,6 +54,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
 	router := getRouterHTTPFilter()
 	lua := getLuaFilter()
+	awsLambda := getAwsLambdaFilter()
 	cors := getCorsHTTPFilter()
 	localRateLimit := getHTTPLocalRateLimitFilter()
 
@@ -60,9 +63,12 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		localRateLimit,
 		extAauth,
 		lua,
+		awsLambda,
 		router,
 	}
+
 	conf, _ := config.ReadConfigs()
+
 	if conf.Envoy.Filters.Compression.Enabled {
 		compressionFilter, err := getCompressorFilter()
 		if err != nil {
@@ -205,6 +211,36 @@ func getLuaFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &luaFilter
+}
+
+//getAwsLambdaFilter gets AWS Lambda filter
+func getAwsLambdaFilter() *hcmv3.HttpFilter {
+	conf, _ := config.ReadConfigs()
+
+	var mode awslambdav3.Config_InvocationMode
+
+	if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == invocationModeSynchronous {
+		mode = awslambdav3.Config_SYNCHRONOUS
+	} else {
+		mode = awslambdav3.Config_ASYNCHRONOUS
+	}
+
+	awsLambdaConfig := &awslambdav3.Config{
+		Arn:                "arn:aws:lambda:" + conf.Envoy.AwsLambda.AwsRegion + ":account_id:function:func_name",
+		PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
+		InvocationMode:     mode,
+	}
+	ext, err2 := anypb.New(awsLambdaConfig)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+	awsLambdaFilter := hcmv3.HttpFilter{
+		Name: awsLambdaFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: ext,
+		},
+	}
+	return &awsLambdaFilter
 }
 
 // getHTTPLocalRateLimitFilter returns the local rate limit filter which is used for JWKS endpoint specifically.

@@ -36,6 +36,7 @@ import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
@@ -164,16 +165,20 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                         .setHeader(HeaderValue.newBuilder().setKey(APIConstants.PATH_HEADER).setValue(constructedPath)
                                 .build()).build();
-                okResponseBuilder.addHeaders(headerValueOption);
+                    okResponseBuilder.addHeaders(headerValueOption);
             }
 
             if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
+                            if ((Constants.AWS_LAMBDA_CLUSTER_NAME.equals(value)) &&
+                                    Constants.X_WSO2_CLUSTER_HEADER.equals(key)) {
+                                return;
+                            }
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();
                             okResponseBuilder.addHeaders(headerValueOption);
-                        }
+                }
                 );
             }
             okResponseBuilder.addAllHeadersToRemove(responseObject.getRemoveHeaderMap());

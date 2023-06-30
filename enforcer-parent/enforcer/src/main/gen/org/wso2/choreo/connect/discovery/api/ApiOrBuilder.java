@@ -345,4 +345,16 @@ public interface ApiOrBuilder extends
    */
   org.wso2.choreo.connect.discovery.api.GraphqlComplexityOrBuilder getGraphqlComplexityInfoOrBuilder(
       int index);
+
+  /**
+   * <code>string endpointType = 25;</code>
+   * @return The endpointType.
+   */
+  java.lang.String getEndpointType();
+  /**
+   * <code>string endpointType = 25;</code>
+   * @return The bytes for endpointType.
+   */
+  com.google.protobuf.ByteString
+      getEndpointTypeBytes();
 }

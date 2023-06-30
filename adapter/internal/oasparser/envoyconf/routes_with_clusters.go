@@ -35,6 +35,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	awslambdav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/aws_lambda/v3"
 	cors_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/cors/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	local_rate_limitv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/local_ratelimit/v3"
@@ -215,6 +216,39 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 			routes = append(routes, routesP...)
 		}
 		return routes, clusters, endpoints, nil
+
+	}
+
+	if mgwSwagger.EndpointType == constants.AwsLambda {
+		for _, resource := range mgwSwagger.GetResources() {
+			amznResourceName := ""
+			for i, operation := range resource.GetOperations() {
+				value := model.ResolveAmznResourceName(operation.GetVendorExtensions())
+
+				if (i != 0) && (amznResourceName != value) {
+					logger.LoggerOasparser.Errorf("ARNs in all the operations of the same resource path should have the same value. | APIID: %v API Title: %v API version: %v", mgwSwagger.GetID(), apiTitle, apiVersion)
+					return nil, nil, nil, fmt.Errorf("error while creating routes for AWS Lambda API : %s version : %s", apiTitle, apiVersion)
+				} else if value == "" {
+					logger.LoggerOasparser.Errorf("ARN cannot be empty. | APIID: %v API Title: %v API version: %v", mgwSwagger.GetID(), apiTitle, apiVersion)
+				} else {
+					amznResourceName = value
+				}
+				resource.SetAmznResourceName(amznResourceName)
+			}
+
+			routesX, err := createRoutes(genRouteCreateParams(&mgwSwagger, resource, vHost, "", awslambdaClusterName, awslambdaClusterName, nil, nil, organizationID, false))
+			if err != nil {
+				logger.LoggerXds.ErrorC(logging.ErrorDetails{
+					Message: fmt.Sprintf("Error while creating routes for AWS Lambda API : %s version : %s. Error: %s",
+						apiTitle, apiVersion, err.Error()),
+					Severity:  logging.MAJOR,
+					ErrorCode: 2239,
+				})
+				return nil, nil, nil, fmt.Errorf("error while creating routes for AWS Lambda API : %s version : %s. %v", apiTitle, apiVersion, err)
+			}
+
+			routes = append(routes, routesX...)
+		}
 	}
 
 	if mgwSwagger.GetAPIType() == constants.GRAPHQL {
@@ -402,6 +436,31 @@ func getClusterName(epPrefix string, organizationID string, vHost string, swagge
 func CreateLuaCluster(interceptorCerts map[string][]byte, endpoint model.InterceptEndpoint) (*clusterv3.Cluster, []*corev3.Address, error) {
 	logger.LoggerOasparser.Debug("creating a lua cluster ", endpoint.ClusterName)
 	return processEndpoints(endpoint.ClusterName, &endpoint.EndpointCluster, interceptorCerts, endpoint.ClusterTimeout, endpoint.EndpointCluster.Endpoints[0].Basepath)
+}
+
+// CreateAwsLambdaCluster creates AWS Lambda cluster configuration.
+func CreateAwsLambdaCluster(conf *config.Config) (*clusterv3.Cluster, []*corev3.Address, error) {
+	epTimeout := conf.Envoy.ClusterTimeoutInSeconds
+	epCluster := &model.EndpointCluster{
+		Endpoints: []model.Endpoint{{
+			Host:    "lambda." + conf.Envoy.AwsLambda.AwsRegion + ".amazonaws.com",
+			URLType: httpsURLType,
+			Port:    uint32(443),
+		}},
+	}
+
+	cluster, address, err := processEndpoints(awslambdaClusterName, epCluster, nil, epTimeout, "")
+	cluster.Metadata = &corev3.Metadata{
+		FilterMetadata: map[string]*structpb.Struct{
+			"com.amazonaws.lambda": {
+				Fields: map[string]*structpb.Value{
+					"egress_gateway": structpb.NewBoolValue(true),
+				},
+			},
+		},
+	}
+
+	return cluster, address, err
 }
 
 // CreateTracingCluster creates a cluster definition for router's tracing server.
@@ -753,6 +812,14 @@ func createRoutes(params *routeCreateParams) (routes []*routev3.Route, err error
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
 	isDefaultVersion := params.isDefaultVersion
+	endpointType := params.endpointType
+	amznResourceName := ""
+
+	if resource != nil {
+		amznResourceName = resource.GetAmznResourceName()
+	}
+
+	conf, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -898,6 +965,36 @@ end`
 		wellknown.CORS:                      corsFilter,
 	}
 
+	if endpointType == constants.AwsLambda {
+
+		var mode awslambdav3.Config_InvocationMode
+
+		if strings.ToUpper(conf.Envoy.AwsLambda.InvocationMode) == invocationModeSynchronous {
+			mode = awslambdav3.Config_SYNCHRONOUS
+		} else {
+			mode = awslambdav3.Config_ASYNCHRONOUS
+		}
+
+		awsLambdaPerFilterConfig := awslambdav3.PerRouteConfig{
+			InvokeConfig: &awslambdav3.Config{
+				Arn:                amznResourceName,
+				PayloadPassthrough: conf.Envoy.AwsLambda.PayloadPassthrough,
+				InvocationMode:     mode,
+			},
+		}
+
+		awsLambdaMarshelled := proto.NewBuffer(nil)
+		awsLambdaMarshelled.SetDeterministic(true)
+		_ = awsLambdaMarshelled.Marshal(&awsLambdaPerFilterConfig)
+
+		awsLambdaFilter := &any.Any{
+			TypeUrl: awsLambdaRouteName,
+			Value:   awsLambdaMarshelled.Bytes(),
+		}
+
+		perRouteFilterConfigs[awsLambdaFilterName] = awsLambdaFilter
+	}
+
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 
 	if resource != nil && resource.HasPolicies() {
@@ -1018,8 +1115,8 @@ end`
 				metadataValue := operation.GetMethod() + "_to_" + newMethod
 				match2.DynamicMetadata = generateMetadataMatcherForInternalRoutes(metadataValue)
 
-				action1 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
-				action2 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
+				action1 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
+				action2 := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
 
 				// Create route1 for current method.
 				// Do not add policies to route config. Send via enforcer
@@ -1043,7 +1140,7 @@ end`
 			} else {
 				logger.LoggerOasparser.Debug("Creating routes for resource with policies", resourcePath, operation.GetMethod())
 				// create route for current method. Add policies to route config. Send via enforcer
-				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
+				action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
 				match := generateRouteMatch(routePath)
 				match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(operation.GetMethod()), params.isSandbox,
 					sandClusterName)
@@ -1065,7 +1162,7 @@ end`
 		methodRegex := strings.Join(resourceMethods, "|")
 		match := generateRouteMatch(routePath)
 		match.Headers = generateHTTPMethodMatcher(includeOptionsMethod(methodRegex), params.isSandbox, sandClusterName)
-		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig)
+		action := generateRouteAction(apiType, prodRouteConfig, sandRouteConfig, endpointType)
 		action.Route.RegexRewrite = generateRegexMatchAndSubstitute(routePath, endpointBasepath, resourcePath)
 
 		route := generateRouteConfig(xWso2Basepath, match, action, nil, decorator, perRouteFilterConfigs,
@@ -1509,6 +1606,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		passRequestPayloadToEnforcer: swagger.GetXWso2RequestBodyPass(),
 		isDefaultVersion:             swagger.IsDefaultVersion,
 		isSandbox:                    isSandbox,
+		endpointType:                 swagger.GetEndpointType(),
 	}
 
 	if swagger.GetProdEndpoints() != nil {

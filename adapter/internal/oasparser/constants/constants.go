@@ -37,6 +37,7 @@ const (
 	XWso2Cors                         string = "x-wso2-cors"
 	XWso2HTTP2BackendEnabled          string = "x-wso2-http2-backend-enabled"
 	XThrottlingTier                   string = "x-throttling-tier"
+	XAmznResourceName                 string = "x-amzn-resource-name"
 	XWso2ThrottlingTier               string = "x-wso2-throttling-tier"
 	XAuthHeader                       string = "x-wso2-auth-header"
 	XAuthType                         string = "x-auth-type"
@@ -117,6 +118,7 @@ const (
 	SSE                   string = "SSE"
 	Prototyped            string = "prototyped"
 	MockedOASEndpointType string = "MOCKED_OAS"
+	AwsLambda             string = "awslambda"
 	TemplateEndpointType  string = "TEMPLATE"
 	InlineEndpointType    string = "INLINE"
 )

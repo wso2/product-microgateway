@@ -79,5 +79,10 @@ public class MockServices {
             Http2MockBackend http2BackendProdTLS = new Http2MockBackend(Constants.MOCK_BACKEND_HTTP2_SERVER_SECURED_PORT, true, false);
             http2BackendProdTLS.startServer();
         }
+
+        if (argList.contains("-echo-service")){
+            EchoService echoService = new EchoService(Constants.ECHO_SERVICE_SERVER_PORT, true);
+            echoService.start();
+        }
     }
 }
