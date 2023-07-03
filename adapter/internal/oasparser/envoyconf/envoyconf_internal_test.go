@@ -19,6 +19,7 @@ package envoyconf
 
 import (
 	"io/ioutil"
+	"log"
 	"regexp"
 	"strings"
 	"testing"
@@ -430,7 +431,9 @@ func TestGenerateRegex(t *testing.T) {
 	for _, item := range dataItems {
 		resultPattern := generateRegex(item.inputpath)
 		resultIsMatching, err := regexp.MatchString(resultPattern, item.userInputPath)
-
+		if item.message == "when the resource ends with *" {
+			log.Default().Println(resultPattern, item.userInputPath, err)
+		}
 		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
 		assert.Nil(t, err)
 	}

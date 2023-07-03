@@ -1341,6 +1341,7 @@ func generatePathRegexSegment(resourcePath string) string {
 	resourceRegex := ""
 	matcher := regexp.MustCompile(`{([^}]+)}`)
 	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
+	resourceRegex = GetUpdatedRegexToMatchDots(resourceRegex)
 	if strings.HasSuffix(resourceRegex, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + wildCardRegex
 	} else {
@@ -1413,7 +1414,6 @@ func GetUpdatedRegexToMatchDots(regex string) string {
 func generateRegex(fullpath string) string {
 	endRegex := "(\\?([^/]+))?"
 	newPath := generatePathRegexSegment(fullpath)
-	newPath = GetUpdatedRegexToMatchDots(newPath)
 	return "^" + newPath + endRegex + "$"
 }
 

@@ -127,6 +127,7 @@ const (
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
 
+// SemVersion is the struct to store the version components of an API
 type SemVersion struct {
 	Version string
 	Major   int
