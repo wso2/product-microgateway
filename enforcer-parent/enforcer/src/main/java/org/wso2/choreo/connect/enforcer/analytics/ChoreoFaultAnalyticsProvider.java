@@ -220,7 +220,9 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     public Map<String, Object> getProperties() {
         Map map = new HashMap();
         String gwURL = requestContext.getHeaders().get(AnalyticsConstants.GATEWAY_URL);
+        String deploymentType = requestContext.getMatchedAPI().getDeploymentType();
         map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
+        map.put(AnalyticsConstants.DEPLOYMENT_TYPE, deploymentType);
         return map;
     }
 }

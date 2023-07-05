@@ -157,6 +157,8 @@ public class AnalyticsFilter {
                     endUserName == null ? APIConstants.END_USER_UNKNOWN : endUserName);
             requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
                     requestContext.getMatchedAPI().getBasePath());
+            requestContext.addMetadataToMap(MetadataConstants.DEPLOYMENT_TYPE,
+                    requestContext.getMatchedAPI().getDeploymentType());
 
             // Adding Gateway URL
             String gatewayUrl = requestContext.getHeaders().get(GATEWAY_URL);
