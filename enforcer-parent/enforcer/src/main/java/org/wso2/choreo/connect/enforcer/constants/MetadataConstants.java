@@ -54,4 +54,5 @@ public class MetadataConstants {
     public static final String CHOREO_CONNECT_ENFORCER_REPLY = "choreo-connect-enforcer-reply";
     public static final String CHOREO_CONNECT_ENFORCER_REPLY_OK = "Ok";
     public static final String GATEWAY_URL = WSO2_METADATA_PREFIX + "x-original-gw-url";
+    public static final String DEPLOYMENT_TYPE = WSO2_METADATA_PREFIX + "deployment-type";
 }
