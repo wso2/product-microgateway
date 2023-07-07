@@ -151,3 +151,9 @@ const (
 	choreoConnectEnforcerReply = "choreo-connect-enforcer-reply"
 	uaexCode                   = "UAEX"
 )
+
+// Access Logs
+const (
+	AccessLogTypeText = "text"
+	AccessLogTypeJSON = "json"
+)

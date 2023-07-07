@@ -27,15 +27,42 @@ logLevel = "INFO"
 [accessLogs]
 enable = false
 logfile = "/dev/stdout" # This file will be created inside router container.
+logType = "text" # LogTypes can be "text" or "json"
+
 # Log format that is append after "reservedLogFormat". This can be used by dev for debug purpose.
 # For example: secondaryLogFormat = "'%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%'"
 #
 # Following is the default value of 'reservedLogFormat'
 # Here '%ROUTE_NAME%' equals '<API_UUID>'
-# reservedLogFormat: "[%START_TIME%]' '%ROUTE_NAME%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
+# reservedLogFormat: "[%START_TIME%]' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
 # "'%REQ(:AUTHORITY)%' '%REQ(:METHOD)%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%' " +
 # "'%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' " +
 # "'%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' " +
 # "'%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%' '%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%' '%REQUEST_DURATION%' " +
 # "'%RESPONSE_DURATION%' '"
 secondaryLogFormat = ""
+
+[accessLogs.jSONFormat]
+t = "%START_TIME%"
+gwHost = "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%"
+host = "%REQ(:AUTHORITY)%"
+m = "%REQ(:METHOD)%"
+gwPath = "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%"
+reqPath = "%REQ(:PATH)%"
+rtName = "%ROUTE_NAME%"
+proto = "%PROTOCOL%"
+resCd = "%RESPONSE_CODE%"
+resCdInf = "%RESPONSE_CODE_DETAILS%"
+resFlg = "%RESPONSE_FLAGS%"
+usrAgt = "%REQ(USER-AGENT)%"
+reqId = "%REQ(X-REQUEST-ID)%"
+fwdFor = "%REQ(X-FORWARDED-FOR)%"
+upsHost = "%UPSTREAM_HOST%"
+bytRec = "%BYTES_RECEIVED%"
+bytSnt = "%BYTES_SENT%"
+du = "%DURATION%"
+upsSvcTime = "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+reqTxDu = "%REQUEST_TX_DURATION%"
+resTxDu = "%RESPONSE_TX_DURATION%"
+reqDu = "%REQUEST_DURATION%"
+resDu = "%RESPONSE_DURATION%"
