@@ -25,11 +25,13 @@ type pkg struct {
 type accessLog struct {
 	Enable  bool
 	LogFile string
+	LogType string
 	// ReservedLogFormat is reserved for Choreo Gateway Access Logs Observability feature. Changes to this may
 	// break the functionality in the observability feature.
 	ReservedLogFormat string
 	// SecondaryLogFormat can be used by dev to log properties for debug purposes
 	SecondaryLogFormat string
+	JSONFormat         map[string]string
 }
 
 // LogConfig represents the configurations related to adapter logs and envoy access logs.
@@ -57,15 +59,41 @@ func getDefaultLogConfig() *LogConfig {
 		AccessLogs: &accessLog{
 			Enable:  false,
 			LogFile: "/dev/stdout",
+			LogType: "text",
 			// Following default value of "ReservedLogFormat" is document in log_config.toml for references.
 			// Update log_config.toml if any changes are done here.
-			ReservedLogFormat: "[%START_TIME%]' '%ROUTE_NAME%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
+			ReservedLogFormat: "[%START_TIME%]' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
 				"'%REQ(:AUTHORITY)%' '%REQ(:METHOD)%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%' " +
 				"'%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' " +
 				"'%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' " +
 				"'%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%' '%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%' '%REQUEST_DURATION%' " +
-				"'%RESPONSE_DURATION%' '",
+				"'%RESPONSE_DURATION%' '%ROUTE_NAME%' '",
 			SecondaryLogFormat: "",
+			JSONFormat: map[string]string{
+				"t":          "%START_TIME%",
+				"gwHost":     "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%",
+				"host":       "%REQ(:AUTHORITY)%",
+				"m":          "%REQ(:METHOD)%",
+				"gwPath":     "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%",
+				"reqPath":    "%REQ(:PATH)%",
+				"rtName":     "%ROUTE_NAME%",
+				"prtcol":      "%PROTOCOL%",
+				"resCd":      "%RESPONSE_CODE%",
+				"resCdInf":   "%RESPONSE_CODE_DETAILS%",
+				"resFlg":     "%RESPONSE_FLAGS%",
+				"usrAgt":     "%REQ(USER-AGENT)%",
+				"reqId":      "%REQ(X-REQUEST-ID)%",
+				"fwdFor":     "%REQ(X-FORWARDED-FOR)%",
+				"upsHost":    "%UPSTREAM_HOST%",
+				"bytRec":     "%BYTES_RECEIVED%",
+				"bytSnt":     "%BYTES_SENT%",
+				"du":         "%DURATION%",
+				"upsSvcTime": "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%",
+				"reqTxDu":    "%REQUEST_TX_DURATION%",
+				"resTxDu":    "%RESPONSE_TX_DURATION%",
+				"reqDu":      "%REQUEST_DURATION%",
+				"resDu":      "%RESPONSE_DURATION%",
+			},
 		},
 	}
 	adapterLogConfig.Rotation.MaxSize = 10

@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -43,6 +44,15 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 		return nil
 	}
 
+	formatters := []*corev3.TypedExtensionConfig{
+		{
+			Name: "envoy.formatter.req_without_query",
+			TypedConfig: &anypb.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
+			},
+		},
+	}
+	// Set the default log format
 	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
 		LogFormat: &corev3.SubstitutionFormatString{
 			Format: &corev3.SubstitutionFormatString_TextFormatSource{
@@ -53,16 +63,35 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 					},
 				},
 			},
-			Formatters: []*corev3.TypedExtensionConfig{
-				{
-					Name: "envoy.formatter.req_without_query",
-					TypedConfig: &anypb.Any{
-						TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
-					},
-				},
-			},
+			Formatters: formatters,
 		},
 	}
+
+	// Configure the log format based on the log type
+	switch logConf.AccessLogs.LogType {
+	case AccessLogTypeJSON:
+		logFields := map[string]*structpb.Value{}
+		for k, v := range logConf.AccessLogs.JSONFormat {
+			logFields[k] = &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: v}}
+		}
+		logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
+			LogFormat: &corev3.SubstitutionFormatString{
+				Format: &corev3.SubstitutionFormatString_JsonFormat{
+					JsonFormat: &structpb.Struct{
+						Fields: logFields,
+					},
+				},
+				Formatters: formatters,
+			},
+		}
+		logger.LoggerOasparser.Debug("Access log type is set to json.")
+	case AccessLogTypeText:
+		logger.LoggerOasparser.Debug("Access log type is set to text.")
+	default:
+		logger.LoggerOasparser.Errorf("Error setting access log type. Invalid Access log type %q. Continue with default log type %q",
+			logConf.AccessLogs.LogType, AccessLogTypeText)
+	}
+
 	logpath = logConf.AccessLogs.LogFile
 
 	accessLogConf := &file_accesslogv3.FileAccessLog{
