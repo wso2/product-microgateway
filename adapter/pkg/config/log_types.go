@@ -67,7 +67,7 @@ func getDefaultLogConfig() *LogConfig {
 				"'%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' " +
 				"'%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' " +
 				"'%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%' '%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%' '%REQUEST_DURATION%' " +
-				"'%RESPONSE_DURATION%' '",
+				"'%RESPONSE_DURATION%' '%ROUTE_NAME%' '",
 			SecondaryLogFormat: "",
 			JSONFormat: map[string]string{
 				"t":          "%START_TIME%",
@@ -77,7 +77,7 @@ func getDefaultLogConfig() *LogConfig {
 				"gwPath":     "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%",
 				"reqPath":    "%REQ(:PATH)%",
 				"rtName":     "%ROUTE_NAME%",
-				"proto":      "%PROTOCOL%",
+				"prtcol":      "%PROTOCOL%",
 				"resCd":      "%RESPONSE_CODE%",
 				"resCdInf":   "%RESPONSE_CODE_DETAILS%",
 				"resFlg":     "%RESPONSE_FLAGS%",
