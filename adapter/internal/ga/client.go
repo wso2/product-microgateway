@@ -221,7 +221,15 @@ func getAdapterNode() *core.Node {
 
 // InitGAClient initializes the connection to the global adapter.
 func InitGAClient() {
-	logger.LoggerGA.Info("Starting the XDS Client connection to Global Adapter.")
+	config, _ := config.ReadConfigs()
+	if config.ControlPlane.DynamicEnvironments.Enabled {
+		logger.LoggerGA.Infof("Starting the XDS Client connection for %s-%s-%s to Global Adapter.",
+			config.ControlPlane.DynamicEnvironments.DataPlaneID,
+			config.ControlPlane.DynamicEnvironments.GatewayAccessibilityType,
+			config.GlobalAdapter.LocalLabel)
+	} else {
+		logger.LoggerGA.Infof("Starting the XDS Client connection to Global Adapter.")
+	}
 	go handleAPIEventsFromGA(GAAPIChannel)
 	conn := initializeAndWatch()
 	for retryTrueReceived := range connectionFaultChannel {
