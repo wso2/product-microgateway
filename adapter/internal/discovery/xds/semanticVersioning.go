@@ -42,11 +42,19 @@ func ValidateAndGetVersionComponents(version string, apiName string) (*SemVersio
 	if len(versionComponents) < 2 {
 		logger.LoggerXds.Errorf("API version validation failed for API: %v. API Version: %v", apiName, version)
 		errMessage := "Invalid version: " + version + " for API: " + apiName +
-			". API version should be in the format x.y.z where x,y,z are non-negative integers"
+			". API version should be in the format x.y.z, x.y, vx.y.z or vx.y where x,y,z are non-negative integers" +
+			" and v is version prefix"
 		return nil, errors.New(errMessage)
 	}
 
-	majorVersion, majorVersionConvErr := strconv.Atoi(versionComponents[0])
+	var majorVersionStr string
+	if strings.HasPrefix(versionComponents[0], "v") {
+		majorVersionStr = versionComponents[0][1:]
+	} else {
+		majorVersionStr = versionComponents[0]
+	}
+
+	majorVersion, majorVersionConvErr := strconv.Atoi(majorVersionStr)
 	minorVersion, minorVersionConvErr := strconv.Atoi(versionComponents[1])
 	if majorVersionConvErr != nil || majorVersion < 0 {
 		logger.LoggerXds.Errorf(fmt.Sprintf("API major version should be a non-negative integer in API: %v. API Version: %v", apiName, version), majorVersionConvErr)
@@ -146,7 +154,7 @@ func CompareSemanticVersions(baseVersion, version SemVersion) bool {
 func updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVersion, vHost string) {
 	apiSemVersion, err := ValidateAndGetVersionComponents(apiVersion, apiName)
 	// If the version validation is not success, we just proceed without intelligent version
-	// Valid version pattern: x.y.z or x.y where x, y and z are non-negative integers
+	// Valid version pattern: vx.y.z or vx.y where x, y and z are non-negative integers and v is a prefix
 	if err != nil && apiSemVersion == nil {
 		return
 	}

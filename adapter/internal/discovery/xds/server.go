@@ -482,7 +482,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	apiName := mgwSwagger.GetTitle()
 	apiVersion := mgwSwagger.GetVersion()
 
-	if conf.Adapter.IsIntelligentRoutingEnabled {
+	if conf.Adapter.IsIntelligentRoutingEnabled && strings.HasPrefix(apiVersion, "v") {
 		updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVersion, vHost)
 	}
 
@@ -686,7 +686,7 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 		toBeDelEnvs, toBeKeptEnvs = getEnvironmentsToBeDeleted(existingLabels, environments)
 	}
 
-	if conf.Adapter.IsIntelligentRoutingEnabled {
+	if conf.Adapter.IsIntelligentRoutingEnabled && strings.HasPrefix(api.GetVersion(), "v") {
 		updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier, api)
 	}
 
