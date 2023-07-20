@@ -27,6 +27,8 @@ private static final long serialVersionUID = 0L;
     subscriptionUUID_ = "";
     appUUID_ = "";
     apiUUID_ = "";
+    context_ = "";
+    versionRange_ = "";
   }
 
   @java.lang.Override
@@ -119,6 +121,18 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             apiUUID_ = s;
+            break;
+          }
+          case 98: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            context_ = s;
+            break;
+          }
+          case 106: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            versionRange_ = s;
             break;
           }
           default: {
@@ -463,6 +477,82 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int CONTEXT_FIELD_NUMBER = 12;
+  private volatile java.lang.Object context_;
+  /**
+   * <code>string context = 12;</code>
+   * @return The context.
+   */
+  @java.lang.Override
+  public java.lang.String getContext() {
+    java.lang.Object ref = context_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      context_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string context = 12;</code>
+   * @return The bytes for context.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getContextBytes() {
+    java.lang.Object ref = context_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      context_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int VERSIONRANGE_FIELD_NUMBER = 13;
+  private volatile java.lang.Object versionRange_;
+  /**
+   * <code>string versionRange = 13;</code>
+   * @return The versionRange.
+   */
+  @java.lang.Override
+  public java.lang.String getVersionRange() {
+    java.lang.Object ref = versionRange_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      versionRange_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string versionRange = 13;</code>
+   * @return The bytes for versionRange.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getVersionRangeBytes() {
+    java.lang.Object ref = versionRange_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      versionRange_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -510,6 +600,12 @@ private static final long serialVersionUID = 0L;
     if (!getApiUUIDBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiUUID_);
     }
+    if (!getContextBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 12, context_);
+    }
+    if (!getVersionRangeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 13, versionRange_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -556,6 +652,12 @@ private static final long serialVersionUID = 0L;
     if (!getApiUUIDBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiUUID_);
     }
+    if (!getContextBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, context_);
+    }
+    if (!getVersionRangeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, versionRange_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -593,6 +695,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getAppUUID())) return false;
     if (!getApiUUID()
         .equals(other.getApiUUID())) return false;
+    if (!getContext()
+        .equals(other.getContext())) return false;
+    if (!getVersionRange()
+        .equals(other.getVersionRange())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -627,6 +733,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getAppUUID().hashCode();
     hash = (37 * hash) + APIUUID_FIELD_NUMBER;
     hash = (53 * hash) + getApiUUID().hashCode();
+    hash = (37 * hash) + CONTEXT_FIELD_NUMBER;
+    hash = (53 * hash) + getContext().hashCode();
+    hash = (37 * hash) + VERSIONRANGE_FIELD_NUMBER;
+    hash = (53 * hash) + getVersionRange().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -786,6 +896,10 @@ private static final long serialVersionUID = 0L;
 
       apiUUID_ = "";
 
+      context_ = "";
+
+      versionRange_ = "";
+
       return this;
     }
 
@@ -823,6 +937,8 @@ private static final long serialVersionUID = 0L;
       result.subscriptionUUID_ = subscriptionUUID_;
       result.appUUID_ = appUUID_;
       result.apiUUID_ = apiUUID_;
+      result.context_ = context_;
+      result.versionRange_ = versionRange_;
       onBuilt();
       return result;
     }
@@ -909,6 +1025,14 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getApiUUID().isEmpty()) {
         apiUUID_ = other.apiUUID_;
+        onChanged();
+      }
+      if (!other.getContext().isEmpty()) {
+        context_ = other.context_;
+        onChanged();
+      }
+      if (!other.getVersionRange().isEmpty()) {
+        versionRange_ = other.versionRange_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1592,6 +1716,158 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       apiUUID_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object context_ = "";
+    /**
+     * <code>string context = 12;</code>
+     * @return The context.
+     */
+    public java.lang.String getContext() {
+      java.lang.Object ref = context_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        context_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string context = 12;</code>
+     * @return The bytes for context.
+     */
+    public com.google.protobuf.ByteString
+        getContextBytes() {
+      java.lang.Object ref = context_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        context_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string context = 12;</code>
+     * @param value The context to set.
+     * @return This builder for chaining.
+     */
+    public Builder setContext(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      context_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string context = 12;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearContext() {
+      
+      context_ = getDefaultInstance().getContext();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string context = 12;</code>
+     * @param value The bytes for context to set.
+     * @return This builder for chaining.
+     */
+    public Builder setContextBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      context_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object versionRange_ = "";
+    /**
+     * <code>string versionRange = 13;</code>
+     * @return The versionRange.
+     */
+    public java.lang.String getVersionRange() {
+      java.lang.Object ref = versionRange_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        versionRange_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string versionRange = 13;</code>
+     * @return The bytes for versionRange.
+     */
+    public com.google.protobuf.ByteString
+        getVersionRangeBytes() {
+      java.lang.Object ref = versionRange_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        versionRange_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string versionRange = 13;</code>
+     * @param value The versionRange to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersionRange(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      versionRange_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string versionRange = 13;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearVersionRange() {
+      
+      versionRange_ = getDefaultInstance().getVersionRange();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string versionRange = 13;</code>
+     * @param value The bytes for versionRange to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersionRangeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      versionRange_ = value;
       onChanged();
       return this;
     }

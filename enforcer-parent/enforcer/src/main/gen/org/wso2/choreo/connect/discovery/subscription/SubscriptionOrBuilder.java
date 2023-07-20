@@ -114,4 +114,28 @@ public interface SubscriptionOrBuilder extends
    */
   com.google.protobuf.ByteString
       getApiUUIDBytes();
+
+  /**
+   * <code>string context = 12;</code>
+   * @return The context.
+   */
+  java.lang.String getContext();
+  /**
+   * <code>string context = 12;</code>
+   * @return The bytes for context.
+   */
+  com.google.protobuf.ByteString
+      getContextBytes();
+
+  /**
+   * <code>string versionRange = 13;</code>
+   * @return The versionRange.
+   */
+  java.lang.String getVersionRange();
+  /**
+   * <code>string versionRange = 13;</code>
+   * @return The bytes for versionRange.
+   */
+  com.google.protobuf.ByteString
+      getVersionRangeBytes();
 }

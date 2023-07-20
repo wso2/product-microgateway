@@ -32,6 +32,8 @@ public class Subscription implements CacheableEntity<String> {
     private String appUUID = null;
     private String subscriptionState = null;
     private long timeStamp;
+    private String context;
+    private String versionRange;
 
     public String getSubscriptionId() {
 
@@ -69,6 +71,12 @@ public class Subscription implements CacheableEntity<String> {
         return SubscriptionDataStoreUtil.getSubscriptionCacheKey(getAppUUID(), getApiUUID());
     }
 
+    public String getVersionRangeCacheKey() {
+
+        return SubscriptionDataStoreUtil.getVersionRangeSubscriptionCacheKey(
+                getAppUUID(), getContext(), getVersionRange());
+    }
+
     public long getTimeStamp() {
 
         return timeStamp;
@@ -88,7 +96,9 @@ public class Subscription implements CacheableEntity<String> {
                 ", apiId=" + apiUUID +
                 ", appId=" + appUUID +
                 ", subscriptionState='" + subscriptionState + '\'' +
-                ", timeStamp=" + timeStamp +
+                ", timeStamp=" + timeStamp + '\'' +
+                ", context=" + context + '\'' +
+                ", versionRange=" + versionRange +
                 '}';
     }
 
@@ -106,6 +116,22 @@ public class Subscription implements CacheableEntity<String> {
 
     public void setAppUUID(String appUUID) {
         this.appUUID = appUUID;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    public String getVersionRange() {
+        return versionRange;
+    }
+
+    public void setVersionRange(String versionRange) {
+        this.versionRange = versionRange;
     }
 }
 

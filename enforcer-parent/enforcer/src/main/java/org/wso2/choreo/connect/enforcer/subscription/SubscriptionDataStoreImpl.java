@@ -72,6 +72,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
+    private Map<String, Subscription> apiVersionRangeSubscriptionMap;
     private String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
 
     SubscriptionDataStoreImpl() {
@@ -90,6 +91,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
+        this.apiVersionRangeSubscriptionMap = new ConcurrentHashMap<>();
         initializeLoadingTasks();
     }
 
@@ -132,6 +134,13 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
+    public Subscription getSubscriptionByAppIdApiContextVersionRange(String appUUID, String context,
+                                                                     String versionRange) {
+        return apiVersionRangeSubscriptionMap.get(SubscriptionDataStoreUtil
+                .getVersionRangeSubscriptionCacheKey(appUUID, context, versionRange));
+    }
+
+    @Override
     public ApiPolicy getApiPolicyByName(String policyName) {
 
         String key = PolicyType.API + DELEM_PERIOD +
@@ -150,6 +159,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     public void addSubscriptions(List<org.wso2.choreo.connect.discovery.subscription.Subscription> subscriptionList) {
         Map<String, Subscription> newSubscriptionMap = new ConcurrentHashMap<>();
+        Map<String, Subscription> newApiVersionRangeSubscriptionMap = new ConcurrentHashMap<>();
 
         for (org.wso2.choreo.connect.discovery.subscription.Subscription subscription : subscriptionList) {
             Subscription newSubscription = new Subscription();
@@ -159,14 +169,18 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             newSubscription.setAppUUID(subscription.getAppUUID());
             newSubscription.setSubscriptionState(subscription.getSubscriptionState());
             newSubscription.setTimeStamp(subscription.getTimeStamp());
+            newSubscription.setContext(subscription.getContext());
+            newSubscription.setVersionRange(subscription.getVersionRange());
 
             newSubscriptionMap.put(newSubscription.getCacheKey(), newSubscription);
+            newApiVersionRangeSubscriptionMap.put(newSubscription.getVersionRangeCacheKey(), newSubscription);
         }
 
         if (log.isDebugEnabled()) {
             log.debug("Total Subscriptions in new cache: {}", newSubscriptionMap.size());
         }
         this.subscriptionMap = newSubscriptionMap;
+        this.apiVersionRangeSubscriptionMap = newApiVersionRangeSubscriptionMap;
     }
 
 
@@ -299,11 +313,23 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 }
             }
         }
+        synchronized (apiVersionRangeSubscriptionMap) {
+            Subscription retrievedVersionRangeSubscription = apiVersionRangeSubscriptionMap
+                    .get(subscription.getVersionRangeCacheKey());
+            if (retrievedVersionRangeSubscription == null) {
+                apiVersionRangeSubscriptionMap.put(subscription.getVersionRangeCacheKey(), subscription);
+            } else {
+                if (subscription.getTimeStamp() >= retrievedVersionRangeSubscription.getTimeStamp()) {
+                    apiVersionRangeSubscriptionMap.put(subscription.getVersionRangeCacheKey(), subscription);
+                }
+            }
+        }
     }
 
     @Override
     public void removeSubscription(Subscription subscription) {
         subscriptionMap.remove(subscription.getCacheKey());
+        apiVersionRangeSubscriptionMap.remove(subscription.getVersionRangeCacheKey());
     }
 
     @Override

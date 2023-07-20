@@ -35,6 +35,11 @@ public class SubscriptionDataStoreUtil {
         return appId + DELEM_PERIOD + apiId;
     }
 
+    public static String getVersionRangeSubscriptionCacheKey(String appId, String context, String versionRange) {
+
+        return appId + DELEM_PERIOD + context + DELEM_PERIOD + versionRange;
+    }
+
     public static String getPolicyCacheKey(String tierName) {
 
         return tierName;

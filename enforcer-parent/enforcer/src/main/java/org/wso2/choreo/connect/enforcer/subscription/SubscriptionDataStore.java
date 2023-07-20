@@ -69,6 +69,15 @@ public interface SubscriptionDataStore {
     Subscription getSubscriptionById(String appUUID, String apiUUID);
 
     /**
+     * Get subscription by app uuid and api context (context without version) and version range key
+     * @param appUUID application uuid
+     * @param context api context without version
+     * @param versionRange api version range key
+     * @return {@link Subscription}
+     */
+    Subscription getSubscriptionByAppIdApiContextVersionRange(String appUUID, String context, String versionRange);
+
+    /**
      * Gets API Throttling Policy by the name and Tenant Id.
      *
      * @param policyName Name of the Throttling Policy
