@@ -24,4 +24,5 @@ package org.wso2.choreo.connect.enforcer.constants;
 public class RouterAccessLogConstants {
     public static final String ORIGINAL_PATH_DATA_NAME = "originalPath";
     public static final String ORIGINAL_HOST_DATA_NAME = "originalHost";
+    public static final String API_UUID_DATA_NAME = "apiUUID";
 }

@@ -143,6 +143,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         addMetadata(structBuilder, key, value));
             }
 
+            addMetadata(structBuilder, RouterAccessLogConstants.API_UUID_DATA_NAME,
+                    responseObject.getApiUuid());
+
             return CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
@@ -183,6 +186,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     responseObject.getRequestPath());
             addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_HOST_DATA_NAME,
                     request.getAttributes().getRequest().getHttp().getHost());
+            addMetadata(structBuilder, RouterAccessLogConstants.API_UUID_DATA_NAME,
+                    responseObject.getApiUuid());
 
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())

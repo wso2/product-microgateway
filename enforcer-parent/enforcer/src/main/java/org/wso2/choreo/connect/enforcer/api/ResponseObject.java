@@ -37,6 +37,7 @@ public class ResponseObject {
     private ArrayList<String> queryParamsToRemove = new ArrayList<>();
     private Map<String, String> queryParams;
     private String requestPath;
+    private String apiUuid;
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -136,5 +137,13 @@ public class ResponseObject {
 
     public void setRequestPath(String requestPath) {
         this.requestPath = requestPath;
+    }
+
+    public String getApiUuid() {
+        return apiUuid;
+    }
+
+    public void setApiUuid(String apiUuid) {
+        this.apiUuid = apiUuid;
     }
 }
