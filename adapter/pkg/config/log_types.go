@@ -67,7 +67,8 @@ func getDefaultLogConfig() *LogConfig {
 				"'%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' " +
 				"'%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' " +
 				"'%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%' '%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%' '%REQUEST_DURATION%' " +
-				"'%RESPONSE_DURATION%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%' '",
+				"'%RESPONSE_DURATION%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%' " +
+				"'%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%' '",
 			SecondaryLogFormat: "",
 			JSONFormat: map[string]string{
 				"time":          "%START_TIME%",
@@ -77,6 +78,7 @@ func getDefaultLogConfig() *LogConfig {
 				"apiPath":       "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%",
 				"upstrmPath":    "%REQ(:PATH)%",
 				"apiUuid":       "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%",
+				"extAuthDtls":   "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%",
 				"prot":          "%PROTOCOL%",
 				"respCode":      "%RESPONSE_CODE%",
 				"respCodeDtls":  "%RESPONSE_CODE_DETAILS%",

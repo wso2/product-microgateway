@@ -70,6 +70,10 @@ public class RequestContext {
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
 
+    // This is used to keep the ext-auth details
+    // For example, reason for denying a request
+    private String extAuthDetails;
+
     /**
      * The dynamic metadata sent from enforcer are stored in this metadata map.
      * @return dynamic metadata map
@@ -336,6 +340,22 @@ public class RequestContext {
      */
     public ArrayList<String> getProtectedHeaders() {
         return protectedHeaders;
+    }
+
+    /**
+     * Details of the ext-auth. Specially the reason for the failure.
+     *
+     * @return extAuthDetails
+     */
+    public String getExtAuthDetails() {
+        return extAuthDetails;
+    }
+
+    /**
+     * Details of the ext-auth. Specially the reason for the failure.
+     */
+    public void setExtAuthDetails(String extAuthDetails) {
+        this.extAuthDetails = extAuthDetails;
     }
 
     /**

@@ -119,7 +119,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
             // To handle pre flight options request
             if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
-
+                addMetadata(structBuilder, RouterAccessLogConstants.EXT_AUTH_DETAILS,
+                        responseObject.getExtAuthDetails());
                 return CheckResponse.newBuilder()
                         .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                         .setDeniedResponse(responseBuilder.setStatus(status).build())
@@ -145,6 +146,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
             addMetadata(structBuilder, RouterAccessLogConstants.API_UUID_DATA_NAME,
                     responseObject.getApiUuid());
+            addMetadata(structBuilder, RouterAccessLogConstants.EXT_AUTH_DETAILS,
+                    responseObject.getExtAuthDetails());
 
             return CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
@@ -188,6 +191,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     request.getAttributes().getRequest().getHttp().getHost());
             addMetadata(structBuilder, RouterAccessLogConstants.API_UUID_DATA_NAME,
                     responseObject.getApiUuid());
+            // EXT_AUTH_DETAILS is not included for now as there is no any use cases.
 
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
