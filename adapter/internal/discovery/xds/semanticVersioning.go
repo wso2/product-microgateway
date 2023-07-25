@@ -90,26 +90,25 @@ func ValidateAndGetVersionComponents(version string, apiName string) (*SemVersio
 
 // GetMajorMinorVersionRangeRegex generates major and minor version compatible range regex for the given version
 func GetMajorMinorVersionRangeRegex(semVersion SemVersion) string {
-	versionRegexString := GetVersionMatchRegex(semVersion.Version)
 	majorVersion := strconv.Itoa(semVersion.Major)
 	minorVersion := strconv.Itoa(semVersion.Minor)
 	if semVersion.Patch == nil {
-		return "(v" + majorVersion + "(\\." + minorVersion + ")?|" + versionRegexString + ")"
+		return "v" + majorVersion + "(\\." + minorVersion + ")?"
 	}
 	patchVersion := strconv.Itoa(*semVersion.Patch)
-	return "(v" + majorVersion + "(\\." + minorVersion + "(\\." + patchVersion + ")?)?|" + versionRegexString + ")"
+	return "v" + majorVersion + "(\\." + minorVersion + "(\\." + patchVersion + ")?)?"
 }
 
 // GetMinorVersionRangeRegex generates minor version compatible range regex for the given version
 func GetMinorVersionRangeRegex(semVersion SemVersion) string {
 	versionRegexString := GetVersionMatchRegex(semVersion.Version)
 	if semVersion.Patch == nil {
-		return "(v" + versionRegexString + "|" + versionRegexString + ")"
+		return versionRegexString
 	}
 	majorVersion := strconv.Itoa(semVersion.Major)
 	minorVersion := strconv.Itoa(semVersion.Minor)
 	patchVersion := strconv.Itoa(*semVersion.Patch)
-	return "(v" + majorVersion + "\\." + minorVersion + "(\\." + patchVersion + ")?|" + versionRegexString + ")"
+	return "v" + majorVersion + "\\." + minorVersion + "(\\." + patchVersion + ")?"
 }
 
 // GetMajorVersionRange generates major version range for the given version
