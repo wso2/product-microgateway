@@ -119,7 +119,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
             // To handle pre flight options request
             if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
-
+                includeMetadataForAccessLogs(structBuilder, request, responseObject);
                 return CheckResponse.newBuilder()
                         .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                         .setDeniedResponse(responseBuilder.setStatus(status).build())
@@ -142,6 +142,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         addMetadata(structBuilder, key, value));
             }
+            includeMetadataForAccessLogs(structBuilder, request, responseObject);
 
             return CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
@@ -179,10 +180,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 responseObject.getMetaDataMap().forEach((key, value) ->
                         addMetadata(structBuilder, key, value));
             }
-            addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
-                    responseObject.getRequestPath());
-            addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_HOST_DATA_NAME,
-                    request.getAttributes().getRequest().getHttp().getHost());
+            includeMetadataForAccessLogs(structBuilder, request, responseObject);
 
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
@@ -237,6 +235,25 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             }
         }
         return requestPathBuilder.toString();
+    }
+
+    /**
+     * This will include ext auth metadata required for access logs.
+     *
+     * @param structBuilder  the builder in which the metadata is stored.
+     * @param request        check request
+     * @param responseObject response object for check response
+     */
+    private void includeMetadataForAccessLogs(Struct.Builder structBuilder, CheckRequest request,
+                                              ResponseObject responseObject) {
+        addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_PATH_DATA_NAME,
+                responseObject.getRequestPath());
+        addMetadata(structBuilder, RouterAccessLogConstants.ORIGINAL_HOST_DATA_NAME,
+                request.getAttributes().getRequest().getHttp().getHost());
+        addMetadata(structBuilder, RouterAccessLogConstants.API_UUID_DATA_NAME,
+                responseObject.getApiUuid());
+        addMetadata(structBuilder, RouterAccessLogConstants.EXT_AUTH_DETAILS,
+                responseObject.getExtAuthDetails());
     }
 
     /**

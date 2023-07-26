@@ -162,6 +162,7 @@ public class RestAPI implements API {
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject(requestContext.getRequestID());
         responseObject.setRequestPath(requestContext.getRequestPath());
+        responseObject.setApiUuid(apiConfig.getUuid());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         populateRemoveAndProtectedHeaders(requestContext);
