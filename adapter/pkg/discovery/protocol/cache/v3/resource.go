@@ -82,7 +82,7 @@ func GetResourceName(res envoy_types.Resource) string {
 	case *subscription.SubscriptionPolicyList:
 		return "SubscriptionPolicyList"
 	case *keymgt.KeyManagerConfig:
-		return fmt.Sprint(v.Name)
+		return fmt.Sprint(v.Name, v.Organization)
 	case *throttle.ThrottleData:
 		return "ThrottleData"
 	case *ga.Api:

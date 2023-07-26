@@ -51,7 +51,6 @@ import (
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
-	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
@@ -113,8 +112,8 @@ var (
 	enforcerThrottleData             *throttle.ThrottleData
 
 	// KeyManagerList to store data
-	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
-	isReady        = false
+	// KeyManagerList = make([]eventhubTypes.KeyManager, 0)
+	isReady = false
 )
 
 var void struct{}
@@ -1200,8 +1199,7 @@ func ExtractVhostFromAPIIdentifier(id string) (string, error) {
 // GenerateAndUpdateKeyManagerList converts the data into KeyManager proto type
 func GenerateAndUpdateKeyManagerList() {
 	var keyManagerConfigList = make([]types.Resource, 0)
-	for _, keyManager := range KeyManagerList {
-		kmConfig := MarshalKeyManager(&keyManager)
+	for _, kmConfig := range KeyManagerMap {
 		if kmConfig != nil {
 			keyManagerConfigList = append(keyManagerConfigList, kmConfig)
 		}

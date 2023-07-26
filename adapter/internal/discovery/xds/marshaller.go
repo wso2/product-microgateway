@@ -26,6 +26,8 @@ var (
 	ApplicationPolicyMap map[int32]*subscription.ApplicationPolicy
 	// SubscriptionPolicyMap contains the subscription policies recieved from API Manager Control Plane
 	SubscriptionPolicyMap map[int32]*subscription.SubscriptionPolicy
+	// KeyManagerMap contains the key managers recieved from API Manager Control Plane. Key is combination of name and organization
+	KeyManagerMap map[string]*keymgt.KeyManagerConfig
 )
 
 // EventType is a enum to distinguish Create, Update and Delete Events
@@ -41,6 +43,10 @@ const (
 )
 
 const blockedStatus string = "BLOCKED"
+
+func init() {
+	KeyManagerMap = make(map[string]*keymgt.KeyManagerConfig)
+}
 
 // MarshalConfig will marshal a Config struct - read from the config toml - to
 // enfocer's CDS resource representation.
