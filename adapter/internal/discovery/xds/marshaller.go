@@ -345,6 +345,7 @@ func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
 			Enabled:       keyManager.Enabled,
 			TenantDomain:  keyManager.TenantDomain,
 			Configuration: configuration,
+			Organization:  keyManager.Organization,
 		}
 		return newKeyManager
 	}

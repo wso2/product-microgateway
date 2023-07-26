@@ -15,4 +15,5 @@ message KeyManagerConfig {
   bool enabled = 3;
   string tenantDomain = 4;
   string configuration = 5;
+  string organization = 6;
 }
