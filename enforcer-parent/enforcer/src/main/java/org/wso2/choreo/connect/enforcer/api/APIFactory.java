@@ -37,6 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * API, and then request will be dispatched to that API.
  */
 public class APIFactory {
+
+    private static final List<String> KNOWN_VHOST_PREFIXES =
+            List.of("dev", "sandbox_dev", "prod", "sandbox", "dev-internal", "prod-internal");
     private static final Logger logger = LogManager.getLogger(APIFactory.class);
 
     private static APIFactory apiFactory;
@@ -76,6 +79,9 @@ public class APIFactory {
                 enforcerApi.init(api);
                 String apiKey = getApiKey(enforcerApi);
                 newApis.put(apiKey, enforcerApi);
+                if (KNOWN_VHOST_PREFIXES.contains(api.getVhost().substring(0, api.getVhost().indexOf('.')))) {
+                    newApis.put(getApiKeyWithOrgId(enforcerApi), enforcerApi);
+                }
             }
 
         }
@@ -138,6 +144,12 @@ public class APIFactory {
     private String getApiKey(API api) {
         APIConfig apiConfig = api.getAPIConfig();
         return getApiKey(apiConfig.getVhost(), apiConfig.getBasePath(), apiConfig.getVersion());
+    }
+
+    private String getApiKeyWithOrgId(API api) {
+        APIConfig apiConfig = api.getAPIConfig();
+        return String.format("%s-%s:%s:%s", apiConfig.getOrganizationId(),
+                apiConfig.getVhost(), apiConfig.getBasePath(), apiConfig.getVersion());
     }
 
     private String getApiKey(String vhost, String basePath, String version) {
