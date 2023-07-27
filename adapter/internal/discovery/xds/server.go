@@ -51,6 +51,7 @@ import (
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semantic_version"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
@@ -89,7 +90,7 @@ var (
 
 	reverseAPINameVersionMap map[string]string
 
-	orgIDLatestAPIVersionMap map[string]map[string]map[string]SemVersion // organizationID -> Vhost:APIName -> Version Range -> Latest API Version
+	orgIDLatestAPIVersionMap map[string]map[string]map[string]semantic_version.SemVersion // organizationID -> Vhost:APIName -> Version Range -> Latest API Version
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -127,14 +128,6 @@ const (
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
 
-// SemVersion is the struct to store the version components of an API
-type SemVersion struct {
-	Version string
-	Major   int
-	Minor   int
-	Patch   *int
-}
-
 // ID uses the node ID field
 func (IDHash) ID(node *corev3.Node) string {
 	if node == nil {
@@ -167,7 +160,7 @@ func init() {
 	envoyClusterConfigMap = make(map[string][]*clusterv3.Cluster)
 	envoyEndpointConfigMap = make(map[string][]*corev3.Address)
 
-	orgIDLatestAPIVersionMap = make(map[string]map[string]map[string]SemVersion)
+	orgIDLatestAPIVersionMap = make(map[string]map[string]map[string]semantic_version.SemVersion)
 
 	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
 	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map

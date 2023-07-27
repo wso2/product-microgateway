@@ -17,15 +17,13 @@
 package xds
 
 import (
-	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semantic_version"
 )
 
 // GetVersionMatchRegex returns the regex to match the full version string
@@ -34,57 +32,8 @@ func GetVersionMatchRegex(version string) string {
 	return strings.ReplaceAll(version, ".", "\\.")
 }
 
-// ValidateAndGetVersionComponents validates version string and extracts version components
-func ValidateAndGetVersionComponents(version string, apiName string) (*SemVersion, error) {
-	versionComponents := strings.Split(version, ".")
-
-	// If the versionComponents length is less than 2, return error
-	if len(versionComponents) < 2 {
-		logger.LoggerXds.Errorf("API version validation failed for API: %v. API Version: %v", apiName, version)
-		errMessage := "Invalid version: " + version + " for API: " + apiName +
-			". API version should be in the format x.y.z, x.y, vx.y.z or vx.y where x,y,z are non-negative integers" +
-			" and v is version prefix"
-		return nil, errors.New(errMessage)
-	}
-
-	majorVersionStr := strings.TrimPrefix(versionComponents[0], "v")
-
-	majorVersion, majorVersionConvErr := strconv.Atoi(majorVersionStr)
-	minorVersion, minorVersionConvErr := strconv.Atoi(versionComponents[1])
-	if majorVersionConvErr != nil || majorVersion < 0 {
-		logger.LoggerXds.Errorf(fmt.Sprintf("API major version should be a non-negative integer in API: %v. API Version: %v", apiName, version), majorVersionConvErr)
-		return nil, errors.New("Invalid version format")
-	}
-
-	if minorVersionConvErr != nil || minorVersion < 0 {
-		logger.LoggerXds.Errorf(fmt.Sprintf("API minor version should be a non-negative integer in API: %v. API Version: %v", apiName, version), minorVersionConvErr)
-		return nil, errors.New("Invalid version format")
-	}
-
-	if len(versionComponents) == 2 {
-		return &SemVersion{
-			Version: version,
-			Major:   majorVersion,
-			Minor:   minorVersion,
-			Patch:   nil,
-		}, nil
-	}
-
-	patchVersion, patchVersionConvErr := strconv.Atoi(versionComponents[2])
-	if patchVersionConvErr != nil {
-		logger.LoggerXds.Errorf(fmt.Sprintf("API patch version should be an integer in API: %v. API Version: %v", apiName, version), patchVersionConvErr)
-		return nil, errors.New("Invalid version format")
-	}
-	return &SemVersion{
-		Version: version,
-		Major:   majorVersion,
-		Minor:   minorVersion,
-		Patch:   &patchVersion,
-	}, nil
-}
-
 // GetMajorMinorVersionRangeRegex generates major and minor version compatible range regex for the given version
-func GetMajorMinorVersionRangeRegex(semVersion SemVersion) string {
+func GetMajorMinorVersionRangeRegex(semVersion semantic_version.SemVersion) string {
 	majorVersion := strconv.Itoa(semVersion.Major)
 	minorVersion := strconv.Itoa(semVersion.Minor)
 	if semVersion.Patch == nil {
@@ -95,7 +44,7 @@ func GetMajorMinorVersionRangeRegex(semVersion SemVersion) string {
 }
 
 // GetMinorVersionRangeRegex generates minor version compatible range regex for the given version
-func GetMinorVersionRangeRegex(semVersion SemVersion) string {
+func GetMinorVersionRangeRegex(semVersion semantic_version.SemVersion) string {
 	if semVersion.Patch == nil {
 		return GetVersionMatchRegex(semVersion.Version)
 	}
@@ -106,18 +55,18 @@ func GetMinorVersionRangeRegex(semVersion SemVersion) string {
 }
 
 // GetMajorVersionRange generates major version range for the given version
-func GetMajorVersionRange(semVersion SemVersion) string {
+func GetMajorVersionRange(semVersion semantic_version.SemVersion) string {
 	return "v" + strconv.Itoa(semVersion.Major)
 }
 
 // GetMinorVersionRange generates minor version range for the given version
-func GetMinorVersionRange(semVersion SemVersion) string {
+func GetMinorVersionRange(semVersion semantic_version.SemVersion) string {
 	return "v" + strconv.Itoa(semVersion.Major) + "." + strconv.Itoa(semVersion.Minor)
 }
 
 // CompareSemanticVersions compares two semantic versions and returns true
 // if `version` is greater or equal than `baseVersion`
-func CompareSemanticVersions(baseVersion, version SemVersion) bool {
+func CompareSemanticVersions(baseVersion, version semantic_version.SemVersion) bool {
 	if baseVersion.Major < version.Major {
 		return true
 	} else if baseVersion.Major > version.Major {
@@ -145,7 +94,7 @@ func CompareSemanticVersions(baseVersion, version SemVersion) bool {
 }
 
 func updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVersion, vHost string) {
-	apiSemVersion, err := ValidateAndGetVersionComponents(apiVersion, apiName)
+	apiSemVersion, err := semantic_version.ValidateAndGetVersionComponents(apiVersion, apiName)
 	// If the version validation is not success, we just proceed without intelligent version
 	// Valid version pattern: vx.y.z or vx.y where x, y and z are non-negative integers and v is a prefix
 	if err != nil && apiSemVersion == nil {
@@ -206,10 +155,10 @@ func updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVe
 		majorVersionRange := GetMajorVersionRange(*apiSemVersion)
 		minorVersionRange := GetMinorVersionRange(*apiSemVersion)
 		if _, orgExists := orgIDLatestAPIVersionMap[organizationID]; !orgExists {
-			orgIDLatestAPIVersionMap[organizationID] = make(map[string]map[string]SemVersion)
+			orgIDLatestAPIVersionMap[organizationID] = make(map[string]map[string]semantic_version.SemVersion)
 		}
 		if _, apiRangeExists := orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier]; !apiRangeExists {
-			orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier] = make(map[string]SemVersion)
+			orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier] = make(map[string]semantic_version.SemVersion)
 		}
 		latestVersions := orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier]
 		latestVersions[minorVersionRange] = *apiSemVersion
@@ -253,7 +202,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 	if !latestAPIVersionMapExists {
 		return
 	}
-	deletingAPISemVersion, _ := ValidateAndGetVersionComponents(api.GetVersion(), api.GetTitle())
+	deletingAPISemVersion, _ := semantic_version.ValidateAndGetVersionComponents(api.GetVersion(), api.GetTitle())
 	if deletingAPISemVersion == nil {
 		return
 	}
@@ -261,7 +210,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 	newLatestMajorRangeAPIIdentifier := ""
 	if deletingAPIsMajorRangeLatestAPISemVersion, ok := latestAPIVersionMap[majorVersionRange]; ok {
 		if deletingAPIsMajorRangeLatestAPISemVersion.Version == api.GetVersion() {
-			newLatestMajorRangeAPI := &SemVersion{
+			newLatestMajorRangeAPI := &semantic_version.SemVersion{
 				Version: "",
 				Major:   deletingAPISemVersion.Major,
 				Minor:   0,
@@ -270,7 +219,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 			for currentApiIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
 				// Iterate all the API versions other than the deleting API itself
 				if swagger.GetTitle() == api.GetTitle() && currentApiIdentifier != apiIdentifier {
-					currentAPISemVersion, _ := ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
+					currentAPISemVersion, _ := semantic_version.ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
 					if currentAPISemVersion != nil {
 						if currentAPISemVersion.Major == deletingAPISemVersion.Major {
 							if CompareSemanticVersions(*newLatestMajorRangeAPI, *currentAPISemVersion) {
@@ -331,7 +280,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 	minorVersionRange := GetMinorVersionRange(*deletingAPISemVersion)
 	if deletingAPIsMinorRangeLatestAPI, ok := latestAPIVersionMap[minorVersionRange]; ok {
 		if deletingAPIsMinorRangeLatestAPI.Version == api.GetVersion() {
-			newLatestMinorRangeAPI := &SemVersion{
+			newLatestMinorRangeAPI := &semantic_version.SemVersion{
 				Version: "",
 				Major:   deletingAPISemVersion.Major,
 				Minor:   deletingAPISemVersion.Minor,
@@ -341,7 +290,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 			for currentApiIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
 				// Iterate all the API versions other than the deleting API itself
 				if swagger.GetTitle() == api.GetTitle() && currentApiIdentifier != apiIdentifier {
-					currentAPISemVersion, _ := ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
+					currentAPISemVersion, _ := semantic_version.ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
 					if currentAPISemVersion != nil {
 						if currentAPISemVersion.Major == deletingAPISemVersion.Major &&
 							currentAPISemVersion.Minor == deletingAPISemVersion.Minor {
