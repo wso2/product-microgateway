@@ -24,6 +24,7 @@ import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.config.EnvVarConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
 
@@ -79,7 +80,8 @@ public class APIFactory {
                 enforcerApi.init(api);
                 String apiKey = getApiKey(enforcerApi);
                 newApis.put(apiKey, enforcerApi);
-                if (KNOWN_VHOST_PREFIXES.contains(api.getVhost().split("\\.")[0])) {
+                if (EnvVarConfig.getInstance().isDuplicateVhostEnabled() &&
+                        KNOWN_VHOST_PREFIXES.contains(api.getVhost().split("\\.")[0])) {
                     newApis.put(getApiKeyWithOrgId(enforcerApi), enforcerApi);
                 }
             }
