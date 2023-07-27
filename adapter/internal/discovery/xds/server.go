@@ -793,7 +793,6 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	var endpointArray []*corev3.Address
 	var apis []types.Resource
 
-	//regExp, _ := regexp.Compile("")
 	for organizationID, entityMap := range orgIDOpenAPIEnvoyMap {
 		for apiKey, labels := range entityMap {
 			if arrayContains(labels, label) {
@@ -805,7 +804,7 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
 				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
-				if arrayContains(knownVhostPrefixes, strings.SplitN(vhost, ".", 2)[0]) {
+				if arrayContains(knownVhostPrefixes, strings.Split(vhost, ".")[0]) {
 					vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)] =
 						append(vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)],
 							orgIDOpenAPIRoutesMap[organizationID][apiKey]...)

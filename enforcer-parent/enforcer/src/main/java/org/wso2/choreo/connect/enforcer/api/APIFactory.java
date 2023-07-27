@@ -79,7 +79,7 @@ public class APIFactory {
                 enforcerApi.init(api);
                 String apiKey = getApiKey(enforcerApi);
                 newApis.put(apiKey, enforcerApi);
-                if (KNOWN_VHOST_PREFIXES.contains(api.getVhost().substring(0, api.getVhost().indexOf('.')))) {
+                if (KNOWN_VHOST_PREFIXES.contains(api.getVhost().split("\\.")[0])) {
                     newApis.put(getApiKeyWithOrgId(enforcerApi), enforcerApi);
                 }
             }
