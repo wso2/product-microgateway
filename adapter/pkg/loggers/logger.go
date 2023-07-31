@@ -37,7 +37,7 @@ const (
 	pkgTLSUtils        = "github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 	pkgAdapter         = "github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	pkgSync            = "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
-	pkgSemanticVersion = "github.com/wso2/product-microgateway/adapter/pkg/semantic_version"
+	pkgSemanticVersion = "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
 )
 
 // logger package references

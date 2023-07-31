@@ -51,7 +51,7 @@ import (
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
-	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semantic_version"
+	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 

@@ -23,7 +23,7 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
-	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semantic_version"
+	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
 )
 
 // GetVersionMatchRegex returns the regex to match the full version string
@@ -216,15 +216,15 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 				Minor:   0,
 				Patch:   nil,
 			}
-			for currentApiIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
+			for currentAPIIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
 				// Iterate all the API versions other than the deleting API itself
-				if swagger.GetTitle() == api.GetTitle() && currentApiIdentifier != apiIdentifier {
+				if swagger.GetTitle() == api.GetTitle() && currentAPIIdentifier != apiIdentifier {
 					currentAPISemVersion, _ := semantic_version.ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
 					if currentAPISemVersion != nil {
 						if currentAPISemVersion.Major == deletingAPISemVersion.Major {
 							if CompareSemanticVersions(*newLatestMajorRangeAPI, *currentAPISemVersion) {
 								newLatestMajorRangeAPI = currentAPISemVersion
-								newLatestMajorRangeAPIIdentifier = currentApiIdentifier
+								newLatestMajorRangeAPIIdentifier = currentAPIIdentifier
 							}
 						}
 					}
@@ -287,16 +287,16 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 				Patch:   nil,
 			}
 			newLatestMinorRangeAPIIdentifier := ""
-			for currentApiIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
+			for currentAPIIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
 				// Iterate all the API versions other than the deleting API itself
-				if swagger.GetTitle() == api.GetTitle() && currentApiIdentifier != apiIdentifier {
+				if swagger.GetTitle() == api.GetTitle() && currentAPIIdentifier != apiIdentifier {
 					currentAPISemVersion, _ := semantic_version.ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
 					if currentAPISemVersion != nil {
 						if currentAPISemVersion.Major == deletingAPISemVersion.Major &&
 							currentAPISemVersion.Minor == deletingAPISemVersion.Minor {
 							if CompareSemanticVersions(*newLatestMinorRangeAPI, *currentAPISemVersion) {
 								newLatestMinorRangeAPI = currentAPISemVersion
-								newLatestMinorRangeAPIIdentifier = currentApiIdentifier
+								newLatestMinorRangeAPIIdentifier = currentAPIIdentifier
 							}
 						}
 					}

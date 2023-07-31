@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package semantic_version_utils
+package semanticversion
 
 import (
 	"errors"
