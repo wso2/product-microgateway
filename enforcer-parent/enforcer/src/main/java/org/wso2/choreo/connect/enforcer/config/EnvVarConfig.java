@@ -38,6 +38,7 @@ public class EnvVarConfig {
     public static final String XDS_MAX_RETRIES = "XDS_MAX_RETRIES";
     public static final String XDS_RETRY_PERIOD = "XDS_RETRY_PERIOD";
     public static final String HOSTNAME = "HOSTNAME";
+    public static final String TEMP_DUPLICATE_VHOST_ENABLED = "TEMP_DUPLICATE_VHOST_ENABLED";
 
     // Since the container is running in linux container, path separator is not needed.
     private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
@@ -53,6 +54,7 @@ public class EnvVarConfig {
     public static final String DEFAULT_XDS_MAX_RETRIES = Integer.toString(Constants.MAX_XDS_RETRIES);
     public static final String DEFAULT_XDS_RETRY_PERIOD = Integer.toString(Constants.XDS_DEFAULT_RETRY);
     public static final String DEFAULT_HOSTNAME = "Unassigned";
+    public static final String DEFAULT_TEMP_DUPLICATE_VHOST_ENABLED = "false";
 
     private static EnvVarConfig instance;
     private final String trustedAdapterCertsPath;
@@ -70,6 +72,7 @@ public class EnvVarConfig {
     private final String xdsMaxRetries;
     private final String xdsRetryPeriod;
     private final String instanceIdentifier;
+    private final String duplicateVhostEnabled;
 
     private EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
@@ -91,6 +94,8 @@ public class EnvVarConfig {
         // HOSTNAME environment property is readily available in docker and kubernetes, and it represents the Pod
         // name in Kubernetes context, containerID in docker context.
         instanceIdentifier = retrieveEnvVarOrDefault(HOSTNAME, DEFAULT_HOSTNAME);
+        duplicateVhostEnabled = retrieveEnvVarOrDefault(TEMP_DUPLICATE_VHOST_ENABLED,
+                DEFAULT_TEMP_DUPLICATE_VHOST_ENABLED);
     }
 
     public static EnvVarConfig getInstance() {
@@ -163,5 +168,9 @@ public class EnvVarConfig {
 
     public String getInstanceIdentifier() {
         return instanceIdentifier;
+    }
+
+    public boolean isDuplicateVhostEnabled() {
+        return Boolean.valueOf(duplicateVhostEnabled);
     }
 }

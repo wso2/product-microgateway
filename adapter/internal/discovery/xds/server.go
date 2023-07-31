@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -115,11 +116,15 @@ var (
 var void struct{}
 
 const (
-	commonEnforcerLabel  string = "commonEnforcerLabel"
-	maxRandomInt         int    = 999999999
-	prototypedAPI        string = "PROTOTYPED"
-	apiKeyFieldSeparator string = ":"
+	commonEnforcerLabel       string = "commonEnforcerLabel"
+	maxRandomInt              int    = 999999999
+	prototypedAPI             string = "PROTOTYPED"
+	apiKeyFieldSeparator      string = ":"
+	tempDuplicateVhostEnabled string = "TEMP_DUPLICATE_VHOST_ENABLED"
 )
+
+var knownVhostPrefixes = []string{"dev", "sandbox_dev", "prod", "sandbox", "dev-internal", "prod-internal"}
+var isDuplicateVhostEnabled = false
 
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
@@ -178,6 +183,12 @@ func init() {
 	enforcerThrottleData = &throttle.ThrottleData{}
 	rand.Seed(time.Now().UnixNano())
 	// go watchEnforcerResponse()
+	// temporary fix for duplicate vhost for vhost migration
+	if val, present := os.LookupEnv(tempDuplicateVhostEnabled); present {
+		if val == "true" {
+			isDuplicateVhostEnabled = true
+		}
+	}
 }
 
 // GetXdsCache returns xds server cache.
@@ -802,6 +813,11 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
 				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+				if isDuplicateVhostEnabled && arrayContains(knownVhostPrefixes, strings.Split(vhost, ".")[0]) {
+					vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)] =
+						append(vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)],
+							orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+				}
 				endpointArray = append(endpointArray, orgIDOpenAPIEndpointsMap[organizationID][apiKey]...)
 				enfocerAPI, ok := orgIDOpenAPIEnforcerApisMap[organizationID][apiKey]
 				if ok {
