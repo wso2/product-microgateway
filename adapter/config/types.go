@@ -99,6 +99,8 @@ type adapter struct {
 	SandboxVhost string
 	// Sandbox environment name for Choreo that exposes the sandbox endpoint
 	SandboxEnvName string
+	// Feature flag to enable semantic version based intelligent routing
+	IsIntelligentRoutingEnabled bool
 }
 
 // Envoy Listener Component related configurations.

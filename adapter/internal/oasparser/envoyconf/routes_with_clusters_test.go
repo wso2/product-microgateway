@@ -268,7 +268,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
 
 		route := routes[0].GetMatch().GetSafeRegex().Regex
-		assert.Equal(t, route, "^/echowebsocket/1.0(/{0,1})(\\?([^/]+))?$", "route created mismatch")
+		assert.Equal(t, route, "^/echowebsocket/1\\.0(/{0,1})(\\?([^/]+))?$", "route created mismatch")
 	}
 	if strings.HasSuffix(apiYamlFilePath, "api_prod.yaml") {
 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
@@ -284,7 +284,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
 
 		route := routes[0].GetMatch().GetSafeRegex().Regex
-		assert.Equal(t, route, "^/echowebsocketprod/1.0(/{0,1})(\\?([^/]+))?$", "route created mismatch")
+		assert.Equal(t, route, "^/echowebsocketprod/1\\.0(/{0,1})(\\?([^/]+))?$", "route created mismatch")
 
 	}
 
