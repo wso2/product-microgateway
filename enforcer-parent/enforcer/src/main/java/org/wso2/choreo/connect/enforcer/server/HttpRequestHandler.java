@@ -54,7 +54,9 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         }
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
-        return matchedAPI.process(requestContext);
+        ResponseObject responseObject = matchedAPI.process(requestContext);
+        responseObject.setExtAuthDetails(requestContext.getExtAuthDetails());
+        return responseObject;
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {

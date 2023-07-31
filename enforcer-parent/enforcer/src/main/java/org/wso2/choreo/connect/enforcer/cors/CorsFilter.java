@@ -38,6 +38,7 @@ import org.wso2.choreo.connect.enforcer.tracing.Utils;
 public class CorsFilter implements Filter {
 
     private static final Logger logger = LogManager.getLogger(CorsFilter.class);
+    private static final String CORS_FAILURE = "CORS_FAILURE";
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
@@ -72,6 +73,7 @@ public class CorsFilter implements Filter {
                 requestContext.getProperties()
                         .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);
                 requestContext.addOrModifyHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
+                requestContext.setExtAuthDetails(CORS_FAILURE);
                 logger.debug("OPTIONS request received for " +
                         requestContext.getMatchedAPI().getResources().get(0).getPath() +
                         ". Responded with allow header : " + allowedMethodsBuilder.toString());

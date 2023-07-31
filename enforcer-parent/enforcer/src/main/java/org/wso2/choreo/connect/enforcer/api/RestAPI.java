@@ -150,7 +150,9 @@ public class RestAPI implements API {
                 .endpoints(endpoints).endpointSecurity(endpointSecurity)
                 .organizationId(api.getOrganizationId()).apiProvider(api.getApiProvider())
                 .enableBackendJWT(api.getEnableBackendJWT())
-                .deploymentType(api.getDeploymentType()).environmentId(api.getEnvironmentId()).build();
+                .deploymentType(api.getDeploymentType())
+                .environmentId(api.getEnvironmentId())
+                .environmentName(api.getEnvironmentName()).build();
 
         initFilters();
         return basePath;
@@ -160,6 +162,7 @@ public class RestAPI implements API {
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject(requestContext.getRequestID());
         responseObject.setRequestPath(requestContext.getRequestPath());
+        responseObject.setApiUuid(apiConfig.getUuid());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         populateRemoveAndProtectedHeaders(requestContext);

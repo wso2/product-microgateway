@@ -47,8 +47,8 @@ public class APIConfig {
     private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
     private String deploymentType;
-
     private String environmentId;
+    private String environmentName;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -130,6 +130,10 @@ public class APIConfig {
 
     public String getEnvironmentId() {
         return environmentId;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
     }
 
     /**
@@ -238,9 +242,8 @@ public class APIConfig {
         private String apiProvider;
         private List<ResourceConfig> resources = new ArrayList<>();
         private String deploymentType = "PRODUCTION";
-
         private String environmentId;
-
+        private String environmentName;
         private boolean enableBackendJWT;
 
         public Builder(String name) {
@@ -346,6 +349,13 @@ public class APIConfig {
             return this;
         }
 
+        public Builder environmentName(String environmentName) {
+            if (!StringUtils.isEmpty(environmentName)) {
+                this.environmentName = environmentName;
+            }
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -368,6 +378,7 @@ public class APIConfig {
             apiConfig.enableBackendJWT = this.enableBackendJWT;
             apiConfig.deploymentType = this.deploymentType;
             apiConfig.environmentId = this.environmentId;
+            apiConfig.environmentName = this.environmentName;
             return apiConfig;
         }
     }

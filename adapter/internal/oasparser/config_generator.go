@@ -219,6 +219,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		EnableBackendJWT:    mgwSwagger.EnableBackendJWT,
 		DeploymentType:      mgwSwagger.DeploymentType,
 		EnvironmentId:       mgwSwagger.EnvironmentID,
+		EnvironmentName:     mgwSwagger.EnvironmentName,
 	}
 }
 

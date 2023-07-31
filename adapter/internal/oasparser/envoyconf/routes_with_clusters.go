@@ -1047,7 +1047,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 	router = routev3.Route{
-		Name:      xWso2Basepath, //Categorize routes with same base path
+		Name:      getRouteName(params.apiUUID), //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
 		Metadata:  nil,
@@ -1100,7 +1100,12 @@ func getInlineLuaScript(requestInterceptor map[string]model.InterceptEndpoint, r
 	return interceptor.GetInterceptor(i)
 }
 
-func createStaticRoute(path string, pathSubstitute string, clusterName string) *routev3.Route {
+func createSystemRoute(path string, pathSubstitute string, clusterName string) *routev3.Route {
+	routeName := fmt.Sprintf("%s#%s", "system", path)
+	return createStaticRoute(routeName, path, pathSubstitute, clusterName)
+}
+
+func createStaticRoute(routeName, path string, pathSubstitute string, clusterName string) *routev3.Route {
 	var (
 		router    routev3.Route
 		action    *routev3.Route_Route
@@ -1139,7 +1144,7 @@ func createStaticRoute(path string, pathSubstitute string, clusterName string) *
 	}
 
 	router = routev3.Route{
-		Name:      path, //Categorize routes with same base path
+		Name:      routeName, //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
 		Metadata:  nil,
@@ -1153,13 +1158,13 @@ func createStaticRoute(path string, pathSubstitute string, clusterName string) *
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
-	return createStaticRoute(testKeyPath, "/testkey", extAuthzHTTPCluster)
+	return createSystemRoute(testKeyPath, "/testkey", extAuthzHTTPCluster)
 }
 
 // CreateJwksEndpoint generates a route for JWKS /.wellknown/jwks endpoint
 func CreateJwksEndpoint() *routev3.Route {
 	conf, _ := config.ReadConfigs()
-	route := createStaticRoute(jwksPath, "/jwks", extAuthzHTTPCluster)
+	route := createSystemRoute(jwksPath, "/jwks", extAuthzHTTPCluster)
 	ratelimitPerRoute := &local_rate_limitv3.LocalRateLimit{
 		StatPrefix: jwksRateLimitStatPrefix,
 		TokenBucket: &typev3.TokenBucket{
@@ -1239,7 +1244,7 @@ func CreateHealthEndpoint() *routev3.Route {
 	}
 
 	router = routev3.Route{
-		Name:  healthPath, //Categorize routes with same base path
+		Name:  getSystemRouteName(healthPath), //Categorize routes with same base path
 		Match: match,
 		Action: &routev3.Route_DirectResponse{
 			DirectResponse: &routev3.DirectResponseAction{
@@ -1294,7 +1299,7 @@ func CreateReadyEndpoint() *routev3.Route {
 	}
 
 	router = routev3.Route{
-		Name:  readyPath, //Categorize routes with same base path
+		Name:  getSystemRouteName(readyPath), //Categorize routes with same base path
 		Match: match,
 		Action: &routev3.Route_DirectResponse{
 			DirectResponse: &routev3.DirectResponseAction{
@@ -1493,6 +1498,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	}
 	params := &routeCreateParams{
 		organizationID:      organizationID,
+		apiUUID:             swagger.GetID(),
 		title:               swagger.GetTitle(),
 		apiType:             swagger.GetAPIType(),
 		version:             swagger.GetVersion(),
@@ -1557,4 +1563,15 @@ func getDefaultResourceMethods(apiType string) []string {
 		defaultResourceMethods = []string{"GET"}
 	}
 	return defaultResourceMethods
+}
+
+func getSystemRouteName(apiContext string) string {
+	return fmt.Sprintf("%s#%s", "system", apiContext)
+}
+
+func getRouteName(apiUUID string) string {
+	// Get route name from this function incase
+	// if we want to append something to the route name (eg: API context) in future.
+	// So the route name would be <apiUUID>#<apiContext>
+	return apiUUID
 }

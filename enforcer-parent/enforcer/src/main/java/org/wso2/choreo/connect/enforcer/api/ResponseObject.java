@@ -37,6 +37,8 @@ public class ResponseObject {
     private ArrayList<String> queryParamsToRemove = new ArrayList<>();
     private Map<String, String> queryParams;
     private String requestPath;
+    private String apiUuid;
+    private String extAuthDetails;
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -136,5 +138,21 @@ public class ResponseObject {
 
     public void setRequestPath(String requestPath) {
         this.requestPath = requestPath;
+    }
+
+    public String getApiUuid() {
+        return apiUuid;
+    }
+
+    public void setApiUuid(String apiUuid) {
+        this.apiUuid = apiUuid;
+    }
+
+    public String getExtAuthDetails() {
+        return extAuthDetails;
+    }
+
+    public void setExtAuthDetails(String extAuthDetails) {
+        this.extAuthDetails = extAuthDetails;
     }
 }

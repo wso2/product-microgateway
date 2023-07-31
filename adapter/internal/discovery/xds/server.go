@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -51,6 +52,7 @@ import (
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
@@ -89,7 +91,7 @@ var (
 
 	reverseAPINameVersionMap map[string]string
 
-	orgIDLatestAPIVersionMap map[string]map[string]map[string]SemVersion // organizationID -> Vhost:APIName -> Version Range -> Latest API Version
+	orgIDLatestAPIVersionMap map[string]map[string]map[string]semantic_version.SemVersion // organizationID -> Vhost:APIName -> Version Range -> Latest API Version
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -118,22 +120,18 @@ var (
 var void struct{}
 
 const (
-	commonEnforcerLabel  string = "commonEnforcerLabel"
-	maxRandomInt         int    = 999999999
-	prototypedAPI        string = "PROTOTYPED"
-	apiKeyFieldSeparator string = ":"
+	commonEnforcerLabel       string = "commonEnforcerLabel"
+	maxRandomInt              int    = 999999999
+	prototypedAPI             string = "PROTOTYPED"
+	apiKeyFieldSeparator      string = ":"
+	tempDuplicateVhostEnabled string = "TEMP_DUPLICATE_VHOST_ENABLED"
 )
+
+var knownVhostPrefixes = []string{"dev", "sandbox_dev", "prod", "sandbox", "dev-internal", "prod-internal"}
+var isDuplicateVhostEnabled = false
 
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
-
-// SemVersion is the struct to store the version components of an API
-type SemVersion struct {
-	Version string
-	Major   int
-	Minor   int
-	Patch   *int
-}
 
 // ID uses the node ID field
 func (IDHash) ID(node *corev3.Node) string {
@@ -167,7 +165,7 @@ func init() {
 	envoyClusterConfigMap = make(map[string][]*clusterv3.Cluster)
 	envoyEndpointConfigMap = make(map[string][]*corev3.Address)
 
-	orgIDLatestAPIVersionMap = make(map[string]map[string]map[string]SemVersion)
+	orgIDLatestAPIVersionMap = make(map[string]map[string]map[string]semantic_version.SemVersion)
 
 	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
 	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map
@@ -191,6 +189,12 @@ func init() {
 	enforcerThrottleData = &throttle.ThrottleData{}
 	rand.Seed(time.Now().UnixNano())
 	// go watchEnforcerResponse()
+	// temporary fix for duplicate vhost for vhost migration
+	if val, present := os.LookupEnv(tempDuplicateVhostEnabled); present {
+		if val == "true" {
+			isDuplicateVhostEnabled = true
+		}
+	}
 }
 
 // GetXdsCache returns xds server cache.
@@ -350,6 +354,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	mgwSwagger.DeploymentType = deployedEnvironments[0].DeploymentType
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	mgwSwagger.EnvironmentID = deployedEnvironments[0].ID
+	mgwSwagger.EnvironmentName = deployedEnvironments[0].Name
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 
@@ -825,6 +830,11 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
 				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+				if isDuplicateVhostEnabled && arrayContains(knownVhostPrefixes, strings.Split(vhost, ".")[0]) {
+					vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)] =
+						append(vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)],
+							orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+				}
 				endpointArray = append(endpointArray, orgIDOpenAPIEndpointsMap[organizationID][apiKey]...)
 				enfocerAPI, ok := orgIDOpenAPIEnforcerApisMap[organizationID][apiKey]
 				if ok {

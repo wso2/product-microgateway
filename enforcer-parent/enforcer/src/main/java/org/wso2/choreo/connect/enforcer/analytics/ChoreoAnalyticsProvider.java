@@ -224,6 +224,17 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
         return logEntry.getCommonProperties().getDownstreamRemoteAddress().getSocketAddress().getAddress();
     }
 
+    @Override
+    public Map<String, Object> getProperties() {
+        Map map = new HashMap();
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
+        String gwURL = getValueAsString(fieldsMap, MetadataConstants.GATEWAY_URL);
+        String deploymentType = getValueAsString(fieldsMap, MetadataConstants.DEPLOYMENT_TYPE);
+        map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
+        map.put(AnalyticsConstants.DEPLOYMENT_TYPE, deploymentType);
+        return map;
+    }
+
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
         if (fieldsMap == null || !fieldsMap.containsKey(key)) {
             return null;

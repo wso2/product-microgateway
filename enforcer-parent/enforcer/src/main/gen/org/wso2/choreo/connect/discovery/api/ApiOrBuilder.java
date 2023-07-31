@@ -303,4 +303,16 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getEnvironmentIdBytes();
+
+  /**
+   * <code>string environmentName = 23;</code>
+   * @return The environmentName.
+   */
+  java.lang.String getEnvironmentName();
+  /**
+   * <code>string environmentName = 23;</code>
+   * @return The bytes for environmentName.
+   */
+  com.google.protobuf.ByteString
+      getEnvironmentNameBytes();
 }

@@ -24,6 +24,7 @@ import (
 // routeCreateParams is the DTO used to provide information to the envoy route create function
 type routeCreateParams struct {
 	organizationID      string
+	apiUUID             string
 	title               string
 	version             string
 	apiType             string
