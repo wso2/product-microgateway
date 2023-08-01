@@ -45,6 +45,7 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
@@ -185,15 +186,17 @@ public class JWTAuthenticator implements Authenticator {
                 }
 
             }
-            JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
+            JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier,
+                    requestContext.getMatchedAPI().getOrganizationId());
             if (validationInfo != null) {
                 if (validationInfo.isValid()) {
                     // Check if the token has access to the gateway configured environment.
                     checkTokenEnv(claims, requestContext.getMatchedAPI().getEnvironmentName());
                     // Validate subscriptions
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                    EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
-                    ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
+                    ExtendedTokenIssuerDto issuerDto = KeyManagerHolder.getInstance()
+                            .getTokenIssuerDTO(requestContext.getMatchedAPI().getOrganizationId(),
+                                    validationInfo.getIssuer());
                     Scope validateSubscriptionSpanScope = null;
                     try {
                         if (issuerDto.isValidateSubscriptions()) {
@@ -588,7 +591,7 @@ public class JWTAuthenticator implements Authenticator {
         return api;
     }
 
-    private JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo, String jti)
+    private JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo, String jti, String organizationUUID)
             throws APISecurityException {
 
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
@@ -626,7 +629,7 @@ public class JWTAuthenticator implements Authenticator {
         if (jwtValidationInfo == null) {
 
             try {
-                jwtValidationInfo = jwtValidator.validateJWTToken(signedJWTInfo);
+                jwtValidationInfo = jwtValidator.validateJWTToken(signedJWTInfo, organizationUUID);
                 signedJWTInfo.setValidationStatus(jwtValidationInfo.isValid() ?
                         SignedJWTInfo.ValidationStatus.VALID : SignedJWTInfo.ValidationStatus.INVALID);
                 if (isGatewayTokenCacheEnabled) {

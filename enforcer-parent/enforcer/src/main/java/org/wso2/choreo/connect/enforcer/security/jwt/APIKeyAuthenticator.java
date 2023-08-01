@@ -43,6 +43,7 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -74,7 +75,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
         }
-        Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
+        Map<String, ExtendedTokenIssuerDto> tokenIssuers = KeyManagerHolder.getInstance().getTokenIssuerMap()
+                .get(APIConstants.SUPER_TENANT_DOMAIN_NAME);
         for (ExtendedTokenIssuerDto tokenIssuer: tokenIssuers.values()) {
             if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(tokenIssuer.getName())) {
                 apiKeySubValidationEnabled = tokenIssuer.isValidateSubscriptions();

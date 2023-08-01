@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * KeyManager holder class for Micro gateway.
@@ -53,16 +54,13 @@ public class KeyManagerHolder {
     private static final Logger logger = LogManager.getLogger(KeyManagerHolder.class);
 
     private static final String X509 = "X.509";
-    private static KeyManagerHolder instance;
-    private Map<String, ExtendedTokenIssuerDto> tokenIssuerMap = ConfigHolder.getInstance().getConfig().getIssuersMap();
+    private static final KeyManagerHolder INSTANCE = new KeyManagerHolder();
+    private Map<String, Map<String, ExtendedTokenIssuerDto>> tokenIssuerMap = new ConcurrentHashMap<>();
 
     private KeyManagerHolder() {}
 
     public static KeyManagerHolder getInstance() {
-        if (instance == null) {
-            instance = new KeyManagerHolder();
-        }
-        return instance;
+        return INSTANCE;
     }
 
     public void init() {
@@ -71,12 +69,11 @@ public class KeyManagerHolder {
     }
 
     public void populateKMIssuerConfiguration(List<KeyManagerConfig> kmIssuers) {
-        Map<String, ExtendedTokenIssuerDto> kmIssuerMap =  getAllKmIssuers(kmIssuers);
-        updateIssuerMap(kmIssuerMap);
+        updateIssuerMap(getAllKmIssuers(kmIssuers));
     }
 
-    public Map<String, ExtendedTokenIssuerDto> getAllKmIssuers(List<KeyManagerConfig> kmIssuers) {
-        Map<String, ExtendedTokenIssuerDto> kmIssuerMap = new HashMap<>();
+    private Map<String,  Map<String, ExtendedTokenIssuerDto>> getAllKmIssuers(List<KeyManagerConfig> kmIssuers) {
+        Map<String,  Map<String, ExtendedTokenIssuerDto>> kmIssuerMap = new ConcurrentHashMap<>();
         for (KeyManagerConfig keyManagerConfig : kmIssuers) {
             JSONObject configObj = new JSONObject(keyManagerConfig.getConfiguration());
             Map<String, Object> configuration = new HashMap<>();
@@ -88,15 +85,16 @@ public class KeyManagerHolder {
             }
 
             if (keyManagerConfig.getEnabled()) {
-                addKMTokenIssuers(keyManagerConfig.getName(), configuration, kmIssuerMap);
+                addKMTokenIssuers(keyManagerConfig.getName(), keyManagerConfig.getOrganization(),
+                        configuration, kmIssuerMap);
             }
         }
         return kmIssuerMap;
     }
 
 
-    public void addKMTokenIssuers(String keyManagerName, Map<String, Object> configuration,
-                                  Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
+    private void addKMTokenIssuers(String keyManagerName, String organization, Map<String, Object> configuration,
+                                  Map<String, Map<String, ExtendedTokenIssuerDto>> kmIssuerMap) {
         Object selfValidateJWT = configuration.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
         if (selfValidateJWT != null && (Boolean) selfValidateJWT) {
             Object issuer = configuration.get(APIConstants.KeyManager.ISSUER);
@@ -152,24 +150,57 @@ public class KeyManagerHolder {
                         }
                     }
                 }
-                kmIssuerMap.put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
+                if (!kmIssuerMap.containsKey(organization)) {
+                    kmIssuerMap.put(organization, new HashMap<>());
+                }
+                Map<String, ExtendedTokenIssuerDto> orgSpecificKMIssuerMap = kmIssuerMap.get(organization);
+                orgSpecificKMIssuerMap.put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
             }
         }
     }
 
-    public void updateIssuerMap(Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
+    public void updateIssuerMap(Map<String, Map<String, ExtendedTokenIssuerDto>> kmIssuerMap) {
         ArrayList<ExtendedTokenIssuerDto> configIssuerList = ConfigHolder.getInstance().getConfigIssuerList();
+        Map<String, Map<String, ExtendedTokenIssuerDto>> tokenIssuerMap = new ConcurrentHashMap<>(kmIssuerMap);
         for (ExtendedTokenIssuerDto configTokenIssuer : configIssuerList) {
-            if (!kmIssuerMap.containsKey(configTokenIssuer.getIssuer())) {
+            if (!tokenIssuerMap.containsKey(APIConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                tokenIssuerMap.put(APIConstants.SUPER_TENANT_DOMAIN_NAME, new ConcurrentHashMap<>());
+            }
+            Map<String, ExtendedTokenIssuerDto> kmIssuerMapForCarbonSuper =
+                    tokenIssuerMap.get(APIConstants.SUPER_TENANT_DOMAIN_NAME);
+            if (!kmIssuerMapForCarbonSuper.containsKey(configTokenIssuer.getIssuer())) {
                 //add issuer from config if they are not presenting at external km response
-                kmIssuerMap.put(configTokenIssuer.getIssuer(), configTokenIssuer);
+                kmIssuerMapForCarbonSuper.put(configTokenIssuer.getIssuer(), configTokenIssuer);
             } else {
                 logger.warn("token issuer " + configTokenIssuer.getIssuer() + " already exists in config map. " +
                         "Existing configurations will be replaced by external KeyManager configurations");
             }
         }
-        // add the updated issuer list replacing the existing one
-        tokenIssuerMap.clear();
-        tokenIssuerMap.putAll(kmIssuerMap);
+        this.tokenIssuerMap = tokenIssuerMap;
+    }
+
+    public Map<String, Map<String, ExtendedTokenIssuerDto>> getTokenIssuerMap() {
+        return this.tokenIssuerMap;
+    }
+
+    public ExtendedTokenIssuerDto getTokenIssuerDTO(String organizationUUID, String issuer) {
+        Map<String, Map<String, ExtendedTokenIssuerDto>> tokenIssuerMap = getTokenIssuerMap();
+        if (tokenIssuerMap.containsKey(organizationUUID)) {
+            Map<String, ExtendedTokenIssuerDto> orgSpecificKMIssuerMap = tokenIssuerMap.get(organizationUUID);
+            if (orgSpecificKMIssuerMap.containsKey(issuer)) {
+                return orgSpecificKMIssuerMap.get(issuer);
+            }
+        }
+        if (tokenIssuerMap.containsKey(APIConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            Map<String, ExtendedTokenIssuerDto> orgSpecificKMIssuerMap =
+                    tokenIssuerMap.get(APIConstants.SUPER_TENANT_DOMAIN_NAME);
+            if (orgSpecificKMIssuerMap.containsKey(issuer)) {
+                String residentKMName = orgSpecificKMIssuerMap.get(issuer).getName();
+                if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(residentKMName)) {
+                    return orgSpecificKMIssuerMap.get(issuer);
+                }
+            }
+        }
+        return null;
     }
 }

@@ -75,6 +75,7 @@ import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.jwks.BackendJWKSDto;
+import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
@@ -93,6 +94,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -235,6 +237,9 @@ public class ConfigHolder {
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             logger.error("Error while initiating the truststore for JWT related public certificates", e);
         }
+        Map<String, Map<String, ExtendedTokenIssuerDto>> tokenIssuerMap = new ConcurrentHashMap<>();
+        Map<String, ExtendedTokenIssuerDto> superTenantTokenIssuerMap = new ConcurrentHashMap<>();
+        tokenIssuerMap.put(APIConstants.SUPER_TENANT_DOMAIN_NAME, superTenantTokenIssuerMap);
         for (Issuer jwtIssuer : cdsIssuers) {
             ExtendedTokenIssuerDto issuerDto = new ExtendedTokenIssuerDto(jwtIssuer.getIssuer());
 
@@ -275,9 +280,10 @@ public class ConfigHolder {
             issuerDto.setName(jwtIssuer.getName());
             issuerDto.setConsumerKeyClaim(jwtIssuer.getConsumerKeyClaim());
             issuerDto.setValidateSubscriptions(jwtIssuer.getValidateSubscription());
-            config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
+            superTenantTokenIssuerMap.put(jwtIssuer.getIssuer(), issuerDto);
             configIssuerList.add(issuerDto);
         }
+        KeyManagerHolder.getInstance().updateIssuerMap(tokenIssuerMap);
     }
 
     private void populateThrottlingConfig(Throttling throttling) {

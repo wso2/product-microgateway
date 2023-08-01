@@ -35,6 +35,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
 import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
@@ -44,7 +45,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -60,13 +60,13 @@ public class JWTValidator {
     public JWTValidator() {}
 
 
-    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws EnforcerException {
+    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo, String organizationUUID) 
+            throws EnforcerException {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
-        Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
-
-        if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
-            ExtendedTokenIssuerDto tokenIssuer = tokenIssuers.get(issuer);
+        ExtendedTokenIssuerDto tokenIssuer = KeyManagerHolder.getInstance()
+                .getTokenIssuerDTO(organizationUUID, issuer);
+        if (tokenIssuer != null && StringUtils.isNotEmpty(issuer)) {
             this.jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
             if (this.jwtTransformer == null) {
                 this.jwtTransformer = new DefaultJWTTransformer();
