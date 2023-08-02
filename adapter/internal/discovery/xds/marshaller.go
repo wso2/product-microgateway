@@ -353,6 +353,9 @@ func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
 			Configuration: configuration,
 			Organization:  keyManager.Organization,
 		}
+		if newKeyManager.Organization == "" {
+			newKeyManager.Organization = "carbon.super"
+		}
 		return newKeyManager
 	}
 	logger.LoggerXds.Debugf("Error happens while marshaling key manager data for " + fmt.Sprint(keyManager.Name))
