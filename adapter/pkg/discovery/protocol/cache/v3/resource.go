@@ -86,7 +86,7 @@ func GetResourceName(res envoy_types.Resource) string {
 	case *throttle.ThrottleData:
 		return "ThrottleData"
 	case *ga.Api:
-		return fmt.Sprint(v.ApiUUID)
+		return fmt.Sprint(v.ApiUUID, v.DeployedEnv)
 	case *keymgt.RevokedToken:
 		return fmt.Sprint(v.Jti)
 	default:
