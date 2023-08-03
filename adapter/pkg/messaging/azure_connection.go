@@ -21,6 +21,7 @@ package messaging
 import (
 	"context"
 	"errors"
+	"os"
 	"strconv"
 	"time"
 
@@ -31,7 +32,9 @@ import (
 )
 
 // TODO: (erandi) when refactoring, refactor organization purge flow as well
-var bindingKeys = []string{tokenRevocation, notification, stepQuotaThreshold, stepQuotaReset, organizationPurge}
+var bindingKeys = []string{tokenRevocation, notification, stepQuotaThreshold, stepQuotaReset}
+
+const orgPurgeEnabled = "ORG_PURGE_ENABLED"
 
 // Subscription stores the meta data of a specific subscription
 type Subscription struct {
@@ -58,6 +61,15 @@ func init() {
 	AzureStepQuotaThresholdChannel = make(chan []byte)
 	AzureStepQuotaResetChannel = make(chan []byte)
 	AzureOrganizationPurgeChannel = make(chan []byte)
+
+	// Temporarily disable reacting organization Purge
+	orgPurgeEnabled, envParseErr := strconv.ParseBool(os.Getenv(orgPurgeEnabled))
+
+	if envParseErr == nil {
+		if orgPurgeEnabled {
+			bindingKeys = append(bindingKeys, organizationPurge)
+		}
+	}
 }
 
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
