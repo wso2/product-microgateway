@@ -197,6 +197,12 @@ public class JWTAuthenticator implements Authenticator {
                     ExtendedTokenIssuerDto issuerDto = KeyManagerHolder.getInstance()
                             .getTokenIssuerDTO(requestContext.getMatchedAPI().getOrganizationId(),
                                     validationInfo.getIssuer());
+                    // Unreachable condition as JWT Validator already checks this but still added it for safety.
+                    if (issuerDto == null) {
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                    }
                     Scope validateSubscriptionSpanScope = null;
                     try {
                         if (issuerDto.isValidateSubscriptions()) {
