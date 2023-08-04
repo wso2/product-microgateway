@@ -64,35 +64,6 @@ func GetMinorVersionRange(semVersion semantic_version.SemVersion) string {
 	return "v" + strconv.Itoa(semVersion.Major) + "." + strconv.Itoa(semVersion.Minor)
 }
 
-// CompareSemanticVersions compares two semantic versions and returns true
-// if `version` is greater or equal than `baseVersion`
-func CompareSemanticVersions(baseVersion, version semantic_version.SemVersion) bool {
-	if baseVersion.Major < version.Major {
-		return true
-	} else if baseVersion.Major > version.Major {
-		return false
-	} else {
-		if baseVersion.Minor < version.Minor {
-			return true
-		} else if baseVersion.Minor > version.Minor {
-			return false
-		} else {
-			if baseVersion.Patch != nil && version.Patch != nil {
-				if *baseVersion.Patch < *version.Patch {
-					return true
-				} else if *baseVersion.Patch > *version.Patch {
-					return false
-				}
-			} else if baseVersion.Patch == nil && version.Patch != nil {
-				return true
-			} else if baseVersion.Patch != nil && version.Patch == nil {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 func updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVersion, vHost string) {
 	apiSemVersion, err := semantic_version.ValidateAndGetVersionComponents(apiVersion, apiName)
 	// If the version validation is not success, we just proceed without intelligent version
@@ -109,8 +80,8 @@ func updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVe
 		orgIDLatestAPIVersionMap[organizationID][apiRangeIdentifier][GetMinorVersionRange(*apiSemVersion)]
 
 	// Check whether the current API is the latest version in the major and minor version ranges
-	isLatestMajorVersion := !isMajorRangeRegexAvailable || CompareSemanticVersions(existingMajorRangeLatestSemVersion, *apiSemVersion)
-	isLatestMinorVersion := !isMinorRangeRegexAvailable || CompareSemanticVersions(existingMinorRangeLatestSemVersion, *apiSemVersion)
+	isLatestMajorVersion := !isMajorRangeRegexAvailable || existingMajorRangeLatestSemVersion.Compare(*apiSemVersion)
+	isLatestMinorVersion := !isMinorRangeRegexAvailable || existingMinorRangeLatestSemVersion.Compare(*apiSemVersion)
 
 	// Remove the existing regexes from the path specifier when latest major and/or minor version is available
 	if (isMajorRangeRegexAvailable || isMinorRangeRegexAvailable) && (isLatestMajorVersion || isLatestMinorVersion) {
@@ -222,7 +193,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 					currentAPISemVersion, _ := semantic_version.ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
 					if currentAPISemVersion != nil {
 						if currentAPISemVersion.Major == deletingAPISemVersion.Major {
-							if CompareSemanticVersions(*newLatestMajorRangeAPI, *currentAPISemVersion) {
+							if newLatestMajorRangeAPI.Compare(*currentAPISemVersion) {
 								newLatestMajorRangeAPI = currentAPISemVersion
 								newLatestMajorRangeAPIIdentifier = currentAPIIdentifier
 							}
@@ -294,7 +265,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 					if currentAPISemVersion != nil {
 						if currentAPISemVersion.Major == deletingAPISemVersion.Major &&
 							currentAPISemVersion.Minor == deletingAPISemVersion.Minor {
-							if CompareSemanticVersions(*newLatestMinorRangeAPI, *currentAPISemVersion) {
+							if newLatestMinorRangeAPI.Compare(*currentAPISemVersion) {
 								newLatestMinorRangeAPI = currentAPISemVersion
 								newLatestMinorRangeAPIIdentifier = currentAPIIdentifier
 							}
