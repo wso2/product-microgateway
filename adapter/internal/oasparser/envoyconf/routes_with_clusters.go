@@ -883,7 +883,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if strings.HasSuffix(resourcePath, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
 	}
-	basePath = GetUpdatedRegexToMatchDots(basePath)
 	pathRegex := "^" + basePath + resourceRegex
 
 	if xWso2Basepath != "" {
@@ -1346,7 +1345,6 @@ func generatePathRegexSegment(resourcePath string) string {
 	resourceRegex := ""
 	matcher := regexp.MustCompile(`{([^}]+)}`)
 	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
-	resourceRegex = GetUpdatedRegexToMatchDots(resourceRegex)
 	if strings.HasSuffix(resourceRegex, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + wildCardRegex
 	} else {
@@ -1402,12 +1400,6 @@ func basepathConsistent(basePath string) string {
 	}
 	modifiedBasePath = strings.TrimSuffix(modifiedBasePath, "/")
 	return modifiedBasePath
-}
-
-// GetUpdatedRegexToMatchDots returns the regex to match the "." character in an existing regex.
-func GetUpdatedRegexToMatchDots(regex string) string {
-	// Match "." character in the regex by replacing it with "\\."
-	return strings.ReplaceAll(regex, ".", "\\.")
 }
 
 // generateRegex generates regex for the resources which have path paramaters
