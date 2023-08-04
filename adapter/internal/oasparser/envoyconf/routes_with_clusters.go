@@ -1339,14 +1339,19 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 	return newPath
 }
 
-func generatePathRegexSegment(resourcePath string) string {
+// generatePathRegexSegment - generates a regex segment for a given resource path
+// resourcePath - resource path of the api
+// options - boolean parameter to indicate whether to generate path segment for substitution string
+func generatePathRegexSegment(resourcePath string, options ...bool) string {
 	pathParaRegex := "([^/]+)"
 	wildCardRegex := "((/(.*))*)"
 	trailingSlashRegex := "(/{0,1})"
 	resourceRegex := ""
 	matcher := regexp.MustCompile(`{([^}]+)}`)
 	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
-	resourceRegex = GetUpdatedRegexToMatchDots(resourceRegex)
+	if !(len(options) > 0 && options[0]) {
+		resourceRegex = GetUpdatedRegexToMatchDots(resourceRegex)
+	}
 	if strings.HasSuffix(resourceRegex, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + wildCardRegex
 	} else {
@@ -1355,12 +1360,16 @@ func generatePathRegexSegment(resourcePath string) string {
 	return resourceRegex
 }
 
+func generatePathRegexSegmentForSubstitutionString(resourcePath string) string {
+	return generatePathRegexSegment(resourcePath, true)
+}
+
 func generateSubstitutionString(resourcePath string, endpointBasepath string) string {
 	pathParaRegex := "([^/]+)"
 	trailingSlashRegex := "(/{0,1})"
 	wildCardRegex := "((/(.*))*)"
 	pathParamIndex := 0
-	resourceRegex := generatePathRegexSegment(resourcePath)
+	resourceRegex := generatePathRegexSegmentForSubstitutionString(resourcePath)
 	for {
 		pathParaRemains := strings.Contains(resourceRegex, pathParaRegex)
 		if !pathParaRemains {
