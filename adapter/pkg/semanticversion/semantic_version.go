@@ -81,32 +81,3 @@ func ValidateAndGetVersionComponents(version string, apiName string) (*SemVersio
 		Patch:   &patchVersion,
 	}, nil
 }
-
-// Compare - compares two semantic versions and returns true
-// if `version` is greater or equal than `baseVersion`
-func (baseVersion SemVersion) Compare(version SemVersion) bool {
-	if baseVersion.Major < version.Major {
-		return true
-	} else if baseVersion.Major > version.Major {
-		return false
-	} else {
-		if baseVersion.Minor < version.Minor {
-			return true
-		} else if baseVersion.Minor > version.Minor {
-			return false
-		} else {
-			if baseVersion.Patch != nil && version.Patch != nil {
-				if *baseVersion.Patch < *version.Patch {
-					return true
-				} else if *baseVersion.Patch > *version.Patch {
-					return false
-				}
-			} else if baseVersion.Patch == nil && version.Patch != nil {
-				return true
-			} else if baseVersion.Patch != nil && version.Patch == nil {
-				return false
-			}
-		}
-	}
-	return true
-}
