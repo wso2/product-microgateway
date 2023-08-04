@@ -57,9 +57,10 @@ var defaultConfig = &Config{
 		Truststore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
-		ArtifactsDirectory: "/home/wso2/artifacts",
-		SandboxVhost:       "sandbox.host",
-		SandboxEnvName:     "sandbox",
+		ArtifactsDirectory:          "/home/wso2/artifacts",
+		SandboxVhost:                "sandbox.host",
+		SandboxEnvName:              "sandbox",
+		IsIntelligentRoutingEnabled: false,
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
