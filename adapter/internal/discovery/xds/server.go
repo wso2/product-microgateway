@@ -33,6 +33,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 
@@ -51,6 +52,7 @@ import (
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 	wso2_resource "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	semantic_version "github.com/wso2/product-microgateway/adapter/pkg/semanticversion"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
@@ -88,6 +90,8 @@ var (
 	orgIDvHostBasepathMap       map[string]map[string]string               // organizationID -> Vhost:basepath -> Vhost:API_UUID
 
 	reverseAPINameVersionMap map[string]string
+
+	orgIDLatestAPIVersionMap map[string]map[string]map[string]semantic_version.SemVersion // organizationID -> Vhost:APIName -> Version Range -> Latest API Version
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -160,6 +164,8 @@ func init() {
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 	envoyClusterConfigMap = make(map[string][]*clusterv3.Cluster)
 	envoyEndpointConfigMap = make(map[string][]*corev3.Address)
+
+	orgIDLatestAPIVersionMap = make(map[string]map[string]map[string]semantic_version.SemVersion)
 
 	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
 	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map
@@ -478,6 +484,13 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		orgIDOpenAPIRoutesMap[organizationID] = routesMap
 	}
 
+	apiName := mgwSwagger.GetTitle()
+	apiVersion := mgwSwagger.GetVersion()
+
+	if conf.Adapter.IsIntelligentRoutingEnabled && strings.HasPrefix(apiVersion, "v") {
+		updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVersion, vHost)
+	}
+
 	if _, ok := orgIDOpenAPIClustersMap[organizationID]; ok {
 		orgIDOpenAPIClustersMap[organizationID][apiIdentifier] = clusters
 	} else {
@@ -655,7 +668,7 @@ func DeleteAPIWithAPIMEvent(uuid, organizationID string, environments []string, 
 
 // deleteAPI deletes an API, its resources and updates the caches of given environments
 func deleteAPI(apiIdentifier string, environments []string, organizationID string) error {
-	_, exists := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
+	api, exists := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API: %v from Organization: %v. API Does not exist.", apiIdentifier, organizationID)
 		return errors.New(mgw.NotFound)
@@ -676,6 +689,10 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 		}
 	} else {
 		toBeDelEnvs, toBeKeptEnvs = getEnvironmentsToBeDeleted(existingLabels, environments)
+	}
+
+	if conf.Adapter.IsIntelligentRoutingEnabled && strings.HasPrefix(api.GetVersion(), "v") {
+		updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier, api)
 	}
 
 	for _, val := range toBeDelEnvs {
@@ -1142,6 +1159,11 @@ func IsAPIExist(vhost, uuid, organizationID string) (exists bool) {
 // GenerateIdentifierForAPI generates an identifier unique to the API
 func GenerateIdentifierForAPI(vhost, name, version string) string {
 	return fmt.Sprint(vhost, apiKeyFieldSeparator, name, apiKeyFieldSeparator, version)
+}
+
+// GenerateIdentifierForAPIWithoutVersion generates an identifier unique to the API despite of the version
+func GenerateIdentifierForAPIWithoutVersion(vhost, name string) string {
+	return fmt.Sprint(vhost, apiKeyFieldSeparator, name)
 }
 
 // GenerateIdentifierForAPIWithUUID generates an identifier unique to the API

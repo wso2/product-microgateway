@@ -883,6 +883,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if strings.HasSuffix(resourcePath, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
 	}
+	basePath = GetUpdatedRegexToMatchDots(basePath)
 	pathRegex := "^" + basePath + resourceRegex
 
 	if xWso2Basepath != "" {
@@ -1338,13 +1339,19 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 	return newPath
 }
 
-func generatePathRegexSegment(resourcePath string) string {
+// generatePathRegexSegment - generates a regex segment for a given resource path
+// resourcePath - resource path of the api
+// options - boolean parameter to indicate whether to generate path segment for substitution string
+func generatePathRegexSegment(resourcePath string, options ...bool) string {
 	pathParaRegex := "([^/]+)"
 	wildCardRegex := "((/(.*))*)"
 	trailingSlashRegex := "(/{0,1})"
 	resourceRegex := ""
 	matcher := regexp.MustCompile(`{([^}]+)}`)
 	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
+	if !(len(options) > 0 && options[0]) {
+		resourceRegex = GetUpdatedRegexToMatchDots(resourceRegex)
+	}
 	if strings.HasSuffix(resourceRegex, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + wildCardRegex
 	} else {
@@ -1353,12 +1360,19 @@ func generatePathRegexSegment(resourcePath string) string {
 	return resourceRegex
 }
 
+// generatePathRegexSegmentForSubstitutionString generates the regex for substitution string.
+// This function doesn't transform `.` characters to its regex matcher, compared to generating router matching regex.
+// Path parameters will be transformed to regex matchers.
+func generatePathRegexSegmentForSubstitutionString(resourcePath string) string {
+	return generatePathRegexSegment(resourcePath, true)
+}
+
 func generateSubstitutionString(resourcePath string, endpointBasepath string) string {
 	pathParaRegex := "([^/]+)"
 	trailingSlashRegex := "(/{0,1})"
 	wildCardRegex := "((/(.*))*)"
 	pathParamIndex := 0
-	resourceRegex := generatePathRegexSegment(resourcePath)
+	resourceRegex := generatePathRegexSegmentForSubstitutionString(resourcePath)
 	for {
 		pathParaRemains := strings.Contains(resourceRegex, pathParaRegex)
 		if !pathParaRemains {
@@ -1400,6 +1414,12 @@ func basepathConsistent(basePath string) string {
 	}
 	modifiedBasePath = strings.TrimSuffix(modifiedBasePath, "/")
 	return modifiedBasePath
+}
+
+// GetUpdatedRegexToMatchDots returns the regex to match the "." character in an existing regex.
+func GetUpdatedRegexToMatchDots(regex string) string {
+	// Match "." character in the regex by replacing it with "\\."
+	return strings.ReplaceAll(regex, ".", "\\.")
 }
 
 // generateRegex generates regex for the resources which have path paramaters

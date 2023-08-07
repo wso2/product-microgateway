@@ -235,6 +235,11 @@ func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
 }
 
+// GetVHost returns the vhost of the API
+func (swagger *MgwSwagger) GetVHost() string {
+	return swagger.VHost
+}
+
 // SetID set the Id of the API
 func (swagger *MgwSwagger) SetID(id string) {
 	swagger.id = id
