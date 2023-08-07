@@ -1360,6 +1360,9 @@ func generatePathRegexSegment(resourcePath string, options ...bool) string {
 	return resourceRegex
 }
 
+// generatePathRegexSegmentForSubstitutionString generates the regex for substitution string.
+// This function doesn't transform `.` characters to its regex matcher, compared to generating router matching regex.
+// Path parameters will be transformed to regex matchers.
 func generatePathRegexSegmentForSubstitutionString(resourcePath string) string {
 	return generatePathRegexSegment(resourcePath, true)
 }
