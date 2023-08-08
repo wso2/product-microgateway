@@ -166,13 +166,13 @@ public class KeyValidator {
                                                 " {} app_UUID: {} API_Context:API_Version: {} API_UUID : {}",
                                         app.getName(), app.getUUID(), apiContext + ":" + apiVersion, uuid);
                             } else {
-                                log.debug("All information is retrieved from the inmemory data store.");
+                                log.debug("All information is retrieved from the in-memory data store.");
                             }
                         } catch (EnforcerException e) {
                             log.error("API version is not a valid semantic version", e);
                         }
                     } else {
-                        log.debug("All information is retrieved from the inmemory data store.");
+                        log.debug("All information is retrieved from the in-memory data store.");
                     }
                 } else {
                     log.info("Application not found in the data store for uuid " + key.getApplicationUUID());
