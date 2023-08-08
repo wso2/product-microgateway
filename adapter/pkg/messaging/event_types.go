@@ -163,6 +163,8 @@ type SubscriptionEvent struct {
 	ApplicationUUID   string `json:"applicationUUID"`
 	PolicyID          string `json:"policyId"`
 	SubscriptionState string `json:"subscriptionState"`
+	Context           string `json:"context"`
+	VersionRange      string `json:"versionRange"`
 	Event
 }
 

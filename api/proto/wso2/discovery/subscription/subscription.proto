@@ -22,4 +22,6 @@ message Subscription {
 	string subscriptionUUID = 9;
 	string appUUID = 10;
 	string apiUUID = 11;
+	string context = 12;
+	string versionRange = 13;
 }

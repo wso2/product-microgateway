@@ -26,6 +26,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
+import org.wso2.choreo.connect.enforcer.dto.SemVersion;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
@@ -37,6 +38,7 @@ import org.wso2.choreo.connect.enforcer.models.URLMapping;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.SemanticVersionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,13 +151,28 @@ public class KeyValidator {
                 app = datastore.getApplicationById(key.getApplicationUUID());
                 if (app != null) {
                     sub = datastore.getSubscriptionById(app.getUUID(), uuid);
-                    if (sub != null) {
-                        log.debug("All information is retrieved from the inmemory data store.");
+                    if (sub == null && apiVersion.startsWith("v")) {
+                        try {
+                            SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion,
+                                    uuid);
+                            // Remove last occurrence of version from the context
+                            int lastIndexOfVersion = apiContext.lastIndexOf("/" + apiVersion);
+                            String apiContextTemplate = apiContext.substring(0, lastIndexOfVersion);
+                            sub = datastore.getSubscriptionByAppIdApiContextVersionRange(app.getUUID(),
+                                    apiContextTemplate, "v" + apiSemVersion.getMajor());
+                            if (sub == null) {
+                                log.info(
+                                        "Valid subscription not found for oauth access token. application:" +
+                                                " {} app_UUID: {} API_Context:API_Version: {} API_UUID : {}",
+                                        app.getName(), app.getUUID(), apiContext + ":" + apiVersion, uuid);
+                            } else {
+                                log.debug("All information is retrieved from the in-memory data store.");
+                            }
+                        } catch (EnforcerException e) {
+                            log.debug("API version: {} is not a valid semantic version", apiVersion);
+                        }
                     } else {
-                        log.info(
-                                "Valid subscription not found for oauth access token. " +
-                                        "application: {} app_UUID: {} API_Context:API_Version: {} API_UUID : {}",
-                                app.getName(), app.getUUID(), apiContext + ":" + apiVersion, uuid);
+                        log.debug("All information is retrieved from the in-memory data store.");
                     }
                 } else {
                     log.info("Application not found in the data store for uuid " + key.getApplicationUUID());

@@ -579,6 +579,8 @@ func marshalSubscription(subscriptionInternal *types.Subscription) *subscription
 		SubscriptionUUID:  subscriptionInternal.SubscriptionUUID,
 		ApiUUID:           subscriptionInternal.APIUUID,
 		AppUUID:           subscriptionInternal.ApplicationUUID,
+		Context:           subscriptionInternal.Context,
+		VersionRange:      subscriptionInternal.VersionRange,
 	}
 	if sub.TenantDomain == "" {
 		sub.TenantDomain = config.GetControlPlaneConnectedTenantDomain()
