@@ -151,7 +151,7 @@ public class KeyValidator {
                 app = datastore.getApplicationById(key.getApplicationUUID());
                 if (app != null) {
                     sub = datastore.getSubscriptionById(app.getUUID(), uuid);
-                    if (sub == null) {
+                    if (sub == null && apiVersion.startsWith("v")) {
                         try {
                             SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion,
                                     uuid);
@@ -169,7 +169,7 @@ public class KeyValidator {
                                 log.debug("All information is retrieved from the in-memory data store.");
                             }
                         } catch (EnforcerException e) {
-                            log.error("API version is not a valid semantic version", e);
+                            log.debug("API version: {} is not a valid semantic version", apiVersion);
                         }
                     } else {
                         log.debug("All information is retrieved from the in-memory data store.");
