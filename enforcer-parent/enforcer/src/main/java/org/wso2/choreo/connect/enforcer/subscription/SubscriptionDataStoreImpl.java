@@ -173,7 +173,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             newSubscription.setVersionRange(subscription.getVersionRange());
 
             newSubscriptionMap.put(newSubscription.getCacheKey(), newSubscription);
-            newApiVersionRangeSubscriptionMap.put(newSubscription.getVersionRangeCacheKey(), newSubscription);
+
+            // Add to version range subscription map, if the version range is non-empty
+            if(!subscription.getVersionRange().equals("")) {
+                newApiVersionRangeSubscriptionMap.put(newSubscription.getVersionRangeCacheKey(), newSubscription);
+            }
         }
 
         if (log.isDebugEnabled()) {
