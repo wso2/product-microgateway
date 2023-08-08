@@ -197,6 +197,8 @@ public class JWTAuthenticator implements Authenticator {
                     ExtendedTokenIssuerDto issuerDto = KeyManagerHolder.getInstance()
                             .getTokenIssuerDTO(requestContext.getMatchedAPI().getOrganizationId(),
                                     validationInfo.getIssuer());
+                    isAllowedEnvironmentForIDP(requestContext.getMatchedAPI().getEnvironmentName(),
+                            issuerDto.getEnvironments());
                     // Unreachable condition as JWT Validator already checks this but still added it for safety.
                     if (issuerDto == null) {
                         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -357,6 +359,39 @@ public class JWTAuthenticator implements Authenticator {
                 }
             }
         }
+    }
+
+    /**
+     * isAllowedEnvironmentForIDP checks if the token is valid for the environment that the API is deployed.
+     *
+     * @param apiDeployedEnv            The environment that the API is deployed.
+     * @param allowedEnvsForTokenIssuer The environments that the token is valid for.
+     * @throws APISecurityException If the token is not valid for the environment that the API is deployed.
+     */
+    private void isAllowedEnvironmentForIDP(String apiDeployedEnv,
+                                            String[] allowedEnvsForTokenIssuer) throws APISecurityException {
+        if (allowedEnvsForTokenIssuer == null) {
+            // If the allowedEnvsForTokenIssuer is null, the token is valid for all environments.
+            return;
+        }
+        // If the allowedEnvsForTokenIssuer is not null, but the length is 0,
+        // the token is invalid for all environments.
+        if (allowedEnvsForTokenIssuer.length == 0) {
+            log.info("The access token does not have access to any environment.");
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                    APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
+        }
+        // Iterate over each environment and find a match
+        for (String env : allowedEnvsForTokenIssuer) {
+            if (apiDeployedEnv.equals(env)) {
+                return;
+            }
+        }
+        log.info("The access token does not have access to the environment {}.", apiDeployedEnv);
+        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
     }
 
     /**

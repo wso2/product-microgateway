@@ -111,8 +111,6 @@ var (
 	enforcerRevokedTokensMap         map[string][]types.Resource
 	enforcerThrottleData             *throttle.ThrottleData
 
-	// KeyManagerList to store data
-	// KeyManagerList = make([]eventhubTypes.KeyManager, 0)
 	isReady = false
 )
 

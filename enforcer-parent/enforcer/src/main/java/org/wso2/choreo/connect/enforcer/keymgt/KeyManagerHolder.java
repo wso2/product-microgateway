@@ -150,8 +150,25 @@ public class KeyManagerHolder {
                         }
                     }
                 }
+                if (configuration.containsKey(APIConstants.KeyManager.ADDITIONAL_PROPERTIES)) {
+                    Object additionalProperties = configuration.get(APIConstants.KeyManager.ADDITIONAL_PROPERTIES);
+                    if (additionalProperties instanceof JSONObject) {
+                        Gson gson = new Gson();
+                        Map<String, Object> additionalPropertiesMap = gson.fromJson(additionalProperties.toString(),
+                                Map.class);
+                        if (additionalPropertiesMap != null &&
+                                additionalPropertiesMap.containsKey(APIConstants.KeyManager.ENVIRONMENTS)) {
+                            Object environmentsObject =
+                                    additionalPropertiesMap.get(APIConstants.KeyManager.ENVIRONMENTS);
+                            if (environmentsObject instanceof JSONArray) {
+                                String[] environments = gson.fromJson(environmentsObject.toString(), String[].class);
+                                tokenIssuerDto.setEnvironments(environments);
+                            }
+                        }
+                    }
+                }
                 if (!kmIssuerMap.containsKey(organization)) {
-                    kmIssuerMap.put(organization, new HashMap<>());
+                    kmIssuerMap.put(organization, new ConcurrentHashMap<>());
                 }
                 Map<String, ExtendedTokenIssuerDto> orgSpecificKMIssuerMap = kmIssuerMap.get(organization);
                 orgSpecificKMIssuerMap.put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
@@ -172,7 +189,7 @@ public class KeyManagerHolder {
                 //add issuer from config if they are not presenting at external km response
                 kmIssuerMapForCarbonSuper.put(configTokenIssuer.getIssuer(), configTokenIssuer);
             } else {
-                logger.warn("token issuer " + configTokenIssuer.getIssuer() + " already exists in config map. " +
+                logger.debug("token issuer " + configTokenIssuer.getIssuer() + " already exists in config map. " +
                         "Existing configurations will be replaced by external KeyManager configurations");
             }
         }

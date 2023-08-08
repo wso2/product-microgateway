@@ -27,6 +27,7 @@ public class ExtendedTokenIssuerDto extends TokenIssuerDto {
     private String name;
     private boolean validateSubscriptions;
     private String alias;
+    private String[] environments;
 
 
     public ExtendedTokenIssuerDto(String issuer) {
@@ -55,6 +56,14 @@ public class ExtendedTokenIssuerDto extends TokenIssuerDto {
 
     public void setCertificateAlias(String alias) {
         this.alias = alias;
+    }
+
+    public String[] getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(String[] environments) {
+        this.environments = environments;
     }
 }
 
