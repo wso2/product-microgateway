@@ -155,7 +155,9 @@ public class KeyValidator {
                         try {
                             SemVersion apiSemVersion = SemanticVersionUtil.validateAndGetVersionComponents(apiVersion,
                                     uuid);
-                            String apiContextTemplate = apiContext.replace("/" + apiVersion, "");
+                            // Remove last occurrence of version from the context
+                            int lastIndexOfVersion = apiContext.lastIndexOf("/" + apiVersion);
+                            String apiContextTemplate = apiContext.substring(0, lastIndexOfVersion);
                             sub = datastore.getSubscriptionByAppIdApiContextVersionRange(app.getUUID(),
                                     apiContextTemplate, "v" + apiSemVersion.getMajor());
                             if (sub == null) {
