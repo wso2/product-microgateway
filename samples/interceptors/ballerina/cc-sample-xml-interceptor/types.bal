@@ -112,13 +112,3 @@ public type ResponseHandlerRequestBody record {
     # Map (string-to-string dictionary) of key value pairs
     InterceptorContext interceptorContext?;
 };
-
-public type RequestHandlerResponse record {|
-    *http:Ok;
-    RequestHandlerResponseBody body;
-|};
-
-public type ResponseHandlerResponse record {|
-    *http:Ok;
-    ResponseHandlerResponseBody body;
-|};
