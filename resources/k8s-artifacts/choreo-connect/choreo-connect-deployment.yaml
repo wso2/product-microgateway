@@ -83,6 +83,7 @@ spec:
           ports:
             - containerPort: 8081
             - containerPort: 9001
+            - containerPort: 19080
           startupProbe:
             exec:
               command: [ "sh", "check_health.sh" ]
