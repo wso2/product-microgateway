@@ -18,16 +18,6 @@ import ballerina/xmldata;
 import ballerina/lang.array;
 import ballerina/lang.value;
 
-public type RequestHandlerResponse record {|
-    *http:Ok;
-    RequestHandlerResponseBody body;
-|};
-
-public type ResponseHandlerResponse record {|
-    *http:Ok;
-    ResponseHandlerResponseBody body;
-|};
-
 listener http:Listener ep0 = new (9081, secureSocket = {
     key: {
         certFile: "/home/ballerina/certs/interceptor.pem",
@@ -41,10 +31,10 @@ listener http:Listener ep0 = new (9081, secureSocket = {
 });
 
 service /api/v1 on ep0 {
-    resource function post 'handle\-request(@http:Payload {} RequestHandlerRequestBody payload) returns RequestHandlerResponse {
+    resource function post 'handle\-request(@http:Payload RequestHandlerRequestBody payload) returns OkRequestHandlerResponseBody {
         return {body: requestHandler(payload)};
     }
-    resource function post 'handle\-response(@http:Payload {} ResponseHandlerRequestBody payload) returns ResponseHandlerResponse {
+    resource function post 'handle\-response(@http:Payload ResponseHandlerRequestBody payload) returns OkResponseHandlerResponseBody {
         return {body: responseHandler(payload)};
     }
 }
