@@ -198,7 +198,7 @@ func Run(conf *config.Config) {
 	}
 
 	// Start the metrics server
-	go metrics.StartMetricsServer("9999")
+	go metrics.StartMetricsServer("19085")
 
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()

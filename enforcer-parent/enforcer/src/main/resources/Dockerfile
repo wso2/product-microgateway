@@ -110,9 +110,6 @@ COPY maven/LICENSE.txt .
 #Add the agent using JVM arg -javaagent:/home/wso2/conf/applicationinsights-agent-3.1.1.jar
 #Add the config file using System property -Dapplicationinsights.configuration.file=/home/wso2/conf/applicationinsights.json
 
-# Add jmx_prometheus_javaagent
-ENV JAVA_AGENT_OPTS="${JAVA_AGENT_OPTS} -javaagent:${ENFORCER_HOME}/lib/jmx_prometheus_javaagent-0.18.0.jar=19080:${ENFORCER_HOME}/conf/prometheus_jmx_config.yml"
+EXPOSE 8081 9001
 
-EXPOSE 8081 9001 19080
-
-CMD java $JAVA_AGENT_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
+CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS $JAVA_AGENT_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
