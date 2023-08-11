@@ -49,6 +49,7 @@ services:
     ports:
       - "18000:18000"
       - "9843:9843"
+      - "9999:9999"
   enforcer:
     image: wso2/choreo-connect-enforcer:1.3.0-m1-SNAPSHOT
     logging:

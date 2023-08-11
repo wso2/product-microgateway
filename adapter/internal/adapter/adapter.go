@@ -43,6 +43,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	healthservice "github.com/wso2/product-microgateway/adapter/pkg/health/api/wso2/health/service"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
+	"github.com/wso2/product-microgateway/adapter/pkg/metrics"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
@@ -195,6 +196,9 @@ func Run(conf *config.Config) {
 			ErrorCode: 1102,
 		})
 	}
+
+	// Start the metrics server
+	go metrics.StartMetricsServer("9999")
 
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()
