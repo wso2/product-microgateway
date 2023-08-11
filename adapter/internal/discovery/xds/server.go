@@ -489,6 +489,10 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 
 	if conf.Adapter.IsIntelligentRoutingEnabled && strings.HasPrefix(apiVersion, "v") {
 		updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVersion, vHost)
+		if isDuplicateVhostEnabled && arrayContains(knownVhostPrefixes, strings.Split(vHost, ".")[0]) {
+			orgIDVhost := fmt.Sprintf("%s-%s", organizationID, vHost)
+			updateRoutingRulesOnAPIUpdate(organizationID, apiIdentifier, apiName, apiVersion, orgIDVhost)
+		}
 	}
 
 	if _, ok := orgIDOpenAPIClustersMap[organizationID]; ok {
