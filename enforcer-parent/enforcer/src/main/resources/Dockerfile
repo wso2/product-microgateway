@@ -65,7 +65,6 @@ ARG GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
 
 ENV VERSION=${MG_VERSION}
 ENV JAVA_OPTS=""
-ENV JAVA_AGENT_OPTS=""
 ENV ENFORCER_HOME=${MG_USER_HOME}
 
 ENV ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
@@ -112,4 +111,4 @@ COPY maven/LICENSE.txt .
 
 EXPOSE 8081 9001
 
-CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS $JAVA_AGENT_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
+CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
