@@ -59,6 +59,6 @@ COPY maven/adapter-linux-amd64 adapter
 COPY maven/check_health.sh .
 COPY maven/LICENSE.txt .
 
-EXPOSE 18000 9843 6060 9999
+EXPOSE 18000 9843 6060
 
 CMD ./adapter

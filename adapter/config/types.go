@@ -99,6 +99,8 @@ type adapter struct {
 	SoapErrorInXMLEnabled bool
 	// SourceControl represents the configuration related to the repository where the api artifacts are stored
 	SourceControl sourceControl
+	// Metric represents configurations to expose/export go metrics
+	Metrics metrics
 }
 
 // Envoy Listener Component related configurations.
@@ -467,6 +469,7 @@ type tracing struct {
 type metrics struct {
 	Enabled bool
 	Type    string
+	Port    int32
 }
 
 type analyticsAdapter struct {

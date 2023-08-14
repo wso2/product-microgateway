@@ -198,7 +198,12 @@ func Run(conf *config.Config) {
 	}
 
 	// Start the metrics server
-	go metrics.StartMetricsServer("19085")
+	if conf.Adapter.Metrics.Enabled {
+		if conf.Adapter.Metrics.Type == metrics.PrometheusMetricType {
+			logger.LoggerMgw.Info("Starting Prometheus Metrics Server ....")
+			go metrics.StartPrometheusMetricsServer(conf.Adapter.Metrics.Port)
+		}
+	}
 
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()

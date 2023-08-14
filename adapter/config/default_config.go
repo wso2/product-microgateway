@@ -66,6 +66,11 @@ var defaultConfig = &Config{
 			MaxRetryCount:      20,
 			ArtifactsDirectory: "/home/wso2/git-artifacts",
 		},
+		Metrics: metrics{
+			Enabled: false,
+			Type:    "prometheus",
+			Port:    19085,
+		},
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
