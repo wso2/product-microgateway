@@ -883,8 +883,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if strings.HasSuffix(resourcePath, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
 	}
-	basePath = GetUpdatedRegexToMatchDots(basePath)
-	pathRegex := "^" + basePath + resourceRegex
+	pathRegex := "^" + GetUpdatedRegexToMatchDots(basePath) + resourceRegex
 
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
