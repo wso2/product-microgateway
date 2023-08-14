@@ -369,14 +369,14 @@ public class JWTAuthenticator implements Authenticator {
      * @throws APISecurityException If the token is not valid for the environment that the API is deployed.
      */
     private void isAllowedEnvironmentForIDP(String apiDeployedEnv,
-                                            String[] allowedEnvsForTokenIssuer) throws APISecurityException {
+                                            Set<String> allowedEnvsForTokenIssuer) throws APISecurityException {
         if (allowedEnvsForTokenIssuer == null) {
             // If the allowedEnvsForTokenIssuer is null, the token is valid for all environments.
             return;
         }
         // If the allowedEnvsForTokenIssuer is not null, but the length is 0,
         // the token is invalid for all environments.
-        if (allowedEnvsForTokenIssuer.length == 0) {
+        if (allowedEnvsForTokenIssuer.size() == 0) {
             log.info("The access token does not have access to any environment.");
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
@@ -387,6 +387,9 @@ public class JWTAuthenticator implements Authenticator {
             if (apiDeployedEnv.equals(env)) {
                 return;
             }
+        }
+        if (allowedEnvsForTokenIssuer.contains(apiDeployedEnv)) {
+            return;
         }
         log.info("The access token does not have access to the environment {}.", apiDeployedEnv);
         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
@@ -685,7 +688,7 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 return jwtValidationInfo;
             } catch (EnforcerException e) {
-                log.error("JWT Validation failed", e);
+                log.debug("JWT Validation failed", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_GENERAL_ERROR,
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);

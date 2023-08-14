@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.KeyManagerDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.dto.IDPEnvironmentDTO;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.ByteArrayInputStream;
@@ -39,11 +40,14 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -160,9 +164,16 @@ public class KeyManagerHolder {
                                 additionalPropertiesMap.containsKey(APIConstants.KeyManager.ENVIRONMENTS)) {
                             Object environmentsObject =
                                     additionalPropertiesMap.get(APIConstants.KeyManager.ENVIRONMENTS);
+                            Set<String> allowedAPIMEnvironments = new HashSet<>();
+                            // If environments field is available no values are assigned means that IDP is not allowed
+                            // for any environment.
                             if (environmentsObject instanceof JSONArray) {
-                                String[] environments = gson.fromJson(environmentsObject.toString(), String[].class);
-                                tokenIssuerDto.setEnvironments(environments);
+                                IDPEnvironmentDTO[] environments =
+                                        gson.fromJson(environmentsObject.toString(), IDPEnvironmentDTO[].class);
+                                for (IDPEnvironmentDTO environment : environments) {
+                                    allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
+                                }
+                                tokenIssuerDto.setEnvironments(allowedAPIMEnvironments);
                             }
                         }
                     }
