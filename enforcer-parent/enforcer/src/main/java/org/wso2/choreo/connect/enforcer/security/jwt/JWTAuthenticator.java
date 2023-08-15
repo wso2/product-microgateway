@@ -377,21 +377,15 @@ public class JWTAuthenticator implements Authenticator {
         // If the allowedEnvsForTokenIssuer is not null, but the length is 0,
         // the token is invalid for all environments.
         if (allowedEnvsForTokenIssuer.size() == 0) {
-            log.info("The access token does not have access to any environment.");
+            log.debug("The access token does not have access to any environment.");
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
                     APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
         }
-        // Iterate over each environment and find a match
-        for (String env : allowedEnvsForTokenIssuer) {
-            if (apiDeployedEnv.equals(env)) {
-                return;
-            }
-        }
         if (allowedEnvsForTokenIssuer.contains(apiDeployedEnv)) {
             return;
         }
-        log.info("The access token does not have access to the environment {}.", apiDeployedEnv);
+        log.debug("The access token does not have access to the environment {}.", apiDeployedEnv);
         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                 APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
                 APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);

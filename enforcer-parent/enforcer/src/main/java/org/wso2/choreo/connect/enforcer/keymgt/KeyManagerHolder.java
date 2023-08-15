@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.keymgt;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -98,7 +99,7 @@ public class KeyManagerHolder {
 
 
     private void addKMTokenIssuers(String keyManagerName, String organization, Map<String, Object> configuration,
-                                  Map<String, Map<String, ExtendedTokenIssuerDto>> kmIssuerMap) {
+                                   Map<String, Map<String, ExtendedTokenIssuerDto>> kmIssuerMap) {
         Object selfValidateJWT = configuration.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
         if (selfValidateJWT != null && (Boolean) selfValidateJWT) {
             Object issuer = configuration.get(APIConstants.KeyManager.ISSUER);
@@ -168,12 +169,20 @@ public class KeyManagerHolder {
                             // If environments field is available no values are assigned means that IDP is not allowed
                             // for any environment.
                             if (environmentsObject instanceof JSONArray) {
-                                IDPEnvironmentDTO[] environments =
-                                        gson.fromJson(environmentsObject.toString(), IDPEnvironmentDTO[].class);
-                                for (IDPEnvironmentDTO environment : environments) {
-                                    allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
+                                IDPEnvironmentDTO[] environments = null;
+                                try {
+                                    environments = gson.fromJson(environmentsObject.toString(),
+                                            IDPEnvironmentDTO[].class);
+                                } catch (JsonSyntaxException e) {
+                                    logger.error("Error while parsing environments for issuer " + issuer +
+                                            ". Error cause: " + e.getMessage());
                                 }
-                                tokenIssuerDto.setEnvironments(allowedAPIMEnvironments);
+                                if (environments != null) {
+                                    for (IDPEnvironmentDTO environment : environments) {
+                                        allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
+                                    }
+                                    tokenIssuerDto.setEnvironments(allowedAPIMEnvironments);
+                                }
                             }
                         }
                     }
