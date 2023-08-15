@@ -1,2 +1,20 @@
+# Config options: https://github.com/prometheus/jmx_exporter/blob/main/README.md
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
 rules:
-  - pattern: ".*"
+  # WSO2 Choreo Connect related metrics
+  - pattern: 'org.wso2.choreo.connect.enforcer<type=ExtAuthMetrics><>total_request_count: (.*)'
+    name: org_wso2_choreo_connect_enforcer_total_request_count
+    help: "WSO2 choreo connect enforcer total_request_count"
+    attrNameSnakeCase: true
+    type: COUNTER
+  - pattern: 'org.wso2.choreo.connect.enforcer<type=ExtAuthMetrics><>(average_response_time_millis|max_response_time_millis|min_response_time_millis|request_count_in_last_five_minutes): (.*)'
+    name: org_wso2_choreo_connect_enforcer_$1
+    help: "WSO2 choreo connect enforcer $1"
+    attrNameSnakeCase: true
+    type: GAUGE
+  - pattern: 'org.wso2.choreo.connect.enforcer<type=ThreadPoolConfig><>(\w+): (.*)'
+    name: org_wso2_choreo_connect_enforcer_thread_pool_$1
+    help: "WSO2 choreo connect enforcer thread pool $1"
+    attrNameSnakeCase: true
+    type: GAUGE
