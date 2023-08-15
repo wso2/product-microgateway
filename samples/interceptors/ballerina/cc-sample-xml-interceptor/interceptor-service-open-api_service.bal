@@ -31,11 +31,11 @@ listener http:Listener ep0 = new (9081, secureSocket = {
 });
 
 service /api/v1 on ep0 {
-    resource function post 'handle\-request(@http:Payload {} RequestHandlerRequestBody payload) returns RequestHandlerResponseBody {
-        return requestHandler(payload);
+    resource function post 'handle\-request(@http:Payload RequestHandlerRequestBody payload) returns OkRequestHandlerResponseBody {
+        return {body: requestHandler(payload)};
     }
-    resource function post 'handle\-response(@http:Payload {} ResponseHandlerRequestBody payload) returns ResponseHandlerResponseBody {
-        return responseHandler(payload);
+    resource function post 'handle\-response(@http:Payload ResponseHandlerRequestBody payload) returns OkResponseHandlerResponseBody {
+        return {body: responseHandler(payload)};
     }
 }
 

@@ -11,7 +11,7 @@ To learn about interceptors and for instructions on how to run it please head ov
 
 ## Prerequisites
 - Docker
-- Ballerina Swan Lake Beta 3
+- Ballerina Swan Lake Update 5(2201.5.0) or greater
 
 ## Build the sample from source
 
