@@ -80,8 +80,9 @@ public class APIFactory {
                 enforcerApi.init(api);
                 String apiKey = getApiKey(enforcerApi);
                 newApis.put(apiKey, enforcerApi);
-                if (EnvVarConfig.getInstance().isDuplicateVhostEnabled() &&
-                        KNOWN_VHOST_PREFIXES.contains(api.getVhost().split("\\.")[0])) {
+                if ((EnvVarConfig.getInstance().isDuplicateVhostEnabled() &&
+                        KNOWN_VHOST_PREFIXES.contains(api.getVhost().split("\\.")[0])) ||
+                        (EnvVarConfig.getInstance().isDuplicateVhostEnabledPdp())) {
                     newApis.put(getApiKeyWithOrgId(enforcerApi), enforcerApi);
                 }
             }
