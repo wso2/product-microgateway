@@ -60,6 +60,30 @@
     ]
   },
   {
+    "name": "VersionRangeSubscriptionValidationApi",
+    "version": "v1.0",
+    "context": "int_routing",
+    "operationsDTOS": [
+      {
+        "verb": "GET",
+        "target": "/pet/findByStatus",
+        "throttlingPolicy": "Unlimited"
+      }
+    ]
+  },
+  {
+    "name": "VersionRangeSubscriptionValidationApi",
+    "version": "v1.1",
+    "context": "int_routing",
+    "operationsDTOS": [
+      {
+        "verb": "GET",
+        "target": "/pet/findByStatus",
+        "throttlingPolicy": "Unlimited"
+      }
+    ]
+  },
+  {
     "name": "VHostAPI1",
     "version": "1.0.0",
     "context": "vhostApi1",

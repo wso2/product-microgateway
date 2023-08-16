@@ -1,3 +1,6 @@
+[adapter]
+IsIntelligentRoutingEnabled = true
+
 [router]
 [router.cors]
     enabled = false
