@@ -40,10 +40,7 @@ const (
 
 // handleKMEvent
 func handleKMConfiguration() {
-	var (
-		indexOfKeymanager int
-		isFound           bool
-	)
+	// This is not used in choreo. Instead it uses the notification channel.
 	for d := range msg.KeyManagerChannel {
 		var notification msg.EventKeyManagerNotification
 		// var keyManagerConfig resourceTypes.KeymanagerConfig
@@ -54,13 +51,8 @@ func handleKMConfiguration() {
 			return
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
-		for i := range xds.KeyManagerList {
-			if strings.EqualFold(notification.Event.PayloadData.Name, xds.KeyManagerList[i].Name) {
-				isFound = true
-				indexOfKeymanager = i
-				break
-			}
-		}
+
+		_, isFound := xds.KeyManagerMap[xds.GenerateKeyManagerMapKey(notification.Event.PayloadData.Name, notification.Event.PayloadData.Organization)]
 
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Value)
 
@@ -68,40 +60,32 @@ func handleKMConfiguration() {
 			if _, ok := err.(base64.CorruptInputError); ok {
 				logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
 			}
-
 			logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v", err)
 			return
 		}
 
 		if strings.EqualFold(keyManagerConfigEvent, notification.Event.PayloadData.EventType) {
 			if isFound && strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
-				logger.LoggerInternalMsg.Infof("Found KM %s to be deleted index %d", notification.Event.PayloadData.Name,
-					indexOfKeymanager)
-				if isFound {
-					xds.KeyManagerList[indexOfKeymanager] = xds.KeyManagerList[len(xds.KeyManagerList)-1]
-					xds.KeyManagerList = xds.KeyManagerList[:len(xds.KeyManagerList)-1]
-				}
+				logger.LoggerInternalMsg.Infof("Found KM %s:%s to be deleted ", notification.Event.PayloadData.Name, notification.Event.PayloadData.Organization)
+				delete(xds.KeyManagerMap, xds.GenerateKeyManagerMapKey(notification.Event.PayloadData.Name,
+					notification.Event.PayloadData.Organization))
 				xds.GenerateAndUpdateKeyManagerList()
 			} else if decodedByte != nil {
 				logger.LoggerInternalMsg.Infof("decoded stream %s", string(decodedByte))
 				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
 				if kmConfigMapErr != nil {
 					logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr)
-					return
+					continue
 				}
 
 				if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
 					strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {
 					keyManager := eventhubTypes.KeyManager{Name: notification.Event.PayloadData.Name,
 						Type: notification.Event.PayloadData.Type, Enabled: notification.Event.PayloadData.Enabled,
-						TenantDomain: notification.Event.PayloadData.TenantDomain, Configuration: kmConfigMap}
-					logger.LoggerInternalMsg.Infof("data %v", keyManager.Configuration)
-
-					if isFound {
-						xds.KeyManagerList[indexOfKeymanager] = keyManager
-					} else {
-						xds.KeyManagerList = append(xds.KeyManagerList, keyManager)
-					}
+						TenantDomain: notification.Event.PayloadData.TenantDomain, Configuration: kmConfigMap,
+						Organization: notification.Event.PayloadData.Organization}
+					logger.LoggerInternalMsg.Infof("KeyManager data is saved. %v", keyManager.Configuration)
+					xds.KeyManagerMap[xds.GenerateKeyManagerMapKey(keyManager.Name, keyManager.Organization)] = xds.MarshalKeyManager(&keyManager)
 					xds.GenerateAndUpdateKeyManagerList()
 				}
 			}

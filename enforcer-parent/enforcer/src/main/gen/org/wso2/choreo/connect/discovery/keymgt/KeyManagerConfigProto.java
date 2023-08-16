@@ -29,14 +29,14 @@ public final class KeyManagerConfigProto {
   static {
     java.lang.String[] descriptorData = {
       "\n.wso2/discovery/keymgt/key_manager_conf" +
-      "ig.proto\022\025wso2.discovery.keymgt\"l\n\020KeyMa" +
-      "nagerConfig\022\014\n\004name\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022" +
-      "\017\n\007enabled\030\003 \001(\010\022\024\n\014tenantDomain\030\004 \001(\t\022\025" +
-      "\n\rconfiguration\030\005 \001(\tB\210\001\n(org.wso2.chore" +
-      "o.connect.discovery.keymgtB\025KeyManagerCo" +
-      "nfigProtoP\001ZCgithub.com/envoyproxy/go-co" +
-      "ntrol-plane/wso2/discovery/keymgt;keymgt" +
-      "b\006proto3"
+      "ig.proto\022\025wso2.discovery.keymgt\"\202\001\n\020KeyM" +
+      "anagerConfig\022\014\n\004name\030\001 \001(\t\022\014\n\004type\030\002 \001(\t" +
+      "\022\017\n\007enabled\030\003 \001(\010\022\024\n\014tenantDomain\030\004 \001(\t\022" +
+      "\025\n\rconfiguration\030\005 \001(\t\022\024\n\014organization\030\006" +
+      " \001(\tB\210\001\n(org.wso2.choreo.connect.discove" +
+      "ry.keymgtB\025KeyManagerConfigProtoP\001ZCgith" +
+      "ub.com/envoyproxy/go-control-plane/wso2/" +
+      "discovery/keymgt;keymgtb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -47,7 +47,7 @@ public final class KeyManagerConfigProto {
     internal_static_wso2_discovery_keymgt_KeyManagerConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_keymgt_KeyManagerConfig_descriptor,
-        new java.lang.String[] { "Name", "Type", "Enabled", "TenantDomain", "Configuration", });
+        new java.lang.String[] { "Name", "Type", "Enabled", "TenantDomain", "Configuration", "Organization", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -212,6 +212,8 @@ public class APIConstants {
 
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
+        public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
+        public static final String ENVIRONMENTS = "environments";
         public static final String USERINFO_ENDPOINT = "userinfo_endpoint";
         public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
         public static final String EVENT_HUB_CONFIGURATIONS = "EventHubConfigurations";

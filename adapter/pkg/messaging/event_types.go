@@ -89,6 +89,7 @@ type EventKeyManagerNotification struct {
 			Value        string `json:"value"`
 			TenantID     string `json:"tenantId,omitempty"`
 			TenantDomain string `json:"tenantDomain,omitempty"`
+			Organization string `json:"organization,omitempty"` // This field is not present in APIM product, and remains unused in choreo
 		} `json:"payloadData"`
 	} `json:"event"`
 }

@@ -122,7 +122,7 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 		}
 
 		for _, kmConfig := range keyManagers {
-			xds.KeyManagerList = append(xds.KeyManagerList, kmConfig)
+			xds.KeyManagerMap[xds.GenerateKeyManagerMapKey(kmConfig.Name, kmConfig.Organization)] = xds.MarshalKeyManager(&kmConfig)
 		}
 		xds.GenerateAndUpdateKeyManagerList()
 	} else {
@@ -148,6 +148,8 @@ func retryFetchData(conf *config.Config, errorMessage string, err error) {
 
 // ClearKeyManagerData clears all the key manager data before reloading
 func ClearKeyManagerData() {
-	xds.KeyManagerList = nil
+	for keyManagerRef := range xds.KeyManagerMap {
+		delete(xds.KeyManagerMap, keyManagerRef)
+	}
 	xds.GenerateAndUpdateKeyManagerList()
 }

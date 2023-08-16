@@ -45,6 +45,7 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
@@ -185,15 +186,24 @@ public class JWTAuthenticator implements Authenticator {
                 }
 
             }
-            JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
+            JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier,
+                    requestContext.getMatchedAPI().getOrganizationId());
             if (validationInfo != null) {
                 if (validationInfo.isValid()) {
                     // Check if the token has access to the gateway configured environment.
                     checkTokenEnv(claims, requestContext.getMatchedAPI().getEnvironmentName());
                     // Validate subscriptions
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                    EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
-                    ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
+                    ExtendedTokenIssuerDto issuerDto = KeyManagerHolder.getInstance()
+                            .getTokenIssuerDTO(requestContext.getMatchedAPI().getOrganizationId(),
+                                    validationInfo.getIssuer());
+                    if (issuerDto == null) {
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                    }
+                    isAllowedEnvironmentForIDP(requestContext.getMatchedAPI().getEnvironmentName(),
+                            issuerDto.getEnvironments());
                     Scope validateSubscriptionSpanScope = null;
                     try {
                         if (issuerDto.isValidateSubscriptions()) {
@@ -348,6 +358,36 @@ public class JWTAuthenticator implements Authenticator {
                 }
             }
         }
+    }
+
+    /**
+     * isAllowedEnvironmentForIDP checks if the token is valid for the environment that the API is deployed.
+     *
+     * @param apiDeployedEnv            The environment that the API is deployed.
+     * @param allowedEnvsForTokenIssuer The environments that the token is valid for.
+     * @throws APISecurityException If the token is not valid for the environment that the API is deployed.
+     */
+    void isAllowedEnvironmentForIDP(String apiDeployedEnv,
+                                            Set<String> allowedEnvsForTokenIssuer) throws APISecurityException {
+        if (allowedEnvsForTokenIssuer == null) {
+            // If the allowedEnvsForTokenIssuer is null, the token is valid for all environments.
+            return;
+        }
+        // If the allowedEnvsForTokenIssuer is not null, but the length is 0,
+        // the token is invalid for all environments.
+        if (allowedEnvsForTokenIssuer.size() == 0) {
+            log.debug("The access token does not have access to any environment.");
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                    APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
+        }
+        if (allowedEnvsForTokenIssuer.contains(apiDeployedEnv)) {
+            return;
+        }
+        log.debug("The access token does not have access to the environment {}.", apiDeployedEnv);
+        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
     }
 
     /**
@@ -588,7 +628,7 @@ public class JWTAuthenticator implements Authenticator {
         return api;
     }
 
-    private JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo, String jti)
+    private JWTValidationInfo getJwtValidationInfo(SignedJWTInfo signedJWTInfo, String jti, String organizationUUID)
             throws APISecurityException {
 
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
@@ -626,7 +666,7 @@ public class JWTAuthenticator implements Authenticator {
         if (jwtValidationInfo == null) {
 
             try {
-                jwtValidationInfo = jwtValidator.validateJWTToken(signedJWTInfo);
+                jwtValidationInfo = jwtValidator.validateJWTToken(signedJWTInfo, organizationUUID);
                 signedJWTInfo.setValidationStatus(jwtValidationInfo.isValid() ?
                         SignedJWTInfo.ValidationStatus.VALID : SignedJWTInfo.ValidationStatus.INVALID);
                 if (isGatewayTokenCacheEnabled) {
@@ -641,7 +681,7 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 return jwtValidationInfo;
             } catch (EnforcerException e) {
-                log.error("JWT Validation failed", e);
+                log.debug("JWT Validation failed", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_GENERAL_ERROR,
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);

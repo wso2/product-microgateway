@@ -81,3 +81,8 @@ func updateVhostInternalMaps(uuid, name, version, vHost string, gwEnvs []string)
 	}
 	apiUUIDToGatewayToVhosts[uuid] = envToVhostMap
 }
+
+// GenerateKeyManagerMapKey generates a key for key manager event map using key manager name and organization
+func GenerateKeyManagerMapKey(keyManagerName, organization string) string {
+	return keyManagerName + ":" + organization
+}

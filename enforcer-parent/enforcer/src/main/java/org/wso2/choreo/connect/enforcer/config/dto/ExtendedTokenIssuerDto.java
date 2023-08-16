@@ -20,6 +20,8 @@ package org.wso2.choreo.connect.enforcer.config.dto;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 
+import java.util.Set;
+
 /**
  * Holds meta data related to a JWT token issuer.
  */
@@ -27,6 +29,7 @@ public class ExtendedTokenIssuerDto extends TokenIssuerDto {
     private String name;
     private boolean validateSubscriptions;
     private String alias;
+    private Set<String> environments;
 
 
     public ExtendedTokenIssuerDto(String issuer) {
@@ -55,6 +58,14 @@ public class ExtendedTokenIssuerDto extends TokenIssuerDto {
 
     public void setCertificateAlias(String alias) {
         this.alias = alias;
+    }
+
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
     }
 }
 

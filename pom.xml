@@ -574,6 +574,30 @@
                 <artifactId>libthrift</artifactId>
                 <version>${libthrift.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito2</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -636,6 +660,8 @@
         <apache.tomcat.dependency.version>10.1.4</apache.tomcat.dependency.version>
         <libthrift.version>0.14.0</libthrift.version>
         <kotlin-stdlib.version>1.6.0</kotlin-stdlib.version>
+        <mockito.version>2.28.2</mockito.version>
+        <powermock.version>2.0.9</powermock.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.14.1</jackson.annotations.version>

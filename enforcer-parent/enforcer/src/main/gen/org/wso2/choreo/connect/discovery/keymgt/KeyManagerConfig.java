@@ -24,6 +24,7 @@ private static final long serialVersionUID = 0L;
     type_ = "";
     tenantDomain_ = "";
     configuration_ = "";
+    organization_ = "";
   }
 
   @java.lang.Override
@@ -83,6 +84,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             configuration_ = s;
+            break;
+          }
+          case 50: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            organization_ = s;
             break;
           }
           default: {
@@ -280,6 +287,44 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int ORGANIZATION_FIELD_NUMBER = 6;
+  private volatile java.lang.Object organization_;
+  /**
+   * <code>string organization = 6;</code>
+   * @return The organization.
+   */
+  @java.lang.Override
+  public java.lang.String getOrganization() {
+    java.lang.Object ref = organization_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      organization_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string organization = 6;</code>
+   * @return The bytes for organization.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getOrganizationBytes() {
+    java.lang.Object ref = organization_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      organization_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -309,6 +354,9 @@ private static final long serialVersionUID = 0L;
     if (!getConfigurationBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 5, configuration_);
     }
+    if (!getOrganizationBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, organization_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -333,6 +381,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getConfigurationBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, configuration_);
+    }
+    if (!getOrganizationBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, organization_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -359,6 +410,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTenantDomain())) return false;
     if (!getConfiguration()
         .equals(other.getConfiguration())) return false;
+    if (!getOrganization()
+        .equals(other.getOrganization())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -381,6 +434,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getTenantDomain().hashCode();
     hash = (37 * hash) + CONFIGURATION_FIELD_NUMBER;
     hash = (53 * hash) + getConfiguration().hashCode();
+    hash = (37 * hash) + ORGANIZATION_FIELD_NUMBER;
+    hash = (53 * hash) + getOrganization().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -528,6 +583,8 @@ private static final long serialVersionUID = 0L;
 
       configuration_ = "";
 
+      organization_ = "";
+
       return this;
     }
 
@@ -559,6 +616,7 @@ private static final long serialVersionUID = 0L;
       result.enabled_ = enabled_;
       result.tenantDomain_ = tenantDomain_;
       result.configuration_ = configuration_;
+      result.organization_ = organization_;
       onBuilt();
       return result;
     }
@@ -624,6 +682,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getConfiguration().isEmpty()) {
         configuration_ = other.configuration_;
+        onChanged();
+      }
+      if (!other.getOrganization().isEmpty()) {
+        organization_ = other.organization_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -986,6 +1048,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       configuration_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object organization_ = "";
+    /**
+     * <code>string organization = 6;</code>
+     * @return The organization.
+     */
+    public java.lang.String getOrganization() {
+      java.lang.Object ref = organization_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        organization_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string organization = 6;</code>
+     * @return The bytes for organization.
+     */
+    public com.google.protobuf.ByteString
+        getOrganizationBytes() {
+      java.lang.Object ref = organization_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        organization_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string organization = 6;</code>
+     * @param value The organization to set.
+     * @return This builder for chaining.
+     */
+    public Builder setOrganization(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      organization_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string organization = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearOrganization() {
+      
+      organization_ = getDefaultInstance().getOrganization();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string organization = 6;</code>
+     * @param value The bytes for organization to set.
+     * @return This builder for chaining.
+     */
+    public Builder setOrganizationBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      organization_ = value;
       onChanged();
       return this;
     }

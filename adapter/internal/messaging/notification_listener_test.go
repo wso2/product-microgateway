@@ -41,51 +41,37 @@ func TestHandleKeyManagerEvents(t *testing.T) {
 
 	// add one key manager
 	handleKeyManagerEvents(addKMEvent1)
-	assert.Equal(t, 1, len(xds.KeyManagerList), "Key Manager list is not populated with the Key Manager from Event")
-	assert.Equal(t, "AsgardeoDevKM", xds.KeyManagerList[0].Name, "Key Manager list is not populated properly with the Key Manager from Event")
+	assert.Equal(t, 1, len(xds.KeyManagerMap), "Key Manager list is not populated with the Key Manager from Event")
+	_, ok := xds.KeyManagerMap["AsgardeoDevKM:070b8f30-5eaf-4392-99cb-a4e9c1cc53e3"]
+	assert.True(t, ok, "Key Manager list is not populated properly with the Key Manager from Event")
 
 	// try to add the same key manager again - should not duplicate internal the KM list
 	handleKeyManagerEvents(addKMEvent1)
-	assert.Equal(t, 1, len(xds.KeyManagerList), "Key Manager list might have been populated with duplicated entries")
+	assert.Equal(t, 1, len(xds.KeyManagerMap), "Key Manager list might have been populated with duplicated entries")
 
 	// add onother key manager
 	handleKeyManagerEvents(addKMEvent2)
-	assert.Equal(t, 2, len(xds.KeyManagerList), "Key Manager list is not populated with the new Key Manager from Event")
+	assert.Equal(t, 2, len(xds.KeyManagerMap), "Key Manager list is not populated with the new Key Manager from Event")
 
-	found := false
-	for _, keyManager := range xds.KeyManagerList {
-		if strings.EqualFold(keyManager.Name, "AsgardeoDevKM2") {
-			found = true
-			issuer := keyManager.Configuration["issuer"]
-			assert.Equal(t, "https://dev.api.asgardeo.io/t/malinthaamarasinghe/oauth2/token", issuer,
-				"Key Manager list is not populated with the new Key Manager from Event. Configuration is incorrect.")
-		}
-	}
+	keyManagerConfig, found := xds.KeyManagerMap["AsgardeoDevKM2:070b8f30-5eaf-4392-99cb-a4e9c1cc53e3"]
 	assert.True(t, found, "Key Manager list is not populated properly with the new Key Manager from Event")
+	assert.True(t, strings.Contains(keyManagerConfig.Configuration, "\"issuer\":\"https://dev.api.asgardeo.io/t/malinthaamarasinghe/oauth2/token\""),
+		"Key Manager list is not populated with the new Key Manager from Event. Configuration is incorrect.")
 
 	// update the second key manager
 	handleKeyManagerEvents(updateKMEvent)
-	assert.Equal(t, 2, len(xds.KeyManagerList), "Key Manager list is not populated with the updated Key Manager from Event")
-	found = false
-	for _, keyManager := range xds.KeyManagerList {
-		if strings.EqualFold(keyManager.Name, "AsgardeoDevKM2") {
-			found = true
-			issuer := keyManager.Configuration["issuer"]
-			assert.Equal(t, "https://dev.api.asgardeo.io/t/malinthaamarasinghe2/oauth2/token", issuer,
-				"Key Manager list is not populated with the updated Key Manager from Event. Configuration is incorrect.")
-		}
-	}
+	assert.Equal(t, 2, len(xds.KeyManagerMap), "Key Manager list is not populated with the updated Key Manager from Event")
+
+	keyManagerConfig, found = xds.KeyManagerMap["AsgardeoDevKM2:070b8f30-5eaf-4392-99cb-a4e9c1cc53e3"]
+	assert.True(t, found, "Key Manager list is not populated properly with the new Key Manager from Event")
+	assert.True(t, strings.Contains(keyManagerConfig.Configuration, "\"issuer\":\"https://dev.api.asgardeo.io/t/malinthaamarasinghe2/oauth2/token\""),
+		"Key Manager list is not populated with the new Key Manager from Event. Configuration is incorrect.")
 
 	// delete the second key manager
 	handleKeyManagerEvents(deleteKMEvent)
-	assert.Equal(t, 1, len(xds.KeyManagerList), "Key Manager is not removed from the Delete Key Manager Event")
+	assert.Equal(t, 1, len(xds.KeyManagerMap), "Key Manager is not removed from the Delete Key Manager Event")
 
-	found = false
-	for _, keyManager := range xds.KeyManagerList {
-		if strings.EqualFold(keyManager.Name, "AsgardeoDevKM2") {
-			found = true
-		}
-	}
+	_, found = xds.KeyManagerMap["AsgardeoDevKM2:070b8f30-5eaf-4392-99cb-a4e9c1cc53e3"]
 	assert.False(t, found, "Key Manager is not deleted populated properly from the delete Key Manager Event")
 }
 
