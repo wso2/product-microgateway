@@ -43,6 +43,7 @@ import java.util.Map;
  */
 public class BlockedApiTestCase extends ApimBaseTest {
     private static final String API_NAME = "BlockedApi";
+    private static final String API_VERSION = "1.0.0";
     private static final String API_CONTEXT = "blocked";
     private static final String APPLICATION_NAME = "BlockedApiApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
@@ -56,7 +57,8 @@ public class BlockedApiTestCase extends ApimBaseTest {
 
         // Get App ID and API ID
         String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
-        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
+        apiId = ApimResourceProcessor.apiNameVersionToId.get(
+                PublisherUtils.getAPINameVersionIdentifier(API_NAME, API_VERSION));
 
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);

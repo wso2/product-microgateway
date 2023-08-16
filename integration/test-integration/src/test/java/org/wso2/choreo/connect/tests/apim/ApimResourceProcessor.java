@@ -54,7 +54,7 @@ public class ApimResourceProcessor {
     private static final Type TYPE_APPLICATION = new TypeToken<List<Application>>() {}.getType();
     private static final Type TYPE_SUBSCRIPTION = new TypeToken<List<Subscription>>() {}.getType();
 
-    public static final Map<String, String> apiNameToId = new HashMap<>();
+    public static final Map<String, String> apiNameVersionToId = new HashMap<>();
     public static final Map<String, String> applicationNameToId = new HashMap<>();
 
     public void createApisAppsSubs(String apiProvider, RestAPIPublisherImpl publisherRestClient,
@@ -76,7 +76,7 @@ public class ApimResourceProcessor {
                     PublisherUtils.deployAndPublishAPI(apiId, api.getName(), vhost, publisherRestClient);
                 }
             }
-            apiNameToId.put(api.getName(), apiId);
+            apiNameVersionToId.put(PublisherUtils.getAPINameVersionIdentifier(api.getName(), api.getVersion()), apiId);
         }
     }
 
@@ -93,7 +93,8 @@ public class ApimResourceProcessor {
         List<Subscription> subscriptions = readSubscriptionsFromJsonFile(Utils.getTargetDirPath()
                 + TestConstant.TEST_RESOURCES_PATH + BEFORE_CC_STARTUP_FOLDER + SUBSCRIPTION_FILE);
         for (Subscription subscription : subscriptions) {
-            String apiId = apiNameToId.get(subscription.getApiName());
+            String apiId = apiNameVersionToId.get(PublisherUtils.getAPINameVersionIdentifier(
+                    subscription.getApiName(), subscription.getApiVersion()));
             String applicationId = applicationNameToId.get(subscription.getAppName());
             StoreUtils.subscribeToAPI(apiId, applicationId, subscription.getTier(), storeRestClient);
             log.info("Created Subscription for API:" + subscription.getApiName() + " App:" + subscription.getAppName());

@@ -1,36 +1,43 @@
 [
   {
     "apiName": "AdvancedThrottlingApi",
+    "apiVersion": "1.0.0",
     "appName": "AdvanceThrottlingApp",
     "tier": "Unlimited"
   },
   {
     "apiName": "BlockedApi",
+    "apiVersion": "1.0.0",
     "appName": "BlockedApiApp",
     "tier": "Unlimited"
   },
   {
     "apiName": "ExistingApi",
+    "apiVersion": "1.0.0",
     "appName": "ExistingApiApp",
     "tier": "Unlimited"
   },
   {
     "apiName": "VHostAPI1",
+    "apiVersion": "1.0.0",
     "appName": "VHostApp",
     "tier": "Unlimited"
   },
   {
     "apiName": "VHostAPI2",
+    "apiVersion": "1.0.0",
     "appName": "VHostApp",
     "tier": "Unlimited"
   },
   {
     "apiName": "EndpointWithTrailingSlashAPI",
+    "apiVersion": "1.0.0",
     "appName": "EndpointWithTrailingSlashApiApp",
     "tier": "Unlimited"
   },
   {
     "apiName": "EnvoyHttpFilterAPI",
+    "apiVersion": "1.0.0",
     "appName": "CommonApp",
     "tier": "Unlimited"
   }
