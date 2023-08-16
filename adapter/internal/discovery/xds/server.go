@@ -120,15 +120,17 @@ var (
 var void struct{}
 
 const (
-	commonEnforcerLabel       string = "commonEnforcerLabel"
-	maxRandomInt              int    = 999999999
-	prototypedAPI             string = "PROTOTYPED"
-	apiKeyFieldSeparator      string = ":"
-	tempDuplicateVhostEnabled string = "TEMP_DUPLICATE_VHOST_ENABLED"
+	commonEnforcerLabel          string = "commonEnforcerLabel"
+	maxRandomInt                 int    = 999999999
+	prototypedAPI                string = "PROTOTYPED"
+	apiKeyFieldSeparator         string = ":"
+	tempDuplicateVhostEnabled    string = "TEMP_DUPLICATE_VHOST_ENABLED"
+	tempDuplicateVhostEnabledPdp string = "TEMP_DUPLICATE_VHOST_ENABLED_PDP"
 )
 
 var knownVhostPrefixes = []string{"dev", "sandbox_dev", "prod", "sandbox", "dev-internal", "prod-internal"}
 var isDuplicateVhostEnabled = false
+var isDuplicateVhostEnabledPdp = false
 
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
@@ -193,6 +195,11 @@ func init() {
 	if val, present := os.LookupEnv(tempDuplicateVhostEnabled); present {
 		if val == "true" {
 			isDuplicateVhostEnabled = true
+		}
+	}
+	if val, present := os.LookupEnv(tempDuplicateVhostEnabledPdp); present {
+		if val == "true" {
+			isDuplicateVhostEnabledPdp = true
 		}
 	}
 }
@@ -830,7 +837,8 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
 				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
-				if isDuplicateVhostEnabled && arrayContains(knownVhostPrefixes, strings.Split(vhost, ".")[0]) {
+				if (isDuplicateVhostEnabled && arrayContains(knownVhostPrefixes, strings.Split(vhost, ".")[0])) ||
+					isDuplicateVhostEnabledPdp {
 					vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)] =
 						append(vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)],
 							orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
