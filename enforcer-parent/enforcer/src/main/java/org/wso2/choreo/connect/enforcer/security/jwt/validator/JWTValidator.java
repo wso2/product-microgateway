@@ -127,12 +127,14 @@ public class JWTValidator {
                         if (jwksMap.containsKey(jwksUrl)) {
                             jwkSet = jwksMap.get(jwksUrl);
                         } else {
-                            jwkSet = retrieveJWKSet(tokenIssuer);
+                            jwkSet = JWTUtils.retrieveJWKSConfiguration(
+                                    tokenIssuer.getJwksConfigurationDTO().getUrl());
                             jwksMap.put(jwksUrl, jwkSet);
                         }
                     }
                     if (jwkSet.getKeyByKeyId(keyID) == null) {
-                        jwkSet = retrieveJWKSet(tokenIssuer);
+                        jwkSet = JWTUtils.retrieveJWKSConfiguration(
+                                tokenIssuer.getJwksConfigurationDTO().getUrl());
                         jwksMap.put(jwksUrl, jwkSet);
                     }
                     if (jwkSet.getKeyByKeyId(keyID) instanceof RSAKey) {
@@ -154,7 +156,7 @@ public class JWTValidator {
                 }
             }
             return JWTUtils.verifyTokenSignature(signedJWT, certificateAlias);
-        } catch (ParseException | JOSEException | IOException e) {
+        } catch (JOSEException | IOException e) {
             throw new EnforcerException("JWT Signature verification failed", e);
         }
     }
@@ -165,12 +167,6 @@ public class JWTValidator {
         Date now = new Date();
         Date exp = jwtClaimsSet.getExpirationTime();
         return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
-    }
-
-    private JWKSet retrieveJWKSet(ExtendedTokenIssuerDto tokenIssuer) throws IOException, ParseException {
-        String jwksInfo = JWTUtils.retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
-        jwkSet = JWKSet.parse(jwksInfo);
-        return jwkSet;
     }
 
     protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
