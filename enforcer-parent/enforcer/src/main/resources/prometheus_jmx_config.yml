@@ -18,3 +18,9 @@ rules:
     help: "WSO2 choreo connect enforcer thread pool $1"
     attrNameSnakeCase: true
     type: GAUGE
+  # OS related metrics
+  - pattern: 'java.lang<type=OperatingSystem><>(\w+): (.*)'
+    name: os_$1
+    help: Operating System $1
+    attrNameSnakeCase: true
+    type: GAUGE
