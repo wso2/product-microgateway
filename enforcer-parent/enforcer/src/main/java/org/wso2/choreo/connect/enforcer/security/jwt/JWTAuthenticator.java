@@ -197,14 +197,13 @@ public class JWTAuthenticator implements Authenticator {
                     ExtendedTokenIssuerDto issuerDto = KeyManagerHolder.getInstance()
                             .getTokenIssuerDTO(requestContext.getMatchedAPI().getOrganizationId(),
                                     validationInfo.getIssuer());
-                    isAllowedEnvironmentForIDP(requestContext.getMatchedAPI().getEnvironmentName(),
-                            issuerDto.getEnvironments());
-                    // Unreachable condition as JWT Validator already checks this but still added it for safety.
                     if (issuerDto == null) {
                         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                                 APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
                     }
+                    isAllowedEnvironmentForIDP(requestContext.getMatchedAPI().getEnvironmentName(),
+                            issuerDto.getEnvironments());
                     Scope validateSubscriptionSpanScope = null;
                     try {
                         if (issuerDto.isValidateSubscriptions()) {
@@ -368,7 +367,7 @@ public class JWTAuthenticator implements Authenticator {
      * @param allowedEnvsForTokenIssuer The environments that the token is valid for.
      * @throws APISecurityException If the token is not valid for the environment that the API is deployed.
      */
-    private void isAllowedEnvironmentForIDP(String apiDeployedEnv,
+    void isAllowedEnvironmentForIDP(String apiDeployedEnv,
                                             Set<String> allowedEnvsForTokenIssuer) throws APISecurityException {
         if (allowedEnvsForTokenIssuer == null) {
             // If the allowedEnvsForTokenIssuer is null, the token is valid for all environments.
