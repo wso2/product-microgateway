@@ -515,4 +515,8 @@ public class PublisherUtils {
                 " Provider:" + apiRequest.getProvider() + " Context:" + apiRequest.getContext();
     }
 
+    public static String getAPINameVersionIdentifier(String apiName, String apiVersion) {
+        return apiName + ":" + apiVersion;
+    }
+
 }

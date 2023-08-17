@@ -61,6 +61,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final String THROTTLED_QUERY_PARAM_VALUE = "admin";
     private final String THROTTLED_CLAIM = "ClaimApp";
     private static final String API_NAME = "AdvancedThrottlingApi";
+    private static final String API_VERSION = "1.0.0";
     private static final String API_CONTEXT = "advanced_throttling";
     private static final String APPLICATION_NAME = "AdvanceThrottlingApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
@@ -121,7 +122,8 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         // Get App ID and API ID
         applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
-        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
+        apiId = ApimResourceProcessor.apiNameVersionToId.get(
+                PublisherUtils.getAPINameVersionIdentifier(API_NAME, API_VERSION));
 
         // Create access token
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,

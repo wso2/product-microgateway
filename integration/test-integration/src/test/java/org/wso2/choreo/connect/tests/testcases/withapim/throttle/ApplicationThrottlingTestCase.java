@@ -30,6 +30,7 @@ import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
+import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
     private static final String API_NAME = "ApplicationThrottlingApi";
+    private static final String API_VERSION = "1.0.0";
     private static final String API_CONTEXT = "application_throttling";
     private static final String APPLICATION_NAME = "ApplicationThrottlingApp";
 
@@ -72,7 +74,8 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
         requestCountPolicyDTO = addedPolicy.getData();
 
         // Get API ID
-        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
+        apiId = ApimResourceProcessor.apiNameVersionToId.get(
+                PublisherUtils.getAPINameVersionIdentifier(API_NAME, API_VERSION));
 
         // creating the application
         Application app = new Application(APPLICATION_NAME, policyName);

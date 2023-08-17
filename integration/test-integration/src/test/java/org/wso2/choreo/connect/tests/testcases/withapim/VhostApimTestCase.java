@@ -43,6 +43,7 @@ public class VhostApimTestCase extends ApimBaseTest {
     private final String US_HOST = "us.wso2.com";
 
     public static final String API_1_NAME = "VHostAPI1";
+    public static final String API_1_VERSION = "1.0.0";
     private static final String API_1_CONTEXT = "vhostApi1";
     private static final String API_2_CONTEXT = "vhostApi2";
     public static final String APPLICATION_NAME = "VHostApp";
@@ -62,7 +63,8 @@ public class VhostApimTestCase extends ApimBaseTest {
 
         // Get App ID and API IDs
         String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
-        apiId1 = ApimResourceProcessor.apiNameToId.get(API_1_NAME);
+        apiId1 = ApimResourceProcessor.apiNameVersionToId.get(
+                PublisherUtils.getAPINameVersionIdentifier(API_1_NAME, API_1_VERSION));
 
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);

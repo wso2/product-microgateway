@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
+import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.*;
@@ -43,6 +44,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     private String endpointURL;
 
     public static final String API_NAME = "SubscriptionValidationApi";
+    public static final String API_VERSION = "1.0.0";
     private static final String API_CONTEXT = "subs_validation";
     public static final String APPLICATION_NAME = "SubscriptionValidationApp";
     public static final String X_ENVOY_UPSTREAM_SERVICE_TIME_HEADER= "x-envoy-upstream-service-time";
@@ -53,7 +55,8 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
 
         // Get App ID and API ID
         applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
-        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
+        apiId = ApimResourceProcessor.apiNameVersionToId.get(
+                PublisherUtils.getAPINameVersionIdentifier(API_NAME, API_VERSION));
 
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
