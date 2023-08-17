@@ -598,6 +598,34 @@
                 <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-standalone</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-jdk14</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -629,7 +657,7 @@
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
         <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
-        <nimbus.jose.jwt.version>8.0</nimbus.jose.jwt.version>
+        <nimbus.jose.jwt.version>8.23</nimbus.jose.jwt.version>
         <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
         <otel.alpha.version>1.6.0-alpha</otel.alpha.version>
@@ -662,6 +690,7 @@
         <kotlin-stdlib.version>1.6.0</kotlin-stdlib.version>
         <mockito.version>2.28.2</mockito.version>
         <powermock.version>2.0.9</powermock.version>
+        <wiremock.version>2.27.2</wiremock.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
         <jackson.annotations.version>2.14.1</jackson.annotations.version>

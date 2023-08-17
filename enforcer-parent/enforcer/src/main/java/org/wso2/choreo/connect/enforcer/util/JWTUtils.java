@@ -22,14 +22,16 @@ import com.google.common.cache.LoadingCache;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKMatcher;
+import com.nimbusds.jose.jwk.JWKSelector;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
@@ -37,10 +39,10 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.security.jwt.ExtendedJWKSResourceRetriever;
 import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -57,6 +59,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -65,6 +68,14 @@ import java.util.concurrent.TimeUnit;
 public class JWTUtils {
     private static final Logger log = LogManager.getLogger(JWTUtils.class);
 
+    private static final int DEFAULT_HTTP_CONNECTION_TIMEOUT = 1000;
+    private static final int DEFAULT_HTTP_READ_TIMEOUT = 3000;
+    private static final ExtendedJWKSResourceRetriever resourceRetriever = new ExtendedJWKSResourceRetriever(
+            DEFAULT_HTTP_CONNECTION_TIMEOUT,
+            DEFAULT_HTTP_READ_TIMEOUT,
+            RemoteJWKSet.DEFAULT_HTTP_SIZE_LIMIT);
+
+
     /**
      * This method used to retrieve JWKS keys from endpoint.
      *
@@ -72,22 +83,18 @@ public class JWTUtils {
      * @return JwksKeys
      * @throws IOException Exception while invoking the JWKS endpoint
      */
-    public static String retrieveJWKSConfiguration(String jwksEndpoint) throws IOException {
+    public static JWKSet retrieveJWKSConfiguration(String jwksEndpoint)
+            throws IOException, RemoteKeySourceException {
 
         URL url = new URL(jwksEndpoint);
-        try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
-            HttpGet httpGet = new HttpGet(jwksEndpoint);
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    HttpEntity entity = response.getEntity();
-                    try (InputStream content = entity.getContent()) {
-                        return IOUtils.toString(content, Charset.defaultCharset());
-                    }
-                } else {
-                    return null;
-                }
-            }
-        }
+
+        RemoteJWKSet<SecurityContext> remoteJWKSet =  new RemoteJWKSet<>(url, resourceRetriever);
+        List<JWK> matchingJWKs = remoteJWKSet.get(new JWKSelector(
+                new JWKMatcher.Builder().maxKeySize(51200)
+                        .algorithm(JWSAlgorithm.RS256)
+                        .hasKeyID(true)
+                        .build()), null);
+        return new JWKSet(matchingJWKs);
     }
 
     /**
