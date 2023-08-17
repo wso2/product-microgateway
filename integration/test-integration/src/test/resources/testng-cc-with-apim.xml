@@ -80,6 +80,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>-->
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VersionRangeInvocationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EndpointsWithTrailingSlashTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EnforcerAPITestCase"/>
