@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 /**
@@ -140,20 +141,8 @@ public class FilterUtils {
     private static SSLConnectionSocketFactory createSocketFactory() throws EnforcerException {
         SSLContext sslContext;
         try {
-            KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
-
-            X509HostnameVerifier hostnameVerifier;
-            String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
-
-            if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-            } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
-            } else {
-                hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
-            }
-
+            sslContext = createSSLContext();
+            HostnameVerifier hostnameVerifier = getHostnameVerifier();
             return new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         } catch (KeyStoreException e) {
             handleException("Failed to read from Key Store", e);
@@ -164,6 +153,30 @@ public class FilterUtils {
         }
 
         return null;
+    }
+
+    /**
+     * getHostnameVerifier returns the hostname verifier based on the system property httpclient.hostnameVerifier.
+     * @return
+     */
+    public static HostnameVerifier getHostnameVerifier() {
+        X509HostnameVerifier hostnameVerifier;
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+
+        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        } else {
+            hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+        }
+        return hostnameVerifier;
+    }
+
+    public static SSLContext createSSLContext() throws NoSuchAlgorithmException,
+            KeyStoreException, KeyManagementException {
+        KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
+        return SSLContexts.custom().loadTrustMaterial(trustStore).build();
     }
 
     public static void handleException(String msg, Throwable t) throws EnforcerException {

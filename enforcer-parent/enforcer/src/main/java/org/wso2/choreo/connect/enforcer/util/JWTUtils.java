@@ -30,7 +30,6 @@ import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.nimbusds.jose.util.DefaultResourceRetriever;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.logging.log4j.LogManager;
@@ -40,6 +39,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.security.jwt.ExtendedJWKSResourceRetriever;
 import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
 
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class JWTUtils {
 
     private static final int DEFAULT_HTTP_CONNECTION_TIMEOUT = 1000;
     private static final int DEFAULT_HTTP_READ_TIMEOUT = 3000;
-    private static final DefaultResourceRetriever resourceRetriever = new DefaultResourceRetriever(
+    private static final ExtendedJWKSResourceRetriever resourceRetriever = new ExtendedJWKSResourceRetriever(
             DEFAULT_HTTP_CONNECTION_TIMEOUT,
             DEFAULT_HTTP_READ_TIMEOUT,
             RemoteJWKSet.DEFAULT_HTTP_SIZE_LIMIT);
