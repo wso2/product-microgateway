@@ -91,7 +91,6 @@ public class JWTUtils {
         RemoteJWKSet<SecurityContext> remoteJWKSet =  new RemoteJWKSet<>(url, resourceRetriever);
         List<JWK> matchingJWKs = remoteJWKSet.get(new JWKSelector(
                 new JWKMatcher.Builder().maxKeySize(51200)
-                        .algorithm(JWSAlgorithm.RS256)
                         .hasKeyID(true)
                         .build()), null);
         return new JWKSet(matchingJWKs);

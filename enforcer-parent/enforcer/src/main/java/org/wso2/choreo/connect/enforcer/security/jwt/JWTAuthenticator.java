@@ -681,7 +681,7 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 return jwtValidationInfo;
             } catch (EnforcerException e) {
-                log.debug("JWT Validation failed", e);
+                log.debug("JWT Validation failed:" + e.getMessage());
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_GENERAL_ERROR,
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
