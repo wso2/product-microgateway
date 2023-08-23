@@ -250,10 +250,9 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 }
 
 func generateBackendJWTConfiguration(backendJWTConfig mgw.BackendJWTConfiguration) *api.BackendJWTConfiguration {
-	backendJWTConfiguration := &api.BackendJWTConfiguration{
+	return &api.BackendJWTConfiguration{
 		Audiences: backendJWTConfig.Audiences,
 	}
-	return backendJWTConfiguration
 }
 
 func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.EndpointCluster {
