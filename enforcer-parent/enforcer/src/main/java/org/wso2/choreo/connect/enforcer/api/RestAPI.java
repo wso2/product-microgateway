@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.BackendJWTConfiguration;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
@@ -76,6 +77,7 @@ public class RestAPI implements API {
         Map<String, List<String>> securityScopesMap = new HashMap<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
+        BackendJWTConfiguration backendJWTConfiguration = new BackendJWTConfiguration();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -84,6 +86,9 @@ public class RestAPI implements API {
         }
         if (sandboxEndpoints != null) {
             endpoints.put(APIConstants.API_KEY_TYPE_SANDBOX, sandboxEndpoints);
+        }
+        if (api.getEnableBackendJWT() && api.getBackendJWTConfiguration() != null) {
+            backendJWTConfiguration.setAudiences(api.getBackendJWTConfiguration().getAudiencesList());
         }
 
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
@@ -149,7 +154,7 @@ public class RestAPI implements API {
                 .disableSecurity(api.getDisableSecurity()).authHeader(api.getAuthorizationHeader())
                 .endpoints(endpoints).endpointSecurity(endpointSecurity)
                 .organizationId(api.getOrganizationId()).apiProvider(api.getApiProvider())
-                .enableBackendJWT(api.getEnableBackendJWT())
+                .enableBackendJWT(api.getEnableBackendJWT()).backendJWTConfiguration(backendJWTConfiguration)
                 .deploymentType(api.getDeploymentType())
                 .environmentId(api.getEnvironmentId())
                 .environmentName(api.getEnvironmentName()).build();

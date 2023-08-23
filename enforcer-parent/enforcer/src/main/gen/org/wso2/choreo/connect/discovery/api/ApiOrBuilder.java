@@ -315,4 +315,19 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getEnvironmentNameBytes();
+
+  /**
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   * @return Whether the backendJWTConfiguration field is set.
+   */
+  boolean hasBackendJWTConfiguration();
+  /**
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   * @return The backendJWTConfiguration.
+   */
+  org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration getBackendJWTConfiguration();
+  /**
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder getBackendJWTConfigurationOrBuilder();
 }

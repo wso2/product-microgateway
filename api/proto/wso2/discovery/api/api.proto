@@ -22,6 +22,7 @@ import "wso2/discovery/api/endpoint_cluster.proto";
 import "wso2/discovery/api/Resource.proto";
 import "wso2/discovery/api/endpoint_security.proto";
 import "wso2/discovery/api/security_scheme.proto";
+import "wso2/discovery/api/backend_jwt_configuration.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
 option java_package = "org.wso2.choreo.connect.discovery.api";
@@ -55,4 +56,5 @@ message Api {
 	string deploymentType = 21;
 	string environmentId = 22;
 	string environmentName = 23;
+	BackendJWTConfiguration backendJWTConfiguration = 24;
 }

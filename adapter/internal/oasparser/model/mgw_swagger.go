@@ -66,6 +66,7 @@ type MgwSwagger struct {
 	RateLimitLevel      string
 	RateLimitPolicy     string
 	EnableBackendJWT    bool
+	BackendJWTConfiguration BackendJWTConfiguration
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 	// DeploymentType could be either "PRODUCTION" or "SANDBOX"
@@ -134,6 +135,11 @@ type SecurityScheme struct {
 	Type           string // Type of the security scheme. Valid: apiKey, api_key, oauth2
 	Name           string // Used for API key. Name of header or query. ex: x-api-key, apikey
 	In             string // Where the api key found in. Valid: query, header
+}
+
+// BackendJWTConfiguration represents the structure of an backend JWT configuration in the api.yaml file
+type BackendJWTConfiguration struct {
+	Audiences []string `mapstructure:"audiences"`
 }
 
 // CorsConfig represents the API level Cors Configuration
@@ -1238,6 +1244,14 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 
 	// Enable/Disable Backend JWTs per api
 	swagger.EnableBackendJWT = data.EnableBackendJWT
+
+	if swagger.EnableBackendJWT {
+		audiences := make([]string, 0, len(data.BackendJWTConfiguration.Audiences))
+		for _, audienceVal := range data.BackendJWTConfiguration.Audiences{
+			audiences = append(audiences, audienceVal)
+		}
+		swagger.BackendJWTConfiguration.Audiences = audiences
+	}
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data.EndpointConfig
