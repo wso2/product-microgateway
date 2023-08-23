@@ -55,9 +55,6 @@
                             </value>
                         </property>
                     </systemProperties>
-                    <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.wso2.choreo.connect:org.wso2.choreo.connect.enforcer</classpathDependencyExclude>
-                    </classpathDependencyExcludes>
                 </configuration>
             </plugin>
             <plugin>

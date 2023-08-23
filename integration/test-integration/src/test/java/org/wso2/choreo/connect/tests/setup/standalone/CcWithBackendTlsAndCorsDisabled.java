@@ -42,6 +42,7 @@ public class CcWithBackendTlsAndCorsDisabled {
         ApictlUtils.createProject("intercept_response_openAPI.yaml", "intercept_response_petstore", "backend_tls.crt", null, "interceptor.crt");
         ApictlUtils.createProject("cors_openAPI.yaml", "cors_petstore");
         ApictlUtils.createProject("api_key_swagger_security_openAPI.yaml", "apikey");
+        ApictlUtils.createProject("backend_security_with_aud_claim.yaml", "backendJWTWithAudClaim", null, null, null, "backendJWT_with_aud_claim.yaml");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -51,6 +52,7 @@ public class CcWithBackendTlsAndCorsDisabled {
         ApictlUtils.deployAPI("intercept_response_petstore", "test");
         ApictlUtils.deployAPI("cors_petstore", "test");
         ApictlUtils.deployAPI("apikey", "test");
+        ApictlUtils.deployAPI("backendJWTWithAudClaim", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

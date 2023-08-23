@@ -70,6 +70,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorRequestFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorResponseFlowTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.interceptor.InterceptorServiceRequestBodyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.BackendJWTWithAudClaimTestcase"/>
         </classes>
     </test>
     <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
