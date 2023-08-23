@@ -1251,7 +1251,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			audiences = append(audiences, audienceVal)
 		}
 		swagger.BackendJWTConfiguration.Audiences = audiences
-		logger.LoggerAPI.Debug("Audience claims processed for the API: %s", swagger.title)
+		logger.LoggerAPI.Debugf("Audience claims processed for the API: %v", swagger.title)
 	}
 
 	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
