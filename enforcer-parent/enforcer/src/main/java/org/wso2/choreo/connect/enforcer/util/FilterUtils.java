@@ -360,7 +360,8 @@ public class FilterUtils {
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
         if (apiConfig.getBackendJWTConfiguration() != null &&
-                apiConfig.getBackendJWTConfiguration().getAudiences() != null) {
+                apiConfig.getBackendJWTConfiguration().getAudiences() != null &&
+                apiConfig.getBackendJWTConfiguration().getAudiences().size() > 0) {
             log.debug("Setting available audiences for the backendJWT. Available audiences are : " +
                     apiConfig.getBackendJWTConfiguration().getAudiences());
             jwtInfoDto.getJwtValidationInfo().setClaims(new HashMap<>() {{

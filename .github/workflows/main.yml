@@ -54,7 +54,3 @@ jobs:
       - name: Run integration tests
         run: |
           mvn clean install -PRelease -pl ':integration' -amd -s .maven/settings.xml
-      - name: Build multi platform Ubuntu images
-        run: |
-          ./build-ubuntu-multi-platform-images.sh all
-          docker images

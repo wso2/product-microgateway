@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2023, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,8 +62,8 @@ public class BackendJWTWithAudClaimTestcase {
         Assert.assertNotNull(jwtClaimSet, "Cannot find JWT claim set in the backend JWT");
         Assert.assertTrue(jwtClaimSet.containsKey("aud"), "Cannot find aud claim in the backend JWT");
         List<String> audList = (List<String>) jwtClaimSet.get("aud");
-        Assert.assertTrue(audList.get(0).equalsIgnoreCase("https://petstore.swagger.io")
-                        && audList.get(1).equalsIgnoreCase("https://petstore.swagger.io/pet"),
+        Assert.assertTrue(audList.get(0).equals("https://petstore.swagger.io")
+                        && audList.get(1).equals("https://petstore.swagger.io/pet"),
                 "Audience claims do not matched.");
     }
 }
