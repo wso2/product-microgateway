@@ -25,23 +25,23 @@ var hostInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 }, []string{"os"})
 
 var availableCPUs = prometheus.NewGauge(prometheus.GaugeOpts{
-	Name: "os_available_cpus",
-	Help: "Number of available CPUs",
+	Name: "os_available_cpu_total",
+	Help: "Number of available CPUs.",
 })
 
 var freePhysicalMemory = prometheus.NewGauge(prometheus.GaugeOpts{
-	Name: "os_free_physical_memory",
-	Help: "Amount of free physical memory in bytes",
+	Name: "os_free_physical_memory_bytes",
+	Help: "Amount of free physical memory in bytes.",
 })
 
 var systemCPULoad = prometheus.NewGauge(prometheus.GaugeOpts{
-	Name: "os_system_cpu_load",
-	Help: "System-wide CPU usage as a percentage",
+	Name: "os_system_cpu_load_percentage",
+	Help: "System-wide CPU usage as a percentage.",
 })
 
 var processCPULoad = prometheus.NewGauge(prometheus.GaugeOpts{
 	Name: "os_process_cpu_load_percentage",
-	Help: "CPU usage of the current process as a percentage",
+	Help: "CPU usage of the current process as a percentage.",
 })
 
 var loadAvg = prometheus.NewGaugeVec(prometheus.GaugeOpts{
