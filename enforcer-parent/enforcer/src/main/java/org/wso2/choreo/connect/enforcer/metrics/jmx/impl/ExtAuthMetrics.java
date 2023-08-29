@@ -30,7 +30,8 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
     private static final long REQUEST_COUNT_INTERVAL_MILLIS = 5 * 60 * 1000;
     private static ExtAuthMetrics extAuthMetricsMBean = null;
 
-    private long requestCountInLastFiveMinutes = 0;
+    private long requestCountInLastFiveMinuteWindow = 0;
+    private long requestCountWindowStartTimeMillis = System.currentTimeMillis();
     private long totalRequestCount = 0;
     private double averageResponseTimeMillis = 0;
     private double maxResponseTimeMillis = Double.MIN_VALUE;
@@ -51,7 +52,8 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
                 if (extAuthMetricsMBean == null) {
                     Timer timer = new Timer();
                     extAuthMetricsMBean = new ExtAuthMetrics();
-                    timer.schedule(extAuthMetricsMBean, 0, REQUEST_COUNT_INTERVAL_MILLIS);
+                    extAuthMetricsMBean.requestCountWindowStartTimeMillis = System.currentTimeMillis();
+                    timer.schedule(extAuthMetricsMBean, REQUEST_COUNT_INTERVAL_MILLIS, REQUEST_COUNT_INTERVAL_MILLIS);
                 }
             }
         }
@@ -79,7 +81,7 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
     };
 
     public synchronized void recordMetric(long responseTimeMillis) {
-        this.requestCountInLastFiveMinutes += 1;
+        this.requestCountInLastFiveMinuteWindow += 1;
         this.totalRequestCount += 1;
         this.averageResponseTimeMillis = this.averageResponseTimeMillis +
                 (responseTimeMillis - this.averageResponseTimeMillis) / totalRequestCount;
@@ -97,11 +99,17 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
 
     @Override
     public synchronized void run() {
-        requestCountInLastFiveMinutes = 0;
+        requestCountWindowStartTimeMillis = System.currentTimeMillis();
+        requestCountInLastFiveMinuteWindow = 0;
     }
 
     @Override
-    public long getRequestCountInLastFiveMinutes() {
-        return requestCountInLastFiveMinutes;
+    public long getRequestCountInLastFiveMinuteWindow() {
+        return requestCountInLastFiveMinuteWindow;
+    }
+
+    @Override
+    public long getRequestCountWindowStartTimeMillis() {
+        return requestCountWindowStartTimeMillis;
     }
 }

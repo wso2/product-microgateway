@@ -55,8 +55,17 @@ public interface ExtAuthMetricsMXBean {
     public void resetExtAuthMetrics();
 
     /**
-     * Resets all the metrics to thier initial values.
+     * Get request count in last five minutes window
+     *
+     * @return long
      */
-    public long getRequestCountInLastFiveMinutes();
+    public long getRequestCountInLastFiveMinuteWindow();
+
+    /**
+     * Get the start time of request count window
+     *
+     * @return
+     */
+    public long getRequestCountWindowStartTimeMillis();
 
 }
