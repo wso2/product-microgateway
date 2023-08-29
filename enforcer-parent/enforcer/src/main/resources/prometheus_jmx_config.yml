@@ -8,7 +8,7 @@ rules:
     help: "WSO2 choreo connect enforcer total request count."
     attrNameSnakeCase: true
     type: COUNTER
-  - pattern: 'org.wso2.choreo.connect.enforcer<type=ExtAuthMetrics><>(average_response_time_millis|max_response_time_millis|min_response_time_millis|request_count_in_last_five_minutes): (.*)'
+  - pattern: 'org.wso2.choreo.connect.enforcer<type=ExtAuthMetrics><>(average_response_time_millis|max_response_time_millis|min_response_time_millis|request_count_in_last_five_minute_window|request_count_window_start_time_millis): (.*)'
     name: org_wso2_choreo_connect_enforcer_$1
     help: "WSO2 choreo connect enforcer $1."
     attrNameSnakeCase: true
