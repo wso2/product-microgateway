@@ -397,6 +397,30 @@ func TestGenerateRegex(t *testing.T) {
 			isMatched:     false,
 		},
 		{
+			inputpath:     "/v2/pet/{petId}/images/*",
+			userInputPath: "/v2/pet/123/images/123-foo.png",
+			message:       "when the resource ends with * and path params in the middle passes",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/images/*",
+			userInputPath: "/v2/pet123/images/123-foo.png",
+			message:       "when the resource ends with * and path params in the middle fails",
+			isMatched:     false,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/images)/*",
+			userInputPath: "/v2/pet/123/images)/123-foo.png",
+			message:       "when the resource ends with *, special char in the path and path params in the middle passes",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/images)/*",
+			userInputPath: "/v2/pet123/images/123-foo.png",
+			message:       "when the resource ends with *, special char in the path and path params in the middle fails",
+			isMatched:     false,
+		},
+		{
 			inputpath:     "/v2/pet/{petId}.api",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource path param suffixed",
@@ -501,11 +525,38 @@ func TestGenerateSubstitutionString(t *testing.T) {
 			"when input path has a path param and a wildcard at the end",
 			true,
 		},
+		{
+			"/v2.1.1/{petId}/*",
+			"/basepath/v2.1.1/\\1",
+			"when input path has sem version, a path param and a wildcard at the end",
+			true,
+		},
+		{
+			"/v2.1.1/{petId}/*",
+			"/basepath/v2.1.2/\\1",
+			"when input path has sem version, a path param and a wildcard at the end with not matching sem version",
+			false,
+		},
+		{
+			"/v2.1.1/{petId}/hello)/*",
+			"/basepath/v2.1.1/\\1/hello)",
+			"when input path has sem version, special char in the path, a path param and a wildcard at the end",
+			true,
+		},
+		{
+			"/v2.1.1/{petId}/hello)/*",
+			"/basepath/v2.1.1/\\1/hello\\)",
+			"when input path has sem version, special char in the path, a path param and a wildcard at the end with not matching special char",
+			false,
+		},
 	}
 	for _, item := range dataItems {
 		generatedSubstitutionString := generateSubstitutionString(item.inputPath, "/basepath")
-		isEqual := generatedSubstitutionString == item.expectedSubsString
-		assert.Equal(t, item.shouldEqual, isEqual, item.message)
+		if item.shouldEqual {
+			assert.Equal(t, item.expectedSubsString, generatedSubstitutionString, item.message)
+		} else {
+			assert.NotEqual(t, item.expectedSubsString, generatedSubstitutionString, item.message)
+		}
 	}
 }
 
@@ -557,7 +608,7 @@ func TestGenerateRegexSegment(t *testing.T) {
 	}
 
 	for _, item := range dataItems {
-		generatedPathRegexSegment := generatePathRegexSegment(item.inputPath)
+		generatedPathRegexSegment := generatePathRegexSegment(item.inputPath, false)
 		isEqual := generatedPathRegexSegment == item.regexSegment
 		assert.Equal(t, item.shouldEqual, isEqual, item.message)
 	}

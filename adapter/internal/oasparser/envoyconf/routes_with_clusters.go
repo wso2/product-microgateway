@@ -878,12 +878,12 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if strings.Contains(resourcePath, "?") {
 		resourcePath = strings.Split(resourcePath, "?")[0]
 	}
-	resourceRegex := generatePathRegexSegment(resourcePath)
+	resourceRegex := generatePathRegexSegment(resourcePath, false)
 	substitutionString := generateSubstitutionString(resourcePath, endpointBasepath)
 	if strings.HasSuffix(resourcePath, "/*") {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "((/(.*))*)")
 	}
-	pathRegex := "^" + GetUpdatedRegexToMatchDots(basePath) + resourceRegex
+	pathRegex := "^" + regexp.QuoteMeta(basePath) + resourceRegex
 
 	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
@@ -1340,19 +1340,25 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 
 // generatePathRegexSegment - generates a regex segment for a given resource path
 // resourcePath - resource path of the api
-// options - boolean parameter to indicate whether to generate path segment for substitution string
-func generatePathRegexSegment(resourcePath string, options ...bool) string {
+// skipEscapeMetaChars - skip escaping meta chars (special chars like `.(){}`.) True this for route substitution path.
+func generatePathRegexSegment(resourcePath string, skipEscapeMetaChars bool) string {
 	pathParaRegex := "([^/]+)"
 	wildCardRegex := "((/(.*))*)"
 	trailingSlashRegex := "(/{0,1})"
-	resourceRegex := ""
-	matcher := regexp.MustCompile(`{([^}]+)}`)
-	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
-	if !(len(options) > 0 && options[0]) {
-		resourceRegex = GetUpdatedRegexToMatchDots(resourceRegex)
+
+	pathParaReplaceRegex := `{([^}]+)}`
+	wildCardReplaceRegex := "/*"
+	if !skipEscapeMetaChars {
+		resourcePath = regexp.QuoteMeta(resourcePath)
+		pathParaReplaceRegex = `\\{([^}]+)\\}`
+		wildCardReplaceRegex = "/\\*"
 	}
-	if strings.HasSuffix(resourceRegex, "/*") {
-		resourceRegex = strings.TrimSuffix(resourceRegex, "/*") + wildCardRegex
+
+	resourceRegex := ""
+	matcher := regexp.MustCompile(pathParaReplaceRegex)
+	resourceRegex = matcher.ReplaceAllString(resourcePath, pathParaRegex)
+	if strings.HasSuffix(resourceRegex, wildCardReplaceRegex) {
+		resourceRegex = strings.TrimSuffix(resourceRegex, wildCardReplaceRegex) + wildCardRegex
 	} else {
 		resourceRegex = strings.TrimSuffix(resourceRegex, "/") + trailingSlashRegex
 	}
@@ -1415,12 +1421,6 @@ func basepathConsistent(basePath string) string {
 	return modifiedBasePath
 }
 
-// GetUpdatedRegexToMatchDots returns the regex to match the "." character in an existing regex.
-func GetUpdatedRegexToMatchDots(regex string) string {
-	// Match "." character in the regex by replacing it with "\\."
-	return strings.ReplaceAll(regex, ".", "\\.")
-}
-
 // generateRegex generates regex for the resources which have path paramaters
 // such that the envoy configuration can use it as a route.
 // If path has path parameters ({id}), append a regex pattern (pathParaRegex).
@@ -1429,7 +1429,7 @@ func GetUpdatedRegexToMatchDots(regex string) string {
 // TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
 func generateRegex(fullpath string) string {
 	endRegex := "(\\?([^/]+))?"
-	newPath := generatePathRegexSegment(fullpath)
+	newPath := generatePathRegexSegment(fullpath, false)
 	return "^" + newPath + endRegex + "$"
 }
 
