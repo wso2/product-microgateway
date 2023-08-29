@@ -18,12 +18,15 @@
 package envoyconf
 
 import (
+	"regexp"
 	"strings"
 
 	config_access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	file_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
 	grpc_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/grpc/v3"
+	matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -107,7 +110,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 	accessLog := config_access_logv3.AccessLog{
 		Name:   fileAccessLogName,
-		Filter: nil,
+		Filter: getAccessLogFilterConfig(),
 		ConfigType: &config_access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
 		},
@@ -167,4 +170,35 @@ func getAccessLogs() []*config_access_logv3.AccessLog {
 		accessLoggers = append(accessLoggers, getGRPCAccessLogConfigs(conf))
 	}
 	return accessLoggers
+}
+
+// getAccessLogFilterConfig provides exclude path configurations for envoy access logs
+func getAccessLogFilterConfig() *config_access_logv3.AccessLogFilter {
+	conf := config.ReadLogConfigs()
+	logger.LoggerOasparser.Debugf("Access log exclude path configuration enabled is set to %t. Regex: %s",
+		conf.AccessLogs.ExcludePaths.Enabled, conf.AccessLogs.ExcludePaths.Regex)
+	if !conf.AccessLogs.ExcludePaths.Enabled {
+		return nil
+	}
+
+	_, err := regexp.Compile(conf.AccessLogs.ExcludePaths.Regex)
+	if err != nil {
+		logger.LoggerOasparser.Fatal("Error compiling access log exclude path regex. ", err)
+	}
+
+	return &config_access_logv3.AccessLogFilter{
+		FilterSpecifier: &config_access_logv3.AccessLogFilter_HeaderFilter{
+			HeaderFilter: &config_access_logv3.HeaderFilter{
+				Header: &routev3.HeaderMatcher{
+					Name: ":path",
+					HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
+						SafeRegexMatch: &matcherv3.RegexMatcher{
+							Regex: conf.AccessLogs.ExcludePaths.Regex,
+						},
+					},
+					InvertMatch: true,
+				},
+			},
+		},
+	}
 }

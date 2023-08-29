@@ -29,6 +29,10 @@ enable = false
 logfile = "/dev/stdout" # This file will be created inside router container.
 logType = "text" # LogTypes can be "text" or "json"
 
+[accessLogs.excludePaths]
+enabled = true
+regex = "^(/health|/ready)"
+
 # Log format that is append after "reservedLogFormat". This can be used by dev for debug purpose.
 # For example: secondaryLogFormat = "'%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%'"
 #
@@ -39,7 +43,8 @@ logType = "text" # LogTypes can be "text" or "json"
 # "'%REQ(:PATH)%' '%PROTOCOL%' '%RESPONSE_CODE%' '%RESPONSE_CODE_DETAILS%' '%RESPONSE_FLAGS%' '%REQ(USER-AGENT)%' " +
 # "'%REQ(X-REQUEST-ID)%' '%REQ(X-FORWARDED-FOR)%' '%UPSTREAM_HOST%' '%BYTES_RECEIVED%' '%BYTES_SENT%' '%DURATION%' " +
 # "'%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%' '%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%' '%REQUEST_DURATION%' " +
-# "'%RESPONSE_DURATION%' '%ROUTE_NAME%' '"
+# "'%RESPONSE_DURATION%' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%' " +
+# "'%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%' '"
 secondaryLogFormat = ""
 
 [accessLogs.jSONFormat]
@@ -49,8 +54,6 @@ host = "%REQ(:AUTHORITY)%"
 method = "%REQ(:METHOD)%"
 apiPath = "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%"
 upstrmPath = "%REQ(:PATH)%"
-apiUUID = "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%"
-extAuthDtls = "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%"
 prot = "%PROTOCOL%"
 respCode = "%RESPONSE_CODE%"
 respCodeDtls = "%RESPONSE_CODE_DETAILS%"
@@ -67,3 +70,5 @@ reqTxDur = "%REQUEST_TX_DURATION%"
 respTxDur = "%RESPONSE_TX_DURATION%"
 reqDur = "%REQUEST_DURATION%"
 respDur = "%RESPONSE_DURATION%"
+apiUUID = "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%"
+extAuthDtls = "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%"
