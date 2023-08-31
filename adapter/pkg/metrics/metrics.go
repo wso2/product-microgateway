@@ -15,10 +15,11 @@
  *
  */
 
- // Package metrics holds the implementation for exposing adapter metrics to prometheus
+// Package metrics holds the implementation for exposing adapter metrics to prometheus
 package metrics
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -34,6 +35,7 @@ import (
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // PrometheusMetricType prometheus metric type
@@ -157,7 +159,11 @@ func recordMetrics() {
 
 func handleError(err error, message string) bool {
 	if err != nil {
-		logger.LoggerMgw.Error(message)
+		logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+			Message:   fmt.Sprintf(message, err.Error()),
+			Severity:  logging.MINOR,
+			ErrorCode: 1109,
+		})
 		return true
 	}
 	return false
