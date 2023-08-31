@@ -44,7 +44,7 @@ public class ApiLevelRatelimitTestCase {
     public void createApiProject() throws Exception {
         API api = new API();
         api.setName("ratelimit");
-        api.setContext("v2/ratelimitService");
+        api.setContext("v1.0.0/ratelimitService");
         api.setVersion("1.0.0");
         api.setProvider("admin");
 
@@ -55,7 +55,7 @@ public class ApiLevelRatelimitTestCase {
 
         testKey = TokenUtil.getJWT(api, applicationDto, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION,
                 3600, null, true);
-        endpointURL = Utils.getServiceURLHttps("/v2/ratelimitService/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps("/v1.0.0/ratelimitService/pet/findByStatus");
         headers.put("Internal-Key", testKey);
     }
 

@@ -397,6 +397,18 @@ func TestGenerateRegex(t *testing.T) {
 			isMatched:     false,
 		},
 		{
+			inputpath:     "/2.0/pet/{petId}/images/*",
+			userInputPath: "/2x0/pet/123/images/123-foo.png",
+			message:       "when the version contains dots, those dots should not matched with any character",
+			isMatched:     false,
+		},
+		{
+			inputpath:     "/v2.0/pet/{petId}/images/*",
+			userInputPath: "/v2x0/pet/123/images/123-foo.png",
+			message:       "when the version contains dots and starts with 'v', dots should not matched with any character",
+			isMatched:     false,
+		},
+		{
 			inputpath:     "/v2/pet/{petId}/images/*",
 			userInputPath: "/v2/pet/123/images/123-foo.png",
 			message:       "when the resource ends with * and path params in the middle passes",
@@ -416,8 +428,8 @@ func TestGenerateRegex(t *testing.T) {
 		},
 		{
 			inputpath:     "/v2/pet/{petId}/images)/*",
-			userInputPath: "/v2/pet123/images/123-foo.png",
-			message:       "when the resource ends with *, special char in the path and path params in the middle fails",
+			userInputPath: "/v2/pet/123/images/123-foo.png",
+			message:       "when the resource ends with *, path params in the middle and special char in the path should exists",
 			isMatched:     false,
 		},
 		{
@@ -458,7 +470,8 @@ func TestGenerateRegex(t *testing.T) {
 		if item.message == "when the resource ends with *" {
 			log.Default().Println(resultPattern, item.userInputPath, err)
 		}
-		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
+		assert.Equal(t, item.isMatched, resultIsMatching, item.message,
+			map[string]string{"inputpath": item.inputpath, "resultPattern": resultPattern, "userInputPath": item.userInputPath})
 		assert.Nil(t, err)
 	}
 }
