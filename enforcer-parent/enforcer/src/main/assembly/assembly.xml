@@ -67,9 +67,5 @@
             <outputDirectory/>
             <destName>LICENSE.txt</destName>
         </file>
-        <file>
-            <source>src/main/resources/prometheus_jmx_config.yml</source>
-            <outputDirectory>conf</outputDirectory>
-        </file>
     </files>
 </assembly>

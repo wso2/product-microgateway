@@ -100,7 +100,6 @@ USER ${MG_USER}
 
 COPY maven/lib/ lib/
 COPY maven/conf/log4j2.properties conf/log4j2.properties
-COPY maven/conf/prometheus_jmx_config.yml conf/prometheus_jmx_config.yml
 COPY maven/security security
 COPY maven/check_health.sh .
 COPY maven/LICENSE.txt .
