@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -35,6 +35,17 @@ jobs:
         id: extract-project-version
       - name: Print Maven project version
         run: echo ${{ steps.extract-project-version.outputs.version }}
+      - name: Generate proto API
+        run: sudo sh api/protogen.sh
+      - name: Check for uncommitted changes
+        run: |
+          if [[ `git status --porcelain` ]]; then
+            echo "There are uncommitted changes"
+            git status
+            exit 1
+          else
+            echo "No changes"
+          fi
       - name: Build with Maven
         run: |
           export GOFLAGS=-mod=mod

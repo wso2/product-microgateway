@@ -217,6 +217,12 @@
             <groupId>org.wso2.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer</artifactId>
             <version>${project.parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.choreo.connect</groupId>
