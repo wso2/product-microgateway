@@ -41,7 +41,7 @@ public class OperationLevelRatelimitTestCase {
     public void createApiProject() throws Exception {
         API api = new API();
         api.setName("ratelimit");
-        api.setContext("v2/operationLevelRL");
+        api.setContext("v1.0.0/operationLevelRL");
         api.setVersion("1.0.0");
         api.setProvider("admin");
 
@@ -57,7 +57,7 @@ public class OperationLevelRatelimitTestCase {
 
     @Test(description = "Test operation level 3 permin rate-limiting with envoy rate-limit service")
     public void testRateLimitsWithEnvoyRateLimitService3PerMin() throws Exception {
-        String endpointURL = Utils.getServiceURLHttps("/v2/operationLevelRL/pet/findByStatus");
+        String endpointURL = Utils.getServiceURLHttps("/v1.0.0/operationLevelRL/pet/findByStatus");
         Assert.assertTrue(RateLimitUtils.isThrottled(
                         RateLimitUtils.sendMultipleRequests(endpointURL, headers, 4)),
                 "Operation level rate-limit 3 per min testcase failed.");
@@ -66,14 +66,14 @@ public class OperationLevelRatelimitTestCase {
     @Test(description = "Test operation level 5 per min rate-limiting with envoy rate-limit service")
     public void testRateLimitsWithEnvoyRateLimitService5PerMin() throws Exception {
         String requestData = "Payload to create pet 5";
-        String endpointURL1 = Utils.getServiceURLHttps("/v2/operationLevelRL/pet/3");
-        String endpointURL2 = Utils.getServiceURLHttps("/v2/operationLevelRL/pet/4");
+        String endpointURL1 = Utils.getServiceURLHttps("/v1.0.0/operationLevelRL/pet/3");
+        String endpointURL2 = Utils.getServiceURLHttps("/v1.0.0/operationLevelRL/pet/4");
         RateLimitUtils.sendMultipleRequests(endpointURL2, headers, 2);
         Assert.assertTrue(RateLimitUtils.isThrottled(
                         RateLimitUtils.sendMultipleRequests(endpointURL1, headers, 4))
                 , "Operation level rate-limit 5 per min testcase failed.");
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(
-                "/v2/operationLevelRL/pet/5"), requestData, headers);
+                "/v1.0.0/operationLevelRL/pet/5"), requestData, headers);
         Assert.assertNotNull(response, "Response value recieved as null");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), requestData, "Request data and response data is not equal ");
@@ -81,7 +81,7 @@ public class OperationLevelRatelimitTestCase {
 
     @Test(description = "Test an operation without defining envoy rate-limits")
     public void testOperationWithoutEnvoyRateLimits() throws Exception {
-        String endpointURL = Utils.getServiceURLHttps("/v2/operationLevelRL/pets/findByTags");
+        String endpointURL = Utils.getServiceURLHttps("/v1.0.0/operationLevelRL/pets/findByTags");
         HttpResponse response = HttpsClientRequest.doGet(endpointURL, headers);
         Map<String,String> responseHeadersMap = response.getHeaders();
         Assert.assertTrue(!responseHeadersMap.containsKey("x-ratelimit-limit"), "x-ratelimit-limit header available");

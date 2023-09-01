@@ -24,7 +24,7 @@ x-wso2-endpoints:
       urls:
         - http://mockBackend:2390/v2 # same base path as x-wso2-production-endpoints
       type: loadbalance
-x-wso2-basePath: /v2/operationLevelRL
+x-wso2-basePath: /v1.0.0/operationLevelRL
 schemes:
   - http
 paths:
