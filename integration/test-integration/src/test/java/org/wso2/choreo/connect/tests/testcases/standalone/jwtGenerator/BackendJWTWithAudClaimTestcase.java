@@ -18,18 +18,17 @@
 
 package org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
-import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.util.*;
 
+import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BackendJWTWithAudClaimTestcase {
@@ -56,12 +55,11 @@ public class BackendJWTWithAudClaimTestcase {
         Assert.assertTrue(respHeaders.containsKey(ResponseConstants.BACKEND_JWT_DEFAULT_HEADER_NAME),
                 "Backend JWT relevant header not found in the response");
         String backendJWT = respHeaders.get(ResponseConstants.BACKEND_JWT_DEFAULT_HEADER_NAME);
-        SignedJWTInfo signedJWTInfo = JWTUtils.getSignedJwt(backendJWT);
-        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-        Map<String, Object> jwtClaimSet = jwtClaimsSet.getClaims();
-        Assert.assertNotNull(jwtClaimSet, "Cannot find JWT claim set in the backend JWT");
-        Assert.assertTrue(jwtClaimSet.containsKey("aud"), "Cannot find aud claim in the backend JWT");
-        List<String> audList = (List<String>) jwtClaimSet.get("aud");
+        String strTokenBody = backendJWT.split("\\.")[1];
+        String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
+        JSONObject tokenBody = new JSONObject(decodedTokenBody);
+        JSONArray audList = (JSONArray) tokenBody.get("aud");
+        Assert.assertTrue(audList.length() == 1, "Cannot find required audience count in the backend JWT");
         Assert.assertTrue(audList.get(0).equals("https://petstore.swagger.io")
                         && audList.get(1).equals("https://petstore.swagger.io/pet"),
                 "Audience claims do not matched.");
