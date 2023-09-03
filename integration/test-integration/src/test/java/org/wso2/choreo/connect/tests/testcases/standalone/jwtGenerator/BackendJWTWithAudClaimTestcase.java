@@ -25,7 +25,11 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
-import org.wso2.choreo.connect.tests.util.*;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.TokenUtil;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -34,18 +38,17 @@ import java.util.Map;
 public class BackendJWTWithAudClaimTestcase {
     private String jwtTokenProd;
     private static final String API_CONTEXT = "backend-security-with-aud-claim";
+    private static final Map<String, String> headers = new HashMap<>();
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
-        Utils.delay(10000, "Could not wait until the test starts");
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME*3, "Could not wait until the test starts");
     }
 
     @Test(description = "Test the availability of JWT Generator header")
     public void testAudienceClaimsInBackendJWT() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         String endpoint = Utils.getServiceURLHttps(API_CONTEXT + "/echo");
         HttpResponse response = HttpsClientRequest
                 .doGet(Utils.getServiceURLHttps(endpoint), headers);
@@ -59,7 +62,7 @@ public class BackendJWTWithAudClaimTestcase {
         String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
         JSONObject tokenBody = new JSONObject(decodedTokenBody);
         JSONArray audList = (JSONArray) tokenBody.get("aud");
-        Assert.assertTrue(audList.length() == 1, "Cannot find required audience count in the backend JWT");
+        Assert.assertTrue(audList.length() == 2, "Cannot find required audience count in the backend JWT");
         Assert.assertTrue(audList.get(0).equals("https://petstore.swagger.io")
                         && audList.get(1).equals("https://petstore.swagger.io/pet"),
                 "Audience claims do not matched.");

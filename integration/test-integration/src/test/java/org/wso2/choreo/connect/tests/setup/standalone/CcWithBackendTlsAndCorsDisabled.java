@@ -53,7 +53,7 @@ public class CcWithBackendTlsAndCorsDisabled {
         ApictlUtils.deployAPI("cors_petstore", "test");
         ApictlUtils.deployAPI("apikey", "test");
         ApictlUtils.deployAPI("backendJWTWithAudClaim", "test");
-        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(20);
     }
 
     @AfterTest(description = "stop the setup")
