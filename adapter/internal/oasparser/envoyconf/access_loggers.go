@@ -178,12 +178,11 @@ func getAccessLogFilterConfig() *config_access_logv3.AccessLogFilter {
 	logConf := config.ReadLogConfigs()
 	conf, _ := config.ReadConfigs()
 
-	if logConf.AccessLogs.Excludes.SystemHost.Enabled {
-		logger.LoggerOasparser.Debugf("Access log excludes for system host is enabled with path regex: %q",
-			logConf.AccessLogs.Excludes.SystemHost.PathRegex)
-	} else {
+	if !logConf.AccessLogs.Excludes.SystemHost.Enabled {
 		return nil
 	}
+	logger.LoggerOasparser.Debugf("Access log excludes for system host is enabled with path regex: %q",
+		logConf.AccessLogs.Excludes.SystemHost.PathRegex)
 
 	systemHostFilter := &config_access_logv3.AccessLogFilter{
 		FilterSpecifier: &config_access_logv3.AccessLogFilter_HeaderFilter{
