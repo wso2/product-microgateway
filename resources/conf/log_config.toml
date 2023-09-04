@@ -29,9 +29,10 @@ enable = false
 logfile = "/dev/stdout" # This file will be created inside router container.
 logType = "text" # LogTypes can be "text" or "json"
 
-[accessLogs.excludePaths]
+[accessLogs.excludes]
+[accessLogs.excludes.systemHost]
 enabled = true
-regex = "^(/health|/ready)"
+pathRegex = "^(/health|/ready)$" # keep this empty to match all paths
 
 # Log format that is append after "reservedLogFormat". This can be used by dev for debug purpose.
 # For example: secondaryLogFormat = "'%REQUEST_TX_DURATION%' '%RESPONSE_TX_DURATION%'"

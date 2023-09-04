@@ -23,10 +23,10 @@ type pkg struct {
 }
 
 type accessLog struct {
-	Enable       bool
-	LogFile      string
-	LogType      string
-	ExcludePaths ExcludePaths
+	Enable   bool
+	LogFile  string
+	LogType  string
+	Excludes AccessLogExcludes
 	// ReservedLogFormat is reserved for Choreo Gateway Access Logs Observability feature. Changes to this may
 	// break the functionality in the observability feature.
 	ReservedLogFormat string
@@ -35,10 +35,15 @@ type accessLog struct {
 	JSONFormat         map[string]string
 }
 
-// ExcludePaths represents the configurations related to exclude paths from access logs.
-type ExcludePaths struct {
-	Enabled bool
-	Regex   string
+// AccessLogExcludes represents the configurations related to excludes from access logs.
+type AccessLogExcludes struct {
+	SystemHost AccessLogExcludesSystemHost
+}
+
+// AccessLogExcludesSystemHost represents the configurations related to excludes from access logs for requests made to system host.
+type AccessLogExcludesSystemHost struct {
+	Enabled   bool
+	PathRegex string
 }
 
 // LogConfig represents the configurations related to adapter logs and envoy access logs.
@@ -67,9 +72,11 @@ func getDefaultLogConfig() *LogConfig {
 			Enable:  false,
 			LogFile: "/dev/stdout",
 			LogType: "text",
-			ExcludePaths: ExcludePaths{
-				Enabled: true,
-				Regex:   "^(/health|/ready)",
+			Excludes: AccessLogExcludes{
+				SystemHost: AccessLogExcludesSystemHost{
+					Enabled:   true,
+					PathRegex: "^(/health|/ready)$",
+				},
 			},
 			// Following default value of "ReservedLogFormat" is document in log_config.toml for references.
 			// Update log_config.toml if any changes are done here.
