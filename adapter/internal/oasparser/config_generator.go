@@ -197,29 +197,30 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 	}
 
 	return &api.Api{
-		Id:                  mgwSwagger.GetID(),
-		Title:               mgwSwagger.GetTitle(),
-		Description:         mgwSwagger.GetDescription(),
-		BasePath:            mgwSwagger.GetXWso2Basepath(),
-		Version:             mgwSwagger.GetVersion(),
-		ApiType:             mgwSwagger.GetAPIType(),
-		ProductionEndpoints: generateRPCEndpointCluster(mgwSwagger.GetProdEndpoints()),
-		SandboxEndpoints:    generateRPCEndpointCluster(mgwSwagger.GetSandEndpoints()),
-		Resources:           resources,
-		ApiLifeCycleState:   lifeCycleState,
-		Tier:                mgwSwagger.GetXWso2ThrottlingTier(),
-		SecurityScheme:      securitySchemes,
-		Security:            securityList,
-		EndpointSecurity:    endpointSecurityDetails,
-		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
-		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
-		OrganizationId:      mgwSwagger.OrganizationID,
-		ApiProvider:         mgwSwagger.APIProvider,
-		Vhost:               vhost,
-		EnableBackendJWT:    mgwSwagger.EnableBackendJWT,
-		DeploymentType:      mgwSwagger.DeploymentType,
-		EnvironmentId:       mgwSwagger.EnvironmentID,
-		EnvironmentName:     mgwSwagger.EnvironmentName,
+		Id:                      mgwSwagger.GetID(),
+		Title:                   mgwSwagger.GetTitle(),
+		Description:             mgwSwagger.GetDescription(),
+		BasePath:                mgwSwagger.GetXWso2Basepath(),
+		Version:                 mgwSwagger.GetVersion(),
+		ApiType:                 mgwSwagger.GetAPIType(),
+		ProductionEndpoints:     generateRPCEndpointCluster(mgwSwagger.GetProdEndpoints()),
+		SandboxEndpoints:        generateRPCEndpointCluster(mgwSwagger.GetSandEndpoints()),
+		Resources:               resources,
+		ApiLifeCycleState:       lifeCycleState,
+		Tier:                    mgwSwagger.GetXWso2ThrottlingTier(),
+		SecurityScheme:          securitySchemes,
+		Security:                securityList,
+		EndpointSecurity:        endpointSecurityDetails,
+		AuthorizationHeader:     mgwSwagger.GetXWSO2AuthHeader(),
+		DisableSecurity:         mgwSwagger.GetDisableSecurity(),
+		OrganizationId:          mgwSwagger.OrganizationID,
+		ApiProvider:             mgwSwagger.APIProvider,
+		Vhost:                   vhost,
+		EnableBackendJWT:        mgwSwagger.EnableBackendJWT,
+		BackendJWTConfiguration: generateBackendJWTConfiguration(mgwSwagger.BackendJWTConfiguration),
+		DeploymentType:          mgwSwagger.DeploymentType,
+		EnvironmentId:           mgwSwagger.EnvironmentID,
+		EnvironmentName:         mgwSwagger.EnvironmentName,
 	}
 }
 
@@ -246,6 +247,12 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		DisableSecurity: operation.GetDisableSecurity(),
 	}
 	return &apiOperation
+}
+
+func generateBackendJWTConfiguration(backendJWTConfig mgw.BackendJWTConfiguration) *api.BackendJWTConfiguration {
+	return &api.BackendJWTConfiguration{
+		Audiences: backendJWTConfig.Audiences,
+	}
 }
 
 func generateRPCEndpointCluster(inputEndpointCluster *mgw.EndpointCluster) *api.EndpointCluster {

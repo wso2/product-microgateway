@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
@@ -352,11 +353,21 @@ public class FilterUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        String apiContext = requestContext.getMatchedAPI().getBasePath();
-        String apiVersion = requestContext.getMatchedAPI().getVersion();
+        APIConfig apiConfig = requestContext.getMatchedAPI();
+        String apiContext = apiConfig.getBasePath();
+        String apiVersion = apiConfig.getVersion();
         jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        if (apiConfig.getBackendJWTConfiguration() != null &&
+                apiConfig.getBackendJWTConfiguration().getAudiences() != null &&
+                apiConfig.getBackendJWTConfiguration().getAudiences().size() > 0) {
+            log.debug("Setting available audiences for the backendJWT. Available audiences are : " +
+                    apiConfig.getBackendJWTConfiguration().getAudiences());
+            jwtInfoDto.getJwtValidationInfo().setClaims(new HashMap<>() {{
+                put("aud", apiConfig.getBackendJWTConfiguration().getAudiences());
+            }});
+        }
         return jwtInfoDto;
     }
 

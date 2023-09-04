@@ -42,6 +42,7 @@ public class APIConfig {
     private String uuid;
     private String apiProvider;
     private boolean enableBackendJWT;
+    private BackendJWTConfiguration backendJWTConfiguration;
     private Map<String, List<String>> apiSecurity = new HashMap<>();
     private String tier;
     private boolean disableSecurity = false;
@@ -219,6 +220,14 @@ public class APIConfig {
         return deploymentType;
     }
 
+    public BackendJWTConfiguration getBackendJWTConfiguration() {
+        return backendJWTConfiguration;
+    }
+
+    public void setBackendJWTConfiguration(BackendJWTConfiguration backendJWTConfiguration) {
+        this.backendJWTConfiguration = backendJWTConfiguration;
+    }
+
     /**
      * Implements builder pattern to build an API Config object.
      */
@@ -245,6 +254,7 @@ public class APIConfig {
         private String environmentId;
         private String environmentName;
         private boolean enableBackendJWT;
+        private BackendJWTConfiguration backendJWTConfiguration;
 
         public Builder(String name) {
             this.name = name;
@@ -335,6 +345,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder backendJWTConfiguration(BackendJWTConfiguration backendJWTConfiguration) {
+            this.backendJWTConfiguration = backendJWTConfiguration;
+            return this;
+        }
+
         public Builder deploymentType(String deploymentType) {
             if (!StringUtils.isEmpty(deploymentType)) {
                 this.deploymentType = deploymentType;
@@ -376,6 +391,7 @@ public class APIConfig {
             apiConfig.securitySchemeDefinitions = this.securitySchemeDefinitions;
             apiConfig.apiProvider = this.apiProvider;
             apiConfig.enableBackendJWT = this.enableBackendJWT;
+            apiConfig.backendJWTConfiguration = this.backendJWTConfiguration;
             apiConfig.deploymentType = this.deploymentType;
             apiConfig.environmentId = this.environmentId;
             apiConfig.environmentName = this.environmentName;

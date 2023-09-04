@@ -130,23 +130,29 @@ type APIYaml struct {
 }
 
 type apiData struct {
-	ID                         string               `json:"Id,omitempty"`
-	Name                       string               `json:"name,omitempty"`
-	Context                    string               `json:"context,omitempty"`
-	Version                    string               `json:"version,omitempty"`
-	RevisionID                 int                  `json:"revisionId,omitempty"`
-	APIType                    string               `json:"type,omitempty"`
-	LifeCycleStatus            string               `json:"lifeCycleStatus,omitempty"`
-	EndpointImplementationType string               `json:"endpointImplementationType,omitempty"`
-	AuthorizationHeader        string               `json:"authorizationHeader,omitempty"`
-	SecurityScheme             []string             `json:"securityScheme,omitempty"`
-	OrganizationID             string               `json:"organizationId,omitempty"`
-	Provider                   string               `json:"provider,omitempty"`
-	ThrottlingLimit            ThrottlingLimit      `json:"throttlingLimit,omitempty"`
-	EnableBackendJWT           bool                 `json:"enableBackendJWT,omitempty"`
-	EndpointConfig             endpointConfigStruct `json:"endpointConfig,omitempty"`
-	Operations                 []OperationYaml      `json:"Operations,omitempty"`
+	ID                         string                  `json:"Id,omitempty"`
+	Name                       string                  `json:"name,omitempty"`
+	Context                    string                  `json:"context,omitempty"`
+	Version                    string                  `json:"version,omitempty"`
+	RevisionID                 int                     `json:"revisionId,omitempty"`
+	APIType                    string                  `json:"type,omitempty"`
+	LifeCycleStatus            string                  `json:"lifeCycleStatus,omitempty"`
+	EndpointImplementationType string                  `json:"endpointImplementationType,omitempty"`
+	AuthorizationHeader        string                  `json:"authorizationHeader,omitempty"`
+	SecurityScheme             []string                `json:"securityScheme,omitempty"`
+	OrganizationID             string                  `json:"organizationId,omitempty"`
+	Provider                   string                  `json:"provider,omitempty"`
+	ThrottlingLimit            ThrottlingLimit         `json:"throttlingLimit,omitempty"`
+	EnableBackendJWT           bool                    `json:"enableBackendJWT,omitempty"`
+	BackendJWTConfiguration    backendJWTConfiguration `json:"backendJWTConfiguration,omitempty"`
+	EndpointConfig             endpointConfigStruct    `json:"endpointConfig,omitempty"`
+	Operations                 []OperationYaml         `json:"Operations,omitempty"`
 }
+
+type backendJWTConfiguration struct {
+	Audiences []string `json:"audiences,omitempty"`
+}
+
 type endpointConfigStruct struct {
 	EndpointType                 string              `json:"endpoint_type,omitempty"`
 	LoadBalanceAlgo              string              `json:"algoCombo,omitempty"`

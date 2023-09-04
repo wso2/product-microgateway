@@ -59,5 +59,6 @@ public class ResponseConstants {
 
     public static final String VALID_REMOVE_HEADER_RESPONSE ="\"{\"header\":\"not available\"}\"";
     public static final String INVALID_REMOVE_HEADER_RESPONSE ="\"{\"header\":\"available\"}\"";
+    public static final String BACKEND_JWT_DEFAULT_HEADER_NAME = "x-jwt-assertion";
 
 }

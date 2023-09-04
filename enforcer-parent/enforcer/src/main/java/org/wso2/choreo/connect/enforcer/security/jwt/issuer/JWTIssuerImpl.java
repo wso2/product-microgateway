@@ -34,7 +34,6 @@ import java.util.Map;
 public class JWTIssuerImpl extends AbstractJWTIssuer {
     private static final Log log = LogFactory.getLog(JWTIssuerImpl.class);
     private static final String KEY_TYPE = "PRODUCTION";
-    private static final String AUD_VALUE = "http://org.wso2.apimgt/gateway";
 
     @Override
     public Map<String, String> populateStandardClaims(TokenValidationContext validationContext)
@@ -55,7 +54,6 @@ public class JWTIssuerImpl extends AbstractJWTIssuer {
         claims.put("iss", super.jwtIssuerConfigurationDto.getIssuer());
         claims.put("exp", String.valueOf(expireIn));
         claims.put("iat", String.valueOf(currentTime));
-        claims.put("aud", AUD_VALUE);
         claims.put(dialect + "keytype", KEY_TYPE);
         // in test key we provide the requested scope without any authorization checks.
         if (validationContext.getAttribute(APIConstants.JwtTokenConstants.SCOPE) != null) {

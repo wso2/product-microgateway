@@ -237,6 +237,19 @@ private static final long serialVersionUID = 0L;
             environmentName_ = s;
             break;
           }
+          case 194: {
+            org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder subBuilder = null;
+            if (backendJWTConfiguration_ != null) {
+              subBuilder = backendJWTConfiguration_.toBuilder();
+            }
+            backendJWTConfiguration_ = input.readMessage(org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(backendJWTConfiguration_);
+              backendJWTConfiguration_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -1068,6 +1081,32 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int BACKENDJWTCONFIGURATION_FIELD_NUMBER = 24;
+  private org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration backendJWTConfiguration_;
+  /**
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   * @return Whether the backendJWTConfiguration field is set.
+   */
+  @java.lang.Override
+  public boolean hasBackendJWTConfiguration() {
+    return backendJWTConfiguration_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   * @return The backendJWTConfiguration.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration getBackendJWTConfiguration() {
+    return backendJWTConfiguration_ == null ? org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.getDefaultInstance() : backendJWTConfiguration_;
+  }
+  /**
+   * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder getBackendJWTConfigurationOrBuilder() {
+    return getBackendJWTConfiguration();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1150,6 +1189,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getEnvironmentNameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 23, environmentName_);
+    }
+    if (backendJWTConfiguration_ != null) {
+      output.writeMessage(24, getBackendJWTConfiguration());
     }
     unknownFields.writeTo(output);
   }
@@ -1237,6 +1279,10 @@ private static final long serialVersionUID = 0L;
     if (!getEnvironmentNameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, environmentName_);
     }
+    if (backendJWTConfiguration_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(24, getBackendJWTConfiguration());
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1307,6 +1353,11 @@ private static final long serialVersionUID = 0L;
         .equals(other.getEnvironmentId())) return false;
     if (!getEnvironmentName()
         .equals(other.getEnvironmentName())) return false;
+    if (hasBackendJWTConfiguration() != other.hasBackendJWTConfiguration()) return false;
+    if (hasBackendJWTConfiguration()) {
+      if (!getBackendJWTConfiguration()
+          .equals(other.getBackendJWTConfiguration())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1378,6 +1429,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getEnvironmentId().hashCode();
     hash = (37 * hash) + ENVIRONMENTNAME_FIELD_NUMBER;
     hash = (53 * hash) + getEnvironmentName().hashCode();
+    if (hasBackendJWTConfiguration()) {
+      hash = (37 * hash) + BACKENDJWTCONFIGURATION_FIELD_NUMBER;
+      hash = (53 * hash) + getBackendJWTConfiguration().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1588,6 +1643,12 @@ private static final long serialVersionUID = 0L;
 
       environmentName_ = "";
 
+      if (backendJWTConfigurationBuilder_ == null) {
+        backendJWTConfiguration_ = null;
+      } else {
+        backendJWTConfiguration_ = null;
+        backendJWTConfigurationBuilder_ = null;
+      }
       return this;
     }
 
@@ -1674,6 +1735,11 @@ private static final long serialVersionUID = 0L;
       result.deploymentType_ = deploymentType_;
       result.environmentId_ = environmentId_;
       result.environmentName_ = environmentName_;
+      if (backendJWTConfigurationBuilder_ == null) {
+        result.backendJWTConfiguration_ = backendJWTConfiguration_;
+      } else {
+        result.backendJWTConfiguration_ = backendJWTConfigurationBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -1874,6 +1940,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getEnvironmentName().isEmpty()) {
         environmentName_ = other.environmentName_;
         onChanged();
+      }
+      if (other.hasBackendJWTConfiguration()) {
+        mergeBackendJWTConfiguration(other.getBackendJWTConfiguration());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -4182,6 +4251,125 @@ private static final long serialVersionUID = 0L;
       environmentName_ = value;
       onChanged();
       return this;
+    }
+
+    private org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration backendJWTConfiguration_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration, org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder, org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder> backendJWTConfigurationBuilder_;
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * @return Whether the backendJWTConfiguration field is set.
+     */
+    public boolean hasBackendJWTConfiguration() {
+      return backendJWTConfigurationBuilder_ != null || backendJWTConfiguration_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     * @return The backendJWTConfiguration.
+     */
+    public org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration getBackendJWTConfiguration() {
+      if (backendJWTConfigurationBuilder_ == null) {
+        return backendJWTConfiguration_ == null ? org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.getDefaultInstance() : backendJWTConfiguration_;
+      } else {
+        return backendJWTConfigurationBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     */
+    public Builder setBackendJWTConfiguration(org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration value) {
+      if (backendJWTConfigurationBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        backendJWTConfiguration_ = value;
+        onChanged();
+      } else {
+        backendJWTConfigurationBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     */
+    public Builder setBackendJWTConfiguration(
+        org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder builderForValue) {
+      if (backendJWTConfigurationBuilder_ == null) {
+        backendJWTConfiguration_ = builderForValue.build();
+        onChanged();
+      } else {
+        backendJWTConfigurationBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     */
+    public Builder mergeBackendJWTConfiguration(org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration value) {
+      if (backendJWTConfigurationBuilder_ == null) {
+        if (backendJWTConfiguration_ != null) {
+          backendJWTConfiguration_ =
+            org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.newBuilder(backendJWTConfiguration_).mergeFrom(value).buildPartial();
+        } else {
+          backendJWTConfiguration_ = value;
+        }
+        onChanged();
+      } else {
+        backendJWTConfigurationBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     */
+    public Builder clearBackendJWTConfiguration() {
+      if (backendJWTConfigurationBuilder_ == null) {
+        backendJWTConfiguration_ = null;
+        onChanged();
+      } else {
+        backendJWTConfiguration_ = null;
+        backendJWTConfigurationBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder getBackendJWTConfigurationBuilder() {
+      
+      onChanged();
+      return getBackendJWTConfigurationFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder getBackendJWTConfigurationOrBuilder() {
+      if (backendJWTConfigurationBuilder_ != null) {
+        return backendJWTConfigurationBuilder_.getMessageOrBuilder();
+      } else {
+        return backendJWTConfiguration_ == null ?
+            org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.getDefaultInstance() : backendJWTConfiguration_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration, org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder, org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder> 
+        getBackendJWTConfigurationFieldBuilder() {
+      if (backendJWTConfigurationBuilder_ == null) {
+        backendJWTConfigurationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration, org.wso2.choreo.connect.discovery.api.BackendJWTConfiguration.Builder, org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder>(
+                getBackendJWTConfiguration(),
+                getParentForChildren(),
+                isClean());
+        backendJWTConfiguration_ = null;
+      }
+      return backendJWTConfigurationBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
