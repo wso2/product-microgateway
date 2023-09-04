@@ -23,15 +23,27 @@ type pkg struct {
 }
 
 type accessLog struct {
-	Enable  bool
-	LogFile string
-	LogType string
+	Enable   bool
+	LogFile  string
+	LogType  string
+	Excludes AccessLogExcludes
 	// ReservedLogFormat is reserved for Choreo Gateway Access Logs Observability feature. Changes to this may
 	// break the functionality in the observability feature.
 	ReservedLogFormat string
 	// SecondaryLogFormat can be used by dev to log properties for debug purposes
 	SecondaryLogFormat string
 	JSONFormat         map[string]string
+}
+
+// AccessLogExcludes represents the configurations related to excludes from access logs.
+type AccessLogExcludes struct {
+	SystemHost AccessLogExcludesSystemHost
+}
+
+// AccessLogExcludesSystemHost represents the configurations related to excludes from access logs for requests made to system host.
+type AccessLogExcludesSystemHost struct {
+	Enabled   bool
+	PathRegex string
 }
 
 // LogConfig represents the configurations related to adapter logs and envoy access logs.
@@ -60,6 +72,12 @@ func getDefaultLogConfig() *LogConfig {
 			Enable:  false,
 			LogFile: "/dev/stdout",
 			LogType: "text",
+			Excludes: AccessLogExcludes{
+				SystemHost: AccessLogExcludesSystemHost{
+					Enabled:   true,
+					PathRegex: "^(/health|/ready)$",
+				},
+			},
 			// Following default value of "ReservedLogFormat" is document in log_config.toml for references.
 			// Update log_config.toml if any changes are done here.
 			ReservedLogFormat: "[%START_TIME%]' '%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalHost)%' " +
@@ -77,8 +95,6 @@ func getDefaultLogConfig() *LogConfig {
 				"method":        "%REQ(:METHOD)%",
 				"apiPath":       "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)%",
 				"upstrmPath":    "%REQ(:PATH)%",
-				"apiUuid":       "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%",
-				"extAuthDtls":   "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%",
 				"prot":          "%PROTOCOL%",
 				"respCode":      "%RESPONSE_CODE%",
 				"respCodeDtls":  "%RESPONSE_CODE_DETAILS%",
@@ -95,6 +111,8 @@ func getDefaultLogConfig() *LogConfig {
 				"respTxDur":     "%RESPONSE_TX_DURATION%",
 				"reqDur":        "%REQUEST_DURATION%",
 				"respDur":       "%RESPONSE_DURATION%",
+				"apiUuid":       "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%",
+				"extAuthDtls":   "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%",
 			},
 		},
 	}

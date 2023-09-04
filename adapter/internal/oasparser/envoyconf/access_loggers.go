@@ -18,12 +18,16 @@
 package envoyconf
 
 import (
+	"fmt"
+	"regexp"
 	"strings"
 
 	config_access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	file_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
 	grpc_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/grpc/v3"
+	matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -107,7 +111,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 	accessLog := config_access_logv3.AccessLog{
 		Name:   fileAccessLogName,
-		Filter: nil,
+		Filter: getAccessLogFilterConfig(),
 		ConfigType: &config_access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
 		},
@@ -167,4 +171,68 @@ func getAccessLogs() []*config_access_logv3.AccessLog {
 		accessLoggers = append(accessLoggers, getGRPCAccessLogConfigs(conf))
 	}
 	return accessLoggers
+}
+
+// getAccessLogFilterConfig provides exclude path configurations for envoy access logs
+func getAccessLogFilterConfig() *config_access_logv3.AccessLogFilter {
+	logConf := config.ReadLogConfigs()
+	conf, _ := config.ReadConfigs()
+
+	if !logConf.AccessLogs.Excludes.SystemHost.Enabled {
+		return nil
+	}
+	logger.LoggerOasparser.Debugf("Access log excludes for system host is enabled with path regex: %q",
+		logConf.AccessLogs.Excludes.SystemHost.PathRegex)
+
+	systemHostFilter := &config_access_logv3.AccessLogFilter{
+		FilterSpecifier: &config_access_logv3.AccessLogFilter_HeaderFilter{
+			HeaderFilter: &config_access_logv3.HeaderFilter{
+				Header: &routev3.HeaderMatcher{
+					Name: ":authority",
+					HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
+						SafeRegexMatch: &matcherv3.RegexMatcher{
+							Regex: fmt.Sprintf("^%s(:\\d+)$", conf.Envoy.SystemHost),
+						},
+					},
+					InvertMatch: true,
+				},
+			},
+		},
+	}
+
+	if logConf.AccessLogs.Excludes.SystemHost.PathRegex != "" {
+		_, err := regexp.Compile(logConf.AccessLogs.Excludes.SystemHost.PathRegex)
+		if err != nil {
+			logger.LoggerOasparser.Fatal("Error compiling access log exclude path regex. ", err)
+		}
+
+		// if path regex is specified, use the OrFilter to combine the system host filter and the path regex filter
+		return &config_access_logv3.AccessLogFilter{
+			FilterSpecifier: &config_access_logv3.AccessLogFilter_OrFilter{
+				OrFilter: &config_access_logv3.OrFilter{
+					Filters: []*config_access_logv3.AccessLogFilter{
+						systemHostFilter,
+						{
+							FilterSpecifier: &config_access_logv3.AccessLogFilter_HeaderFilter{
+								HeaderFilter: &config_access_logv3.HeaderFilter{
+									Header: &routev3.HeaderMatcher{
+										Name: ":path",
+										HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
+											SafeRegexMatch: &matcherv3.RegexMatcher{
+												Regex: logConf.AccessLogs.Excludes.SystemHost.PathRegex,
+											},
+										},
+										InvertMatch: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+	}
+
+	// if path regex is not specified, use the system host filter alone
+	return systemHostFilter
 }

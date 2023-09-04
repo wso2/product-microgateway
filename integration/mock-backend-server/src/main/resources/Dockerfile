@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/openjdk11:jre-11.0.18_10-alpine
+FROM adoptopenjdk/openjdk11:jre-11.0.20_8
 
 WORKDIR /home/app
 
