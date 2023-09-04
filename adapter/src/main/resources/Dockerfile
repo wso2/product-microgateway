@@ -59,4 +59,6 @@ COPY maven/LICENSE.txt .
 # DEBUG_LEVEL is for debugging go-amqp library.
 ENV DEBUG_LEVEL=0
 
+EXPOSE 18000 9843 6060
+
 CMD ./adapter
