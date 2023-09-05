@@ -155,35 +155,28 @@ public class KeyManagerHolder {
                         }
                     }
                 }
-                if (configuration.containsKey(APIConstants.KeyManager.ADDITIONAL_PROPERTIES)) {
-                    Object additionalProperties = configuration.get(APIConstants.KeyManager.ADDITIONAL_PROPERTIES);
-                    if (additionalProperties instanceof JSONObject) {
-                        Gson gson = new Gson();
-                        Map<String, Object> additionalPropertiesMap = gson.fromJson(additionalProperties.toString(),
-                                Map.class);
-                        if (additionalPropertiesMap != null &&
-                                additionalPropertiesMap.containsKey(APIConstants.KeyManager.ENVIRONMENTS)) {
-                            Object environmentsObject =
-                                    additionalPropertiesMap.get(APIConstants.KeyManager.ENVIRONMENTS);
+
+                if (configuration.containsKey(APIConstants.KeyManager.ENVIRONMENTS)) {
+                    Object environmentsObject =
+                            configuration.get(APIConstants.KeyManager.ENVIRONMENTS);
+                    // If environments field is available no values are assigned means that IDP is not allowed
+                    // for any environment.
+                    if (environmentsObject instanceof JSONArray) {
+                        IDPEnvironmentDTO[] environments = null;
+                        try {
+                            Gson gson = new Gson();
+                            environments = gson.fromJson(environmentsObject.toString(),
+                                    IDPEnvironmentDTO[].class);
+                        } catch (JsonSyntaxException e) {
+                            logger.error("Error while parsing environments for issuer " + issuer +
+                                    ". Error cause: " + e.getMessage());
+                        }
+                        if (environments != null) {
                             Set<String> allowedAPIMEnvironments = new HashSet<>();
-                            // If environments field is available no values are assigned means that IDP is not allowed
-                            // for any environment.
-                            if (environmentsObject instanceof JSONArray) {
-                                IDPEnvironmentDTO[] environments = null;
-                                try {
-                                    environments = gson.fromJson(environmentsObject.toString(),
-                                            IDPEnvironmentDTO[].class);
-                                } catch (JsonSyntaxException e) {
-                                    logger.error("Error while parsing environments for issuer " + issuer +
-                                            ". Error cause: " + e.getMessage());
-                                }
-                                if (environments != null) {
-                                    for (IDPEnvironmentDTO environment : environments) {
-                                        allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
-                                    }
-                                    tokenIssuerDto.setEnvironments(allowedAPIMEnvironments);
-                                }
+                            for (IDPEnvironmentDTO environment : environments) {
+                                allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
                             }
+                            tokenIssuerDto.setEnvironments(allowedAPIMEnvironments);
                         }
                     }
                 }
