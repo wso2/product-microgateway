@@ -156,16 +156,15 @@ public class KeyManagerHolder {
                     }
                 }
 
-                Gson gson = new Gson();
                 if (configuration.containsKey(APIConstants.KeyManager.ENVIRONMENTS)) {
                     Object environmentsObject =
                             configuration.get(APIConstants.KeyManager.ENVIRONMENTS);
-                    Set<String> allowedAPIMEnvironments = new HashSet<>();
                     // If environments field is available no values are assigned means that IDP is not allowed
                     // for any environment.
                     if (environmentsObject instanceof JSONArray) {
                         IDPEnvironmentDTO[] environments = null;
                         try {
+                            Gson gson = new Gson();
                             environments = gson.fromJson(environmentsObject.toString(),
                                     IDPEnvironmentDTO[].class);
                         } catch (JsonSyntaxException e) {
@@ -173,6 +172,7 @@ public class KeyManagerHolder {
                                     ". Error cause: " + e.getMessage());
                         }
                         if (environments != null) {
+                            Set<String> allowedAPIMEnvironments = new HashSet<>();
                             for (IDPEnvironmentDTO environment : environments) {
                                 allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
                             }
