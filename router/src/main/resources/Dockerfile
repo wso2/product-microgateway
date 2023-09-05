@@ -16,7 +16,8 @@
 FROM envoyproxy/envoy:v1.24.7
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install --no-install-recommends --no-install-suggests -y gettext-base
 
 ENV LANG=C.UTF-8
 
@@ -58,7 +59,8 @@ ENV ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
 ENV ENFORCER_ANALYTICS_HOST=$ENFORCER_HOST
 
 ENV CONCURRENCY=2
-ENV TRAILING_ARGS=
+ENV FILE_FLUSH_INTERVAL_MSEC=10000
+ENV TRAILING_ARGS=""
 
 USER ${MG_USER}
 ENV ENVOY_UID=0
@@ -69,4 +71,10 @@ COPY maven/wasm /home/wso2/wasm
 COPY maven/security/truststore/ca-certificates.crt /etc/ssl/certs
 COPY maven/interceptor /home/wso2/interceptor
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml
-CMD /usr/local/bin/envoy -c /etc/envoy/envoy.yaml --config-yaml "{admin: {address: {socket_address: {address: '${ROUTER_ADMIN_HOST}', port_value: '${ROUTER_ADMIN_PORT}'}}}, dynamic_resources: {ads_config: {api_type: GRPC, transport_api_version: V3, grpc_services: [{envoy_grpc: {cluster_name: xds_cluster}}]}, cds_config: {ads: {}, resource_api_version: V3}, lds_config: {ads: {}, resource_api_version: V3}}, node: {cluster: '${ROUTER_CLUSTER}', id: '${ROUTER_LABEL}', metadata: {instanceIdentifier : ${HOSTNAME}}}, static_resources: {clusters: [{name: xds_cluster, type: STRICT_DNS, connect_timeout: 1s, upstream_connection_options: {tcp_keepalive: {keepalive_probes: 3, keepalive_time: 300, keepalive_interval: 30}}, load_assignment: {cluster_name: xds_cluster, endpoints: [{lb_endpoints: [{endpoint: {address: {socket_address: {address: '${ADAPTER_HOST}', port_value: '${ADAPTER_PORT}'}}}}]}]}, typed_extension_protocol_options: {envoy.extensions.upstreams.http.v3.HttpProtocolOptions: {'@type': 'type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions', explicit_http_config: {http2_protocol_options: {}}}}, transport_socket: {name: envoy.transport_sockets.tls, typed_config: {'@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext, common_tls_context: {tls_params: {tls_minimum_protocol_version: TLSv1_2, tls_maximum_protocol_version: TLSv1_2}, tls_certificates: {private_key: {filename: '${ROUTER_PRIVATE_KEY_PATH}'}, certificate_chain: {filename: '${ROUTER_PUBLIC_CERT_PATH}'}}, validation_context: {trusted_ca: {filename: '${ADAPTER_CA_CERT_PATH}'}}}}}}, {name: ext-authz, type: STRICT_DNS, connect_timeout: 20s, typed_extension_protocol_options: {envoy.extensions.upstreams.http.v3.HttpProtocolOptions: {'@type': 'type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions', explicit_http_config: {http2_protocol_options: {}}}}, transport_socket: {name: envoy.transport_sockets.tls, typed_config: {'@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext, common_tls_context: {tls_params: {tls_minimum_protocol_version: TLSv1_2, tls_maximum_protocol_version: TLSv1_2}, tls_certificates: {private_key: {filename: '${ROUTER_PRIVATE_KEY_PATH}'}, certificate_chain: {filename: '${ROUTER_PUBLIC_CERT_PATH}'}}, validation_context: {trusted_ca: {filename: '${ENFORCER_CA_CERT_PATH}'}}}}}, load_assignment: {cluster_name: ext-authz, endpoints: [{lb_endpoints: [{endpoint: {address: {socket_address: {address: '${ENFORCER_HOST}', port_value: '${ENFORCER_PORT}'}}}}]}]}}, {name: access-logger, type: STRICT_DNS, connect_timeout: 200s, typed_extension_protocol_options: {envoy.extensions.upstreams.http.v3.HttpProtocolOptions: {'@type': 'type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions', explicit_http_config: {http2_protocol_options: {}}}}, transport_socket: {name: envoy.transport_sockets.tls, typed_config: {'@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext, common_tls_context: {tls_params: {tls_minimum_protocol_version: TLSv1_2, tls_maximum_protocol_version: TLSv1_2}, tls_certificates: {private_key: {filename: '${ROUTER_PRIVATE_KEY_PATH}'}, certificate_chain: {filename: '${ROUTER_PUBLIC_CERT_PATH}'}}, validation_context: {trusted_ca: {filename: '${ENFORCER_CA_CERT_PATH}'}}}}}, load_assignment: {cluster_name: access-logger, endpoints: [{lb_endpoints: [{endpoint: {address: {socket_address: {address: '${ENFORCER_ANALYTICS_HOST}', port_value: '${ENFORCER_ANALYTICS_RECEIVER_PORT}'}}}}]}]}}, {name: ext_authz_http_cluster, type: STRICT_DNS, connect_timeout: 20s, transport_socket: {name: envoy.transport_sockets.tls, typed_config: {'@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext, common_tls_context: {tls_params: {tls_minimum_protocol_version: TLSv1_2, tls_maximum_protocol_version: TLSv1_2}, tls_certificates: {private_key: {filename: '${ROUTER_PRIVATE_KEY_PATH}'}, certificate_chain: {filename: '${ROUTER_PUBLIC_CERT_PATH}'}}, validation_context: {trusted_ca: {filename: '${ENFORCER_CA_CERT_PATH}'}}}}}, load_assignment: {cluster_name: ext_authz_http_cluster, endpoints: [{lb_endpoints: [{endpoint: {address: {socket_address: {address: '${ENFORCER_HOST}', port_value: 9001}}}}]}]}}]}}" --concurrency "${CONCURRENCY}"  $TRAILING_ARGS
+COPY maven/envoy.yaml.template /home/wso2/envoy.yaml.template
+COPY maven/docker-entrypoint.sh /home/wso2/docker-entrypoint.sh
+
+EXPOSE 9000 9090 9095
+
+# initiate container and start Router.
+ENTRYPOINT ["/home/wso2/docker-entrypoint.sh"]
