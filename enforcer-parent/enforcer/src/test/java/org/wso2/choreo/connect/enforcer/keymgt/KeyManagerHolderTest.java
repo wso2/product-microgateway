@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.keymgt;
 
+import org.checkerframework.checker.units.qual.A;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +57,19 @@ public class KeyManagerHolderTest {
                 "\"client_registration_endpoint\":" +
                 "\"https://dev.api.asgardeo.io/t/malinthaa/api/server/v1\"," +
                 "\"consumer_key_claim\":\"azp\",\"certificate_type\":\"JWKS\"," +
-                "\"token_endpoint\":\"https://dev.api.asgardeo.io/t/malinthaa/oauth2/token\"}";
+                "\"token_endpoint\":\"https://dev.api.asgardeo.io/t/malinthaa/oauth2/token\", " +
+                "\"environments\":[{" +
+                "                \"choreo\": \"Production\",\n" +
+                "                \"apim\": [\n" +
+                "                    \"Production and Sandbox\",\n" +
+                "                    \"sandbox-prod\",\n" +
+                "                    \"Prod-Internal\",\n" +
+                "                    \"production-us-east-azure\",\n" +
+                "                    \"production-sandbox-us-east-azure\",\n" +
+                "                    \"production-internal-us-east-azure\"\n" +
+                "                ]" +
+                "            }]" +
+                "}";
 
         KeyManagerConfig keyManagerConfig = KeyManagerConfig.newBuilder().setName("Asgardeo").setType("DIRECT")
                 .setEnabled(true).setTenantDomain("carbon.super").setConfiguration(asgardeoConfiguration)
@@ -99,6 +112,14 @@ public class KeyManagerHolderTest {
         Assert.assertEquals("https://dev.api.asgardeo.io/t/malinthaa/oauth2/jwks",
                 asgardeoIssuer.getJwksConfigurationDTO().getUrl());
         Assert.assertTrue(asgardeoIssuer.getJwksConfigurationDTO().isEnabled());
+        Assert.assertFalse(asgardeoIssuer.getEnvironments().isEmpty());
+        Assert.assertEquals(6, asgardeoIssuer.getEnvironments().size());
+        Assert.assertTrue(asgardeoIssuer.getEnvironments().contains("Production and Sandbox"));
+        Assert.assertTrue(asgardeoIssuer.getEnvironments().contains("sandbox-prod"));
+        Assert.assertTrue(asgardeoIssuer.getEnvironments().contains("Prod-Internal"));
+        Assert.assertTrue(asgardeoIssuer.getEnvironments().contains("production-us-east-azure"));
+        Assert.assertTrue(asgardeoIssuer.getEnvironments().contains("production-sandbox-us-east-azure"));
+        Assert.assertTrue(asgardeoIssuer.getEnvironments().contains("production-internal-us-east-azure"));
 
         Assert.assertNotNull("Token issuer map does not contain keyManager under carbon.super",
                 KeyManagerHolder.getInstance().getTokenIssuerMap().get("carbon.super"));
