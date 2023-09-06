@@ -191,7 +191,7 @@ func getAccessLogFilterConfig() *config_access_logv3.AccessLogFilter {
 					Name: ":authority",
 					HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
 						SafeRegexMatch: &matcherv3.RegexMatcher{
-							Regex: fmt.Sprintf("^%s(:\\d+)$", conf.Envoy.SystemHost),
+							Regex: fmt.Sprintf("^%s(:\\d+)?$", conf.Envoy.SystemHost),
 						},
 					},
 					InvertMatch: true,
