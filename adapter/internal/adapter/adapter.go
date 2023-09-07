@@ -177,7 +177,9 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 		discoveryv3.RegisterAggregatedDiscoveryServiceServer(rlsGrpcServer, rlsServer)
 		go func() {
 			logger.LoggerMgw.Info("Starting Rate Limiter xDS gRPC server.")
+			health.RateLimiterGrpcService.SetStatus(true)
 			if err = rlsGrpcServer.Serve(rlsLis); err != nil {
+				health.RateLimiterGrpcService.SetStatus(false)
 				logger.LoggerMgw.Error("Error serving Rate Limiter xDS gRPC server: ", err)
 			}
 		}()
