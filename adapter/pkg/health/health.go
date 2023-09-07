@@ -19,9 +19,10 @@ package health
 
 import (
 	"context"
+	"sync"
+
 	healthservice "github.com/wso2/product-microgateway/adapter/pkg/health/api/wso2/health/service"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
-	"sync"
 )
 
 var (
@@ -35,7 +36,8 @@ var (
 
 // Service components to be set health status
 const (
-	RestService service = "adapter.internal.RestService"
+	RestService            service = "adapter.internal.RestService"
+	RateLimiterGrpcService service = "adapter.internal.RateLimiterGrpcService"
 )
 
 type service string
