@@ -21,9 +21,13 @@ echo "Configuring Choreo Connect Router"
 MG_ENVOY_YAML="$(envsubst < /home/wso2/envoy.yaml.template)"
 
 echo "Starting Choreo Connect Router"
+args=()
+if [ -n "$FILE_FLUSH_INTERVAL_MSEC" ]; then
+    args+=(--file-flush-interval-msec "${FILE_FLUSH_INTERVAL_MSEC}")
+fi
 /usr/local/bin/envoy \
     -c /etc/envoy/envoy.yaml \
     --config-yaml "${MG_ENVOY_YAML}" \
     --concurrency "${CONCURRENCY}" \
-    --file-flush-interval-msec "${FILE_FLUSH_INTERVAL_MSEC}" \
+    "${args[@]}" \
     $TRAILING_ARGS
