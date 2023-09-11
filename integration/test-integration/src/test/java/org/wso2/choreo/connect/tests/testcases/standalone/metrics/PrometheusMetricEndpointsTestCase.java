@@ -27,16 +27,16 @@ public class PrometheusMetricEndpointsTestCase {
     public void testEnforcerMetricEndpoint() throws Exception {
         HttpResponse response = HttpClientRequest.doGet("http://localhost:19080/metrics");
         int responseCode = response.getResponseCode();
-        Assert.assertTrue(response.getData().contains("jvm_"), "Metric information not found in expected format");
         Assert.assertEquals(200, responseCode, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("jvm_"), "Metric information not found in expected format");
     }
 
     @Test(description = "Test whether adapter metric endpoint is up")
     public void testAdapterMetricEndpoint() throws Exception {
         HttpResponse response = HttpClientRequest.doGet("http://localhost:19085/metrics");
         int responseCode = response.getResponseCode();
-        Assert.assertTrue(response.getData().contains("go_"), "Metric information not found in expected format");
         Assert.assertEquals(200, responseCode, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("go_"), "Metric information not found in expected format");
     }
 
 
@@ -44,8 +44,8 @@ public class PrometheusMetricEndpointsTestCase {
     public void testRouterMetricEndpoint() throws Exception {
         HttpResponse response = HttpClientRequest.doGet("http://localhost:9000/stats/prometheus");
         int responseCode = response.getResponseCode();
-        Assert.assertTrue(response.getData().contains("envoy_"), "Metric information not found in expected format");
         Assert.assertEquals(200, responseCode, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("envoy_"), "Metric information not found in expected format");
     }
-
 }
+
