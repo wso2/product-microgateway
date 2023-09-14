@@ -67,9 +67,10 @@ var defaultConfig = &Config{
 			ArtifactsDirectory: "/home/wso2/git-artifacts",
 		},
 		Metrics: metrics{
-			Enabled: false,
-			Type:    "prometheus",
-			Port:    19085,
+			Enabled:            false,
+			Type:               "prometheus",
+			Port:               19085,
+			CollectionInterval: 5,
 		},
 	},
 	Envoy: envoy{

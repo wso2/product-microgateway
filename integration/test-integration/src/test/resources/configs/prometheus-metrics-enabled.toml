@@ -79,3 +79,4 @@
   enabled = true
   type = "prometheus"
   port = 19085
+  collectionInterval = 10

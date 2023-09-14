@@ -200,7 +200,7 @@ func Run(conf *config.Config) {
 	// Start the metrics server
 	if conf.Adapter.Metrics.Enabled && conf.Adapter.Metrics.Type == metrics.PrometheusMetricType {
 		logger.LoggerMgw.Info("Starting Prometheus Metrics Server ....")
-		go metrics.StartPrometheusMetricsServer(conf.Adapter.Metrics.Port)
+		go metrics.StartPrometheusMetricsServer(conf.Adapter.Metrics.Port, conf.Adapter.Metrics.CollectionInterval)
 
 	}
 

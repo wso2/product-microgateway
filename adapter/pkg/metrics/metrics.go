@@ -100,7 +100,7 @@ func init() {
 }
 
 // recordMetrics record custom golang metrics
-func recordMetrics() {
+var recordMetrics = func(collectionInterval int32) {
 	for {
 		host, err := host.Info()
 		if handleError(err, "Failed to get host info") {
@@ -151,8 +151,8 @@ func recordMetrics() {
 		loadAvg.WithLabelValues("5m").Set(avg.Load5)
 		loadAvg.WithLabelValues("15m").Set(avg.Load15)
 
-		// Sleep 5s before the next measurement
-		time.Sleep(5 * time.Second)
+		// Sleep before the next measurement
+		time.Sleep(time.Duration(collectionInterval) * time.Second)
 	}
 
 }
@@ -170,8 +170,43 @@ func handleError(err error, message string) bool {
 }
 
 // StartPrometheusMetricsServer initializes and starts the metrics server to expose metrics to prometheus.
-func StartPrometheusMetricsServer(port int32) {
-	go recordMetrics()
-	http.Handle("/metrics", promhttp.HandlerFor(prometheusMetricRegistry, promhttp.HandlerOpts{}))
-	http.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), nil)
+func StartPrometheusMetricsServer(port int32, collectionInterval int32) {
+	done := make(chan struct{}) // Channel to indicate recordMetrics routine exit
+
+	// Start the Prometheus metrics server
+	go func() {
+		http.Handle("/metrics", promhttp.HandlerFor(prometheusMetricRegistry, promhttp.HandlerOpts{}))
+		err := http.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), nil)
+		if err != nil {
+			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintln("Prometheus metrics server error:", err),
+				Severity:  logging.MAJOR,
+				ErrorCode: 1110,
+			})
+		}
+	}()
+
+	for {
+		// Start the recordMetrics goroutine
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.LoggerMgw.ErrorC(logging.ErrorDetails{
+						Message:   fmt.Sprintln("recordMetrics goroutine exited with error:", r),
+						Severity:  logging.MAJOR,
+						ErrorCode: 1111,
+					})
+				}
+			}()
+			recordMetrics(collectionInterval)
+			done <- struct{}{} // Signal that the goroutine has completed
+		}()
+
+		// Wait for the previous recordMetrics goroutine to complete
+		<-done
+
+		// Log and restart the goroutine
+		logger.LoggerMgw.Info("Restarting recordMetrics goroutine...")
+		time.Sleep(3 * time.Second)
+	}
 }

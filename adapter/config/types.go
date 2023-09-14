@@ -467,9 +467,10 @@ type tracing struct {
 }
 
 type metrics struct {
-	Enabled bool
-	Type    string
-	Port    int32
+	Enabled            bool
+	Type               string
+	Port               int32
+	CollectionInterval int32
 }
 
 type analyticsAdapter struct {
