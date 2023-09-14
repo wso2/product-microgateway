@@ -99,8 +99,8 @@ soapErrorInXMLEnabled = false
    type = "prometheus"
    # The port through which metrics are exposed
    port = 19085
-  # The periodic metric collection interval in seconds
-  collectionInterval = 5
+   # The periodic metric collection interval in seconds
+   collectionInterval = 5
 
 # Configurations required for router to route the traffic from different clients to services
 [router] # --------------------------------------------------------

@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.util.*;
 
 public class PrometheusMetricEndpointsTestCase {
-    @Test(description = "Test whether enforcer metric endpoint is up")
+    @Test(description = "Test whether Enforcer metric endpoint is up")
     public void testEnforcerMetricEndpoint() throws Exception {
         HttpResponse response = HttpClientRequest.doGet("http://localhost:19080/metrics");
         Assert.assertNotNull(response);
@@ -32,7 +32,7 @@ public class PrometheusMetricEndpointsTestCase {
         Assert.assertTrue(response.getData().contains("jvm_"), "Metric information not found in expected format");
     }
 
-    @Test(description = "Test whether adapter metric endpoint is up")
+    @Test(description = "Test whether Adapter metric endpoint is up")
     public void testAdapterMetricEndpoint() throws Exception {
         HttpResponse response = HttpClientRequest.doGet("http://localhost:19085/metrics");
         Assert.assertNotNull(response);
@@ -42,7 +42,7 @@ public class PrometheusMetricEndpointsTestCase {
     }
 
 
-    @Test(description = "Test whether router metric endpoint is up")
+    @Test(description = "Test whether Router metric endpoint is up")
     public void testRouterMetricEndpoint() throws Exception {
         HttpResponse response = HttpClientRequest.doGet("http://localhost:9000/stats/prometheus");
         Assert.assertNotNull(response);

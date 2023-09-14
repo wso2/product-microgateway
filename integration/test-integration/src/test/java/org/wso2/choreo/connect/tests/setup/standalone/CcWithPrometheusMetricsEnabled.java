@@ -39,7 +39,6 @@ public class CcWithPrometheusMetricsEnabled {
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
         TimeUnit.SECONDS.sleep(5);
-
     }
 
     @AfterTest(description = "stop the setup")
