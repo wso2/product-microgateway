@@ -629,6 +629,7 @@ func marshalKeyMapping(keyMappingInternal *types.ApplicationKeyMapping) *subscri
 		TenantId:        keyMappingInternal.TenantID,
 		TenantDomain:    keyMappingInternal.TenantDomain,
 		Timestamp:       keyMappingInternal.TimeStamp,
+		EnvId:           keyMappingInternal.EnvID,
 	}
 }
 

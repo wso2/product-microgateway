@@ -66,6 +66,7 @@ type ApplicationKeyMapping struct {
 	ConsumerKey     string `json:"consumerKey"`
 	KeyType         string `json:"keyType"`
 	KeyManager      string `json:"keyManager"`
+	EnvID           string `json:"EnvId"`
 	TenantID        int32  `json:"tenanId,omitempty"`
 	TenantDomain    string `json:"tenanDomain,omitempty"`
 	TimeStamp       int64  `json:"timeStamp,omitempty"`

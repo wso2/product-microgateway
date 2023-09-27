@@ -188,6 +188,7 @@ public class KeyValidator {
         if (app != null && key != null && sub != null) {
             String keyType = key.getKeyType();
             validate(infoDTO, datastore, apiConfig, keyType, app, sub);
+            infoDTO.setEnvId(key.getEnvId());
         }
         if (!infoDTO.isAuthorized() && infoDTO.getValidationStatus() == 0) {
             //Scenario where validation failed and message is not set

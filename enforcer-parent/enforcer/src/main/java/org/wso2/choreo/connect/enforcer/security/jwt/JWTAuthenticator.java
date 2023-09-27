@@ -245,8 +245,12 @@ public class JWTAuthenticator implements Authenticator {
                                             "User is NOT authorized to access the Resource. "
                                                     + "API Subscription validation failed.");
                                 }
-                                // Check if the token has access to the gateway configured environment.
+                                // Check if the token has access to the deployment type.
                                 checkTokenEnvAgainstDeploymentType(apiKeyValidationInfoDTO.getType(),
+                                        requestContext.getMatchedAPI());
+
+                                // Check if the token has access to the gateway configured environment.
+                                checkTokenEnvAgainstDeploymentEnv(apiKeyValidationInfoDTO.getEnvId(),
                                         requestContext.getMatchedAPI());
                             }
                         } else {
@@ -332,6 +336,28 @@ public class JWTAuthenticator implements Authenticator {
             }
         }
 
+    }
+
+    protected void checkTokenEnvAgainstDeploymentEnv(String keyEnvId, APIConfig matchedAPI)
+            throws APISecurityException {
+
+        // TODO: This needs to be changed to Choreo env.
+        String apiEnvName = matchedAPI.getEnvironmentName();
+        if (StringUtils.isNotEmpty(keyEnvId) || !StringUtils.equals(keyEnvId, "DEFAULT_ENV")) {
+            if (StringUtils.equals(keyEnvId, apiEnvName)) {
+                log.debug("The access token has access to the API environment {}.", apiEnvName);
+            } else {
+                log.debug("The access token does not have access to the app environment {}.", apiEnvName);
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH,
+                        APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH_ERROR_MESSAGE);
+            }
+        } else {
+            log.debug("The key is not mapped to any specific environment.");
+            // Check whether the application is internal. If so the environment is a mandatory parameter.
+            // If the application is external and key's environment is not defined,
+            // Allow only critical environment access.
+        }
     }
 
     private void checkTokenEnv(JWTClaimsSet claims, String matchedEnv) throws APISecurityException {

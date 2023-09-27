@@ -138,6 +138,7 @@ type ApplicationRegistrationEvent struct {
 	ConsumerKey     string `json:"consumerKey"`
 	KeyType         string `json:"keyType"`
 	KeyManager      string `json:"keyManager"`
+	EnvID           string `json:"EnvId"`
 	Event
 }
 

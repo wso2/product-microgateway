@@ -30,16 +30,16 @@ public final class ApplicationKeyMappingProto {
     java.lang.String[] descriptorData = {
       "\n9wso2/discovery/subscription/applicatio" +
       "n_key_mapping.proto\022\033wso2.discovery.subs" +
-      "cription\"\274\001\n\025ApplicationKeyMapping\022\023\n\013co" +
+      "cription\"\313\001\n\025ApplicationKeyMapping\022\023\n\013co" +
       "nsumerKey\030\001 \001(\t\022\017\n\007keyType\030\002 \001(\t\022\022\n\nkeyM" +
       "anager\030\003 \001(\t\022\025\n\rapplicationId\030\004 \001(\005\022\020\n\010t" +
       "enantId\030\005 \001(\005\022\024\n\014tenantDomain\030\006 \001(\t\022\021\n\tt" +
-      "imestamp\030\007 \001(\003\022\027\n\017applicationUUID\030\010 \001(\tB" +
-      "\237\001\n.org.wso2.choreo.connect.discovery.su" +
-      "bscriptionB\032ApplicationKeyMappingProtoP\001" +
-      "ZOgithub.com/envoyproxy/go-control-plane" +
-      "/wso2/discovery/subscription;subscriptio" +
-      "nb\006proto3"
+      "imestamp\030\007 \001(\003\022\027\n\017applicationUUID\030\010 \001(\t\022" +
+      "\r\n\005envId\030\t \001(\tB\237\001\n.org.wso2.choreo.conne" +
+      "ct.discovery.subscriptionB\032ApplicationKe" +
+      "yMappingProtoP\001ZOgithub.com/envoyproxy/g" +
+      "o-control-plane/wso2/discovery/subscript" +
+      "ion;subscriptionb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -50,7 +50,7 @@ public final class ApplicationKeyMappingProto {
     internal_static_wso2_discovery_subscription_ApplicationKeyMapping_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_subscription_ApplicationKeyMapping_descriptor,
-        new java.lang.String[] { "ConsumerKey", "KeyType", "KeyManager", "ApplicationId", "TenantId", "TenantDomain", "Timestamp", "ApplicationUUID", });
+        new java.lang.String[] { "ConsumerKey", "KeyType", "KeyManager", "ApplicationId", "TenantId", "TenantDomain", "Timestamp", "ApplicationUUID", "EnvId", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
