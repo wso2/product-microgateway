@@ -354,9 +354,10 @@ public class JWTAuthenticator implements Authenticator {
             }
         } else {
             log.debug("The key is not mapped to any specific environment.");
-            // Check whether the application is internal. If so the environment is a mandatory parameter.
-            // If the application is external and key's environment is not defined,
-            // Allow only critical environment access.
+            // Check whether the application is internal. If so the environment is a mandatory parameter,
+            // then need to fail the access.
+            // If the application is external and key's environment is not defined or DEFAULT_ENV,
+            // then allow access only if the environment is critical.
         }
     }
 
