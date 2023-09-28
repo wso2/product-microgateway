@@ -119,7 +119,12 @@ var recordMetrics = func(collectionInterval int32) {
 		if handleError(err, "Failed to read cpu usage metrics") || len(percentages) == 0 {
 			return
 		}
-		systemCPULoad.Set(percentages[0])
+		totalPercentage := 0.0
+		for _, p := range percentages {
+			totalPercentage += p
+		}
+		averagePercentage := totalPercentage / float64(len(percentages))
+		systemCPULoad.Set(averagePercentage)
 
 		pid := os.Getpid()
 		p, err := procfs.NewProc(pid)
@@ -174,7 +179,7 @@ func StartPrometheusMetricsServer(port int32, collectionInterval int32) {
 	// Start the Prometheus metrics server
 	go func() {
 		http.Handle("/metrics", promhttp.HandlerFor(prometheusMetricRegistry, promhttp.HandlerOpts{}))
-		err := http.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), nil)
+		err := http.ListenAndServe(":"+strconv.Itoa(int(port)), nil)
 		if err != nil {
 			logger.LoggerMgw.ErrorC(logging.ErrorDetails{
 				Message:   fmt.Sprintln("Prometheus metrics server error:", err),
