@@ -47,7 +47,7 @@ PRGDIR=`dirname "$PRG"`
 GW_HOME=`cd "$PRGDIR/.." ; pwd`
 export MGW_VERSION="3.2.7"
 
-JAVA_PATH=$GW_HOME/lib/jdk8u332-b09-jre
+JAVA_PATH=$GW_HOME/lib/jdk8u382-b05-jre
 if [ -d "$JAVA_HOME" ]; then
   echo "JAVA_HOME: $JAVA_HOME"
 else

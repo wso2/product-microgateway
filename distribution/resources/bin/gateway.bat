@@ -49,8 +49,8 @@ IF EXIST "%JAVA_HOME%" (
 
     REM External java_home was detected, now check if it is java8
     ECHO "%JAVA_VERSION%"|find "1.8."| find "11." >NUL
-    IF %ERRORLEVEL% NEQ 0 SET JAVA_HOME=%GW_HOME%\lib\jdk8u332-b09-jre
-) ELSE SET JAVA_HOME=%GW_HOME%\lib\jdk8u332-b09-jre
+    IF %ERRORLEVEL% NEQ 0 SET JAVA_HOME=%GW_HOME%\lib\jdk8u382-b05-jre
+) ELSE SET JAVA_HOME=%GW_HOME%\lib\jdk8u382-b05-jre
 
 REM -----------------------------------------------------------------------------
 REM --- END OF GLOBAL VARIABLES ---
