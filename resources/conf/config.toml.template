@@ -91,6 +91,17 @@ soapErrorInXMLEnabled = false
     # Path to the private key used for authentication (Use "" in the case of a public repository (only for GitHub))
     sshKeyFile = "/home/wso2/ssh-keys/id_ed25519"
 
+# Configuration to expose adapter metrics
+[adapter.metrics]
+   # Enable/Disable metrics
+   enabled = false
+   # The type of metric server, currently supports only prometheus
+   type = "prometheus"
+   # The port through which metrics are exposed
+   port = 19085
+   # The periodic metric collection interval in seconds
+   collectionInterval = 5
+
 # Configurations required for router to route the traffic from different clients to services
 [router] # --------------------------------------------------------
   # Host for listener of Router

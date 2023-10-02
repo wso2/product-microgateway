@@ -189,10 +189,10 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/</outputDirectory>
                             <includeGroupIds>
-                                org.apache.logging.log4j, org.json.wso2
+                                org.apache.logging.log4j, org.json.wso2, io.prometheus.jmx
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j2-impl
+                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j2-impl, jmx_prometheus_javaagent
                             </includeArtifactIds>
                         </configuration>
                     </execution>
@@ -628,6 +628,11 @@
         <dependency>
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus.jmx</groupId>
+            <artifactId>jmx_prometheus_javaagent</artifactId>
+            <version>${io.prometheus.jmx.version}</version>
         </dependency>
     </dependencies>
 

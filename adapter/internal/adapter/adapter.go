@@ -43,6 +43,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	healthservice "github.com/wso2/product-microgateway/adapter/pkg/health/api/wso2/health/service"
 	"github.com/wso2/product-microgateway/adapter/pkg/logging"
+	"github.com/wso2/product-microgateway/adapter/pkg/metrics"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
@@ -196,7 +197,16 @@ func Run(conf *config.Config) {
 		})
 	}
 
-	logger.LoggerMgw.Info("Starting adapter ....")
+logger.LoggerMgw.Info("Starting adapter ....")
+	
+	// Start the metrics server
+	if conf.Adapter.Metrics.Enabled && strings.EqualFold(conf.Adapter.Metrics.Type, metrics.PrometheusMetricType) {
+		logger.LoggerMgw.Info("Starting Prometheus Metrics Server ....")
+		go metrics.StartPrometheusMetricsServer(conf.Adapter.Metrics.Port, conf.Adapter.Metrics.CollectionInterval)
+
+	}
+
+
 	cache := xds.GetXdsCache()
 	enforcerCache := xds.GetEnforcerCache()
 	enforcerSubscriptionCache := xds.GetEnforcerSubscriptionCache()

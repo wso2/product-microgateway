@@ -30,24 +30,24 @@ public interface ExtAuthMetricsMXBean {
 
     /**
      * Getter for average response time in milli seconds.
-     * 
-     * @return long
+     *
+     * @return double
      */
-    public long getAverageResponseTimeMillis();
+    public double getAverageResponseTimeMillis();
 
     /**
      * Getter for maximum response time in milliseconds.
-     * 
-     * @return long
+     *
+     * @return double
      */
-    public long getMaxResponseTimeMillis();
+    public double getMaxResponseTimeMillis();
 
     /**
      * Getter for mimnimum response time in milliseconds.
-     * 
-     * @return long
+     *
+     * @return double
      */
-    public long getMinResponseTimeMillis();
+    public double getMinResponseTimeMillis();
 
     /**
      * Resets all the metrics to thier initial values.
@@ -55,8 +55,17 @@ public interface ExtAuthMetricsMXBean {
     public void resetExtAuthMetrics();
 
     /**
-     * Resets all the metrics to thier initial values.
+     * Get request count in last five minutes window
+     *
+     * @return long
      */
-    public long getRequestCountInLastFiveMinutes();
+    public long getRequestCountInLastFiveMinuteWindow();
+
+    /**
+     * Get the start time of request count window
+     *
+     * @return
+     */
+    public long getRequestCountWindowStartTimeMillis();
 
 }

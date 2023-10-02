@@ -30,11 +30,12 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
     private static final long REQUEST_COUNT_INTERVAL_MILLIS = 5 * 60 * 1000;
     private static ExtAuthMetrics extAuthMetricsMBean = null;
 
-    private long requestCountInLastFiveMinutes = 0;
+    private long requestCountInLastFiveMinuteWindow = 0;
+    private long requestCountWindowStartTimeMillis = System.currentTimeMillis();
     private long totalRequestCount = 0;
-    private long averageResponseTimeMillis = 0;
-    private long maxResponseTimeMillis = Long.MIN_VALUE;
-    private long minResponseTimeMillis = Long.MAX_VALUE;
+    private double averageResponseTimeMillis = 0;
+    private double maxResponseTimeMillis = Double.MIN_VALUE;
+    private double minResponseTimeMillis = Double.MAX_VALUE;
 
     private ExtAuthMetrics() {
         MBeanRegistrator.registerMBean(this);
@@ -42,7 +43,7 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
 
     /**
      * Getter for the Singleton ExtAuthMetrics instance.
-     * 
+     *
      * @return ExtAuthMetrics
      */
     public static ExtAuthMetrics getInstance() {
@@ -51,7 +52,8 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
                 if (extAuthMetricsMBean == null) {
                     Timer timer = new Timer();
                     extAuthMetricsMBean = new ExtAuthMetrics();
-                    timer.schedule(extAuthMetricsMBean, 0, REQUEST_COUNT_INTERVAL_MILLIS);
+                    extAuthMetricsMBean.requestCountWindowStartTimeMillis = System.currentTimeMillis();
+                    timer.schedule(extAuthMetricsMBean, REQUEST_COUNT_INTERVAL_MILLIS, REQUEST_COUNT_INTERVAL_MILLIS);
                 }
             }
         }
@@ -64,24 +66,25 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
     };
 
     @Override
-    public long getAverageResponseTimeMillis() {
+    public double getAverageResponseTimeMillis() {
         return averageResponseTimeMillis;
     };
 
     @Override
-    public long getMaxResponseTimeMillis() {
+    public double getMaxResponseTimeMillis() {
         return maxResponseTimeMillis;
     };
 
     @Override
-    public long getMinResponseTimeMillis() {
+    public double getMinResponseTimeMillis() {
         return minResponseTimeMillis;
     };
 
     public synchronized void recordMetric(long responseTimeMillis) {
-        this.requestCountInLastFiveMinutes += 1;
+        this.requestCountInLastFiveMinuteWindow += 1;
         this.totalRequestCount += 1;
-        this.averageResponseTimeMillis = (this.averageResponseTimeMillis + responseTimeMillis) / totalRequestCount;
+        this.averageResponseTimeMillis = this.averageResponseTimeMillis +
+                (responseTimeMillis - this.averageResponseTimeMillis) / totalRequestCount;
         this.minResponseTimeMillis = Math.min(this.minResponseTimeMillis, responseTimeMillis);
         this.maxResponseTimeMillis = Math.max(this.maxResponseTimeMillis, responseTimeMillis);
     }
@@ -90,17 +93,23 @@ public class ExtAuthMetrics extends TimerTask implements ExtAuthMetricsMXBean {
     public synchronized void resetExtAuthMetrics() {
         this.totalRequestCount = 0;
         this.averageResponseTimeMillis = 0;
-        this.maxResponseTimeMillis = Long.MIN_VALUE;
-        this.minResponseTimeMillis = Long.MAX_VALUE;
+        this.maxResponseTimeMillis = Double.MIN_VALUE;
+        this.minResponseTimeMillis = Double.MAX_VALUE;
     }
 
     @Override
     public synchronized void run() {
-        requestCountInLastFiveMinutes = 0;
+        requestCountWindowStartTimeMillis = System.currentTimeMillis();
+        requestCountInLastFiveMinuteWindow = 0;
     }
 
     @Override
-    public long getRequestCountInLastFiveMinutes() {
-        return requestCountInLastFiveMinutes;
+    public long getRequestCountInLastFiveMinuteWindow() {
+        return requestCountInLastFiveMinuteWindow;
+    }
+
+    @Override
+    public long getRequestCountWindowStartTimeMillis() {
+        return requestCountWindowStartTimeMillis;
     }
 }

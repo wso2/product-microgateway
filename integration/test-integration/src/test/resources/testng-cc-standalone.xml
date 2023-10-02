@@ -143,4 +143,10 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.awsLambda.AwsLambdaSupportTestCase"/>
         </classes>
     </test>
+    <test name="cc-with-prometheus-metrics" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithPrometheusMetricsEnabled"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.metrics.PrometheusMetricEndpointsTestCase"/>
+        </classes>
+    </test>
 </suite>

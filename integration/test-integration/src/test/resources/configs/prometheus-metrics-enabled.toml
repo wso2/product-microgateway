@@ -1,0 +1,82 @@
+[adapter]
+[adapter.keystore]
+  certPath = "/home/wso2/security/keystore/mg.pem"
+  keyPath = "/home/wso2/security/keystore/mg.key"
+
+[adapter.truststore]
+  location = "/home/wso2/security/truststore"
+
+[router]
+  listenerPort = 9090
+  securedListenerPort = 9095
+  systemHost = "localhost"
+  useRemoteAddress = false
+
+[router.keystore]
+  certPath = "/home/wso2/security/keystore/mg.pem"
+  keyPath = "/home/wso2/security/keystore/mg.key"
+
+[router.upstream]
+[router.upstream.tls]
+  trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
+  verifyHostName = true
+  disableSslVerification = false
+
+[enforcer]
+[enforcer.jwtIssuer]
+  enabled = true
+  issuer = "https://localhost:9095/testkey"
+
+[enforcer.throttling]
+  enableGlobalEventPublishing = true
+  jmsConnectionProviderURL = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5673'"
+  [enforcer.throttling.publisher]
+    username = "admin"
+    password = "$env{tm_admin_pwd}"
+    [[enforcer.throttling.publisher.URLGroup]]
+      receiverURLs = ["tcp://apim:9612"]
+      authURLs = ["ssl://apim:9712"]
+
+[enforcer.security]
+[[enforcer.security.tokenService]]
+  name = "Resident Key Manager"
+  issuer = "https://localhost:9444/oauth2/token"
+  certificateAlias = "wso2carbon"
+  jwksURL = ""
+  validateSubscription = false
+  consumerKeyClaim = "azp"
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+[[enforcer.security.tokenService]]
+  name = "MGW"
+  issuer = "https://localhost:9095/testkey"
+  certificateAlias = "mgw"
+  jwksURL = ""
+  validateSubscription = false
+  consumerKeyClaim = ""
+  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+[[enforcer.security.tokenService]]
+  name = "APIM Publisher"
+  issuer = "https://localhost:9444/publisher"
+  validateSubscription = true
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+[controlPlane]
+  enabled = true
+  serviceURL = "https://apim:9444/"
+  username = "admin"
+  password = "$env{cp_admin_pwd}"
+  environmentLabels = ["Default"]
+  skipSSLVerification = true
+  [controlPlane.brokerConnectionParameters]
+    eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5673?retries='10'&connectdelay='30'"]
+
+[analytics]
+  enabled = false
+
+[adapter.metrics]
+  enabled = true
+  type = "prometheus"
+  port = 19085
+  collectionInterval = 10
