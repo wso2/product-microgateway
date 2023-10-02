@@ -343,7 +343,7 @@ public class JWTAuthenticator implements Authenticator {
 
         // TODO: This needs to be changed to Choreo env.
         String apiEnvName = matchedAPI.getEnvironmentName();
-        if (StringUtils.isNotEmpty(keyEnvId) || !StringUtils.equals(keyEnvId, "DEFAULT_ENV")) {
+        if (StringUtils.isNotEmpty(keyEnvId) && !StringUtils.equals(keyEnvId, "DEFAULT_ENV")) {
             if (StringUtils.equals(keyEnvId, apiEnvName)) {
                 log.debug("The access token has access to the API environment {}.", apiEnvName);
             } else {
