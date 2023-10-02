@@ -40,6 +40,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.wso2.choreo.connect.enforcer.constants.APIConstants.JwtTokenConstants.DEFAULT_CHOREO_ENV_ID;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ConfigHolder.class})
@@ -114,24 +115,27 @@ public class JWTAuthenticatorTest {
         APIConfig apiConfig = new APIConfig.Builder("testAPI")
                 .environmentName("env-1")
                 .build();
-        validate(jwtAuthenticator, "env-1", apiConfig, false);
-        validate(jwtAuthenticator, "env-2", apiConfig, true);
+        validate(jwtAuthenticator, "env-1", apiConfig, true);
+        validate(jwtAuthenticator, "env-2", apiConfig, false);
+        validate(jwtAuthenticator, "", apiConfig, true);
+        validate(jwtAuthenticator, null, apiConfig, true);
+        validate(jwtAuthenticator, DEFAULT_CHOREO_ENV_ID, apiConfig, true);
     }
 
     private static void validate(JWTAuthenticator jwtAuthenticator, String keyEnv,
-                                 APIConfig apiConfig, boolean isNotValid) {
+                                 APIConfig apiConfig, boolean isValid) {
 
         try {
             jwtAuthenticator.checkTokenEnvAgainstDeploymentEnv(keyEnv, apiConfig);
-            if (isNotValid) {
+            if (!isValid) {
                 fail("JWT authenticator passed the test when it should have failed");
             }
         } catch (APISecurityException exception) {
-            if (isNotValid) {
+            if (!isValid) {
                 assertEquals(APIConstants.StatusCodes.UNAUTHORIZED.getCode(), exception.getStatusCode());
                 assertEquals(APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH, exception.getErrorCode());
             } else {
-                fail("Expected status code and error code are not thrown");
+                fail("Throwing exception when it should have passed");
             }
         }
     }
