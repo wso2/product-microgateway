@@ -139,7 +139,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u332-b09/OpenJDK8U-jre_x64_linux_hotspot_8u332b09.tar.gz</url>
+                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u382-b05/OpenJDK8U-jre_x64_linux_hotspot_8u382b05.tar.gz</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/extracted-jre-linux</outputDirectory>
                         </configuration>
@@ -151,7 +151,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u332-b09/OpenJDK8U-jre_x64_mac_hotspot_8u332b09.tar.gz</url>
+                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u382-b05/OpenJDK8U-jre_x64_mac_hotspot_8u382b05.tar.gz</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/extracted-jre-macos</outputDirectory>
                         </configuration>
@@ -163,7 +163,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u332-b09/OpenJDK8U-jre_x64_windows_hotspot_8u332b09.zip</url>
+                            <url>https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u382-b05/OpenJDK8U-jre_x64_windows_hotspot_8u382b05.zip</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/extracted-jre-windows</outputDirectory>
                         </configuration>

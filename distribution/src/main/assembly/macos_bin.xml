@@ -72,9 +72,9 @@
         </fileSet>
         <fileSet>
             <directory>
-                ${project.build.directory}/extracted-jre-macos/jdk8u332-b09-jre/Contents/Home
+                ${project.build.directory}/extracted-jre-macos/jdk8u382-b05-jre/Contents/Home
             </directory>
-            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/jdk8u332-b09-jre</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-toolkit-macos-${project.version}/lib/jdk8u382-b05-jre</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
