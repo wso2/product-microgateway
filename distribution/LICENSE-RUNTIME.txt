@@ -13,7 +13,7 @@ below is and where the actual text of the license can be found.
 
 Name                                                                                                Version        License
 _________________________________________________________________________________________________________________________________________________
-org.wso2.micro.gateway.tools-3.2.7.jar                                                              bundle         apache2
+org.wso2.micro.gateway.tools-3.2.8.jar                                                              bundle         apache2
 jmx_prometheus_javaagent-0.17.2.jar                                                                 jar            apache2
 
 
