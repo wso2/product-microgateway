@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.wso2.choreo.connect.enforcer.constants.APIConstants.JwtTokenConstants.DEFAULT_CHOREO_ENV_ID;
+import static org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator.ENABLE_KEY_ENV_VALIDATION;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ConfigHolder.class})
@@ -115,11 +117,21 @@ public class JWTAuthenticatorTest {
         APIConfig apiConfig = new APIConfig.Builder("testAPI")
                 .environmentName("env-1")
                 .build();
+
+        // Cross environment access will be allowed when the System property is not set.
+        validate(jwtAuthenticator, "env-2", apiConfig, true);
+
+        System.setProperty(ENABLE_KEY_ENV_VALIDATION, "true");
         validate(jwtAuthenticator, "env-1", apiConfig, true);
         validate(jwtAuthenticator, "env-2", apiConfig, false);
         validate(jwtAuthenticator, "", apiConfig, true);
         validate(jwtAuthenticator, null, apiConfig, true);
         validate(jwtAuthenticator, DEFAULT_CHOREO_ENV_ID, apiConfig, true);
+    }
+
+    @After
+    public void tearDown() {
+        System.clearProperty(ENABLE_KEY_ENV_VALIDATION);
     }
 
     private static void validate(JWTAuthenticator jwtAuthenticator, String keyEnv,

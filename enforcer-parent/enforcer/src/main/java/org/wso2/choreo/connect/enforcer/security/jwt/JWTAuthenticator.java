@@ -80,6 +80,7 @@ public class JWTAuthenticator implements Authenticator {
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
+    protected static final String ENABLE_KEY_ENV_VALIDATION = "enableKeyEnvValidation";
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -341,6 +342,12 @@ public class JWTAuthenticator implements Authenticator {
 
     protected void checkTokenEnvAgainstDeploymentEnv(String keyEnvId, APIConfig matchedAPI)
             throws APISecurityException {
+
+        // Enable Key Env validation only if system property is set.
+        String disableRoleValidation = System.getProperty(ENABLE_KEY_ENV_VALIDATION);
+        if (!Boolean.parseBoolean(disableRoleValidation)) {
+            return;
+        }
 
         // TODO: This needs to be changed to Choreo env.
         String apiEnvName = matchedAPI.getEnvironmentName();
