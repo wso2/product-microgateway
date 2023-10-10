@@ -42,7 +42,7 @@ ENV ADAPTER_HOST_NAME=adapter
 ENV ADAPTER_HOST=adapter
 ENV ADAPTER_XDS_PORT=18000
 ENV ENFORCER_LABEL="Default"
-ENV XDS_MAX_MSG_SIZE=4194304
+ENV XDS_MAX_MSG_SIZE=41943040
 ENV XDS_MAX_RETRIES=3
 #todo update the connection string
 ENV APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/
