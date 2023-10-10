@@ -51,7 +51,7 @@ public class EnvVarConfig {
     private static final String DEFAULT_ADAPTER_HOST = "adapter";
     private static final String DEFAULT_ADAPTER_XDS_PORT = "18000";
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";
-    public static final String DEFAULT_XDS_MAX_MSG_SIZE = "4194304";
+    public static final String DEFAULT_XDS_MAX_MSG_SIZE = "41943040";
     public static final String DEFAULT_XDS_MAX_RETRIES = Integer.toString(Constants.MAX_XDS_RETRIES);
     public static final String DEFAULT_XDS_RETRY_PERIOD = Integer.toString(Constants.XDS_DEFAULT_RETRY);
     public static final String DEFAULT_HOSTNAME = "Unassigned";
