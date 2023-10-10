@@ -122,7 +122,8 @@ public class KeyManagerDiscoveryClient implements Runnable {
 
     public void watchKeyManagers() {
         // TODO: implement a deadline with retries
-        reqObserver = stub.streamKeyManagers(new StreamObserver<>() {
+        int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
+        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamKeyManagers(new StreamObserver<>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.info("Key manager event received with version : " + response.getVersionInfo());
