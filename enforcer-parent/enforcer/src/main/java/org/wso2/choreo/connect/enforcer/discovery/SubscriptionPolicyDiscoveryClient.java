@@ -122,7 +122,8 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
 
     public void watchSubscriptionPolicies() {
         // TODO: (Praminda) implement a deadline with retries
-        reqObserver = stub.streamSubscriptionPolicies(new StreamObserver<>() {
+        int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
+        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamSubscriptionPolicies(new StreamObserver<>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.info("Subscription policy event received with version : " + response.getVersionInfo());
