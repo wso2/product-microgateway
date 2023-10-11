@@ -151,7 +151,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private void initializeLoadingTasks() {
         SubscriptionDiscoveryClient.getInstance().watchSubscriptions();
         ApplicationDiscoveryClient.getInstance().watchApplications();
-        ApiListDiscoveryClient.getInstance().watchApiList();
+        // Disabled API List discovery as it is not set as per current adapter implementation.
+//        ApiListDiscoveryClient.getInstance().watchApiList();
         ApplicationPolicyDiscoveryClient.getInstance().watchApplicationPolicies();
         SubscriptionPolicyDiscoveryClient.getInstance().watchSubscriptionPolicies();
         ApplicationKeyMappingDiscoveryClient.getInstance().watchApplicationKeyMappings();
