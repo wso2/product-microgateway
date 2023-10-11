@@ -131,7 +131,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 			} else {
 				// Keep the iteration going on until a response is recieved.
 				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
-				go func(d response) {
+				go func(d response, endpoint string, responseType interface{}) {
 					// Retry fetching from control plane after a configured time interval
 					if conf.ControlPlane.RetryInterval == 0 {
 						// Assign default retry interval
@@ -140,8 +140,8 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
-					go InvokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
-				}(data)
+					go InvokeService(endpoint, responseType, nil, responseChannel, 0)
+				}(data, url.endpoint, url.responseType)
 			}
 		}
 	}
