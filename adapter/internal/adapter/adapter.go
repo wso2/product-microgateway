@@ -197,15 +197,14 @@ func Run(conf *config.Config) {
 		})
 	}
 
-logger.LoggerMgw.Info("Starting adapter ....")
-	
+	logger.LoggerMgw.Info("Starting adapter ....")
+
 	// Start the metrics server
 	if conf.Adapter.Metrics.Enabled && strings.EqualFold(conf.Adapter.Metrics.Type, metrics.PrometheusMetricType) {
 		logger.LoggerMgw.Info("Starting Prometheus Metrics Server ....")
 		go metrics.StartPrometheusMetricsServer(conf.Adapter.Metrics.Port, conf.Adapter.Metrics.CollectionInterval)
 
 	}
-
 
 	cache := xds.GetXdsCache()
 	enforcerCache := xds.GetEnforcerCache()
@@ -392,7 +391,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 				ErrorCode: 1107,
 			})
 			health.SetControlPlaneRestAPIStatus(false)
-			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
+			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
