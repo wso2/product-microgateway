@@ -124,7 +124,8 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
     public void watchApplicationPolicies() {
         // TODO: (Praminda) implement a deadline with retries
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
-        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApplicationPolicies(new StreamObserver<DiscoveryResponse>() {
+        reqObserver = stub.withMaxInboundMessageSize(maxSize)
+                .streamApplicationPolicies(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.info("Application policy event received with version : " + response.getVersionInfo());

@@ -124,7 +124,8 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
     public void watchApplicationKeyMappings() {
         // TODO: (Praminda) implement a deadline with retries
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
-        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApplicationKeyMappings(new StreamObserver<DiscoveryResponse>() {
+        reqObserver = stub.withMaxInboundMessageSize(maxSize)
+                .streamApplicationKeyMappings(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.info("Application key generation event received with version : " + response.getVersionInfo());
