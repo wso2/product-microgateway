@@ -372,9 +372,9 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
 			if conf.ControlPlane.DynamicEnvironments.Enabled {
-				sync.RetryFetchingAPIs(c, data, sync.RetrieveRuntimeArtifactEndpoint, true, queryParamMap)
+				sync.RetryFetchingAPIs(c, data, sync.RetrieveRuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
 			} else {
-				sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
+				sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
 			}
 		}
 	}
