@@ -227,7 +227,7 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 
 // RetryFetchingAPIs function keeps retrying to fetch APIs from runtime-artifact endpoint.
 func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint string, sendType bool,
-	queryParamMap map[string]string) {
+	queryParamMap map[string]string, apiUUIDList []string) {
 	retryInterval := workerPool.controlPlaneParams.retryInterval
 
 	// Retry fetching from control plane after a configured time interval
@@ -240,7 +240,7 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, data SyncAPIResponse, endpoint st
 	logger.LoggerSync.Infof("Retrying to fetch API data from control plane for the API %q.", data.APIUUID)
 	channelFillPercentage := float64(len(workerPool.internalQueue)) / float64(cap(workerPool.internalQueue)) * 100
 	logger.LoggerSync.Infof("Workerpool channel size as a percentage is : %f", channelFillPercentage)
-	FetchAPIs(&data.APIUUID, data.GatewayLabels, c, endpoint, sendType, nil, queryParamMap)
+	FetchAPIs(&data.APIUUID, data.GatewayLabels, c, endpoint, sendType, apiUUIDList, queryParamMap)
 
 }
 
