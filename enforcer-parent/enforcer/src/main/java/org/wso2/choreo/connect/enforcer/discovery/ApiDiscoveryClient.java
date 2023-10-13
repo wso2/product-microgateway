@@ -123,7 +123,12 @@ public class ApiDiscoveryClient implements Runnable {
         reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApis(new StreamObserver<>() {
             @Override
             public void onNext(DiscoveryResponse response) {
-                logger.info("API event received with version : " + response.getVersionInfo());
+                logger.info("API event received with version : " + response.getVersionInfo() +
+                        " and size(bytes) : " + response.getSerializedSize());
+                if ((double) response.getSerializedSize() / maxSize > 0.90) {
+                    logger.error("Current response size exceeds 90% of the maximum message size for the type : " +
+                            response.getTypeUrl());
+                }
                 logger.debug("Received API discovery response " + response);
                 XdsSchedulerManager.getInstance().stopAPIDiscoveryScheduling();
                 latestReceived = response;

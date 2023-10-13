@@ -128,7 +128,12 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
                 .streamApplicationPolicies(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
-                logger.info("Application policy event received with version : " + response.getVersionInfo());
+                logger.info("Application policy event received with version : " + response.getVersionInfo() +
+                        " and size(bytes) : " + response.getSerializedSize());
+                if ((double) response.getSerializedSize() / maxSize > 0.90) {
+                    logger.error("Current response size exceeds 90% of the maximum message size for the type : " +
+                            response.getTypeUrl());
+                }
                 logger.debug("Received Application Policy discovery response " + response);
                 XdsSchedulerManager.getInstance().stopApplicationPolicyDiscoveryScheduling();
                 latestReceived = response;
