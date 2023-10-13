@@ -344,12 +344,12 @@ public class JWTAuthenticator implements Authenticator {
             throws APISecurityException {
 
         // Enable Key Env validation only if system property is set.
-        String disableRoleValidation = System.getProperty(ENABLE_KEY_ENV_VALIDATION);
-        if (!Boolean.parseBoolean(disableRoleValidation)) {
+        String disableKeyEnvValidation = System.getProperty(ENABLE_KEY_ENV_VALIDATION);
+        if (!Boolean.parseBoolean(disableKeyEnvValidation)) {
             return;
         }
 
-        // TODO: This needs to be changed to Choreo env.
+        // TODO(senthalan): This needs to be changed to Choreo env id when the migration is done.
         String apiEnvName = matchedAPI.getEnvironmentName();
         if (StringUtils.isNotEmpty(keyEnvId) && !StringUtils.equals(keyEnvId, DEFAULT_CHOREO_ENV_ID)) {
             if (StringUtils.equals(keyEnvId, apiEnvName)) {
