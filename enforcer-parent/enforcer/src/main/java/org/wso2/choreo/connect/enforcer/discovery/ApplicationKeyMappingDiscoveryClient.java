@@ -130,8 +130,8 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
             public void onNext(DiscoveryResponse response) {
                 logger.info("Application key generation event received with version : " + response.getVersionInfo() +
                         " and size(bytes) : " + response.getSerializedSize());
-                if ((double) response.getSerializedSize() / maxSize > 0.90) {
-                    logger.error("Current response size exceeds 90% of the maximum message size for the type : " +
+                if ((double) response.getSerializedSize() / maxSize > 0.80) {
+                    logger.error("Current response size exceeds 80% of the maximum message size for the type : " +
                             response.getTypeUrl());
                 }
                 logger.debug("Received Application Key Mapping discovery response " + response);
