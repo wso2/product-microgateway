@@ -122,10 +122,16 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
 
     public void watchSubscriptionPolicies() {
         // TODO: (Praminda) implement a deadline with retries
-        reqObserver = stub.streamSubscriptionPolicies(new StreamObserver<>() {
+        int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
+        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamSubscriptionPolicies(new StreamObserver<>() {
             @Override
             public void onNext(DiscoveryResponse response) {
-                logger.info("Subscription policy event received with version : " + response.getVersionInfo());
+                logger.info("Subscription policy event received with version : " + response.getVersionInfo() +
+                        " and size(bytes) : " + response.getSerializedSize());
+                if ((double) response.getSerializedSize() / maxSize > 0.80) {
+                    logger.error("Current response size exceeds 80% of the maximum message size for the type : " +
+                            response.getTypeUrl());
+                }
                 logger.debug("Received Subscription  policy discovery response " + response);
                 XdsSchedulerManager.getInstance().stopSubscriptionPolicyDiscoveryScheduling();
                 latestReceived = response;

@@ -122,7 +122,8 @@ public class ApiListDiscoveryClient implements Runnable {
 
     public void watchApiList() {
         // TODO: (Praminda) implement a deadline with retries
-        reqObserver = stub.streamApiList(new StreamObserver<DiscoveryResponse>() {
+        int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
+        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApiList(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.info("API list event received with version : " + response.getVersionInfo());
