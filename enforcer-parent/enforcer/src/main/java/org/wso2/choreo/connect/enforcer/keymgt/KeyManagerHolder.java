@@ -174,7 +174,9 @@ public class KeyManagerHolder {
                         if (environments != null) {
                             Set<String> allowedAPIMEnvironments = new HashSet<>();
                             for (IDPEnvironmentDTO environment : environments) {
-                                allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
+                                if (environment != null && environment.getApim() != null) {
+                                    allowedAPIMEnvironments.addAll(Arrays.asList(environment.getApim()));
+                                }
                             }
                             tokenIssuerDto.setEnvironments(allowedAPIMEnvironments);
                         }

@@ -445,6 +445,8 @@ public class JWTAuthenticator implements Authenticator {
         if (System.getenv("DEPLOYMENT_TYPE_ENFORCED") != null
                 && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
                 && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
+            log.info("Deprecated: Production access token is used to access sandbox API deployment in " +
+                    "organization : " +  matchedAPI.getOrganizationId());
             return;
         }
 

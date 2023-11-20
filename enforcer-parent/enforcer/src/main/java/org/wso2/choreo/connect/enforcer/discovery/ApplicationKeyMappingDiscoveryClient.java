@@ -123,10 +123,17 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
 
     public void watchApplicationKeyMappings() {
         // TODO: (Praminda) implement a deadline with retries
-        reqObserver = stub.streamApplicationKeyMappings(new StreamObserver<DiscoveryResponse>() {
+        int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
+        reqObserver = stub.withMaxInboundMessageSize(maxSize)
+                .streamApplicationKeyMappings(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
-                logger.info("Application key generation event received with version : " + response.getVersionInfo());
+                logger.info("Application key generation event received with version : " + response.getVersionInfo() +
+                        " and size(bytes) : " + response.getSerializedSize());
+                if ((double) response.getSerializedSize() / maxSize > 0.80) {
+                    logger.error("Current response size exceeds 80% of the maximum message size for the type : " +
+                            response.getTypeUrl());
+                }
                 logger.debug("Received Application Key Mapping discovery response " + response);
                 XdsSchedulerManager.getInstance().stopApplicationKeyMappingDiscoveryScheduling();
                 latestReceived = response;

@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationPolicyDiscoveryClient;
@@ -151,7 +150,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private void initializeLoadingTasks() {
         SubscriptionDiscoveryClient.getInstance().watchSubscriptions();
         ApplicationDiscoveryClient.getInstance().watchApplications();
-        ApiListDiscoveryClient.getInstance().watchApiList();
+        // Disabled API List discovery as it is not set as per current adapter implementation.
+//        ApiListDiscoveryClient.getInstance().watchApiList();
         ApplicationPolicyDiscoveryClient.getInstance().watchApplicationPolicies();
         SubscriptionPolicyDiscoveryClient.getInstance().watchSubscriptionPolicies();
         ApplicationKeyMappingDiscoveryClient.getInstance().watchApplicationKeyMappings();

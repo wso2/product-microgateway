@@ -177,7 +177,9 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 		discoveryv3.RegisterAggregatedDiscoveryServiceServer(rlsGrpcServer, rlsServer)
 		go func() {
 			logger.LoggerMgw.Info("Starting Rate Limiter xDS gRPC server.")
+			health.RateLimiterGrpcService.SetStatus(true)
 			if err = rlsGrpcServer.Serve(rlsLis); err != nil {
+				health.RateLimiterGrpcService.SetStatus(false)
 				logger.LoggerMgw.Error("Error serving Rate Limiter xDS gRPC server: ", err)
 			}
 		}()
@@ -370,9 +372,9 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
 			if conf.ControlPlane.DynamicEnvironments.Enabled {
-				sync.RetryFetchingAPIs(c, data, sync.RetrieveRuntimeArtifactEndpoint, true, queryParamMap)
+				sync.RetryFetchingAPIs(c, data, sync.RetrieveRuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
 			} else {
-				sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
+				sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap, apiUUIDList)
 			}
 		}
 	}

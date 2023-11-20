@@ -53,11 +53,7 @@ func (cb *Callbacks) OnStreamClosed(id int64, node *core.Node) {
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	nodeIdentifier := common.GetNodeIdentifier(request)
-	if nodeQueueInstance.IsNewNode(nodeIdentifier) {
-		logger.LoggerEnforcerXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s",
-			id, nodeIdentifier, request.VersionInfo)
-	}
-	logger.LoggerEnforcerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
+	logger.LoggerEnforcerXdsCallbacks.Infof("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
 		id, nodeIdentifier, request.GetVersionInfo(), request.GetTypeUrl())
 	if request.ErrorDetail != nil {
 		logger.LoggerEnforcerXdsCallbacks.Errorf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(),
@@ -82,7 +78,7 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 func (cb *Callbacks) OnStreamResponse(context context.Context, id int64, request *discovery.DiscoveryRequest,
 	response *discovery.DiscoveryResponse) {
 	nodeIdentifier := common.GetNodeIdentifier(request)
-	logger.LoggerEnforcerXdsCallbacks.Debugf("stream response on stream id: %d node: %s for type: %s version: %s",
+	logger.LoggerEnforcerXdsCallbacks.Infof("stream response on stream id: %d node: %s for type: %s version: %s",
 		id, nodeIdentifier, request.GetTypeUrl(), response.GetVersionInfo())
 }
 

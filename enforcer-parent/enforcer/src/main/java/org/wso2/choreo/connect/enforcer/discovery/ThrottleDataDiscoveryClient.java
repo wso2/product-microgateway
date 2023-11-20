@@ -124,7 +124,12 @@ public class ThrottleDataDiscoveryClient implements Runnable {
                 .streamThrottleData(new StreamObserver<>() {
                     @Override
                     public void onNext(DiscoveryResponse response) {
-                        logger.info("Throttle data event received with version : " + response.getVersionInfo());
+                        logger.info("Throttle data event received with version : " + response.getVersionInfo() +
+                                " and size(bytes) : " + response.getSerializedSize());
+                        if ((double) response.getSerializedSize() / maxSize > 0.80) {
+                            logger.error("Current response size exceeds 80% of the maximum message size " +
+                                    "for the type : " + response.getTypeUrl());
+                        }
                         logger.debug("Received ThrottleData discovery response " + response);
                         XdsSchedulerManager.getInstance().stopThrottleDataDiscoveryScheduling();
                         latestReceived = response;

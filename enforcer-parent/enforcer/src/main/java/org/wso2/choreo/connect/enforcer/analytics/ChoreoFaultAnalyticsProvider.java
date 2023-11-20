@@ -112,6 +112,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
                 tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
         api.setOrganizationId(requestContext.getMatchedAPI().getOrganizationId());
         api.setEnvironmentId(requestContext.getMatchedAPI().getEnvironmentId());
+        api.setApiContext(requestContext.getMatchedAPI().getBasePath());
         return api;
     }
 
@@ -204,9 +205,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public String getUserAgentHeader() {
-        // User agent is not required for fault scenario
-        logger.error("Internal Error: User agent header is not required for fault events");
-        return null;
+        return requestContext.getHeaders().get("user-agent");
     }
 
     @Override
@@ -223,6 +222,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         String deploymentType = requestContext.getMatchedAPI().getDeploymentType();
         map.put(AnalyticsConstants.GATEWAY_URL, gwURL);
         map.put(AnalyticsConstants.DEPLOYMENT_TYPE, deploymentType);
+        map.put(AnalyticsConstants.API_METHOD, requestContext.getRequestMethod());
         return map;
     }
 }
