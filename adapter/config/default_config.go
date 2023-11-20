@@ -182,6 +182,7 @@ var defaultConfig = &Config{
 				},
 			},
 		},
+		PerConnectionBufferLimitBytes: 1048576,
 	},
 	Enforcer: enforcer{
 		Management: management{

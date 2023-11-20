@@ -122,6 +122,7 @@ type envoy struct {
 	AwsLambda                        awsLambda
 	UseRemoteAddress                 bool
 	Filters                          filters
+	PerConnectionBufferLimitBytes    uint32
 }
 
 type connectionTimeouts struct {
