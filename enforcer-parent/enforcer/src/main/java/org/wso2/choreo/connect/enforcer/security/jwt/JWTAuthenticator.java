@@ -343,29 +343,28 @@ public class JWTAuthenticator implements Authenticator {
     protected void checkTokenEnvAgainstDeploymentEnv(String keyEnvId, APIConfig matchedAPI)
             throws APISecurityException {
 
-        // Enable Key Env validation only if system property is set.
-        String disableKeyEnvValidation = System.getProperty(ENABLE_KEY_ENV_VALIDATION);
-        if (!Boolean.parseBoolean(disableKeyEnvValidation)) {
-            return;
-        }
-
-        // TODO(senthalan): This needs to be changed to Choreo env id when the migration is done.
-        String apiEnvName = matchedAPI.getEnvironmentName();
-        if (StringUtils.isNotEmpty(keyEnvId) && !StringUtils.equals(keyEnvId, DEFAULT_CHOREO_ENV_ID)) {
-            if (StringUtils.equals(keyEnvId, apiEnvName)) {
-                log.debug("The access token has access to the API environment {}.", apiEnvName);
-            } else {
-                log.debug("The access token does not have access to the app environment {}.", apiEnvName);
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
-                        APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH,
-                        APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH_ERROR_MESSAGE);
-            }
-        } else {
+        String apiEnvId = matchedAPI.getEnvironmentId();
+        if (StringUtils.isEmpty(keyEnvId) || StringUtils.equals(keyEnvId, DEFAULT_CHOREO_ENV_ID)) {
             log.debug("The key is not mapped to any specific environment.");
-            // Check whether the application is internal. If so the environment is a mandatory parameter,
-            // then need to fail the access.
+            // In the future,
+            // If the application is internal (the key environment is a mandatory),
+            //      then need to fail the access.
             // If the application is external and key's environment is not defined or ALL,
-            // then allow access only if the environment is critical.
+            //      then allow access only if the environment is critical.
+        } else {
+            if (StringUtils.equals(keyEnvId, apiEnvId)) {
+                log.debug("The access token has access to the API environment {}.", apiEnvId);
+            } else {
+                log.warn("[Cross Environment Access] API: {}, API Env: {} , Key Env: {} ",
+                        matchedAPI.getName(),  apiEnvId, keyEnvId);
+                // Enable Key Env validation only if system property is set.
+                String enableKeyEnvValidation = System.getProperty(ENABLE_KEY_ENV_VALIDATION);
+                if (Boolean.parseBoolean(enableKeyEnvValidation)) {
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                            APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH,
+                            APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH_ERROR_MESSAGE);
+                }
+            }
         }
     }
 
