@@ -36,6 +36,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // CreateRoutesConfigForRds generates the default RouteConfiguration.
@@ -185,6 +186,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 				Filters: filters,
 			},
 			},
+			PerConnectionBufferLimitBytes: wrapperspb.UInt32(conf.Envoy.PerConnectionBufferLimitBytes),
 		}
 
 		tlsCert := generateTLSCert(conf.Envoy.KeyStore.KeyPath, conf.Envoy.KeyStore.CertPath)
@@ -263,6 +265,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 				Filters: filters,
 			},
 			},
+			PerConnectionBufferLimitBytes: wrapperspb.UInt32(conf.Envoy.PerConnectionBufferLimitBytes),
 		}
 		listeners = append(listeners, &listener)
 		logger.LoggerOasparser.Infof("Non-secured Listener is added. %s : %d", listenerHostAddress, conf.Envoy.ListenerPort)

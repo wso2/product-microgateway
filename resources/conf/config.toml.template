@@ -125,6 +125,8 @@ soapErrorInXMLEnabled = false
   systemHost = "localhost"
   # If configured true, router appends the immediate downstream ip address to the x-forward-for header
   useRemoteAddress = false
+  # If configured with a custom value, the buffer limit per connection will be set to the provided value.
+  perConnectionBufferLimitBytes = 1048576
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]

@@ -46,6 +46,8 @@ func TestCreateListenerWithRds(t *testing.T) {
 	assert.NotEmpty(t, securedListener.FilterChains, "Filter chain for listener should not be null.")
 	assert.NotNil(t, securedListener.FilterChains[0].GetTransportSocket(),
 		"Transport Socket should not be null for secured listener")
+	assert.Equal(t, uint32(1048576), securedListener.PerConnectionBufferLimitBytes.GetValue(),
+		"Buffered payload limit mismatch for secured Listener.")
 
 	nonSecuredListener := listeners[1]
 	if nonSecuredListener.Validate() != nil {
@@ -58,6 +60,8 @@ func TestCreateListenerWithRds(t *testing.T) {
 	assert.NotEmpty(t, nonSecuredListener.FilterChains, "Filter chain for listener should not be null.")
 	assert.Nil(t, nonSecuredListener.FilterChains[0].GetTransportSocket(),
 		"Transport Socket should be null for non-secured listener")
+	assert.Equal(t, uint32(1048576), nonSecuredListener.PerConnectionBufferLimitBytes.GetValue(),
+		"Buffered payload limit mismatch for non-secured Listener.")
 }
 
 func TestCreateVirtualHost(t *testing.T) {
