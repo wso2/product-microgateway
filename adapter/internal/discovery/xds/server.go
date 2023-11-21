@@ -981,8 +981,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	//TODO: (Dinusha) check this hardcoded value
 	logger.LoggerXds.Debug("Updating Enforcer Subscription Cache")
 	label := commonEnforcerLabel
-	subscriptionList := enforcerSubscriptionMap[label]
-	subscriptionList = append(subscriptionList, subscriptions)
+	subscriptionList := append([]types.Resource{}, subscriptions)
 
 	// TODO: (VirajSalaka) Decide if a map is required to keep version (just to avoid having the same version)
 	version := rand.Intn(maxRandomInt)
@@ -1003,8 +1002,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	logger.LoggerXds.Debug("Updating Enforcer Application Cache")
 	label := commonEnforcerLabel
-	applicationList := enforcerApplicationMap[label]
-	applicationList = append(applicationList, applications)
+	applicationList := append([]types.Resource{}, applications)
 
 	version := rand.Intn(maxRandomInt)
 	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
@@ -1023,8 +1021,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 // UpdateEnforcerAPIList sets new update to the enforcer's Apis
 func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	logger.LoggerXds.Debug("Updating Enforcer API Cache")
-	apiList := enforcerAPIListMap[label]
-	apiList = append(apiList, apis)
+	apiList := append([]types.Resource{}, apis)
 
 	version := rand.Intn(maxRandomInt)
 	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
@@ -1044,8 +1041,7 @@ func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.ApplicationPolicyList) {
 	logger.LoggerXds.Debug("Updating Enforcer Application Policy Cache")
 	label := commonEnforcerLabel
-	applicationPolicyList := enforcerApplicationPolicyMap[label]
-	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
+	applicationPolicyList := append([]types.Resource{}, applicationPolicies)
 
 	version := rand.Intn(maxRandomInt)
 	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
@@ -1065,8 +1061,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.SubscriptionPolicyList) {
 	logger.LoggerXds.Debug("Updating Enforcer Subscription Policy Cache")
 	label := commonEnforcerLabel
-	subscriptionPolicyList := enforcerSubscriptionPolicyMap[label]
-	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
+	subscriptionPolicyList := append([]types.Resource{}, subscriptionPolicies)
 
 	version := rand.Intn(maxRandomInt)
 	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
@@ -1092,8 +1087,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.ApplicationKeyMappingList) {
 	logger.LoggerXds.Debug("Updating Application Key Mapping Cache")
 	label := commonEnforcerLabel
-	applicationKeyMappingList := enforcerApplicationKeyMappingMap[label]
-	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
+	applicationKeyMappingList := append([]types.Resource{}, applicationKeyMappings)
 
 	version := rand.Intn(maxRandomInt)
 	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
@@ -1237,8 +1231,7 @@ func UpdateEnforcerKeyManagers(keyManagerConfigList []types.Resource) {
 func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 	logger.LoggerXds.Debug("Updating enforcer cache for revoked tokens")
 	label := commonEnforcerLabel
-	tokens := enforcerRevokedTokensMap[label]
-	tokens = append(tokens, revokedTokens...)
+	tokens := append([]types.Resource{}, revokedTokens...)
 
 	version := rand.Intn(maxRandomInt)
 	snap, _ := wso2_cache.NewSnapshot(fmt.Sprint(version), map[wso2_resource.Type][]types.Resource{
