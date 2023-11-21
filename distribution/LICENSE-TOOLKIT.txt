@@ -273,7 +273,7 @@ jackson-annotations-2.10.3.jar                                                  
 json-path-2.4.0.wso2v2.jar                                                                          bundle         apache2             
 json-smart-2.3.jar                                                                                  jarinbundle    apache2             
 asm-1.0.2.jar                                                                                       jarinbundle    bsd                 
-guava-27.1-jre.jar                                                                                  bundle         apache2             
+guava-32.1.1-jre.jar                                                                                bundle         apache2             
 jackson-core-2.10.3.jar                                                                             bundle         apache2             
 mgw-interceptor-3.2.8.jar                                                                           jar            apache2
 disruptor-3.4.2.wso2v1.jar                                                                          bundle         apache2             

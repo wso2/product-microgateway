@@ -12,7 +12,7 @@ target = "java8"
     path = "../../../target/lib/dependencies/org.everit.json.schema-1.5.0.wso2.v1.jar"
 
     [[platform.libraries]]
-    path = "../../../target/lib/dependencies/json-3.0.0.wso2v2.jar"
+    path = "../../../target/lib/dependencies/json-3.0.0.wso2v4.jar"
 
     [[platform.libraries]]
     path = "../../../target/lib/dependencies/log4j-core-2.17.0.jar"
