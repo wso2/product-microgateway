@@ -148,4 +148,13 @@ as exposing APIs from [WSO2 API Manager](https://wso2.com/api-management/).
 ## Documentation
 
 You can refer [Choreo Connect Documentation](https://apim.docs.wso2.com/en/4.0.0/deploy-and-publish/deploy-on-gateway/choreo-connect/getting-started/choreo-connect-overview/).
+
+## Survey On Open Source Community Communication
+
+WSO2 wants to learn more about our open source software (OSS) community and your communication preferences to serve you better.
+
+In addition, we may reach out to a small number of respondents to ask additional questions and offer a small gift.
+
+Link to survey: https://forms.gle/h5q4M3K7vyXba3bK6
+
   
