@@ -118,6 +118,7 @@ type envoy struct {
 	Upstream                         envoyUpstream
 	Connection                       connection
 	RateLimit                        rateLimit
+	MaximumResourcePathLengthInKB    int16
 }
 
 type connectionTimeouts struct {

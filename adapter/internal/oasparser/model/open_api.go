@@ -27,6 +27,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
+	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
@@ -130,7 +131,11 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 	// resource level if vendor ext is not present at each resource level.
 	val, found := resolveDisableSecurity(openAPI.ExtensionProps)
 	if openAPI.Paths != nil {
+		conf, _ := config.ReadConfigs()
 		for path, pathItem := range openAPI.Paths {
+			if conf.Envoy.MaximumResourcePathLengthInKB != -1 && (isResourcePathLimitExceeds(path, int(conf.Envoy.MaximumResourcePathLengthInKB))) {
+				return nil, errors.New("The path " + path + " exceeds maximum allowed length")
+			}
 			// Checks for resource level security. (security is disabled in resource level using x-wso2-disable-security extension)
 			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity(pathItem.ExtensionProps)
 			methodsArray := make([]*Operation, len(pathItem.Operations()))

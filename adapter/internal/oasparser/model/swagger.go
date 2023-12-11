@@ -22,6 +22,8 @@ import (
 
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
+
+	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
@@ -44,7 +46,11 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
 	swagger.securityScheme = setSecurityDefinitions(swagger2)
 	swagger.security = swagger2.Security
-	swagger.resources = setResourcesSwagger(swagger2)
+	parsedEndpoints, epParsingError := setResourcesSwagger(swagger2)
+	if epParsingError != nil {
+		return errors.New("one of the resource paths exceeds maximum allowed content length")
+	}
+	swagger.resources = parsedEndpoints
 	swagger.apiType = HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
@@ -80,13 +86,18 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
-func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
+func setResourcesSwagger(swagger2 spec.Swagger) ([]*Resource, error) {
 	var resources []*Resource
 	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
 	// If API level vendor ext is present, then the same key:value should be added to
 	// resourve level, if it's not present at resource level using "addResourceLevelDisableSecurity"
 	if swagger2.Paths != nil {
+		conf, _ := config.ReadConfigs()
 		for path, pathItem := range swagger2.Paths.Paths {
+			if conf.Envoy.MaximumResourcePathLengthInKB != -1 &&
+				isResourcePathLimitExceeds(path, int(conf.Envoy.MaximumResourcePathLengthInKB)) {
+				return nil, errors.New("The path " + path + " exceeds maximum allowed length")
+			}
 			disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
 			// Checks for resource level security, if security is disabled in resource level,
 			// below code segment will override above two variable values (disableSecurity & found)
@@ -161,7 +172,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []*Resource {
 			}
 		}
 	}
-	return SortResources(resources)
+	return SortResources(resources), nil
 }
 
 // Sets security definitions defined in swagger 2 format.

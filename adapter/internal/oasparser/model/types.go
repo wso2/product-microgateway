@@ -349,3 +349,11 @@ func createDefaultAPIYaml() APIYaml {
 		},
 	}
 }
+
+func isResourcePathLimitExceeds(path string, maximumAllowedResourceLength int) bool {
+	strLength := len(path)
+	if float32(strLength)/1024 > float32(maximumAllowedResourceLength) {
+		return true
+	}
+	return false
+}
