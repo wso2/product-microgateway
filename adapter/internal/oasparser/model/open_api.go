@@ -133,8 +133,9 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]*Resource, error) {
 	if openAPI.Paths != nil {
 		conf, _ := config.ReadConfigs()
 		for path, pathItem := range openAPI.Paths {
-			if conf.Envoy.MaximumResourcePathLengthInKB != -1 && (isResourcePathLimitExceeds(path, int(conf.Envoy.MaximumResourcePathLengthInKB))) {
-				return nil, errors.New("The path " + path + " exceeds maximum allowed length")
+			if conf.Envoy.MaximumResourcePathLengthInKB != -1 &&
+				isResourcePathLimitExceeds(path, int(conf.Envoy.MaximumResourcePathLengthInKB)) {
+				return nil, errors.New("path: " + path + " exceeds maximum allowed length")
 			}
 			// Checks for resource level security. (security is disabled in resource level using x-wso2-disable-security extension)
 			isResourceLvlSecurityDisabled, foundInResourceLevel := resolveDisableSecurity(pathItem.ExtensionProps)

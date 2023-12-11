@@ -84,6 +84,8 @@ sandboxVhost = "sandbox.host"
   systemHost = "localhost"
   # Hostname for API Resources exposed within the cluster (eg: /.wellknown/jwks and /testkey)
   internalServiceHost = "localhost"
+  # Allowed maximum resource path content size in KB
+  maximumResourcePathLengthInKB = -1
 
 # Configurations of key store used in Choreo Connect Router
 [router.keystore]
