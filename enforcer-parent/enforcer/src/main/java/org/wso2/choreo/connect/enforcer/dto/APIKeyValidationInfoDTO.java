@@ -67,6 +67,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String apiUUID;
     private String applicationUUID;
     private Map<String, String> appAttributes;
+    private String envId;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -395,6 +396,16 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     public void setApiUUID(String apiUUID) {
         this.apiUUID = apiUUID;
+    }
+
+    public void setEnvId(String envId) {
+
+        this.envId = envId;
+    }
+
+    public String getEnvId() {
+
+        return envId;
     }
 }
 

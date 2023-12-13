@@ -84,4 +84,16 @@ public interface ApplicationKeyMappingOrBuilder extends
    */
   com.google.protobuf.ByteString
       getApplicationUUIDBytes();
+
+  /**
+   * <code>string envId = 9;</code>
+   * @return The envId.
+   */
+  java.lang.String getEnvId();
+  /**
+   * <code>string envId = 9;</code>
+   * @return The bytes for envId.
+   */
+  com.google.protobuf.ByteString
+      getEnvIdBytes();
 }

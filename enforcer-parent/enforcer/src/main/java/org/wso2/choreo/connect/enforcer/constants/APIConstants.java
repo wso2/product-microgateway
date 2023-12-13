@@ -182,7 +182,7 @@ public class APIConstants {
         public static final String ENV_NAME_PREFIX = "choreo:environment:";
         public static final String PRODUCTION_KEY_TYPE = "PRODUCTION";
         public static final String SANDBOX_KEY_TYPE = "SANDBOX";
-
+        public static final String DEFAULT_CHOREO_ENV_ID = "ALL";
     }
 
     /**

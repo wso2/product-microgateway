@@ -73,6 +73,11 @@ public class APISecurityConstants {
     public static final String API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE = "The access token is not authorized "
             + "to access the environment.";
 
+
+    public static final int API_AUTH_KEY_ENVIRONMENT_MISMATCH = 900913;
+    public static final String API_AUTH_KEY_ENVIRONMENT_MISMATCH_ERROR_MESSAGE = "The access token is not authorized "
+            + "to access the application environment.";
+
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";

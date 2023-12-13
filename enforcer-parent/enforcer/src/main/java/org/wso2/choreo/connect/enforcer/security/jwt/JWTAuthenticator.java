@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.wso2.choreo.connect.enforcer.constants.APIConstants.JwtTokenConstants.DEFAULT_CHOREO_ENV_ID;
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -79,6 +80,7 @@ public class JWTAuthenticator implements Authenticator {
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
+    protected static final String ENABLE_KEY_ENV_VALIDATION = "enableKeyEnvValidation";
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -245,8 +247,12 @@ public class JWTAuthenticator implements Authenticator {
                                             "User is NOT authorized to access the Resource. "
                                                     + "API Subscription validation failed.");
                                 }
-                                // Check if the token has access to the gateway configured environment.
+                                // Check if the token has access to the deployment type.
                                 checkTokenEnvAgainstDeploymentType(apiKeyValidationInfoDTO.getType(),
+                                        requestContext.getMatchedAPI());
+
+                                // Check if the token has access to the gateway configured environment.
+                                checkTokenEnvAgainstDeploymentEnv(apiKeyValidationInfoDTO.getEnvId(),
                                         requestContext.getMatchedAPI());
                             }
                         } else {
@@ -332,6 +338,34 @@ public class JWTAuthenticator implements Authenticator {
             }
         }
 
+    }
+
+    protected void checkTokenEnvAgainstDeploymentEnv(String keyEnvId, APIConfig matchedAPI)
+            throws APISecurityException {
+
+        String apiEnvId = matchedAPI.getEnvironmentId();
+        if (StringUtils.isEmpty(keyEnvId) || StringUtils.equals(keyEnvId, DEFAULT_CHOREO_ENV_ID)) {
+            log.debug("The key is not mapped to any specific environment.");
+            // In the future,
+            // If the application is internal (the key environment is a mandatory),
+            //      then need to fail the access.
+            // If the application is external and key's environment is not defined or ALL,
+            //      then allow access only if the environment is critical.
+        } else {
+            if (StringUtils.equals(keyEnvId, apiEnvId)) {
+                log.debug("The access token has access to the API environment {}.", apiEnvId);
+            } else {
+                log.warn("[Cross Environment Access] API: {}, API Env: {} , Key Env: {} ",
+                        matchedAPI.getName(),  apiEnvId, keyEnvId);
+                // Enable Key Env validation only if system property is set.
+                String enableKeyEnvValidation = System.getProperty(ENABLE_KEY_ENV_VALIDATION);
+                if (Boolean.parseBoolean(enableKeyEnvValidation)) {
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                            APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH,
+                            APISecurityConstants.API_AUTH_KEY_ENVIRONMENT_MISMATCH_ERROR_MESSAGE);
+                }
+            }
+        }
     }
 
     private void checkTokenEnv(JWTClaimsSet claims, String matchedEnv) throws APISecurityException {

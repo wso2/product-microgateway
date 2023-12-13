@@ -19,4 +19,5 @@ message ApplicationKeyMapping {
     string tenantDomain = 6;
     int64 timestamp = 7;
     string applicationUUID = 8;
+    string envId = 9;
 }
