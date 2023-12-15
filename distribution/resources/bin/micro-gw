@@ -176,13 +176,12 @@ fi
 
 JDK_18=`$JAVACMD -version 2>&1 | grep "1.8."`
 JDK_11=`$JAVACMD -version 2>&1 | grep "11."`
-if [ "$JDK_18" = "" ]; then
-    if [ "$JDK_11" = "" ]; then
-      echo "Warning!!! Microgateway is supported only on Java 1.8 and 11. Hence JAVA_HOME is set to internal JRE"
-      JAVACMD=
-      JAVA_HOME=$JAVA_PATH
-      change_java_home_path
-    fi
+JDK_17=`$JAVACMD -version 2>&1 | grep "17."`
+if [ -z "$JDK_18" ] && [ -z "$JDK_11" ] && [ -z "$JDK_17" ]; then
+  echo "Warning!!! Microgateway is supported only on Java 1.8, 11 and 17. Hence JAVA_HOME is set to internal JRE"
+  JAVACMD=
+  JAVA_HOME=$JAVA_PATH
+  change_java_home_path
 fi
 
 export JAVA_HOME=$JAVA_HOME
