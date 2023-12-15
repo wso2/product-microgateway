@@ -183,6 +183,7 @@ public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";
 public const string GRPC_ANALYTICS_ENABLE = "enable";
 public const string GRPC_ENDPOINT_URL = "endpointURL";
 public const string GRPC_RETRY_TIME_MILLISECONDS = "reconnectTimeInMillies";
+public const string GRPC_TIMEOUT_MILLISECONDS = "timeoutInMillis";
  
 //validation_filter related constatnts
 public const string PATHS = "paths";
