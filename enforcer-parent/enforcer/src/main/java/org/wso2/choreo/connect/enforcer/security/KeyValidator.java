@@ -160,17 +160,17 @@ public class KeyValidator {
                             String apiContextTemplate = apiContext.substring(0, lastIndexOfVersion);
                             sub = datastore.getSubscriptionByAppIdApiContextVersionRange(app.getUUID(),
                                     apiContextTemplate, "v" + apiSemVersion.getMajor());
-                            if (sub == null) {
-                                log.info(
-                                        "Valid subscription not found for oauth access token. application:" +
-                                                " {} app_UUID: {} API_Context:API_Version: {} API_UUID : {}",
-                                        app.getName(), app.getUUID(), apiContext + ":" + apiVersion, uuid);
-                            } else {
-                                log.debug("All information is retrieved from the in-memory data store.");
-                            }
                         } catch (EnforcerException e) {
                             log.debug("API version: {} is not a valid semantic version", apiVersion);
                         }
+                    } else {
+                        log.debug("All information is retrieved from the in-memory data store.");
+                    }
+                    if (sub == null) {
+                        log.info(
+                                "Valid subscription not found for oauth access token. application:" +
+                                        " {} app_UUID: {} API_Context:API_Version: {} API_UUID : {}",
+                                app.getName(), app.getUUID(), apiContext + ":" + apiVersion, uuid);
                     } else {
                         log.debug("All information is retrieved from the in-memory data store.");
                     }
