@@ -300,13 +300,6 @@ public class JWTAuthenticator implements Authenticator {
                     AuthenticationContext authenticationContext = FilterUtils
                             .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
                                     apiKeyValidationInfoDTO, endUserToken, jwtToken, true);
-                    //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
-                    if (claims.getClaim("keytype") != null) {
-                        authenticationContext.setKeyType(claims.getClaim("keytype").toString());
-                    }
-                    // Check if the token has access to the gateway configured environment.
-                    checkTokenEnvAgainstDeploymentType(requestContext.getAuthenticationContext().getKeyType(),
-                            requestContext.getMatchedAPI());
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
                         String subscriptionId = authenticationContext.getApiUUID() + ":" +
