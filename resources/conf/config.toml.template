@@ -211,9 +211,15 @@ soapErrorInXMLEnabled = false
   # Maximum concurrent streams allowed for peer on one HTTP/2 connection
   maxConcurrentStreams = 2147483647
 
-[router.downstream]
-# The configurations for SSL configuration related to the client connection in Choreo Connect
+# The configurations for SSL configuration related to the downstream connection in Choreo Connect
 [router.downstream.tls]
+  # Minimum TLS protocol version
+  minimumProtocolVersion = "TLS1_1"
+  # Maximum TLS protocol version
+  maximumProtocolVersion = "TLS1_2"
+  # If specified, the TLS listener will only support the specified ciphers when negotiating TLS 1.0-1.2 
+  # (this setting has no effect when negotiating TLS 1.3)
+  ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
   # Path to trusted certificates
   trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
   # If configured true, router enables the client certificate validation for providing client certificates

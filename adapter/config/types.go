@@ -278,8 +278,11 @@ type envoyDownstream struct {
 }
 
 type downstreamTLS struct {
-	TrustedCertPath string
-	MTLSAPIsEnabled bool
+	MTLSAPIsEnabled        bool
+	MinimumProtocolVersion string
+	MaximumProtocolVersion string
+	Ciphers                string
+	TrustedCertPath        string
 }
 
 type upstreamTLS struct {
