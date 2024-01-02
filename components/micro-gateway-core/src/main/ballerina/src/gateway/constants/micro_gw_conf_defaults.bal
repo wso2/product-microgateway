@@ -84,6 +84,7 @@ public const string DEFAULT_AM_ANALYTICS_VERSION_310 = "3.1.0";
 //constants for gRPC analytics
 public const string DEFAULT_GRPC_ENDPOINT_URL = "https://localhost:9806";
 public const int DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES = 6000;
+public const int DEFAULT_GRPC_TIMEOUT_IN_MILLIS = 2147483647;
 
 public const boolean DEFAULT_HTTP2_ENABLED = true;
 

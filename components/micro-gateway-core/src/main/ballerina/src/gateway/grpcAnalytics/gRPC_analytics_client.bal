@@ -4,6 +4,7 @@ import ballerina/task;
 grpc:StreamingClient gRPCEp = new grpc:StreamingClient();
 boolean gRPCConnection = false; //check gRPC connection
 int reConnectTime =  <int>getConfigIntValue(GRPC_ANALYTICS,GRPC_RETRY_TIME_MILLISECONDS, DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES);
+int timeout = <int>getConfigIntValue(GRPC_ANALYTICS,GRPC_TIMEOUT_MILLISECONDS, DEFAULT_GRPC_TIMEOUT_IN_MILLIS);
 boolean isTaskStarted = false;    //to check gRPC reconnect task
 
 task:Scheduler gRPCConnectTimer = new({
@@ -46,7 +47,7 @@ config = {
         },
         verifyHostname:false //to avoid SSL certificate validation error
     },
-    timeoutInMillis : 2147483647
+    timeoutInMillis : timeout
 } );
 
 # `initGRPCService` function binds gRPC streaming client endpoint with server message listner.
