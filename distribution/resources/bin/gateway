@@ -297,7 +297,7 @@ if [ ! "$CMD" = "stop" ]; then
       fi
       if [ "$OBSERVABILITY_FLAG" == "true" ]; then
           jmx_port=$(sed -n '2p' $CONFIG_OUT_FILE)
-          export JAVA_OPTS="$JAVA_OPTS -javaagent:$GW_HOME/lib/gateway/jmx_prometheus_javaagent-0.17.2.jar=$jmx_port:$GW_HOME/conf/Prometheus/config.yml"
+          export JAVA_OPTS="$JAVA_OPTS -javaagent:$GW_HOME/lib/gateway/jmx_prometheus_javaagent-0.18.0.jar=$jmx_port:$GW_HOME/conf/Prometheus/config.yml"
       fi
   fi
   if [ -a "$CONFIG_OUT_FILE" ];then
