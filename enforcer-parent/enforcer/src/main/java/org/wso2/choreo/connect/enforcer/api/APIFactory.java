@@ -84,6 +84,15 @@ public class APIFactory {
                         KNOWN_VHOST_PREFIXES.contains(api.getVhost().split("\\.")[0])) ||
                         (EnvVarConfig.getInstance().isDuplicateVhostEnabledPdp())) {
                     newApis.put(getApiKeyWithOrgId(enforcerApi), enforcerApi);
+                    if (api.getVhost().startsWith("sandbox.")) {
+                        String duplicatedVhostProd =
+                                api.getVhost().replaceFirst("sandbox\\.", "prod-sandbox.");
+                        newApis.put(getApiKeyWithOrgId(enforcerApi, duplicatedVhostProd), enforcerApi);
+                    } else if (api.getVhost().startsWith("sandbox_dev.")) {
+                        String duplicatedVhostDev =
+                                api.getVhost().replaceFirst("sandbox_dev\\.", "dev-sandbox.");
+                        newApis.put(getApiKeyWithOrgId(enforcerApi, duplicatedVhostDev), enforcerApi);
+                    }
                 }
             }
 
@@ -153,6 +162,12 @@ public class APIFactory {
         APIConfig apiConfig = api.getAPIConfig();
         return String.format("%s-%s:%s:%s", apiConfig.getOrganizationId(),
                 apiConfig.getVhost(), apiConfig.getBasePath(), apiConfig.getVersion());
+    }
+
+    private String getApiKeyWithOrgId(API api, String vhost) {
+        APIConfig apiConfig = api.getAPIConfig();
+        return String.format("%s-%s:%s:%s", apiConfig.getOrganizationId(),
+                vhost, apiConfig.getBasePath(), apiConfig.getVersion());
     }
 
     private String getApiKey(String vhost, String basePath, String version) {
