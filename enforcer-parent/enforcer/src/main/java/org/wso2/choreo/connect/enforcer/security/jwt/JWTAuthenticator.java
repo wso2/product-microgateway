@@ -79,6 +79,12 @@ public class JWTAuthenticator implements Authenticator {
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
+    private static String[] whitelistedOrganizationsArray;
+
+    static {
+        whitelistedOrganizationsArray =
+                System.getenv("WHITELISTED_ORGANIZATIONS").split("\\s+");
+    }
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -409,8 +415,6 @@ public class JWTAuthenticator implements Authenticator {
                 && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
                 && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
             if (System.getenv("WHITELISTED_ORGANIZATIONS") != null) {
-                String[] whitelistedOrganizationsArray =
-                        System.getenv("WHITELISTED_ORGANIZATIONS").split("\\s+");
                 for (String whitelistedOrgId : whitelistedOrganizationsArray) {
                     if (matchedAPI.getOrganizationId().equalsIgnoreCase(whitelistedOrgId)) {
                         return;
