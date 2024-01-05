@@ -304,9 +304,6 @@ public class JWTAuthenticator implements Authenticator {
                     if (claims.getClaim("keytype") != null) {
                         authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                     }
-                    // Check if the token has access to the gateway configured environment.
-                    checkTokenEnvAgainstDeploymentType(requestContext.getAuthenticationContext().getKeyType(),
-                            requestContext.getMatchedAPI());
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
                         String subscriptionId = authenticationContext.getApiUUID() + ":" +
@@ -411,6 +408,19 @@ public class JWTAuthenticator implements Authenticator {
         if (System.getenv("DEPLOYMENT_TYPE_ENFORCED") != null
                 && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
                 && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
+            if (System.getenv("WHITELISTED_ORGANIZATIONS") != null) {
+                String[] whitelistedOrganizationsArray =
+                        System.getenv("WHITELISTED_ORGANIZATIONS").split("\\s+");
+                for (String whitelistedOrgId : whitelistedOrganizationsArray) {
+                    if (matchedAPI.getOrganizationId().equalsIgnoreCase(whitelistedOrgId)) {
+                        return;
+                    }
+                }
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                        APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
+            }
+
             log.info("Deprecated: Production access token is used to access sandbox API deployment in " +
                     "organization : " +  matchedAPI.getOrganizationId());
             return;
