@@ -63,7 +63,7 @@ public type BasicAuthHandler object {
         }
         string headerValue = req.getHeader(authHeader);
         string credential = headerValue.substring(5, headerValue.length()).trim();
-        var authenticationResult = self.basicAuthProvider.authenticate(credential);
+        var authenticationResult = self.basicAuthProvider.authenticate(<@untainted> credential);
         if (authenticationResult is boolean) {
             return authenticationResult;
         } else {
