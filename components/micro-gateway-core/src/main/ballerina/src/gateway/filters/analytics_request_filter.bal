@@ -121,6 +121,10 @@ function doFilterResponseData(http:Response response, http:FilterContext context
     //Response analytics data publishing
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
         context);
+    if (requestResponseExecutionDTO is RequestResponseExecutionDTO && !validateEvent(requestResponseExecutionDTO)) {
+        printDebug(KEY_ANALYTICS_FILTER, "Event dropped without publishing due to malformation of attributes");
+        return;
+    }
     if (isGrpcAnalyticsEnabled != false  && requestResponseExecutionDTO is RequestResponseExecutionDTO) {
         //Response stream gRPC Analyrics
         AnalyticsStreamMessage message = createResponseMessage(requestResponseExecutionDTO);
@@ -154,6 +158,14 @@ function doFilterAll(http:Response response, http:FilterContext context) {
         printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
         doFilterFault(context, resp);
     }
+}
+
+function validateEvent(RequestResponseExecutionDTO requestResponseExecutionDTO) returns boolean {
+    //considered as a malformed even when request timestamp is less than or equal to zero
+    if(requestResponseExecutionDTO.requestTimestamp <= 0) {
+        return false;
+    }
+    return true;
 }
 
 function createResponseMessage(RequestResponseExecutionDTO requestResponseExecutionDTO) returns AnalyticsStreamMessage {
