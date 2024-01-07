@@ -55,30 +55,29 @@ public type BasicAuthProvider object {
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
         string[] providerIds = [AUTHN_SCHEME_BASIC];
         //set Username from the request
-        string encodedCredentials = credential;
-        byte[] | error decodedCredentials = arrays:fromBase64(encodedCredentials);
+        byte[] | error decodedCredentials = arrays:fromBase64(credential);
 
         //Extract username and password from the request
-        string userName;
-        string password;
+        byte[] userName;
+        byte[] password;
+        string userNameAsString = "";
         if (decodedCredentials is byte[]) {
-            string | error decodedCredentialsString = strings:fromBytes(decodedCredentials);
-            if (decodedCredentialsString is string) {
-                if (decodedCredentialsString.indexOf(":", 0) == ()) {
-                    setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
-                    return false;
-                }
-                string[] decodedCred = split(decodedCredentialsString.trim(), ":");
-                userName = decodedCred[0];
-                printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userName);
-                if (decodedCred.length() < 2) {
-                    setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
-                    return false;
-                }
-                password = decodedCred[1];
-            } else {
-                printError(KEY_AUTHN_FILTER, "Error while decoding the authorization header for basic authentication");
-                setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
+            int colonIndex = indexOfColon(decodedCredentials);
+            if (colonIndex < 0) {
+                setErrorMessageToInvocationContext(API_AUTH_BASICAUTH_INVALID_FORMAT);
+                return false;
+            }
+
+            userName = extractCredentials(decodedCredentials, 0, colonIndex);
+            string | error userNameString = strings:fromBytes(userName);
+            if (userNameString is string) {
+                userNameAsString = userNameString;
+                printDebug(KEY_AUTHN_FILTER, "Decoded user name from the header : " + userNameAsString);
+            }
+            password = extractCredentials(decodedCredentials, colonIndex + 1, decodedCredentials.length());
+
+            if (password.length() == 0) {
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_BASICAUTH_CREDENTIALS);
                 return false;
             }
         } else {
@@ -89,16 +88,24 @@ public type BasicAuthProvider object {
         //Starting a new span
         int | error | () spanHash = startSpan(HASHING_MECHANISM);
         //Hashing mechanism
-        string passwordFromConfig = readPassword(userName);
-        string hashedPass = password;
+        string hashedPasswordFromConfig = readPassword(userNameAsString);
+        byte[] hashedPass = password;
         // this is to support backward compatibility with 3.0.x where only sha1 was supported for hashing.
-        if(passwordFromConfig != "" && !passwordFromConfig.startsWith(SHA_PREFIX)) {
-            hashedPass = crypto:hashSha1(password.toBytes()).toBase16();
+        if(hashedPasswordFromConfig != "" && !hashedPasswordFromConfig.startsWith(SHA_PREFIX)) {
+            hashedPass = crypto:hashSha1(password).toBase16().toBytes();
+            string|error hashedPassStr = strings:fromBytes(hashedPass);
+            if (hashedPassStr is string) {
+                //password is logged only when it is present as a hash value
+                printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + mask(hashedPassStr));
+            }
         }
-        printDebug(KEY_AUTHN_FILTER, "Hashed password value : " + hashedPass);
-        string credentials = userName + ":" + hashedPass;
+
+        byte[] credentials = [];
+        credentials.push(...userName);
+        credentials.push(58);
+        credentials.push(...hashedPass);
         string hashedRequest;
-        string encodedVal = credentials.toBytes().toBase64();
+        string encodedVal = credentials.toBase64();
         printDebug(KEY_AUTHN_FILTER, "Encoded Auth header value : " + encodedVal);
         hashedRequest = BASIC_PREFIX_WITH_SPACE + encodedVal;
         //finishing span
@@ -108,6 +115,8 @@ public type BasicAuthProvider object {
         var isAuthorized = self.inboundBasicAuthProvider.authenticate(encodedVal);
         //finishing span
         finishSpan(BALLERINA_INBOUND_BASICAUTH, spanInbound);
+        resetCredentials(password);
+        resetCredentials(hashedPass);
         if (isAuthorized is boolean) {
             printDebug(KEY_AUTHN_FILTER, "Basic auth provider returned with value : " + isAuthorized.toString());
             if (!isAuthorized) {
@@ -126,7 +135,7 @@ public type BasicAuthProvider object {
             authenticationContext.applicationTier = UNLIMITED_TIER;
             authenticationContext.apiKey = ANONYMOUS_APP_ID;
             //Username is extracted from the request
-            authenticationContext.username = userName;
+            authenticationContext.username = userNameAsString;
             authenticationContext.applicationId = ANONYMOUS_APP_ID;
             authenticationContext.applicationName = ANONYMOUS_APP_NAME;
             authenticationContext.subscriber = ANONYMOUS_APP_OWNER;
@@ -154,4 +163,49 @@ function readPassword(string username) returns string {
     // first read the user id from user->id mapping
     // read the hashed password from the user-store file, using the user id
     return config:getAsString(CONFIG_USER_SECTION + "." + username + "." + PASSWORD, "");
+}
+
+# Finds the index of : in a basic auth header
+#
+# + authHeader - Basic Auth Header Value
+# + return - index of ':' character
+function indexOfColon(byte[] authHeader) returns int {
+    // Iterate through the byte array
+    int index = 0;
+    foreach byte b in authHeader {
+        if (b == 58) {
+            return index;
+        }
+        index = index + 1;
+    }
+    // Colon not found
+    return -1;
+}
+
+# Extracts username and password
+#
+# + authHeader - Basic Auth Header Value
+# + startIndex - start index
+# + endIndex - end index
+# + return - extracted username or password
+function extractCredentials(byte[] authHeader, int startIndex, int endIndex) returns byte[] {
+    int i = startIndex;
+    byte[] credential = [];
+    while i < endIndex {
+        credential[i - startIndex] = authHeader[i];
+        i = i + 1;
+    }
+    return credential;
+}
+
+# Resets byte[] fields to all '0'
+#
+# + credentials - byte[] to be zeroed
+function resetCredentials(byte[] credentials) {
+    int size = credentials.length();
+    int i = 0;
+    while (i < size) {
+        credentials[i] = 0;
+        i = i + 1;
+    }
 }
