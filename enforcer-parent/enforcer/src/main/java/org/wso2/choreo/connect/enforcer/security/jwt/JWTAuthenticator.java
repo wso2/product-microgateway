@@ -79,11 +79,15 @@ public class JWTAuthenticator implements Authenticator {
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
-    private static String[] whitelistedOrganizationsArray;
+    private static final String[] prodTokenNonProdAllowedOrgs;
 
     static {
-        whitelistedOrganizationsArray =
-                System.getenv("WHITELISTED_ORGANIZATIONS").split("\\s+");
+        if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
+            prodTokenNonProdAllowedOrgs =
+                    System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+");
+        } else {
+            prodTokenNonProdAllowedOrgs = null;
+        }
     }
 
     public JWTAuthenticator() {
@@ -414,8 +418,8 @@ public class JWTAuthenticator implements Authenticator {
         if (System.getenv("DEPLOYMENT_TYPE_ENFORCED") != null
                 && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
                 && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
-            if (System.getenv("WHITELISTED_ORGANIZATIONS") != null) {
-                for (String whitelistedOrgId : whitelistedOrganizationsArray) {
+            if (prodTokenNonProdAllowedOrgs != null) {
+                for (String whitelistedOrgId : prodTokenNonProdAllowedOrgs) {
                     if (matchedAPI.getOrganizationId().equalsIgnoreCase(whitelistedOrgId)) {
                         return;
                     }
