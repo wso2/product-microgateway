@@ -63,12 +63,12 @@ import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.Date;
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
