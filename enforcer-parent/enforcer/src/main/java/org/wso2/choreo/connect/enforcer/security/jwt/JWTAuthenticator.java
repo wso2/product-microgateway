@@ -416,7 +416,8 @@ public class JWTAuthenticator implements Authenticator {
         if (System.getenv("DEPLOYMENT_TYPE_ENFORCED") != null
                 && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
                 && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
-            if (!prodTokenNonProdAllowedOrgs.isEmpty() && !prodTokenNonProdAllowedOrgs.contains(matchedAPI.getOrganizationId())) {
+            if (!prodTokenNonProdAllowedOrgs.isEmpty() &&
+                    !prodTokenNonProdAllowedOrgs.contains(matchedAPI.getOrganizationId())) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
                         APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
