@@ -62,13 +62,7 @@ import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
+import java.util.*;
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -79,14 +73,12 @@ public class JWTAuthenticator implements Authenticator {
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
-    private static final String[] prodTokenNonProdAllowedOrgs;
+    private static final HashSet<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
 
     static {
         if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
-            prodTokenNonProdAllowedOrgs =
-                    System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+");
-        } else {
-            prodTokenNonProdAllowedOrgs = null;
+            Collections.addAll(prodTokenNonProdAllowedOrgs,
+                    System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
         }
     }
 
@@ -418,11 +410,9 @@ public class JWTAuthenticator implements Authenticator {
         if (System.getenv("DEPLOYMENT_TYPE_ENFORCED") != null
                 && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
                 && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
-            if (prodTokenNonProdAllowedOrgs != null) {
-                for (String whitelistedOrgId : prodTokenNonProdAllowedOrgs) {
-                    if (matchedAPI.getOrganizationId().equalsIgnoreCase(whitelistedOrgId)) {
-                        return;
-                    }
+            if (!prodTokenNonProdAllowedOrgs.isEmpty()) {
+                if (prodTokenNonProdAllowedOrgs.contains(matchedAPI.getOrganizationId())) {
+                    return;
                 }
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
