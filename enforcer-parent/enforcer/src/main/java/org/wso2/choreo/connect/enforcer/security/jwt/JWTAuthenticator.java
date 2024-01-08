@@ -73,7 +73,7 @@ public class JWTAuthenticator implements Authenticator {
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
-    private static final HashSet<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
+    private static final Set<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
 
     static {
         if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
