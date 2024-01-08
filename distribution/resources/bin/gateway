@@ -45,7 +45,7 @@ PRGDIR=`dirname "$PRG"`
 
 # set BALLERINA_HOME
 GW_HOME=`cd "$PRGDIR/.." ; pwd`
-export MGW_VERSION="3.2.8"
+export MGW_VERSION="3.2.9"
 
 JAVA_PATH=$GW_HOME/lib/jdk8u382-b05-jre
 if [ -d "$JAVA_HOME" ]; then
