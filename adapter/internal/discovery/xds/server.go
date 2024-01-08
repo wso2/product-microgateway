@@ -839,6 +839,17 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 					vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)] =
 						append(vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, vhost)],
 							orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+					if strings.HasPrefix(vhost, "sandbox.") {
+						duplicatedVhostProd := strings.Replace(vhost, strings.Split(vhost, ".")[0], "prod-sandbox", 1)
+						vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, duplicatedVhostProd)] =
+							append(vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, duplicatedVhostProd)],
+								orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+					} else if strings.HasPrefix(vhost, "sandbox_dev.") {
+						duplicatedVhostDev := strings.Replace(vhost, strings.Split(vhost, ".")[0], "dev-sandbox", 1)
+						vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, duplicatedVhostDev)] =
+							append(vhostToRouteArrayMap[fmt.Sprintf("%s-%s", organizationID, duplicatedVhostDev)],
+								orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+					}
 				}
 				endpointArray = append(endpointArray, orgIDOpenAPIEndpointsMap[organizationID][apiKey]...)
 				enfocerAPI, ok := orgIDOpenAPIEnforcerApisMap[organizationID][apiKey]
