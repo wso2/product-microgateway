@@ -62,13 +62,13 @@ import org.wso2.choreo.connect.enforcer.util.JWTUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -79,6 +79,14 @@ public class JWTAuthenticator implements Authenticator {
     private final JWTValidator jwtValidator = new JWTValidator();
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
+    private static final Set<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
+
+    static {
+        if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
+            Collections.addAll(prodTokenNonProdAllowedOrgs,
+                    System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
+        }
+    }
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -304,9 +312,6 @@ public class JWTAuthenticator implements Authenticator {
                     if (claims.getClaim("keytype") != null) {
                         authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                     }
-                    // Check if the token has access to the gateway configured environment.
-                    checkTokenEnvAgainstDeploymentType(requestContext.getAuthenticationContext().getKeyType(),
-                            requestContext.getMatchedAPI());
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
                         String subscriptionId = authenticationContext.getApiUUID() + ":" +
@@ -411,6 +416,12 @@ public class JWTAuthenticator implements Authenticator {
         if (System.getenv("DEPLOYMENT_TYPE_ENFORCED") != null
                 && System.getenv("DEPLOYMENT_TYPE_ENFORCED").equalsIgnoreCase("false")
                 && keyType.equalsIgnoreCase(APIConstants.JwtTokenConstants.PRODUCTION_KEY_TYPE)) {
+            if (!prodTokenNonProdAllowedOrgs.isEmpty() &&
+                    !prodTokenNonProdAllowedOrgs.contains(matchedAPI.getOrganizationId())) {
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT,
+                        APISecurityConstants.API_AUTH_INVALID_ENVIRONMENT_ERROR_MESSAGE);
+            }
             log.info("Deprecated: Production access token is used to access sandbox API deployment in " +
                     "organization : " +  matchedAPI.getOrganizationId());
             return;
