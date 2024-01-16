@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.security.jwt.validator;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -114,10 +115,10 @@ public class JWTValidator {
 
     protected boolean validateSignature(SignedJWT signedJWT, ExtendedTokenIssuerDto tokenIssuer)
             throws EnforcerException {
+        String certificateAlias = tokenIssuer.getCertificateAlias();
+        String keyID = signedJWT.getHeader().getKeyID();
+        String jwksUrl = tokenIssuer.getJwksConfigurationDTO().getUrl();
         try {
-            String certificateAlias = tokenIssuer.getCertificateAlias();
-            String keyID = signedJWT.getHeader().getKeyID();
-            String jwksUrl = tokenIssuer.getJwksConfigurationDTO().getUrl();
             if (StringUtils.isNotEmpty(keyID)) {
                 if (tokenIssuer.getJwksConfigurationDTO().isEnabled() && StringUtils
                         .isNotEmpty(jwksUrl)) {
@@ -156,6 +157,9 @@ public class JWTValidator {
                 }
             }
             return JWTUtils.verifyTokenSignature(signedJWT, certificateAlias);
+        } catch (RemoteKeySourceException e) {
+            logger.error("Error while retrieving the JWKSet from the remote endpoint : " + jwksUrl, e);
+            throw new EnforcerException("JWT Signature verification failed", e);
         } catch (JOSEException | IOException e) {
             throw new EnforcerException("JWT Signature verification failed", e);
         }
