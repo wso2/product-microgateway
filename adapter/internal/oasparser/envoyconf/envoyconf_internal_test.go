@@ -711,7 +711,7 @@ func TestGetCorsPolicy(t *testing.T) {
 	assert.NotNil(t, corsPolicy2.GetAllowMethods())
 	assert.Equal(t, "GET, POST", corsPolicy2.GetAllowMethods(), "Cors allow methods mismatch.")
 	assert.NotNil(t, corsPolicy2.GetAllowHeaders(), "Cors Allowed headers should not be null.")
-	assert.Equal(t, "X-TEST-HEADER1, X-TEST-HEADER2", corsPolicy2.GetAllowHeaders(), "Cors Allow headers mismatch")
+	assert.Equal(t, "X-TEST-HEADER1, X-TEST-HEADER2, x-choreo-test-session-id", corsPolicy2.GetAllowHeaders(), "Cors Allow headers mismatch")
 	assert.NotNil(t, corsPolicy2.GetExposeHeaders(), "Cors Expose headers should not be null.")
 	assert.Equal(t, "X-Custom-Header", corsPolicy2.GetExposeHeaders(), "Cors Expose headers mismatch")
 	assert.True(t, corsPolicy2.GetAllowCredentials().GetValue(), "Cors Access Allow Credentials should be true")
