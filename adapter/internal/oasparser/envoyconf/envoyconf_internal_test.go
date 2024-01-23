@@ -737,7 +737,7 @@ func TestGetCorsPolicy(t *testing.T) {
 	err := routeWithoutCors.GetTypedPerFilterConfig()[wellknown.CORS].UnmarshalTo(corsConfig1)
 
 	assert.Nilf(t, err, "Error while parsing Cors Configuration %v", corsConfig1)
-	assert.Equal(t, "x-choreo-test-session-id", corsConfig1.GetAllowHeaders(), "Cors Allow headers mismatch")
+	assert.Empty(t, corsConfig1.GetAllowHeaders(), "Cors AllowHeaders should be empty.")
 	assert.Empty(t, corsConfig1.GetAllowCredentials(), "Cors AllowCredentials should be empty.")
 	assert.Empty(t, corsConfig1.GetAllowMethods(), "Cors AllowMethods should be empty.")
 	assert.Empty(t, corsConfig1.GetAllowOriginStringMatch(), "Cors AllowOriginStringMatch should be empty.")
