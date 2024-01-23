@@ -3,7 +3,7 @@ module github.com/wso2/product-microgateway/adapter
 go 1.18
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.1.4
+	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.6.0
 	github.com/envoyproxy/go-control-plane v0.11.0
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getkin/kin-openapi v0.8.0
@@ -25,7 +25,7 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/net v0.10.0
+	golang.org/x/net v0.17.0
 	golang.org/x/text v0.14.0
 	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6
 	google.golang.org/grpc v1.52.0
@@ -35,8 +35,9 @@ require (
 )
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.0.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.1.2 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.8.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.4.0 // indirect
+	github.com/Azure/go-amqp v1.0.4 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
