@@ -1455,8 +1455,14 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 		return nil
 	}
 
-	// Append `x-choreo-test-session-id` used for internal endpoint testing to AccessControlAllowHeaders.
-	corsConfig.AccessControlAllowHeaders = append(corsConfig.AccessControlAllowHeaders, choreoTestSessionHeaderName)
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
+		return nil;
+	}
+	if len(conf.Envoy.Cors.MandatoryHeaders) > 0 {
+		corsConfig.AccessControlAllowHeaders = append(corsConfig.AccessControlAllowHeaders, conf.Envoy.Cors.MandatoryHeaders...)
+	}
 
 	stringMatcherArray := []*envoy_type_matcherv3.StringMatcher{}
 	for _, origin := range corsConfig.AccessControlAllowOrigins {

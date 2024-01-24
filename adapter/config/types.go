@@ -216,6 +216,7 @@ type globalCors struct {
 	AllowHeaders     []string
 	AllowCredentials bool
 	ExposeHeaders    []string
+	MandatoryHeaders []string
 }
 
 // Envoy Upstream Related Configurations
