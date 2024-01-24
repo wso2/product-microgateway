@@ -46,7 +46,7 @@ func CreateRoutesConfigForRds(vHosts []*routev3.VirtualHost) *routev3.RouteConfi
 	routeConfiguration := routev3.RouteConfiguration{
 		Name:                   rdsConfigName,
 		VirtualHosts:           vHosts,
-		RequestHeadersToRemove: []string{clusterHeaderName, gatewayURLHeaderName},
+		RequestHeadersToRemove: []string{clusterHeaderName, gatewayURLHeaderName, choreoTestSessionHeaderName},
 	}
 	return &routeConfiguration
 }

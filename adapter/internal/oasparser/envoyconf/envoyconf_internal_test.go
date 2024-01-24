@@ -711,7 +711,7 @@ func TestGetCorsPolicy(t *testing.T) {
 	assert.NotNil(t, corsPolicy2.GetAllowMethods())
 	assert.Equal(t, "GET, POST", corsPolicy2.GetAllowMethods(), "Cors allow methods mismatch.")
 	assert.NotNil(t, corsPolicy2.GetAllowHeaders(), "Cors Allowed headers should not be null.")
-	assert.Equal(t, "X-TEST-HEADER1, X-TEST-HEADER2", corsPolicy2.GetAllowHeaders(), "Cors Allow headers mismatch")
+	assert.Equal(t, "X-TEST-HEADER1, X-TEST-HEADER2, x-choreo-test-session-id", corsPolicy2.GetAllowHeaders(), "Cors Allow headers mismatch")
 	assert.NotNil(t, corsPolicy2.GetExposeHeaders(), "Cors Expose headers should not be null.")
 	assert.Equal(t, "X-Custom-Header", corsPolicy2.GetExposeHeaders(), "Cors Expose headers mismatch")
 	assert.True(t, corsPolicy2.GetAllowCredentials().GetValue(), "Cors Access Allow Credentials should be true")
@@ -719,7 +719,7 @@ func TestGetCorsPolicy(t *testing.T) {
 	// Test the configuration when headers configuration is not provided.
 	corsPolicy3 := getCorsPolicy(corsConfigModel3)
 	assert.NotNil(t, corsPolicy3, "Cors Policy should not be null.")
-	assert.Empty(t, corsPolicy3.GetAllowHeaders(), "Cors Allow headers should be null.")
+	assert.Equal(t, "x-choreo-test-session-id", corsPolicy3.GetAllowHeaders(), "Cors Allow headers mismatch")
 	assert.Empty(t, corsPolicy3.GetExposeHeaders(), "Cors Expose Headers should be null.")
 	assert.NotEmpty(t, corsPolicy3.GetAllowOriginStringMatch(), "Cors Allowded Origins should not be null.")
 	assert.Equal(t, regexp.QuoteMeta("http://test1.com"),

@@ -42,7 +42,7 @@ public class CorsTestCase {
     private String allowedOrigin1 = "http://test1.com";
     private String allowedOrigin2 = "http://test2.com";
     private String allowedMethods = "GET,PUT,POST";
-    private String allowedHeaders = "Authorization,X-PINGOTHER";
+    private String allowedHeaders = "Authorization,X-PINGOTHER,x-choreo-test-session-id";
     private String exposeHeaders = "X-Custom-Header";
 
     private static final String ORIGIN_HEADER = "Origin";

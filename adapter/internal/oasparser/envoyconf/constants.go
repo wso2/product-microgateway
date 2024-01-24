@@ -157,3 +157,8 @@ const (
 	AccessLogTypeText = "text"
 	AccessLogTypeJSON = "json"
 )
+
+// Test session header name used for internal endpoint testing
+const (
+	choreoTestSessionHeaderName = "x-choreo-test-session-id"
+)

@@ -84,6 +84,7 @@ var defaultConfig = &Config{
 				"testKey", "Internal-Key"},
 			AllowCredentials: false,
 			ExposeHeaders:    []string{},
+			MandatoryHeaders: []string{"x-choreo-test-session-id"},
 		},
 		Upstream: envoyUpstream{
 			TLS: upstreamTLS{
