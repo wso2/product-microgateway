@@ -1455,11 +1455,7 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 		return nil
 	}
 
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
-		return nil;
-	}
+	conf, _ := config.ReadConfigs()
 	if len(conf.Envoy.Cors.MandatoryHeaders) > 0 {
 		corsConfig.AccessControlAllowHeaders = append(corsConfig.AccessControlAllowHeaders, conf.Envoy.Cors.MandatoryHeaders...)
 	}
