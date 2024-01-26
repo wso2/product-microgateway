@@ -220,7 +220,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 	retryCounter := 0
 	retryLimit := 10
 	receivedArtifact := false
-	for retryCounter < retryLimit {
+	for {
 		data := <-c
 		logger.LoggerSync.Debugf("Receiving data for the API: %q", updatedAPIID)
 		if data.Resp != nil {
@@ -234,8 +234,17 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 			break
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerSync.Errorf("Error occurred when retrieving API %q from control plane: %v", updatedAPIID, data.Err)
-			health.SetControlPlaneRestAPIStatus(false)
+
+			// If API is not found (404), then there is no point in setting the control plane status as unhealthy.
+			if data.ErrorCode != 404 {
+				health.SetControlPlaneRestAPIStatus(false)
+			}
+			break
 		} else {
+			// if retry limit exceeded then exit the loop
+			if retryCounter >= retryLimit {
+				break
+			}
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane for the API %q: %v. Hence retrying..", updatedAPIID, data.Err)
 			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap, nil)
