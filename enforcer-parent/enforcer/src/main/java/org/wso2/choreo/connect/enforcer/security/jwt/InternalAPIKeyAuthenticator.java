@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -39,6 +40,9 @@ import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.security.KeyValidator;
+import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -47,6 +51,8 @@ import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implements the authenticator interface to authenticate request using an Internal Key.
@@ -203,6 +209,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     try {
                         api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
                                 false);
+                        validateScopes(requestContext, payload, jwtTokenPayloadInfo);
                     } finally {
                         log.debug("Internal Key authentication successful.");
                         if (Utils.tracingEnabled()) {
@@ -252,6 +259,42 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         }
         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                 APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+    }
+
+    private void validateScopes(RequestContext requestContext, JWTClaimsSet payload,
+                                JWTTokenPayloadInfo jwtTokenPayloadInfo) throws APISecurityException {
+
+        String apiVersion = requestContext.getMatchedAPI().getVersion();
+        String apiContext = requestContext.getMatchedAPI().getBasePath();
+        ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
+
+        Set<String> scopeSet = null;
+        try {
+            scopeSet = new HashSet<>(
+                    jwtTokenPayloadInfo.getPayload().getStringListClaim(APIConstants.JwtTokenConstants.SCOPE)
+            );
+            APIKeyValidationInfoDTO apiKeyValidationInfoDTO =  getAPIKeyValidationDTO(requestContext, payload);
+            apiKeyValidationInfoDTO.setScopes(scopeSet);
+
+            TokenValidationContext tokenValidationContext = new TokenValidationContext();
+            tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+            tokenValidationContext.setAccessToken(jwtTokenPayloadInfo.getAccessToken());
+            tokenValidationContext.setHttpVerb(matchingResource.getMethod().toString());
+            tokenValidationContext.setMatchingResourceConfig(matchingResource);
+            tokenValidationContext.setContext(apiContext);
+            tokenValidationContext.setVersion(apiVersion);
+
+            boolean valid = KeyValidator.validateScopes(tokenValidationContext);
+            if (!valid) {
+                log.error("Scope validation failed for the token");
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.INVALID_SCOPE, APISecurityConstants.INVALID_SCOPE_MESSAGE);
+            }
+        } catch (ParseException | EnforcerException e) {
+            log.warn("API Key authentication failed. ", e);
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.INVALID_SCOPE, APISecurityConstants.INVALID_SCOPE_MESSAGE);
+        }
     }
 
     private APIKeyValidationInfoDTO getAPIKeyValidationDTO(RequestContext requestContext, JWTClaimsSet payload)
