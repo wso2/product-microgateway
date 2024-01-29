@@ -29,11 +29,11 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/common"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
-	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	"github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
@@ -220,7 +220,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 	retryCounter := 0
 	retryLimit := 10
 	receivedArtifact := false
-	for retryCounter < retryLimit {
+	for {
 		data := <-c
 		logger.LoggerSync.Debugf("Receiving data for the API: %q", updatedAPIID)
 		if data.Resp != nil {
@@ -234,8 +234,23 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 			break
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerSync.Errorf("Error occurred when retrieving API %q from control plane: %v", updatedAPIID, data.Err)
-			health.SetControlPlaneRestAPIStatus(false)
+			// If the request is rate limited retry after 10 seconds
+			if data.ErrorCode == 429 {
+				if retryCounter >= retryLimit {
+					break
+				}
+				delayPeriod := time.Duration(10 * retryCounter)
+				time.Sleep(delayPeriod * time.Second)
+				sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap, nil)
+				retryCounter++
+				continue
+			}
+			break
 		} else {
+			// if retry limit exceeded then exit the loop
+			if retryCounter >= retryLimit {
+				break
+			}
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane for the API %q: %v. Hence retrying..", updatedAPIID, data.Err)
 			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap, nil)
