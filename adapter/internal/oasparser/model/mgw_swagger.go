@@ -43,7 +43,6 @@ import (
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
 	id                  string
-	UUID                string
 	apiType             string
 	description         string
 	title               string
