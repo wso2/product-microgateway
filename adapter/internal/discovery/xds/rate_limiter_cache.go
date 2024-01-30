@@ -88,11 +88,7 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 		return nil
 	}
 	level := strings.ToUpper(mgwSwagger.RateLimitLevel)
-	if mgwSwagger.RateLimitLevel == envoyconf.RateLimitPolicyAPILevel {
-		loggers.LoggerXds.Infof("API level rate-limiting enabled for the API: %q", apiID)
-	} else {
-		loggers.LoggerXds.Infof("Operation level rate-limiting enabled for the API: %q", apiID)
-	}
+	loggers.LoggerXds.Infof("Rate-limiting enabled for the API: %q, level: %q", apiID, level)
 
 	var rlsConfigs []*rls_config.RateLimitDescriptor
 	if level == envoyconf.RateLimitPolicyAPILevel {
