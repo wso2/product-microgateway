@@ -52,6 +52,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -270,9 +271,12 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
         Set<String> scopeSet = null;
         try {
-            scopeSet = new HashSet<>(
-                    jwtTokenPayloadInfo.getPayload().getStringListClaim(APIConstants.JwtTokenConstants.SCOPE)
-            );
+            scopeSet = new HashSet<>();
+            List<String> scopeList = jwtTokenPayloadInfo.getPayload()
+                    .getStringListClaim(APIConstants.JwtTokenConstants.SCOPE);
+            if (scopeList != null) {
+                scopeSet.addAll(scopeList);
+            }
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO =  getAPIKeyValidationDTO(requestContext, payload);
             apiKeyValidationInfoDTO.setScopes(scopeSet);
 

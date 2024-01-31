@@ -36,8 +36,8 @@ public class InternalKeyTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        internalKey = TokenUtil.getJwtForPetstoreWithDifferentContext(TestConstant.KEY_TYPE_PRODUCTION, null,
-                true, "v2/standard");
+        internalKey = TokenUtil.getJwtForPetstoreWithDifferentContext(TestConstant.KEY_TYPE_PRODUCTION,
+                "write:pets read:pets", true, "v2/standard");
         tamperedInternalKey = internalKey.substring(0, internalKey.length()-4);
     }
 
