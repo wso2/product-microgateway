@@ -704,6 +704,8 @@ func TestGetCorsPolicy(t *testing.T) {
 	// Test configuration when all the fields are provided.
 	corsPolicy2 := getCorsPolicy(corsConfigModel2)
 	assert.NotNil(t, corsPolicy2, "Cors Policy should not be null.")
+	// To make sure that the allow headers in the config passed is not modified.
+	assert.Equal(t, 2, len(corsConfigModel2.AccessControlAllowHeaders), "Cors Config is modified which is not supposed to be modified.")
 	assert.NotEmpty(t, corsPolicy2.GetAllowOriginStringMatch(), "Cors Allowded Origins should not be null.")
 	assert.Equal(t, regexp.QuoteMeta("http://test.com"),
 		corsPolicy2.GetAllowOriginStringMatch()[0].GetSafeRegex().GetRegex(),
