@@ -1454,10 +1454,11 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 	if corsConfig == nil || !corsConfig.Enabled {
 		return nil
 	}
+	var finalAccessControlAllowHeaders []string
 
 	conf, _ := config.ReadConfigs()
 	if len(conf.Envoy.Cors.MandatoryHeaders) > 0 {
-		corsConfig.AccessControlAllowHeaders = append(corsConfig.AccessControlAllowHeaders, conf.Envoy.Cors.MandatoryHeaders...)
+		finalAccessControlAllowHeaders = append(corsConfig.AccessControlAllowHeaders, conf.Envoy.Cors.MandatoryHeaders...)
 	}
 
 	stringMatcherArray := []*envoy_type_matcherv3.StringMatcher{}
@@ -1485,8 +1486,8 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 	if len(corsConfig.AccessControlAllowMethods) > 0 {
 		corsPolicy.AllowMethods = strings.Join(corsConfig.AccessControlAllowMethods, ", ")
 	}
-	if len(corsConfig.AccessControlAllowHeaders) > 0 {
-		corsPolicy.AllowHeaders = strings.Join(corsConfig.AccessControlAllowHeaders, ", ")
+	if len(finalAccessControlAllowHeaders) > 0 {
+		corsPolicy.AllowHeaders = strings.Join(finalAccessControlAllowHeaders, ", ")
 	}
 	if len(corsConfig.AccessControlExposeHeaders) > 0 {
 		corsPolicy.ExposeHeaders = strings.Join(corsConfig.AccessControlExposeHeaders, ", ")
