@@ -15,7 +15,7 @@ jobs:
       - name: Setup Go environment
         uses: actions/setup-go@v2
         with:
-          go-version: '1.18.x'
+          go-version: '1.19.x'
       - name: Cache M2 Repo
         uses: actions/cache@v1
         with:
