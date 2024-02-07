@@ -34,7 +34,6 @@ import (
 	wasm_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/wasm/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	wasmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/wasm/v3"
-	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -167,9 +166,6 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 					Seconds: conf.Envoy.RateLimit.RequestTimeoutInMillis / 1000,
 				},
 			},
-		},
-		StatusOnError: &typev3.HttpStatus{
-			Code: typev3.StatusCode_ServiceUnavailable,
 		},
 	}
 	ext, err2 := anypb.New(rateLimit)
