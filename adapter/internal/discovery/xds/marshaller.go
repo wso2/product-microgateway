@@ -342,6 +342,8 @@ func marshalKeyMappingMapToList(keyMappingMap map[string]*subscription.Applicati
 
 // MarshalKeyManager converts the data into KeyManager proto type
 func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
+	// Filter the key manager configuration based on the configuration retention list
+	keyManager.Configuration = getFilteredKeyManagerConfig(keyManager.Configuration)
 	configList, err := json.Marshal(keyManager.Configuration)
 	configuration := string(configList)
 	if err == nil {

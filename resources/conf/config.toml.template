@@ -66,6 +66,13 @@ sandboxVhost = "sandbox.host"
   # Optional path to the private key for Consul communication. If this is set, then you need to also set certFile
   keyFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
+# Configurations for formatting xDS payloads sent to other Choreo Connect components
+[adapter.xdsPayloadFormatter]
+# Enforcer Key Manager formattings
+[adapter.xdsPayloadFormatter.keyManagerConfigs]
+# Retain only the following keys in the Key Manager configurations from Control Plane events and send to Enforcer
+retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_claim", "scopes_claim", "jwks_endpoint", "certificate_type", "certificate_value", "environments"]
+
 # Configurations required for router to route the traffic from different clients to services
 [router] # --------------------------------------------------------
   # Host for listener of Router
@@ -481,7 +488,7 @@ enabled = true
     # Number of tasks can be submitted to the worker pool without being blocked.
     queueSizePerPool = 1000
   # HTTP client configuration.
-  [controlPlane.httpClient] 
+  [controlPlane.hTTPClient]
     requestTimeOut = 30
 
 # Global Adapter related configurations

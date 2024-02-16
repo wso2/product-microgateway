@@ -161,7 +161,7 @@ func handleKeyManagerEvents(data []byte) {
 		delete(xds.KeyManagerMap, xds.GenerateKeyManagerMapKey(keyManagerEvent.Name, keyManagerEvent.Organization))
 		xds.GenerateAndUpdateKeyManagerList()
 	} else if decodedByte != nil {
-		logger.LoggerInternalMsg.Infof("decoded Key Manager stream %s", string(decodedByte))
+		logger.LoggerInternalMsg.Debugf("decoded Key Manager stream %s", string(decodedByte))
 		kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
 		if kmConfigMapErr != nil {
 			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr)
@@ -174,7 +174,7 @@ func handleKeyManagerEvents(data []byte) {
 				Type: keyManagerEvent.Type, Enabled: keyManagerEvent.Enabled,
 				TenantDomain: keyManagerEvent.TenantDomain, Organization: keyManagerEvent.Organization,
 				Configuration: kmConfigMap}
-			logger.LoggerInternalMsg.Infof("Key Manager data %v", keyManager.Configuration)
+			logger.LoggerInternalMsg.Debugf("Key Manager data %v", keyManager.Configuration)
 			xds.KeyManagerMap[xds.GenerateKeyManagerMapKey(keyManagerEvent.Name, keyManagerEvent.Organization)] = xds.MarshalKeyManager(&keyManager)
 			xds.GenerateAndUpdateKeyManagerList()
 		}

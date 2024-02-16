@@ -89,6 +89,8 @@ type adapter struct {
 	VhostMapping []vhostMapping
 	// Consul represents the configuration required to connect to consul service discovery
 	Consul consul
+	// XdsPayloadFormatter represents the configuration to format the xds payload
+	XdsPayloadFormatter xdsPayloadFormatter
 	// Keystore contains the keyFile and Cert File of the adapter
 	Keystore keystore
 	// Trusted Certificates
@@ -206,6 +208,16 @@ type consul struct {
 	CertFile string
 	// KeyFile path to the key file(PEM encoded) required for tls connection between adapter and a consul client
 	KeyFile string
+}
+
+type xdsPayloadFormatter struct {
+	// KeyManagerConfigs contains format configurations related to key manager configuration
+	KeyManagerConfigs keyManagerConfigs
+}
+
+type keyManagerConfigs struct {
+	// RetainKeys contains the keys that should be retained in the xds payload
+	RetainKeys []string
 }
 
 // Global CORS configurations
