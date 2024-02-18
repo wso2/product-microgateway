@@ -47,6 +47,7 @@ func TestGetFilteredKeyManagerConfig(t *testing.T) {
 		"consumer_key_claim":             "azp",
 		"certificate_type":               "JWKS",
 		"token_endpoint":                 "https://api.asgardeo.io/t/renukafernando/oauth2/token",
+		"environments":                   []string{"Production"},
 	}
 	expectedKmConfigMap := map[string]interface{}{
 		"claim_mappings":     []string{},
@@ -55,6 +56,7 @@ func TestGetFilteredKeyManagerConfig(t *testing.T) {
 		"scopes_claim":       "scope",
 		"consumer_key_claim": "azp",
 		"certificate_type":   "JWKS",
+		"environments":       []string{"Production"},
 	}
 
 	filteredConfig := getFilteredKeyManagerConfig(kmConfigMap)
