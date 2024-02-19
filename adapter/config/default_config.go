@@ -50,6 +50,14 @@ var defaultConfig = &Config{
 			CertFile:           "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem",
 			KeyFile:            "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem",
 		},
+		XdsPayloadFormatter: xdsPayloadFormatter{
+			KeyManagerConfigs: keyManagerConfigs{
+				RetainKeys: []string{
+					"self_validate_jwt", "issuer", "claim_mappings", "consumer_key_claim",
+					"scopes_claim", "jwks_endpoint", "certificate_type", "certificate_value", "environments",
+				},
+			},
+		},
 		Keystore: keystore{
 			KeyPath:  "/home/wso2/security/keystore/mg.key",
 			CertPath: "/home/wso2/security/keystore/mg.pem",

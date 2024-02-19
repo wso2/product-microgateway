@@ -80,6 +80,10 @@ public class KeyManagerHolder {
     private Map<String,  Map<String, ExtendedTokenIssuerDto>> getAllKmIssuers(List<KeyManagerConfig> kmIssuers) {
         Map<String,  Map<String, ExtendedTokenIssuerDto>> kmIssuerMap = new ConcurrentHashMap<>();
         for (KeyManagerConfig keyManagerConfig : kmIssuers) {
+            if (!keyManagerConfig.getEnabled()) {
+                continue;
+            }
+
             JSONObject configObj = new JSONObject(keyManagerConfig.getConfiguration());
             Map<String, Object> configuration = new HashMap<>();
             Iterator<String> keysItr = configObj.keys();
@@ -89,10 +93,8 @@ public class KeyManagerHolder {
                 configuration.put(key, value);
             }
 
-            if (keyManagerConfig.getEnabled()) {
-                addKMTokenIssuers(keyManagerConfig.getName(), keyManagerConfig.getOrganization(),
-                        configuration, kmIssuerMap);
-            }
+            addKMTokenIssuers(keyManagerConfig.getName(), keyManagerConfig.getOrganization(),
+                configuration, kmIssuerMap);
         }
         return kmIssuerMap;
     }
