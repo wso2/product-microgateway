@@ -22,12 +22,14 @@ import (
 	"context"
 	"errors"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 
 	asb "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus/admin"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
@@ -83,7 +85,9 @@ func InitiateBrokerConnectionAndValidate(connectionString string, componentName 
 	_, err := asb.NewClientFromConnectionString(connectionString, nil)
 
 	if err == nil {
-		logger.LoggerMsg.Debugf("ASB client initialized for connection url: %s", connectionString)
+		if logger.LoggerMsg.IsLevelEnabled(logrus.DebugLevel) {
+			logger.LoggerMsg.Debugf("ASB client initialized for connection url: %s", maskSharedAccessKey(connectionString))
+		}
 
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
 			err = nil
@@ -168,4 +172,10 @@ func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal e
 		retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
 	}
 	logger.LoggerMsg.Errorf("%v. %s .Retrying after %s seconds", errVal, retryAttemptMessage, reconnectInterval)
+}
+
+func maskSharedAccessKey(endpoint string) string {
+	re := regexp.MustCompile(`(SharedAccessKey=)([^;]+)`)
+	maskedEndpoint := re.ReplaceAllString(endpoint, "${1}************")
+	return maskedEndpoint
 }
