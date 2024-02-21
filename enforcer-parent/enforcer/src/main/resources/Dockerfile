@@ -62,6 +62,7 @@ RUN \
 
 COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
 RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
+
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
