@@ -11,7 +11,7 @@ option java_multiple_files = true;
 
 // SubscriptionPolicy data model
 message SubscriptionPolicy {
-    int32 id = 1;
+	int32 id = 1;
 	int32 tenantId = 2;
 	string name = 3;
 	string quotaType = 4;
@@ -21,5 +21,5 @@ message SubscriptionPolicy {
 	string rateLimitTimeUnit = 8;
 	bool stopOnQuotaReach = 9;
 	string tenantDomain = 10;
-    int64 timestamp = 11;
+	int64 timestamp = 11;
 }

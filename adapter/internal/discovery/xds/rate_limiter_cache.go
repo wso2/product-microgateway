@@ -94,7 +94,7 @@ func (r *rateLimitPolicyCache) AddAPILevelRateLimitPolicies(apiID string, mgwSwa
 	if level == envoyconf.RateLimitPolicyAPILevel {
 		rlPolicyConfig, err := getRateLimitPolicy(policies, mgwSwagger.RateLimitPolicy)
 		if err != nil {
-			loggers.LoggerXds.Errorf("Error generating rate limit configuration for API: %q", apiID)
+			loggers.LoggerXds.Errorf("Error generating API level rate limit configuration for API: %q", apiID)
 			return err
 		}
 

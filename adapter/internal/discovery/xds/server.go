@@ -106,7 +106,6 @@ var (
 	enforcerApplicationMap           map[string][]types.Resource
 	enforcerAPIListMap               map[string][]types.Resource
 	enforcerApplicationPolicyMap     map[string][]types.Resource
-	enforcerSubscriptionPolicyMap    map[string][]types.Resource
 	enforcerApplicationKeyMappingMap map[string][]types.Resource
 	enforcerRevokedTokensMap         map[string][]types.Resource
 	enforcerThrottleData             *throttle.ThrottleData
@@ -182,7 +181,6 @@ func init() {
 	enforcerApplicationMap = make(map[string][]types.Resource)
 	enforcerAPIListMap = make(map[string][]types.Resource)
 	enforcerApplicationPolicyMap = make(map[string][]types.Resource)
-	enforcerSubscriptionPolicyMap = make(map[string][]types.Resource)
 	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
 	enforcerThrottleData = &throttle.ThrottleData{}
@@ -694,7 +692,6 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	} else {
 		toBeDelEnvs, toBeKeptEnvs = getEnvironmentsToBeDeleted(existingLabels, environments)
 	}
-
 	if conf.Adapter.IsIntelligentRoutingEnabled && strings.HasPrefix(api.GetVersion(), "v") {
 		updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier, api)
 	}
@@ -1084,7 +1081,6 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
-	enforcerSubscriptionPolicyMap[label] = subscriptionPolicyList
 
 	conf, _ := config.ReadConfigs()
 	for _, env := range conf.ControlPlane.EnvironmentLabels {
