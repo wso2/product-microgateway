@@ -209,9 +209,9 @@ func Run(conf *config.Config) {
 	}
 
 	if conf.GlobalAdapter.Enabled {
-		logger.LoggerMgw.Infof("Preparing adapter in partition: %s to obtain dynamic configurations via xDS....", conf.GlobalAdapter.LocalLabel)
+		logger.LoggerMgw.Infof("Preparing adapter in partition: %s to serve dynamic configurations via xDS....", conf.GlobalAdapter.LocalLabel)
 	} else {
-		logger.LoggerMgw.Info("Preparing adapter to obtain dynamic configurations via xDS....")
+		logger.LoggerMgw.Info("Preparing adapter to serve dynamic configurations via xDS....")
 	}
 	cache := xds.GetXdsCache()
 	rateLimiterCache := xds.GetRateLimiterCache()
