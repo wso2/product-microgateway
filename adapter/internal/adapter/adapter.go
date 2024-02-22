@@ -208,7 +208,11 @@ func Run(conf *config.Config) {
 		logger.LoggerMgw.Error("Error reading the log configs. ", errC)
 	}
 
-	logger.LoggerMgw.Info("Starting adapter ....")
+	if conf.GlobalAdapter.Enabled {
+		logger.LoggerMgw.Infof("Preparing adapter in partition: %s to serve dynamic configurations via xDS....", conf.GlobalAdapter.LocalLabel)
+	} else {
+		logger.LoggerMgw.Info("Preparing adapter to serve dynamic configurations via xDS....")
+	}
 	cache := xds.GetXdsCache()
 	rateLimiterCache := xds.GetRateLimiterCache()
 	enforcerCache := xds.GetEnforcerCache()

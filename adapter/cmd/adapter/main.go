@@ -19,22 +19,14 @@
 package main
 
 import (
-	"os"
-
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
-	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
 	"github.com/wso2/product-microgateway/adapter/internal/adapter"
+	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 func main() {
-
-	var file string
-	if len(os.Args) > 1 {
-		file = os.Args[1]
-		logger.Debug(file)
-	}
-	startMicroGateway(os.Args)
+	startMicroGateway()
 }
 
 func initServer() error {
@@ -43,8 +35,7 @@ func initServer() error {
 
 // startMicroGateway reads the configuration files and then start the adapter components.
 // Commandline arguments needs to be provided as args
-func startMicroGateway(args []string) {
-
+func startMicroGateway() {
 	logger.Info("Starting Choreo Connect Adapter")
 	err := initServer()
 	if err != nil {

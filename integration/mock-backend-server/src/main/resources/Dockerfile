@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/openjdk11:jre-11.0.20_8
+FROM adoptopenjdk/openjdk11:jre-11.0.22_7-ubuntu
 
 WORKDIR /home/app
 
