@@ -33,4 +33,5 @@ func ProcessEvents(config *config.Config) {
 	go handleNotification()
 	go handleKMConfiguration()
 	go handleThrottleData() // TODO: Remove this since it's not being used now
+	go handleTokenRevocation()
 }
