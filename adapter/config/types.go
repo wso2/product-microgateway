@@ -484,6 +484,7 @@ type controlPlane struct {
 	BrokerConnectionParameters brokerConnectionParameters
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
+	InitialFetch               initialFetch
 }
 
 type dynamicEnvironments struct {
@@ -496,6 +497,10 @@ type requestWorkerPool struct {
 	PoolSize              int
 	QueueSizePerPool      int
 	PauseTimeAfterFailure time.Duration
+}
+
+type initialFetch struct {
+	ChunkSize int
 }
 
 type globalAdapter struct {

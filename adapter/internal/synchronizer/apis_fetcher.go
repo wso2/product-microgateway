@@ -66,10 +66,11 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		logger.LoggerSync.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
 		return err
 	}
-	logger.LoggerSync.Infof("Start Deploying %d API/s...", len(zipReader.File)-2)
+	apisCount := len(zipReader.File) - 2
+	logger.LoggerSync.Infof("Start Deploying %d API/s...", apisCount)
 
 	// apiFiles represents zipped API files fetched from API Manager
-	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
+	apiFiles := make(map[string]*zip.File, apisCount)
 	// Read deployments from deployment.json file
 	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader)
 	if err != nil {
