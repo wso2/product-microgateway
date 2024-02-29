@@ -120,6 +120,10 @@ func PushAPIProjects(payload []byte, environments []string, xdsOptions common.Xd
 			deploymentList = append(deploymentList, MergeDeployedRevisionList(deployedRevisionList)...)
 		}
 	}
+
+	// TODO: (renuka) notify the revision deployment to the control plane once all chunks are deployed.
+	// This is not fixed as notify the control plane chunk by chunk (even though the chunk is not really applied to the Enforcer and Router) is not a drastic issue.
+    // This path is only happening when Adapter is restarting and at that time the deployed time is already updated in the control plane.
 	notifier.SendRevisionUpdate(deploymentList)
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(deploymentList))
 	// Error nil for successful execution
