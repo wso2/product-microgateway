@@ -339,7 +339,7 @@ var defaultConfig = &Config{
 			PauseTimeAfterFailure: 5,
 		},
 		InitialFetch: initialFetch{
-			ChunkSize: 500,
+			ChunkSize: 10000,
 		},
 	},
 	GlobalAdapter: globalAdapter{

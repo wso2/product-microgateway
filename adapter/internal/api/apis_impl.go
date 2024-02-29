@@ -30,6 +30,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
@@ -221,7 +222,7 @@ func validateAndUpdateXds(apiProject mgw.ProjectAPI, override *bool) (err error)
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		_, err = xds.UpdateAPI(vhost, apiProject, environments)
+		_, err = xds.UpdateAPI(vhost, apiProject, environments, common.XdsOptions{})
 		if err != nil {
 			return
 		}
@@ -235,6 +236,7 @@ func ApplyAPIProjectFromAPIM(
 	payload []byte,
 	vhostToEnvsMap map[string][]*synchronizer.GatewayLabel,
 	apiEnvs map[string]map[string]synchronizer.APIEnvProps,
+	xdsOptions common.XdsOptions,
 ) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
@@ -280,7 +282,7 @@ func ApplyAPIProjectFromAPIM(
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			environments, vhost, apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		// first update the API for vhost
-		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, environments)
+		deployedRevision, err := xds.UpdateAPI(vhost, apiProject, environments, xdsOptions)
 		if err != nil {
 			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiYaml.Name, apiYaml.Version, apiYaml.ID)
 		}
