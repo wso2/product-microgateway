@@ -46,6 +46,7 @@ import (
 	healthservice "github.com/wso2/product-microgateway/adapter/pkg/health/api/wso2/health/service"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"github.com/wso2/product-microgateway/adapter/pkg/utils"
 
 	"context"
 	"flag"
@@ -328,9 +329,31 @@ OUTER:
 	logger.LoggerMgw.Info("Bye!")
 }
 
-// fetch APIs from control plane during the server start up and push them
+// fetchAPIsOnStartUp fetches APIs from control plane chunk by chunk during the server start up and push them
 // to the router and enforcer components.
 func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
+	if apiUUIDList == nil {
+		logger.LoggerMgw.Info("Fetching APIs at startup...")
+		fetchChunkedAPIsOnStartUp(conf, nil, common.XdsOptions{})
+	} else {
+		logger.LoggerMgw.Infof("Fetching APIs at startup with the received API UUID list (size: %d)...", len(apiUUIDList))
+
+		chunkedAPIUuidsList := utils.ChunkSlice(apiUUIDList, conf.ControlPlane.InitialFetch.ChunkSize)
+		for i, chunkedAPIUuids := range chunkedAPIUuidsList {
+			logger.LoggerMgw.Infof("Fetching chunked APIs... [%d/%d]", i+1, len(chunkedAPIUuidsList))
+			isNotFinalChunk := i != len(chunkedAPIUuidsList)-1
+			fetchChunkedAPIsOnStartUp(conf, chunkedAPIUuids, common.XdsOptions{SkipUpdatingXdsCache: isNotFinalChunk})
+		}
+	}
+
+	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
+	xds.DeployReadinessAPI(conf.ControlPlane.EnvironmentLabels)
+	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
+}
+
+// fetch APIs from control plane during the server start up and push them
+// to the router and enforcer components.
+func fetchChunkedAPIsOnStartUp(conf *config.Config, apiUUIDList []string, xdsOptions common.XdsOptions) {
 	// Populate data from config.
 	envs := conf.ControlPlane.EnvironmentLabels
 
@@ -361,7 +384,7 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
-			err := synchronizer.PushAPIProjects(data.Resp, envs)
+			err := synchronizer.PushAPIProjects(data.Resp, envs, xdsOptions)
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
@@ -382,9 +405,6 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			}
 		}
 	}
-	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
-	xds.DeployReadinessAPI(envs)
-	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
 }
 
 // FetchAPIUUIDsFromGlobalAdapter get the UUIDs of the APIs at the LA startup from GA

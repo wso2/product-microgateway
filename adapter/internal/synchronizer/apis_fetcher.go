@@ -58,7 +58,7 @@ func init() {
 // byte slice. This method ensures to update the enforcer and router using entries inside the
 // downloaded apis.zip one by one.
 // If the updating envoy or enforcer fails, this method returns an error, if not error would be nil.
-func PushAPIProjects(payload []byte, environments []string) error {
+func PushAPIProjects(payload []byte, environments []string, xdsOptions common.XdsOptions) error {
 	var deploymentList []*notifier.DeployedAPIRevision
 	// Reading the root zip
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
@@ -66,10 +66,11 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		logger.LoggerSync.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
 		return err
 	}
-	logger.LoggerSync.Infof("Start Deploying %d API/s...", len(zipReader.File)-2)
+	apisCount := len(zipReader.File) - 2
+	logger.LoggerSync.Infof("Start Deploying %d API/s...", apisCount)
 
 	// apiFiles represents zipped API files fetched from API Manager
-	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
+	apiFiles := make(map[string]*zip.File, apisCount)
 	// Read deployments from deployment.json file
 	deploymentDescriptor, envProps, err := sync.ReadRootFiles(zipReader)
 	if err != nil {
@@ -112,13 +113,17 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		var deployedRevisionList []*notifier.DeployedAPIRevision
-		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps)
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap, envProps, xdsOptions)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		} else if deployedRevisionList != nil {
 			deploymentList = append(deploymentList, MergeDeployedRevisionList(deployedRevisionList)...)
 		}
 	}
+
+	// TODO: (renuka) notify the revision deployment to the control plane once all chunks are deployed.
+	// This is not fixed as notify the control plane chunk by chunk (even though the chunk is not really applied to the Enforcer and Router) is not a drastic issue.
+    // This path is only happening when Adapter is restarting and at that time the deployed time is already updated in the control plane.
 	notifier.SendRevisionUpdate(deploymentList)
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(deploymentList))
 	// Error nil for successful execution
@@ -227,7 +232,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string, envToD
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerSync.Infof("Pushing data to router and enforcer for the API %q", updatedAPIID)
 			receivedArtifact = true
-			err := PushAPIProjects(data.Resp, finalEnvs)
+			err := PushAPIProjects(data.Resp, finalEnvs, common.XdsOptions{})
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while pushing API data for the API %q: %v ", updatedAPIID, err)
 			}

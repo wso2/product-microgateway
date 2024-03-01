@@ -338,6 +338,9 @@ var defaultConfig = &Config{
 			QueueSizePerPool:      1000,
 			PauseTimeAfterFailure: 5,
 		},
+		InitialFetch: initialFetch{
+			ChunkSize: 10000,
+		},
 	},
 	GlobalAdapter: globalAdapter{
 		Enabled:              false,

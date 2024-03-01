@@ -40,6 +40,7 @@ import (
 	envoy_resource "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
+	"github.com/wso2/product-microgateway/adapter/internal/common"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	oasParser "github.com/wso2/product-microgateway/adapter/internal/oasparser"
@@ -271,7 +272,9 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*synchronizer.GatewayLabel) (*notifier.DeployedAPIRevision, error) {
+func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*synchronizer.GatewayLabel,
+	xdsOptions common.XdsOptions) (*notifier.DeployedAPIRevision, error) {
+
 	var mgwSwagger mgw.MgwSwagger
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
@@ -520,12 +523,18 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	}
 
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
-	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, routerLabels)
-	if revisionStatus {
-		// send updated revision to control plane
-		deployedRevision = notifier.UpdateDeployedRevisions(apiYaml.ID, apiYaml.RevisionID, environments,
-			vHost)
+	// Skipping the xDS cache update is fine as Choreo uses one gateway label for single Choreo Connect deployment.
+	if !xdsOptions.SkipUpdatingXdsCache {
+		logger.LoggerXds.Debugf("Updating the XDS cache for the API %v:%v", apiYaml.Name, apiYaml.Version)
+		updateXdsCacheOnAPIAdd(oldLabels, routerLabels)
+	} else {
+		logger.LoggerXds.Debugf("Skipping the XDS cache update for the API %v:%v", apiYaml.Name, apiYaml.Version)
 	}
+
+	// Send updated revision without checking the error state of xDS cache consistent state by assuming it should be consistent for the resources
+	// created by the Adapter.
+	deployedRevision = notifier.UpdateDeployedRevisions(apiYaml.ID, apiYaml.RevisionID, environments,
+		vHost)
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery(organizationID) //consul service discovery starting point
 	}
