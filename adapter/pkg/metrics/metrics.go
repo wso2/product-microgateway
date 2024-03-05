@@ -172,7 +172,13 @@ func handleError(err error, message string) bool {
 	return false
 }
 
-// StartPrometheusMetricsServer initializes and starts the metrics server to expose metrics to prometheus.
+/* StartPrometheusMetricsServer initializes and starts the metrics server to expose metrics to prometheus.
+   It employs goroutines for concurrent execution of serving metrics and recording them, while ensuring
+   sequential execution for each recordMetrics call using a synchronization channel (done).
+   Parameters:
+   	- port: The port number to listen on.
+   	- collectionInterval: The interval for recording metrics.
+*/
 func StartPrometheusMetricsServer(port int32, collectionInterval int32) {
 	done := make(chan struct{}) // Channel to indicate recordMetrics routine exit
 
