@@ -379,6 +379,7 @@ public class FilterUtils {
             if (claims.get(JWTConstants.SUB) != null) {
                 String sub = (String) claims.get(JWTConstants.SUB);
                 jwtInfoDto.setSub(sub);
+                jwtInfoDto.setEndUser(sub);
             }
             if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
                 JSONArray orgArray = (JSONArray) claims.get(JWTConstants.ORGANIZATIONS);
