@@ -197,8 +197,8 @@ func Run(conf *config.Config) {
 		})
 	}
 
-logger.LoggerMgw.Info("Starting adapter ....")
-	
+	logger.LoggerMgw.Info("Starting adapter ....")
+
 	// Start the metrics server
 	if conf.Adapter.Metrics.Enabled && strings.EqualFold(conf.Adapter.Metrics.Type, metrics.PrometheusMetricType) {
 		logger.LoggerMgw.Info("Starting Prometheus Metrics Server ....")
