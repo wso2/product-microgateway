@@ -78,6 +78,16 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 		for k, v := range logConf.AccessLogs.JSONFormat {
 			logFields[k] = &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: v}}
 		}
+		formattedSecondaryLogFormat := strings.ReplaceAll(logConf.AccessLogs.SecondaryLogFormat, "'", "")
+		secondaryLogFields := strings.Split(formattedSecondaryLogFormat, " ")
+		// iterate through secondary log fields and update the logfields map
+		for _, field := range secondaryLogFields {
+			if field == "" {
+				continue
+			}
+			logFields[strings.ReplaceAll(field, "%", "")] =
+				&structpb.Value{Kind: &structpb.Value_StringValue{StringValue: field}}
+		}
 		logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
 			LogFormat: &corev3.SubstitutionFormatString{
 				Format: &corev3.SubstitutionFormatString_JsonFormat{
