@@ -186,6 +186,13 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
             okResponseBuilder.addHeaders(headerValueOption);
+
+            // Add the API UUID to the request headers tobe sent to the backend
+            headerValueOption = HeaderValueOption.newBuilder()
+                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.CHOREO_API_UUID_HEADER)
+                            .setValue(responseObject.getApiUuid()).build()).build();
+            okResponseBuilder.addHeaders(headerValueOption);
+
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build())
                     .setDynamicMetadata(structBuilder.build())
