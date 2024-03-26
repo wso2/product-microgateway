@@ -134,12 +134,23 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
   # Disable SSL verification
   disableSslVerification = false
 
-[router.upstream.dns]
-  #  DNS refresh rate in miliseconds
+[router.upstream.dNS]
+  #  DNS refresh rate in milliseconds
   dNSRefreshRate = 5000
   # set cluster’s DNS refresh rate to resource record’s TTL which comes from DNS resolution
   respectDNSTtl = false
-  
+
+[router.upstream.dNS.DNSResolver]
+  # DNS resolver type. Available options: c-ares
+  resolverType = "c-ares"
+[router.upstream.dNS.DNSResolver.cAres]
+  # If there are no available network interfaces for a given IP family, filter those addresses from the results
+  filterUnroutableFamilies = false
+  # Use TCP for all DNS queries instead of the default protocol UDP.
+  useTCPForDNSLookups = false
+  # Do not use the default search domains; only query hostnames as-is or as aliases.
+  noDefaultSearchDomain = false
+
 # health configs for upstream clusters 
 [router.upstream.health]
   #  time in seconds to wait for a health check response

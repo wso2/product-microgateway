@@ -124,6 +124,14 @@ var defaultConfig = &Config{
 			DNS: upstreamDNS{
 				DNSRefreshRate: 5000,
 				RespectDNSTtl:  false,
+				DNSResolver: dnsResolverConfig{
+					ResolverType: "",
+					CAres: cAres{
+						FilterUnroutableFamilies: false,
+						UseTCPForDNSLookups:      false,
+						NoDefaultSearchDomain:    false,
+					},
+				},
 			},
 		},
 		Connection: connection{

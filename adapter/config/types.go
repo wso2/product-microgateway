@@ -17,6 +17,7 @@
 package config
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -266,6 +267,35 @@ type upstreamHealth struct {
 type upstreamDNS struct {
 	DNSRefreshRate int32
 	RespectDNSTtl  bool
+	DNSResolver    dnsResolverConfig `toml:"DNSResolver"`
+}
+
+type dnsResolverConfig struct {
+	ResolverType dnsResolverType
+	CAres        cAres
+}
+
+type dnsResolverType string
+
+const (
+	// DNSResolverCAres is the c-ares DNS resolver type
+	DNSResolverCAres dnsResolverType = "c-ares"
+)
+
+func (r dnsResolverType) isValid() error {
+	switch r {
+	case DNSResolverCAres: // if required we can include DNS_RESOLVER_APPLE here
+		return nil
+	case "": // for Envoy default settings
+		return nil
+	}
+	return fmt.Errorf("invalid DNS resolver type: %q, supported types [%q]", r, DNSResolverCAres)
+}
+
+type cAres struct {
+	FilterUnroutableFamilies bool
+	UseTCPForDNSLookups      bool
+	NoDefaultSearchDomain    bool
 }
 
 type upstreamRetry struct {
