@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"strconv"
 
@@ -990,26 +991,25 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	action.Route.ClusterSpecifier = headerBasedClusterSpecifier
 	logger.LoggerOasparser.Debug("added header based cluster")
 
-	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
-		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
-		// Retry configs are always added via headers. This is to update the
-		// default retry back-off base interval, which cannot be updated via headers.
-		retryConfig := config.Envoy.Upstream.Retry
-		commonRetryPolicy := &routev3.RetryPolicy{
-			RetryOn: retryPolicyRetriableStatusCodes,
-			NumRetries: &wrapperspb.UInt32Value{
-				Value: 0,
-				// If not set to 0, default value 1 will be
-				// applied to both prod and sandbox even if they are not set.
-			},
-			RetriableStatusCodes: retryConfig.StatusCodes,
-			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
-				BaseInterval: &durationpb.Duration{
-					Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000,
+	if os.Getenv("ROUTER_CONNECTION_FAILURE_RETRY_ENABLED") != "" {
+		if prodRouteConfig != nil || sandRouteConfig != nil {
+			// Retry configs are always added via headers. This is to update the
+			// default retry back-off base interval, which cannot be updated via headers.
+			retryConfig := config.Envoy.Upstream.Retry
+			commonRetryPolicy := &routev3.RetryPolicy{
+				RetryOn: retryOnConnectFailures,
+				NumRetries: &wrapperspb.UInt32Value{
+					Value: retryConfig.MaxRetryCount,
+					// If not set to 0, default value 1 will be
+					// applied to both prod and sandbox even if they are not set.
 				},
-			},
+				RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
+					BaseInterval: durationpb.New(retryConfig.BaseInterval),
+					MaxInterval:  durationpb.New(2 * retryConfig.BaseInterval),
+				},
+			}
+			action.Route.RetryPolicy = commonRetryPolicy
 		}
-		action.Route.RetryPolicy = commonRetryPolicy
 	}
 
 	corsFilter, _ := anypb.New(corsPolicy)
