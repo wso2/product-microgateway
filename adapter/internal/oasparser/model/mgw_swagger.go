@@ -42,36 +42,37 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id                  string
-	apiType             string
-	description         string
-	title               string
-	version             string
-	vendorExtensions    map[string]interface{}
-	productionEndpoints *EndpointCluster
-	sandboxEndpoints    *EndpointCluster
-	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []*Resource
-	xWso2Basepath       string
-	xWso2Cors           *CorsConfig
-	securityScheme      []SecurityScheme
-	security            []map[string][]string
-	xWso2ThrottlingTier string
-	xWso2AuthHeader     string
-	disableSecurity     bool
-	OrganizationID      string
-	VHost               string
-	IsProtoTyped        bool
-	RateLimitLevel      string
-	RateLimitPolicy     string
-	EnableBackendJWT    bool
+	id                      string
+	apiType                 string
+	description             string
+	title                   string
+	version                 string
+	vendorExtensions        map[string]interface{}
+	productionEndpoints     *EndpointCluster
+	sandboxEndpoints        *EndpointCluster
+	xWso2Endpoints          map[string]*EndpointCluster
+	resources               []*Resource
+	xWso2Basepath           string
+	xWso2Cors               *CorsConfig
+	securityScheme          []SecurityScheme
+	security                []map[string][]string
+	xWso2ThrottlingTier     string
+	xWso2AuthHeader         string
+	disableSecurity         bool
+	OrganizationID          string
+	VHost                   string
+	IsProtoTyped            bool
+	RateLimitLevel          string
+	RateLimitPolicy         string
+	EnableBackendJWT        bool
 	BackendJWTConfiguration BackendJWTConfiguration
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 	// DeploymentType could be either "PRODUCTION" or "SANDBOX"
-	DeploymentType  string
-	EnvironmentID   string
-	EnvironmentName string
+	DeploymentType        string
+	EnvironmentID         string
+	EnvironmentName       string
+	IsClusterLocalService bool
 }
 
 // EndpointCluster represent an upstream cluster
@@ -515,6 +516,14 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 	if len(sandboxUrls) > 0 {
 		logger.LoggerOasparser.Infof("Sandbox endpoints is overridden by env properties %v : %v", swagger.title, swagger.version)
 		swagger.sandboxEndpoints = generateEndpointCluster(sandClustersConfigNamePrefix, sandboxUrls, LoadBalance)
+	}
+
+	// Iterate productionUrls and see if there is anyURL ends with svc.cluster.local and set isClusterLocalService to true
+	for _, endpoint := range productionUrls {
+		if strings.HasSuffix(endpoint.Host, "svc.cluster.local") {
+			swagger.IsClusterLocalService = true
+			break
+		}
 	}
 }
 
@@ -1246,7 +1255,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 
 	if swagger.EnableBackendJWT {
 		audiences := make([]string, 0, len(data.BackendJWTConfiguration.Audiences))
-		for _, audienceVal := range data.BackendJWTConfiguration.Audiences{
+		for _, audienceVal := range data.BackendJWTConfiguration.Audiences {
 			audiences = append(audiences, audienceVal)
 		}
 		swagger.BackendJWTConfiguration.Audiences = audiences

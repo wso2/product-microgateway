@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"strconv"
 
@@ -1020,26 +1021,32 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	action.Route.ClusterSpecifier = headerBasedClusterSpecifier
 	logger.LoggerOasparser.Debug("added header based cluster")
 
-	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
-		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
-		// Retry configs are always added via headers. This is to update the
-		// default retry back-off base interval, which cannot be updated via headers.
-		retryConfig := config.Envoy.Upstream.Retry
-		commonRetryPolicy := &routev3.RetryPolicy{
-			RetryOn: retryPolicyRetriableStatusCodes,
-			NumRetries: &wrapperspb.UInt32Value{
-				Value: 0,
-				// If not set to 0, default value 1 will be
-				// applied to both prod and sandbox even if they are not set.
-			},
-			RetriableStatusCodes: retryConfig.StatusCodes,
-			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
-				BaseInterval: &durationpb.Duration{
+	if os.Getenv("ROUTER_CONNECTION_FAILURE_RETRY_ENABLED") != "" && params.isClusterLocalService {
+		if prodRouteConfig != nil || sandRouteConfig != nil {
+			// Retry configs are always added via headers. This is to update the
+			// default retry back-off base interval, which cannot be updated via headers.
+			retryConfig := config.Envoy.Upstream.Retry
+			commonRetryPolicy := &routev3.RetryPolicy{
+				RetryOn: retryOnConnectFailures,
+				NumRetries: &wrapperspb.UInt32Value{
+					Value: retryConfig.MaxRetryCount,
+					// If not set to 0, default value 1 will be
+					// applied to both prod and sandbox even if they are not set.
+				},
+				PerTryTimeout: &durationpb.Duration{
 					Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000,
 				},
-			},
+				RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
+					BaseInterval: &durationpb.Duration{
+						Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000,
+					},
+					MaxInterval: &durationpb.Duration{
+						Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000 * 2,
+					},
+				},
+			}
+			action.Route.RetryPolicy = commonRetryPolicy
 		}
-		action.Route.RetryPolicy = commonRetryPolicy
 	}
 
 	corsFilter, _ := anypb.New(corsPolicy)
@@ -1514,23 +1521,24 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		}
 	}
 	params := &routeCreateParams{
-		organizationID:      organizationID,
-		apiUUID:             swagger.GetID(),
-		title:               swagger.GetTitle(),
-		apiType:             swagger.GetAPIType(),
-		version:             swagger.GetVersion(),
-		vHost:               vHost,
-		xWSO2BasePath:       swagger.GetXWso2Basepath(),
-		AuthHeader:          swagger.GetXWSO2AuthHeader(),
-		prodClusterName:     prodClusterName,
-		endpointBasePath:    endpointBasePath,
-		corsPolicy:          swagger.GetCorsConfig(),
-		resourcePathParam:   "",
-		resourceMethods:     getDefaultResourceMethods(swagger.GetAPIType()),
-		requestInterceptor:  requestInterceptor,
-		responseInterceptor: responseInterceptor,
-		rateLimitLevel:      rlMethodDescriptorValue,
-		isRLPolicyAvailable: isRLPolicyAvailable,
+		organizationID:        organizationID,
+		apiUUID:               swagger.GetID(),
+		title:                 swagger.GetTitle(),
+		apiType:               swagger.GetAPIType(),
+		version:               swagger.GetVersion(),
+		vHost:                 vHost,
+		xWSO2BasePath:         swagger.GetXWso2Basepath(),
+		AuthHeader:            swagger.GetXWSO2AuthHeader(),
+		prodClusterName:       prodClusterName,
+		endpointBasePath:      endpointBasePath,
+		corsPolicy:            swagger.GetCorsConfig(),
+		resourcePathParam:     "",
+		resourceMethods:       getDefaultResourceMethods(swagger.GetAPIType()),
+		requestInterceptor:    requestInterceptor,
+		responseInterceptor:   responseInterceptor,
+		rateLimitLevel:        rlMethodDescriptorValue,
+		isRLPolicyAvailable:   isRLPolicyAvailable,
+		isClusterLocalService: swagger.IsClusterLocalService,
 	}
 
 	if resource != nil {
