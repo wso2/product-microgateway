@@ -85,7 +85,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 			if field == "" {
 				continue
 			}
-			logFields[strings.ReplaceAll(strings.TrimSpace(field), "%", "")] =
+			logFields[strings.ReplaceAll(field, "%", "")] =
 				&structpb.Value{Kind: &structpb.Value_StringValue{StringValue: field}}
 		}
 		logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
