@@ -293,9 +293,17 @@ func (r dnsResolverType) isValid() error {
 }
 
 type cAres struct {
+	Resolvers                []socketAddress
+	UseResolversAsFallback   bool
 	FilterUnroutableFamilies bool
 	UseTCPForDNSLookups      bool
 	NoDefaultSearchDomain    bool
+}
+
+type socketAddress struct {
+	Protocol string
+	Address  string
+	Port     uint32
 }
 
 type upstreamRetry struct {

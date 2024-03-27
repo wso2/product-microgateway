@@ -34,9 +34,25 @@ func getDNSResolverConf() (*corev3.TypedExtensionConfig, error) {
 	case "": // Use Envoy default settings
 		return nil, nil
 	case config.DNSResolverCAres:
+		resolvers := []*corev3.Address{}
+		for _, resolver := range conf.Envoy.Upstream.DNS.DNSResolver.CAres.Resolvers {
+			protocol := corev3.SocketAddress_Protocol_value[resolver.Protocol]
+			resolvers = append(resolvers, &corev3.Address{
+				Address: &corev3.Address_SocketAddress{
+					SocketAddress: &corev3.SocketAddress{
+						Protocol: corev3.SocketAddress_Protocol(protocol),
+						Address:  resolver.Address,
+						PortSpecifier: &corev3.SocketAddress_PortValue{
+							PortValue: resolver.Port,
+						},
+					},
+				},
+			})
+		}
+
 		dnsResolverConf = &caresv3.CaresDnsResolverConfig{
-			Resolvers:                []*corev3.Address{},
-			UseResolversAsFallback:   false,
+			Resolvers:                resolvers,
+			UseResolversAsFallback:   conf.Envoy.Upstream.DNS.DNSResolver.CAres.UseResolversAsFallback,
 			FilterUnroutableFamilies: conf.Envoy.Upstream.DNS.DNSResolver.CAres.FilterUnroutableFamilies,
 			DnsResolverOptions: &corev3.DnsResolverOptions{
 				UseTcpForDnsLookups:   conf.Envoy.Upstream.DNS.DNSResolver.CAres.UseTCPForDNSLookups,

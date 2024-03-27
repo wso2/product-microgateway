@@ -141,15 +141,22 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
   respectDNSTtl = false
 
 [router.upstream.dNS.DNSResolver]
-  # DNS resolver type. Available options: c-ares
+  # DNS resolver type. Available options: "c-ares"
   resolverType = "c-ares"
 [router.upstream.dNS.DNSResolver.cAres]
+  # Use the system DNS resolver as a fallback when the c-ares resolver fails. If false the resolvers listed in the resolvers list will override the default system resolvers.
+  useResolversAsFallback = false
   # If there are no available network interfaces for a given IP family, filter those addresses from the results
   filterUnroutableFamilies = false
   # Use TCP for all DNS queries instead of the default protocol UDP.
   useTCPForDNSLookups = false
   # Do not use the default search domains; only query hostnames as-is or as aliases.
   noDefaultSearchDomain = false
+[[router.upstream.dNS.DNSResolver.cAres.resolvers]]
+  # Available options: "UDP", "TCP"
+  protocol = "TCP" 
+  address = "0.0.0.0"
+  port = 53
 
 # health configs for upstream clusters 
 [router.upstream.health]

@@ -127,6 +127,8 @@ var defaultConfig = &Config{
 				DNSResolver: dnsResolverConfig{
 					ResolverType: "",
 					CAres: cAres{
+						Resolvers:                []socketAddress{},
+						UseResolversAsFallback:   false,
 						FilterUnroutableFamilies: false,
 						UseTCPForDNSLookups:      false,
 						NoDefaultSearchDomain:    false,
