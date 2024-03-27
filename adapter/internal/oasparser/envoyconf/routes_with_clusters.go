@@ -563,6 +563,11 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 	}
 	conf, _ := config.ReadConfigs()
 
+	dnsResolverConf, err := getDNSResolverConf()
+	if err != nil {
+		return nil, nil, err
+	}
+
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
 		ConnectTimeout:       ptypes.DurationProto(timeout * time.Second),
@@ -576,6 +581,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		TransportSocketMatches: transportSocketMatches,
 		DnsRefreshRate:         durationpb.New(time.Duration(conf.Envoy.Upstream.DNS.DNSRefreshRate) * time.Millisecond),
 		RespectDnsTtl:          conf.Envoy.Upstream.DNS.RespectDNSTtl,
+		TypedDnsResolverConfig: dnsResolverConf,
 	}
 
 	if len(clusterDetails.Endpoints) > 1 {

@@ -104,6 +104,12 @@ func ReadConfigs() (*Config, error) {
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem(), "GlobalAdapter", true)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Enforcer)).Elem(), "Enforcer", false)
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Analytics)).Elem(), "Analytics", false)
+
+		err = adapterConfig.validateConfig()
+		if err != nil {
+			logger.Fatal("Error parsing the configuration: ", err)
+			return
+		}
 	})
 	return adapterConfig, e
 }
@@ -240,6 +246,10 @@ func (config *Config) resolveJWTGeneratorConfig() error {
 		return fmt.Errorf("atleast one keypair should be set to be used for signing the backend JWT")
 	}
 	return nil
+}
+
+func (config *Config) validateConfig() error {
+	return config.Envoy.Upstream.DNS.DNSResolver.ResolverType.isValid()
 }
 
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {
