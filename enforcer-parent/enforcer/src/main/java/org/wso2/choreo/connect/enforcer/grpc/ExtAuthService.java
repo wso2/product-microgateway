@@ -189,7 +189,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
             // Add the API UUID to the request headers tobe sent to the backend
             headerValueOption = HeaderValueOption.newBuilder()
-                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.CHOREO_API_UUID_HEADER)
+                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.CHOREO_API_ID_HEADER)
                             .setValue(responseObject.getApiUuid()).build()).build();
             okResponseBuilder.addHeaders(headerValueOption);
 
