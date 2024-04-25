@@ -634,7 +634,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 		subscriptionPolicyType: {
 			"Policy1": {
 				{
-					Key: "policy",
+					Key:   "policy",
 					Value: "Policy1",
 					RateLimit: &rls_config.RateLimitPolicy{
 						Unit:            rls_config.RateLimitUnit_SECOND,
@@ -645,7 +645,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 			},
 			"Policy2": {
 				{
-					Key: "policy",
+					Key:   "policy",
 					Value: "Policy2",
 					RateLimit: &rls_config.RateLimitPolicy{
 						Unit:            rls_config.RateLimitUnit_MINUTE,
