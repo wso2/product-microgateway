@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 )
 
 func TestGetRateLimitUnit(t *testing.T) {
@@ -576,4 +577,85 @@ func getDummyAPISwagger(apiID, level, apiPolicy, res1GetPolicy, res1PostPolicy, 
 	mgwSwagger.OrganizationID = "org1"
 	mgwSwagger.VHost = "vhost1"
 	return mgwSwagger
+}
+func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
+	policyList := &types.SubscriptionPolicyList{
+		List: []types.SubscriptionPolicy{
+			{
+				Name: "Policy1",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 100,
+						TimeUnit:     "SECOND",
+					},
+				},
+			},
+			{
+				Name: "Policy2",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 200,
+						TimeUnit:     "MINUTE",
+					},
+				},
+			},
+			{
+				Name: "Unauthenticated",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 300,
+						TimeUnit:     "HOUR",
+					},
+				},
+			},
+			{
+				Name: "AsyncPolicy1",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "eventCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 300,
+						TimeUnit:     "HOUR",
+					},
+				},
+			},
+		},
+	}
+
+	// Initialize rlsPolicyCache.metadataBasedPolicies
+	rlsPolicyCache.metadataBasedPolicies = make(map[string]map[string][]*rls_config.RateLimitDescriptor)
+
+	err := AddSubscriptionLevelRateLimitPolicy(policyList)
+	assert.NoError(t, err)
+
+	expectedPolicies := map[string]map[string][]*rls_config.RateLimitDescriptor{
+		subscriptionPolicyType: {
+			"Policy1": {
+				{
+					Key: "policy",
+					Value: "Policy1",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_SECOND,
+						RequestsPerUnit: 100,
+						Name:            "Policy1",
+					},
+				},
+			},
+			"Policy2": {
+				{
+					Key: "policy",
+					Value: "Policy2",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_MINUTE,
+						RequestsPerUnit: 200,
+						Name:            "Policy2",
+					},
+				},
+			},
+		},
+	}
+
+	assert.Equal(t, expectedPolicies, rlsPolicyCache.metadataBasedPolicies)
 }

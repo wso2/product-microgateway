@@ -52,6 +52,8 @@ import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -314,10 +316,20 @@ public class JWTAuthenticator implements Authenticator {
                     }
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
+                        APIConfig matchedApi = requestContext.getMatchedAPI();
+                        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(matchedApi.getBasePath());
+                        if (apiTenantDomain == null) {
+                            apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+                        }
+                        SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
+                                .getTenantSubscriptionStore(apiTenantDomain);
                         String subscriptionId = authenticationContext.getApiUUID() + ":" +
                                 authenticationContext.getApplicationUUID();
+                        String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
-                        requestContext.addMetadataToMap("ratelimit:usage-policy", authenticationContext.getTier());
+                        requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
+                        requestContext.addMetadataToMap("ratelimit:organization",
+                                datastore.getSubscriptionPolicyByName(subPolicyName).getOrganization());
                     }
                     return authenticationContext;
                 } else {

@@ -179,10 +179,11 @@ type ScopeEvent struct {
 
 // PolicyInfo for struct policy Info events
 type PolicyInfo struct {
-	PolicyID   int32  `json:"policyId"`
-	PolicyName string `json:"policyName"`
-	QuotaType  string `json:"quotaType"`
-	PolicyType string `json:"policyType"`
+	PolicyID     int32  `json:"policyId"`
+	PolicyName   string `json:"policyName"`
+	QuotaType    string `json:"quotaType"`
+	PolicyType   string `json:"policyType"`
+	Organization string `json:"organization"`
 	Event
 }
 

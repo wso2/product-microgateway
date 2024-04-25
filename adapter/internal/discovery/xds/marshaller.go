@@ -501,16 +501,15 @@ func MarshalMultipleSubscriptionPolicies(policies *types.SubscriptionPolicyList)
 // from message broker. And then it returns the subscriptionPolicyList.
 func MarshalSubscriptionPolicyEventAndReturnList(policy *types.SubscriptionPolicy, eventType EventType) *subscription.SubscriptionPolicyList {
 	if eventType == DeleteEvent {
-		delete(ApplicationPolicyMap, policy.ID)
-		logger.LoggerXds.Infof("Application Policy: %s is deleted.", policy.Name)
+		delete(SubscriptionPolicyMap, policy.ID)
+		logger.LoggerXds.Infof("Subscription policy: %s is deleted for organization: %s", policy.Name, policy.Organization)
 	} else {
 		subPolicy := marshalSubscriptionPolicy(policy)
 		SubscriptionPolicyMap[policy.ID] = subPolicy
 		if eventType == UpdateEvent {
-			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is updated.", subPolicy.Name)
-		} else {
-			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is added.", subPolicy.Name)
+			logger.LoggerInternalMsg.Infof("Subscription policy: %s is updated for organization: %s", subPolicy.Name, subPolicy.Organization)
 		}
+		logger.LoggerInternalMsg.Infof("Subscription policy: %s is added for organization: %s", subPolicy.Name, subPolicy.Organization)
 	}
 	return marshalSubscriptionPolicyMapToList(SubscriptionPolicyMap)
 }
@@ -671,6 +670,7 @@ func marshalSubscriptionPolicy(policy *types.SubscriptionPolicy) *subscription.S
 		TenantId:             policy.TenantID,
 		TenantDomain:         policy.TenantDomain,
 		Timestamp:            policy.TimeStamp,
+		Organization:         policy.Organization,
 	}
 }
 

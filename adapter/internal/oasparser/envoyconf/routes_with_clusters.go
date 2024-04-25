@@ -69,9 +69,11 @@ const (
 	DescriptorValueForOperationMethod = ":method"
 	DescriptorKeyForSubscription      = "subscription"
 	DescriptorKeyForPolicy            = "policy"
+	DescriptorKeyForOrganization      = "organization"
 
 	descriptorMetadataKeyForSubscription = "ratelimit:subscription"
 	descriptorMetadataKeyForUsagePolicy  = "ratelimit:usage-policy"
+	descriptorMetadataKeyForOrganization = "ratelimit:organization"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -971,6 +973,25 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		if config.Envoy.RateLimit.Enabled {
 			action.Route.RateLimits = append(action.Route.RateLimits, &routev3.RateLimit{
 				Actions: []*routev3.RateLimit_Action{
+					{
+						ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+							Metadata: &routev3.RateLimit_Action_MetaData{
+								DescriptorKey: DescriptorKeyForOrganization,
+								MetadataKey: &metadatav3.MetadataKey{
+									Key: extAuthzFilterName,
+									Path: []*metadatav3.MetadataKey_PathSegment{
+										{
+											Segment: &metadatav3.MetadataKey_PathSegment_Key{
+												Key: descriptorMetadataKeyForOrganization,
+											},
+										},
+									},
+								},
+								Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+								SkipIfAbsent: true,
+							},
+						},
+					},
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_Metadata{
 							Metadata: &routev3.RateLimit_Action_MetaData{

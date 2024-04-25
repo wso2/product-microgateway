@@ -22,4 +22,5 @@ message SubscriptionPolicy {
 	bool stopOnQuotaReach = 9;
 	string tenantDomain = 10;
 	int64 timestamp = 11;
+	string organization = 12;
 }

@@ -447,7 +447,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 			GraphQLMaxComplexity: subscriptionPolicyEvent.GraphQLMaxComplexity,
 			GraphQLMaxDepth:      subscriptionPolicyEvent.GraphQLMaxDepth, RateLimitCount: subscriptionPolicyEvent.RateLimitCount,
 			RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
-			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
+			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp, Organization: subscriptionPolicyEvent.Organization}
 
 		var subscriptionPolicyList *subscription.SubscriptionPolicyList
 		if subscriptionPolicyEvent.Event.Type == policyCreate {

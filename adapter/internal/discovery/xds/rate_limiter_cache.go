@@ -77,7 +77,7 @@ type rateLimitPolicyCache struct {
 	apiLevelRateLimitPolicies map[string]map[string]map[string][]*rls_config.RateLimitDescriptor
 	// metadataBasedPolicies is used to store the rate limit policies which are based on dynamic metadata.
 	// rate limit type (eg: subscription) -> policy name (eg: Gold, Silver) -> Rate Limit Config
-	metadataBasedPolicies map[string]map[string]*rls_config.RateLimitDescriptor
+	metadataBasedPolicies map[string]map[string][]*rls_config.RateLimitDescriptor
 	// mutex for API level
 	apiLevelMu sync.RWMutex
 }
@@ -249,8 +249,8 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 	//Iterate through the subscription policies and append it to the orgDescriptors
 	for metadataType, metadataPolicyMap := range r.metadataBasedPolicies {
 		var subscriptionDescriptors []*rls_config.RateLimitDescriptor
-		for _, subscriptionPolicyDescriptor := range metadataPolicyMap {
-			subscriptionDescriptors = append(subscriptionDescriptors, subscriptionPolicyDescriptor)
+		for _, subscriptionPolicyDescriptorList := range metadataPolicyMap {
+			subscriptionDescriptors = append(subscriptionDescriptors, subscriptionPolicyDescriptorList...)
 		}
 		metadataDescriptor := &rls_config.RateLimitDescriptor{
 			Key:         metadataType,
@@ -295,11 +295,11 @@ func (r *rateLimitPolicyCache) updateXdsCache(label string) bool {
 }
 
 // AddSubscriptionLevelRateLimitPolicy adds a subscription level rate limit policy to the cache. This method is called
-// only during the startup as there is no option available to add subscription level rate limit policies via the choreo console
+// only during the startup
 func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyList) error {
 	// Check if rlsPolicyCache.metadataBasedPolicies[Subscription] exists and create a new map if not
 	if _, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType]; !ok {
-		rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType] = make(map[string]*rls_config.RateLimitDescriptor)
+		rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType] = make(map[string][]*rls_config.RateLimitDescriptor)
 	}
 	for _, policy := range policyList.List {
 		// Needs to skip on async policies.
@@ -319,13 +319,16 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 		rlPolicyConfig := rls_config.RateLimitPolicy{
 			Unit:            rateLimitUnit,
 			RequestsPerUnit: uint32(policy.DefaultLimit.RequestCount.RequestCount),
+			Name:            policy.Name,
 		}
-		rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Name] = &rls_config.RateLimitDescriptor{
-			Key:       "policy",
-			Value:     policy.Name,
-			RateLimit: &rlPolicyConfig,
+		rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Name] = []*rls_config.RateLimitDescriptor{
+			{
+				Key:       "policy",
+				Value:     policy.Name,
+				RateLimit: &rlPolicyConfig,
+			},
 		}
-		loggers.LoggerXds.Infof("Subscription level rate limit policy is added to the cache map: %v", policy)
+		loggers.LoggerXds.Infof("Custom subscription policy: %s is added to the cache map for organization: %s", policy.Name, policy.Organization)
 	}
 	return nil
 }
@@ -334,6 +337,6 @@ func init() {
 	rlsPolicyCache = &rateLimitPolicyCache{
 		xdsCache:                  gcp_cache.NewSnapshotCache(false, IDHash{}, nil),
 		apiLevelRateLimitPolicies: make(map[string]map[string]map[string][]*rls_config.RateLimitDescriptor),
-		metadataBasedPolicies:     make(map[string]map[string]*rls_config.RateLimitDescriptor),
+		metadataBasedPolicies:     make(map[string]map[string][]*rls_config.RateLimitDescriptor),
 	}
 }
