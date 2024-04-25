@@ -125,7 +125,7 @@ type SubscriptionPolicy struct {
 	TenantDomain         string                    `json:"tenanDomain,omitempty"`
 	TimeStamp            int64                     `json:"timeStamp,omitempty"`
 	DefaultLimit         *SubscriptionDefaultLimit `json:"defaultLimit,omitempty"`
-	Organization		 string                    `json:"organization,omitempty"`
+	Organization         string                    `json:"organization,omitempty"`
 }
 
 // SubscriptionDefaultLimit is used to parse the json called DefaultLimit within SubscriptionPolicy
