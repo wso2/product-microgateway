@@ -587,9 +587,10 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 100,
-						TimeUnit:     "SECOND",
+						TimeUnit:     "sec",
 					},
 				},
+				Organization: "org1",
 			},
 			{
 				Name: "Policy2",
@@ -597,9 +598,10 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 200,
-						TimeUnit:     "MINUTE",
+						TimeUnit:     "min",
 					},
 				},
+				Organization: "org1",
 			},
 			{
 				Name: "Unauthenticated",
@@ -607,9 +609,10 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 300,
-						TimeUnit:     "HOUR",
+						TimeUnit:     "hours",
 					},
 				},
+				Organization: "org1",
 			},
 			{
 				Name: "AsyncPolicy1",
@@ -617,23 +620,24 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "eventCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 300,
-						TimeUnit:     "HOUR",
+						TimeUnit:     "hours",
 					},
 				},
+				Organization: "org1",
 			},
 		},
 	}
 
 	// Initialize rlsPolicyCache.metadataBasedPolicies
-	rlsPolicyCache.metadataBasedPolicies = make(map[string]map[string][]*rls_config.RateLimitDescriptor)
+	rlsPolicyCache.metadataBasedPolicies = make(map[string]map[string]map[string]*rls_config.RateLimitDescriptor)
 
 	err := AddSubscriptionLevelRateLimitPolicy(policyList)
 	assert.NoError(t, err)
 
-	expectedPolicies := map[string]map[string][]*rls_config.RateLimitDescriptor{
+	expectedPolicies := map[string]map[string]map[string]*rls_config.RateLimitDescriptor{
 		subscriptionPolicyType: {
-			"Policy1": {
-				{
+			"org1": {
+				"Policy1": {
 					Key:   "policy",
 					Value: "Policy1",
 					RateLimit: &rls_config.RateLimitPolicy{
@@ -642,9 +646,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 						Name:            "Policy1",
 					},
 				},
-			},
-			"Policy2": {
-				{
+				"Policy2": {
 					Key:   "policy",
 					Value: "Policy2",
 					RateLimit: &rls_config.RateLimitPolicy{

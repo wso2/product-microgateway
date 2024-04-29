@@ -129,6 +129,25 @@ func TestCreateRoute(t *testing.T) {
 						{
 							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
 								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: "organization",
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: "ratelimit:organization",
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
 									DescriptorKey: "subscription",
 									MetadataKey: &metadatav3.MetadataKey{
 										Key: extAuthzFilterName,
