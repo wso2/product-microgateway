@@ -46,6 +46,7 @@ import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
+import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
@@ -328,9 +329,10 @@ public class JWTAuthenticator implements Authenticator {
                         String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
-                        String organization = datastore.getSubscriptionPolicyByName(subPolicyName).getOrganization();
-                        if (StringUtils.isNotEmpty(organization)) {
-                            requestContext.addMetadataToMap("ratelimit:organization", organization);
+                        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
+                        if (datastore.getSubscriptionPolicyByName(subPolicyName) != null &&
+                                StringUtils.isNotEmpty(subPolicy.getOrganization())) {
+                            requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
                         } else {
                             requestContext.addMetadataToMap("ratelimit:organization",
                                     APIConstants.SUPER_TENANT_DOMAIN_NAME);
