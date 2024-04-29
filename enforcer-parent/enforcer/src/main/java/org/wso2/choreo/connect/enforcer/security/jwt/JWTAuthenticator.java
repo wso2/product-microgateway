@@ -328,8 +328,13 @@ public class JWTAuthenticator implements Authenticator {
                         String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
-                        requestContext.addMetadataToMap("ratelimit:organization",
-                                datastore.getSubscriptionPolicyByName(subPolicyName).getOrganization());
+                        String organization = datastore.getSubscriptionPolicyByName(subPolicyName).getOrganization();
+                        if (StringUtils.isNotEmpty(organization)) {
+                            requestContext.addMetadataToMap("ratelimit:organization", organization);
+                        } else {
+                            requestContext.addMetadataToMap("ratelimit:organization",
+                                    APIConstants.SUPER_TENANT_DOMAIN_NAME);
+                        }
                     }
                     return authenticationContext;
                 } else {
