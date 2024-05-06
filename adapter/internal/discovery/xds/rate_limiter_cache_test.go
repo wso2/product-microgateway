@@ -641,7 +641,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 				DefaultLimit: &types.SubscriptionDefaultLimit{
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
-						RequestCount: 2147483647,
+						RequestCount: -1,
 						TimeUnit:     "min",
 					},
 				},
@@ -652,7 +652,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 				DefaultLimit: &types.SubscriptionDefaultLimit{
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
-						RequestCount: 2147483647,
+						RequestCount: -1,
 						TimeUnit:     "min",
 					},
 				},

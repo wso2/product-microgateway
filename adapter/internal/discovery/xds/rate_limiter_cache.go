@@ -250,22 +250,22 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 	}
 
 	//Iterate through the subscription policies and append it to the orgDescriptors
-// 	domain: Default
-// 	descriptors:
-//   	- key: organisation
-//        value: org001
-//         - key: subscription
-//           descriptors:
-//            - key: policy
-//              value: gold
-//              rate_limit:
-//                requests_per_unit: 1000
-//                unit: minute
-//            - key: policy
-//              value: silver
-//              rate_limit:
-//                requests_per_unit: 200
-//                unit: minute
+	// 	domain: Default
+	// 	descriptors:
+	//   	- key: organisation
+	//        value: org001
+	//         - key: subscription
+	//           descriptors:
+	//            - key: policy
+	//              value: gold
+	//              rate_limit:
+	//                requests_per_unit: 1000
+	//                unit: minute
+	//            - key: policy
+	//              value: silver
+	//              rate_limit:
+	//                requests_per_unit: 200
+	//                unit: minute
 	if subscriptionPoliciesList, ok := r.metadataBasedPolicies[subscriptionPolicyType]; ok {
 		for orgUUID := range subscriptionPoliciesList {
 			var metadataDescriptor *rls_config.RateLimitDescriptor
@@ -331,10 +331,7 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 		}
 
 		// Need not to add the Unauthenticated and Unlimited policies to the rate limiter service
-		if policy.Organization == "carbon.super" && policy.Name == "Unauthenticated" {
-			continue
-		}
-		if policy.Name == "Unlimited" {
+		if (policy.Organization == "carbon.super" && policy.Name == "Unauthenticated") || policy.DefaultLimit.RequestCount.RequestCount == -1 {
 			continue
 		}
 		rateLimitUnit, err := parseRateLimitUnitFromSubscriptionPolicy(policy.DefaultLimit.RequestCount.TimeUnit)
