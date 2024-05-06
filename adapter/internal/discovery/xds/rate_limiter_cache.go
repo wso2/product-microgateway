@@ -79,7 +79,7 @@ type rateLimitPolicyCache struct {
 	// org -> vhost -> API-Identifier (i.e. Vhost:API-UUID) -> Rate Limit Configs
 	apiLevelRateLimitPolicies map[string]map[string]map[string][]*rls_config.RateLimitDescriptor
 	// metadataBasedPolicies is used to store the rate limit policies which are based on dynamic metadata.
-	// rate limit type (eg: subscription) -> policy name (eg: Gold, Silver) -> Rate Limit Config
+	// metadata related to the subscription rate-limiting: organization -> subscriptionID -> rate-limit-policy
 	metadataBasedPolicies map[string]map[string]map[string]*rls_config.RateLimitDescriptor
 	// mutex for API level
 	apiLevelMu sync.RWMutex
@@ -250,20 +250,35 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 	}
 
 	//Iterate through the subscription policies and append it to the orgDescriptors
-	//organization -> subscription -> policyName -> RateLimitDescriptor
+// 	domain: Default
+// 	descriptors:
+//   	- key: organisation
+//        Value: org001
+//         - key: subscription
+//           descriptors:
+//            - key: policy
+//              value: gold
+//              rate_limit:
+//                requests_per_unit: 1000
+//                unit: minute
+//            - key: policy
+//              value: silver
+//              rate_limit:
+//                requests_per_unit: 200
+//                unit: minute
 	if subscriptionPoliciesList, ok := r.metadataBasedPolicies[subscriptionPolicyType]; ok {
-		for orgName := range subscriptionPoliciesList {
+		for orgUUID := range subscriptionPoliciesList {
 			var metadataDescriptor *rls_config.RateLimitDescriptor
 			var policyDescriptors []*rls_config.RateLimitDescriptor
 			metadataDescriptor = &rls_config.RateLimitDescriptor{
 				Key:   organization,
-				Value: orgName,
+				Value: orgUUID,
 			}
 			subscriptionIDDescriptor := &rls_config.RateLimitDescriptor{
 				Key: subscriptionPolicyType,
 			}
-			for policyName := range subscriptionPoliciesList[orgName] {
-				policyDescriptors = append(policyDescriptors, subscriptionPoliciesList[orgName][policyName])
+			for policyName := range subscriptionPoliciesList[orgUUID] {
+				policyDescriptors = append(policyDescriptors, subscriptionPoliciesList[orgUUID][policyName])
 			}
 			subscriptionIDDescriptor.Descriptors = policyDescriptors
 			metadataDescriptor.Descriptors = append(metadataDescriptor.Descriptors, subscriptionIDDescriptor)
@@ -307,8 +322,7 @@ func (r *rateLimitPolicyCache) updateXdsCache(label string) bool {
 	return true
 }
 
-// AddSubscriptionLevelRateLimitPolicy adds a subscription level rate limit policy to the cache. This method is called
-// only during the startup
+// AddSubscriptionLevelRateLimitPolicy adds a subscription level rate limit policy to the cache.
 func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyList) error {
 	for _, policy := range policyList.List {
 		// Needs to skip on async policies.
@@ -317,7 +331,10 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 		}
 
 		// Need not to add the Unauthenticated and Unlimited policies to the rate limiter service
-		if policy.Name == "Unauthenticated" || policy.Name == "Unlimited" {
+		if policy.Organization == "carbon.super" && policy.Name == "Unauthenticated" {
+			continue
+		}
+		if policy.Name == "Unlimited" {
 			continue
 		}
 		rateLimitUnit, err := parseRateLimitUnitFromSubscriptionPolicy(policy.DefaultLimit.RequestCount.TimeUnit)
@@ -328,7 +345,6 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 		rlPolicyConfig := rls_config.RateLimitPolicy{
 			Unit:            rateLimitUnit,
 			RequestsPerUnit: uint32(policy.DefaultLimit.RequestCount.RequestCount),
-			Name:            policy.Name,
 		}
 		descriptor := &rls_config.RateLimitDescriptor{
 			Key:       "policy",

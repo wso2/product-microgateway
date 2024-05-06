@@ -608,8 +608,8 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 				DefaultLimit: &types.SubscriptionDefaultLimit{
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
-						RequestCount: 300,
-						TimeUnit:     "hours",
+						RequestCount: 2147483647,
+						TimeUnit:     "min",
 					},
 				},
 				Organization: "org1",
@@ -624,6 +624,17 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org1",
+			},
+			{
+				Name: "Org2Policy1",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 124,
+						TimeUnit:     "sec",
+					},
+				},
+				Organization: "org2",
 			},
 		},
 	}
@@ -643,7 +654,6 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					RateLimit: &rls_config.RateLimitPolicy{
 						Unit:            rls_config.RateLimitUnit_SECOND,
 						RequestsPerUnit: 100,
-						Name:            "Policy1",
 					},
 				},
 				"Policy2": {
@@ -652,7 +662,24 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					RateLimit: &rls_config.RateLimitPolicy{
 						Unit:            rls_config.RateLimitUnit_MINUTE,
 						RequestsPerUnit: 200,
-						Name:            "Policy2",
+					},
+				},
+				"Unauthenticated": {
+					Key:   "policy",
+					Value: "Unauthenticated",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_MINUTE,
+						RequestsPerUnit: 2147483647,
+					},
+				},
+			},
+			"org2": {
+				"Org2Policy1": {
+					Key:   "policy",
+					Value: "Org2Policy1",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_SECOND,
+						RequestsPerUnit: 124,
 					},
 				},
 			},
