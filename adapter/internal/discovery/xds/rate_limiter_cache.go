@@ -253,7 +253,7 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 // 	domain: Default
 // 	descriptors:
 //   	- key: organisation
-//        Value: org001
+//        value: org001
 //         - key: subscription
 //           descriptors:
 //            - key: policy

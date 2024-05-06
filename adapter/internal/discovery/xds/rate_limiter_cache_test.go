@@ -608,8 +608,8 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 				DefaultLimit: &types.SubscriptionDefaultLimit{
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
-						RequestCount: 2147483647,
-						TimeUnit:     "min",
+						RequestCount: 300,
+						TimeUnit:     "hours",
 					},
 				},
 				Organization: "org1",
@@ -632,6 +632,28 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 124,
 						TimeUnit:     "sec",
+					},
+				},
+				Organization: "org2",
+			},
+			{
+				Name: "Unlimited",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 2147483647,
+						TimeUnit:     "min",
+					},
+				},
+				Organization: "carbon.super",
+			},
+			{
+				Name: "Unlimited",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 2147483647,
+						TimeUnit:     "min",
 					},
 				},
 				Organization: "org2",
@@ -668,8 +690,8 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					Key:   "policy",
 					Value: "Unauthenticated",
 					RateLimit: &rls_config.RateLimitPolicy{
-						Unit:            rls_config.RateLimitUnit_MINUTE,
-						RequestsPerUnit: 2147483647,
+						Unit:            rls_config.RateLimitUnit_HOUR,
+						RequestsPerUnit: 300,
 					},
 				},
 			},
