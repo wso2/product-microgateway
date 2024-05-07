@@ -79,7 +79,7 @@ type rateLimitPolicyCache struct {
 	// org -> vhost -> API-Identifier (i.e. Vhost:API-UUID) -> Rate Limit Configs
 	apiLevelRateLimitPolicies map[string]map[string]map[string][]*rls_config.RateLimitDescriptor
 	// metadataBasedPolicies is used to store the rate limit policies which are based on dynamic metadata.
-	// metadata related to the subscription rate-limiting: organization -> subscriptionID -> rate-limit-policy
+	// metadata related to the subscription rate-limiting: subscription -> organization -> subscription-policy
 	metadataBasedPolicies map[string]map[string]map[string]*rls_config.RateLimitDescriptor
 	// mutex for API level
 	apiLevelMu sync.RWMutex
@@ -331,7 +331,7 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 		}
 
 		// Need not to add the Unauthenticated and Unlimited policies to the rate limiter service
-		if (policy.Organization == "carbon.super" && policy.Name == "Unauthenticated") || policy.DefaultLimit.RequestCount.RequestCount == -1 {
+		if (policy.Organization == "carbon.super" && policy.Name == "Unauthenticated") || policy.DefaultLimit.RequestCount.RequestCount < 0 {
 			continue
 		}
 		rateLimitUnit, err := parseRateLimitUnitFromSubscriptionPolicy(policy.DefaultLimit.RequestCount.TimeUnit)
