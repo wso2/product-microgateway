@@ -93,7 +93,6 @@ public class JWTAuthenticator implements Authenticator {
         }
     }
     private static String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
-    private static Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -336,6 +335,8 @@ public class JWTAuthenticator implements Authenticator {
                         if (datastore.getSubscriptionPolicyByName(subPolicyName) != null &&
                                 StringUtils.isNotEmpty(orgList)) {
                             SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
+                            Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
+                                    .collect(Collectors.toSet());
                             if (StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
                                     orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) {
                                 requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
