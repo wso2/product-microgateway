@@ -269,6 +269,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             newSubscriptionPolicy.setTierName(subscriptionPolicy.getName());
             newSubscriptionPolicy.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
             newSubscriptionPolicy.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
+            newSubscriptionPolicy.setOrganization(subscriptionPolicy.getOrganization());
 
             newSubscriptionPolicyMap.put(newSubscriptionPolicy.getCacheKey(), newSubscriptionPolicy);
         }

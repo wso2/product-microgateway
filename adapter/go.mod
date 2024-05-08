@@ -1,6 +1,6 @@
 module github.com/wso2/product-microgateway/adapter
 
-go 1.18
+go 1.22
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.6.0
@@ -19,17 +19,17 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/lestrrat-go/jwx v1.2.28
+	github.com/lestrrat-go/jwx v1.2.29
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/pelletier/go-toml v1.8.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
-	github.com/stretchr/testify v1.8.4
-	golang.org/x/net v0.17.0
-	golang.org/x/text v0.14.0
+	github.com/stretchr/testify v1.9.0
+	golang.org/x/net v0.25.0
+	golang.org/x/text v0.15.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98
 	google.golang.org/grpc v1.58.3
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.34.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -63,8 +63,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	go.mongodb.org/mongo-driver v1.7.5 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230711160842-782d3b101e98 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

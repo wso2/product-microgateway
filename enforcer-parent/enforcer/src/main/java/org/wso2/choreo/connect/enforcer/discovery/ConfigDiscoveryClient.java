@@ -121,7 +121,7 @@ public class ConfigDiscoveryClient implements Runnable {
             shutdown();
             XdsSchedulerManager.getInstance().stopConfigDiscoveryScheduling();
 
-            // Theres only one config root resource here. Therefore taking 0, no need to iterate
+            // There's only one config root resource here. Therefore taking 0, no need to iterate
             Config config = res.getResources(0).unpack(Config.class);
             ConfigHolder.load(config);
             this.latch.countDown();

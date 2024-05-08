@@ -46,12 +46,15 @@ import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
+import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.KeyValidator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -69,6 +72,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -87,6 +92,7 @@ public class JWTAuthenticator implements Authenticator {
                     System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
         }
     }
+    private static String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -314,10 +320,34 @@ public class JWTAuthenticator implements Authenticator {
                     }
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
+                        APIConfig matchedApi = requestContext.getMatchedAPI();
+                        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(matchedApi.getBasePath());
+                        if (apiTenantDomain == null) {
+                            apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+                        }
+                        SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
+                                .getTenantSubscriptionStore(apiTenantDomain);
                         String subscriptionId = authenticationContext.getApiUUID() + ":" +
                                 authenticationContext.getApplicationUUID();
+                        String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
-                        requestContext.addMetadataToMap("ratelimit:usage-policy", authenticationContext.getTier());
+                        requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
+                        if (datastore.getSubscriptionPolicyByName(subPolicyName) != null &&
+                                StringUtils.isNotEmpty(orgList)) {
+                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
+                            Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
+                                    .collect(Collectors.toSet());
+                            if (StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
+                                    orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) {
+                                requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
+                            } else {
+                                requestContext.addMetadataToMap("ratelimit:organization",
+                                        APIConstants.SUPER_TENANT_DOMAIN_NAME);
+                            }
+                        } else {
+                            requestContext.addMetadataToMap("ratelimit:organization",
+                                    APIConstants.SUPER_TENANT_DOMAIN_NAME);
+                        }
                     }
                     return authenticationContext;
                 } else {

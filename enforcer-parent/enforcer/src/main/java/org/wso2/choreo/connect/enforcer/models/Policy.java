@@ -39,6 +39,7 @@ public class Policy implements CacheableEntity<String> {
     private Integer tenantId = null;
     private String name = null;
     private String quotaType = null;
+    private String organization = null;
 
     public int getId() {
 
@@ -83,6 +84,14 @@ public class Policy implements CacheableEntity<String> {
     public void setTierName(String name) {
 
         this.name = name;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
     @Override
