@@ -92,6 +92,8 @@ public class JWTAuthenticator implements Authenticator {
                     System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
         }
     }
+    private static String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
+    private static Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -331,14 +333,11 @@ public class JWTAuthenticator implements Authenticator {
                         String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
-                        String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
                         if (datastore.getSubscriptionPolicyByName(subPolicyName) != null &&
                                 StringUtils.isNotEmpty(orgList)) {
                             SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
-                            Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
-                                    .collect(Collectors.toSet());
                             if (StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
-                                    orgSet.contains(subPolicy.getOrganization()) || orgSet.contains("*")) {
+                                    orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) {
                                 requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
                             } else {
                                 requestContext.addMetadataToMap("ratelimit:organization",

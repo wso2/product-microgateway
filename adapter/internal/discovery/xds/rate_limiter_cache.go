@@ -79,7 +79,7 @@ type rateLimitPolicyCache struct {
 	// org -> vhost -> API-Identifier (i.e. Vhost:API-UUID) -> Rate Limit Configs
 	apiLevelRateLimitPolicies map[string]map[string]map[string][]*rls_config.RateLimitDescriptor
 	// metadataBasedPolicies is used to store the rate limit policies which are based on dynamic metadata.
-	// metadata related to the subscription rate-limiting: subscription -> organization -> rate-limit config
+	// metadata related rate limit configs: rate limit type (eg: subscription) -> organization -> policy name (eg: Gold, Silver) -> rate-limit config
 	metadataBasedPolicies map[string]map[string]map[string]*rls_config.RateLimitDescriptor
 	// mutex for API level
 	apiLevelMu sync.RWMutex
@@ -249,7 +249,8 @@ func (r *rateLimitPolicyCache) generateRateLimitConfig(label string) *rls_config
 		orgDescriptors = append(orgDescriptors, orgDescriptor)
 	}
 
-	//Iterate through the subscription policies and append it to the orgDescriptors
+	// Iterate through the subscription policies and append it to the orgDescriptors
+	// Sample Rate Limiter config:
 	// 	domain: Default
 	// 	descriptors:
 	//   	- key: organisation
@@ -324,6 +325,10 @@ func (r *rateLimitPolicyCache) updateXdsCache(label string) bool {
 
 // AddSubscriptionLevelRateLimitPolicy adds a subscription level rate limit policy to the cache.
 func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyList) error {
+	// Check if rlsPolicyCache.metadataBasedPolicies[Subscription] exists and create a new map if not
+	if _, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType]; !ok {
+		rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType] = make(map[string]map[string]*rls_config.RateLimitDescriptor)
+	}
 	for _, policy := range policyList.List {
 		// Needs to skip on async policies.
 		if policy.DefaultLimit == nil || policy.DefaultLimit.QuotaType != "requestCount" || policy.DefaultLimit.RequestCount == nil {
@@ -347,10 +352,6 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 			Key:       "policy",
 			Value:     policy.Name,
 			RateLimit: &rlPolicyConfig,
-		}
-		// Check if rlsPolicyCache.metadataBasedPolicies[Subscription] exists and create a new map if not
-		if _, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType]; !ok {
-			rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType] = make(map[string]map[string]*rls_config.RateLimitDescriptor)
 		}
 		if _, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; !ok {
 			rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization] = make(map[string]*rls_config.RateLimitDescriptor)
