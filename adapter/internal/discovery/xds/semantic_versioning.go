@@ -150,7 +150,7 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 			}
 			for currentAPIIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
 				// Iterate all the API versions other than the deleting API itself
-				if swagger.GetTitle() == api.GetTitle() && currentAPIIdentifier != apiIdentifier {
+				if swagger.GetTitle() == api.GetTitle() && currentAPIIdentifier != apiIdentifier && swagger.GetVHost() == api.GetVHost() {
 					currentAPISemVersion, _ := semantic_version.ValidateAndGetVersionComponents(swagger.GetVersion(), swagger.GetTitle())
 					if currentAPISemVersion != nil {
 						if currentAPISemVersion.Major == deletingAPISemVersion.Major {
