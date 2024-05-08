@@ -72,6 +72,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -329,10 +331,19 @@ public class JWTAuthenticator implements Authenticator {
                         String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
-                        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
+                        String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
                         if (datastore.getSubscriptionPolicyByName(subPolicyName) != null &&
-                                StringUtils.isNotEmpty(subPolicy.getOrganization())) {
-                            requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
+                                StringUtils.isNotEmpty(orgList)) {
+                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
+                            Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
+                                    .collect(Collectors.toSet());
+                            if (StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
+                                    orgSet.contains(subPolicy.getOrganization()) || orgSet.contains("*")) {
+                                requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
+                            } else {
+                                requestContext.addMetadataToMap("ratelimit:organization",
+                                        APIConstants.SUPER_TENANT_DOMAIN_NAME);
+                            }
                         } else {
                             requestContext.addMetadataToMap("ratelimit:organization",
                                     APIConstants.SUPER_TENANT_DOMAIN_NAME);
