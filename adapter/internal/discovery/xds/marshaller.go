@@ -508,8 +508,9 @@ func MarshalSubscriptionPolicyEventAndReturnList(policy *types.SubscriptionPolic
 		SubscriptionPolicyMap[policy.ID] = subPolicy
 		if eventType == UpdateEvent {
 			logger.LoggerInternalMsg.Infof("Subscription policy: %s is updated for organization: %s", subPolicy.Name, subPolicy.Organization)
+		} else {
+			logger.LoggerInternalMsg.Infof("Subscription policy: %s is added for organization: %s", subPolicy.Name, subPolicy.Organization)
 		}
-		logger.LoggerInternalMsg.Infof("Subscription policy: %s is added for organization: %s", subPolicy.Name, subPolicy.Organization)
 	}
 	return marshalSubscriptionPolicyMapToList(SubscriptionPolicyMap)
 }

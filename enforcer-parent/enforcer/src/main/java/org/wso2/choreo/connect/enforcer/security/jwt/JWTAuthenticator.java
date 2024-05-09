@@ -348,6 +348,9 @@ public class JWTAuthenticator implements Authenticator {
                             requestContext.addMetadataToMap("ratelimit:organization",
                                     APIConstants.SUPER_TENANT_DOMAIN_NAME);
                         }
+                        log.debug("Organization ID: " + requestContext.getMetadataMap().get("ratelimit:organization")
+                                + ", SubscriptionId: " + subscriptionId + ", SubscriptionPolicy: " + subPolicyName
+                                + " will be evaluated for subscription rate-limiting");
                     }
                     return authenticationContext;
                 } else {
