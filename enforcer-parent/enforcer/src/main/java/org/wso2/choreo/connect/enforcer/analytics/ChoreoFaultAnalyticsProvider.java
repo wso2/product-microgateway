@@ -38,7 +38,6 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
-import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.HashMap;
 import java.util.Map;

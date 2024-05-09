@@ -37,7 +37,6 @@ import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import org.wso2.choreo.connect.enforcer.models.URLMapping;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
-import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.SemanticVersionUtil;
 
 import java.util.ArrayList;

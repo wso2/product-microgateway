@@ -36,7 +36,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
-import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
