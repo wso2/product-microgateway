@@ -321,10 +321,7 @@ public class JWTAuthenticator implements Authenticator {
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
                         APIConfig matchedApi = requestContext.getMatchedAPI();
-                        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(matchedApi.getBasePath());
-                        if (apiTenantDomain == null) {
-                            apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-                        }
+                        String apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
                         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                                 .getTenantSubscriptionStore(apiTenantDomain);
                         String subscriptionId = authenticationContext.getApiUUID() + ":" +

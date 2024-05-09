@@ -36,7 +36,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
-import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -121,10 +120,8 @@ public class AnalyticsFilter {
             requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
             requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
 
-            String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
-                    requestContext.getMatchedAPI().getBasePath());
             requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
-                    tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
+                    APIConstants.SUPER_TENANT_DOMAIN_NAME);
             requestContext.addMetadataToMap(MetadataConstants.API_ENVIRONMENT_ID,
                     requestContext.getMatchedAPI().getEnvironmentId() == null ? APIConstants.DEFAULT_ENVIRONMENT_NAME :
                             requestContext.getMatchedAPI().getEnvironmentId());

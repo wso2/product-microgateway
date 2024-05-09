@@ -38,7 +38,6 @@ import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
-import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,10 +105,7 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiType(requestContext.getMatchedAPI().getApiType());
         api.setApiName(requestContext.getMatchedAPI().getName());
         api.setApiVersion(requestContext.getMatchedAPI().getVersion());
-        String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
-                requestContext.getMatchedAPI().getBasePath());
-        api.setApiCreatorTenantDomain(
-                tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
+        api.setApiCreatorTenantDomain(APIConstants.SUPER_TENANT_DOMAIN_NAME);
         api.setOrganizationId(requestContext.getMatchedAPI().getOrganizationId());
         api.setEnvironmentId(requestContext.getMatchedAPI().getEnvironmentId());
         api.setApiContext(requestContext.getMatchedAPI().getBasePath());

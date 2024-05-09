@@ -37,7 +37,6 @@ import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import org.wso2.choreo.connect.enforcer.models.URLMapping;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
-import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.util.SemanticVersionUtil;
 
 import java.util.ArrayList;
@@ -132,11 +131,7 @@ public class KeyValidator {
         String apiVersion = apiConfig.getVersion();
         log.debug("Validation Info : { uuid : {}, context : {}, version : {}, consumerKey : {} }",
                 uuid, apiContext, apiVersion, consumerKey);
-        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
-        if (apiTenantDomain == null) {
-            apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
+        String apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         ApplicationKeyMapping key = null;
         Application app = null;
         Subscription sub = null;
@@ -208,11 +203,7 @@ public class KeyValidator {
         String apiUuid = apiConfig.getUuid();
         String apiContext = apiConfig.getBasePath();
         log.debug("Before validating subscriptions with API key. API_uuid: {}, context: {}", apiUuid, apiContext);
-        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
-        if (apiTenantDomain == null) {
-            apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
+        String apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         Application app = null;
         Subscription sub = null;
 

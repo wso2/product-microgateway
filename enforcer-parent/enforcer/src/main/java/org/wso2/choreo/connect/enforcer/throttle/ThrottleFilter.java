@@ -131,7 +131,7 @@ public class ThrottleFilter implements Filter {
                 String appTier = authContext.getApplicationTier();
                 String appTenant = authContext.getSubscriberTenantDomain();
                 String clientIp = reqContext.getClientIp();
-                String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+                String apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
                 // API Tenant Domain is required to be taken in order to support internal Key scenario.
                 // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
                 String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(),
@@ -142,9 +142,6 @@ public class ThrottleFilter implements Filter {
                     resourceThrottleKey = apiThrottleKey;
                     resourceTier = apiTier;
                     isApiLevelTriggered = true;
-                }
-                if (apiTenantDomain == null) {
-                    apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
                 }
 
                 if (dataHolder.isBlockingConditionsPresent()) {
@@ -291,17 +288,13 @@ public class ThrottleFilter implements Filter {
         String apiContext = basePath + ':' + apiVersion;
         String apiName = api.getName();
         String apiTier = getApiTier(api);
-        String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+        String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         String appTenant = authContext.getSubscriberTenantDomain();
         // API Tenant Domain is required to be taken in order to support internal Key scenario.
         // Using apiTenant is valid as the choreo connect does not work in multi-tenant mode.
         String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), tenantDomain);
         String resourceTier;
         String resourceKey;
-
-        if (tenantDomain == null) {
-            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
 
         // apiConfig instance will have the tier assigned only if openapi definition contains the
         // extension
