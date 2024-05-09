@@ -186,17 +186,6 @@ public class FilterUtils {
         throw new EnforcerException(msg, t);
     }
 
-    public static String getTenantDomainFromRequestURL(String requestURI) {
-        String domain = null;
-        if (requestURI.contains("/t/")) {
-            int index = requestURI.indexOf("/t/");
-            int endIndex = requestURI.indexOf("/", index + 3);
-            domain = endIndex != -1 ? requestURI.substring(index + 3, endIndex) : requestURI.substring(index + 3);
-        }
-
-        return domain;
-    }
-
     public static AuthenticationContext generateAuthenticationContextForUnsecured(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         String clientIP = requestContext.getClientIp();

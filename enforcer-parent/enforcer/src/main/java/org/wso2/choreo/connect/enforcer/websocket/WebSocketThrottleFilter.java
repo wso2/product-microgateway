@@ -104,11 +104,8 @@ public class WebSocketThrottleFilter implements Filter {
             String appTier = authContext.getApplicationTier();
             String appTenant = authContext.getSubscriberTenantDomain();
             String clientIp = requestContext.getWebSocketFrameContext().getRemoteIp();
-            String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+            String apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
             String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
-            if (apiTenantDomain == null) {
-                apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-            }
 
             // Check for blocking conditions
             if (dataHolder.isBlockingConditionsPresent()) {
@@ -228,13 +225,9 @@ public class WebSocketThrottleFilter implements Filter {
         String apiContext = basePath + ':' + apiVersion;
         String apiName = api.getName();
         String apiTier = getApiTier(api);
-        String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+        String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         String appTenant = authContext.getSubscriberTenantDomain();
         String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
-
-        if (tenantDomain == null) {
-            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
         throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ":" + authorizedUser);
