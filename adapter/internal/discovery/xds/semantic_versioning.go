@@ -146,7 +146,6 @@ func updateRoutingRulesOnAPIDelete(organizationID, apiIdentifier string, api mgw
 				Version: "",
 				Major:   deletingAPISemVersion.Major,
 				Minor:   0,
-				Patch:   nil,
 			}
 			for currentAPIIdentifier, swagger := range orgIDAPIMgwSwaggerMap[organizationID] {
 				// Iterate all the API versions other than the deleting API itself
