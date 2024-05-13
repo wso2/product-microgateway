@@ -61,9 +61,9 @@ func parseRateLimitUnitFromSubscriptionPolicy(name string) (rls_config.RateLimit
 		return rls_config.RateLimitUnit_SECOND, nil
 	case "min":
 		return rls_config.RateLimitUnit_MINUTE, nil
-	case "hours":
+	case "hour":
 		return rls_config.RateLimitUnit_HOUR, nil
-	case "days":
+	case "day":
 		return rls_config.RateLimitUnit_DAY, nil
 	default:
 		return rls_config.RateLimitUnit_UNKNOWN, fmt.Errorf("invalid rate limit unit %q", name)

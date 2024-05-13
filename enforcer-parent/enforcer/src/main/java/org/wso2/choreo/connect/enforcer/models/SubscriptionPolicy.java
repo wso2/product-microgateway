@@ -18,6 +18,8 @@
 
 package org.wso2.choreo.connect.enforcer.models;
 
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStoreUtil;
 
 /**
@@ -78,7 +80,9 @@ public class SubscriptionPolicy extends Policy {
     }
     @Override
     public String getCacheKey() {
-        return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.DELEM_PERIOD + getOrganization() +
+        String org = StringUtils.isNotEmpty(getOrganization()) ? getOrganization() :
+                APIConstants.SUPER_TENANT_DOMAIN_NAME;
+        return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.DELEM_PERIOD + org +
                 SubscriptionDataStoreUtil.DELEM_PERIOD + getName();
     }
 
