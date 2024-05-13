@@ -30,6 +30,7 @@ type SemVersion struct {
 	Version string
 	Major   int
 	Minor   int
+	Patch   *int
 }
 
 // ValidateAndGetVersionComponents validates version string and extracts version components
@@ -64,13 +65,20 @@ func ValidateAndGetVersionComponents(version string, apiName string) (*SemVersio
 			Version: version,
 			Major:   majorVersion,
 			Minor:   minorVersion,
+			Patch:   nil,
 		}, nil
 	}
 
+	patchVersion, patchVersionConvErr := strconv.Atoi(versionComponents[2])
+	if patchVersionConvErr != nil {
+		logger.LoggerSemanticVersion.Errorf(fmt.Sprintf("API patch version should be an integer in API: %v. API Version: %v", apiName, version), patchVersionConvErr)
+		return nil, errors.New("Invalid version format")
+	}
 	return &SemVersion{
 		Version: version,
 		Major:   majorVersion,
 		Minor:   minorVersion,
+		Patch:   &patchVersion,
 	}, nil
 }
 
@@ -86,6 +94,18 @@ func (baseVersion SemVersion) Compare(version SemVersion) bool {
 			return true
 		} else if baseVersion.Minor > version.Minor {
 			return false
+		} else {
+			if baseVersion.Patch != nil && version.Patch != nil {
+				if *baseVersion.Patch < *version.Patch {
+					return true
+				} else if *baseVersion.Patch > *version.Patch {
+					return false
+				}
+			} else if baseVersion.Patch == nil && version.Patch != nil {
+				return true
+			} else if baseVersion.Patch != nil && version.Patch == nil {
+				return false
+			}
 		}
 	}
 	return true
