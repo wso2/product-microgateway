@@ -78,9 +78,8 @@ public class SubscriptionPolicy extends Policy {
     }
     @Override
     public String getCacheKey() {
-
-        return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.getPolicyCacheKey(getName());
-
+        return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.DELEM_PERIOD + getOrganization() +
+                SubscriptionDataStoreUtil.DELEM_PERIOD + getName();
     }
 
     @Override
@@ -88,7 +87,7 @@ public class SubscriptionPolicy extends Policy {
         return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
                 + ", stopOnQuotaReach=" + stopOnQuotaReach + ", getId()=" + getId() + ", getQuotaType()="
                 + getQuotaType() + ", isContentAware()=" + isContentAware() + ", getTenantId()=" + getTenantId()
-                + ", getName()=" + getName() + "]";
+                + ", getName()=" + getName() + ", getOrganization()=" + getOrganization() +"]";
     }
 }
 

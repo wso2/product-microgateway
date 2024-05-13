@@ -72,7 +72,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
     private Map<String, Subscription> apiVersionRangeSubscriptionMap;
-    private String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
 
     SubscriptionDataStoreImpl() {
     }
@@ -111,10 +110,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicyByName(String policyName) {
-
+    public SubscriptionPolicy getSubscriptionPolicyByOrgIdAndName(String orgId, String policyName) {
+        String organizationId = orgId == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : orgId;
         String key = PolicyType.SUBSCRIPTION +
-                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName);
+                SubscriptionDataStoreUtil.DELEM_PERIOD + organizationId +
+                SubscriptionDataStoreUtil.DELEM_PERIOD + policyName;
         return subscriptionPolicyMap.get(key);
     }
 
@@ -546,7 +546,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         if (StringUtils.isEmpty(policyName)) {
             subscriptionPolicies.addAll(this.subscriptionPolicyMap.values());
         } else {
-            SubscriptionPolicy policy = this.getSubscriptionPolicyByName(policyName);
+            SubscriptionPolicy policy = this.getSubscriptionPolicyByOrgIdAndName(APIConstants.SUPER_TENANT_DOMAIN_NAME,
+                    policyName);
             subscriptionPolicies.add(policy);
         }
         return subscriptionPolicies;
