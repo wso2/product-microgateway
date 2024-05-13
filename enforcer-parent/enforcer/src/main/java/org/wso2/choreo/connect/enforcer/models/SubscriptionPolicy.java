@@ -87,7 +87,7 @@ public class SubscriptionPolicy extends Policy {
         return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
                 + ", stopOnQuotaReach=" + stopOnQuotaReach + ", getId()=" + getId() + ", getQuotaType()="
                 + getQuotaType() + ", isContentAware()=" + isContentAware() + ", getTenantId()=" + getTenantId()
-                + ", getName()=" + getName() + ", getOrganization()=" + getOrganization() +"]";
+                + ", getName()=" + getName() + ", getOrganization()=" + getOrganization() + "]";
     }
 }
 

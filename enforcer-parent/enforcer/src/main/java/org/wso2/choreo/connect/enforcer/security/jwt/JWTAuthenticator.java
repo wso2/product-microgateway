@@ -335,15 +335,16 @@ public class JWTAuthenticator implements Authenticator {
                         String subscriptionId = authenticationContext.getApiUUID() + ":" +
                                 authenticationContext.getApplicationUUID();
                         String subPolicyName = authenticationContext.getTier();
-                        String organizationId = requestContext.getMatchedAPI().getOrganizationId();
-
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
-                        if (datastore.getSubscriptionPolicyByOrgIdAndName(organizationId, subPolicyName) != null &&
-                                orgSet != null) {
-                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName(organizationId,
-                                    subPolicyName);
+
+                        String matchedApiOrganizationId = requestContext.getMatchedAPI().getOrganizationId();
+                        if (datastore.getSubscriptionPolicyByOrgIdAndName(matchedApiOrganizationId, subPolicyName)
+                                != null && orgSet != null) {
+                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName
+                                    (matchedApiOrganizationId, subPolicyName);
                             String metaDataOrgId = StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
+                                    StringUtils.isNotEmpty(orgList) &&
                                     (orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) ?
                                     subPolicy.getOrganization() : APIConstants.SUPER_TENANT_DOMAIN_NAME;
                             log.debug("Subscription rate-limiting will be evaluated for the organization: " +
@@ -354,8 +355,8 @@ public class JWTAuthenticator implements Authenticator {
                                     APIConstants.SUPER_TENANT_DOMAIN_NAME);
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("Organization ID: " + organizationId + ", SubscriptionId: " + subscriptionId +
-                                    ", SubscriptionPolicy: " + subPolicyName +
+                            log.debug("Organization ID: " + matchedApiOrganizationId + ", SubscriptionId: "
+                                    + subscriptionId + ", SubscriptionPolicy: " + subPolicyName +
                                     " will be evaluated for subscription rate-limiting");
                         }
                     }
