@@ -86,7 +86,7 @@ public class JWTAuthenticator implements Authenticator {
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private static final Set<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
     private static final String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
-    private static Set<String> orgSet = null;
+    private static Set<String> orgSet = new HashSet<>();
 
     static {
         if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
@@ -340,7 +340,7 @@ public class JWTAuthenticator implements Authenticator {
 
                         String matchedApiOrganizationId = requestContext.getMatchedAPI().getOrganizationId();
                         if (datastore.getSubscriptionPolicyByOrgIdAndName(matchedApiOrganizationId, subPolicyName)
-                                != null && orgSet != null) {
+                                != null) {
                             SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName
                                     (matchedApiOrganizationId, subPolicyName);
                             String metaDataOrgId = StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
