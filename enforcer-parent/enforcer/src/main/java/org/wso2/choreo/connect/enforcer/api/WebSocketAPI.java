@@ -20,14 +20,17 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
+import org.wso2.choreo.connect.enforcer.commons.model.BackendJWTConfiguration;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointCluster;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -68,9 +71,12 @@ public class WebSocketAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         String apiType = api.getApiType();
-        Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
-        Map<String, List<String>> apiSecurity = new HashMap<>();
+        Map<String, SecuritySchemaConfig> securitySchemeDefinitions = new HashMap<>();
+        Map<String, List<String>> securityScopesMap = new HashMap<>();
         Map<String, EndpointCluster> endpoints = new HashMap<>();
+        List<ResourceConfig> resources = new ArrayList<>();
+        EndpointSecurity endpointSecurity = new EndpointSecurity();
+        BackendJWTConfiguration backendJWTConfiguration = new BackendJWTConfiguration();
 
         EndpointCluster productionEndpoints = Utils.processEndpoints(api.getProductionEndpoints());
         EndpointCluster sandboxEndpoints = Utils.processEndpoints(api.getSandboxEndpoints());
@@ -81,6 +87,10 @@ public class WebSocketAPI implements API {
             endpoints.put(APIConstants.API_KEY_TYPE_SANDBOX, sandboxEndpoints);
         }
 
+        if (api.getEnableBackendJWT() && api.getBackendJWTConfiguration() != null) {
+            backendJWTConfiguration.setAudiences(api.getBackendJWTConfiguration().getAudiencesList());
+        }
+
         for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
             if (securityScheme.getType() != null) {
                 String schemaType = securityScheme.getType();
@@ -89,16 +99,16 @@ public class WebSocketAPI implements API {
                 securitySchemaConfig.setType(schemaType);
                 securitySchemaConfig.setName(securityScheme.getName());
                 securitySchemaConfig.setIn(securityScheme.getIn());
-                securitySchemes.put(schemaType, securitySchemaConfig);
+                securitySchemeDefinitions.put(schemaType, securitySchemaConfig);
             }
         }
 
         for (SecurityList securityList : api.getSecurityList()) {
             for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
-                apiSecurity.put(entry.getKey(), new ArrayList<>());
+                securityScopesMap.put(entry.getKey(), new ArrayList<>());
                 if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
                     List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
-                    apiSecurity.replace(entry.getKey(), scopeList);
+                    securityScopesMap.replace(entry.getKey(), scopeList);
                 }
                 // only supports security scheme OR combinations. Example -
                 // Security:
@@ -108,7 +118,18 @@ public class WebSocketAPI implements API {
             }
         }
 
-        EndpointSecurity endpointSecurity = new EndpointSecurity();
+        for (Resource res : api.getResourcesList()) {
+            Map<String, EndpointCluster> endpointClusterMap = new HashMap();
+            EndpointCluster prodEndpointCluster = Utils.processEndpoints(res.getProductionEndpoints());
+            EndpointCluster sandEndpointCluster = Utils.processEndpoints(res.getSandboxEndpoints());
+            if (prodEndpointCluster != null) {
+                endpointClusterMap.put(APIConstants.API_KEY_TYPE_PRODUCTION, prodEndpointCluster);
+            }
+            if (sandEndpointCluster != null) {
+                endpointClusterMap.put(APIConstants.API_KEY_TYPE_SANDBOX, sandEndpointCluster);
+            }
+        }
+
         if (api.getEndpointSecurity().hasProductionSecurityInfo()) {
             endpointSecurity.setProductionSecurityInfo(
                     APIProcessUtils.convertProtoEndpointSecurity(
@@ -122,11 +143,13 @@ public class WebSocketAPI implements API {
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
-                .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .apiSecurity(apiSecurity).tier(api.getTier()).endpointSecurity(endpointSecurity)
+                .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
+                .apiSecurity(securityScopesMap).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).endpoints(endpoints).apiProvider(api.getApiProvider())
-                .build();
+                .securitySchemeDefinitions(securitySchemeDefinitions).enableBackendJWT(api.getEnableBackendJWT())
+                .backendJWTConfiguration(backendJWTConfiguration).deploymentType(api.getDeploymentType())
+                .environmentId(api.getEnvironmentId()).environmentName(api.getEnvironmentName()).build();
         initFilters();
         initUpgradeFilters();
         return basePath;
@@ -135,6 +158,10 @@ public class WebSocketAPI implements API {
     @Override
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
+        responseObject.setRequestPath(requestContext.getRequestPath());
+        responseObject.setApiUuid(apiConfig.getUuid());
+        Utils.populateRemoveAndProtectedHeaders(requestContext);
+        
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
@@ -248,4 +275,5 @@ public class WebSocketAPI implements API {
                 (Long) requestContext.getProperties().get(ThrottleConstants.HEADER_RETRY_AFTER));
         return webSocketThrottleResponse;
     }
+
 }
