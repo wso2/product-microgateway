@@ -170,7 +170,7 @@ public class RestAPI implements API {
         responseObject.setApiUuid(apiConfig.getUuid());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
-        populateRemoveAndProtectedHeaders(requestContext);
+        Utils.populateRemoveAndProtectedHeaders(requestContext);
 
         if (executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
@@ -295,54 +295,5 @@ public class RestAPI implements API {
                         + filterDTO.getClassName());
             }
         }
-    }
-
-    private void populateRemoveAndProtectedHeaders(RequestContext requestContext) {
-        // If the resource has disabled security, then the authorization headers are passed as it is.
-        // Expectation is that the backend should validate the authorization header if it is not processed
-        // at the gateway level.
-        // It is required to check if the resource Path is not null, because when CORS preflight request handling, or
-        // generic OPTIONS method call happens, matchedResourcePath becomes null.
-        if (requestContext.getMatchedResourcePath() != null &&
-                requestContext.getMatchedResourcePath().isDisableSecurity()) {
-            return;
-        }
-
-        Map<String, SecuritySchemaConfig> securitySchemeDefinitions =
-                requestContext.getMatchedAPI().getSecuritySchemeDefinitions();
-        // API key headers are considered to be protected headers, such that the header would not be sent
-        // to backend and traffic manager.
-        // This would prevent leaking credentials, even if user is invoking unsecured resource with some
-        // credentials.
-        for (Map.Entry<String, SecuritySchemaConfig> entry : securitySchemeDefinitions.entrySet()) {
-            SecuritySchemaConfig schema = entry.getValue();
-            if (APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME.equalsIgnoreCase(schema.getType())) {
-                if (APIConstants.SWAGGER_API_KEY_IN_HEADER.equals(schema.getIn())) {
-                    requestContext.getProtectedHeaders().add(schema.getName());
-                    requestContext.getRemoveHeaders().add(schema.getName());
-                    continue;
-                }
-                if (APIConstants.SWAGGER_API_KEY_IN_QUERY.equals(schema.getIn())) {
-                    requestContext.getQueryParamsToRemove().add(schema.getName());
-                }
-            }
-        }
-
-        // Internal-Key credential is considered to be protected headers, such that the header would not be sent
-        // to backend and traffic manager.
-        String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
-                .getTestConsoleHeaderName().toLowerCase();
-        requestContext.getRemoveHeaders().add(internalKeyHeader);
-        // Avoid internal key being published to the Traffic Manager
-        requestContext.getProtectedHeaders().add(internalKeyHeader);
-
-        // Remove Authorization Header
-        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
-        String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
-        if (!authHeader.isEnableOutboundAuthHeader()) {
-            requestContext.getRemoveHeaders().add(authHeaderName);
-        }
-        // Authorization Header should not be included in the throttle publishing event.
-        requestContext.getProtectedHeaders().add(authHeaderName);
     }
 }
