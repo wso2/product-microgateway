@@ -343,8 +343,7 @@ public class JWTAuthenticator implements Authenticator {
                                 != null) {
                             SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName
                                     (matchedApiOrganizationId, subPolicyName);
-                            String metaDataOrgId = StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
-                                    StringUtils.isNotEmpty(orgList) &&
+                            String metaDataOrgId = StringUtils.isNotEmpty(orgList) &&
                                     (orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) ?
                                     subPolicy.getOrganization() : APIConstants.SUPER_TENANT_DOMAIN_NAME;
                             log.debug("Subscription rate-limiting will be evaluated for the organization: " +

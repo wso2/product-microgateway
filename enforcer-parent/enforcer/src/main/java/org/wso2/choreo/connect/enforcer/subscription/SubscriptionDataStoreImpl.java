@@ -541,13 +541,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String policyName) {
+    public List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String organizationId, String policyName) {
         List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         if (StringUtils.isEmpty(policyName)) {
             subscriptionPolicies.addAll(this.subscriptionPolicyMap.values());
         } else {
-            SubscriptionPolicy policy = this.getSubscriptionPolicyByOrgIdAndName(APIConstants.SUPER_TENANT_DOMAIN_NAME,
-                    policyName);
+            SubscriptionPolicy policy = this.getSubscriptionPolicyByOrgIdAndName(organizationId, policyName);
             subscriptionPolicies.add(policy);
         }
         return subscriptionPolicies;

@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.models;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.choreo.connect.enforcer.common.CacheableEntity;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStoreUtil;
@@ -87,6 +88,9 @@ public class Policy implements CacheableEntity<String> {
     }
 
     public String getOrganization() {
+        if (StringUtils.isEmpty(organization)) {
+            return APIConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         return organization;
     }
 

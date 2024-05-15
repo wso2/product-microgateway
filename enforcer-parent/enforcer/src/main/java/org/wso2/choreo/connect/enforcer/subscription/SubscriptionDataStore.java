@@ -207,6 +207,6 @@ public interface SubscriptionDataStore {
      * @param policyName The name of the policy
      * @return
      */
-    List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String policyName);
+    List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String organizationId, String policyName);
 
 }
