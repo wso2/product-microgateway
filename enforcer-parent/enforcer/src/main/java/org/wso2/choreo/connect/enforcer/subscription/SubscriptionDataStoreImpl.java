@@ -111,7 +111,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByOrgIdAndName(String orgId, String policyName) {
-        String organizationId = StringUtils.isNotEmpty(orgId) ? APIConstants.SUPER_TENANT_DOMAIN_NAME : orgId;
+        String organizationId = StringUtils.isEmpty(orgId) ? APIConstants.SUPER_TENANT_DOMAIN_NAME : orgId;
         String key = PolicyType.SUBSCRIPTION +
                 SubscriptionDataStoreUtil.DELEM_PERIOD + organizationId +
                 SubscriptionDataStoreUtil.DELEM_PERIOD + policyName;
