@@ -295,7 +295,8 @@ public class KeyValidator {
         String apiTier = apiConfig.getTier();
 
         ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy());
-        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId());
+        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName(apiConfig.getOrganizationId(),
+                sub.getPolicyId());
         ApiPolicy apiPolicy = datastore.getApiPolicyByName(apiTier);
         boolean isContentAware = false;
         if (appPolicy.isContentAware() || subPolicy.isContentAware() || (apiPolicy != null && apiPolicy

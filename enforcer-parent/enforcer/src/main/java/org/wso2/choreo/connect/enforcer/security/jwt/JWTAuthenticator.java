@@ -85,14 +85,19 @@ public class JWTAuthenticator implements Authenticator {
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private static final Set<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
+    private static final String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
+    private static Set<String> orgSet = new HashSet<>();
 
     static {
         if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
             Collections.addAll(prodTokenNonProdAllowedOrgs,
                     System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
         }
+        if (orgList != null) {
+            orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
+                    .collect(Collectors.toSet());
+        }
     }
-    private static String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -329,27 +334,26 @@ public class JWTAuthenticator implements Authenticator {
                         String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
-                        if (datastore.getSubscriptionPolicyByName(subPolicyName) != null &&
-                                StringUtils.isNotEmpty(orgList)) {
-                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
-                            Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
-                                    .collect(Collectors.toSet());
-                            if (StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
-                                    orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) {
-                                requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
-                            } else {
-                                requestContext.addMetadataToMap("ratelimit:organization",
-                                        APIConstants.SUPER_TENANT_DOMAIN_NAME);
-                            }
+
+                        String matchedApiOrganizationId = requestContext.getMatchedAPI().getOrganizationId();
+                        if (datastore.getSubscriptionPolicyByOrgIdAndName(matchedApiOrganizationId, subPolicyName)
+                                != null) {
+                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName
+                                    (matchedApiOrganizationId, subPolicyName);
+                            String metaDataOrgId = StringUtils.isNotEmpty(orgList) &&
+                                    (orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) ?
+                                    subPolicy.getOrganization() : APIConstants.SUPER_TENANT_DOMAIN_NAME;
+                            log.debug("Subscription rate-limiting will be evaluated for the organization: " +
+                                    metaDataOrgId);
+                            requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);
                         } else {
                             requestContext.addMetadataToMap("ratelimit:organization",
                                     APIConstants.SUPER_TENANT_DOMAIN_NAME);
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("Organization ID: " +
-                                    requestContext.getMetadataMap().get("ratelimit:organization")
-                                    + ", SubscriptionId: " + subscriptionId + ", SubscriptionPolicy: " + subPolicyName
-                                    + " will be evaluated for subscription rate-limiting");
+                            log.debug("Organization ID: " + matchedApiOrganizationId + ", SubscriptionId: "
+                                    + subscriptionId + ", SubscriptionPolicy: " + subPolicyName +
+                                    " will be evaluated for subscription rate-limiting");
                         }
                     }
                     return authenticationContext;
