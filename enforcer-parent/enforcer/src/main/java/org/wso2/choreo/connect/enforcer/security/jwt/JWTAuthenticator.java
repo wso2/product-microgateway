@@ -45,6 +45,7 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.features.FeatureFlags;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
@@ -85,17 +86,11 @@ public class JWTAuthenticator implements Authenticator {
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private static final Set<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
-    private static final String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
-    private static Set<String> orgSet = new HashSet<>();
 
     static {
         if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
             Collections.addAll(prodTokenNonProdAllowedOrgs,
                     System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
-        }
-        if (orgList != null) {
-            orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
-                    .collect(Collectors.toSet());
         }
     }
 
@@ -340,9 +335,8 @@ public class JWTAuthenticator implements Authenticator {
                                 != null) {
                             SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName
                                     (matchedApiOrganizationId, subPolicyName);
-                            String metaDataOrgId = StringUtils.isNotEmpty(orgList) &&
-                                    (orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) ?
-                                    subPolicy.getOrganization() : APIConstants.SUPER_TENANT_DOMAIN_NAME;
+                            String metaDataOrgId =
+                                    FeatureFlags.getCustomSubscriptionPolicyHandlingOrg(subPolicy.getOrganization());
                             log.debug("Subscription rate-limiting will be evaluated for the organization: " +
                                     metaDataOrgId);
                             requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);

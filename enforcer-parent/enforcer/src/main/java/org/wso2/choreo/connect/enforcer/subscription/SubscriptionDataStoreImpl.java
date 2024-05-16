@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscovery
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationPolicyDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.features.FeatureFlags;
 import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
@@ -111,7 +112,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByOrgIdAndName(String orgId, String policyName) {
-        String organizationId = StringUtils.isEmpty(orgId) ? APIConstants.SUPER_TENANT_DOMAIN_NAME : orgId;
+        String organizationId = FeatureFlags.getCustomSubscriptionPolicyHandlingOrg(orgId);
         String key = PolicyType.SUBSCRIPTION +
                 SubscriptionDataStoreUtil.DELEM_PERIOD + organizationId +
                 SubscriptionDataStoreUtil.DELEM_PERIOD + policyName;
