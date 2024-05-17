@@ -24,18 +24,22 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Feature flags for Choreo Connect.
+ */
 public class FeatureFlags {
     private static final Set<String> CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG;
     private static final boolean ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG;
 
     static {
-        final String ORG_ENV_VAR = System.getenv().getOrDefault("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG", "");
-        CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG = new HashSet<>(Arrays.asList(ORG_ENV_VAR.split(",")));
-        ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG = ORG_ENV_VAR.equals("*");
+        final String orgEnvVar = System.getenv().getOrDefault("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG", "");
+        CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG = new HashSet<>(Arrays.asList(orgEnvVar.split(",")));
+        ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG = orgEnvVar.equals("*");
     }
 
     public static boolean isCustomSubscriptionPolicyHandlingEnabled(String orgId) {
-        return ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG || CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG.contains(orgId);
+        return ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG
+                || CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG.contains(orgId);
     }
 
     public static String getCustomSubscriptionPolicyHandlingOrg(String orgId) {
