@@ -161,7 +161,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) ([]*Resource, error) {
 				if found {
 					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
 				}
-				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
+				methodsArray = append(methodsArray, NewOperation("OPTIONS", pathItem.Options.Security,
 					pathItem.Options.Extensions))
 				methodFound = true
 			}
