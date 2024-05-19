@@ -75,6 +75,16 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	return httpFilters
 }
 
+// get router filter in a array
+func getHTTPRouterFilters() []*hcmv3.HttpFilter {
+	router := getRouterHTTPFilter()
+
+	httpRouterFilters := []*hcmv3.HttpFilter{
+		router,
+	}
+	return httpRouterFilters
+}
+
 // getRouterHTTPFilter gets router http filter.
 func getRouterHTTPFilter() *hcmv3.HttpFilter {
 

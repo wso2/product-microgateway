@@ -58,6 +58,7 @@ const (
 	defaultRdsConfigName            string = "default"
 	defaultHTTPListenerName         string = "HTTPListener"
 	defaultHTTPSListenerName        string = "HTTPSListener"
+	newHTTPListenerName 			string = "NewHTTPListener"
 	defaultAccessLogPath            string = "/tmp/envoy.access.log"
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
@@ -105,6 +106,7 @@ const (
 )
 const (
 	httpsURLType     string = "https"
+	httpURLType 	 string = "http"
 	wssURLType       string = "wss"
 	httpMethodHeader string = ":method"
 )
