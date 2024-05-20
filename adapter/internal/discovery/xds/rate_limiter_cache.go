@@ -336,7 +336,7 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 		}
 
 		// Need not to add the Unauthenticated and Unlimited policies to the rate limiter service
-		if (policy.Organization == "carbon.super" && policy.Name == "Unauthenticated") || policy.DefaultLimit.RequestCount.RequestCount < 0 {
+		if (policy.Organization == "carbon.super" && policy.Name == "Unauthenticated") || policy.DefaultLimit.RequestCount.RequestCount <= 0 {
 			continue
 		}
 		rateLimitUnit, err := parseRateLimitUnitFromSubscriptionPolicy(policy.DefaultLimit.RequestCount.TimeUnit)
