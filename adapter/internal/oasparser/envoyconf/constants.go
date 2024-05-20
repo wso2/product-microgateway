@@ -23,6 +23,7 @@ const (
 	tracingClusterName      string = "wso2_cc_trace"
 	extAuthzHTTPCluster     string = "ext_authz_http_cluster"
 	rateLimitClusterName    string = "rate-limit"
+	varnishClusterName 		string = "varnish"
 )
 
 const (

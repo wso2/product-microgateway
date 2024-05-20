@@ -162,6 +162,12 @@ var defaultConfig = &Config{
 			SSLCertSANHostname:     "",
 		},
 	},
+	Varnish: varnish{
+		Enabled: true,
+		Host:    "varnish",
+		Port:    8080,
+
+	},	
 	Enforcer: enforcer{
 		Management: management{
 			Username: "admin",

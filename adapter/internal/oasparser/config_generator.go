@@ -65,6 +65,16 @@ func GetGlobalClusters() ([]*clusterv3.Cluster, []*corev3.Address) {
 		}
 	}
 
+	if conf.Varnish.Enabled {
+		varnishCluster, varnishEP, errVarnish := envoy.CreateVarnishCluster()
+		if errVarnish == nil {
+			clusters = append(clusters, varnishCluster)
+			endpoints = append(endpoints, varnishEP...)
+		} else {
+			logger.LoggerOasparser.Fatalf("Failed to initialize Varnish cluster. Hence terminating the adapter. Error: %s", errVarnish)
+		}
+	}
+	
 	if conf.Tracing.Enabled && conf.Tracing.Type != envoyconf.TracerTypeAzure {
 		logger.LoggerOasparser.Debugln("Creating global cluster - Tracing")
 		if c, e, err := envoyconf.CreateTracingCluster(conf); err == nil {
