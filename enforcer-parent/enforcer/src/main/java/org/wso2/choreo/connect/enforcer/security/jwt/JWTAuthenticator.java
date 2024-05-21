@@ -329,18 +329,31 @@ public class JWTAuthenticator implements Authenticator {
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
 
                         String matchedApiOrganizationId = requestContext.getMatchedAPI().getOrganizationId();
-                        if (datastore.getSubscriptionPolicyByOrgIdAndName(matchedApiOrganizationId, subPolicyName)
-                                != null) {
-                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName
-                                    (matchedApiOrganizationId, subPolicyName);
-                            String metaDataOrgId =
+                        // Denotes datastore contains a subscription policy for the given name and organization
+                        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName(
+                                matchedApiOrganizationId, subPolicyName);
+                        String metaDataOrgId = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+                        if (subPolicy != null) {
+                            metaDataOrgId =
                                     FeatureFlags.getCustomSubscriptionPolicyHandlingOrg(subPolicy.getOrganization());
-                            log.debug("Subscription rate-limiting will be evaluated for the organization: " +
-                                    metaDataOrgId);
                             requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);
+                            if (subPolicy.getRateLimitCount() > 0 &&
+                                    StringUtils.isNotEmpty(subPolicy.getRateLimitTimeUnit())) {
+                                String bustCtrlPolicyName = "burst" + subPolicyName;
+                                requestContext.addMetadataToMap("burstCtrl:organization", metaDataOrgId);
+                                requestContext.addMetadataToMap("burstCtrl:subscription", subscriptionId);
+                                requestContext.addMetadataToMap("burstCtrl:usage-policy", bustCtrlPolicyName);
+
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Organization ID: " + metaDataOrgId + ", SubscriptionId: "
+                                            + subscriptionId + ", BurstControlPolicy: " + bustCtrlPolicyName +
+                                            " will be evaluated for burst controlling");
+                                }
+                            }
                         } else {
-                            requestContext.addMetadataToMap("ratelimit:organization",
-                                    APIConstants.SUPER_TENANT_DOMAIN_NAME);
+                            // Datastore does not contain a subscription policy for the given name and
+                            // organization. Hence, subscription rate-limiting should be performed using the default org
+                            requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);
                         }
                         if (log.isDebugEnabled()) {
                             log.debug("Organization ID: " + matchedApiOrganizationId + ", SubscriptionId: "

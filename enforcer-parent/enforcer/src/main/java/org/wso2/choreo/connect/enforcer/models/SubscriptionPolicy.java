@@ -30,6 +30,8 @@ public class SubscriptionPolicy extends Policy {
     private Boolean stopOnQuotaReach = null;
     private Integer graphQLMaxComplexity = null;
     private Integer graphQLMaxDepth = null;
+    private String burstControlTimeUnit = null;
+    private Integer burstControlCount = null;
 
     public int getRateLimitCount() {
 
@@ -76,6 +78,23 @@ public class SubscriptionPolicy extends Policy {
     public void setGraphQLMaxDepth(int graphQLMaxDepth) {
         this.graphQLMaxDepth = graphQLMaxDepth;
     }
+
+    public String getBurstControlTimeUnit() {
+        return burstControlTimeUnit;
+    }
+
+    public void setBurstControlTimeUnit(String burstControlTimeUnit) {
+        this.burstControlTimeUnit = burstControlTimeUnit;
+    }
+
+    public Integer getBurstControlCount() {
+        return burstControlCount;
+    }
+
+    public void setBurstControlCount(Integer burstControlCount) {
+        this.burstControlCount = burstControlCount;
+    }
+
     @Override
     public String getCacheKey() {
         return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.DELEM_PERIOD + getOrganization() +
@@ -87,7 +106,9 @@ public class SubscriptionPolicy extends Policy {
         return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
                 + ", stopOnQuotaReach=" + stopOnQuotaReach + ", getId()=" + getId() + ", getQuotaType()="
                 + getQuotaType() + ", isContentAware()=" + isContentAware() + ", getTenantId()=" + getTenantId()
-                + ", getName()=" + getName() + ", getOrganization()=" + getOrganization() + "]";
+                + ", getName()=" + getName() + ", getOrganization()=" + getOrganization()
+                + ", getBurstControlCount()=" + getBurstControlCount() + ", getBurstControlTimeUnit()="
+                + getBurstControlTimeUnit() + "]";
     }
 }
 

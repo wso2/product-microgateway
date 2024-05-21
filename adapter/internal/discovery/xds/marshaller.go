@@ -665,13 +665,15 @@ func marshalSubscriptionPolicy(policy *types.SubscriptionPolicy) *subscription.S
 		QuotaType:            policy.QuotaType,
 		GraphQLMaxComplexity: policy.GraphQLMaxComplexity,
 		GraphQLMaxDepth:      policy.GraphQLMaxDepth,
-		RateLimitCount:       policy.RateLimitCount,
-		RateLimitTimeUnit:    policy.RateLimitTimeUnit,
+		RateLimitCount:       policy.DefaultLimit.RequestCount.RequestCount,
+		RateLimitTimeUnit:    policy.DefaultLimit.RequestCount.TimeUnit,
 		StopOnQuotaReach:     policy.StopOnQuotaReach,
 		TenantId:             policy.TenantID,
 		TenantDomain:         policy.TenantDomain,
 		Timestamp:            policy.TimeStamp,
 		Organization:         policy.Organization,
+		BurstControlCount:    policy.RateLimitCount,
+		BurstControlTimeUnit: policy.RateLimitTimeUnit,
 	}
 }
 

@@ -185,6 +185,67 @@ func TestCreateRoute(t *testing.T) {
 						},
 					},
 				},
+				{
+					Actions: []*routev3.RateLimit_Action{
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForOrganization,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForBurstCtrlOrganization,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForSubscription,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForBurstCtrlSubscription,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForPolicy,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForBurstCtrlUsagePolicy,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}

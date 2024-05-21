@@ -658,6 +658,19 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 				},
 				Organization: "org2",
 			},
+			{
+				Name: "Time value policy",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 6000,
+						TimeUnit:     "hour",
+					},
+				},
+				Organization: "org2",
+				RateLimitCount: 100,
+				RateLimitTimeUnit: "min",
+			},
 		},
 	}
 
@@ -702,6 +715,22 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					RateLimit: &rls_config.RateLimitPolicy{
 						Unit:            rls_config.RateLimitUnit_SECOND,
 						RequestsPerUnit: 124,
+					},
+				},
+				"burstTime value policy": {
+					Key:   "policy",
+					Value: "burstTime value policy",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_MINUTE,
+						RequestsPerUnit: 100,
+					},
+				},
+				"Time value policy": {
+					Key:   "policy",
+					Value: "Time value policy",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_HOUR,
+						RequestsPerUnit: 6000,
 					},
 				},
 			},

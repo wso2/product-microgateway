@@ -25,6 +25,7 @@ private static final long serialVersionUID = 0L;
     rateLimitTimeUnit_ = "";
     tenantDomain_ = "";
     organization_ = "";
+    burstControlTimeUnit_ = "";
   }
 
   @java.lang.Override
@@ -120,6 +121,17 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             organization_ = s;
+            break;
+          }
+          case 104: {
+
+            burstControlCount_ = input.readInt32();
+            break;
+          }
+          case 114: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            burstControlTimeUnit_ = s;
             break;
           }
           default: {
@@ -421,6 +433,55 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int BURSTCONTROLCOUNT_FIELD_NUMBER = 13;
+  private int burstControlCount_;
+  /**
+   * <code>int32 burstControlCount = 13;</code>
+   * @return The burstControlCount.
+   */
+  @java.lang.Override
+  public int getBurstControlCount() {
+    return burstControlCount_;
+  }
+
+  public static final int BURSTCONTROLTIMEUNIT_FIELD_NUMBER = 14;
+  private volatile java.lang.Object burstControlTimeUnit_;
+  /**
+   * <code>string burstControlTimeUnit = 14;</code>
+   * @return The burstControlTimeUnit.
+   */
+  @java.lang.Override
+  public java.lang.String getBurstControlTimeUnit() {
+    java.lang.Object ref = burstControlTimeUnit_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      burstControlTimeUnit_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string burstControlTimeUnit = 14;</code>
+   * @return The bytes for burstControlTimeUnit.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getBurstControlTimeUnitBytes() {
+    java.lang.Object ref = burstControlTimeUnit_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      burstControlTimeUnit_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -470,6 +531,12 @@ private static final long serialVersionUID = 0L;
     }
     if (!getOrganizationBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 12, organization_);
+    }
+    if (burstControlCount_ != 0) {
+      output.writeInt32(13, burstControlCount_);
+    }
+    if (!getBurstControlTimeUnitBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 14, burstControlTimeUnit_);
     }
     unknownFields.writeTo(output);
   }
@@ -523,6 +590,13 @@ private static final long serialVersionUID = 0L;
     if (!getOrganizationBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, organization_);
     }
+    if (burstControlCount_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(13, burstControlCount_);
+    }
+    if (!getBurstControlTimeUnitBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, burstControlTimeUnit_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -562,6 +636,10 @@ private static final long serialVersionUID = 0L;
         != other.getTimestamp()) return false;
     if (!getOrganization()
         .equals(other.getOrganization())) return false;
+    if (getBurstControlCount()
+        != other.getBurstControlCount()) return false;
+    if (!getBurstControlTimeUnit()
+        .equals(other.getBurstControlTimeUnit())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -599,6 +677,10 @@ private static final long serialVersionUID = 0L;
         getTimestamp());
     hash = (37 * hash) + ORGANIZATION_FIELD_NUMBER;
     hash = (53 * hash) + getOrganization().hashCode();
+    hash = (37 * hash) + BURSTCONTROLCOUNT_FIELD_NUMBER;
+    hash = (53 * hash) + getBurstControlCount();
+    hash = (37 * hash) + BURSTCONTROLTIMEUNIT_FIELD_NUMBER;
+    hash = (53 * hash) + getBurstControlTimeUnit().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -760,6 +842,10 @@ private static final long serialVersionUID = 0L;
 
       organization_ = "";
 
+      burstControlCount_ = 0;
+
+      burstControlTimeUnit_ = "";
+
       return this;
     }
 
@@ -798,6 +884,8 @@ private static final long serialVersionUID = 0L;
       result.tenantDomain_ = tenantDomain_;
       result.timestamp_ = timestamp_;
       result.organization_ = organization_;
+      result.burstControlCount_ = burstControlCount_;
+      result.burstControlTimeUnit_ = burstControlTimeUnit_;
       onBuilt();
       return result;
     }
@@ -885,6 +973,13 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getOrganization().isEmpty()) {
         organization_ = other.organization_;
+        onChanged();
+      }
+      if (other.getBurstControlCount() != 0) {
+        setBurstControlCount(other.getBurstControlCount());
+      }
+      if (!other.getBurstControlTimeUnit().isEmpty()) {
+        burstControlTimeUnit_ = other.burstControlTimeUnit_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1509,6 +1604,113 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       organization_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int burstControlCount_ ;
+    /**
+     * <code>int32 burstControlCount = 13;</code>
+     * @return The burstControlCount.
+     */
+    @java.lang.Override
+    public int getBurstControlCount() {
+      return burstControlCount_;
+    }
+    /**
+     * <code>int32 burstControlCount = 13;</code>
+     * @param value The burstControlCount to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBurstControlCount(int value) {
+      
+      burstControlCount_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 burstControlCount = 13;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBurstControlCount() {
+      
+      burstControlCount_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object burstControlTimeUnit_ = "";
+    /**
+     * <code>string burstControlTimeUnit = 14;</code>
+     * @return The burstControlTimeUnit.
+     */
+    public java.lang.String getBurstControlTimeUnit() {
+      java.lang.Object ref = burstControlTimeUnit_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        burstControlTimeUnit_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string burstControlTimeUnit = 14;</code>
+     * @return The bytes for burstControlTimeUnit.
+     */
+    public com.google.protobuf.ByteString
+        getBurstControlTimeUnitBytes() {
+      java.lang.Object ref = burstControlTimeUnit_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        burstControlTimeUnit_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string burstControlTimeUnit = 14;</code>
+     * @param value The burstControlTimeUnit to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBurstControlTimeUnit(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      burstControlTimeUnit_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string burstControlTimeUnit = 14;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBurstControlTimeUnit() {
+      
+      burstControlTimeUnit_ = getDefaultInstance().getBurstControlTimeUnit();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string burstControlTimeUnit = 14;</code>
+     * @param value The bytes for burstControlTimeUnit to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBurstControlTimeUnitBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      burstControlTimeUnit_ = value;
       onChanged();
       return this;
     }
