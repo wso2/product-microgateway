@@ -160,6 +160,10 @@ public class WebSocketAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         responseObject.setRequestPath(requestContext.getRequestPath());
         responseObject.setApiUuid(apiConfig.getUuid());
+        // TODO (thushani) manage resource level security disabling
+        if (apiConfig.isDisableSecurity()) {
+            requestContext.getMatchedResourcePath().setDisableSecurity(true);
+        }
         Utils.populateRemoveAndProtectedHeaders(requestContext);
         
         if (executeFilterChain(requestContext)) {
