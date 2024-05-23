@@ -52,8 +52,8 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 	return bytes.HasPrefix(trim, prefix)
 }
 
-// FindAPIDefinitionVersion finds the openapi version ("2" or "3") for the given
-// openAPI json content.
+// FindAPIDefinitionVersion finds the openapi version ("2" or "3") or Async API version for the given
+// API Definition.
 func FindAPIDefinitionVersion(jsn []byte) string {
 	var version string = "2"
 	var result map[string]interface{}
