@@ -64,7 +64,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 
 	for _, item := range dataItems {
 		apiJsn, _ := utills.ToJSON([]byte(item.inputSwagger))
-		resultswaggerVerison := utills.FindSwaggerVersion(apiJsn)
+		resultswaggerVerison := utills.FindAPIDefinitionVersion(apiJsn)
 
 		assert.Equal(t, item.result, resultswaggerVerison, item.message)
 	}

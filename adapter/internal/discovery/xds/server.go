@@ -313,8 +313,8 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		return nil, err
 	}
 
-	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
-		err = mgwSwagger.GetMgwSwagger(apiProject.OpenAPIJsn)
+	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK || apiProject.APIType == mgw.WS {
+		err = mgwSwagger.GetMgwSwagger(apiProject.APIDefinition)
 		if err != nil {
 			logger.LoggerXds.Error("Error while populating swagger from api definition. ", err)
 			return nil, err
@@ -323,6 +323,7 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		// it will enable folowing securities globally for the API, overriding swagger securities.
 		isYamlAPIKey := false
 		isYamlOauth := false
+		logger.LoggerAPI.Info("API Type is HTTP, Webhook or WebSocket. Checking for security schemes in api.yaml", apiYaml.SecurityScheme)
 		for _, value := range apiYaml.SecurityScheme {
 			if value == model.APIMAPIKeyType {
 				logger.LoggerXds.Debugf("API key is enabled in api.yaml for API %v:%v", apiYaml.Name, apiYaml.Version)
@@ -334,9 +335,6 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 		}
 		mgwSwagger.SanitizeAPISecurity(isYamlAPIKey, isYamlOauth)
 		mgwSwagger.SetXWso2AuthHeader(apiYaml.AuthorizationHeader)
-	} else if apiProject.APIType != mgw.WS {
-		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
 
 	if vHost == conf.Adapter.SandboxVhost {

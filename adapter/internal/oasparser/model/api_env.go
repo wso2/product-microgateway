@@ -64,7 +64,7 @@ func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 	return productionEndpoints, sandboxEndpoints
 }
 
-//RetrieveEndpointBasicAuthCredentialsFromEnv retrieve endpoint security credentials from env variables
+// RetrieveEndpointBasicAuthCredentialsFromEnv retrieve endpoint security credentials from env variables
 func RetrieveEndpointBasicAuthCredentialsFromEnv(apiHashValue string, keyType string, endpointSecurity EndpointSecurity) EndpointSecurity {
 	// production Endpoint security
 	endpointSecurity.Username = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_"+keyType+
