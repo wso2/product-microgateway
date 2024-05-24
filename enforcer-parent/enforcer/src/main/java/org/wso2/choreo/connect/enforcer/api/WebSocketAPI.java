@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
@@ -128,6 +129,11 @@ public class WebSocketAPI implements API {
             if (sandEndpointCluster != null) {
                 endpointClusterMap.put(APIConstants.API_KEY_TYPE_SANDBOX, sandEndpointCluster);
             }
+            for (Operation operation : res.getMethodsList()) {
+                ResourceConfig resConfig = Utils.buildResource(operation, res.getPath(), securityScopesMap);
+                resConfig.setTier(api.getTier());
+                resources.add(resConfig);
+            }
         }
 
         if (api.getEndpointSecurity().hasProductionSecurityInfo()) {
@@ -160,10 +166,7 @@ public class WebSocketAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         responseObject.setRequestPath(requestContext.getRequestPath());
         responseObject.setApiUuid(apiConfig.getUuid());
-        // TODO (thushani) manage resource level security disabling
-        if (apiConfig.isDisableSecurity()) {
-            requestContext.getMatchedResourcePath().setDisableSecurity(true);
-        }
+        
         Utils.populateRemoveAndProtectedHeaders(requestContext);
         
         if (executeFilterChain(requestContext)) {

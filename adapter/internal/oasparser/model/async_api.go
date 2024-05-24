@@ -37,7 +37,6 @@ type AsyncAPI struct {
 	} `json:"info,omitempty"`
 	Servers struct {
 		Production Server `json:"production,omitempty"`
-		Sandbox    Server `json:"sandbox,omitempty"`
 	} `json:"servers,omitempty"`
 	Channels   map[string]ChannelItem `json:"channels,omitempty"`
 	Components struct {
@@ -83,6 +82,11 @@ type OperationAsync struct {
 	}
 }
 
+const (
+	xScopes    string = "x-scopes"
+	oauth2Type string = "oauth2"
+)
+
 // SetInfoAsyncAPI populates the MgwSwagger object with information in asyncapi.yaml.
 func (swagger *MgwSwagger) SetInfoAsyncAPI(asyncAPI AsyncAPI) error {
 	swagger.vendorExtensions = asyncAPI.VendorExtensions
@@ -102,16 +106,6 @@ func (swagger *MgwSwagger) SetInfoAsyncAPI(asyncAPI AsyncAPI) error {
 			return errors.New("error encountered when parsing the production endpoint for AsyncAPI")
 		}
 	}
-	if asyncAPI.Servers.Sandbox.URL != "" {
-		endpoint, err := getEndpointForWebsocketURL(asyncAPI.Servers.Sandbox.URL)
-		if err == nil {
-			sandboxEndpoints := append([]Endpoint{}, *endpoint)
-			swagger.sandboxEndpoints = generateEndpointCluster("clusterSand",
-				sandboxEndpoints, "load_balance")
-		} else {
-			return errors.New("error encountered when parsing the sandbox endpoint for AsyncAPI")
-		}
-	}
 	return nil
 }
 
@@ -126,7 +120,7 @@ func (asyncAPI AsyncAPI) getSecuritySchemes() []SecurityScheme {
 
 func (asyncAPI AsyncAPI) getResources() []*Resource {
 	resources := []*Resource{}
-	val, found := resolveAsyncAPIDisableSecurity(asyncAPI)
+	val := asyncAPI.isAPILevelSecurityDisabled()
 	for channel, channelItem := range asyncAPI.Channels {
 		// ex: channel = /notify, channelItem = { Publish:map, Subscribe:map }
 		var pubOrSubVendorExtensions map[string]interface{}
@@ -146,12 +140,10 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 			continue
 		}
 
-		if found {
-			pubOrSubVendorExtensions["x-wso2-disable-security"] = val
-		}
+		pubOrSubVendorExtensions[xWso2DisableSecurity] = val
 
 		if channelItem.XAuthType == "None" || channelItem.XWso2DisableSecurity {
-			pubOrSubVendorExtensions["x-wso2-disable-security"] = true
+			pubOrSubVendorExtensions[xWso2DisableSecurity] = true
 		}
 
 		security := getSecurityArray(pubOrSubVendorExtensions)
@@ -162,11 +154,7 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 
 		// we ignore other topic vendor extensions except x-auth-type and x-wso2-disable-security
 		channelVendorExtensions := map[string]interface{}{}
-		if found {
-			channelVendorExtensions["x-wso2-disable-security"] = val
-		}
 		resource := setOperationSwagger(channel, methodsArray, channelVendorExtensions)
-		logger.LoggerAPI.Info("Resource: ", resource.methods, resource.path, resource.vendorExtensions)
 		resources = append(resources, &resource)
 	}
 
@@ -174,15 +162,15 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 }
 
 func getSecurityArray(vendorExtensions map[string]interface{}) (security []map[string][]string) {
-	if vendorExtensions["x-scopes"] != nil {
+	if vendorExtensions[xScopes] != nil {
 		securityItem := make(map[string][]string)
-		rawScopes := vendorExtensions["x-scopes"].([]interface{})
+		rawScopes := vendorExtensions[xScopes].([]interface{})
 		var scopes []string
 
 		for _, rawScope := range rawScopes {
 			scopes = append(scopes, rawScope.(string))
 		}
-		securityItem["oauth2"] = scopes
+		securityItem[oauth2Type] = scopes
 		security = append(security, securityItem)
 	}
 	return security
@@ -205,39 +193,23 @@ func (asyncAPI *AsyncAPI) unmarshallAPILevelVendorExtensions(b []byte) error {
 	return nil
 }
 
-// convertExtensibletoReadableFormat unmarshalls the vendor extensible in asyncapi.
-func convertExtensibletoReadableFormatfromAsyncAPI(asyncAPI AsyncAPI) map[string]interface{} {
-	jsnRawExtensible := asyncAPI.VendorExtensions
-	b, err := json.Marshal(jsnRawExtensible)
-	if err != nil {
-		logger.LoggerOasparser.Error("Error marshalling vendor extensions: ", err)
-	}
-
-	var extensible map[string]interface{}
-	err = json.Unmarshal(b, &extensible)
-	if err != nil {
-		logger.LoggerOasparser.Error("Error unmarshalling vendor extensions: ", err)
-	}
-	return extensible
-}
-
 // This method check if the x-wso2-disable-security vendor extension present in the given
 // asyncapi vendor extensions.
 // If found, it will return two bool values which are the following in order.
 // 1st bool represnt the value of the vendor extension.
 // 2nd bool represent if the vendor extension present.
-func resolveAsyncAPIDisableSecurity(asyncAPI AsyncAPI) (bool, bool) {
-	extensions := convertExtensibletoReadableFormatfromAsyncAPI(asyncAPI)
+func (asyncAPI *AsyncAPI) isAPILevelSecurityDisabled() bool {
+	extensions := asyncAPI.VendorExtensions
 	if y, found := extensions[xWso2DisableSecurity]; found {
 		if val, ok := y.(bool); ok {
-			return val, found
+			return val
 		} else if strVal, ok := y.(string); ok {
 			// Handle string that represents a boolean
 			if boolVal, err := strconv.ParseBool(strVal); err == nil {
-				return boolVal, found
+				return boolVal
 			}
 		}
 		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
 	}
-	return false, false
+	return false
 }

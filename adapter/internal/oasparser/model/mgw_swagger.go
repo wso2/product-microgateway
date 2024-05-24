@@ -1232,7 +1232,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			}
 		}
 	} else {
-		return errors.New("API version not specified or not supported")
+		return errors.New("API version not specified or not supported for the version" + definitionVersion)
 	}
 
 	if err != nil {

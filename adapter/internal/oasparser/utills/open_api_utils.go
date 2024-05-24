@@ -72,7 +72,7 @@ func FindAPIDefinitionVersion(jsn []byte) string {
 			return "asyncapi_2"
 		}
 		logger.LoggerOasparser.Errorf("AsyncAPI version %v is not supported.", versionNumber.(string))
-		return "not_supported"
+		return "not_supported_asyncapi_version" + versionNumber.(string)
 	}
 	logger.LoggerOasparser.Error("API definition version is not defined.")
 	return version
