@@ -43,6 +43,8 @@ public class APIConstants {
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String WSO2_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
     public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTP_GET_METHOD = "GET";
+    public static final String HTTP_HEAD_METHOD = "HEAD";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
     public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
