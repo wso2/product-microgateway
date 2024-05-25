@@ -165,7 +165,7 @@ var defaultConfig = &Config{
 	Varnish: varnish{
 		Enabled: true,
 		Host:    "varnish",
-		Port:    8080,
+		Port:     80,
 
 	},	
 	Enforcer: enforcer{
