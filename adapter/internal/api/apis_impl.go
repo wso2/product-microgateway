@@ -43,6 +43,7 @@ import (
 const (
 	openAPIDir                 string = "Definitions"
 	openAPIFilename            string = "swagger."
+	asyncAPIFilename           string = "asyncapi."
 	apiYAMLFile                string = "api.yaml"
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	apiJSONFile                string = "api.json"

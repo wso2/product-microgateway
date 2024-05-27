@@ -33,6 +33,7 @@ import (
 const (
 	openAPIDir                 string = "Definitions"
 	openAPIFilename            string = "swagger."
+	asyncAPIFilename           string = "asyncapi."
 	apiYAMLFile                string = "api.yaml"
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	endpointCertFile           string = "endpoint_certificates."
@@ -60,7 +61,7 @@ type ProjectAPI struct {
 	RateLimitPolicies  map[string]*APIRateLimitPolicy
 	APIEnvProps        map[string]synchronizer.APIEnvProps
 	Deployments        []Deployment
-	OpenAPIJsn         []byte
+	APIDefinition      []byte
 	InterceptorCerts   []byte
 	APIType            string // read from api.yaml and formatted to upper case
 	APILifeCycleStatus string // read from api.yaml and formatted to upper case
@@ -228,15 +229,19 @@ func (apiProject *ProjectAPI) ProcessFilesInsideProject(fileContent []byte, file
 		}
 		apiProject.Deployments = deployments
 	}
-	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
-		loggers.LoggerAPI.Debugf("openAPI file : %v", fileName)
+	if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+openAPIFilename) ||
+		strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+asyncAPIFilename) {
+		loggers.LoggerAPI.Debugf("API definition file : %v", fileName)
 		swaggerJsn, conversionErr := utills.ToJSON(fileContent)
 		if conversionErr != nil {
 			loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
 			return conversionErr
 		}
-		apiProject.OpenAPIJsn = swaggerJsn
+		apiProject.APIDefinition = swaggerJsn
 		apiProject.APIType = HTTP
+		if strings.Contains(fileName, openAPIDir+string(os.PathSeparator)+asyncAPIFilename) {
+			apiProject.APIType = WS
+		}
 	} else if strings.Contains(fileName, interceptorCertDir+string(os.PathSeparator)) &&
 		(strings.HasSuffix(fileName, crtExtension) || strings.HasSuffix(fileName, pemExtension)) {
 		if !tlsutils.IsPublicCertificate(fileContent) {

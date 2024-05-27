@@ -166,7 +166,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) ([]*Resource, error) {
 				methodFound = true
 			}
 			if methodFound {
-				resource := setOperationSwagger(path, methodsArray, pathItem)
+				resource := setOperationSwagger(path, methodsArray, pathItem.Extensions)
 				resources = append(resources, &resource)
 			}
 		}
@@ -194,7 +194,7 @@ func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
 	}
 }
 
-func setOperationSwagger(path string, methods []*Operation, pathItem spec.PathItem) Resource {
+func setOperationSwagger(path string, methods []*Operation, vendorExtensions map[string]interface{}) Resource {
 	return Resource{
 		path:    path,
 		methods: methods,
@@ -206,6 +206,6 @@ func setOperationSwagger(path string, methods []*Operation, pathItem spec.PathIt
 		//schemes:          operation.Schemes,
 		//tags:             operation.Tags,
 		//security:         operation.Security,
-		vendorExtensions: pathItem.VendorExtensible.Extensions,
+		vendorExtensions: vendorExtensions,
 	}
 }
