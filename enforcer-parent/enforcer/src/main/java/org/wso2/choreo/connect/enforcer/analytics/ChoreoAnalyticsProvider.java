@@ -224,8 +224,11 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Map<String, Object> getProperties() {
         AnalyticsCustomDataProvider customDataProvider = AnalyticsFilter.getAnalyticsCustomDataProvider();
-        if (customDataProvider != null && customDataProvider.getCustomProperties(customProperties) != null) {
-            return customDataProvider.getCustomProperties(customProperties);
+        if (customDataProvider != null) {
+            Map<String, Object> customPropertyMap = customDataProvider.getCustomProperties(customProperties);
+            if (customPropertyMap != null) {
+                return customPropertyMap;
+            }
         }
         return this.customProperties;
     }
