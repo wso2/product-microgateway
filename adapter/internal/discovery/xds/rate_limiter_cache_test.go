@@ -741,7 +741,6 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 								Unit:            rls_config.RateLimitUnit_MINUTE,
 								RequestsPerUnit: 100,
 							},
-							ShadowMode: true,
 						},
 					},
 				},

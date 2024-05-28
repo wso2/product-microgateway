@@ -659,11 +659,11 @@ func marshalApplicationPolicy(policy *types.ApplicationPolicy) *subscription.App
 }
 
 func marshalSubscriptionPolicy(policy *types.SubscriptionPolicy) *subscription.SubscriptionPolicy {
-	if (policy.DefaultLimit == nil || policy.DefaultLimit.RequestCount == nil){
+	if policy.DefaultLimit == nil || policy.DefaultLimit.RequestCount == nil {
 		policy.DefaultLimit = &types.SubscriptionDefaultLimit{
 			RequestCount: &types.SubscriptionRequestCount{
 				RequestCount: policy.RateLimitCount,
-				TimeUnit:    policy.RateLimitTimeUnit,
+				TimeUnit:     policy.RateLimitTimeUnit,
 			},
 		}
 	}

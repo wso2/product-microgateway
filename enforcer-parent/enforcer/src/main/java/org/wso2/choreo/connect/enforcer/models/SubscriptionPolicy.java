@@ -76,7 +76,6 @@ public class SubscriptionPolicy extends Policy {
     public void setGraphQLMaxDepth(int graphQLMaxDepth) {
         this.graphQLMaxDepth = graphQLMaxDepth;
     }
-
     @Override
     public String getCacheKey() {
         return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.DELEM_PERIOD + getOrganization() +

@@ -318,7 +318,6 @@ public class JWTAuthenticator implements Authenticator {
                     }
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
-                        APIConfig matchedApi = requestContext.getMatchedAPI();
                         String apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
                         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                                 .getTenantSubscriptionStore(apiTenantDomain);
@@ -343,7 +342,7 @@ public class JWTAuthenticator implements Authenticator {
                             requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("Organization ID: " + matchedApiOrganizationId + ", SubscriptionId: "
+                            log.debug("Organization ID: " + metaDataOrgId + ", SubscriptionId: "
                                     + subscriptionId + ", SubscriptionPolicy: " + subPolicyName +
                                     " will be evaluated for subscription rate-limiting");
                         }
