@@ -352,6 +352,7 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 			Key:       "policy",
 			Value:     policy.Name,
 			RateLimit: &rlPolicyConfig,
+			ShadowMode: !policy.StopOnQuotaReach,
 		}
 		if _, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; !ok {
 			rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization] = make(map[string]*rls_config.RateLimitDescriptor)
@@ -362,18 +363,19 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 			burstCtrlUnit, err := parseRateLimitUnitFromSubscriptionPolicy(policy.RateLimitTimeUnit)
 			if err != nil {
 				loggers.LoggerXds.Error("Error while getting the burst control time unit", err)
+				return err
 			}
 			burstCtrlPolicyConfig := rls_config.RateLimitPolicy{
 				Unit:            burstCtrlUnit,
 				RequestsPerUnit: uint32(policy.RateLimitCount),
 			}
-			burstCtrlPolicyName := "burst"+ policy.Name
 			burstCtrlDescriptor := &rls_config.RateLimitDescriptor{
-				Key: "policy",
-				Value: burstCtrlPolicyName,
+				Key: "burst",
+				Value: "enabled",
 				RateLimit: &burstCtrlPolicyConfig,
+				ShadowMode: !policy.StopOnQuotaReach,
 			}
-			rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization][burstCtrlPolicyName] = burstCtrlDescriptor
+			descriptor.Descriptors = append(descriptor.Descriptors, burstCtrlDescriptor)
 		}
 		loggers.LoggerXds.Infof("Custom subscription policy: %s is added to the cache map for organization: %s", policy.Name, policy.Organization)
 	}

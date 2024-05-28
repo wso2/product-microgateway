@@ -680,8 +680,6 @@ func marshalSubscriptionPolicy(policy *types.SubscriptionPolicy) *subscription.S
 		TenantDomain:         policy.TenantDomain,
 		Timestamp:            policy.TimeStamp,
 		Organization:         policy.Organization,
-		BurstControlCount:    policy.RateLimitCount,
-		BurstControlTimeUnit: policy.RateLimitTimeUnit,
 	}
 }
 

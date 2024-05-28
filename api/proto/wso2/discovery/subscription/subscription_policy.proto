@@ -23,6 +23,4 @@ message SubscriptionPolicy {
 	string tenantDomain = 10;
 	int64 timestamp = 11;
 	string organization = 12;
-	int32 burstControlCount = 13;
-	string burstControlTimeUnit = 14;
 }

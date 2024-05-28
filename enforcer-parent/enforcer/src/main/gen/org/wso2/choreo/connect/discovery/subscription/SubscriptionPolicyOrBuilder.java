@@ -108,22 +108,4 @@ public interface SubscriptionPolicyOrBuilder extends
    */
   com.google.protobuf.ByteString
       getOrganizationBytes();
-
-  /**
-   * <code>int32 burstControlCount = 13;</code>
-   * @return The burstControlCount.
-   */
-  int getBurstControlCount();
-
-  /**
-   * <code>string burstControlTimeUnit = 14;</code>
-   * @return The burstControlTimeUnit.
-   */
-  java.lang.String getBurstControlTimeUnit();
-  /**
-   * <code>string burstControlTimeUnit = 14;</code>
-   * @return The bytes for burstControlTimeUnit.
-   */
-  com.google.protobuf.ByteString
-      getBurstControlTimeUnitBytes();
 }

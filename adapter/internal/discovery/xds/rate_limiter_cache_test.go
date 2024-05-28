@@ -591,6 +591,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Policy2",
@@ -602,6 +603,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Unauthenticated",
@@ -613,6 +615,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "AsyncPolicy1",
@@ -624,6 +627,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Org2Policy1",
@@ -635,6 +639,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org2",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Unlimited",
@@ -646,6 +651,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "carbon.super",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Unlimited",
@@ -657,6 +663,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org2",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Time value policy",
@@ -670,6 +677,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 				Organization: "org2",
 				RateLimitCount: 100,
 				RateLimitTimeUnit: "min",
+				StopOnQuotaReach: false,
 			},
 		},
 	}
@@ -717,20 +725,24 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 						RequestsPerUnit: 124,
 					},
 				},
-				"burstTime value policy": {
-					Key:   "policy",
-					Value: "burstTime value policy",
-					RateLimit: &rls_config.RateLimitPolicy{
-						Unit:            rls_config.RateLimitUnit_MINUTE,
-						RequestsPerUnit: 100,
-					},
-				},
 				"Time value policy": {
 					Key:   "policy",
 					Value: "Time value policy",
 					RateLimit: &rls_config.RateLimitPolicy{
 						Unit:            rls_config.RateLimitUnit_HOUR,
 						RequestsPerUnit: 6000,
+					},
+					ShadowMode: true,
+					Descriptors: []*rls_config.RateLimitDescriptor{
+						{
+							Key:   "burst",
+							Value: "enabled",
+							RateLimit: &rls_config.RateLimitPolicy{
+								Unit:            rls_config.RateLimitUnit_MINUTE,
+								RequestsPerUnit: 100,
+							},
+							ShadowMode: true,
+						},
 					},
 				},
 			},

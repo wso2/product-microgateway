@@ -135,7 +135,7 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:organization",
+													Key: descriptorMetadataKeyForOrganization,
 												},
 											},
 										},
@@ -154,7 +154,7 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:subscription",
+													Key: descriptorMetadataKeyForSubscription,
 												},
 											},
 										},
@@ -173,7 +173,7 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:usage-policy",
+													Key: descriptorMetadataKeyForUsagePolicy,
 												},
 											},
 										},
@@ -196,7 +196,7 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: descriptorMetadataKeyForBurstCtrlOrganization,
+													Key: descriptorMetadataKeyForOrganization,
 												},
 											},
 										},
@@ -215,7 +215,7 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: descriptorMetadataKeyForBurstCtrlSubscription,
+													Key: descriptorMetadataKeyForSubscription,
 												},
 											},
 										},
@@ -234,13 +234,21 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: descriptorMetadataKeyForBurstCtrlUsagePolicy,
+													Key: descriptorMetadataKeyForUsagePolicy,
 												},
 											},
 										},
 									},
 									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
 									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+								GenericKey: &routev3.RateLimit_Action_GenericKey{
+									DescriptorKey:   "burst",
+									DescriptorValue: "enabled",
 								},
 							},
 						},

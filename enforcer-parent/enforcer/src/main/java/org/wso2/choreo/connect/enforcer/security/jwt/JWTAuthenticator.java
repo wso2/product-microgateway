@@ -337,19 +337,6 @@ public class JWTAuthenticator implements Authenticator {
                             metaDataOrgId =
                                     FeatureFlags.getCustomSubscriptionPolicyHandlingOrg(subPolicy.getOrganization());
                             requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);
-                            if (subPolicy.getRateLimitCount() > 0 &&
-                                    StringUtils.isNotEmpty(subPolicy.getRateLimitTimeUnit())) {
-                                String bustCtrlPolicyName = "burst" + subPolicyName;
-                                requestContext.addMetadataToMap("burstCtrl:organization", metaDataOrgId);
-                                requestContext.addMetadataToMap("burstCtrl:subscription", subscriptionId);
-                                requestContext.addMetadataToMap("burstCtrl:usage-policy", bustCtrlPolicyName);
-
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Organization ID: " + metaDataOrgId + ", SubscriptionId: "
-                                            + subscriptionId + ", BurstControlPolicy: " + bustCtrlPolicyName +
-                                            " will be evaluated for burst controlling");
-                                }
-                            }
                         } else {
                             // Datastore does not contain a subscription policy for the given name and
                             // organization. Hence, subscription rate-limiting should be performed using the default org
