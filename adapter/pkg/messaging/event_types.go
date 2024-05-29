@@ -202,6 +202,8 @@ type SubscriptionPolicyEvent struct {
 	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
 	GraphQLMaxComplexity int32  `json:"graphQLMaxComplexity"`
 	GraphQLMaxDepth      int32  `json:"graphQLMaxDepth"`
+	BurstControlCount    int32  `json:"burstControlCount"`
+	BurstControlTimeUnit string `json:"burstControlTimeUnit"`
 }
 
 // KeyManagerEvent for struct

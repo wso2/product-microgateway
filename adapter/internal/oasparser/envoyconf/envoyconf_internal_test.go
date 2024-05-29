@@ -135,7 +135,7 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:organization",
+													Key: descriptorMetadataKeyForOrganization,
 												},
 											},
 										},
@@ -154,7 +154,7 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:subscription",
+													Key: descriptorMetadataKeyForSubscription,
 												},
 											},
 										},
@@ -173,13 +173,82 @@ func TestCreateRoute(t *testing.T) {
 										Path: []*metadatav3.MetadataKey_PathSegment{
 											{
 												Segment: &metadatav3.MetadataKey_PathSegment_Key{
-													Key: "ratelimit:usage-policy",
+													Key: descriptorMetadataKeyForUsagePolicy,
 												},
 											},
 										},
 									},
 									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
 									SkipIfAbsent: true,
+								},
+							},
+						},
+					},
+				},
+				{
+					Actions: []*routev3.RateLimit_Action{
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForOrganization,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForOrganization,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForSubscription,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForSubscription,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+								Metadata: &routev3.RateLimit_Action_MetaData{
+									DescriptorKey: DescriptorKeyForPolicy,
+									MetadataKey: &metadatav3.MetadataKey{
+										Key: extAuthzFilterName,
+										Path: []*metadatav3.MetadataKey_PathSegment{
+											{
+												Segment: &metadatav3.MetadataKey_PathSegment_Key{
+													Key: descriptorMetadataKeyForUsagePolicy,
+												},
+											},
+										},
+									},
+									Source:       routev3.RateLimit_Action_MetaData_DYNAMIC,
+									SkipIfAbsent: true,
+								},
+							},
+						},
+						{
+							ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+								GenericKey: &routev3.RateLimit_Action_GenericKey{
+									DescriptorKey:   "burst",
+									DescriptorValue: "enabled",
 								},
 							},
 						},
