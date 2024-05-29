@@ -659,6 +659,8 @@ func marshalApplicationPolicy(policy *types.ApplicationPolicy) *subscription.App
 }
 
 func marshalSubscriptionPolicy(policy *types.SubscriptionPolicy) *subscription.SubscriptionPolicy {
+	// since we are not using choreo-product-apim with latest changes
+	// below correction is required for test cases
 	if policy.DefaultLimit == nil || policy.DefaultLimit.RequestCount == nil {
 		policy.DefaultLimit = &types.SubscriptionDefaultLimit{
 			RequestCount: &types.SubscriptionRequestCount{
