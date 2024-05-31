@@ -591,6 +591,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Policy2",
@@ -602,6 +603,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Unauthenticated",
@@ -609,10 +611,11 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "requestCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 300,
-						TimeUnit:     "hours",
+						TimeUnit:     "hour",
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "AsyncPolicy1",
@@ -620,10 +623,11 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					QuotaType: "eventCount",
 					RequestCount: &types.SubscriptionRequestCount{
 						RequestCount: 300,
-						TimeUnit:     "hours",
+						TimeUnit:     "hour",
 					},
 				},
 				Organization: "org1",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Org2Policy1",
@@ -635,6 +639,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org2",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Unlimited",
@@ -646,6 +651,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "carbon.super",
+				StopOnQuotaReach: true,
 			},
 			{
 				Name: "Unlimited",
@@ -657,6 +663,35 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					},
 				},
 				Organization: "org2",
+				StopOnQuotaReach: true,
+			},
+			{
+				Name: "Time value policy",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 6000,
+						TimeUnit:     "hour",
+					},
+				},
+				Organization: "org2",
+				RateLimitCount: 100,
+				RateLimitTimeUnit: "min",
+				StopOnQuotaReach: false,
+			},
+			{
+				Name: "Policy with stop on quota Reach and burst controlling",
+				DefaultLimit: &types.SubscriptionDefaultLimit{
+					QuotaType: "requestCount",
+					RequestCount: &types.SubscriptionRequestCount{
+						RequestCount: 5000,
+						TimeUnit:     "hour",
+					},
+				},
+				Organization: "org2",
+				RateLimitCount: 100,
+				RateLimitTimeUnit: "min",
+				StopOnQuotaReach: true,
 			},
 		},
 	}
@@ -702,6 +737,43 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 					RateLimit: &rls_config.RateLimitPolicy{
 						Unit:            rls_config.RateLimitUnit_SECOND,
 						RequestsPerUnit: 124,
+					},
+				},
+				"Time value policy": {
+					Key:   "policy",
+					Value: "Time value policy",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_HOUR,
+						RequestsPerUnit: 6000,
+					},
+					ShadowMode: true,
+					Descriptors: []*rls_config.RateLimitDescriptor{
+						{
+							Key:   "burst",
+							Value: "enabled",
+							RateLimit: &rls_config.RateLimitPolicy{
+								Unit:            rls_config.RateLimitUnit_MINUTE,
+								RequestsPerUnit: 100,
+							},
+						},
+					},
+				},
+				"Policy with stop on quota Reach and burst controlling": {
+					Key:   "policy",
+					Value: "Policy with stop on quota Reach and burst controlling",
+					RateLimit: &rls_config.RateLimitPolicy{
+						Unit:            rls_config.RateLimitUnit_HOUR,
+						RequestsPerUnit: 5000,
+					},
+					Descriptors: []*rls_config.RateLimitDescriptor{
+						{
+							Key:   "burst",
+							Value: "enabled",
+							RateLimit: &rls_config.RateLimitPolicy{
+								Unit:            rls_config.RateLimitUnit_MINUTE,
+								RequestsPerUnit: 100,
+							},
+						},
 					},
 				},
 			},

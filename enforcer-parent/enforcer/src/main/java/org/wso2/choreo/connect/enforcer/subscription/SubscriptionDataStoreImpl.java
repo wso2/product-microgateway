@@ -22,12 +22,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
-import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationPolicyDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.features.FeatureFlags;
 import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
@@ -72,7 +72,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
     private Map<String, Subscription> apiVersionRangeSubscriptionMap;
-    private String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
 
     SubscriptionDataStoreImpl() {
     }
@@ -111,10 +110,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicyByName(String policyName) {
-
+    public SubscriptionPolicy getSubscriptionPolicyByOrgIdAndName(String orgId, String policyName) {
+        String organizationId = FeatureFlags.getCustomSubscriptionPolicyHandlingOrg(orgId);
         String key = PolicyType.SUBSCRIPTION +
-                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName);
+                SubscriptionDataStoreUtil.DELEM_PERIOD + organizationId +
+                SubscriptionDataStoreUtil.DELEM_PERIOD + policyName;
         return subscriptionPolicyMap.get(key);
     }
 
@@ -541,12 +541,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String policyName) {
+    public List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String organizationId, String policyName) {
         List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         if (StringUtils.isEmpty(policyName)) {
             subscriptionPolicies.addAll(this.subscriptionPolicyMap.values());
         } else {
-            SubscriptionPolicy policy = this.getSubscriptionPolicyByName(policyName);
+            SubscriptionPolicy policy = this.getSubscriptionPolicyByOrgIdAndName(organizationId, policyName);
             subscriptionPolicies.add(policy);
         }
         return subscriptionPolicies;

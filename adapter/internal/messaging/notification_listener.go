@@ -57,6 +57,8 @@ const (
 	policyDelete                = "POLICY_DELETE"
 	blockedStatus               = "BLOCKED"
 	keyManagerConfig            = "KEY_MANAGER_CONFIGURATION"
+	requestCountQuotaType       = "requestCount"
+	TenantID                    = -1234
 )
 
 // var variables
@@ -442,12 +444,28 @@ func handlePolicyEvents(data []byte, eventType string) {
 			return
 		}
 
-		subscriptionPolicy := types.SubscriptionPolicy{ID: subscriptionPolicyEvent.PolicyID, TenantID: -1,
-			Name: subscriptionPolicyEvent.PolicyName, QuotaType: subscriptionPolicyEvent.QuotaType,
+		subscriptionPolicy := types.SubscriptionPolicy{
+			ID:                   subscriptionPolicyEvent.PolicyID,
+			TenantID:             TenantID,
+			Name:                 subscriptionPolicyEvent.PolicyName,
+			QuotaType:            subscriptionPolicyEvent.QuotaType,
 			GraphQLMaxComplexity: subscriptionPolicyEvent.GraphQLMaxComplexity,
-			GraphQLMaxDepth:      subscriptionPolicyEvent.GraphQLMaxDepth, RateLimitCount: subscriptionPolicyEvent.RateLimitCount,
-			RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
-			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp, Organization: subscriptionPolicyEvent.Organization}
+			GraphQLMaxDepth:      subscriptionPolicyEvent.GraphQLMaxDepth,
+			RateLimitCount:       subscriptionPolicyEvent.BurstControlCount,
+			RateLimitTimeUnit:    subscriptionPolicyEvent.BurstControlTimeUnit,
+			StopOnQuotaReach:     subscriptionPolicyEvent.StopOnQuotaReach,
+			TenantDomain:         subscriptionPolicyEvent.TenantDomain,
+			TimeStamp:            subscriptionPolicyEvent.TimeStamp,
+			Organization:         subscriptionPolicyEvent.Organization,
+		}
+
+		subscriptionPolicy.DefaultLimit = &types.SubscriptionDefaultLimit{
+			QuotaType: requestCountQuotaType,
+			RequestCount: &types.SubscriptionRequestCount{
+				RequestCount: subscriptionPolicyEvent.RateLimitCount,
+				TimeUnit:     subscriptionPolicyEvent.RateLimitTimeUnit,
+			},
+		}
 
 		var subscriptionPolicyList *subscription.SubscriptionPolicyList
 		if subscriptionPolicyEvent.Event.Type == policyCreate {

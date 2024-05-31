@@ -91,7 +91,7 @@ public interface SubscriptionDataStore {
      * @param policyName Name of the Throttling Policy
      * @return Subscription Throttling Policy
      */
-    SubscriptionPolicy getSubscriptionPolicyByName(String policyName);
+    SubscriptionPolicy getSubscriptionPolicyByOrgIdAndName(String orgId, String policyName);
 
     /**
      * Gets Application Throttling Policy by the name and Tenant Id.
@@ -207,6 +207,6 @@ public interface SubscriptionDataStore {
      * @param policyName The name of the policy
      * @return
      */
-    List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String policyName);
+    List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String organizationId, String policyName);
 
 }

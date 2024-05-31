@@ -61,9 +61,9 @@ func parseRateLimitUnitFromSubscriptionPolicy(name string) (rls_config.RateLimit
 		return rls_config.RateLimitUnit_SECOND, nil
 	case "min":
 		return rls_config.RateLimitUnit_MINUTE, nil
-	case "hours":
+	case "hour":
 		return rls_config.RateLimitUnit_HOUR, nil
-	case "days":
+	case "day":
 		return rls_config.RateLimitUnit_DAY, nil
 	default:
 		return rls_config.RateLimitUnit_UNKNOWN, fmt.Errorf("invalid rate limit unit %q", name)
@@ -336,7 +336,7 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 		}
 
 		// Need not to add the Unauthenticated and Unlimited policies to the rate limiter service
-		if (policy.Organization == "carbon.super" && policy.Name == "Unauthenticated") || policy.DefaultLimit.RequestCount.RequestCount < 0 {
+		if (policy.Organization == "carbon.super" && policy.Name == "Unauthenticated") || policy.DefaultLimit.RequestCount.RequestCount <= 0 {
 			continue
 		}
 		rateLimitUnit, err := parseRateLimitUnitFromSubscriptionPolicy(policy.DefaultLimit.RequestCount.TimeUnit)
@@ -352,9 +352,28 @@ func AddSubscriptionLevelRateLimitPolicy(policyList *types.SubscriptionPolicyLis
 			Key:       "policy",
 			Value:     policy.Name,
 			RateLimit: &rlPolicyConfig,
+			ShadowMode: !policy.StopOnQuotaReach,
 		}
 		if _, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; !ok {
 			rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization] = make(map[string]*rls_config.RateLimitDescriptor)
+		}
+
+		if policy.RateLimitCount > 0 && policy.RateLimitTimeUnit != "" {
+			burstCtrlUnit, err := parseRateLimitUnitFromSubscriptionPolicy(policy.RateLimitTimeUnit)
+			if err != nil {
+				loggers.LoggerXds.Error("Error while getting the burst control time unit", err)
+				return err
+			}
+			burstCtrlPolicyConfig := rls_config.RateLimitPolicy{
+				Unit:            burstCtrlUnit,
+				RequestsPerUnit: uint32(policy.RateLimitCount),
+			}
+			burstCtrlDescriptor := &rls_config.RateLimitDescriptor{
+				Key: "burst",
+				Value: "enabled",
+				RateLimit: &burstCtrlPolicyConfig,
+			}
+			descriptor.Descriptors = append(descriptor.Descriptors, burstCtrlDescriptor)
 		}
 		rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization][policy.Name] = descriptor
 		loggers.LoggerXds.Infof("Custom subscription policy: %s is added to the cache map for organization: %s", policy.Name, policy.Organization)
