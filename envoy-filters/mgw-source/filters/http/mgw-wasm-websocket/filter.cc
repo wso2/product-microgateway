@@ -106,28 +106,30 @@ FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
   if (buffer.has_value() && buffer.value()->size() != 0) {
     auto pairs = buffer.value()->pairs();
     for (auto &p : pairs) {
-      if (std::string(p.first) == "isThrottled" && std::string(p.second) == "true") {
-        LOG_TRACE(std::string("Initial throttle state is overlimit for the request : ") + this->x_request_id_);
-        this->throttle_state_ = ThrottleState::OverLimit;
-      } else if (std::string(p.first) == INITIAL_APIM_ERROR_CODE) {
-        int errorCode;
-        sscanf(std::string(p.second).c_str(), "%d", &errorCode);
-        this->apim_error_code_ = errorCode;
-        LOG_TRACE(std::string("Initial APIM Error code is ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
-      } else if (std::string(p.first) == THROTTLE_CONDITION_EXPIRE_TIMESTAMP) {
-        int timestamp;
-        sscanf(std::string(p.second).c_str(), "%d", &timestamp);
-        this->throttle_period_ = timestamp;
-        LOG_TRACE(std::string("Throttle Period is till ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
-      } else if (std::string(p.first) == EXT_AUTHZ_DURATION) {
-        LOG_TRACE(std::string("Ext Authz Duration Ignored!!!"));
-      } else {
-        // The above metadata is only required for determining throttling state in the start. Hence they are not
-        // required to stored in metadata separately. Everything else will be stored under metadata.
-        (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
-        LOG_TRACE(std::string(p.first) + std::string(" -> ") + std::string(p.second) +
-            std::string(" dynamic metadata for the request : ") + this->x_request_id_);
-      }
+      // TODO (thushani) Implement fixes for throttling
+
+      // if (std::string(p.first) == "isThrottled" && std::string(p.second) == "true") {
+      //   LOG_TRACE(std::string("Initial throttle state is overlimit for the request : ") + this->x_request_id_);
+      //   this->throttle_state_ = ThrottleState::OverLimit;
+      // } else if (std::string(p.first) == INITIAL_APIM_ERROR_CODE) {
+      //   int errorCode;
+      //   sscanf(std::string(p.second).c_str(), "%d", &errorCode);
+      //   this->apim_error_code_ = errorCode;
+      //   LOG_TRACE(std::string("Initial APIM Error code is ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
+      // } else if (std::string(p.first) == THROTTLE_CONDITION_EXPIRE_TIMESTAMP) {
+      //   int timestamp;
+      //   sscanf(std::string(p.second).c_str(), "%d", &timestamp);
+      //   this->throttle_period_ = timestamp;
+      //   LOG_TRACE(std::string("Throttle Period is till ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
+      // } else if (std::string(p.first) == EXT_AUTHZ_DURATION) {
+      //   LOG_TRACE(std::string("Ext Authz Duration Ignored!!!"));
+      // }
+
+      // The above metadata is only required for determining throttling state in the start. Hence they are not
+      // required to stored in metadata separately. Everything else will be stored under metadata.
+      (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
+      LOG_TRACE(std::string(p.first) + std::string(" -> ") + std::string(p.second) +
+          std::string(" dynamic metadata for the request : ") + this->x_request_id_);
     }
   }
   // Create a new gRPC bidirectional stream.
