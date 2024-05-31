@@ -46,7 +46,6 @@ public:
   void updateFilterState(ResponseStatus status) override;
   void updateHandlerState(HandlerState state) override;
   void updateThrottlePeriod(const int throttle_period) override;
-  void updateAPIMErrorCode(int apim_error_code) override;
   ~MgwWebSocketContext() override;
 
 private:

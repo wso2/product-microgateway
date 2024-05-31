@@ -27,9 +27,6 @@ using google::protobuf::util::JsonParseOptions;
 using google::protobuf::util::Status;
 
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest;
-using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest_MessageDirection_HANDSHAKE;
-using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest_MessageDirection_PUBLISH;
-using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest_MessageDirection_SUBSCRIBE;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameResponse;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::Config;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::Metadata;
@@ -153,8 +150,7 @@ FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
       // Read ext_authz_metadata_ metdata saved as a member variable
       *request.mutable_metadata() = *this->metadata_;
       request.set_payload("");
-      request.set_direction(WebSocketFrameRequest_MessageDirection_HANDSHAKE);
-      request.set_apim_error_code(0);
+      // TODO (thushani) set direction for analytics
       sendEnforcerRequest(this, request);
     }
   }
@@ -183,25 +179,22 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
     // Read ext_authz_metadata_ metdata saved as a member variable
     *request.mutable_metadata() = *this->metadata_;
     request.set_payload(std::string(body->view()));
-    request.set_direction(WebSocketFrameRequest_MessageDirection_PUBLISH);
+    // TODO (thushani) set direction for analytics
     
     // Perform throttling logic.
     // If the throttle state is underlimit and if the gRPC stream is open, send WebSocketFrameRequest. 
     // If no gRPC stream, try to open a new stream and then send. 
     if(this->throttle_state_ == ThrottleState::UnderLimit){
-      request.set_apim_error_code(0);
       sendEnforcerRequest(this, request);
       return FilterDataStatus::Continue;
     // If throttle state is FailureModeAllowed, then try to esatblish a new gRPC stream and 
     // pass the request to next filter. This state switch happens when the filter-enforcer connection fails.
     }else if (this->throttle_state_ == ThrottleState::FailureModeAllowed){
-      request.set_apim_error_code(0);
       sendEnforcerRequest(this, request);
       return FilterDataStatus::Continue;
     // If throttle state is FailureModeBlocked, then try to establish a new gRPC stream and 
     // stop interation. This state switch happens when the filter-enforcer connection fails.
     }else if(this->throttle_state_ == ThrottleState::FailureModeBlocked){
-      request.set_apim_error_code(ENFORCER_NOT_REACHABLE_ERROR_CODE);
       sendEnforcerRequest(this, request);
       return FilterDataStatus::StopIterationNoBuffer;
     // If throttle state is overlimit, then check the throttle period before making a decision. 
@@ -216,11 +209,9 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
         if(this->throttle_period_ <= now.tv_sec){
           this->throttle_state_ = ThrottleState::UnderLimit;
           // publish to enforcer
-          request.set_apim_error_code(0);
           sendEnforcerRequest(this, request);
           return FilterDataStatus::Continue;
         }else{
-          request.set_apim_error_code(this->apim_error_code_);
           sendEnforcerRequest(this, request);
           return FilterDataStatus::StopIterationNoBuffer;
         }
@@ -258,25 +249,22 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
     // Read ext_authz_metadata_ metdata saved as a member variable
     *request.mutable_metadata() = *this->metadata_;
     request.set_payload(std::string(body->view()));
-    request.set_direction(WebSocketFrameRequest_MessageDirection_SUBSCRIBE);
+    // TODO (thushani) set direction for analytics
 
     // Perform throttling logic.
     // If the throttle state is underlimit and if the gRPC stream is open, send WebSocketFrameRequest. 
     // If no gRPC stream, try to open a new stream and then send. 
     if(this->throttle_state_ == ThrottleState::UnderLimit){
-      request.set_apim_error_code(0);
       sendEnforcerRequest(this, request);
       return FilterDataStatus::Continue;
     // If throttle state is FailureModeAllowed, then try to esatblish a new gRPC stream and 
     // pass the request to next filter.
     }else if (this->throttle_state_ == ThrottleState::FailureModeAllowed){
-      request.set_apim_error_code(0);
       sendEnforcerRequest(this, request);
       return FilterDataStatus::Continue;
     // If throttle state is FailureModeBlocked, then try to establish a new gRPC stream and 
     // stop interation.
     }else if(this->throttle_state_ == ThrottleState::FailureModeBlocked){
-      request.set_apim_error_code(ENFORCER_NOT_REACHABLE_ERROR_CODE);
       sendEnforcerRequest(this, request);
       return FilterDataStatus::StopIterationNoBuffer;
     // If throttle state is overlimit, then check the throttle period before making a decision. 
@@ -292,11 +280,9 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
         if(this->throttle_period_ <= now.tv_sec){
           this->throttle_state_ = ThrottleState::UnderLimit;
           // publish to enforcer
-          request.set_apim_error_code(0);
           sendEnforcerRequest(this, request);
           return FilterDataStatus::Continue;
         }else{
-          request.set_apim_error_code(this->apim_error_code_);
           sendEnforcerRequest(this, request);
           return FilterDataStatus::StopIterationNoBuffer;
         }
@@ -336,10 +322,6 @@ void MgwWebSocketContext::updateFilterState(ResponseStatus status){
   }else{
     LOG_TRACE("Enforcer throttle decision unknown" + std::string(" : ") + this->x_request_id_);
   }
-}
-
-void MgwWebSocketContext::updateAPIMErrorCode(int code) {
-  this->apim_error_code_ = code;
 }
 
 // Callback used by the handler to update the handler state reference in the filter.
