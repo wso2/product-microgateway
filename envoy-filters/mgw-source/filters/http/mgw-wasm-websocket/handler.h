@@ -24,18 +24,18 @@ class HandlerCallbacks{
 public:
     virtual ~HandlerCallbacks() = default;
 
-    virtual void updateFilterState(ResponseStatus status);
+    virtual void updateFilterState(ResponseStatus status){};
 
-    virtual void updateHandlerState(HandlerState state);
+    virtual void updateHandlerState(HandlerState state){};
 
-    virtual void updateThrottlePeriod(const int throttle_period);
+    virtual void updateThrottlePeriod(const int throttle_period){};
 };
 
 class StreamHanlderClient{
 public:
     virtual ~StreamHanlderClient() = default;
 
-    virtual bool sendMessage(WebSocketFrameRequest request);
+    virtual void sendMessage(WebSocketFrameRequest request){};
 };
 
 using StreamHanlderClientPtr = std::unique_ptr<StreamHanlderClient>;
