@@ -103,27 +103,6 @@ FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
   if (buffer.has_value() && buffer.value()->size() != 0) {
     auto pairs = buffer.value()->pairs();
     for (auto &p : pairs) {
-      // TODO (thushani) Implement fixes for throttling
-
-      // if (std::string(p.first) == "isThrottled" && std::string(p.second) == "true") {
-      //   LOG_TRACE(std::string("Initial throttle state is overlimit for the request : ") + this->x_request_id_);
-      //   this->throttle_state_ = ThrottleState::OverLimit;
-      // } else if (std::string(p.first) == INITIAL_APIM_ERROR_CODE) {
-      //   int errorCode;
-      //   sscanf(std::string(p.second).c_str(), "%d", &errorCode);
-      //   this->apim_error_code_ = errorCode;
-      //   LOG_TRACE(std::string("Initial APIM Error code is ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
-      // } else if (std::string(p.first) == THROTTLE_CONDITION_EXPIRE_TIMESTAMP) {
-      //   int timestamp;
-      //   sscanf(std::string(p.second).c_str(), "%d", &timestamp);
-      //   this->throttle_period_ = timestamp;
-      //   LOG_TRACE(std::string("Throttle Period is till ")  + std::string(p.second) + std::string(" for the request : ") + this->x_request_id_);
-      // } else if (std::string(p.first) == EXT_AUTHZ_DURATION) {
-      //   LOG_TRACE(std::string("Ext Authz Duration Ignored!!!"));
-      // }
-
-      // The above metadata is only required for determining throttling state in the start. Hence they are not
-      // required to stored in metadata separately. Everything else will be stored under metadata.
       (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
       LOG_TRACE(std::string(p.first) + std::string(" -> ") + std::string(p.second) +
           std::string(" dynamic metadata for the request : ") + this->x_request_id_);
@@ -164,7 +143,7 @@ FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
 FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
                                                bool /* end_of_stream */) {
   auto body = getBufferBytes(WasmBufferType::HttpRequestBody, 0, body_buffer_length);
-  LOG_TRACE(std::string("onRequestBody called mgw_WASM_websocket ") + std::string(body->view()) + std::string(" : ") + this->x_request_id_ );
+  LOG_TRACE(std::string("onRequestBody called mgw_WASM_websocket ") + std::string(" : ") + this->x_request_id_ );
   auto data = body->view();
   
   if(isDataFrame(data)){
@@ -290,7 +269,6 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
         // It is unlikely that the return value would be zero https://man7.org/linux/man-pages/man2/gettimeofday.2.html
         LOG_ERROR(std::string("Current Time cannot be processed. Hence the websocket stream is closed. : ") +
             this->x_request_id_);
-        return FilterDataStatus::StopIterationNoBuffer;
         return FilterDataStatus::StopIterationNoBuffer;
       }
     }

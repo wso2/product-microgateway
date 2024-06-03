@@ -54,7 +54,7 @@ void MgwGrpcStreamHandler::onRemoteClose(GrpcStatus status){
 void MgwGrpcStreamHandler::sendMessage(WebSocketFrameRequest request){
   auto res = send(request, true);
   if(res != WasmResult::Ok){
-    LOG_TRACE(std::string("Error sending message"));
+    LOG_WARN(std::string("Error sending message"));
   }else{
     LOG_TRACE(std::string("Message sent successfully"));
   }; 
