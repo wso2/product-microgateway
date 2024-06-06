@@ -118,12 +118,10 @@ func getCorsHTTPFilter() *hcmv3.HttpFilter {
 func getUpgradeFilters() []*hcmv3.HttpFilter {
 	cors := getCorsHTTPFilter()
 	extAauth := getExtAuthzHTTPFilter()
-	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
 	router := getRouterHTTPFilter()
 	upgradeFilters := []*hcmv3.HttpFilter{
 		cors,
 		extAauth,
-		mgwWebSocketWASM,
 		router,
 	}
 	return upgradeFilters
