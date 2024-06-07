@@ -37,6 +37,7 @@ public type KeyValidationHandler object {
     private string issuer = "";
     private boolean remoteUserClaimRetrievalEnabled = false;
     private boolean isLegacyKM = false;
+    private boolean enableIntrospectForFailedJWT = false;
 
     public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
         GatewayConf gatewayConf = getGatewayConfInstance();
@@ -58,6 +59,8 @@ public type KeyValidationHandler object {
             self.classLoaded = jwtGeneratorClassLoaded;
             self.remoteUserClaimRetrievalEnabled = gatewayConf.getKeyManagerConf().remoteUserClaimRetrievalEnabled;
         }
+        self.enableIntrospectForFailedJWT = getConfigBooleanValue(KM_CONF_INSTANCE_ID, ENABLE_INTROSPECT_FOR_FAILED_JWT,
+                                                    DEFAULT_KM_CONF_ENABLE_INTROSPECT_FOR_FAILED_JWT);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -71,7 +74,7 @@ public type KeyValidationHandler object {
             if (headerValue.startsWith(AUTH_SCHEME_BEARER_LOWERCASE)) {
                 string credential = headerValue.substring(6, headerValue.length()).trim();
                 string[] splitContent = split(credential, "\\.");
-                if (splitContent.length() < 3) {
+                if (self.enableIntrospectForFailedJWT || splitContent.length() < 3) {
                     printDebug(KEY_AUTHN_FILTER, "Request will authenticated via key validation service");
                     return true;
                 }

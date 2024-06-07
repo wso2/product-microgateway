@@ -241,6 +241,7 @@ public const string TOKEN_URL = "tokenUrl";
 public const string REFRESH_TOKEN = "refreshToken";
 public const string ACCESS_TOKEN = "accessToken";
 public const string CREDENTIAL_BEARER = "credentialBearer";
+public const string ENABLE_INTROSPECT_FOR_FAILED_JWT = "enableIntrospectForFailedJWT";
 public const string NAME = "name";
 public const string VERSIONS = "versions";
 public const string VERSION = "version";

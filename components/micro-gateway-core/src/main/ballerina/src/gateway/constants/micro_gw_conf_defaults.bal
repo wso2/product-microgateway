@@ -37,6 +37,7 @@ public const string DEFAULT_KM_TOKEN_CONTEXT = "oauth2";
 public const int DEFAULT_TIMESTAMP_SKEW = 5000;
 public const boolean DEFAULT_EXTERNAL = false;
 public const string DEFAULT_KM_CONF_ISSUER = "https://localhost:9443/oauth2/token";
+public const boolean DEFAULT_KM_CONF_ENABLE_INTROSPECT_FOR_FAILED_JWT = false;
 
 public const boolean DEFAULT_KM_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED = false;
 
