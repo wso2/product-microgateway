@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # --------------------------------------------------------------------
 # Copyright (c) 2023, WSO2 LLC. (http://wso2.com) All Rights Reserved.
 #
@@ -21,4 +21,18 @@ export CONFIG_TYPE=GRPC_XDS_SOTW
 export CONFIG_GRPC_XDS_NODE_ID="${RATE_LIMITER_LABEL:-Default}"
 
 # Start the server
-ratelimit "$@"
+ratelimit "$@" &
+
+RL_PID_PID=$!
+_term() {
+    echo "Stopping Choreo Connect Rate-Limiter..."
+    kill -SIGTERM $RL_PID_PID
+    wait $RL_PID_PID
+    echo "Choreo Connect Rate-Limiter stopped."
+    exit 0
+}
+
+# trap handle_signal SIGTERM (TERM in alpine)
+trap _term TERM
+
+wait $RL_PID_PID

@@ -35,7 +35,7 @@
             <outputDirectory>security/truststore</outputDirectory>
         </file>
         <file>
-            <source>src/main/resources/start-server.sh</source>
+            <source>src/main/resources/docker-entrypoint.sh</source>
             <outputDirectory/>
         </file>
         <file>
