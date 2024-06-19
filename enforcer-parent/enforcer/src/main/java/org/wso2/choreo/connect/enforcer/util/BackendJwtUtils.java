@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
@@ -124,7 +124,7 @@ public class BackendJwtUtils {
 
         // Load default jwt generator class
         if (classNameInConfig.equals(JWTConstants.DEFAULT_JWT_GENERATOR_CLASS_NAME)) {
-            jwtGenerator = new APIMgtGatewayJWTGeneratorImpl();
+            jwtGenerator = new APIMgtGatewayUrlSafeJWTGeneratorImpl();
             return jwtGenerator;
         } else {
             Class<AbstractAPIMgtGatewayJWTGenerator> clazz;
