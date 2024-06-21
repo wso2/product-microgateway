@@ -21,9 +21,9 @@ const (
 	accessLoggerClusterName string = "access-logger"
 	grpcAccessLogLogName    string = "mgw_access_logs"
 	tracingClusterName      string = "wso2_cc_trace"
-	extAuthzHTTPCluster     string = "ext_authz_http_cluster"
-	rateLimitClusterName    string = "rate-limit"
-	varnishClusterName 		string = "varnish"
+	extAuthzHTTPCluster		string = "ext_authz_http_cluster"
+	rateLimitClusterName	string = "rate-limit"
+	varnishClusterName		string = "varnish"
 )
 
 const (

@@ -86,7 +86,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 	var listeners []*listenerv3.Listener
 
 	//creating the manager for exisitng listener
-	manager := createHttpConnectionManager(httpFilters, upgradeFilters, accessLogs, conf)
+	manager := createHTTPConnectionManager(httpFilters, upgradeFilters, accessLogs, conf)
 	pbst, err := anypb.New(manager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
@@ -101,7 +101,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 	filters = append(filters, &connectionManagerFilterP)
 
 	// Creating the new manager for new listener
-	newManager := createHttpConnectionManager(router, router, accessLogs, conf)
+	newManager := createHTTPConnectionManager(router, router, accessLogs, conf)
 	pbstNewManager, err := anypb.New(newManager)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
@@ -328,7 +328,7 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 }
 
 // function to create http managers
-func createHttpConnectionManager(httpFilters []*hcmv3.HttpFilter, upgradeFilters []*hcmv3.HttpFilter, accessLogs []*config_access_logv3.AccessLog, conf *config.Config) *hcmv3.HttpConnectionManager {
+func createHTTPConnectionManager(httpFilters []*hcmv3.HttpFilter, upgradeFilters []*hcmv3.HttpFilter, accessLogs []*config_access_logv3.AccessLog, conf *config.Config) *hcmv3.HttpConnectionManager {
     manager := &hcmv3.HttpConnectionManager{
         CodecType:  hcmv3.HttpConnectionManager_AUTO,
         StatPrefix: httpConManagerStartPrefix,
