@@ -113,8 +113,8 @@ type envoy struct {
 	ListenerPort                     uint32
 	SecuredListenerHost              string
 	SecuredListenerPort              uint32
-	NewListenerHost                   string
-	NewListenerPort                   uint32
+	NewListenerHost                  string
+	NewListenerPort                  uint32
 	ClusterTimeoutInSeconds          time.Duration
 	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
 	KeyStore                         keystore
