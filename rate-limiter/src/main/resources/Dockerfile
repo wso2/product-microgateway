@@ -61,9 +61,9 @@ RUN \
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 COPY maven/security security
-COPY maven/start-server.sh .
+COPY maven/docker-entrypoint.sh .
 COPY maven/LICENSE.txt .
 
 EXPOSE 8090 8091 6070
 
-ENTRYPOINT ["sh", "start-server.sh"]
+ENTRYPOINT ["/home/wso2/docker-entrypoint.sh"]
