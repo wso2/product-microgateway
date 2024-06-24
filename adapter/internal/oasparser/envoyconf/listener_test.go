@@ -31,7 +31,7 @@ func TestCreateListenerWithRds(t *testing.T) {
 	// TODO: (Vajira) Add more test scenarios
 	listeners := CreateListenersWithRds()
 	assert.NotEmpty(t, listeners, "Listeners creation has been failed")
-	assert.Equal(t, 3, len(listeners), "Two listeners are not created.")
+	assert.Equal(t, 2, len(listeners), "Two listeners are not created.")
 
 	securedListener := listeners[0]
 	if securedListener.Validate() != nil {
