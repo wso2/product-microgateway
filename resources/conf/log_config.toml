@@ -25,9 +25,9 @@ logLevel = "INFO"
 # The logging configuration for Router
 
 [accessLogs]
-enable = false
+enable = true
 logfile = "/dev/stdout" # This file will be created inside router container.
-logType = "text" # LogTypes can be "text" or "json"
+logType = "json" # LogTypes can be "text" or "json"
 
 [accessLogs.excludes]
 [accessLogs.excludes.systemHost]

@@ -40,6 +40,8 @@ func PopulateQueryParamForOrganizationID(queryParamMap map[string]string) map[st
 	conf, _ := config.ReadConfigs()
 	if conf.GlobalAdapter.Enabled {
 		queryParamMap[organizationID] = commonOrganizationIDValue
+	} else if conf.ControlPlane.OrganizationID != "" {
+		queryParamMap[organizationID] = conf.ControlPlane.OrganizationID
 	}
 	return queryParamMap
 }

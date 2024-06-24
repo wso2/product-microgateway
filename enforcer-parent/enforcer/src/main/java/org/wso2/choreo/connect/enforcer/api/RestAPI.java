@@ -129,7 +129,7 @@ public class RestAPI implements API {
             }
 
             for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath(), securityScopesMap);
+                ResourceConfig resConfig = Utils.buildResource(operation, res.getPath(), securityScopesMap);
                 resConfig.setEndpoints(endpointClusterMap);
                 resources.add(resConfig);
             }
@@ -216,36 +216,6 @@ public class RestAPI implements API {
     @Override
     public APIConfig getAPIConfig() {
         return this.apiConfig;
-    }
-
-    private ResourceConfig buildResource(Operation operation, String resPath, Map<String,
-            List<String>> apiLevelSecurityList) {
-        ResourceConfig resource = new ResourceConfig();
-        resource.setPath(resPath);
-        resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
-        resource.setTier(operation.getTier());
-        resource.setDisableSecurity(operation.getDisableSecurity());
-        Map<String, List<String>> securityMap = new HashMap<>();
-        if (operation.getSecurityList().size() > 0) {
-            for (SecurityList securityList : operation.getSecurityList()) {
-                for (Map.Entry<String, Scopes> entry : securityList.getScopeListMap().entrySet()) {
-                    securityMap.put(entry.getKey(), new ArrayList<>());
-                    if (entry.getValue() != null && entry.getValue().getScopesList().size() > 0) {
-                        List<String> scopeList = new ArrayList<>(entry.getValue().getScopesList());
-                        securityMap.replace(entry.getKey(), scopeList);
-                    }
-                    // only supports security scheme OR combinations. Example -
-                    // Security:
-                    // - api_key: []
-                    //   oauth: [] <-- AND operation is not supported hence ignoring oauth here.
-                    break;
-                }
-            }
-            resource.setSecuritySchemas(securityMap);
-        } else {
-            resource.setSecuritySchemas(apiLevelSecurityList);
-        }
-        return resource;
     }
 
     private void initFilters() {

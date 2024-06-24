@@ -48,7 +48,14 @@ public class WebSocketFrameService extends WebSocketFrameServiceGrpc.WebSocketFr
     }
 
     public static void removeObserver(String streamId) {
-        responseObservers.remove(streamId);
+        // As per the class java doc, the map of observers is maintained to keep track of open grpc streams.
+        // The map is updated when the first message from the router arrives at the enforcer. If a stream
+        // was created, yet no WebSocketFrameRequests arrives, and the stream gets deleted, the class variable
+        // streamId will not be set (streamId will be null) and an observer will not be added to the map.
+        // Ex: when a backend does not exist.
+        if (streamId != null) {
+            responseObservers.remove(streamId);
+        }
     }
 
 

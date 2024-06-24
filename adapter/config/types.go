@@ -522,6 +522,7 @@ type controlPlane struct {
 	ServiceURLDeprecated       string `toml:"serviceUrl"`
 	Username                   string
 	Password                   string
+	OrganizationID             string
 	SyncApisOnStartUp          bool
 	SendRevisionUpdate         bool
 	EnvironmentLabels          []string

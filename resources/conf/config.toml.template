@@ -480,6 +480,8 @@ enabled = true
   username = "admin"
   # Password of the API Manager user
   password = "$env{cp_admin_pwd}"
+  # Organization ID (Optional)
+  organizationID = ""
   # Environment labels list
   environmentLabels = ["Default"]
   # Connection retry interval

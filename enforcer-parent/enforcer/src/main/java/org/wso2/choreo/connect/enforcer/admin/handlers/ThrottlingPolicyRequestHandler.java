@@ -36,19 +36,22 @@ public class ThrottlingPolicyRequestHandler extends RequestHandler {
     @Override
     public ResponsePayload handleRequest(String[] params, String requestType) throws Exception {
         String policyName = null;
+        String organizationId = null;
         ResponsePayload responsePayload;
         if (params != null) {
             for (String param : params) {
                 String[] keyVal = param.split("=");
                 if (AdminConstants.Parameters.NAME.equals(keyVal[0])) {
                     policyName = keyVal[1];
+                } else if (AdminConstants.Parameters.ORGANIZATION_ID.equals(keyVal[0])) {
+                    organizationId = keyVal[1];
                 }
             }
         }
         if (AdminConstants.APPLICATION_THROTTLING_POLICY_TYPE.equals(requestType)) {
             responsePayload = getApplicationPolicies(policyName);
         } else {
-            responsePayload = getSubscriptionPolicies(policyName);
+            responsePayload = getSubscriptionPolicies(organizationId, policyName);
         }
         return responsePayload;
     }
@@ -59,8 +62,10 @@ public class ThrottlingPolicyRequestHandler extends RequestHandler {
         return AdminUtils.buildResponsePayload(applicationPolicyList, HttpResponseStatus.OK, false);
     }
 
-    private ResponsePayload getSubscriptionPolicies(String policyName) throws JsonProcessingException {
-        List<SubscriptionPolicy> subscriptionPolicies = super.dataStore.getMatchingSubscriptionPolicies(policyName);
+    private ResponsePayload getSubscriptionPolicies(String organizationId, String policyName)
+            throws JsonProcessingException {
+        List<SubscriptionPolicy> subscriptionPolicies = super.dataStore.getMatchingSubscriptionPolicies(
+                organizationId, policyName);
         SubscriptionPolicyList subscriptionPolicyList = AdminUtils.toSubscriptionPolicyList(subscriptionPolicies);
         return AdminUtils.buildResponsePayload(subscriptionPolicyList, HttpResponseStatus.OK, false);
 

@@ -45,6 +45,7 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
+import org.wso2.choreo.connect.enforcer.features.FeatureFlags;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
@@ -72,8 +73,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -92,7 +91,6 @@ public class JWTAuthenticator implements Authenticator {
                     System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
         }
     }
-    private static String orgList = System.getenv("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG");
 
     public JWTAuthenticator() {
         EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
@@ -320,7 +318,6 @@ public class JWTAuthenticator implements Authenticator {
                     }
                     if (!"Unlimited".equals(authenticationContext.getTier())) {
                         // For subscription rate limiting, it is required to populate dynamic metadata
-                        APIConfig matchedApi = requestContext.getMatchedAPI();
                         String apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
                         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                                 .getTenantSubscriptionStore(apiTenantDomain);
@@ -329,27 +326,25 @@ public class JWTAuthenticator implements Authenticator {
                         String subPolicyName = authenticationContext.getTier();
                         requestContext.addMetadataToMap("ratelimit:subscription", subscriptionId);
                         requestContext.addMetadataToMap("ratelimit:usage-policy", subPolicyName);
-                        if (datastore.getSubscriptionPolicyByName(subPolicyName) != null &&
-                                StringUtils.isNotEmpty(orgList)) {
-                            SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(subPolicyName);
-                            Set<String> orgSet = Stream.of(orgList.trim().split("\\s*,\\s*"))
-                                    .collect(Collectors.toSet());
-                            if (StringUtils.isNotEmpty(subPolicy.getOrganization()) &&
-                                    orgSet.contains(subPolicy.getOrganization()) || orgList.equals("*")) {
-                                requestContext.addMetadataToMap("ratelimit:organization", subPolicy.getOrganization());
-                            } else {
-                                requestContext.addMetadataToMap("ratelimit:organization",
-                                        APIConstants.SUPER_TENANT_DOMAIN_NAME);
-                            }
+
+                        String matchedApiOrganizationId = requestContext.getMatchedAPI().getOrganizationId();
+                        // Denotes datastore contains a subscription policy for the given name and organization
+                        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByOrgIdAndName(
+                                matchedApiOrganizationId, subPolicyName);
+                        String metaDataOrgId = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+                        if (subPolicy != null) {
+                            metaDataOrgId =
+                                    FeatureFlags.getCustomSubscriptionPolicyHandlingOrg(subPolicy.getOrganization());
+                            requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);
                         } else {
-                            requestContext.addMetadataToMap("ratelimit:organization",
-                                    APIConstants.SUPER_TENANT_DOMAIN_NAME);
+                            // Datastore does not contain a subscription policy for the given name and
+                            // organization. Hence, subscription rate-limiting should be performed using the default org
+                            requestContext.addMetadataToMap("ratelimit:organization", metaDataOrgId);
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("Organization ID: " +
-                                    requestContext.getMetadataMap().get("ratelimit:organization")
-                                    + ", SubscriptionId: " + subscriptionId + ", SubscriptionPolicy: " + subPolicyName
-                                    + " will be evaluated for subscription rate-limiting");
+                            log.debug("Organization ID: " + metaDataOrgId + ", SubscriptionId: "
+                                    + subscriptionId + ", SubscriptionPolicy: " + subPolicyName +
+                                    " will be evaluated for subscription rate-limiting");
                         }
                     }
                     return authenticationContext;

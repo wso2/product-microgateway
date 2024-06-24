@@ -659,14 +659,24 @@ func marshalApplicationPolicy(policy *types.ApplicationPolicy) *subscription.App
 }
 
 func marshalSubscriptionPolicy(policy *types.SubscriptionPolicy) *subscription.SubscriptionPolicy {
+	// since we are not using choreo-product-apim with latest changes
+	// below correction is required for test cases
+	if policy.DefaultLimit == nil || policy.DefaultLimit.RequestCount == nil {
+		policy.DefaultLimit = &types.SubscriptionDefaultLimit{
+			RequestCount: &types.SubscriptionRequestCount{
+				RequestCount: policy.RateLimitCount,
+				TimeUnit:     policy.RateLimitTimeUnit,
+			},
+		}
+	}
 	return &subscription.SubscriptionPolicy{
 		Id:                   policy.ID,
 		Name:                 policy.Name,
 		QuotaType:            policy.QuotaType,
 		GraphQLMaxComplexity: policy.GraphQLMaxComplexity,
 		GraphQLMaxDepth:      policy.GraphQLMaxDepth,
-		RateLimitCount:       policy.RateLimitCount,
-		RateLimitTimeUnit:    policy.RateLimitTimeUnit,
+		RateLimitCount:       policy.DefaultLimit.RequestCount.RequestCount,
+		RateLimitTimeUnit:    policy.DefaultLimit.RequestCount.TimeUnit,
 		StopOnQuotaReach:     policy.StopOnQuotaReach,
 		TenantId:             policy.TenantID,
 		TenantDomain:         policy.TenantDomain,

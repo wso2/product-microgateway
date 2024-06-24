@@ -346,6 +346,12 @@ func getEndpointForWebsocketURL(rawURL string) (*Endpoint, error) {
 		return nil, err
 	}
 
+	// Hostname validation
+	if !regexp.MustCompile(hostNameValidator).MatchString(parsedURL.Hostname()) {
+		logger.LoggerOasparser.Error("Malformed endpoint detected (Invalid host name) : ", rawURL)
+		return nil, errors.New("malformed endpoint detected (Invalid host name) : " + rawURL)
+	}
+
 	host = parsedURL.Hostname()
 	if parsedURL.Path == "" {
 		basepath = "/"

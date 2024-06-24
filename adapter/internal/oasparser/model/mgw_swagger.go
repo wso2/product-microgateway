@@ -42,29 +42,29 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id                  string
-	apiType             string
-	description         string
-	title               string
-	version             string
-	vendorExtensions    map[string]interface{}
-	productionEndpoints *EndpointCluster
-	sandboxEndpoints    *EndpointCluster
-	xWso2Endpoints      map[string]*EndpointCluster
-	resources           []*Resource
-	xWso2Basepath       string
-	xWso2Cors           *CorsConfig
-	securityScheme      []SecurityScheme
-	security            []map[string][]string
-	xWso2ThrottlingTier string
-	xWso2AuthHeader     string
-	disableSecurity     bool
-	OrganizationID      string
-	VHost               string
-	IsProtoTyped        bool
-	RateLimitLevel      string
-	RateLimitPolicy     string
-	EnableBackendJWT    bool
+	id                      string
+	apiType                 string
+	description             string
+	title                   string
+	version                 string
+	vendorExtensions        map[string]interface{}
+	productionEndpoints     *EndpointCluster
+	sandboxEndpoints        *EndpointCluster
+	xWso2Endpoints          map[string]*EndpointCluster
+	resources               []*Resource
+	xWso2Basepath           string
+	xWso2Cors               *CorsConfig
+	securityScheme          []SecurityScheme
+	security                []map[string][]string
+	xWso2ThrottlingTier     string
+	xWso2AuthHeader         string
+	disableSecurity         bool
+	OrganizationID          string
+	VHost                   string
+	IsProtoTyped            bool
+	RateLimitLevel          string
+	RateLimitPolicy         string
+	EnableBackendJWT        bool
 	BackendJWTConfiguration BackendJWTConfiguration
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
@@ -1047,15 +1047,19 @@ func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
 // x-wso2-disable-security : true/false to enable and disable security.
 func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 	disableSecurity := false
-	y, vExtAuthType := vendorExtensions[xAuthType]
-	z, vExtDisableSecurity := vendorExtensions[xWso2DisableSecurity]
-	if vExtDisableSecurity {
+
+	if z, ok := vendorExtensions[xWso2DisableSecurity]; ok {
 		// If x-wso2-disable-security is present, then disableSecurity = val
 		if val, ok := z.(bool); ok {
 			disableSecurity = val
+		} else if strVal, ok := z.(string); ok {
+			// Handle string that represents a boolean
+			if boolVal, err := strconv.ParseBool(strVal); err == nil {
+				disableSecurity = boolVal
+			}
 		}
 	}
-	if vExtAuthType && !disableSecurity {
+	if y, ok := vendorExtensions[xAuthType]; ok && !disableSecurity {
 		// If APIs are published through APIM, all resource levels contains x-auth-type
 		// vendor extension.
 		if val, ok := y.(string); ok {
@@ -1180,7 +1184,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	return InterceptEndpoint{}, nil
 }
 
-// GetMgwSwagger converts the openAPI v3 and v2 content
+// GetMgwSwagger converts the openAPI v3 and v2 content and asyncAPI content
 // To MgwSwagger objects
 func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 
@@ -1189,9 +1193,9 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 		logger.LoggerOasparser.Error("Error converting api file to json", err)
 		return err
 	}
-	swaggerVersion := utills.FindSwaggerVersion(apiJsn)
+	definitionVersion := utills.FindAPIDefinitionVersion(apiJsn)
 
-	if swaggerVersion == "2" {
+	if definitionVersion == "2" {
 		// map json to struct
 		var apiData2 spec.Swagger
 		err = json.Unmarshal(apiJsn, &apiData2)
@@ -1204,7 +1208,7 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 			}
 		}
 
-	} else if swaggerVersion == "3" {
+	} else if definitionVersion == "3" {
 		// map json to struct
 		var apiData3 openapi3.Swagger
 
@@ -1217,7 +1221,25 @@ func (swagger *MgwSwagger) GetMgwSwagger(apiContent []byte) error {
 				return infoOpenAPIErr
 			}
 		}
+
+	} else if definitionVersion == "asyncapi_2" {
+		var asyncAPISpec AsyncAPI
+		err = json.Unmarshal(apiJsn, &asyncAPISpec)
+		if err == nil {
+			err = asyncAPISpec.unmarshallAPILevelVendorExtensions(apiJsn)
+			if err == nil {
+				err = swagger.SetInfoAsyncAPI(asyncAPISpec)
+			}
+		}
+	} else {
+		return errors.New("API version not specified or not supported for the version" + definitionVersion)
 	}
+
+	if err != nil {
+		logger.LoggerOasparser.Error("Error occurred while extracting the API definition to MgwSwagger ", err)
+		return err
+	}
+
 	err = swagger.SetXWso2Extensions()
 	if err != nil {
 		logger.LoggerOasparser.Error("Error occurred while setting x-wso2 extensions for ",
@@ -1246,7 +1268,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 
 	if swagger.EnableBackendJWT {
 		audiences := make([]string, 0, len(data.BackendJWTConfiguration.Audiences))
-		for _, audienceVal := range data.BackendJWTConfiguration.Audiences{
+		for _, audienceVal := range data.BackendJWTConfiguration.Audiences {
 			audiences = append(audiences, audienceVal)
 		}
 		swagger.BackendJWTConfiguration.Audiences = audiences

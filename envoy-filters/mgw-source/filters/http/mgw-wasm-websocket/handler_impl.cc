@@ -27,7 +27,7 @@ MgwGrpcStreamHandler::MgwGrpcStreamHandler(HandlerCallbacks *callbacks){
 }
 
 MgwGrpcStreamHandler::~MgwGrpcStreamHandler(){
-  LOG_TRACE("Handler destructed");
+  LOG_TRACE("Handler destructed.");
 }
 
 void MgwGrpcStreamHandler::onReceive(size_t body_size){
@@ -36,6 +36,7 @@ void MgwGrpcStreamHandler::onReceive(size_t body_size){
   const WebSocketFrameResponse& frame_response = message->proto<WebSocketFrameResponse>();
   LOG_TRACE(WebSocketFrameResponse_Code_Name(frame_response.throttle_state()));
   if(frame_response.throttle_state() == WebSocketFrameResponse_Code_OK){
+    LOG_TRACE("gRPC streaming onReceive");
     this->callbacks_->updateFilterState(ResponseStatus::OK);
   } else if (frame_response.throttle_state() == WebSocketFrameResponse_Code_OVER_LIMIT){
     this->callbacks_->updateThrottlePeriod(frame_response.throttle_period());
@@ -50,11 +51,11 @@ void MgwGrpcStreamHandler::onRemoteClose(GrpcStatus status){
   this->callbacks_->updateHandlerState(HandlerState::Error);
 };
 
-bool MgwGrpcStreamHandler::sendMessage(WebSocketFrameRequest request){
+void MgwGrpcStreamHandler::sendMessage(WebSocketFrameRequest request){
   auto res = send(request, true);
   if(res != WasmResult::Ok){
-    return false;
+    LOG_WARN(std::string("Error sending message"));
   }else{
-    return true;
+    LOG_TRACE(std::string("Message sent successfully"));
   }; 
 };

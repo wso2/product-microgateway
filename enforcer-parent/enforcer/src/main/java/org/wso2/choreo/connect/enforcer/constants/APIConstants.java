@@ -22,24 +22,16 @@ package org.wso2.choreo.connect.enforcer.constants;
  */
 public class APIConstants {
 
-    //open API extensions
-    public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
-
     public static final String GW_VHOST_PARAM = "vHost";
     public static final String GW_BASE_PATH_PARAM = "basePath";
     public static final String GW_RES_PATH_PARAM = "path";
-    public static final String GW_RES_METHOD_PARAM = "method";
     public static final String GW_VERSION_PARAM = "version";
     public static final String GW_API_NAME_PARAM = "name";
-    public static final String PROTOTYPED_LIFE_CYCLE_STATUS = "PROTOTYPED";
-    public static final String PUBLISHED_LIFE_CYCLE_STATUS = "PUBLISHED";
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String END_USER_ANONYMOUS = "anonymous";
     public static final String ANONYMOUS_PREFIX = "anon:";
     public static final String END_USER_UNKNOWN = "unknown";
-    public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
-    public static final String DEFAULT_ISSUER = "Resident Key Manager";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String WSO2_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
     public static final String HTTPS_PROTOCOL = "https";
@@ -47,17 +39,10 @@ public class APIConstants {
     public static final String HTTP_HEAD_METHOD = "HEAD";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
-    public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
-    public static final String AUTHORIZATION_BASIC = "Basic ";
-    public static final String AUTHORIZATION_BEARER = "Bearer ";
-    public static final String HEADER_TENANT = "xWSO2Tenant";
-    public static final String DEFAULT_VERSION_PREFIX = "_default_";
-    public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
-    public static final String DELEM_COLON = ":";
+
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
-    public static final String TENANT_DOMAIN_SEPARATOR = "@";
     public static final String DEFAULT_ENVIRONMENT_NAME = "Default";
 
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
@@ -70,14 +55,6 @@ public class APIConstants {
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
-
-    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
-    public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
-    public static final String BEGIN_PUBLIC_KEY_STRING = "-----BEGIN PUBLIC KEY-----\n";
-    public static final String END_PUBLIC_KEY_STRING = "-----END PUBLIC KEY-----";
-    public static final String OAUTH2_DEFAULT_SCOPE = "default";
-    public static final String EVENT_TYPE = "eventType";
-    public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
     public static final String EVENT_PAYLOAD_DATA = "payloadData";
 
