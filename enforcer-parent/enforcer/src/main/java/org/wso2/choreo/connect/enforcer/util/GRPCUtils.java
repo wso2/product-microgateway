@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
@@ -50,6 +51,7 @@ public class GRPCUtils {
             logger.error("Error while generating SSL Context.", e);
         }
         return NettyChannelBuilder.forAddress(host, port)
+                .keepAliveTime(2, TimeUnit.MINUTES)
                 .useTransportSecurity()
                 .sslContext(sslContext)
                 .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName())

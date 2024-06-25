@@ -126,6 +126,13 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 			Timeout: time.Duration(20 * time.Second),
 		}),
 	)
+
+	grpcOptions = append(grpcOptions, grpc.KeepaliveEnforcementPolicy(
+		keepalive.EnforcementPolicy{
+			MinTime: time.Duration(30 * time.Second),
+		}),
+	)
+
 	grpcServer := grpc.NewServer(grpcOptions...)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
