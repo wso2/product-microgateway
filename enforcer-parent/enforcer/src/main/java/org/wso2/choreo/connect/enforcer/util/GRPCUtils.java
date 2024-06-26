@@ -25,6 +25,7 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.features.FeatureFlags;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -50,12 +51,16 @@ public class GRPCUtils {
         } catch (SSLException e) {
             logger.error("Error while generating SSL Context.", e);
         }
-        return NettyChannelBuilder.forAddress(host, port)
-                .keepAliveTime(2, TimeUnit.MINUTES)
+
+        NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(host, port)
                 .useTransportSecurity()
                 .sslContext(sslContext)
-                .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName())
-                .build();
+                .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName());
+
+        if (FeatureFlags.isEnforcerGrpcClientKeepaliveEnabled()) {
+            channelBuilder.keepAliveTime(2, TimeUnit.MINUTES);
+        }
+        return channelBuilder.build();
     }
 
     public static boolean isReInitRequired(ManagedChannel channel) {

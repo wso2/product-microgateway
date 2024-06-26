@@ -30,9 +30,12 @@ import java.util.Set;
 public class FeatureFlags {
     private static final Set<String> CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG;
     private static final boolean ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG;
+    private static final boolean ENFORCER_GRPC_CLIENT_KEEPALIVE_ENABLED;
 
     static {
         final String orgEnvVar = System.getenv().getOrDefault("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG", "");
+        final String keepAliveEnvVar = System.getenv().getOrDefault("ENFORCER_GRPC_KEEPALIVE_ENABLED", "");
+        ENFORCER_GRPC_CLIENT_KEEPALIVE_ENABLED = keepAliveEnvVar.trim().equals("true");
         CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG = new HashSet<>(Arrays.asList(orgEnvVar.split(",")));
         ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG = orgEnvVar.equals("*");
     }
@@ -40,6 +43,10 @@ public class FeatureFlags {
     public static boolean isCustomSubscriptionPolicyHandlingEnabled(String orgId) {
         return ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG
                 || CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG.contains(orgId);
+    }
+
+    public static boolean isEnforcerGrpcClientKeepaliveEnabled() {
+        return ENFORCER_GRPC_CLIENT_KEEPALIVE_ENABLED;
     }
 
     public static String getCustomSubscriptionPolicyHandlingOrg(String orgId) {
