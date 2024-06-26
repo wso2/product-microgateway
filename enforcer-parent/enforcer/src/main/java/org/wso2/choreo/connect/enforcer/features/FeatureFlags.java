@@ -34,7 +34,7 @@ public class FeatureFlags {
 
     static {
         final String orgEnvVar = System.getenv().getOrDefault("CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG", "");
-        final String keepAliveEnvVar = System.getenv().getOrDefault("ENFORCER_GRPC_KEEPALIVE_ENABLED", "");
+        final String keepAliveEnvVar = System.getenv().getOrDefault("GRPC_KEEPALIVE_ENABLED", "");
         ENFORCER_GRPC_CLIENT_KEEPALIVE_ENABLED = keepAliveEnvVar.trim().equals("true");
         CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ORG = new HashSet<>(Arrays.asList(orgEnvVar.split(",")));
         ENABLE_CUSTOM_SUBSCRIPTION_POLICY_HANDLING_ALL_ORG = orgEnvVar.equals("*");
