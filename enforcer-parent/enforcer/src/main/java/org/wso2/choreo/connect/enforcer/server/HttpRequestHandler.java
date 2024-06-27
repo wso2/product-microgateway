@@ -55,12 +55,15 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
         ResponseObject responseObject = matchedAPI.process(requestContext);
-
-        if (requestContext.getMatchedResourcePath().isResponseCache() &&
-                (APIConstants.HTTP_GET_METHOD.equals(requestContext.getRequestMethod()) ||
-                        APIConstants.HTTP_HEAD_METHOD.equals(requestContext.getRequestMethod()))) {
-            // Add,change headers for caching enabled requests
-            addCustomHeadersForCaching(responseObject, requestContext);
+        
+        // to only go insside GET,HEAD otherwise OPTION calls will be failed
+        if (APIConstants.HTTP_GET_METHOD.equals(requestContext.getRequestMethod()) ||
+            APIConstants.HTTP_HEAD_METHOD.equals(requestContext.getRequestMethod())) {        
+            // Check if response cache is enabled
+            if (requestContext.getMatchedResourcePath().isResponseCache()) {
+                // Add, change headers for caching enabled requests
+                addCustomHeadersForCaching(responseObject, requestContext);
+            }
         }
 
         responseObject.setExtAuthDetails(requestContext.getExtAuthDetails());
