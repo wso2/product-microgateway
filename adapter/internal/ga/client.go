@@ -22,6 +22,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"os"
+	"strings"
 	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -38,6 +40,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 	grpcStatus "google.golang.org/grpc/status"
 )
 
@@ -72,7 +75,8 @@ var (
 
 const (
 	// The type url for requesting API Entries from global adapter.
-	apiTypeURL string = "type.googleapis.com/wso2.discovery.ga.Api"
+	apiTypeURL                   string = "type.googleapis.com/wso2.discovery.ga.Api"
+	grpcGAServerKeepaliveEnabled string = "GRPC_GA_KEEPALIVE_ENABLED"
 )
 
 // APIEvent represents the event corresponding to a single API Deploy or Remove event
@@ -436,12 +440,20 @@ func getGRPCConnection() (*grpc.ClientConn, error) {
 	retryInterval := conf.GlobalAdapter.RetryInterval
 	backOff := grpc_retry.BackoffLinearWithJitter(retryInterval*time.Second, 0.5)
 	logger.LoggerGA.Infof("Dialing Global Adapter GRPC Service : %s", conf.GlobalAdapter.ServiceURL)
-	return grpc.Dial(
-		conf.GlobalAdapter.ServiceURL,
+
+	grpcDialOpts := []grpc.DialOption{
 		grpc.WithTransportCredentials(generateTLSCredentialsForXdsClient()),
 		grpc.WithBlock(),
-		grpc.WithStreamInterceptor(
-			grpc_retry.StreamClientInterceptor(grpc_retry.WithBackoff(backOff))))
+		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(grpc_retry.WithBackoff(backOff))),
+	}
+
+	if strings.TrimSpace(os.Getenv(grpcGAServerKeepaliveEnabled)) == "true" {
+		grpcDialOpts = append(grpcDialOpts, grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time: time.Duration(2 * time.Minute),
+		}))
+	}
+
+	return grpc.Dial(conf.GlobalAdapter.ServiceURL, grpcDialOpts...)
 }
 
 // FetchAPIsFromGA returns the initial state of GA APIs within Adapter
