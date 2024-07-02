@@ -80,9 +80,8 @@ var (
 )
 
 const (
-	ads                        = "ads"
-	amqpProtocol               = "amqp"
-	grpcServerKeepaliveEnabled = "GRPC_KEEPALIVE_ENABLED"
+	ads          = "ads"
+	amqpProtocol = "amqp"
 )
 
 func init() {
