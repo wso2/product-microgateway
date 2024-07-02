@@ -58,7 +58,7 @@ public class GRPCUtils {
                 .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName());
 
         if (FeatureFlags.isEnforcerGrpcClientKeepaliveEnabled()) {
-            channelBuilder.keepAliveTime(2, TimeUnit.MINUTES);
+            channelBuilder.keepAliveTime(6, TimeUnit.MINUTES);
         }
         return channelBuilder.build();
     }
