@@ -449,7 +449,7 @@ func getGRPCConnection() (*grpc.ClientConn, error) {
 
 	if strings.TrimSpace(os.Getenv(grpcGAServerKeepaliveEnabled)) == "true" {
 		grpcDialOpts = append(grpcDialOpts, grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time: time.Duration(2 * time.Minute),
+			Time: time.Duration(6 * time.Minute),
 		}))
 	}
 
