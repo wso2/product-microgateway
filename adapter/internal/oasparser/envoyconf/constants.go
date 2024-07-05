@@ -82,6 +82,7 @@ const (
 	prodClusterNameContextExtension string = "prodClusterName"
 	sandClusterNameContextExtension string = "sandClusterName"
 	retryPolicyRetriableStatusCodes string = "retriable-status-codes"
+	retryOnConnectFailures          string = "connect-failure"
 )
 
 const (

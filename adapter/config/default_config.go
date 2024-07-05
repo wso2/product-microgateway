@@ -17,6 +17,8 @@
 
 package config
 
+import "time"
+
 // Configuration object which is populated with default values.
 var defaultConfig = &Config{
 	Adapter: adapter{
@@ -117,9 +119,10 @@ var defaultConfig = &Config{
 				HealthyThreshold:   2,
 			},
 			Retry: upstreamRetry{
-				MaxRetryCount:        5,
-				BaseIntervalInMillis: 25,
-				StatusCodes:          []uint32{504},
+				MaxRetryCount: 5,
+				BaseInterval:  25 * time.Millisecond,
+				MaxInterval:   500 * time.Millisecond,
+				StatusCodes:   []uint32{504},
 			},
 			DNS: upstreamDNS{
 				DNSRefreshRate: 5000,
