@@ -323,7 +323,7 @@ func (r *rateLimitPolicyCache) updateXdsCache(label string) bool {
 	return true
 }
 
-// AddSubscriptionLevelRateLimitPolicies adds a subscription level rate limit policy to the cache.
+// AddSubscriptionLevelRateLimitPolicies adds a subscription level rate limit policies to the cache.
 func AddSubscriptionLevelRateLimitPolicies(policyList *types.SubscriptionPolicyList) error {
 	// Check if rlsPolicyCache.metadataBasedPolicies[Subscription] exists and create a new map if not
 	if _, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType]; !ok {
@@ -340,9 +340,32 @@ func AddSubscriptionLevelRateLimitPolicies(policyList *types.SubscriptionPolicyL
 			continue
 		}
 		AddSubscriptionLevelRateLimitPolicy(policy);
-		loggers.LoggerXds.Infof("Custom subscription policy: %s is added to the cache map for organization: %s", policy.Name, policy.Organization)
+		loggers.LoggerXds.Debugf("Rate-limiter cache map updated with subscription policy: %s belonging to the organization: %s", policy.Name, policy.Organization)
 	}
 	return nil
+}
+
+// RemoveSubscriptionRateLimitPolicy removes a subscription level rate limit policy from the rate-limit cache.
+func RemoveSubscriptionRateLimitPolicy(policy types.SubscriptionPolicy) {
+	rlsPolicyCache.apiLevelMu.Lock()
+	defer rlsPolicyCache.apiLevelMu.Unlock()
+	if policiesForOrg , ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; ok {
+		delete(policiesForOrg, policy.Name)
+	}
+}
+
+// UpdateSubscriptionRateLimitPolicy updates a subscription level rate limit policy to the rate-limit cache.
+func UpdateSubscriptionRateLimitPolicy(policy types.SubscriptionPolicy) {
+	rlsPolicyCache.apiLevelMu.Lock()
+	defer rlsPolicyCache.apiLevelMu.Unlock()
+	if policiesForOrg , ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; ok {
+		delete(policiesForOrg, policy.Name)
+	}
+	error := AddSubscriptionLevelRateLimitPolicy(policy)
+	if error != nil {
+		loggers.LoggerXds.Errorf("Error occurred while updating subscription policy: %s for the orgnanization %s. Error: %v",
+				policy.Name, policy.Organization, error)
+	}
 }
 
 // AddSubscriptionLevelRateLimitPolicy adds a subscription level rate limit policy to the rate-limit cache.
@@ -385,29 +408,6 @@ func AddSubscriptionLevelRateLimitPolicy(policy types.SubscriptionPolicy) error 
 	}
 	rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization][policy.Name] = descriptor
 	return nil
-}
-
-// RemoveSubscriptionRateLimitPolicy removes a subscription level rate limit policy from the rate-limit cache.
-func RemoveSubscriptionRateLimitPolicy(policy types.SubscriptionPolicy) {
-	rlsPolicyCache.apiLevelMu.Lock()
-	defer rlsPolicyCache.apiLevelMu.Unlock()
-	if policiesForOrg , ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; ok {
-		delete(policiesForOrg, policy.Name)
-	}
-}
-
-// UpdateSubscriptionRateLimitPolicy updates a subscription level rate limit policy to the rate-limit cache.
-func UpdateSubscriptionRateLimitPolicy(policy types.SubscriptionPolicy) {
-	rlsPolicyCache.apiLevelMu.Lock()
-	defer rlsPolicyCache.apiLevelMu.Unlock()
-	if policiesForOrg , ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; ok {
-		delete(policiesForOrg, policy.Name)
-	}
-	error := AddSubscriptionLevelRateLimitPolicy(policy)
-	if error != nil {
-		loggers.LoggerXds.Errorf("Error occurred while updating subscription policy: %s for the orgnanization %s. Error: %v",
-				policy.Name, policy.Organization, error)
-	}
 }
 
 func init() {
