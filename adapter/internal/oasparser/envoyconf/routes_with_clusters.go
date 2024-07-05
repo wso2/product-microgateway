@@ -996,6 +996,10 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			// Retry configs are always added via headers. This is to update the
 			// default retry back-off base interval, which cannot be updated via headers.
 			retryConfig := config.Envoy.Upstream.Retry
+			maxInterval := retryConfig.MaxInterval
+			if retryConfig.MaxInterval < retryConfig.BaseInterval {
+				maxInterval = retryConfig.BaseInterval
+			}
 			commonRetryPolicy := &routev3.RetryPolicy{
 				RetryOn: retryOnConnectFailures,
 				NumRetries: &wrapperspb.UInt32Value{
@@ -1005,7 +1009,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				},
 				RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
 					BaseInterval: durationpb.New(retryConfig.BaseInterval),
-					MaxInterval:  durationpb.New(2 * retryConfig.BaseInterval),
+					MaxInterval:  durationpb.New(maxInterval),
 				},
 			}
 			action.Route.RetryPolicy = commonRetryPolicy

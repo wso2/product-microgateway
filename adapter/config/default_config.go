@@ -121,6 +121,7 @@ var defaultConfig = &Config{
 			Retry: upstreamRetry{
 				MaxRetryCount: 5,
 				BaseInterval:  25 * time.Millisecond,
+				MaxInterval:   500 * time.Millisecond,
 				StatusCodes:   []uint32{504},
 			},
 			DNS: upstreamDNS{
