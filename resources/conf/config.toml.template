@@ -185,7 +185,7 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
   # Base interval for the Envoy's exponential retry back off algorithm
   baseInterval = "25ms"
   # Max interval for the Envoy's exponential retry back off algorithm
-  baseInterval = "500ms"
+  maxInterval = "500ms"
 
 # Timeouts managed by the connection manager
 [router.connectionTimeout]
