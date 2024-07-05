@@ -699,7 +699,7 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 	// Initialize rlsPolicyCache.metadataBasedPolicies
 	rlsPolicyCache.metadataBasedPolicies = make(map[string]map[string]map[string]*rls_config.RateLimitDescriptor)
 
-	err := AddSubscriptionLevelRateLimitPolicy(policyList)
+	err := AddSubscriptionLevelRateLimitPolicies(policyList)
 	assert.NoError(t, err)
 
 	expectedPolicies := map[string]map[string]map[string]*rls_config.RateLimitDescriptor{
