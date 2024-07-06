@@ -466,13 +466,15 @@ func handlePolicyEvents(data []byte, eventType string) {
 				TimeUnit:     subscriptionPolicyEvent.RateLimitTimeUnit,
 			},
 		}
-
 		var subscriptionPolicyList *subscription.SubscriptionPolicyList
 		if subscriptionPolicyEvent.Event.Type == policyCreate {
+			xds.AddSubscriptionLevelRateLimitPolicy(subscriptionPolicy)
 			subscriptionPolicyList = xds.MarshalSubscriptionPolicyEventAndReturnList(&subscriptionPolicy, xds.CreateEvent)
 		} else if subscriptionPolicyEvent.Event.Type == policyUpdate {
+			xds.UpdateSubscriptionRateLimitPolicy(subscriptionPolicy)
 			subscriptionPolicyList = xds.MarshalSubscriptionPolicyEventAndReturnList(&subscriptionPolicy, xds.UpdateEvent)
 		} else if subscriptionPolicyEvent.Event.Type == policyDelete {
+			xds.RemoveSubscriptionRateLimitPolicy(subscriptionPolicy)
 			subscriptionPolicyList = xds.MarshalSubscriptionPolicyEventAndReturnList(&subscriptionPolicy, xds.DeleteEvent)
 		} else {
 			logger.LoggerInternalMsg.Warnf("SubscriptionPolicy Event Type is not recognized for the Event under "+
@@ -480,6 +482,8 @@ func handlePolicyEvents(data []byte, eventType string) {
 			return
 		}
 		xds.UpdateEnforcerSubscriptionPolicies(subscriptionPolicyList)
+		logger.LoggerInternalMsg.Debugf("Subscription policy event altered xDS caches of the rate-limiter and enforcer. Event type: %s, Organization: " + 
+		"%s, Subscription Policy: %s", subscriptionPolicyEvent.Event.Type, subscriptionPolicy.Organization, subscriptionPolicy.Name)
 	}
 }
 
