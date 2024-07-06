@@ -83,6 +83,8 @@ type rateLimitPolicyCache struct {
 	metadataBasedPolicies map[string]map[string]map[string]*rls_config.RateLimitDescriptor
 	// mutex for API level
 	apiLevelMu sync.RWMutex
+	// mutex for metadata based policies
+	metadataBasedMu sync.RWMutex
 }
 
 // AddAPILevelRateLimitPolicies adds inline Rate Limit policies in APIs to be updated in the Rate Limiter service.
@@ -347,17 +349,17 @@ func AddSubscriptionLevelRateLimitPolicies(policyList *types.SubscriptionPolicyL
 
 // RemoveSubscriptionRateLimitPolicy removes a subscription level rate limit policy from the rate-limit cache.
 func RemoveSubscriptionRateLimitPolicy(policy types.SubscriptionPolicy) {
-	rlsPolicyCache.apiLevelMu.Lock()
-	defer rlsPolicyCache.apiLevelMu.Unlock()
+	rlsPolicyCache.metadataBasedMu.Lock()
+	defer rlsPolicyCache.metadataBasedMu.Unlock()
 	if policiesForOrg , ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; ok {
 		delete(policiesForOrg, policy.Name)
 	}
 }
 
-// UpdateSubscriptionRateLimitPolicy updates a subscription level rate limit policy to the rate-limit cache.
+// UpdateSubscriptionRateLimitPolicy updates a subscription level rate limit policy in the rate-limit cache.
 func UpdateSubscriptionRateLimitPolicy(policy types.SubscriptionPolicy) {
-	rlsPolicyCache.apiLevelMu.Lock()
-	defer rlsPolicyCache.apiLevelMu.Unlock()
+	rlsPolicyCache.metadataBasedMu.Lock()
+	defer rlsPolicyCache.metadataBasedMu.Unlock()
 	if policiesForOrg , ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]; ok {
 		delete(policiesForOrg, policy.Name)
 	}
