@@ -797,7 +797,7 @@ func TestSubscriptionRateLimitPolicyEventDataHandling(t *testing.T) {
 		Organization: "org2",
 		RateLimitCount: 61,
 		RateLimitTimeUnit: "min",
-		StopOnQuotaReach: false,
+		StopOnQuotaReach: true,
 	}
 	AddSubscriptionLevelRateLimitPolicy(policy)
 	_, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]
@@ -810,14 +810,14 @@ func TestSubscriptionRateLimitPolicyEventDataHandling(t *testing.T) {
 		DefaultLimit: &types.SubscriptionDefaultLimit{
 			QuotaType: "requestCount",
 			RequestCount: &types.SubscriptionRequestCount{
-				RequestCount: 6000,
-				TimeUnit:     "day",
+				RequestCount: 6000, // updated request count
+				TimeUnit:     "day",// updated request count time unit
 			},
 		},
 		Organization: "org2",
-		RateLimitCount: 60,
-		RateLimitTimeUnit: "hour",
-		StopOnQuotaReach: false,
+		RateLimitCount: 60, // updated rate-limit count
+		RateLimitTimeUnit: "hour", // updated rate-limit time unit
+		StopOnQuotaReach: false, // updated stop on quota reach
 	}
 	UpdateSubscriptionRateLimitPolicy(updatedPolicy);
 	updatedPolicies, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]
@@ -838,8 +838,6 @@ func TestSubscriptionRateLimitPolicyEventDataHandling(t *testing.T) {
 	}
 
 	RemoveSubscriptionRateLimitPolicy(policy)
-	rlsPolicyCache.metadataBasedMu.RLock()
-	defer rlsPolicyCache.metadataBasedMu.RUnlock()
 	policiesForOrgToCheckDeletion, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]
 	if !ok {
 		t.Errorf("Expected policies for organization %q to exist in the cache, but it doesn't", policy.Organization)
