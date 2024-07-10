@@ -18,6 +18,7 @@ package xds
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	rls_config "github.com/envoyproxy/go-control-plane/ratelimit/config/ratelimit/v3"
@@ -781,4 +782,71 @@ func TestAddSubscriptionLevelRateLimitPolicy(t *testing.T) {
 	}
 
 	assert.Equal(t, expectedPolicies, rlsPolicyCache.metadataBasedPolicies)
+}
+
+func TestSubscriptionRateLimitPolicyEventDataHandling(t *testing.T) {
+	policy := types.SubscriptionPolicy{
+		Name: "policyToCheckDeletion",
+		DefaultLimit: &types.SubscriptionDefaultLimit{
+			QuotaType: "requestCount",
+			RequestCount: &types.SubscriptionRequestCount{
+				RequestCount: 6100,
+				TimeUnit:     "hour",
+			},
+		},
+		Organization: "org2",
+		RateLimitCount: 61,
+		RateLimitTimeUnit: "min",
+		StopOnQuotaReach: false,
+	}
+	AddSubscriptionLevelRateLimitPolicy(policy)
+	_, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]
+	if !ok {
+		t.Errorf("Expected policies for organization %q to exist in the cache, but it doesn't", policy.Organization)
+		return
+	}
+	updatedPolicy := types.SubscriptionPolicy{
+		Name: "policyToCheckDeletion",
+		DefaultLimit: &types.SubscriptionDefaultLimit{
+			QuotaType: "requestCount",
+			RequestCount: &types.SubscriptionRequestCount{
+				RequestCount: 6000,
+				TimeUnit:     "day",
+			},
+		},
+		Organization: "org2",
+		RateLimitCount: 60,
+		RateLimitTimeUnit: "hour",
+		StopOnQuotaReach: false,
+	}
+	UpdateSubscriptionRateLimitPolicy(updatedPolicy);
+	updatedPolicies, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]
+	if !ok {
+		t.Errorf("Expected to have updated policies for organization %q to exist in the cache, but it doesn't", policy.Organization)
+		return
+	}
+	retrievedDescriptor := updatedPolicies[updatedPolicy.Name]
+	assert.Equal(t, uint(retrievedDescriptor.RateLimit.RequestsPerUnit), uint(updatedPolicy.DefaultLimit.RequestCount.RequestCount))
+	assert.Equal(t, strings.ToLower(retrievedDescriptor.RateLimit.Unit.String()), updatedPolicy.DefaultLimit.RequestCount.TimeUnit)
+	assert.True(t, retrievedDescriptor.ShadowMode)
+
+	for _, descriptor := range retrievedDescriptor.GetDescriptors() {
+		if (descriptor.Key == "burst") {
+			assert.Equal(t, strings.ToLower(descriptor.RateLimit.Unit.String()), updatedPolicy.RateLimitTimeUnit)
+			assert.Equal(t, descriptor.RateLimit.RequestsPerUnit, uint32(updatedPolicy.RateLimitCount))
+		}
+	}
+
+	RemoveSubscriptionRateLimitPolicy(policy)
+	rlsPolicyCache.metadataBasedMu.RLock()
+	defer rlsPolicyCache.metadataBasedMu.RUnlock()
+	policiesForOrgToCheckDeletion, ok := rlsPolicyCache.metadataBasedPolicies[subscriptionPolicyType][policy.Organization]
+	if !ok {
+		t.Errorf("Expected policies for organization %q to exist in the cache, but it doesn't", policy.Organization)
+		return
+	}
+	_, ok = policiesForOrgToCheckDeletion[policy.Name]
+	if ok {
+		t.Errorf("Expected policy %q to be removed from the cache, but it still exists", policy.Name)
+	}
 }
