@@ -95,6 +95,10 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 		Name:       wellknown.Router,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
 	}
+	err = filter.Validate()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while validating Router HTTP filter configs. ", err)
+	}
 	return &filter
 }
 
@@ -110,7 +114,10 @@ func getCorsHTTPFilter() *hcmv3.HttpFilter {
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: corsFilterTypedConf},
 	}
-
+	err = filter.Validate()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while validating cors filter configs. ", err)
+	}
 	return &filter
 }
 
@@ -178,6 +185,10 @@ func getRateLimitFilter() *hcmv3.HttpFilter {
 			TypedConfig: ext,
 		},
 	}
+	err2 = rlFilter.Validate()
+	if err2 != nil {
+		logger.LoggerOasparser.Error("Error while validating the rate limit filter.", err2)
+	}
 	return &rlFilter
 }
 
@@ -212,6 +223,10 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 			TypedConfig: ext,
 		},
 	}
+	err2 = extAuthzFilter.Validate()
+	if err2 != nil {
+		logger.LoggerOasparser.Error("Error while validating the ext authz filter.", err2)
+	}
 	return &extAuthzFilter
 }
 
@@ -238,6 +253,10 @@ func getLuaFilter() *hcmv3.HttpFilter {
 			TypedConfig: ext,
 		},
 	}
+	err2 = luaFilter.Validate()
+	if err2 != nil {
+		logger.LoggerOasparser.Error("Error while validating the lua filter.", err2)
+	}
 	return &luaFilter
 }
 
@@ -255,6 +274,10 @@ func getHTTPLocalRateLimitFilter() *hcmv3.HttpFilter {
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{
 			TypedConfig: marshalledRateLimitConfig,
 		},
+	}
+	err = localRateLimitFilter.Validate()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while validating the local rate limit filter.", err)
 	}
 	return localRateLimitFilter
 }
@@ -313,6 +336,10 @@ func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
 				Value:   ext,
 			},
 		},
+	}
+	err = mgwWebSocketFilter.Validate()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while validating web socket filter.", err)
 	}
 	return &mgwWebSocketFilter
 

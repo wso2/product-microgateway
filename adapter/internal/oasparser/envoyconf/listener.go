@@ -222,6 +222,10 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			},
 			},
 		}
+		err = listener.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating listener configs. ", err)
+		}
 		listeners = append(listeners, &listener)
 		logger.LoggerOasparser.Infof("Non-secured Listener is added. %s : %d", listenerHostAddress, conf.Envoy.ListenerPort)
 	} else {
@@ -246,12 +250,16 @@ func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*rou
 			Domains: []string{vhost, fmt.Sprint(vhost, ":*")},
 			Routes:  routes,
 		}
+		err := virtualHost.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating virtual host configs. ", err)
+		}
 		virtualHosts = append(virtualHosts, virtualHost)
 	}
 	return virtualHosts
 }
 
-//TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
+// TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
 func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (*tlsv3.Secret, error) {
 	var secret tlsv3.Secret
 	tlsCert := generateTLSCert(privateKeyPath, pulicKeyPath)
@@ -316,6 +324,9 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 		},
 		MaxPathTagLength: &wrappers.UInt32Value{Value: maxPathLength},
 	}
-
+	err = tracing.Validate()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while validating Tracing configs. ", err)
+	}
 	return tracing, nil
 }
