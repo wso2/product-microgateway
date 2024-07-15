@@ -310,6 +310,7 @@ type upstreamRetry struct {
 	MaxRetryCount uint32
 	BaseInterval  time.Duration
 	MaxInterval   time.Duration
+	RetryOn       string
 	StatusCodes   []uint32
 }
 

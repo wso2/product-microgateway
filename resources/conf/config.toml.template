@@ -182,6 +182,8 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
 [router.upstream.retry]
   # Maximum value that can be set as the count within retry configs in an OpenAPI definition or API-M UI
   maxRetryCount = 5
+  # Condition under which router would retry the backend. https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#config-http-filters-router-x-envoy-retry-on
+  retryOn = "connect-failure"
   # Base interval for the Envoy's exponential retry back off algorithm
   baseInterval = "25ms"
   # Max interval for the Envoy's exponential retry back off algorithm

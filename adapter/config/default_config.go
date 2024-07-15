@@ -120,6 +120,7 @@ var defaultConfig = &Config{
 			},
 			Retry: upstreamRetry{
 				MaxRetryCount: 5,
+				RetryOn: "connect-failure",
 				BaseInterval:  25 * time.Millisecond,
 				MaxInterval:   500 * time.Millisecond,
 				StatusCodes:   []uint32{504},
