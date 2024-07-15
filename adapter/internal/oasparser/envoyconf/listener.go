@@ -275,7 +275,7 @@ func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*rou
 				maxInterval = retryConfig.BaseInterval
 			}
 			commonRetryPolicy := &routev3.RetryPolicy{
-				RetryOn: retryOnConnectFailures,
+				RetryOn: retryConfig.RetryOn,
 				NumRetries: &wrapperspb.UInt32Value{
 					Value: retryConfig.MaxRetryCount,
 					// If not set to 0, default value 1 will be
