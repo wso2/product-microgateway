@@ -763,8 +763,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	resourcePathParam := params.resourcePathParam
 	resourceMethods := params.resourceMethods
 	prodClusterName := params.prodClusterName
-	prodRouteConfig := params.prodRouteConfig
-	sandRouteConfig := params.sandRouteConfig
 	endpointBasepath := params.endpointBasePath
 	requestInterceptor := params.requestInterceptor
 	responseInterceptor := params.responseInterceptor
@@ -1001,28 +999,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 	action.Route.ClusterSpecifier = headerBasedClusterSpecifier
 	logger.LoggerOasparser.Debug("added header based cluster")
-
-	if (prodRouteConfig != nil && prodRouteConfig.RetryConfig != nil) ||
-		(sandRouteConfig != nil && sandRouteConfig.RetryConfig != nil) {
-		// Retry configs are always added via headers. This is to update the
-		// default retry back-off base interval, which cannot be updated via headers.
-		retryConfig := config.Envoy.Upstream.Retry
-		commonRetryPolicy := &routev3.RetryPolicy{
-			RetryOn: retryPolicyRetriableStatusCodes,
-			NumRetries: &wrapperspb.UInt32Value{
-				Value: 0,
-				// If not set to 0, default value 1 will be
-				// applied to both prod and sandbox even if they are not set.
-			},
-			RetriableStatusCodes: retryConfig.StatusCodes,
-			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
-				BaseInterval: &durationpb.Duration{
-					Nanos: int32(retryConfig.BaseIntervalInMillis) * 1000,
-				},
-			},
-		}
-		action.Route.RetryPolicy = commonRetryPolicy
-	}
 
 	corsFilter, _ := anypb.New(corsPolicy)
 

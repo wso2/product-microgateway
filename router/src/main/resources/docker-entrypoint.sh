@@ -17,9 +17,6 @@
 
 set -e
 
-# Feature flag - Enable/disable the graceful shutdown
-export GRACEFUL_SHUTDOWN_ENABLED="${ROUTER_GRACEFUL_SHUTDOWN_ENABLED:-false}"
-
 echo "Configuring Choreo Connect Router"
 MG_ENVOY_YAML="$(envsubst < /home/wso2/envoy.yaml.template)"
 
@@ -39,14 +36,8 @@ echo "Starting Choreo Connect Router"
 ENVOY_PID=$!
 
 _term() {
-    echo "Stopping Choreo Connect Router..."
-
-    if [ "$GRACEFUL_SHUTDOWN_ENABLED" = "true" ]; then
-        echo "Graceful shutdown enabled. Sending SIGTERM to the envoy process..."
-        kill -SIGTERM $ENVOY_PID
-    else
-        echo "Graceful shutdown disabled. Not sending the SIGTERM to the envoy process..."
-    fi
+    echo "Stopping Choreo Connect Router. Sending SIGTERM to the envoy process..."
+    kill -SIGTERM $ENVOY_PID
     wait $ENVOY_PID
     echo "Choreo Connect Router stopped."
     exit 0

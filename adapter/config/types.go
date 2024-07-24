@@ -307,9 +307,11 @@ type socketAddress struct {
 }
 
 type upstreamRetry struct {
-	MaxRetryCount        uint32
-	BaseIntervalInMillis uint32
-	StatusCodes          []uint32
+	MaxRetryCount uint32
+	BaseInterval  time.Duration
+	MaxInterval   time.Duration
+	RetryOn       string
+	StatusCodes   []uint32
 }
 
 type security struct {
