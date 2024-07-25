@@ -1638,7 +1638,7 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 	if apiType == constants.WS {
 		maxStreamDuration = &routev3.RouteAction_MaxStreamDuration{
 			MaxStreamDuration: &durationpb.Duration{
-				Seconds: 60 * 60 * 24,
+				Seconds: 60 * 60 * 1,
 			},
 		}
 	}
