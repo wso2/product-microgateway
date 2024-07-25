@@ -80,9 +80,8 @@ var (
 )
 
 const (
-	ads                        = "ads"
-	amqpProtocol               = "amqp"
-	grpcServerKeepaliveEnabled = "GRPC_KEEPALIVE_ENABLED"
+	ads          = "ads"
+	amqpProtocol = "amqp"
 )
 
 func init() {
@@ -127,15 +126,6 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, rlsServer xds
 			Timeout: time.Duration(20 * time.Second),
 		}),
 	)
-
-	// grpc keep alive feature flag
-	if strings.TrimSpace(os.Getenv(grpcServerKeepaliveEnabled)) == "true" {
-		grpcOptions = append(grpcOptions, grpc.KeepaliveEnforcementPolicy(
-			keepalive.EnforcementPolicy{
-				MinTime: time.Duration(30 * time.Second),
-			}),
-		)
-	}
 
 	grpcServer := grpc.NewServer(grpcOptions...)
 

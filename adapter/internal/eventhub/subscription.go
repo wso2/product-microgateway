@@ -62,7 +62,6 @@ var (
 	appKeyMappingList *types.ApplicationKeyMappingList
 	appPolicyList     *types.ApplicationPolicyList
 	subPolicyList     *types.SubscriptionPolicyList
-	apiList           *types.APIList
 
 	resources = []resource{
 		{
@@ -313,7 +312,7 @@ func retrieveSubscriptionDataFromChannel(response response) {
 		case *types.SubscriptionPolicyList:
 			logger.LoggerSubscription.Debug("Received Subscription Policy information.")
 			subPolicyList = newResponse.(*types.SubscriptionPolicyList)
-			xds.AddSubscriptionLevelRateLimitPolicy(subPolicyList)
+			xds.AddSubscriptionLevelRateLimitPolicies(subPolicyList)
 			xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalMultipleSubscriptionPolicies(subPolicyList))
 		case *types.ApplicationKeyMappingList:
 			logger.LoggerSubscription.Debug("Received Application Key Mapping information.")

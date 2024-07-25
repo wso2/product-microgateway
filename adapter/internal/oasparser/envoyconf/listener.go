@@ -20,7 +20,9 @@ package envoyconf
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -33,10 +35,24 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
+
+var retryBannedVhosts map[string]struct{}
+
+func init() {
+	retryBannedVhosts := make(map[string]struct{})
+	if os.Getenv("ROUTER_CONNECTION_FAILURE_RETRY_BANNED_VHOSTS") != "" {
+		retryBannedVhostsList := strings.Split(os.Getenv("ROUTER_CONNECTION_FAILURE_RETRY_BANNED_VHOSTS"), ",")
+		for _, vhost := range retryBannedVhostsList {
+			retryBannedVhosts[vhost] = struct{}{}
+		}
+	}
+}
 
 // CreateRoutesConfigForRds generates the default RouteConfiguration.
 // Only the provided virtual hosts will be assigned inside the configuration.
@@ -246,12 +262,38 @@ func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*rou
 			Domains: []string{vhost, fmt.Sprint(vhost, ":*")},
 			Routes:  routes,
 		}
+
+		_, retryBanned := retryBannedVhosts[vhost]
+
+		if os.Getenv("ROUTER_CONNECTION_FAILURE_RETRY_ENABLED") != "" && !retryBanned {
+			config, _ := config.ReadConfigs()
+			// Retry configs are always added via headers. This is to update the
+			// default retry back-off base interval, which cannot be updated via headers.
+			retryConfig := config.Envoy.Upstream.Retry
+			maxInterval := retryConfig.MaxInterval
+			if retryConfig.MaxInterval < retryConfig.BaseInterval {
+				maxInterval = retryConfig.BaseInterval
+			}
+			commonRetryPolicy := &routev3.RetryPolicy{
+				RetryOn: retryConfig.RetryOn,
+				NumRetries: &wrapperspb.UInt32Value{
+					Value: retryConfig.MaxRetryCount,
+					// If not set to 0, default value 1 will be
+					// applied to both prod and sandbox even if they are not set.
+				},
+				RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
+					BaseInterval: durationpb.New(retryConfig.BaseInterval),
+					MaxInterval:  durationpb.New(maxInterval),
+				},
+			}
+			virtualHost.RetryPolicy = commonRetryPolicy
+		}
 		virtualHosts = append(virtualHosts, virtualHost)
 	}
 	return virtualHosts
 }
 
-//TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
+// TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
 func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (*tlsv3.Secret, error) {
 	var secret tlsv3.Secret
 	tlsCert := generateTLSCert(privateKeyPath, pulicKeyPath)
