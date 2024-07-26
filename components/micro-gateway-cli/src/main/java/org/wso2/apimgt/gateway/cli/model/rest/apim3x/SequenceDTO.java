@@ -13,52 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.apimgt.gateway.cli.model.rest;
+package org.wso2.apimgt.gateway.cli.model.rest.apim3x;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
 /**
- * Defines different types of Endpoint security.
+ * Data mapper for WSO2 APIM sequences.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class APIEndpointSecurityDTO {
-    private String password = null;
+public class SequenceDTO {
 
-    /**
-     * WSO2 APIM supported endpoint security types.
-     */
-    public enum TypeEnum {
-        basic, digest,
+    @NotNull
+    private String name = null;
+    private String type = null;
+    private String id = null;
+    private Boolean shared = null;
+
+    @JsonProperty("name")
+    public String getName() {
+        return name;
     }
 
-    private TypeEnum type = null;
-    private String username = null;
-
-    @JsonProperty("password")
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @JsonProperty("type")
-    public TypeEnum getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(TypeEnum type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    @JsonProperty("username")
-    public String getUsername() {
-        return username;
+    @JsonProperty("id")
+    public String getId() {
+        return id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setId(String id) {
+        this.id = id;
     }
+
+    @JsonProperty("shared")
+    public Boolean getShared() {
+        return shared;
+    }
+
+    public void setShared(Boolean shared) {
+        this.shared = shared;
+    }
+
 }

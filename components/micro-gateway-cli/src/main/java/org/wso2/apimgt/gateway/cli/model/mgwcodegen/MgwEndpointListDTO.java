@@ -1,8 +1,8 @@
 package org.wso2.apimgt.gateway.cli.model.mgwcodegen;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.EndpointUrlTypeEnum;
+import org.wso2.apimgt.gateway.cli.model.rest.apim3x.APIEndpointSecurityDTO;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointType;
 
 import java.util.List;

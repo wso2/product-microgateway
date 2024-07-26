@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.AdvanceEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.APIEndpointSecurityDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.apim3x.APIEndpointSecurityDTO;
 
 import java.net.MalformedURLException;
 import java.net.URL;

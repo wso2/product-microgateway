@@ -43,7 +43,7 @@ import org.wso2.apimgt.gateway.cli.hashing.HashUtils;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.APICorsConfigurationDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.common.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.route.EndpointListRouteDTO;
 import org.wso2.apimgt.gateway.cli.model.route.RouteEndpointConfig;
@@ -244,7 +244,7 @@ public class OpenAPICodegenUtils {
 
     private static RouteEndpointConfig getEndpointObjectFromAPI(ExtendedAPI api)
             throws MalformedURLException, CLICompileTimeException {
-        return RouteUtils.parseEndpointConfig(api.getEndpointConfig(), api.getEndpointSecurity());
+        return RouteUtils.parseEndpointConfig(api.getEndpointConfigStr(), api.getEndpointSecurity());
 
     }
 
