@@ -122,7 +122,7 @@ public final class ZipUtils {
         }
     }
 
-    private static void unzipFiles(final ZipInputStream zipInputStream, final Path unzipFilePath) throws IOException {
+    public static void unzipFiles(final ZipInputStream zipInputStream, final Path unzipFilePath) throws IOException {
 
         FileOutputStream fileOutStream = new FileOutputStream(unzipFilePath.toAbsolutePath().toString());
         try (BufferedOutputStream bos = new BufferedOutputStream(fileOutStream)) {

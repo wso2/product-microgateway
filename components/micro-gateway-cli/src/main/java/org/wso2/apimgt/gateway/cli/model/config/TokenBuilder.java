@@ -87,6 +87,11 @@ public class TokenBuilder {
         return this;
     }
 
+    public TokenBuilder setApim4xVersion(Boolean apim4xVersion) {
+        this.token.setApim4xVersion(apim4xVersion);
+        return this;
+    }
+
     public Token build() {
         return token;
     }

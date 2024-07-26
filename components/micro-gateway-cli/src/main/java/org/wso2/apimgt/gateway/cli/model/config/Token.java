@@ -27,6 +27,7 @@ import java.io.PrintStream;
  */
 public class Token {
 
+    private Boolean apim4xVersion;
     private String baseURL;
     private String restVersion;
     private String dcrVersion;
@@ -149,5 +150,13 @@ public class Token {
 
     public void setDcrVersion(String dcrVersion) {
         this.dcrVersion = dcrVersion;
+    }
+
+    public Boolean isApim4xVersion() {
+        return apim4xVersion;
+    }
+
+    public void setApim4xVersion(Boolean apim4xVersion) {
+        this.apim4xVersion = apim4xVersion;
     }
 }

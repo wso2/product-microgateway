@@ -2,6 +2,7 @@
 httpRequestTimeout = 1000000
 
 [token]
+apim4xVersion = false
 baseURL = ""
 restVersion = "v1.2"
 dcrVersion = "v0.17"

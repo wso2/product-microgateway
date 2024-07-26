@@ -114,6 +114,7 @@ public class ImportCmd implements LauncherCmd {
     private boolean isOverwriteRequired;
     private String restVersion;
     private String dcrVersion;
+    private Boolean apim4xVersion;
 
     @Override
     public void execute() {
@@ -256,12 +257,16 @@ public class ImportCmd implements LauncherCmd {
 
         List<ExtendedAPI> apis = new ArrayList<>();
         RESTAPIService service = new RESTAPIServiceImpl(publisherEndpoint, adminEndpoint, restVersion, isInsecure);
-        if (label != null) {
-            apis = service.getAPIs(label, accessToken);
+        if (apim4xVersion) {
+            apis = service.exportAPIs(apiName, version, label, accessToken, projectName);
         } else {
-            ExtendedAPI api = service.getAPI(apiName, version, accessToken);
-            if (api != null) {
-                apis.add(api);
+            if (label != null) {
+                apis = service.getAPIs(label, accessToken);
+            } else {
+                ExtendedAPI api = service.getAPI(apiName, version, accessToken);
+                if (api != null) {
+                    apis.add(api);
+                }
             }
         }
 
@@ -297,6 +302,7 @@ public class ImportCmd implements LauncherCmd {
                     .setClientSecret(encryptedCS)
                     .setTrustStoreLocation(trustStoreLocation)
                     .setTrustStorePassword(encryptedTrustStorePass)
+                    .setApim4xVersion(apim4xVersion)
                     .build();
             newConfig.setToken(token);
             newConfig.setCorsConfiguration(config.getCorsConfiguration());
@@ -377,6 +383,7 @@ public class ImportCmd implements LauncherCmd {
         adminEndpoint = token.getAdminEndpoint();
         registrationEndpoint = token.getRegistrationEndpoint();
         tokenEndpoint = token.getTokenEndpoint();
+        apim4xVersion = token.isApim4xVersion();
 
         //copy current token config values
         configTokenValues.setPublisherEndpoint(publisherEndpoint);
@@ -386,6 +393,7 @@ public class ImportCmd implements LauncherCmd {
         configTokenValues.setRestVersion(restVersion);
         configTokenValues.setDCRVersion(dcrVersion);
         configTokenValues.setBaseURL(token.getBaseURL());
+        configTokenValues.setApim4xVersion(apim4xVersion);
 
         isEndPointsNeeded = StringUtils.isEmpty(publisherEndpoint) || StringUtils.isEmpty(adminEndpoint) || StringUtils
                 .isEmpty(registrationEndpoint) || StringUtils.isEmpty(tokenEndpoint);
