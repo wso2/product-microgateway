@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.rest.apim4x.ApiProjectDto;
+import org.wso2.apimgt.gateway.cli.model.rest.apim4x.ApictlProjectDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.apim4x.Apim4xApiDto;
 import org.wso2.apimgt.gateway.cli.model.rest.apim4x.DeploymentsDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
@@ -40,7 +41,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.ZipInputStream;
 
 /**
  * Utility functions to communicate with import REST APIs.
@@ -81,9 +81,9 @@ public final class RESTAPIUtils {
         List<ExtendedAPI> extendedAPIs = new ArrayList<>();
         File tempDir = null;
         try {
-            String tempDirPath = CmdUtils.getProjectTempFolderLocation(projectName);
-            tempDir = Files.createTempDirectory(tempDirPath).toFile();
-            ZipUtils.unzipFiles(new ZipInputStream(input), tempDir.toPath());
+            String projectPath = CmdUtils.getProjectDirectoryPath(projectName);
+            tempDir = Files.createTempDirectory(new File(projectPath).toPath(), CliConstants.EXPORTED_API).toFile();
+            ZipUtils.unzipFromInputStream(tempDir.getPath(), input);
             String deploymentsJsonPath = tempDir.getAbsolutePath() + File.separator + CliConstants.DEPLOYMENTS_JSON;
             File deploymentJsonFile = new File(deploymentsJsonPath);
             if (deploymentJsonFile.exists() && deploymentJsonFile.isFile()) {
@@ -97,8 +97,8 @@ public final class RESTAPIUtils {
                         logger.debug("Deployments size: " + deployments.size());
                         for (ApiProjectDto deployment : deployments) {
                             String apiFileName = tempDir.getAbsolutePath() + File.separator + deployment.getApiFile();
-                            ZipUtils.unzipFiles(new ZipInputStream(Files.newInputStream(Paths.get(apiFileName))),
-                                    tempDir.toPath());
+                            ZipUtils.unzipFromInputStream(tempDir.getPath(),
+                                    Files.newInputStream(Paths.get(apiFileName)));
                         }
                     } else {
                         throw new CLIRuntimeException("No deployments found in the deployments file");
@@ -110,11 +110,17 @@ public final class RESTAPIUtils {
                         String apiJsonPath = apiDirectory.getPath() + File.separator + CliConstants.API_JSON;
                         File apiJsonFile = new File(apiJsonPath);
                         ObjectMapper apiObjectMapper = new ObjectMapper();
-                        Apim4xApiDto apiProject = apiObjectMapper.readValue(apiJsonFile, Apim4xApiDto.class);
-                        String swaggerPath = apiDirectory.getPath() + File.separator + CliConstants.API_SWAGGER;
-                        File swaggerFile = new File(swaggerPath);
-                        apiProject.setApiDefinition(FileUtils.readFileToString(swaggerFile, StandardCharsets.UTF_8));
-                        extendedAPIs.add(new ExtendedAPI(apiProject));
+                        ApictlProjectDTO apiProject = apiObjectMapper.readValue(apiJsonFile, ApictlProjectDTO.class);
+                        String definitionsPath = apiDirectory.getPath() + File.separator + CliConstants.DEFINITIONS_DIR;
+                        File definitionsDir = new File(definitionsPath);
+                        Apim4xApiDto apiInfo = apiProject.getData();
+                        if (definitionsDir.exists() && definitionsDir.isDirectory()) {
+                            String swaggerPath = definitionsPath + File.separator + CliConstants.API_SWAGGER;
+                            File swaggerFile = new File(swaggerPath);
+                            apiInfo.setApiDefinition(FileUtils.readFileToString(swaggerFile,
+                                    StandardCharsets.UTF_8));
+                        }
+                        extendedAPIs.add(new ExtendedAPI(apiInfo));
                     }
                 }
             } else {
