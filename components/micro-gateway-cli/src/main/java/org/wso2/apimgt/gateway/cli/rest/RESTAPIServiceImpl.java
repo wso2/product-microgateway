@@ -18,6 +18,7 @@
 package org.wso2.apimgt.gateway.cli.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
@@ -40,7 +41,9 @@ import org.wso2.apimgt.gateway.cli.utils.RESTAPIUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -50,7 +53,7 @@ import javax.net.ssl.HttpsURLConnection;
  * WSO2 API Publisher.
  */
 public class RESTAPIServiceImpl implements RESTAPIService {
-    private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(RESTAPIUtils.class);
 
     private String publisherEp;
     private String adminEp;
@@ -107,7 +110,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     setAdditionalConfigs(api);
                     // if using APIM v3, then open API should be fetched separately and set to the API object.
                     if (!isExpand) {
-                        api.setApiDefinition(getOpenAPIFromAPIId(api.getId(), accessToken));
+                        api.getApiInfo().setApiDefinition(getOpenAPIFromAPIId(api.getApiInfo().getId(), accessToken));
                     }
                 }
             } else if (responseCode == 401) {
@@ -172,7 +175,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
                 if (apiList != null) {
                     for (ExtendedAPI api : apiList.getList()) {
-                        if (apiName.equals(api.getName()) && version.equals(api.getVersion())) {
+                        if (apiName.equals(api.getApiInfo().getName()) && version.equals(api.getApiInfo()
+                                .getVersion())) {
                             matchedAPI = api;
                             break;
                         }
@@ -184,7 +188,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                     setAdditionalConfigs(matchedAPI);
                     // if using APIM v3, then open API should be fetched separately and set to the API object.
                     if (!isExpand) {
-                        matchedAPI.setApiDefinition(getOpenAPIFromAPIId(matchedAPI.getId(), accessToken));
+                        matchedAPI.getApiInfo().setApiDefinition(getOpenAPIFromAPIId(matchedAPI.getApiInfo().getId(),
+                                accessToken));
                     }
                 } else {
                     throw new CLIInternalException("No proper response received for get API request.");
@@ -254,13 +259,15 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         // set default values from config if per api cors is not enabled
         Config config = CmdUtils.getConfig();
         if (config == null) {
-            if (api.getCorsConfiguration() != null && !api.getCorsConfiguration().getCorsConfigurationEnabled()) {
-                api.setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
+            if (api.getApiInfo().getCorsConfiguration() != null && !api.getApiInfo().getCorsConfiguration()
+                    .getCorsConfigurationEnabled()) {
+                api.getApiInfo().setCorsConfiguration(CmdUtils.getDefaultCorsConfig());
             }
         } else {
-            if (config.getCorsConfiguration().getCorsConfigurationEnabled() && !(api.getCorsConfiguration() != null
-                    && api.getCorsConfiguration().getCorsConfigurationEnabled())) {
-                api.setCorsConfiguration(config.getCorsConfiguration());
+            if (config.getCorsConfiguration().getCorsConfigurationEnabled()
+                    && !(api.getApiInfo().getCorsConfiguration() != null
+                    && api.getApiInfo().getCorsConfiguration().getCorsConfigurationEnabled())) {
+                api.getApiInfo().setCorsConfiguration(config.getCorsConfiguration());
             }
         }
     }
@@ -422,5 +429,64 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             config.setMutualSSL(clientDetails); // todo: check usage of this.
         }
         return selectedCertificates;
+    }
+
+    /**
+     * @see RESTAPIService#exportAPIs(String, String, String, String, String)
+     */
+    @Override
+    public List<ExtendedAPI> exportAPIs(String apiName, String apiVersion, String gatewayLabel, String accessToken,
+                                  String projectName) {
+        logger.debug("Retrieving APIs with gateway label {}", gatewayLabel);
+        URL url;
+        HttpsURLConnection urlConn = null;
+        try {
+            publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
+            String urlStr = publisherEp + RESTServiceConstants.APIS_EXPORT_URI;
+            String queryParams = "?";
+            if (StringUtils.isNotEmpty(apiName)) {
+                queryParams = "name=" + apiName + "&";
+            }
+            if (StringUtils.isNotEmpty(apiVersion)) {
+                queryParams += "version=" + apiVersion + "&";
+            }
+            if (StringUtils.isNotEmpty(gatewayLabel)) {
+                gatewayLabel = Base64.getEncoder().encodeToString(gatewayLabel.getBytes(StandardCharsets.UTF_8));
+                queryParams += "gatewayLabel=" + gatewayLabel + "&";
+            }
+            queryParams += "gatewayType=Envoy";
+            urlStr += queryParams;
+            logger.debug("Export APIs URL: {}", urlStr);
+            url = new URL(urlStr);
+            urlConn = (HttpsURLConnection) url.openConnection();
+            if (inSecure) {
+                urlConn.setHostnameVerifier((s, sslSession) -> true);
+            }
+            urlConn.setDoOutput(true);
+            urlConn.setRequestMethod(RESTServiceConstants.GET);
+            urlConn.setRequestProperty(RESTServiceConstants.AUTHORIZATION,
+                    RESTServiceConstants.BEARER + " " + accessToken);
+            int responseCode = urlConn.getResponseCode();
+            logger.debug("Response code: {}", responseCode);
+            if (responseCode == 200) {
+                logger.debug("Retrieving APIs with label {} was successful.", gatewayLabel);
+                return RESTAPIUtils.getResponseAsExtendedApis(urlConn.getInputStream(), projectName);
+            } else if (responseCode == 401) {
+                throw new CLIRuntimeException(
+                        "Invalid user credentials or the user does not have required permissions");
+            } else if (responseCode == 404) {
+                throw new CLIRuntimeException(
+                        "No APIs found with the provided information for the given gateway label: " + gatewayLabel);
+            } else {
+                throw new RuntimeException("Error occurred while getting token. Status code: " + responseCode);
+            }
+        } catch (IOException e) {
+            String msg = "Error while getting all APIs with label " + gatewayLabel;
+            throw new RuntimeException(msg, e);
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
+        }
     }
 }

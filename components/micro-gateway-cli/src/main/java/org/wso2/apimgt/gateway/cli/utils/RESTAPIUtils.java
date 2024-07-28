@@ -17,16 +17,36 @@
  */
 package org.wso2.apimgt.gateway.cli.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.apimgt.gateway.cli.constants.CliConstants;
+import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.rest.apim4x.ApiProjectDto;
+import org.wso2.apimgt.gateway.cli.model.rest.apim4x.Apim4xApiDto;
+import org.wso2.apimgt.gateway.cli.model.rest.apim4x.DeploymentsDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.rest.RESTAPIServiceImpl;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipInputStream;
 
 /**
  * Utility functions to communicate with import REST APIs.
  */
 public final class RESTAPIUtils {
+    private static final Logger logger = LoggerFactory.getLogger(RESTAPIServiceImpl.class);
 
     private RESTAPIUtils() {
 
@@ -48,5 +68,69 @@ public final class RESTAPIUtils {
             }
             return content.toString();
         }
+    }
+
+    /**
+     * Get input stream and convert it to an API project Object
+     *
+     * @param input Input stream
+     * @param projectName project name
+     * @return API project object
+     */
+    public static List<ExtendedAPI> getResponseAsExtendedApis(InputStream input, String projectName) {
+        List<ExtendedAPI> extendedAPIs = new ArrayList<>();
+        File tempDir = null;
+        try {
+            String tempDirPath = CmdUtils.getProjectTempFolderLocation(projectName);
+            tempDir = Files.createTempDirectory(tempDirPath).toFile();
+            ZipUtils.unzipFiles(new ZipInputStream(input), tempDir.toPath());
+            String deploymentsJsonPath = tempDir.getAbsolutePath() + File.separator + CliConstants.DEPLOYMENTS_JSON;
+            File deploymentJsonFile = new File(deploymentsJsonPath);
+            if (deploymentJsonFile.exists() && deploymentJsonFile.isFile()) {
+                logger.debug("Deployment file exists");
+                String jsonContent = FileUtils.readFileToString(deploymentJsonFile, StandardCharsets.UTF_8);
+                ObjectMapper objectMapper = new ObjectMapper();
+                DeploymentsDTO deploymentsDTO = objectMapper.readValue(jsonContent, DeploymentsDTO.class);
+                if (deploymentsDTO != null && deploymentsDTO.getData() != null) {
+                    Set<ApiProjectDto> deployments = deploymentsDTO.getData().getDeployments();
+                    if (!deployments.isEmpty()) {
+                        logger.debug("Deployments size: " + deployments.size());
+                        for (ApiProjectDto deployment : deployments) {
+                            String apiFileName = tempDir.getAbsolutePath() + File.separator + deployment.getApiFile();
+                            ZipUtils.unzipFiles(new ZipInputStream(Files.newInputStream(Paths.get(apiFileName))),
+                                    tempDir.toPath());
+                        }
+                    } else {
+                        throw new CLIRuntimeException("No deployments found in the deployments file");
+                    }
+                }
+                File[] apiDirectories = new File(tempDir.getPath()).listFiles(File::isDirectory);
+                if (apiDirectories != null) {
+                    for (File apiDirectory : apiDirectories) {
+                        String apiJsonPath = apiDirectory.getPath() + File.separator + CliConstants.API_JSON;
+                        File apiJsonFile = new File(apiJsonPath);
+                        ObjectMapper apiObjectMapper = new ObjectMapper();
+                        Apim4xApiDto apiProject = apiObjectMapper.readValue(apiJsonFile, Apim4xApiDto.class);
+                        String swaggerPath = apiDirectory.getPath() + File.separator + CliConstants.API_SWAGGER;
+                        File swaggerFile = new File(swaggerPath);
+                        apiProject.setApiDefinition(FileUtils.readFileToString(swaggerFile, StandardCharsets.UTF_8));
+                        extendedAPIs.add(new ExtendedAPI(apiProject));
+                    }
+                }
+            } else {
+                throw new CLIRuntimeException("Deployment file does not exist");
+            }
+        } catch (IOException e) {
+            throw new CLIRuntimeException("Error while reading the response as extended APIs", e);
+        } finally {
+            if (tempDir.exists()) {
+                try {
+                    FileUtils.deleteDirectory(tempDir);
+                } catch (IOException e) {
+                    logger.error("Error while deleting temp directory for the project: " + projectName);
+                }
+            }
+        }
+        return extendedAPIs;
     }
 }
