@@ -125,7 +125,7 @@ public class CodeGenerator {
                         genFiles.add(generateService(definitionContext));
                         serviceList.add(definitionContext);
                         ballerinaToml.addDependencies(definitionContext);
-                        copySwaggerToResourcesFolder(api.getName(), api.getVersion(), path);
+                        copySwaggerToResourcesFolder(api.getApiInfo().getName(), api.getApiInfo().getVersion(), path);
                     } catch (BallerinaServiceGenException e) {
                         throw new CLIRuntimeException("Swagger definition cannot be parsed to ballerina code", e);
                     } catch (IOException e) {

@@ -135,14 +135,16 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
 
     @Override
     public BallerinaService buildContext(OpenAPI definition, ExtendedAPI api) throws BallerinaServiceGenException {
-        this.name = CodegenUtils.trim(api.getName());
+        this.name = CodegenUtils.trim(api.getApiInfo().getName());
         this.api = api;
-        if (Character.isDigit(api.getName().charAt(0))) {
+        if (Character.isDigit(api.getApiInfo().getName().charAt(0))) {
             this.qualifiedServiceName =
-                    CodegenUtils.trim("_" + api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
+                    CodegenUtils.trim("_" + api.getApiInfo().getName()) + "__"
+                            + replaceAllNonAlphaNumeric(api.getApiInfo().getVersion());
         } else {
             this.qualifiedServiceName =
-                    CodegenUtils.trim(api.getName()) + "__" + replaceAllNonAlphaNumeric(api.getVersion());
+                    CodegenUtils.trim(api.getApiInfo().getName()) + "__"
+                            + replaceAllNonAlphaNumeric(api.getApiInfo().getVersion());
         }
         this.endpointConfig = api.getEndpointConfigRepresentation();
         this.isGrpc = api.isGrpc();
@@ -257,7 +259,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 }
             } catch (CLICompileTimeException e) {
                 throw new CLIRuntimeException("Error while parsing information under path:" + path.getKey() +
-                        "in the API \"" + api.getName() + ":" + api.getVersion() + "\".\n\t-" + e.getTerminalMsg(), e);
+                        "in the API \"" + api.getApiInfo().getName() + ":" + api.getApiInfo().getVersion() +
+                        "\".\n\t-" + e.getTerminalMsg(), e);
             }
             balPath.getOperations().forEach(op -> {
                 BallerinaOperation operation = op.getValue();
@@ -324,7 +327,7 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
             apiThrottlePolicy = Optional.ofNullable(openAPI.getExtensions()
                     .get(OpenAPIConstants.APIM_THROTTLING_TIER));
         }
-        apiThrottlePolicy.ifPresent(value -> this.api.setApiLevelPolicy(value.toString()));
+        apiThrottlePolicy.ifPresent(value -> this.api.getApiInfo().setApiLevelPolicy(value.toString()));
     }
 
     /**
@@ -500,13 +503,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 Map cacheObjectMap = (Map) responseCacheObject;
                 boolean enabled = (boolean) cacheObjectMap.get(OpenAPIConstants.ENABLED);
                 if (enabled) {
-                    api.setResponseCaching(OpenAPIConstants.CACHE_ENABLED);
+                    api.getApiInfo().setResponseCaching(OpenAPIConstants.CACHE_ENABLED);
                     if (cacheObjectMap.containsKey(OpenAPIConstants.CACHE_TIMEOUT)) {
                         int cacheTimeout = (int) cacheObjectMap.get(OpenAPIConstants.CACHE_TIMEOUT);
-                        api.setCacheTimeout(cacheTimeout * 1000); //set the value in milli seconds.
+                        api.getApiInfo().setCacheTimeout(cacheTimeout * 1000); //set the value in milliseconds.
                     }
                 } else {
-                    api.setResponseCaching(OpenAPIConstants.DISABLED);
+                    api.getApiInfo().setResponseCaching(OpenAPIConstants.DISABLED);
                 }
             }
         }

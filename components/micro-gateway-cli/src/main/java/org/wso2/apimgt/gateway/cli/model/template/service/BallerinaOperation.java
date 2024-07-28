@@ -119,8 +119,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         this.pathParameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(api.getName(),
-                api.getVersion(), operation.getExtensions(), api.getMutualSSL());
+        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(api.getApiInfo().getName(),
+                api.getApiInfo().getVersion(), operation.getExtensions(), api.getMutualSSL());
         this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
@@ -175,11 +175,11 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                 Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
                 extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
             }
-            if (api.getApiLevelPolicy() != null && this.resourceTier != null) {
+            if (api.getApiInfo().getApiLevelPolicy() != null && this.resourceTier != null) {
                 //if api level policy exists then we are neglecting the resource level policies
                 String message = "[WARN] : Resource level policy: " + this.resourceTier
-                        + " will be neglected due to the presence of API level policy: " + api.getApiLevelPolicy()
-                        + " for the API : " + api.getName() + "\n";
+                        + " will be neglected due to the presence of API level policy: "
+                        + api.getApiInfo().getApiLevelPolicy() + " for the API : " + api.getApiInfo().getName() + "\n";
                 CmdUtils.appendMessagesToConsole(message);
                 this.resourceTier = null;
             }
