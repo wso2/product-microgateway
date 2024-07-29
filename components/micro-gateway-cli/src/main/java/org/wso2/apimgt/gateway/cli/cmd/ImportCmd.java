@@ -354,12 +354,20 @@ public class ImportCmd implements LauncherCmd {
      * @param version API version
      */
     private void validateAPIGetRequestParams(String label, String apiName, String version) {
-        if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
-                StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) || StringUtils.isNotEmpty(version)) ||
-                (StringUtils.isEmpty(apiName) && StringUtils.isNotEmpty(version)) ||
-                (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version))) {
-            throw CmdUtils.createUsageException(
-                    "Missing \"-l <label>\" or \"-a <api-name> -v <version>\" parameters");
+        if (apim4xVersion) {
+            if (StringUtils.isEmpty(label)) {
+                throw CmdUtils.createUsageException(
+                        "Missing \"-l <label>\" parameter");
+            }
+        } else {
+            if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
+                    StringUtils.isNotEmpty(label) && (StringUtils.isNotEmpty(apiName) ||
+                            StringUtils.isNotEmpty(version)) || (StringUtils.isEmpty(apiName) &&
+                    StringUtils.isNotEmpty(version)) || (StringUtils.isNotEmpty(apiName) &&
+                    StringUtils.isEmpty(version))) {
+                throw CmdUtils.createUsageException(
+                        "Missing \"-l <label>\" or \"-a <api-name> -v <version>\" parameters");
+            }
         }
     }
 
