@@ -1,5 +1,5 @@
 {
 {{#each this}}
-"{{cut qualifiedServiceName " "}}" : {{{api.apiDefinition}}}{{#unless @last}},{{/unless}}
+"{{cut qualifiedServiceName " "}}" : {{{api.apiInfo.apiDefinition}}}{{#unless @last}},{{/unless}}
 {{/each}}
 }
