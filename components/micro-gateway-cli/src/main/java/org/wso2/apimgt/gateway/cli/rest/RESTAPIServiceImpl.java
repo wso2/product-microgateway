@@ -30,6 +30,7 @@ import org.wso2.apimgt.gateway.cli.model.config.MutualSSL;
 import org.wso2.apimgt.gateway.cli.model.rest.APIListDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertMetadataDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ClientCertificatesDTO;
+import org.wso2.apimgt.gateway.cli.model.rest.apim3x.Apim3xApiDto;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.policy.ApplicationThrottlePolicyListDTO;
@@ -76,6 +77,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         HttpsURLConnection urlConn = null;
         APIListDTO apiListDTO;
         boolean isExpand = false;
+        List<ExtendedAPI> apiList = new ArrayList<>();
         //calling token endpoint
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
@@ -106,12 +108,14 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 logger.trace("Response body: {}", responseStr);
                 //convert json string to object
                 apiListDTO = mapper.readValue(responseStr, APIListDTO.class);
-                for (ExtendedAPI api : apiListDTO.getList()) {
-                    setAdditionalConfigs(api);
+                for (Apim3xApiDto api : apiListDTO.getList()) {
+                    ExtendedAPI apiInfo = new ExtendedAPI(api);
+                    setAdditionalConfigs(apiInfo);
                     // if using APIM v3, then open API should be fetched separately and set to the API object.
                     if (!isExpand) {
-                        api.getApiInfo().setApiDefinition(getOpenAPIFromAPIId(api.getApiInfo().getId(), accessToken));
+                        api.setApiDefinition(getOpenAPIFromAPIId(apiInfo.getApiInfo().getId(), accessToken));
                     }
+                    apiList.add(apiInfo);
                 }
             } else if (responseCode == 401) {
                 throw new CLIRuntimeException(
@@ -128,7 +132,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             }
         }
         logger.debug("Retrieving APIs with label {} was successful.", labelName);
-        return apiListDTO.getList();
+        return apiList;
     }
 
 
@@ -174,10 +178,9 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 //convert json string to object
                 APIListDTO apiList = mapper.readValue(responseStr, APIListDTO.class);
                 if (apiList != null) {
-                    for (ExtendedAPI api : apiList.getList()) {
-                        if (apiName.equals(api.getApiInfo().getName()) && version.equals(api.getApiInfo()
-                                .getVersion())) {
-                            matchedAPI = api;
+                    for (Apim3xApiDto api : apiList.getList()) {
+                        if (apiName.equals(api.getName()) && version.equals(api.getVersion())) {
+                            matchedAPI = new ExtendedAPI(api);
                             break;
                         }
                     }

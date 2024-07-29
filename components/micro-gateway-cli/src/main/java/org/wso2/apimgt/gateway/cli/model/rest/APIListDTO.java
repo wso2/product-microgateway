@@ -17,13 +17,13 @@ package org.wso2.apimgt.gateway.cli.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.apim3x.Apim3xApiDto;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data holder for {@link ExtendedAPI} type API list definition.
+ * Data holder for {@link Apim3xApiDto} type API list definition.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APIListDTO  {
@@ -31,7 +31,7 @@ public class APIListDTO  {
   private Integer count = null;
   private String next = null;
   private String previous = null;
-  private List<ExtendedAPI> list = new ArrayList<ExtendedAPI>();
+  private List<Apim3xApiDto> list = new ArrayList<Apim3xApiDto>();
   private APIListPaginationDTO pagination = null;
 
   
@@ -69,10 +69,10 @@ public class APIListDTO  {
   }
 
   @JsonProperty("list")
-  public List<ExtendedAPI> getList() {
+  public List<Apim3xApiDto> getList() {
     return list;
   }
-  public void setList(List<ExtendedAPI> list) {
+  public void setList(List<Apim3xApiDto> list) {
     this.list = list;
   }
 

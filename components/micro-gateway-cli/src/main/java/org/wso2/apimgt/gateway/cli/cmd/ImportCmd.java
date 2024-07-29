@@ -283,7 +283,7 @@ public class ImportCmd implements LauncherCmd {
         //delete the folder if an exception is thrown in following steps
         try {
             CmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis,
-                    !restVersion.startsWith(CliConstants.REST_API_V1_PREFIX));
+                    !restVersion.startsWith(CliConstants.REST_API_V1_PREFIX) && !apim4xVersion);
         } catch (Exception e) {
             throw new CLIInternalException("Exception occurred during codeGeneration process", e);
         }
