@@ -443,6 +443,7 @@ public class RESTAPIServiceImpl implements RESTAPIService {
         logger.debug("Retrieving APIs with gateway label {}", gatewayLabel);
         URL url;
         HttpsURLConnection urlConn = null;
+        String gatewayLabelEncoded;
         try {
             publisherEp = publisherEp.endsWith("/") ? publisherEp : publisherEp + "/";
             String urlStr = publisherEp + RESTServiceConstants.APIS_EXPORT_URI;
@@ -454,8 +455,8 @@ public class RESTAPIServiceImpl implements RESTAPIService {
                 queryParams += "version=" + apiVersion + "&";
             }
             if (StringUtils.isNotEmpty(gatewayLabel)) {
-                gatewayLabel = Base64.getEncoder().encodeToString(gatewayLabel.getBytes(StandardCharsets.UTF_8));
-                queryParams += "gatewayLabel=" + gatewayLabel + "&";
+                gatewayLabelEncoded = Base64.getEncoder().encodeToString(gatewayLabel.getBytes(StandardCharsets.UTF_8));
+                queryParams += "gatewayLabel=" + gatewayLabelEncoded + "&";
             }
             queryParams += "gatewayType=Envoy";
             urlStr += queryParams;
