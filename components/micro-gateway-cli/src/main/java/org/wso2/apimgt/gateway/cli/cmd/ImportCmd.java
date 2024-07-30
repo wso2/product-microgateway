@@ -140,6 +140,10 @@ public class ImportCmd implements LauncherCmd {
         Config config = CmdUtils.getConfig();
         isOverwriteRequired = false;
 
+        //setup endpoints
+        Token configToken = config.getToken();
+        TokenBuilder configTokenValues = setEndpoints(configToken);
+
         validateAPIGetRequestParams(label, apiName, version);
         //Setup username
         String configuredUser = config.getToken().getUsername();
@@ -168,10 +172,6 @@ public class ImportCmd implements LauncherCmd {
                 }
             }
         }
-
-        //setup endpoints
-        Token configToken = config.getToken();
-        TokenBuilder configTokenValues = setEndpoints(configToken);
 
         //configure trust store
         String configuredTrustStore = config.getToken().getTrustStoreLocation();
