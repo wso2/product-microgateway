@@ -65,4 +65,5 @@ public class RESTServiceConstants {
     public static final String CERTIFICATE_TIER = "Tier";
 
     public static final String ALL_SERVICES_REGEX_PATH = "/*";
+    public static final String CONTENT_TYPE_APPLICATION_ZIP = "application/zip";
 }

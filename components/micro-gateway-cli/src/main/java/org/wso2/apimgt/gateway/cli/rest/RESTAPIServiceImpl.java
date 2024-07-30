@@ -472,8 +472,13 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             int responseCode = urlConn.getResponseCode();
             logger.debug("Response code: {}", responseCode);
             if (responseCode == 200) {
-                logger.debug("Retrieving APIs with label {} was successful.", gatewayLabel);
-                return RESTAPIUtils.getResponseAsExtendedApis(urlConn.getInputStream(), projectName);
+                if (RESTServiceConstants.CONTENT_TYPE_APPLICATION_ZIP.equalsIgnoreCase(urlConn.getContentType())) {
+                    logger.debug("Retrieving APIs with label {} was successful.", gatewayLabel);
+                    return RESTAPIUtils.getResponseAsExtendedApis(urlConn.getInputStream(), projectName);
+                } else {
+                    throw new CLIRuntimeException(
+                            "No APIs found with the provided information for the given gateway label: " + gatewayLabel);
+                }
             } else if (responseCode == 401) {
                 throw new CLIRuntimeException(
                         "Invalid user credentials or the user does not have required permissions");
