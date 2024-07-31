@@ -240,7 +240,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		}
 		err = listener.Validate()
 		if err != nil {
-			logger.LoggerOasparser.Error("Error while validating listener configs. ", err)
+			logger.LoggerOasparser.Fatal("Error while validating listener configs. ", err)
 		}
 		listeners = append(listeners, &listener)
 		logger.LoggerOasparser.Infof("Non-secured Listener is added. %s : %d", listenerHostAddress, conf.Envoy.ListenerPort)

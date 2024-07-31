@@ -128,7 +128,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	}
 	err = accessLog.Validate()
 	if err != nil {
-		logger.LoggerOasparser.Error("Error while validating file access log configs. ", err)
+		logger.LoggerOasparser.Fatal("Error while validating file access log configs. ", err)
 	}
 	return &accessLog
 }
@@ -171,7 +171,7 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 	}
 	err = accessLog.Validate()
 	if err != nil {
-		logger.LoggerOasparser.Error("Error while validating grpc access log configs. ", err)
+		logger.LoggerOasparser.Fatal("Error while validating grpc access log configs. ", err)
 	}
 	return &accessLog
 }
