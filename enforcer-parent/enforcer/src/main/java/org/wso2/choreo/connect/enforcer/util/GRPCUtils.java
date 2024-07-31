@@ -25,7 +25,6 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
-import org.wso2.choreo.connect.enforcer.features.FeatureFlags;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -57,9 +56,8 @@ public class GRPCUtils {
                 .sslContext(sslContext)
                 .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName());
 
-        if (FeatureFlags.isEnforcerGrpcClientKeepaliveEnabled()) {
-            channelBuilder.keepAliveTime(6, TimeUnit.MINUTES);
-        }
+        channelBuilder.keepAliveTime(6, TimeUnit.MINUTES);
+
         return channelBuilder.build();
     }
 
