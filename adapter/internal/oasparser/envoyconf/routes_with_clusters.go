@@ -124,7 +124,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				upstreamCerts, timeout, apiLevelbasePath)
 			if err != nil {
 				apiLevelClusterNameProd = ""
-				logger.LoggerOasparser.Errorf("Error while adding api level production endpoints for %s. %v", apiTitle, err.Error())
+				logger.LoggerOasparser.Errorf("Error while adding api level production endpoints for %s. %v , skipping api...", apiTitle, err.Error())
 			} else {
 				clusters = append(clusters, cluster)
 				endpoints = append(endpoints, address...)
@@ -146,7 +146,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				apiVersion, "")
 			cluster, addresses, err := processEndpoints(epClusterName, endpointCluster, upstreamCerts, timeout, apiLevelbasePath)
 			if err != nil {
-				logger.LoggerOasparser.Errorf("Error while adding x-wso2-endpoints cluster %v for %s. %v ", epName, apiTitle, err.Error())
+				logger.LoggerOasparser.Errorf("Error while adding x-wso2-endpoints cluster %v for %s. %v, skipping api...", epName, apiTitle, err.Error())
 			} else {
 				strictBasePath = true
 				clusters = append(clusters, cluster)
@@ -165,7 +165,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		cluster, addresses, err := CreateLuaCluster(interceptorCerts, apiRequestInterceptor)
 		if err != nil {
 			apiRequestInterceptor = model.InterceptEndpoint{}
-			logger.LoggerOasparser.Errorf("Error while adding api level request intercepter external cluster for %s. %v",
+			logger.LoggerOasparser.Errorf("Error while adding api level request intercepter external cluster for %s. %v, skipping api...",
 				apiTitle, err.Error())
 		} else {
 			clusters = append(clusters, cluster)
@@ -181,7 +181,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 		cluster, addresses, err := CreateLuaCluster(interceptorCerts, apiResponseInterceptor)
 		if err != nil {
 			apiResponseInterceptor = model.InterceptEndpoint{}
-			logger.LoggerOasparser.Errorf("Error while adding api level response intercepter external cluster for %s. %v", apiTitle, err.Error())
+			logger.LoggerOasparser.Errorf("Error while adding api level response intercepter external cluster for %s. %v , skipping api...", apiTitle, err.Error())
 		} else {
 			clusters = append(clusters, cluster)
 			endpoints = append(endpoints, addresses...)
@@ -216,7 +216,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 					clusterNameProd = apiLevelClusterNameProd
 					// reverting resource base path setting as production cluster creation has failed
 					resourceBasePath = prevResourceBasePath
-					logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. %v",
+					logger.LoggerOasparser.Errorf("Error while adding resource level production endpoints for %s:%v-%v. %v, skipping api...",
 						apiTitle, apiVersion, resourcePath, err.Error())
 				} else {
 					clusters = append(clusters, clusterProd)
@@ -247,7 +247,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				apiTitle, apiVersion, resource.GetID())
 			cluster, addresses, err := CreateLuaCluster(interceptorCerts, reqInterceptorVal)
 			if err != nil {
-				logger.LoggerOasparser.Errorf("Error while adding resource level request intercept external cluster for %s. %v",
+				logger.LoggerOasparser.Errorf("Error while adding resource level request intercept external cluster for %s. %v , skipping api...",
 					apiTitle, err.Error())
 			} else {
 				resourceRequestInterceptor = reqInterceptorVal
@@ -267,7 +267,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				opI.ClusterName = getClusterName(requestInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opID)
 				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
 				if err != nil {
-					logger.LoggerOasparser.Errorf("Error while adding operational level request intercept external cluster for %v:%v-%v-%v. %v",
+					logger.LoggerOasparser.Errorf("Error while adding operational level request intercept external cluster for %v:%v-%v-%v. %v , skipping api...",
 						apiTitle, apiVersion, resource.GetPath(), opID, err.Error())
 					// setting resource level interceptor to failed operation level interceptor.
 					operationalReqInterceptors[method] = resourceRequestInterceptor
@@ -286,7 +286,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				vHost, apiTitle, apiVersion, resource.GetID())
 			cluster, addresses, err := CreateLuaCluster(interceptorCerts, respInterceptorVal)
 			if err != nil {
-				logger.LoggerOasparser.Errorf("Error while adding resource level response intercept external cluster for %s. %v",
+				logger.LoggerOasparser.Errorf("Error while adding resource level response intercept external cluster for %s. %v , skipping api...",
 					apiTitle, err.Error())
 			} else {
 				resourceResponseInterceptor = respInterceptorVal
@@ -306,7 +306,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				opI.ClusterName = getClusterName(responseInterceptClustersNamePrefix, organizationID, vHost, apiTitle, apiVersion, opID)
 				cluster, addresses, err := CreateLuaCluster(interceptorCerts, opI)
 				if err != nil {
-					logger.LoggerOasparser.Errorf("Error while adding operational level response intercept external cluster for %v:%v-%v-%v. %v",
+					logger.LoggerOasparser.Errorf("Error while adding operational level response intercept external cluster for %v:%v-%v-%v. %v , skipping api...",
 						apiTitle, apiVersion, resource.GetPath(), opID, err.Error())
 					// setting resource level interceptor to failed operation level interceptor.
 					operationalRespInterceptorVal[method] = resourceResponseInterceptor
@@ -443,6 +443,17 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 			},
 		},
 	}
+	if enableRouterConfigValidation {
+		err = cluster.Validate()
+		if err != nil {
+			if panicOnValidationFailure {
+				logger.LoggerOasparser.Fatal("Error while validating rate limit cluster configs. ", err)
+			} else {
+				logger.LoggerOasparser.Error("Error while validating rate limit cluster configs. ", err)
+			}
+		}
+	}
+
 	return cluster, address, nil
 }
 
@@ -504,6 +515,12 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		}
 		// create addresses for endpoints
 		address := createAddress(ep.Host, ep.Port)
+		if enableRouterConfigValidation {
+			err := address.Validate()
+			if err != nil {
+				logger.LoggerOasparser.Error("Error while validating address config. ", err)
+			}
+		}
 		addresses = append(addresses, address)
 
 		// create loadbalance / failover endpoints
@@ -626,6 +643,14 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		svcdiscovery.ClusterConsulKeyMap[clusterName] = serviceDiscoveryString
 		logger.LoggerOasparser.Debugln("Consul cluster added for x-wso2-endpoints: ", clusterName, " ",
 			serviceDiscoveryString)
+	}
+
+	if enableRouterConfigValidation {
+		err = cluster.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating cluster configs. ", err)
+			return nil, nil, err
+		}
 	}
 
 	return &cluster, addresses, nil
@@ -1002,6 +1027,17 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			wellknown.Lua:                       luaFilter,
 			wellknown.CORS:                      corsFilter,
 		},
+	}
+
+	if enableRouterConfigValidation {
+		err := router.Validate()
+		if err != nil {
+			if panicOnValidationFailure {
+				logger.LoggerOasparser.Fatal("Error while validating Router configs. ", err)
+			} else {
+				logger.LoggerOasparser.Error("Error while validating Router configs. ", err)
+			}
+		}
 	}
 	return &router
 }

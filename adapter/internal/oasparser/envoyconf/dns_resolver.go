@@ -22,6 +22,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	caresv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/network/dns_resolver/cares/v3"
 	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
@@ -69,8 +70,16 @@ func getDNSResolverConf() (*corev3.TypedExtensionConfig, error) {
 		return nil, err
 	}
 
-	return &corev3.TypedExtensionConfig{
+	dnsResolverConfig := &corev3.TypedExtensionConfig{
 		Name:        "Upstream DNS resolver",
 		TypedConfig: dnsResolverConfPbAny,
-	}, nil
+	}
+
+	if enableRouterConfigValidation {
+		err = dnsResolverConfig.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating DNS Resolver configs. ", err)
+		}
+	}
+	return dnsResolverConfig, nil
 }
