@@ -37,6 +37,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
@@ -101,6 +102,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
+        String[] secProtocolHeaderForWS = request.getAttributes().getRequest().getHttp().getHeadersOrDefault(
+            HttpConstants.WEBSOCKET_PROTOCOL_HEADER, "").split(",");
         Struct.Builder structBuilder = Struct.newBuilder();
         // Used to identify that the choreo-connect-enforcer handled the request. It is used to
         // provide local reply for authentication failures.
@@ -151,7 +154,14 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
-
+            if (secProtocolHeaderForWS[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
+                secProtocolHeaderForWS.length == 2) {
+                okResponseBuilder.addResponseHeadersToAdd(
+                        HeaderValueOption.newBuilder()
+                                .setHeader(HeaderValue.newBuilder().setKey(
+                                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER).setValue(Constants.WS_API_KEY_IDENTIFIER).build())
+                                .build());
+            }
             // If the user is sending the APIKey credentials within query parameters, those query parameters should
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
             // query parameter. In this scenario, apiKey query parameter is sent within the property called
