@@ -43,6 +43,8 @@ import (
 )
 
 var retryBannedVhosts map[string]struct{}
+var panicOnValidationFailure bool = false
+var enableRouterConfigValidation bool = false
 
 func init() {
 	retryBannedVhosts := make(map[string]struct{})
@@ -52,6 +54,10 @@ func init() {
 			retryBannedVhosts[vhost] = struct{}{}
 		}
 	}
+	enableRouterConfigValidationString := os.Getenv("ENABLE_ROUTER_CONFIG_VALIDATION")
+	panicOnValidationFailureString := os.Getenv("PANIC_ON_ROUTER_CONFIG_VALIDATION_FAILURE")
+	enableRouterConfigValidation, _ = strconv.ParseBool(enableRouterConfigValidationString)
+	panicOnValidationFailure, _ = strconv.ParseBool(panicOnValidationFailureString)
 }
 
 // CreateRoutesConfigForRds generates the default RouteConfiguration.
@@ -238,9 +244,15 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			},
 			},
 		}
-		err = listener.Validate()
-		if err != nil {
-			logger.LoggerOasparser.Fatal("Error while validating listener configs. ", err)
+		if enableRouterConfigValidation {
+			err = listener.Validate()
+			if err != nil {
+				if panicOnValidationFailure {
+					logger.LoggerOasparser.Fatal("Error while validating listener configs. ", err)
+				} else {
+					logger.LoggerOasparser.Error("Error while validating listener configs. ", err)
+				}
+			}
 		}
 		listeners = append(listeners, &listener)
 		logger.LoggerOasparser.Infof("Non-secured Listener is added. %s : %d", listenerHostAddress, conf.Envoy.ListenerPort)
@@ -291,11 +303,13 @@ func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*rou
 			}
 			virtualHost.RetryPolicy = commonRetryPolicy
 		}
-    
-    err := virtualHost.Validate()
-		if err != nil {
-			logger.LoggerOasparser.Error("Error while validating virtual host configs. ", err)
-    }
+
+		if enableRouterConfigValidation {
+			err := virtualHost.Validate()
+			if err != nil {
+				logger.LoggerOasparser.Error("Error while validating virtual host configs. ", err)
+			}
+		}
 		virtualHosts = append(virtualHosts, virtualHost)
 	}
 	return virtualHosts
@@ -366,9 +380,11 @@ func getTracing(conf *config.Config) (*hcmv3.HttpConnectionManager_Tracing, erro
 		},
 		MaxPathTagLength: &wrappers.UInt32Value{Value: maxPathLength},
 	}
-	err = tracing.Validate()
-	if err != nil {
-		logger.LoggerOasparser.Error("Error while validating Tracing configs. ", err)
+	if enableRouterConfigValidation {
+		err = tracing.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating Tracing configs. ", err)
+		}
 	}
 	return tracing, nil
 }

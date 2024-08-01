@@ -126,10 +126,18 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 			TypedConfig: accessLogTypedConf,
 		},
 	}
-	err = accessLog.Validate()
-	if err != nil {
-		logger.LoggerOasparser.Fatal("Error while validating file access log configs. ", err)
+
+	if enableRouterConfigValidation {
+		err = accessLog.Validate()
+		if err != nil {
+			if panicOnValidationFailure {
+				logger.LoggerOasparser.Fatal("Error while validating file access log configs. ", err)
+			} else {
+				logger.LoggerOasparser.Error("Error while validating file access log configs. ", err)
+			}
+		}
 	}
+
 	return &accessLog
 }
 
@@ -169,9 +177,16 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 			TypedConfig: accessLogTypedConf,
 		},
 	}
-	err = accessLog.Validate()
-	if err != nil {
-		logger.LoggerOasparser.Fatal("Error while validating grpc access log configs. ", err)
+
+	if enableRouterConfigValidation {
+		err = accessLog.Validate()
+		if err != nil {
+			if panicOnValidationFailure {
+				logger.LoggerOasparser.Fatal("Error while validating grpc access log configs. ", err)
+			} else {
+				logger.LoggerOasparser.Error("Error while validating grpc access log configs. ", err)
+			}
+		}
 	}
 	return &accessLog
 }

@@ -443,10 +443,17 @@ func CreateRateLimitCluster() (*clusterv3.Cluster, []*corev3.Address, error) {
 			},
 		},
 	}
-	err = cluster.Validate()
-	if err != nil {
-		logger.LoggerOasparser.Fatal("Error while validating rate limit cluster configs. ", err)
+	if enableRouterConfigValidation {
+		err = cluster.Validate()
+		if err != nil {
+			if panicOnValidationFailure {
+				logger.LoggerOasparser.Fatal("Error while validating rate limit cluster configs. ", err)
+			} else {
+				logger.LoggerOasparser.Error("Error while validating rate limit cluster configs. ", err)
+			}
+		}
 	}
+
 	return cluster, address, nil
 }
 
@@ -508,9 +515,11 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		}
 		// create addresses for endpoints
 		address := createAddress(ep.Host, ep.Port)
-		err := address.Validate()
-		if err != nil {
-			logger.LoggerOasparser.Error("Error while validating address config. ", err)
+		if enableRouterConfigValidation {
+			err := address.Validate()
+			if err != nil {
+				logger.LoggerOasparser.Error("Error while validating address config. ", err)
+			}
 		}
 		addresses = append(addresses, address)
 
@@ -635,11 +644,15 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 		logger.LoggerOasparser.Debugln("Consul cluster added for x-wso2-endpoints: ", clusterName, " ",
 			serviceDiscoveryString)
 	}
-	err = cluster.Validate()
-	if err != nil {
-		logger.LoggerOasparser.Error("Error while validating cluster configs. ", err)
-		return nil, nil, err
+
+	if enableRouterConfigValidation {
+		err = cluster.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating cluster configs. ", err)
+			return nil, nil, err
+		}
 	}
+
 	return &cluster, addresses, nil
 }
 
@@ -1015,9 +1028,16 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			wellknown.CORS:                      corsFilter,
 		},
 	}
-	err := router.Validate()
-	if err != nil {
-		logger.LoggerOasparser.Error("Error while validating Router configs. ", err)
+
+	if enableRouterConfigValidation {
+		err := router.Validate()
+		if err != nil {
+			if panicOnValidationFailure {
+				logger.LoggerOasparser.Fatal("Error while validating Router configs. ", err)
+			} else {
+				logger.LoggerOasparser.Error("Error while validating Router configs. ", err)
+			}
+		}
 	}
 	return &router
 }

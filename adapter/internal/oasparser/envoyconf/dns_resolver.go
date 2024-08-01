@@ -74,9 +74,12 @@ func getDNSResolverConf() (*corev3.TypedExtensionConfig, error) {
 		Name:        "Upstream DNS resolver",
 		TypedConfig: dnsResolverConfPbAny,
 	}
-	err = dnsResolverConfig.Validate()
-	if err != nil {
-		logger.LoggerOasparser.Error("Error while validating DNS Resolver configs. ", err)
+
+	if enableRouterConfigValidation {
+		err = dnsResolverConfig.Validate()
+		if err != nil {
+			logger.LoggerOasparser.Error("Error while validating DNS Resolver configs. ", err)
+		}
 	}
 	return dnsResolverConfig, nil
 }
