@@ -157,10 +157,11 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             if (secProtocolHeaderForWS[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
                 secProtocolHeaderForWS.length == 2) {
                 okResponseBuilder.addResponseHeadersToAdd(
-                        HeaderValueOption.newBuilder()
-                                .setHeader(HeaderValue.newBuilder().setKey(
-                                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER).setValue(Constants.WS_API_KEY_IDENTIFIER).build())
-                                .build());
+                    HeaderValueOption.newBuilder()
+                        .setHeader(HeaderValue.newBuilder()
+                        .setKey(HttpConstants.WEBSOCKET_PROTOCOL_HEADER)
+                        .setValue(Constants.WS_API_KEY_IDENTIFIER).build())
+                        .build());
             }
             // If the user is sending the APIKey credentials within query parameters, those query parameters should
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
