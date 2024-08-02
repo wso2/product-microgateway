@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
@@ -58,7 +59,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
     private String securityParam;
-    private String secProtocolHeader = "sec-webSocket-protocol";
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
 
@@ -72,20 +72,21 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
     }
 
     @Override
-    // check if sec-websocket-protocol header is there
     public boolean canAuthenticate(RequestContext requestContext) {
         String apiType = requestContext.getMatchedAPI().getApiType();
-        String internalKey;
+        String internalKey = requestContext.getHeaders().get(
+            ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         if (apiType.equalsIgnoreCase("WS")) {
-            internalKey = requestContext.getHeaders().get(
-                    ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
             if (internalKey == null || internalKey.isBlank()) {
-                internalKey = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",") [1];
+                String[] secProtocolHeaderValues = requestContext.getHeaders().get(
+                    HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
+                if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
+                    Constants.WS_API_KEY_IDENTIFIER)) {
+                    internalKey = secProtocolHeaderValues[1];
+                }
             }
-        } else  {
-            internalKey = requestContext.getHeaders().get(
-                    ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         }
+
         return isAPIKey(internalKey);
     }
 
@@ -302,13 +303,17 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
             return internalKey.trim();
         }
         if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase("WS")) {
-            String secProtocolHeaderValue = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
-            internalKey = secProtocolHeaderValue.split(",")[1];
+            String[] secProtocolHeaderValues = requestContext.getHeaders().get(
+                HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
+            if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
+                Constants.WS_API_KEY_IDENTIFIER)) {
+                internalKey = secProtocolHeaderValues[1];
+            }
             if (internalKey != null) {
-                if (secProtocolHeaderValue.split(",").length > 2) {
+                if (secProtocolHeaderValues.length > 2) {
                     String protocols = Arrays.stream(
-                        secProtocolHeaderValue.split(","), 2,
-                        secProtocolHeaderValue.split(",").length)
+                        secProtocolHeaderValues, 2,
+                        secProtocolHeaderValues.length)
                             .collect(Collectors.joining(","));
                     requestContext.addOrModifyHeaders(HttpConstants.WEBSOCKET_PROTOCOL_HEADER, protocols);
                 }
