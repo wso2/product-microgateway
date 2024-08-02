@@ -1754,7 +1754,7 @@ func validateEnvoyRoutePathString(configValue string) error {
 
 // Validate envoy route method whether its of known type
 func validateEnvoyRouteMethodString(method string) error {
-	var httpMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE", "SEARCH"}
+	var httpMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"}
 	methodValidated := slices.Contains(httpMethods, method)
 	if methodValidated {
 		return nil
