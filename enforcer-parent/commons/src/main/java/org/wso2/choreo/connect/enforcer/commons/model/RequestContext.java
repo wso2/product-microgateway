@@ -74,6 +74,8 @@ public class RequestContext {
     // For example, reason for denying a request
     private String extAuthDetails;
 
+    private Map<String, String> responseHeadersToAddMap; 
+
     /**
      * The dynamic metadata sent from enforcer are stored in this metadata map.
      * @return dynamic metadata map
@@ -357,6 +359,20 @@ public class RequestContext {
     public void setExtAuthDetails(String extAuthDetails) {
         this.extAuthDetails = extAuthDetails;
     }
+
+    /**
+     * Specifies if headers needs to be added for the response based on request
+     *
+     * @return response headers to add map
+     */
+    public Map<String, String> getResponseHeadersToAddMap() {
+        return responseHeadersToAddMap;
+    }
+
+    public void setResponseHeadersToAddMap(Map<String, String> responseHeadersToAddMap) {
+        this.responseHeadersToAddMap = responseHeadersToAddMap;
+    }
+
 
     /**
      * Implements builder pattern to build an {@link RequestContext} object.

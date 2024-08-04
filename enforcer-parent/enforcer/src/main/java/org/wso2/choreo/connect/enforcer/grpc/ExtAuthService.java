@@ -37,7 +37,6 @@ import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.constants.RouterAccessLogConstants;
@@ -154,15 +153,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
-            if (secProtocolHeaderForWS[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
-                secProtocolHeaderForWS.length == 2) {
-                okResponseBuilder.addResponseHeadersToAdd(
-                    HeaderValueOption.newBuilder()
-                        .setHeader(HeaderValue.newBuilder()
-                        .setKey(HttpConstants.WEBSOCKET_PROTOCOL_HEADER)
-                        .setValue(Constants.WS_API_KEY_IDENTIFIER).build())
-                        .build());
-            }
+            
             // If the user is sending the APIKey credentials within query parameters, those query parameters should
             // not be sent to the backend. Hence, the :path header needs to be constructed again removing the apiKey
             // query parameter. In this scenario, apiKey query parameter is sent within the property called
@@ -183,6 +174,16 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
                                     .build();
                             okResponseBuilder.addHeaders(headerValueOption);
+                        }
+                );
+            }
+
+            if (responseObject.getResponseHeadersToAddMap() != null) {
+                responseObject.getResponseHeadersToAddMap().forEach((key, value) -> {
+                            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
+                                    .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
+                                    .build();
+                            okResponseBuilder.addResponseHeadersToAdd(headerValueOption);
                         }
                 );
             }

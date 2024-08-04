@@ -174,6 +174,10 @@ public class WebSocketAPI implements API {
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
             }
+            if (requestContext.getResponseHeadersToAddMap() != null 
+                && requestContext.getResponseHeadersToAddMap().size() > 0) {
+                responseObject.setResponseHeadersToAddMap(requestContext.getResponseHeadersToAddMap());
+            }
             logger.debug("ext_authz metadata: {}", requestContext.getMetadataMap());
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {

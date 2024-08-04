@@ -39,6 +39,7 @@ public class ResponseObject {
     private String requestPath;
     private String apiUuid;
     private String extAuthDetails;
+    private Map<String, String> responseHeadersToAddMap; 
 
     public ArrayList<String> getRemoveHeaderMap() {
         return removeHeaderMap;
@@ -46,6 +47,14 @@ public class ResponseObject {
 
     public void setRemoveHeaderMap(ArrayList<String> removeHeaderMap) {
         this.removeHeaderMap = removeHeaderMap;
+    }
+
+    public Map<String, String> getResponseHeadersToAddMap() {
+        return responseHeadersToAddMap;
+    }
+
+    public void setResponseHeadersToAddMap(Map<String, String> responseHeadersToAddMap) {
+        this.responseHeadersToAddMap = responseHeadersToAddMap;
     }
 
     public ResponseObject(String correlationID) {
