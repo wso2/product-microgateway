@@ -639,7 +639,7 @@
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.12.0</commons.version>
         <commons.io.version>2.7</commons.io.version>
-        <envoy.controlplane.api.version>0.1.28</envoy.controlplane.api.version>
+        <envoy.controlplane.api.version>0.1.35</envoy.controlplane.api.version>
         <geronimo.jms11.spec.version>1.1.1.wso2v1</geronimo.jms11.spec.version>
         <grpc.netty.shaded.version>1.45.1</grpc.netty.shaded.version>
         <grpc.protobuf.version>1.45.1</grpc.protobuf.version>
@@ -684,7 +684,7 @@
         <jackson.databind.version>2.14.1</jackson.databind.version>
         <exec.maven.plugin.version>3.1.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.8</googlecode.download.plugin.version>
-        <protobuf.java.version>3.21.7</protobuf.java.version>
+        <protobuf.java.version>3.25.4</protobuf.java.version>
         <apache.tomcat.dependency.version>10.1.4</apache.tomcat.dependency.version>
         <libthrift.version>0.14.0</libthrift.version>
         <kotlin-stdlib.version>1.6.0</kotlin-stdlib.version>
