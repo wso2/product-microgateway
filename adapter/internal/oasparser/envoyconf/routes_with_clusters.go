@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"slices"
 	"strconv"
 
 	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
@@ -793,6 +794,20 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	)
 	basePath := getFilteredBasePath(xWso2Basepath, endpointBasepath)
 
+	if enableRouterConfigValidation {
+		for _, method := range resourceMethods {
+			err := validateEnvoyRouteMethodString(method)
+			if err != nil {
+				if panicOnValidationFailure {
+					logger.LoggerOasparser.Fatal(fmt.Sprintf("Error while validating http method %s", method), err)
+					break
+				} else {
+					logger.LoggerOasparser.Error(fmt.Sprintf("Error while validating http method %s", method), err)
+				}
+			}
+		}
+	}
+
 	// OPTIONS is always added even if it is not listed under resources
 	// This is required to handle CORS preflight request fail scenario
 	methodRegex := strings.Join(resourceMethods, "|")
@@ -813,7 +828,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 	resourcePath = resourcePathParam
 	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
-
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
 			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
@@ -1316,6 +1330,16 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 		resourcePath = strings.Split(resourcePath, "?")[0]
 	}
 	fullpath := prefix + resourcePath
+	if enableRouterConfigValidation {
+		err := validateEnvoyRoutePathString(fullpath)
+		if err != nil {
+			if panicOnValidationFailure {
+				logger.LoggerOasparser.Fatal("Error while validating route path config. ", err)
+			} else {
+				logger.LoggerOasparser.Error("Error while validating route path config. ", err)
+			}
+		}
+	}
 	newPath = generateRegex(fullpath)
 	return newPath
 }
@@ -1706,4 +1730,34 @@ func addSubscriptionRatelimitActions(actions []*routev3.RateLimit) []*routev3.Ra
 				},
 			},
 		})
+}
+
+// Validate envoy configuration for smileys/special characters/escape characters. Including regex validation
+func validateEnvoyRoutePathString(configValue string) error {
+	var smileyValidationRegex string = "[:;=Xx8][-~]?[)DPOp3\\[\\]{}]|<3|:\\^\\)|:[)]|:[(]|:[/]|:[Pp]|:[Dd]|:[Oo]|:[|]|:S|:>|:[oO]"
+	smileyValidated, err := regexp.MatchString(smileyValidationRegex, configValue)
+	if err != nil {
+		return err
+	}
+	var substitutionStringValidationRegex string = `\{\{\s*[^}]+\s*\}\}|\$\{\s*[^}]+\s*\}|\{%\s*[^%]+\s*%\}|<%[-=]?\s*[^%]+?\s*%>|%[^%\s]+%`
+	subValidated, err := regexp.MatchString(substitutionStringValidationRegex, configValue)
+	if err != nil {
+		return err
+	}
+	if smileyValidated && subValidated {
+		return nil
+	} else if !smileyValidated {
+		return errors.New("route path contains an emoticon")
+	}
+	return errors.New("route path contains a substitution string")
+}
+
+// Validate envoy route method whether its of known type
+func validateEnvoyRouteMethodString(method string) error {
+	var httpMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"}
+	methodValidated := slices.Contains(httpMethods, method)
+	if methodValidated {
+		return nil
+	}
+	return errors.New("method is invalid ")
 }
