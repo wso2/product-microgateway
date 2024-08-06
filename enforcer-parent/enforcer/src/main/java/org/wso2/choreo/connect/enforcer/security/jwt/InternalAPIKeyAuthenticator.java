@@ -78,20 +78,12 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         String internalKey = requestContext.getHeaders().get(
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         if (apiType.equalsIgnoreCase("WS") && internalKey == null) {
-            String[] secProtocolHeaderValues = requestContext.getHeaders().get(
-                    HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
-            if (internalKey == null || internalKey.isBlank()) {
-                if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
-                    Constants.WS_API_KEY_IDENTIFIER)) {
-                    internalKey = secProtocolHeaderValues[1];
-                }
-            }
+            internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
 
-            if (secProtocolHeaderValues[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
-                    secProtocolHeaderValues.length == 2) {
+            if (isAdditionalResponseHeadersRequired(requestContext)) {
                 HashMap<String, String> responseHeadersToAddMap = new HashMap<>();
                 responseHeadersToAddMap.put(
-                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER, secProtocolHeaderValues[0]);
+                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER, Constants.WS_API_KEY_IDENTIFIER);
                 requestContext.setResponseHeadersToAddMap(responseHeadersToAddMap);
             }
         }
@@ -312,24 +304,46 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
             return internalKey.trim();
         }
         if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase("WS")) {
-            String[] secProtocolHeaderValues = requestContext.getHeaders().get(
-                HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
-            if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
-                Constants.WS_API_KEY_IDENTIFIER)) {
-                internalKey = secProtocolHeaderValues[1];
-            }
+            internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
             if (internalKey != null) {
-                if (secProtocolHeaderValues.length > 2) {
-                    String protocols = Arrays.stream(
-                        secProtocolHeaderValues, 2,
-                        secProtocolHeaderValues.length)
-                            .collect(Collectors.joining(","));
+                String protocols = getProtocolsToSetInRequestHeaders(requestContext);
+                if (protocols != null) {
                     requestContext.addOrModifyHeaders(HttpConstants.WEBSOCKET_PROTOCOL_HEADER, protocols);
                 }
                 return internalKey.trim();
             } 
         }
         return null;
+    }
+
+    public String extractInternalKeyInWSProtocolHeader(RequestContext requestContext) {
+        String protocolHeader = requestContext.getHeaders().get(
+                HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
+        if (protocolHeader != null) {
+            String[] secProtocolHeaderValues = protocolHeader.split(",");
+            if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
+                    Constants.WS_API_KEY_IDENTIFIER)) {
+                return secProtocolHeaderValues[1].trim();
+            }
+        }
+        return null;
+    }
+
+    public String getProtocolsToSetInRequestHeaders(RequestContext requestContext) {
+        String[] secProtocolHeaderValues = requestContext.getHeaders().get(
+            HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
+        if (secProtocolHeaderValues.length > 2) {
+            return Arrays.stream(secProtocolHeaderValues, 2, secProtocolHeaderValues.length)
+                    .collect(Collectors.joining(",")).trim();
+        }
+        return null;
+    }
+
+    public boolean isAdditionalResponseHeadersRequired(RequestContext requestContext) {
+        String[] secProtocolHeaderValues = requestContext.getHeaders().get(
+            HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
+        return secProtocolHeaderValues[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
+                    secProtocolHeaderValues.length == 2;
     }
 
     @Override
