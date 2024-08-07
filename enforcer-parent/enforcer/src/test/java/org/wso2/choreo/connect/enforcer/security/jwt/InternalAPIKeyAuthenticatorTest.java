@@ -89,7 +89,7 @@ public class InternalAPIKeyAuthenticatorTest {
         headersMap2.put(securityParam, mockToken);
         builder2.headers(headersMap2);
         RequestContext requestContext2 = builder2.build();
-        Assert.assertEquals(internalAPIKeyAuthenticator.extractInternalKeyInWSProtocolHeader(requestContext2), null);
+        Assert.assertEquals(internalAPIKeyAuthenticator.extractInternalKeyInWSProtocolHeader(requestContext2), "");
 
     }
 

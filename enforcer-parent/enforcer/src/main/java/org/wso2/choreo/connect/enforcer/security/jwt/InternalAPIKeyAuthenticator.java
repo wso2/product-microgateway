@@ -51,6 +51,7 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -79,13 +80,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         if (apiType.equalsIgnoreCase("WS") && internalKey == null) {
             internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
-
-            if (isAdditionalResponseHeadersRequired(requestContext)) {
-                HashMap<String, String> responseHeadersToAddMap = new HashMap<>();
-                responseHeadersToAddMap.put(
-                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER, Constants.WS_API_KEY_IDENTIFIER);
-                requestContext.setResponseHeadersToAddMap(responseHeadersToAddMap);
-            }
+            addWSProtocolResponseHeaderIfRequired(requestContext);
         }
 
         return isAPIKey(internalKey);
@@ -305,13 +300,13 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         }
         if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase("WS")) {
             internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
-            if (internalKey != null) {
+            if (internalKey != null && !internalKey.isEmpty()) {
                 String protocols = getProtocolsToSetInRequestHeaders(requestContext);
                 if (protocols != null) {
                     requestContext.addOrModifyHeaders(HttpConstants.WEBSOCKET_PROTOCOL_HEADER, protocols);
                 }
                 return internalKey.trim();
-            } 
+            }
         }
         return null;
     }
@@ -326,7 +321,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 return secProtocolHeaderValues[1].trim();
             }
         }
-        return null;
+        return "";
     }
 
     public String getProtocolsToSetInRequestHeaders(RequestContext requestContext) {
@@ -339,11 +334,22 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         return null;
     }
 
-    public boolean isAdditionalResponseHeadersRequired(RequestContext requestContext) {
-        String[] secProtocolHeaderValues = requestContext.getHeaders().get(
-            HttpConstants.WEBSOCKET_PROTOCOL_HEADER).split(",");
-        return secProtocolHeaderValues[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
-                    secProtocolHeaderValues.length == 2;
+    public void addWSProtocolResponseHeaderIfRequired(RequestContext requestContext) {
+        String secProtocolHeader =  requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
+        if (secProtocolHeader != null) {
+            String[] secProtocolHeaderValues = secProtocolHeader.split(",");
+            if (secProtocolHeaderValues[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
+                    secProtocolHeaderValues.length == 2) {
+                Map<String, String> responseHeadersToAddMap = requestContext.getResponseHeadersToAddMap();
+
+                if (responseHeadersToAddMap == null) {
+                    responseHeadersToAddMap = new HashMap<>();
+                }
+                responseHeadersToAddMap.put(
+                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER, Constants.WS_API_KEY_IDENTIFIER);
+                requestContext.setResponseHeadersToAddMap(responseHeadersToAddMap);
+            }
+        }
     }
 
     @Override

@@ -101,8 +101,6 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
-        String[] secProtocolHeaderForWS = request.getAttributes().getRequest().getHttp().getHeadersOrDefault(
-            HttpConstants.WEBSOCKET_PROTOCOL_HEADER, "").split(",");
         Struct.Builder structBuilder = Struct.newBuilder();
         // Used to identify that the choreo-connect-enforcer handled the request. It is used to
         // provide local reply for authentication failures.
