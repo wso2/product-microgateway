@@ -16,6 +16,16 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.22.x'
+      - name: Create docker-compose alias script
+        run: |
+          echo '#!/bin/sh' | sudo tee /usr/bin/docker-compose
+          echo 'docker compose "$@"' | sudo tee -a /usr/bin/docker-compose
+          sudo chmod +x /usr/bin/docker-compose
+      - name: Print Docker version
+        run: |
+          docker version
+          docker compose version
+          docker-compose version
       - name: Cache M2 Repo
         uses: actions/cache@v1
         with:
