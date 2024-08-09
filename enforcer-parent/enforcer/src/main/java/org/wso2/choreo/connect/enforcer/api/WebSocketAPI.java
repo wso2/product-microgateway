@@ -170,9 +170,16 @@ public class WebSocketAPI implements API {
         Utils.populateRemoveAndProtectedHeaders(requestContext);
         
         if (executeFilterChain(requestContext)) {
+            responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
+            responseObject.setQueryParamsToRemove(requestContext.getQueryParamsToRemove());
+            responseObject.setQueryParamMap(requestContext.getQueryParameters());
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
+            }
+            if (requestContext.getResponseHeadersToAddMap() != null 
+                && requestContext.getResponseHeadersToAddMap().size() > 0) {
+                responseObject.setResponseHeadersToAddMap(requestContext.getResponseHeadersToAddMap());
             }
             logger.debug("ext_authz metadata: {}", requestContext.getMetadataMap());
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
