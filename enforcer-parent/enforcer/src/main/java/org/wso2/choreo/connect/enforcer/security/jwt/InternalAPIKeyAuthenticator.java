@@ -78,8 +78,10 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         String apiType = requestContext.getMatchedAPI().getApiType();
         String internalKey = requestContext.getHeaders().get(
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
-        if (apiType.equalsIgnoreCase("WS") && internalKey == null) {
-            internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
+        if (apiType.equalsIgnoreCase("WS")) {
+            if (internalKey == null) {
+                internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
+            }
             addWSProtocolResponseHeaderIfRequired(requestContext);
         }
 
