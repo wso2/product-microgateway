@@ -42,4 +42,5 @@ type routeCreateParams struct {
 	corsPolicy          *model.CorsConfig
 	rateLimitLevel      string
 	isRLPolicyAvailable bool
+	enableRSTRetry      bool
 }

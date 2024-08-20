@@ -114,10 +114,18 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 
 	apiLevelClusterNameProd := ""
 
+	// Enable retry for the routes if the upstream is within the same cluster
+	enableRSTRetry := false
+
 	// check API level production endpoints available
 	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
 		apiLevelEndpointProd := mgwSwagger.GetProdEndpoints()
 		apiLevelbasePath = strings.TrimSuffix(apiLevelEndpointProd.Endpoints[0].Basepath, "/")
+
+		if apiLevelEndpointProd.Endpoints[0].URLType == "http" && strings.HasSuffix(apiLevelEndpointProd.Endpoints[0].Host, "svc.cluster.local") {
+			enableRSTRetry = true
+		}
+
 		apiLevelClusterNameProd = getClusterName(apiLevelEndpointProd.EndpointPrefix, organizationID, vHost, apiTitle,
 			apiVersion, "")
 		if !strings.Contains(apiLevelEndpointProd.EndpointPrefix, xWso2EPClustersConfigNamePrefix) {
@@ -317,12 +325,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts map[str
 				}
 			}
 		}
-
-		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd, operationalReqInterceptors, operationalRespInterceptorVal, organizationID))
+		routeP := createRoute(genRouteCreateParams(&mgwSwagger, resource, vHost, resourceBasePath, clusterNameProd, operationalReqInterceptors, operationalRespInterceptorVal, organizationID, enableRSTRetry))
 		routes = append(routes, routeP)
 	}
 	if mgwSwagger.GetAPIType() == model.WS {
-		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelbasePath, apiLevelClusterNameProd, nil, nil, organizationID))
+		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiLevelbasePath, apiLevelClusterNameProd, nil, nil, organizationID, false))
 		routes = append(routes, routesP)
 	}
 	return routes, clusters, endpoints
@@ -515,6 +522,7 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			return nil, nil, errors.New("endpoint basepath mismatched for " + ep.RawURL + ". expected : " + basePath + " but found : " + ep.Basepath)
 		}
 		// create addresses for endpoints
+		// TODO: Get endpoint from here
 		address := createAddress(ep.Host, ep.Port)
 		if enableRouterConfigValidation {
 			err := address.Validate()
@@ -1021,6 +1029,28 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		}
 	}
 
+	if params.enableRSTRetry {
+		// Retry configs are always added via headers. This is to update the
+		// default retry back-off base interval, which cannot be updated via headers.
+		retryConfig := config.Envoy.Upstream.Retry
+		maxInterval := retryConfig.MaxInterval
+		if retryConfig.MaxInterval < retryConfig.BaseInterval {
+			maxInterval = retryConfig.BaseInterval
+		}
+		action.Route.RetryPolicy = &routev3.RetryPolicy{
+			RetryOn: "reset",
+			NumRetries: &wrapperspb.UInt32Value{
+				Value: retryConfig.MaxRetryCount,
+				// If not set to 0, default value 1 will be
+				// applied to both prod and sandbox even if they are not set.
+			},
+			RetryBackOff: &routev3.RetryPolicy_RetryBackOff{
+				BaseInterval: durationpb.New(retryConfig.BaseInterval),
+				MaxInterval:  durationpb.New(maxInterval),
+			},
+		}
+	}
+
 	headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
 		ClusterHeader: clusterHeaderName,
 	}
@@ -1503,7 +1533,7 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *cors_filter_v3.CorsPolicy {
 
 func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
 	prodClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
-	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
+	responseInterceptor map[string]model.InterceptEndpoint, organizationID string, enableRSTRetry bool) *routeCreateParams {
 
 	var rlMethodDescriptorValue string
 	var isRLPolicyAvailable bool = false
@@ -1537,6 +1567,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		responseInterceptor: responseInterceptor,
 		rateLimitLevel:      rlMethodDescriptorValue,
 		isRLPolicyAvailable: isRLPolicyAvailable,
+		enableRSTRetry:      enableRSTRetry,
 	}
 
 	if resource != nil {

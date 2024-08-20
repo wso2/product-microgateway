@@ -483,6 +483,58 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
 	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
+
+	for _, route := range routes {
+		assert.Nil(t, route.GetRoute().RetryPolicy, "Retry policy should be nil endpoints that doesn't end with svc.cluster.local")
+	}
+}
+
+func TestCreateRoutesWithClustersWithRstRetry(t *testing.T) {
+	envProps := synchronizer.APIEnvProps{
+		EnvID: "some id",
+		APIConfigs: synchronizer.APIConfigs{
+			ProductionEndpoint:    "http://foo.bar.svc.cluster.local:3000",
+			SandBoxEndpoint:       "http://foo.bar.svc.cluster.local:3000",
+			SandboxEndpointChoreo: "http://foo.bar.svc.cluster.local:3000",
+		},
+	}
+
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_basic.yaml"
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_basic.yaml"
+
+	// Read api.yaml
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v", apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v", apiYamlFilePath)
+
+	// Read swagger.yaml
+	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
+	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
+
+	var apiYaml model.APIYaml
+	var mgwSwagger model.MgwSwagger
+
+	// Unmarshal and populate mgwSwagger
+	err = json.Unmarshal(apiJsn, &apiYaml)
+	apiYaml = model.PopulateEndpointsInfo(apiYaml)
+	assert.Nil(t, err, "Error occurred while parsing api.yaml")
+	err = mgwSwagger.PopulateSwaggerFromAPIYaml(apiYaml, model.HTTP)
+	assert.Nil(t, err, "Error occurred while populating mgwSwagger from APIYaml")
+	err = mgwSwagger.GetMgwSwagger(openapiByteArr)
+	assert.Nil(t, err, "Error occurred while parsing swagger.yaml")
+
+	mgwSwagger.SetEnvLabelProperties(envProps, true)
+
+	assert.Equal(t, mgwSwagger.GetProdEndpoints().Endpoints[0].Host, "foo.bar.svc.cluster.local", "Host mismatch")
+
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
+	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
+	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
+
+	for _, route := range routes {
+		assert.NotNil(t, route.GetRoute().RetryPolicy, "Retry policy should not be nil for endpoints that end with svc.cluster.local")
+	}
 }
 
 func TestLoadBalancedCluster(t *testing.T) {

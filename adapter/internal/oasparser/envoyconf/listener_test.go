@@ -110,11 +110,11 @@ func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 	}
 
 	route1 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"GET"}, "test-cluster", corsConfigModel3))
+		"/testPath", []string{"GET"}, "test-cluster", corsConfigModel3, false))
 	route2 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"POST"}, "test-cluster", corsConfigModel3))
+		"/testPath", []string{"POST"}, "test-cluster", corsConfigModel3, false))
 	route3 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
-		"/testPath", []string{"PUT"}, "test-cluster", corsConfigModel3))
+		"/testPath", []string{"PUT"}, "test-cluster", corsConfigModel3, false))
 
 	routes := []*routev3.Route{route1, route2, route3}
 
