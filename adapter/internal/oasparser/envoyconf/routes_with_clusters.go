@@ -522,7 +522,6 @@ func processEndpoints(clusterName string, clusterDetails *model.EndpointCluster,
 			return nil, nil, errors.New("endpoint basepath mismatched for " + ep.RawURL + ". expected : " + basePath + " but found : " + ep.Basepath)
 		}
 		// create addresses for endpoints
-		// TODO: Get endpoint from here
 		address := createAddress(ep.Host, ep.Port)
 		if enableRouterConfigValidation {
 			err := address.Validate()
