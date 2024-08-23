@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"slices"
 	"strconv"
@@ -1028,7 +1029,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		}
 	}
 
-	if params.enableRSTRetry {
+	if params.enableRSTRetry && os.Getenv("ROUTER_CONNECTION_FAILURE_RETRY_ON_RST_ENABLED") == "true" {
 		// Retry configs are always added via headers. This is to update the
 		// default retry back-off base interval, which cannot be updated via headers.
 		retryConfig := config.Envoy.Upstream.Retry

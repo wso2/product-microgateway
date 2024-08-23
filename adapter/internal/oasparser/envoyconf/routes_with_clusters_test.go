@@ -19,6 +19,7 @@ package envoyconf_test
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -490,6 +491,8 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 }
 
 func TestCreateRoutesWithClustersWithRstRetry(t *testing.T) {
+	os.Setenv("ROUTER_CONNECTION_FAILURE_RETRY_ON_RST_ENABLED", "true")
+
 	envProps := synchronizer.APIEnvProps{
 		EnvID: "some id",
 		APIConfigs: synchronizer.APIConfigs{
