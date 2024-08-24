@@ -30,6 +30,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.InternalAPIKeyUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +91,11 @@ public class Utils {
         // generic OPTIONS method call happens, matchedResourcePath becomes null.
         if (requestContext.getMatchedResourcePath() != null &&
                 requestContext.getMatchedResourcePath().isDisableSecurity()) {
+            // If the resource has disabled security, and  if the connection request
+            // is from the Choreo-console Test console UI,  it is required to add
+            // choreo-internal-API-Key header to the response header x-websocket-protocol
+            InternalAPIKeyUtils.addWSProtocolResponseHeaderIfRequired(requestContext);
+
             return;
         }
 
