@@ -28,7 +28,7 @@ import java.util.Map;
 /**
   * Utility functions used for internal API Key Authentication.
   */
- public class InternalAPIKeyUtils {
+public class InternalAPIKeyUtils {
   
          public static void addWSProtocolResponseHeaderIfRequired(RequestContext requestContext) {
         String secProtocolHeader =  requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
