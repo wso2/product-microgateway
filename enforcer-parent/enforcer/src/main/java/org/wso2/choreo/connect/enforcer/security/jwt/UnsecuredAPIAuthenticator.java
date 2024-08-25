@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.InternalAPIKeyUtils;
 
 /**
  * Implements the authenticator interface to authenticate non-secured APIs.
@@ -76,6 +77,9 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 //                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
 //                        GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
 //            }
+            if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
+                InternalAPIKeyUtils.addWSProtocolResponseHeaderIfRequired(requestContext);
+            }
             return FilterUtils.generateAuthenticationContextForUnsecured(requestContext);
         } finally {
             if (Utils.tracingEnabled()) {

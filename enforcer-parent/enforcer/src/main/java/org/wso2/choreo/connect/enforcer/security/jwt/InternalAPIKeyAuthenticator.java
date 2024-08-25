@@ -47,11 +47,10 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.enforcer.util.InternalAPIKeyUtils;
 
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -78,11 +77,11 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         String apiType = requestContext.getMatchedAPI().getApiType();
         String internalKey = requestContext.getHeaders().get(
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
-        if (apiType.equalsIgnoreCase("WS")) {
+        if (apiType.equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
             if (internalKey == null) {
                 internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
             }
-            addWSProtocolResponseHeaderIfRequired(requestContext);
+            InternalAPIKeyUtils.addWSProtocolResponseHeaderIfRequired(requestContext);
         }
 
         return isAPIKey(internalKey);
@@ -300,7 +299,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         if (internalKey != null) {
             return internalKey.trim();
         }
-        if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase("WS")) {
+        if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
             internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
             if (internalKey != null && !internalKey.isEmpty()) {
                 String protocols = getProtocolsToSetInRequestHeaders(requestContext);
@@ -334,24 +333,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     .collect(Collectors.joining(",")).trim();
         }
         return null;
-    }
-
-    public void addWSProtocolResponseHeaderIfRequired(RequestContext requestContext) {
-        String secProtocolHeader =  requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
-        if (secProtocolHeader != null) {
-            String[] secProtocolHeaderValues = secProtocolHeader.split(",");
-            if (secProtocolHeaderValues[0].equals(Constants.WS_API_KEY_IDENTIFIER) &&
-                    secProtocolHeaderValues.length == 2) {
-                Map<String, String> responseHeadersToAddMap = requestContext.getResponseHeadersToAddMap();
-
-                if (responseHeadersToAddMap == null) {
-                    responseHeadersToAddMap = new HashMap<>();
-                }
-                responseHeadersToAddMap.put(
-                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER, Constants.WS_API_KEY_IDENTIFIER);
-                requestContext.setResponseHeadersToAddMap(responseHeadersToAddMap);
-            }
-        }
     }
 
     @Override
