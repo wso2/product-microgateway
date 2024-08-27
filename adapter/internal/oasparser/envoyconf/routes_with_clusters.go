@@ -74,9 +74,6 @@ const (
 	descriptorMetadataKeyForSubscription          = "ratelimit:subscription"
 	descriptorMetadataKeyForUsagePolicy           = "ratelimit:usage-policy"
 	descriptorMetadataKeyForOrganization          = "ratelimit:organization"
-	descriptorMetadataKeyForBurstCtrlSubscription = "burstCtrl:subscription"
-	descriptorMetadataKeyForBurstCtrlUsagePolicy  = "burstCtrl:usage-policy"
-	descriptorMetadataKeyForBurstCtrlOrganization = "burstCtrl:organization"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
