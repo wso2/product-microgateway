@@ -478,9 +478,11 @@ type analyticsEnforcer struct {
 }
 
 type authHeader struct {
-	EnableOutboundAuthHeader bool
-	AuthorizationHeader      string
-	TestConsoleHeaderName    string
+	EnableOutboundAuthHeader   bool
+	AuthorizationHeader        string
+	TestConsoleHeaderName      string
+	TempTestConsoleHeaderNames []string
+	TempTestConsoleHeadersMode string
 }
 
 type jwtIssuer struct {

@@ -22,6 +22,8 @@ private static final long serialVersionUID = 0L;
   private AuthHeader() {
     authorizationHeader_ = "";
     testConsoleHeaderName_ = "";
+    tempTestConsoleHeaderNames_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    tempTestConsoleHeadersMode_ = "";
   }
 
   @java.lang.Override
@@ -44,6 +46,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -71,6 +74,21 @@ private static final long serialVersionUID = 0L;
             testConsoleHeaderName_ = s;
             break;
           }
+          case 34: {
+            java.lang.String s = input.readStringRequireUtf8();
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              tempTestConsoleHeaderNames_ = new com.google.protobuf.LazyStringArrayList();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            tempTestConsoleHeaderNames_.add(s);
+            break;
+          }
+          case 42: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            tempTestConsoleHeadersMode_ = s;
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -86,6 +104,9 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        tempTestConsoleHeaderNames_ = tempTestConsoleHeaderNames_.getUnmodifiableView();
+      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -202,6 +223,79 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int TEMPTESTCONSOLEHEADERNAMES_FIELD_NUMBER = 4;
+  private com.google.protobuf.LazyStringList tempTestConsoleHeaderNames_;
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @return A list containing the tempTestConsoleHeaderNames.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getTempTestConsoleHeaderNamesList() {
+    return tempTestConsoleHeaderNames_;
+  }
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @return The count of tempTestConsoleHeaderNames.
+   */
+  public int getTempTestConsoleHeaderNamesCount() {
+    return tempTestConsoleHeaderNames_.size();
+  }
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @param index The index of the element to return.
+   * @return The tempTestConsoleHeaderNames at the given index.
+   */
+  public java.lang.String getTempTestConsoleHeaderNames(int index) {
+    return tempTestConsoleHeaderNames_.get(index);
+  }
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the tempTestConsoleHeaderNames at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getTempTestConsoleHeaderNamesBytes(int index) {
+    return tempTestConsoleHeaderNames_.getByteString(index);
+  }
+
+  public static final int TEMPTESTCONSOLEHEADERSMODE_FIELD_NUMBER = 5;
+  private volatile java.lang.Object tempTestConsoleHeadersMode_;
+  /**
+   * <code>string tempTestConsoleHeadersMode = 5;</code>
+   * @return The tempTestConsoleHeadersMode.
+   */
+  @java.lang.Override
+  public java.lang.String getTempTestConsoleHeadersMode() {
+    java.lang.Object ref = tempTestConsoleHeadersMode_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      tempTestConsoleHeadersMode_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string tempTestConsoleHeadersMode = 5;</code>
+   * @return The bytes for tempTestConsoleHeadersMode.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getTempTestConsoleHeadersModeBytes() {
+    java.lang.Object ref = tempTestConsoleHeadersMode_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      tempTestConsoleHeadersMode_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -225,6 +319,12 @@ private static final long serialVersionUID = 0L;
     if (!getTestConsoleHeaderNameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, testConsoleHeaderName_);
     }
+    for (int i = 0; i < tempTestConsoleHeaderNames_.size(); i++) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, tempTestConsoleHeaderNames_.getRaw(i));
+    }
+    if (!getTempTestConsoleHeadersModeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, tempTestConsoleHeadersMode_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -243,6 +343,17 @@ private static final long serialVersionUID = 0L;
     }
     if (!getTestConsoleHeaderNameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, testConsoleHeaderName_);
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < tempTestConsoleHeaderNames_.size(); i++) {
+        dataSize += computeStringSizeNoTag(tempTestConsoleHeaderNames_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getTempTestConsoleHeaderNamesList().size();
+    }
+    if (!getTempTestConsoleHeadersModeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, tempTestConsoleHeadersMode_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -265,6 +376,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getAuthorizationHeader())) return false;
     if (!getTestConsoleHeaderName()
         .equals(other.getTestConsoleHeaderName())) return false;
+    if (!getTempTestConsoleHeaderNamesList()
+        .equals(other.getTempTestConsoleHeaderNamesList())) return false;
+    if (!getTempTestConsoleHeadersMode()
+        .equals(other.getTempTestConsoleHeadersMode())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -283,6 +398,12 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getAuthorizationHeader().hashCode();
     hash = (37 * hash) + TESTCONSOLEHEADERNAME_FIELD_NUMBER;
     hash = (53 * hash) + getTestConsoleHeaderName().hashCode();
+    if (getTempTestConsoleHeaderNamesCount() > 0) {
+      hash = (37 * hash) + TEMPTESTCONSOLEHEADERNAMES_FIELD_NUMBER;
+      hash = (53 * hash) + getTempTestConsoleHeaderNamesList().hashCode();
+    }
+    hash = (37 * hash) + TEMPTESTCONSOLEHEADERSMODE_FIELD_NUMBER;
+    hash = (53 * hash) + getTempTestConsoleHeadersMode().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -426,6 +547,10 @@ private static final long serialVersionUID = 0L;
 
       testConsoleHeaderName_ = "";
 
+      tempTestConsoleHeaderNames_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000001);
+      tempTestConsoleHeadersMode_ = "";
+
       return this;
     }
 
@@ -452,9 +577,16 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader result = new org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader(this);
+      int from_bitField0_ = bitField0_;
       result.enableOutboundAuthHeader_ = enableOutboundAuthHeader_;
       result.authorizationHeader_ = authorizationHeader_;
       result.testConsoleHeaderName_ = testConsoleHeaderName_;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        tempTestConsoleHeaderNames_ = tempTestConsoleHeaderNames_.getUnmodifiableView();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      }
+      result.tempTestConsoleHeaderNames_ = tempTestConsoleHeaderNames_;
+      result.tempTestConsoleHeadersMode_ = tempTestConsoleHeadersMode_;
       onBuilt();
       return result;
     }
@@ -514,6 +646,20 @@ private static final long serialVersionUID = 0L;
         testConsoleHeaderName_ = other.testConsoleHeaderName_;
         onChanged();
       }
+      if (!other.tempTestConsoleHeaderNames_.isEmpty()) {
+        if (tempTestConsoleHeaderNames_.isEmpty()) {
+          tempTestConsoleHeaderNames_ = other.tempTestConsoleHeaderNames_;
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          ensureTempTestConsoleHeaderNamesIsMutable();
+          tempTestConsoleHeaderNames_.addAll(other.tempTestConsoleHeaderNames_);
+        }
+        onChanged();
+      }
+      if (!other.getTempTestConsoleHeadersMode().isEmpty()) {
+        tempTestConsoleHeadersMode_ = other.tempTestConsoleHeadersMode_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -542,6 +688,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private boolean enableOutboundAuthHeader_ ;
     /**
@@ -754,6 +901,192 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       testConsoleHeaderName_ = value;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.LazyStringList tempTestConsoleHeaderNames_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private void ensureTempTestConsoleHeaderNamesIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        tempTestConsoleHeaderNames_ = new com.google.protobuf.LazyStringArrayList(tempTestConsoleHeaderNames_);
+        bitField0_ |= 0x00000001;
+       }
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @return A list containing the tempTestConsoleHeaderNames.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getTempTestConsoleHeaderNamesList() {
+      return tempTestConsoleHeaderNames_.getUnmodifiableView();
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @return The count of tempTestConsoleHeaderNames.
+     */
+    public int getTempTestConsoleHeaderNamesCount() {
+      return tempTestConsoleHeaderNames_.size();
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @param index The index of the element to return.
+     * @return The tempTestConsoleHeaderNames at the given index.
+     */
+    public java.lang.String getTempTestConsoleHeaderNames(int index) {
+      return tempTestConsoleHeaderNames_.get(index);
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the tempTestConsoleHeaderNames at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getTempTestConsoleHeaderNamesBytes(int index) {
+      return tempTestConsoleHeaderNames_.getByteString(index);
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @param index The index to set the value at.
+     * @param value The tempTestConsoleHeaderNames to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTempTestConsoleHeaderNames(
+        int index, java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTempTestConsoleHeaderNamesIsMutable();
+      tempTestConsoleHeaderNames_.set(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @param value The tempTestConsoleHeaderNames to add.
+     * @return This builder for chaining.
+     */
+    public Builder addTempTestConsoleHeaderNames(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTempTestConsoleHeaderNamesIsMutable();
+      tempTestConsoleHeaderNames_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @param values The tempTestConsoleHeaderNames to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllTempTestConsoleHeaderNames(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureTempTestConsoleHeaderNamesIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, tempTestConsoleHeaderNames_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTempTestConsoleHeaderNames() {
+      tempTestConsoleHeaderNames_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000001);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+     * @param value The bytes of the tempTestConsoleHeaderNames to add.
+     * @return This builder for chaining.
+     */
+    public Builder addTempTestConsoleHeaderNamesBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      ensureTempTestConsoleHeaderNamesIsMutable();
+      tempTestConsoleHeaderNames_.add(value);
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object tempTestConsoleHeadersMode_ = "";
+    /**
+     * <code>string tempTestConsoleHeadersMode = 5;</code>
+     * @return The tempTestConsoleHeadersMode.
+     */
+    public java.lang.String getTempTestConsoleHeadersMode() {
+      java.lang.Object ref = tempTestConsoleHeadersMode_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        tempTestConsoleHeadersMode_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string tempTestConsoleHeadersMode = 5;</code>
+     * @return The bytes for tempTestConsoleHeadersMode.
+     */
+    public com.google.protobuf.ByteString
+        getTempTestConsoleHeadersModeBytes() {
+      java.lang.Object ref = tempTestConsoleHeadersMode_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        tempTestConsoleHeadersMode_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string tempTestConsoleHeadersMode = 5;</code>
+     * @param value The tempTestConsoleHeadersMode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTempTestConsoleHeadersMode(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      tempTestConsoleHeadersMode_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string tempTestConsoleHeadersMode = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTempTestConsoleHeadersMode() {
+      
+      tempTestConsoleHeadersMode_ = getDefaultInstance().getTempTestConsoleHeadersMode();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string tempTestConsoleHeadersMode = 5;</code>
+     * @param value The bytes for tempTestConsoleHeadersMode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTempTestConsoleHeadersModeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      tempTestConsoleHeadersMode_ = value;
       onChanged();
       return this;
     }

@@ -29,6 +29,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
@@ -120,6 +121,17 @@ public class Utils {
         // to backend and traffic manager.
         String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
                 .getTestConsoleHeaderName().toLowerCase();
+
+        // If the temp test console headers are in active mode,
+        // then those headers are also removed and considered as protected.
+        String tempConsoleTestHeadersMode = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                .getTempTestConsoleTestHeadersMode();
+        if (Constants.TEMP_CONSOLE_TEST_HEADERS_ACTIVE_MODE.equals(tempConsoleTestHeadersMode)) {
+            List<String> tempConsoleTestHeaders = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                    .getTempTestConsoleHeaderNames();
+            requestContext.getRemoveHeaders().addAll(tempConsoleTestHeaders);
+            requestContext.getProtectedHeaders().addAll(tempConsoleTestHeaders);
+        }
         requestContext.getRemoveHeaders().add(internalKeyHeader);
         // Avoid internal key being published to the Traffic Manager
         requestContext.getProtectedHeaders().add(internalKeyHeader);

@@ -51,6 +51,7 @@ import org.wso2.choreo.connect.enforcer.util.InternalAPIKeyUtils;
 
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +61,8 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
     private String securityParam;
+    private List<String> tempConsoleTestHeaders;
+    private String tempTestConsoleHeadersMode;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private final boolean isGatewayTokenCacheEnabled;
 
@@ -70,6 +73,10 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         if (enforcerConfig.getJwtConfigurationDto().isEnabled()) {
             this.jwtGenerator = BackendJwtUtils.getApiMgtGatewayJWTGenerator();
         }
+        this.tempConsoleTestHeaders = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                .getTempTestConsoleHeaderNames();
+        this.tempTestConsoleHeadersMode = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                .getTempTestConsoleTestHeadersMode();
     }
 
     @Override
@@ -77,6 +84,12 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         String apiType = requestContext.getMatchedAPI().getApiType();
         String internalKey = requestContext.getHeaders().get(
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
+        if (internalKey == null &&
+                Constants.TEMP_CONSOLE_TEST_HEADERS_ACTIVE_MODE.equals(tempTestConsoleHeadersMode)) {
+            internalKey = tempConsoleTestHeaders.stream().map(header -> requestContext.getHeaders().get(header))
+                    .filter(this::isAPIKey)
+                    .findFirst().orElse(null);
+        }
         if (apiType.equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
             if (internalKey == null) {
                 internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
@@ -296,6 +309,12 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
     private String extractInternalKey(RequestContext requestContext) {
         String internalKey;
         internalKey = requestContext.getHeaders().get(securityParam);
+        if (internalKey == null &&
+                Constants.TEMP_CONSOLE_TEST_HEADERS_ACTIVE_MODE.equals(tempTestConsoleHeadersMode)) {
+            internalKey = tempConsoleTestHeaders.stream().map(header -> requestContext.getHeaders().get(header))
+                    .filter(this::isAPIKey)
+                    .findFirst().orElse(null);
+        }
         if (internalKey != null) {
             return internalKey.trim();
         }

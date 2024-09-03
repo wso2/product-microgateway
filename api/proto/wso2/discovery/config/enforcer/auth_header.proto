@@ -18,4 +18,8 @@ message AuthHeader {
     string authorizationHeader = 2;
 
     string testConsoleHeaderName = 3;
+
+    repeated string tempTestConsoleHeaderNames = 4;
+
+    string tempTestConsoleHeadersMode = 5;
 }

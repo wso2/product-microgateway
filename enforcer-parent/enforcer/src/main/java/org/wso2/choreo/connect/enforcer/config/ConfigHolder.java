@@ -208,6 +208,8 @@ public class ConfigHolder {
         authHeaderDto.setAuthorizationHeader(authHeader.getAuthorizationHeader());
         authHeaderDto.setEnableOutboundAuthHeader(authHeader.getEnableOutboundAuthHeader());
         authHeaderDto.setTestConsoleHeaderName(authHeader.getTestConsoleHeaderName());
+        authHeaderDto.setTempTestConsoleHeaderNames(authHeader.getTempTestConsoleHeaderNamesList());
+        authHeaderDto.setTempTestConsoleTestHeadersMode(authHeader.getTempTestConsoleHeadersMode());
         config.setAuthHeader(authHeaderDto);
     }
 

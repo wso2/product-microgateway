@@ -48,4 +48,41 @@ public interface AuthHeaderOrBuilder extends
    */
   com.google.protobuf.ByteString
       getTestConsoleHeaderNameBytes();
+
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @return A list containing the tempTestConsoleHeaderNames.
+   */
+  java.util.List<java.lang.String>
+      getTempTestConsoleHeaderNamesList();
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @return The count of tempTestConsoleHeaderNames.
+   */
+  int getTempTestConsoleHeaderNamesCount();
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @param index The index of the element to return.
+   * @return The tempTestConsoleHeaderNames at the given index.
+   */
+  java.lang.String getTempTestConsoleHeaderNames(int index);
+  /**
+   * <code>repeated string tempTestConsoleHeaderNames = 4;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the tempTestConsoleHeaderNames at the given index.
+   */
+  com.google.protobuf.ByteString
+      getTempTestConsoleHeaderNamesBytes(int index);
+
+  /**
+   * <code>string tempTestConsoleHeadersMode = 5;</code>
+   * @return The tempTestConsoleHeadersMode.
+   */
+  java.lang.String getTempTestConsoleHeadersMode();
+  /**
+   * <code>string tempTestConsoleHeadersMode = 5;</code>
+   * @return The bytes for tempTestConsoleHeadersMode.
+   */
+  com.google.protobuf.ByteString
+      getTempTestConsoleHeadersModeBytes();
 }
