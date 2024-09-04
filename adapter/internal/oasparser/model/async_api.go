@@ -97,7 +97,7 @@ func (swagger *MgwSwagger) SetInfoAsyncAPI(asyncAPI AsyncAPI) error {
 	swagger.apiType = WS
 
 	if asyncAPI.Servers.Production.URL != "" {
-		endpoint, err := getEndpointForWebsocketURL(asyncAPI.Servers.Production.URL)
+		endpoint, err := getWebSocketEndpoint(asyncAPI.Servers.Production.URL)
 		if err == nil {
 			productionEndpoints := append([]Endpoint{}, *endpoint)
 			swagger.productionEndpoints = generateEndpointCluster("clusterProd",

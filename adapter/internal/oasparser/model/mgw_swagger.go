@@ -468,7 +468,7 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 		if envProps.APIConfigs.SandboxEndpointChoreo != "" && !conf.ControlPlane.DynamicEnvironments.Enabled {
 			logger.LoggerOasparser.Infof("SandboxEndpointChoreo is found in env properties for %v : %v",
 				swagger.title, swagger.version)
-			endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.SandboxEndpointChoreo)
+			endpoint, err := getHTTPEndpoint(envProps.APIConfigs.SandboxEndpointChoreo)
 			if err == nil {
 				productionUrls = append(productionUrls, *endpoint)
 			} else {
@@ -487,7 +487,7 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 	if envProps.APIConfigs.ProductionEndpoint != "" {
 		logger.LoggerOasparser.Infof("Production endpoints are found in env properties for %v : %v",
 			swagger.title, swagger.version)
-		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.ProductionEndpoint)
+		endpoint, err := getHTTPEndpoint(envProps.APIConfigs.ProductionEndpoint)
 		if err == nil {
 			productionUrls = append(productionUrls, *endpoint)
 		} else {
@@ -503,7 +503,7 @@ func (swagger *MgwSwagger) SetEnvLabelProperties(envProps synchronizer.APIEnvPro
 
 	if envProps.APIConfigs.SandBoxEndpoint != "" {
 		logger.LoggerOasparser.Infof("Sandbox endpoints are found in env properties %v : %v", swagger.title, swagger.version)
-		endpoint, err := getHostandBasepathandPort(envProps.APIConfigs.SandBoxEndpoint)
+		endpoint, err := getHTTPEndpoint(envProps.APIConfigs.SandBoxEndpoint)
 		if err == nil {
 			sandboxUrls = append(sandboxUrls, *endpoint)
 		} else {
@@ -931,7 +931,7 @@ func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
 				logger.LoggerOasparser.Error("Consul syntax parse error ", err)
 				continue
 			}
-			endpoint, err := getHostandBasepathandPort(defHost)
+			endpoint, err := getHTTPEndpoint(defHost)
 			if err == nil {
 				endpoint.ServiceDiscoveryString = queryString
 				endpoints = append(endpoints, *endpoint)
@@ -939,7 +939,7 @@ func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
 				return nil, err
 			}
 		} else {
-			endpoint, err := getHostandBasepathandPort(v.(string))
+			endpoint, err := getHTTPEndpoint(v.(string))
 			if err == nil {
 				endpoints = append(endpoints, *endpoint)
 			} else {
@@ -1112,7 +1112,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			//serviceURL mandatory
 			if v, found := val[serviceURL]; found {
 				serviceURLV := v.(string)
-				endpoint, err := getHostandBasepathandPort(serviceURLV)
+				endpoint, err := getHTTPEndpoint(serviceURLV)
 				if err != nil {
 					logger.LoggerOasparser.Error("Error reading interceptors service url value", err)
 					return InterceptEndpoint{}, errors.New("error reading interceptors service url value")
@@ -1305,7 +1305,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.ProductionEndpoints {
 			if apiType == WS {
-				prodEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+				prodEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *prodEndpoint)
 				} else {
@@ -1319,7 +1319,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			endpointType = FailOver
 			for _, endpointConfig := range endpointConfig.ProductionFailoverEndpoints {
 				if apiType == WS {
-					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+					failoverEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
 					} else {
@@ -1347,7 +1347,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 		var unProcessedURLs []interface{}
 		for _, endpointConfig := range endpointConfig.SandBoxEndpoints {
 			if apiType == WS {
-				sandBoxEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+				sandBoxEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 				if err == nil {
 					endpoints = append(endpoints, *sandBoxEndpoint)
 				} else {
@@ -1361,7 +1361,7 @@ func (swagger *MgwSwagger) PopulateSwaggerFromAPIYaml(apiData APIYaml, apiType s
 			endpointType = FailOver
 			for _, endpointConfig := range endpointConfig.SandboxFailoverEndpoints {
 				if apiType == WS {
-					failoverEndpoint, err := getEndpointForWebsocketURL(endpointConfig.Endpoint)
+					failoverEndpoint, err := getWebSocketEndpoint(endpointConfig.Endpoint)
 					if err == nil {
 						endpoints = append(endpoints, *failoverEndpoint)
 					} else {
