@@ -80,6 +80,8 @@ const (
 	WS string = "WS"
 	// WEBHOOK - API type for WEBHOOK APIs
 	WEBHOOK string = "WEBHOOK"
+	// GRAPHQL - API type for GRAPHQL APIs
+	GRAPHQL string = "GRAPHQL"
 )
 
 // Constants to represent errors

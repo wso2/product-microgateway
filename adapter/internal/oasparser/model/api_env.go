@@ -35,7 +35,7 @@ func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 			break
 		}
 
-		productionEndpoint, err := getHostandBasepathandPort(productionEndpointURL)
+		productionEndpoint, err := getHTTPEndpoint(productionEndpointURL)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("error while reading production endpoint : %v in env variables, %v", productionEndpointURL, err.Error())
 		} else if productionEndpoint != nil {
@@ -52,7 +52,7 @@ func retrieveEndpointsFromEnv(apiHashValue string) ([]Endpoint, []Endpoint) {
 			break
 		}
 
-		sandboxEndpoint, err := getHostandBasepathandPort(sandboxEndpointURL)
+		sandboxEndpoint, err := getHTTPEndpoint(sandboxEndpointURL)
 		if err != nil {
 			loggers.LoggerAPI.Errorf("error while reading sandbox endpoint : %v in env variables, %v", sandboxEndpointURL, err.Error())
 		} else if sandboxEndpoint != nil {
