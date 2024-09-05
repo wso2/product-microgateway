@@ -229,7 +229,7 @@ func getHostandBasepathandPort(apiType string, rawURL string) (*Endpoint, error)
 	)
 
 	// Remove leading and trailing spaces of rawURL
-	rawURL = strings.Trim(rawURL, " ")
+	rawURL = strings.TrimSpace(rawURL)
 
 	if !strings.Contains(rawURL, "://") {
 		if apiType == HTTP || apiType == GRAPHQL || apiType == WEBHOOK {
