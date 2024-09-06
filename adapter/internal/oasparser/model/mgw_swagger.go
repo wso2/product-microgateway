@@ -666,10 +666,9 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 			endpointCluster.Config.RetryConfig = retryConfig
 		}
 	}
-	logger.LoggerOasparser.Debug("Adding CircuitBreakers for the endpoint cluster", endpointInfos[0].Endpoint)
 	// https://apim.docs.wso2.com/en/4.2.0/deploy-and-publish/deploy-on-gateway/choreo-connect/endpoints/resiliency/circuit-breakers/
 	if endpointCluster.Config.CircuitBreakers == nil && apiType == "WS" {
-		logger.LoggerOasparser.Info("Adding circuit breaking configs when ws endpoint is provided")
+		logger.LoggerOasparser.Debug("Adding CircuitBreakers for the endpoint cluster", endpointInfos[0].Endpoint)
 		CircuitBreaker := &CircuitBreakers{
 			MaxConnections:     2,
 			MaxConnectionPools: 7,
