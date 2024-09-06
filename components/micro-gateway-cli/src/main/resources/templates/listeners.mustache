@@ -104,8 +104,13 @@ public function getFilters() returns (http:RequestFilter|http:ResponseFilter) []
     gateway:PreAuthnFilter | gateway:PreAuthnFilterWrapper preAuthnFilter;
     // Throttling filter
     gateway:ThrottleFilter | gateway:ThrottleFilterWrapper throttleFilter;
+    {{#if config.token.apim4xVersion}}
+    // Analytics filter for APIM 4.x versions
+    gateway:Analytics4xRequestFilter analyticsFilter;
+    {{else}}
     // Analytic filter
     gateway:AnalyticsRequestFilter analyticsFilter;
+    {{/if}}
     //Validation Request filter
     gateway:ValidationRequestFilter | gateway:ValidationRequestFilterWrapper validationRequestFilter;
     //Validation filter
@@ -119,13 +124,21 @@ public function getFilters() returns (http:RequestFilter|http:ResponseFilter) []
     if (isObservable) {
         preAuthnFilter = new gateway:PreAuthnFilterWrapper();
         throttleFilter = new gateway:ThrottleFilterWrapper(deployedPolicies);
-        analyticsFilter =  new gateway:AnalyticsRequestFilterWrapper();
+        {{#if config.token.apim4xVersion}}
+        analyticsFilter = new gateway:Analytics4xRequestFilterWrapper();
+        {{else}}
+        analyticsFilter = new gateway:AnalyticsRequestFilterWrapper();
+        {{/if}}
         validationRequestFilter = new gateway:ValidationRequestFilterWrapper();
         validationResponseFilter = new gateway:ValidationResponseFilterWrapper();
     } else {
         preAuthnFilter = new gateway:PreAuthnFilter();
         throttleFilter = new gateway:ThrottleFilter(deployedPolicies);
-        analyticsFilter =  new gateway:AnalyticsRequestFilter();
+        {{#if config.token.apim4xVersion}}
+        analyticsFilter =  new gateway:Analytics4xRequestFilter();
+        {{else}}
+        analyticsFilter = new gateway:AnalyticsRequestFilter();
+        {{/if}}
         validationRequestFilter = new gateway:ValidationRequestFilter();
         validationResponseFilter = new gateway:ValidationResponseFilter();
     }

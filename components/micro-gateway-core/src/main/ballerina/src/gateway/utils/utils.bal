@@ -444,7 +444,7 @@ public function getCurrentTime() returns int {
 }
 
 public function getCurrentTimeForAnalytics() returns int {
-    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled && !isELKAnalyticsEnabled) {
         return 0;
     }
     return getCurrentTime();
@@ -573,7 +573,7 @@ public function printInfo(string key, string message) {
 }
 
 public function setLatency(int starting, http:FilterContext context, string latencyType) {
-    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled && !isELKAnalyticsEnabled) {
             return;
     }
     int ending = getCurrentTime();
@@ -629,7 +629,7 @@ public function decodeValueToBase10(string value) returns string {
 # + request - http request object.
 # + context - http filter context object.
 public function setHostHeaderToFilterContext(http:Request request,@tainted http:FilterContext context) {
-    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled) {
+    if (!isAnalyticsEnabled && !isGrpcAnalyticsEnabled && !isELKAnalyticsEnabled) {
         return;
     }
     if (context.attributes[HOSTNAME_PROPERTY] == ()) {
