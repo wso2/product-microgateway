@@ -74,4 +74,63 @@ public class Constants {
     public static final String DOT = ".";
     public static final String UNDER_SCORE = "_";
     public static final String JSON_EXTENSION = ".json";
+
+    /**
+     * Constants for API security related error codes
+     */
+    public static class APISecurityConstants {
+        public static final int API_AUTH_GENERAL_ERROR = 900900;
+        public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
+        public static final int API_AUTH_MISSING_CREDENTIALS = 900902;
+        public static final int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
+        public static final int API_AUTH_ACCESS_TOKEN_INACTIVE = 900904;
+        public static final int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
+        public static final int API_AUTH_INCORRECT_API_RESOURCE = 900906;
+        public static final int INVALID_SCOPE = 900910;
+        public static final int API_BLOCKED = 900907;
+        public static final int API_AUTH_FORBIDDEN = 900908;
+        public static final int SUBSCRIPTION_INACTIVE = 900909;
+    }
+
+    /**
+     * Constants for API throttling related error codes
+     */
+    public static class APIThrottleConstants {
+        public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
+        public static final int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
+        public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
+        public static final int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
+        public static final int BLOCKED_ERROR_CODE = 900805;
+        public static final int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
+    }
+
+    /**
+     * Constants for API throttling related error codes
+     */
+    public static class TargetConnectivityConstants {
+        public static final int BACKEND_CONNECTION_ERROR = 101503;
+        public static final int HTTP_CONNECTION_TIMEOUT = 101504;
+        public static final int MALFORMED_URL = 101505;
+    }
+
+    /**
+     * APIM 4.x Analytics related constants
+     */
+    public static class AnalyticsConstants {
+        public static final String PUBLISHER_IMPL_CONFIG_KEY = "publisherImpl";
+        public static final String IS_CHOREO_DEPLOYMENT_CONFIG_KEY = "isChoreoDeployment";
+        public static final String TYPE_CONFIG_KEY = "type";
+        public static final String PUBLISHER_REPORTER_CLASS_CONFIG_KEY = "publisher.reporter.class";
+        public static final String AUTH_URL_CONFIG_KEY = "authURL";
+        public static final String AUTH_TOKEN_CONFIG_KEY = "authToken";
+        public static final String RESPONSE_SCHEMA = "RESPONSE";
+        public static final String ERROR_SCHEMA = "ERROR";
+        public static final String CHOREO_RESPONSE_SCHEMA = "CHOREO_RESPONSE";
+        public static final String CHOREO_FAULT_SCHEMA = "CHOREO_ERROR";
+
+        public static final String ELK_TYPE = "elk";
+        public static final String DEFAULT_ELK_PUBLISHER_REPORTER_CLASS
+                = "org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter";
+
+    }
 }
