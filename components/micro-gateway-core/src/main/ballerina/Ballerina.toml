@@ -39,5 +39,14 @@ target = "java8"
     [[platform.libraries]]
     path = "../../../target/lib/dependencies/jackson-databind-2.15.2.jar"
 
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/org.wso2.carbon.apimgt.common.analytics-9.29.120.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/org.wso2.am.analytics.publisher.client-1.2.18.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/log4j-slf4j-impl-2.17.0.jar"
+
 [dependencies]
 "ballerina/java.jms" = "0.8.5"

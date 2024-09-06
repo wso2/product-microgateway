@@ -192,6 +192,11 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${org.apache.logging.log4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport</artifactId>
                 <version>${netty.version}</version>
@@ -649,6 +654,9 @@
         <com.nimbusds.nimbus-jose-jwt>8.8</com.nimbusds.nimbus-jose-jwt>
         <net.minidev.json-smart.version>2.4.11</net.minidev.json-smart.version>
         <net.minidev.asm.version>1.0.2</net.minidev.asm.version>
+        <carbon.apimgt.version>9.29.120</carbon.apimgt.version>
+        <analytics.event.publisher.client.version>1.2.18</analytics.event.publisher.client.version>
+        <ua_parser.version>1.6.1.wso2v1</ua_parser.version>
     </properties>
 
 </project>

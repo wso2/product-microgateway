@@ -46,6 +46,11 @@
             <version>${slf4j.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${org.apache.logging.log4j.version}</version>
+        </dependency>
+        <dependency>
             <groupId>commons-pool.wso2</groupId>
             <artifactId>commons-pool</artifactId>
             <version>${apache.commons.version}</version>
@@ -131,6 +136,21 @@
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.databridge.commons.binary</artifactId>
             <version>${org.wso2.carbon.analytics-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
+            <version>${carbon.apimgt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.am.analytics.publisher</groupId>
+            <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+            <version>${analytics.event.publisher.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ua.parser.wso2</groupId>
+            <artifactId>ua-parser</artifactId>
+            <version>${ua_parser.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.lmax</groupId>
@@ -270,10 +290,14 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds,
-                                net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core
+                                net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core,
+                                org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2,
+                                org.apache.logging.log4j
                             </includeGroupIds>
                             <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm,
-                                log4j-api, log4j-core, jackson-databind, jackson-core, jackson-annotations
+                                log4j-api, log4j-core, jackson-databind, jackson-core,
+                                jackson-annotations, org.wso2.carbon.apimgt.common.analytics,
+                                org.wso2.am.analytics.publisher.client, ua-parser, log4j-slf4j-impl
                             </includeArtifactIds>
                         </configuration>
                     </execution>
