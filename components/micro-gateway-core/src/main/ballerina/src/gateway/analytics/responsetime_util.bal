@@ -84,19 +84,25 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        requestResponseExecutionDTO.isAnonymous = false;
+        requestResponseExecutionDTO.isAuthenticated = true;
         AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         requestResponseExecutionDTO.apiCreator = authContext.apiPublisher;
         requestResponseExecutionDTO.metaClientType = authContext.keyType;
         requestResponseExecutionDTO.applicationConsumerKey = authContext.consumerKey;
         requestResponseExecutionDTO.userName = authContext.username;
         requestResponseExecutionDTO.applicationId = authContext.applicationId;
+        requestResponseExecutionDTO.applicationUUID = authContext.applicationUuid;
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
         requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
+        requestResponseExecutionDTO.isAnonymous = true;
+        requestResponseExecutionDTO.isAuthenticated = false;
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
         requestResponseExecutionDTO.applicationId = ANONYMOUS_APP_ID;
+        requestResponseExecutionDTO.applicationUUID = ANONYMOUS_APP_ID;
         requestResponseExecutionDTO.applicationName = ANONYMOUS_APP_NAME;
         requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
@@ -111,6 +117,7 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
     }
     requestResponseExecutionDTO.apiName = getApiName(context);
+    requestResponseExecutionDTO.apiUUID = <string> invocationContext.attributes[SERVICE_NAME_ATTR];
 
     // apim analytics requires context to be '<basePath>/<version>'
     string mgContext = getContext(context);
