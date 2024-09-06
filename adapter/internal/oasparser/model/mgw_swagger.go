@@ -631,7 +631,7 @@ func (swagger *MgwSwagger) setXWso2Endpoints() error {
 }
 
 // SetEndpointsConfig set configs for Endpoints sent by api.yaml
-func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo) error {
+func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo, apiType string) error {
 	if endpointInfos == nil || len(endpointInfos) == 0 {
 		return nil
 	}
@@ -666,6 +666,19 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 			endpointCluster.Config.RetryConfig = retryConfig
 		}
 	}
+	logger.LoggerOasparser.Debug("Adding CircuitBreakers for the endpoint cluster", endpointInfos[0].Endpoint)
+	// https://apim.docs.wso2.com/en/4.2.0/deploy-and-publish/deploy-on-gateway/choreo-connect/endpoints/resiliency/circuit-breakers/
+	if endpointCluster.Config.CircuitBreakers == nil && apiType == "WS" {
+		logger.LoggerOasparser.Info("Adding circuit breaking configs when ws endpoint is provided")
+		CircuitBreaker := &CircuitBreakers{
+			MaxConnections:     2,
+			MaxConnectionPools: 7,
+			MaxPendingRequests: 0,
+			MaxRequests:        2,
+		}
+		endpointCluster.Config.CircuitBreakers = CircuitBreaker
+	}
+
 	return nil
 }
 
