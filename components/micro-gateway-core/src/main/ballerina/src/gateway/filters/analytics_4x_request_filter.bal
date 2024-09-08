@@ -143,7 +143,9 @@ function generateAnalytics4xEventData(http:Response response, http:FilterContext
             userName: <string> requestResponseExecutionDTO.userName,
             endUserIP: <string> requestResponseExecutionDTO.userIp,
             backendLatency: requestResponseExecutionDTO.backendTime,
-            responseLatency: requestResponseExecutionDTO.responseTime
+            responseLatency: requestResponseExecutionDTO.responseTime,
+            responseSize: requestResponseExecutionDTO.responseSize,
+            responseContentType: requestResponseExecutionDTO.responseContentType
         };
         return analyticsEvent;
     }
@@ -171,6 +173,7 @@ function generateFalut4xEventData(http:Response response, http:FilterContext con
             apiContext: <string> faultDTO.apiContext,
             apiCreator: <string> faultDTO.apiCreator,
             apiCreatorTenantDomain: <string> faultDTO.apiCreatorTenantDomain,
+            userName: <string> faultDTO.userName,
             organizationId: <string> faultDTO.userTenantDomain,
             applicationUUID: <string> faultDTO.applicationUUID,
             applicationName: <string> faultDTO.applicationName,

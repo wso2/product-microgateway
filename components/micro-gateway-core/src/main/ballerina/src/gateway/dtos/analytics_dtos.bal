@@ -47,6 +47,7 @@ public type RequestResponseExecutionDTO record {
     int backendTime = 0;
     boolean responseCacheHit = false;
     int responseSize = 0;
+    string responseContentType = "";
     string protocol = "";
     int responseCode = 0;
     string destination = "";
@@ -146,9 +147,6 @@ public type Analytics4xEventData record {
     int backendLatency = 0;
     int responseLatency = 0;
     int errorCode = 0;
-};
-
-// Analytics fault event for APIM 4.x versions
-public type AnalyticsFault4xEventData record {
-
+    int responseSize = 0;
+    string responseContentType = "";
 };

@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.micro.gateway.core.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +70,8 @@ public class MGWAnalyticsDataProvider implements AnalyticsDataProvider {
     private final long backendLatency;
     private final long responseLatency;
     private final int errorCode;
+    private final int responseSize;
+    private final String responseContentType;
 
     public MGWAnalyticsDataProvider(BMap<String, Object> eventData) {
         this.isFault = Boolean.parseBoolean(String.valueOf(eventData.get("isFault")));
@@ -101,6 +104,8 @@ public class MGWAnalyticsDataProvider implements AnalyticsDataProvider {
         this.backendLatency = Long.parseLong(String.valueOf(eventData.get("backendLatency")));
         this.responseLatency = Long.parseLong(String.valueOf(eventData.get("responseLatency")));
         this.errorCode = Integer.parseInt(String.valueOf(eventData.get("errorCode")));
+        this.responseSize = Integer.parseInt(String.valueOf(eventData.get("responseSize")));
+        this.responseContentType = String.valueOf(eventData.get("responseContentType"));
     }
 
     @Override
@@ -240,5 +245,15 @@ public class MGWAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public Map<String, String> getMaskProperties() {
         return new HashMap<>();
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        Map<String, Object> customProperties = new HashMap<>();
+        customProperties.put(Constants.AnalyticsConstants.API_USER_NAME_KEY, userName);
+        customProperties.put(Constants.AnalyticsConstants.API_CONTEXT_KEY, apiContext);
+        customProperties.put(Constants.AnalyticsConstants.RESPONSE_SIZE, responseSize);
+        customProperties.put(Constants.AnalyticsConstants.RESPONSE_CONTENT_TYPE, responseContentType);
+        return customProperties;
     }
 }

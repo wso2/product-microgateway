@@ -150,6 +150,12 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     } else {        //TODO: we are not building message in order to get the response size if the message is chunk
         requestResponseExecutionDTO.responseSize = 0;
     }
+    // if response contains Content-Type header that value will be taken
+    if (response.getContentType() != "") {
+        requestResponseExecutionDTO.responseContentType = response.getContentType();
+    } else {        //TODO: we are not building message in order to get the response size if the message is chunk
+        requestResponseExecutionDTO.responseContentType = UNKNOWN_VALUE;
+    }
     requestResponseExecutionDTO.responseCode = response.statusCode;
     string resourceName = context.getResourceName();
     string serviceName = context.getServiceName();

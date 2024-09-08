@@ -117,6 +117,10 @@ public class Constants {
      * APIM 4.x Analytics related constants
      */
     public static class AnalyticsConstants {
+        public static final String API_USER_NAME_KEY = "userName";
+        public static final String API_CONTEXT_KEY = "apiContext";
+        public static final String RESPONSE_SIZE = "responseSize";
+        public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
         public static final String PUBLISHER_IMPL_CONFIG_KEY = "publisherImpl";
         public static final String IS_CHOREO_DEPLOYMENT_CONFIG_KEY = "isChoreoDeployment";
         public static final String TYPE_CONFIG_KEY = "type";
