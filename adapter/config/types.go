@@ -242,8 +242,8 @@ type envoyUpstream struct {
 	Health                 upstreamHealth
 	DNS                    upstreamDNS
 	Retry                  upstreamRetry
-	FreeTierCircuitBreaker upstreamCircuitBreaker
-	DevTierCircuitBreaker  upstreamCircuitBreaker
+	EnhancedCircuitBreaker upstreamCircuitBreaker
+	BasicCircuitBreaker    upstreamCircuitBreaker
 }
 
 type upstreamTLS struct {

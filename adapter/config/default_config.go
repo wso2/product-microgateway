@@ -140,13 +140,13 @@ var defaultConfig = &Config{
 					},
 				},
 			},
-			FreeTierCircuitBreaker: upstreamCircuitBreaker{
+			BasicCircuitBreaker: upstreamCircuitBreaker{
 				MaxConnections:     3,
 				MaxRequests:        3,
 				MaxPendingRequests: 1,
 				MaxRetries:         3,
 			},
-			DevTierCircuitBreaker: upstreamCircuitBreaker{
+			EnhancedCircuitBreaker: upstreamCircuitBreaker{
 				MaxConnections:     50,
 				MaxRequests:        50,
 				MaxPendingRequests: 1,
