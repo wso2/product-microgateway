@@ -631,7 +631,7 @@ func (swagger *MgwSwagger) setXWso2Endpoints() error {
 }
 
 // SetEndpointsConfig set configs for Endpoints sent by api.yaml
-func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo, apiType string, orgId string) error {
+func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo, apiType string, orgID string) error {
 	if endpointInfos == nil || len(endpointInfos) == 0 {
 		return nil
 	}
@@ -670,7 +670,7 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 	if endpointCluster.Config.CircuitBreakers == nil && apiType == "WS" {
 		logger.LoggerOasparser.Debug("Adding CircuitBreakers for the endpoint cluster", endpointInfos[0].Endpoint)
 		conf, _ := config.ReadConfigs()
-		isPaidOrg := config.GetIsPaidOrganization(orgId)
+		isPaidOrg := config.GetIsPaidOrganization(orgID)
 		if isPaidOrg {
 			CircuitBreaker := &CircuitBreakers{
 				MaxConnections:     int32(conf.Envoy.Upstream.DevTierCircuitBreaker.MaxConnections),
