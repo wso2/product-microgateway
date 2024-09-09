@@ -631,7 +631,7 @@ func (swagger *MgwSwagger) setXWso2Endpoints() error {
 }
 
 // SetEndpointsConfig set configs for Endpoints sent by api.yaml
-func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo, apiType string) error {
+func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []EndpointInfo, apiType string, orgId string) error {
 	if endpointInfos == nil || len(endpointInfos) == 0 {
 		return nil
 	}
@@ -669,13 +669,27 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 	// https://apim.docs.wso2.com/en/4.2.0/deploy-and-publish/deploy-on-gateway/choreo-connect/endpoints/resiliency/circuit-breakers/
 	if endpointCluster.Config.CircuitBreakers == nil && apiType == "WS" {
 		logger.LoggerOasparser.Debug("Adding CircuitBreakers for the endpoint cluster", endpointInfos[0].Endpoint)
-		CircuitBreaker := &CircuitBreakers{
-			MaxConnections:     2,
-			MaxConnectionPools: 7,
-			MaxPendingRequests: 0,
-			MaxRequests:        2,
+		conf, _ := config.ReadConfigs()
+		isPaidOrg := config.GetIsPaidOrganization(orgId)
+		if isPaidOrg {
+			CircuitBreaker := &CircuitBreakers{
+				MaxConnections:     int32(conf.Envoy.Upstream.DevTierCircuitBreaker.MaxConnections),
+				MaxConnectionPools: int32(conf.Envoy.Upstream.DevTierCircuitBreaker.MaxConnectionPools),
+				MaxPendingRequests: int32(conf.Envoy.Upstream.DevTierCircuitBreaker.MaxPendingRequests),
+				MaxRequests:        int32(conf.Envoy.Upstream.DevTierCircuitBreaker.MaxRequests),
+				MaxRetries:         int32(conf.Envoy.Upstream.DevTierCircuitBreaker.MaxRetries),
+			}
+			endpointCluster.Config.CircuitBreakers = CircuitBreaker
+		} else {
+			CircuitBreaker := &CircuitBreakers{
+				MaxConnections:     int32(conf.Envoy.Upstream.FreeTierCircuitBreaker.MaxConnections),
+				MaxConnectionPools: int32(conf.Envoy.Upstream.FreeTierCircuitBreaker.MaxConnectionPools),
+				MaxPendingRequests: int32(conf.Envoy.Upstream.FreeTierCircuitBreaker.MaxPendingRequests),
+				MaxRequests:        int32(conf.Envoy.Upstream.FreeTierCircuitBreaker.MaxRequests),
+				MaxRetries:         int32(conf.Envoy.Upstream.FreeTierCircuitBreaker.MaxRetries),
+			}
+			endpointCluster.Config.CircuitBreakers = CircuitBreaker
 		}
-		endpointCluster.Config.CircuitBreakers = CircuitBreaker
 	}
 
 	return nil

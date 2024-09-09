@@ -104,6 +104,8 @@ type adapter struct {
 	SandboxEnvName string
 	// Feature flag to enable semantic version based intelligent routing
 	IsIntelligentRoutingEnabled bool
+	// PaidOrganizations contains the list of paid organizations
+	PaidOrganizations string
 }
 
 // Envoy Listener Component related configurations.
@@ -235,11 +237,13 @@ type globalCors struct {
 // Envoy Upstream Related Configurations
 type envoyUpstream struct {
 	// UpstreamTLS related Configuration
-	TLS      upstreamTLS
-	Timeouts upstreamTimeout
-	Health   upstreamHealth
-	DNS      upstreamDNS
-	Retry    upstreamRetry
+	TLS                    upstreamTLS
+	Timeouts               upstreamTimeout
+	Health                 upstreamHealth
+	DNS                    upstreamDNS
+	Retry                  upstreamRetry
+	FreeTierCircuitBreaker upstreamCircuitBreaker
+	DevTierCircuitBreaker  upstreamCircuitBreaker
 }
 
 type upstreamTLS struct {
@@ -312,6 +316,14 @@ type upstreamRetry struct {
 	MaxInterval   time.Duration
 	RetryOn       string
 	StatusCodes   []uint32
+}
+
+type upstreamCircuitBreaker struct {
+	MaxConnections     uint32
+	MaxPendingRequests uint32
+	MaxRequests        uint32
+	MaxConnectionPools uint32
+	MaxRetries         uint32
 }
 
 type security struct {

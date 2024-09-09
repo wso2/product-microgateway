@@ -71,6 +71,7 @@ var defaultConfig = &Config{
 		SandboxVhost:                "sandbox.host",
 		SandboxEnvName:              "sandbox",
 		IsIntelligentRoutingEnabled: false,
+		PaidOrganizations:           "e0682456-2ba6-4c5f-8f36-3c5b6dc46913,4b9afefb-4bcc-4e63-85d3-ddd593841012,d3a7dfea-fb10-4371-b21d-85d1bc28667b",
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
@@ -120,7 +121,7 @@ var defaultConfig = &Config{
 			},
 			Retry: upstreamRetry{
 				MaxRetryCount: 5,
-				RetryOn: "connect-failure",
+				RetryOn:       "connect-failure",
 				BaseInterval:  25 * time.Millisecond,
 				MaxInterval:   500 * time.Millisecond,
 				StatusCodes:   []uint32{504},
@@ -138,6 +139,18 @@ var defaultConfig = &Config{
 						NoDefaultSearchDomain:    false,
 					},
 				},
+			},
+			FreeTierCircuitBreaker: upstreamCircuitBreaker{
+				MaxConnections:     3,
+				MaxRequests:        3,
+				MaxPendingRequests: 1,
+				MaxRetries:         3,
+			},
+			DevTierCircuitBreaker: upstreamCircuitBreaker{
+				MaxConnections:     50,
+				MaxRequests:        50,
+				MaxPendingRequests: 1,
+				MaxRetries:         3,
 			},
 		},
 		Connection: connection{
