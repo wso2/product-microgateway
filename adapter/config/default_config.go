@@ -202,9 +202,11 @@ var defaultConfig = &Config{
 				},
 			},
 			AuthHeader: authHeader{
-				EnableOutboundAuthHeader: false,
-				AuthorizationHeader:      "authorization",
-				TestConsoleHeaderName:    "Internal-Key",
+				EnableOutboundAuthHeader:   false,
+				AuthorizationHeader:        "authorization",
+				TestConsoleHeaderName:      "Internal-Key",
+				TempTestConsoleHeaderNames: []string{},
+				TempTestConsoleHeadersMode: "monitor",
 			},
 		},
 		AuthService: authService{
