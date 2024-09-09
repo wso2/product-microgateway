@@ -169,6 +169,9 @@ type InterceptEndpoint struct {
 
 const prototypedAPI = "prototyped"
 
+// CircuitBreaker names for free tier
+const BasicCircuitBreaker = "BasicCircuitBreaker"
+
 // GetCorsConfig returns the CorsConfiguration Object.
 func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
 	return swagger.xWso2Cors
@@ -670,29 +673,51 @@ func (endpointCluster *EndpointCluster) SetEndpointsConfig(endpointInfos []Endpo
 	if endpointCluster.Config.CircuitBreakers == nil && apiType == "WS" {
 		logger.LoggerOasparser.Debug("Adding CircuitBreakers for the endpoint cluster", endpointInfos[0].Endpoint)
 		conf, _ := config.ReadConfigs()
-		isPaidOrg := config.GetIsPaidOrganization(orgID)
-		if isPaidOrg {
-			CircuitBreaker := &CircuitBreakers{
-				MaxConnections:     int32(conf.Envoy.Upstream.EnhancedCircuitBreaker.MaxConnections),
-				MaxConnectionPools: int32(conf.Envoy.Upstream.EnhancedCircuitBreaker.MaxConnectionPools),
-				MaxPendingRequests: int32(conf.Envoy.Upstream.EnhancedCircuitBreaker.MaxPendingRequests),
-				MaxRequests:        int32(conf.Envoy.Upstream.EnhancedCircuitBreaker.MaxRequests),
-				MaxRetries:         int32(conf.Envoy.Upstream.EnhancedCircuitBreaker.MaxRetries),
-			}
-			endpointCluster.Config.CircuitBreakers = CircuitBreaker
-		} else {
-			CircuitBreaker := &CircuitBreakers{
-				MaxConnections:     int32(conf.Envoy.Upstream.BasicCircuitBreaker.MaxConnections),
-				MaxConnectionPools: int32(conf.Envoy.Upstream.BasicCircuitBreaker.MaxConnectionPools),
-				MaxPendingRequests: int32(conf.Envoy.Upstream.BasicCircuitBreaker.MaxPendingRequests),
-				MaxRequests:        int32(conf.Envoy.Upstream.BasicCircuitBreaker.MaxRequests),
-				MaxRetries:         int32(conf.Envoy.Upstream.BasicCircuitBreaker.MaxRetries),
-			}
-			endpointCluster.Config.CircuitBreakers = CircuitBreaker
-		}
-	}
+		var selectedCircuitBreaker *CircuitBreakers
 
+		for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
+			if utills.GetIsOrganizationInList(orgID, circuitBreaker.Organizations) {
+				selectedCircuitBreaker = createCircuitBreaker(
+					circuitBreaker.MaxConnections,
+					circuitBreaker.MaxPendingRequests,
+					circuitBreaker.MaxRequests,
+					circuitBreaker.MaxRetries,
+					circuitBreaker.MaxConnectionPools,
+				)
+				break
+			}
+		}
+		if selectedCircuitBreaker == nil {
+			for _, circuitBreaker := range conf.Envoy.Upstream.CircuitBreakers {
+				// breaks from the first iteration
+				if circuitBreaker.CircuitBreakerName == BasicCircuitBreaker {
+					selectedCircuitBreaker = createCircuitBreaker(
+						circuitBreaker.MaxConnections,
+						circuitBreaker.MaxPendingRequests,
+						circuitBreaker.MaxRequests,
+						circuitBreaker.MaxRetries,
+						circuitBreaker.MaxConnectionPools,
+					)
+					break
+				}
+
+			}
+		}
+		endpointCluster.Config.CircuitBreakers = selectedCircuitBreaker
+	}
 	return nil
+}
+
+// Helper function to create a CircuitBreakers instance
+func createCircuitBreaker(maxConnections uint32, maxPendingRequests uint32,
+	maxRequests uint32, maxRetries uint32, maxConnectionPools uint32) *CircuitBreakers {
+	return &CircuitBreakers{
+		MaxConnections:     int32(maxConnections),
+		MaxConnectionPools: int32(maxConnectionPools),
+		MaxPendingRequests: int32(maxPendingRequests),
+		MaxRequests:        int32(maxRequests),
+		MaxRetries:         int32(maxRetries),
+	}
 }
 
 func (swagger *MgwSwagger) setXWso2ThrottlingTier() {

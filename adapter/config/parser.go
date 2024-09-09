@@ -60,9 +60,8 @@ const (
 
 // Constants related to utility functions
 const (
-	tenantDomainSeparator     = "@"
-	superTenantDomain         = "carbon.super"
-	organizationListSeparator = ","
+	tenantDomainSeparator = "@"
+	superTenantDomain     = "carbon.super"
 )
 
 // ReadConfigs implements adapter configuration read operation. The read operation will happen only once, hence
@@ -180,26 +179,6 @@ func GetControlPlaneConnectedTenantDomain() string {
 		return tenantDomain[len(tenantDomain)-1]
 	}
 	return superTenantDomain
-}
-
-// GetIsPaidOrganization returns whether the organization is a paid organization or not.
-func GetIsPaidOrganization(orgID string) bool {
-	conf, _ := ReadConfigs()
-
-	// Populate data from the config
-	paidOrganizations := conf.Adapter.PaidOrganizations
-	paidOrganizationsList := strings.Split(paidOrganizations, organizationListSeparator)
-
-	// Convert the list to a set for O(1) lookup
-	paidOrganizationsSet := make(map[string]struct{}, len(paidOrganizationsList))
-	for _, org := range paidOrganizationsList {
-		paidOrganizationsSet[org] = struct{}{}
-	}
-
-	// Check if the orgID is in the set
-	_, exists := paidOrganizationsSet[orgID]
-	return exists
-
 }
 
 func (config *Config) resolveDeprecatedProperties() {

@@ -71,7 +71,6 @@ var defaultConfig = &Config{
 		SandboxVhost:                "sandbox.host",
 		SandboxEnvName:              "sandbox",
 		IsIntelligentRoutingEnabled: false,
-		PaidOrganizations:           "e0682456-2ba6-4c5f-8f36-3c5b6dc46913,4b9afefb-4bcc-4e63-85d3-ddd593841012,d3a7dfea-fb10-4371-b21d-85d1bc28667b",
 	},
 	Envoy: envoy{
 		ListenerHost:                     "0.0.0.0",
@@ -140,17 +139,23 @@ var defaultConfig = &Config{
 					},
 				},
 			},
-			BasicCircuitBreaker: upstreamCircuitBreaker{
-				MaxConnections:     3,
-				MaxRequests:        3,
-				MaxPendingRequests: 1,
-				MaxRetries:         3,
-			},
-			EnhancedCircuitBreaker: upstreamCircuitBreaker{
-				MaxConnections:     50,
-				MaxRequests:        50,
-				MaxPendingRequests: 1,
-				MaxRetries:         3,
+			CircuitBreakers: []upstreamCircuitBreaker{
+				{
+					Organizations:      "*",
+					CircuitBreakerName: "BasicCircuitBreaker",
+					MaxConnections:     3,
+					MaxRequests:        3,
+					MaxPendingRequests: 1,
+					MaxRetries:         3,
+				},
+				{
+					Organizations:      "e0682456-2ba6-4c5f-8f36-3c5b6dc46913,4b9afefb-4bcc-4e63-85d3-ddd593841012,d3a7dfea-fb10-4371-b21d-85d1bc28667b",
+					CircuitBreakerName: "EnhancedCircuitBreaker",
+					MaxConnections:     50,
+					MaxRequests:        50,
+					MaxPendingRequests: 1,
+					MaxRetries:         50,
+				},
 			},
 		},
 		Connection: connection{
