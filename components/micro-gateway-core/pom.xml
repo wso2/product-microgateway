@@ -291,13 +291,12 @@
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds,
                                 net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core,
-                                org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2,
-                                org.apache.logging.log4j
+                                org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2, org.slf4j
                             </includeGroupIds>
                             <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm,
-                                log4j-api, log4j-core, jackson-databind, jackson-core,
+                                log4j-api, log4j-core, log4j-slf4j-impl, jackson-databind, jackson-core,
                                 jackson-annotations, org.wso2.carbon.apimgt.common.analytics,
-                                org.wso2.am.analytics.publisher.client, ua-parser, log4j-slf4j-impl
+                                org.wso2.am.analytics.publisher.client, ua-parser, slf4j-api
                             </includeArtifactIds>
                         </configuration>
                     </execution>

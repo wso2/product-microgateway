@@ -208,19 +208,17 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
-                            <includeGroupIds>org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw, org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2, org.apache.logging.log4j</includeGroupIds>
-                            <includeArtifactIds>andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer, org.wso2.carbon.apimgt.common.analytics, org.wso2.am.analytics.publisher.client, ua-parser, log4j-slf4j-impl</includeArtifactIds>
                             <includeGroupIds>
                                 org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
                                 org.wso2.carbon.analytics-common, org.wso2.orbit.com.lmax, org.wso2.carbon.apimgt,
-                                org.wso2.am.analytics.publisher, ua.parser.wso2, org.apache.logging.log4j
+                                org.wso2.am.analytics.publisher, ua.parser.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
                                 andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer,
                                 mgw-jwt-generator, org.wso2.carbon.databridge.commons,
                                 org.wso2.carbon.databridge.commons.binary, disruptor,
                                 org.wso2.carbon.apimgt.common.analytics, org.wso2.am.analytics.publisher.client,
-                                ua-parser, log4j-slf4j-impl
+                                ua-parser
                             </includeArtifactIds>
                         </configuration>
                     </execution>
