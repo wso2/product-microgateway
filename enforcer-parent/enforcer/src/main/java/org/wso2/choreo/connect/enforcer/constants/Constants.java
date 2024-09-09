@@ -74,4 +74,8 @@ public class Constants {
 
     // keyword to identify API-Key sent in sec-websocket-protocol header
     public static final String WS_API_KEY_IDENTIFIER = "choreo-internal-API-Key";
+
+    // Modes for the temporary console test headers.
+    public static final String TEMP_CONSOLE_TEST_HEADERS_MONITOR_MODE = "monitor";
+    public static final String TEMP_CONSOLE_TEST_HEADERS_ACTIVE_MODE = "active";
 }

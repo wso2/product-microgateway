@@ -18,6 +18,11 @@
 
 package org.wso2.choreo.connect.enforcer.config.dto;
 
+import org.apache.commons.lang.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This contains authorization header properties.
  */
@@ -25,6 +30,8 @@ public class AuthHeaderDto {
     private boolean enableOutboundAuthHeader = false;
     private String authorizationHeader = "";
     private String testConsoleHeaderName = "";
+    private List<String> tempTestConsoleHeaderNames = new ArrayList<>();
+    private String tempTestConsoleTestHeadersMode = "";
 
     public String getAuthorizationHeader() {
         return authorizationHeader;
@@ -48,5 +55,25 @@ public class AuthHeaderDto {
 
     public String getTestConsoleHeaderName() {
         return testConsoleHeaderName;
+    }
+
+    public void setTempTestConsoleHeaderNames(List<String> tempTestConsoleHeaderNames) {
+        if (tempTestConsoleHeaderNames != null) {
+            this.tempTestConsoleHeaderNames = tempTestConsoleHeaderNames;
+        }
+    }
+
+    public List<String> getTempTestConsoleHeaderNames() {
+        return tempTestConsoleHeaderNames;
+    }
+
+    public void setTempTestConsoleTestHeadersMode(String mode) {
+        if (StringUtils.isNotBlank(mode)) {
+            this.tempTestConsoleTestHeadersMode = mode.toLowerCase();
+        }
+    }
+
+    public String getTempTestConsoleTestHeadersMode() {
+        return tempTestConsoleTestHeadersMode;
     }
 }

@@ -351,6 +351,9 @@ enabled = true
   # Header name for the authorization token coming from the downstream client
   authorizationHeader = "authorization"
   testConsoleHeaderName = "Internal-Key"
+  # Temporary additional headers for testConsoleHeaderName
+  tempTestConsoleHeaderNames = ["test-key"]
+  tempTestConsoleHeadersMode = "monitor"
   
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1

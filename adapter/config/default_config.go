@@ -120,7 +120,7 @@ var defaultConfig = &Config{
 			},
 			Retry: upstreamRetry{
 				MaxRetryCount: 5,
-				RetryOn: "connect-failure",
+				RetryOn:       "connect-failure",
 				BaseInterval:  25 * time.Millisecond,
 				MaxInterval:   500 * time.Millisecond,
 				StatusCodes:   []uint32{504},
@@ -202,9 +202,11 @@ var defaultConfig = &Config{
 				},
 			},
 			AuthHeader: authHeader{
-				EnableOutboundAuthHeader: false,
-				AuthorizationHeader:      "authorization",
-				TestConsoleHeaderName:    "Internal-Key",
+				EnableOutboundAuthHeader:   false,
+				AuthorizationHeader:        "authorization",
+				TestConsoleHeaderName:      "Internal-Key",
+				TempTestConsoleHeaderNames: []string{},
+				TempTestConsoleHeadersMode: "monitor",
 			},
 		},
 		AuthService: authService{

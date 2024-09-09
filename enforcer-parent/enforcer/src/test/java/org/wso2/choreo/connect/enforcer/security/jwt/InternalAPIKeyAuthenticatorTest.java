@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
+import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ConfigHolder.class})
@@ -45,6 +46,7 @@ public class InternalAPIKeyAuthenticatorTest {
         PowerMockito.mockStatic(ConfigHolder.class);
         ConfigHolder configHolder = Mockito.mock(ConfigHolder.class);
         EnforcerConfig enforcerConfig = Mockito.mock(EnforcerConfig.class);
+        AuthHeaderDto authHeaderDto = Mockito.mock(AuthHeaderDto.class);
         CacheDto cacheDto = Mockito.mock(CacheDto.class);
         Mockito.when(cacheDto.isEnabled()).thenReturn(true);
         Mockito.when(enforcerConfig.getCacheDto()).thenReturn(cacheDto);
@@ -53,6 +55,7 @@ public class InternalAPIKeyAuthenticatorTest {
         Mockito.when(enforcerConfig.getJwtConfigurationDto()).thenReturn(jwtConfigurationDto);
         Mockito.when(configHolder.getConfig()).thenReturn(enforcerConfig);
         Mockito.when(ConfigHolder.getInstance()).thenReturn(configHolder);
+        Mockito.when(ConfigHolder.getInstance().getConfig().getAuthHeader()).thenReturn(authHeaderDto);
 
         String securityParam = "API-Key";
 
@@ -98,6 +101,7 @@ public class InternalAPIKeyAuthenticatorTest {
         PowerMockito.mockStatic(ConfigHolder.class);
         ConfigHolder configHolder = Mockito.mock(ConfigHolder.class);
         EnforcerConfig enforcerConfig = Mockito.mock(EnforcerConfig.class);
+        AuthHeaderDto authHeaderDto = Mockito.mock(AuthHeaderDto.class);
         CacheDto cacheDto = Mockito.mock(CacheDto.class);
         Mockito.when(cacheDto.isEnabled()).thenReturn(true);
         Mockito.when(enforcerConfig.getCacheDto()).thenReturn(cacheDto);
@@ -106,6 +110,7 @@ public class InternalAPIKeyAuthenticatorTest {
         Mockito.when(enforcerConfig.getJwtConfigurationDto()).thenReturn(jwtConfigurationDto);
         Mockito.when(configHolder.getConfig()).thenReturn(enforcerConfig);
         Mockito.when(ConfigHolder.getInstance()).thenReturn(configHolder);
+        Mockito.when(ConfigHolder.getInstance().getConfig().getAuthHeader()).thenReturn(authHeaderDto);
 
         String securityParam = "API-Key";
 
