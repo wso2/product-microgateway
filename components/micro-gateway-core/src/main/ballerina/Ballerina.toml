@@ -51,5 +51,35 @@ target = "java8"
     [[platform.libraries]]
     path = "../../../target/lib/dependencies/log4j-slf4j-impl-2.17.0.jar"
 
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/slf4j-api-1.7.26.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/azure-core-1.43.0.wso2v1.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/azure-core-amqp-2.8.9.wso2v1.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/azure-messaging-eventhubs-5.16.0.wso2v1.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/reactive-streams-1.0.3.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/feign-core-13.2.1.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/feign-slf4j-13.2.1.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/feign-gson-13.2.1.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/reactor-core-3.4.31.wso2v1.jar"
+
+    [[platform.libraries]]
+    path = "../../../target/lib/dependencies/proton-j-0.33.4.jar"
+
 [dependencies]
 "ballerina/java.jms" = "0.8.5"
