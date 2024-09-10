@@ -200,6 +200,9 @@
     endpointURL = "https://localhost:9806"
     # Time interval in milliseconds for gRPC connection recovery task
     reconnectTimeInMillies = 6000
+  # Configurations for ELK analytics
+  [analytics.elkAnalytics]
+    enable = false
 
 # User configuration for Basic auth
 [b7a.users]
