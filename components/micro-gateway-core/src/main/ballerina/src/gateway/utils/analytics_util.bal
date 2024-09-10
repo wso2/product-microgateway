@@ -16,6 +16,7 @@
 
 import ballerina/config;
 import ballerina/http;
+import ballerina/lang.'int;
 import ballerina/runtime;
 import ballerina/time;
 import ballerina/stringutils;
@@ -221,7 +222,7 @@ public function retrieveHostname(string key, string defaultHost) returns string 
 }
 
 // Populates fault event data for APIM 4.x analytics
-function populateFaultAnalytics4xDTO(http:Response response, http:FilterContext context) returns (FaultDTO | error) {
+function populateFaultAnalytics4xDTO(http:Response response, http:FilterContext context) returns @tainted (FaultDTO | error) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
 
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
@@ -255,6 +256,25 @@ function populateFaultAnalytics4xDTO(http:Response response, http:FilterContext 
     eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
     if (context.attributes[PROTOCOL_PROPERTY] is string) {
         eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
+    }
+
+    // if response contains Content-Length header that value will be taken
+    if (response.hasHeader(CONTENT_LENGHT_HEADER)) {
+        var respSize = 'int:fromString(response.getHeader(CONTENT_LENGHT_HEADER));
+        if (respSize is int) {
+            eventDto.responseSize = respSize;
+            printDebug(KEY_ANALYTICS_FILTER, "Response content lenght header : " + respSize.toString());
+        } else {
+            eventDto.responseSize = 0;
+        }
+    } else {
+        eventDto.responseSize = 0;
+    }
+    // if response contains Content-Type header that value will be taken
+    if (response.getContentType() != "") {
+        eventDto.responseContentType = response.getContentType();
+    } else {
+        eventDto.responseContentType = UNKNOWN_VALUE;
     }
 
     if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {

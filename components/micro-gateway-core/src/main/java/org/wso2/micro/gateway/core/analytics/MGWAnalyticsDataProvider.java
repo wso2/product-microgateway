@@ -198,13 +198,13 @@ public class MGWAnalyticsDataProvider implements AnalyticsDataProvider {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(correlationId);
         metaInfo.setGatewayType("BALLERINA");
-        metaInfo.setRegionId(regionId);
+        metaInfo.setRegionId("Default");
         return metaInfo;
     }
 
     @Override
     public int getProxyResponseCode() {
-        return 0;
+        return targetResponseCode;
     }
 
     @Override

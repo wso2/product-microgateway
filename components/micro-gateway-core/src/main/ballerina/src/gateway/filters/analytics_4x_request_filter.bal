@@ -137,8 +137,6 @@ function generateAnalytics4xEventData(http:Response response, http:FilterContext
             destination: <string> requestResponseExecutionDTO.destination,
             requestTime: requestResponseExecutionDTO.requestTimestamp,
             correlationId: <string> requestResponseExecutionDTO.correlationId,
-            // TODO: check region ID
-            regionId: "region ID",
             userAgentHeader: <string> requestResponseExecutionDTO.userAgent,
             userName: <string> requestResponseExecutionDTO.userName,
             endUserIP: <string> requestResponseExecutionDTO.userIp,
@@ -151,7 +149,7 @@ function generateAnalytics4xEventData(http:Response response, http:FilterContext
     }
 }
 
-function generateFalut4xEventData(http:Response response, http:FilterContext context) returns (Analytics4xEventData | error) {
+function generateFalut4xEventData(http:Response response, http:FilterContext context) returns @tainted (Analytics4xEventData | error) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     printDebug(KEY_ANALYTICS_FILTER, "Invocation context: " + invocationContext.attributes.toString());
     printDebug(KEY_ANALYTICS_FILTER, "Context: " + context.attributes.toString());
@@ -183,7 +181,9 @@ function generateFalut4xEventData(http:Response response, http:FilterContext con
             apiResourceTemplate: <string> faultDTO.apiResourceTemplate,
             requestTime: faultDTO.faultTime,
             errorCode: faultDTO.errorCode,
-            correlationId: <string> faultDTO.correlationId
+            correlationId: <string> faultDTO.correlationId,
+            responseSize: faultDTO.responseSize,
+            responseContentType: <string> faultDTO.responseContentType
         };
         return analyticsEvent;
     }

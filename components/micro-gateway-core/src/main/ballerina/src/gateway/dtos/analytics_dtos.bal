@@ -105,6 +105,8 @@ public type FaultDTO record {
     string applicationOwner = ""; // New 3.2.0
     string keyType = "";
     string correlationId = "";
+    int responseSize = 0;
+    string responseContentType = "";
 };
 
 public type EventDTO record {
