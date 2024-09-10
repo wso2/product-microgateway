@@ -22,18 +22,15 @@ import (
 	"strings"
 )
 
-// GetIsOrganizationInList returns whether the organization is in the list of organizations that has the circuit breaker.
+// GetIsOrganizationInList checks whether the orgID is in the cbOrganization list
 func GetIsOrganizationInList(orgID string, cbOrganizationList string) bool {
-
 	cbOrganizationsList := strings.Split(cbOrganizationList, ",")
 
-	// Convert the list to a set for O(1) lookup
-	cbOrganizationsSet := make(map[string]struct{}, len(cbOrganizationsList))
 	for _, org := range cbOrganizationsList {
-		cbOrganizationsSet[org] = struct{}{}
+		if org == orgID {
+			return true
+		}
 	}
 
-	// Check if the orgID is in the set
-	_, exists := cbOrganizationsSet[orgID]
-	return exists
+	return false
 }

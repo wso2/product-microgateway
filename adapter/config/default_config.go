@@ -149,7 +149,7 @@ var defaultConfig = &Config{
 					MaxRetries:         3,
 				},
 				{
-					Organizations:      "e0682456-2ba6-4c5f-8f36-3c5b6dc46913,4b9afefb-4bcc-4e63-85d3-ddd593841012,d3a7dfea-fb10-4371-b21d-85d1bc28667b",
+					Organizations:      "*",
 					CircuitBreakerName: "EnhancedCircuitBreaker",
 					MaxConnections:     50,
 					MaxRequests:        50,
