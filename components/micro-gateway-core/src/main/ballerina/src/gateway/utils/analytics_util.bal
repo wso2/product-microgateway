@@ -24,7 +24,12 @@ import ballerina/stringutils;
 boolean isAnalyticsEnabled = false;
 boolean isOldAnalyticsEnabled = false;
 boolean configsRead = false;
+
+// ELK analytics configurations
 boolean isELKAnalyticsEnabled = false;
+
+// Choreo based analytics configurations
+boolean isChoreoAnalyticsEnabled = false;
 
 //gRPCConfigs
 boolean isGrpcAnalyticsEnabled = false;
@@ -217,6 +222,10 @@ function initializeELKAnalytics() {
     isELKAnalyticsEnabled = <boolean>getConfigBooleanValue(ELK_ANALYTICS, ELK_ANALYTICS_ENABLE, DEFAULT_ANALYTICS_ENABLED);
 }
 
+function initializeChoreoAnalytics() {
+    isChoreoAnalyticsEnabled = <boolean>getConfigBooleanValue(CHOREO_ANALYTICS, CHOREO_ANALYTICS_ENABLE, DEFAULT_ANALYTICS_ENABLED);
+}
+
 public function retrieveHostname(string key, string defaultHost) returns string {
     return config:getAsString(key, defaultHost);
 }
@@ -287,6 +296,7 @@ function populateFaultAnalytics4xDTO(http:Response response, http:FilterContext 
         eventDto.userName = authContext.username;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
+        eventDto.applicationUUID = authContext.applicationUuid;
         eventDto.userTenantDomain = authContext.subscriberTenantDomain;
         eventDto.apiCreator = authContext.apiPublisher;
         eventDto.applicationOwner = authContext.subscriber;
@@ -299,6 +309,7 @@ function populateFaultAnalytics4xDTO(http:Response response, http:FilterContext 
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
+        eventDto.applicationUUID = ANONYMOUS_APP_ID;
         eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
         eventDto.applicationOwner = END_USER_ANONYMOUS;
     }

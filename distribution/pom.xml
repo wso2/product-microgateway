@@ -210,15 +210,12 @@
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>
                                 org.wso2.andes.wso2, org.wso2.securevault, org.wso2.am.microgw,
-                                org.wso2.carbon.analytics-common, org.wso2.orbit.com.lmax, org.wso2.carbon.apimgt,
-                                org.wso2.am.analytics.publisher, ua.parser.wso2
+                                org.wso2.carbon.analytics-common, org.wso2.orbit.com.lmax
                             </includeGroupIds>
                             <includeArtifactIds>
                                 andes-client, org.wso2.securevault, mgw-interceptor, mgw-jwt-transformer,
                                 mgw-jwt-generator, org.wso2.carbon.databridge.commons,
-                                org.wso2.carbon.databridge.commons.binary, disruptor,
-                                org.wso2.carbon.apimgt.common.analytics, org.wso2.am.analytics.publisher.client,
-                                ua-parser
+                                org.wso2.carbon.databridge.commons.binary, disruptor
                             </includeArtifactIds>
                         </configuration>
                     </execution>

@@ -190,6 +190,12 @@ public const string GRPC_TIMEOUT_MILLISECONDS = "timeoutInMillis";
 public const string ELK_ANALYTICS = "analytics.elkAnalytics";
 public const string ELK_ANALYTICS_ENABLE = "enable";
 
+//Choreo based analytics related constants
+public const string CHOREO_ANALYTICS = "analytics.choreoAnalytics";
+public const string CHOREO_ANALYTICS_ENABLE = "enable";
+public const string CHOREO_ANALYTICS_CONFIG_ENDPOINT = "configEndpoint";
+public const string CHOREO_ANALYTICS_AUTH_TOKEN = "authToken";
+
 //validation_filter related constatnts
 public const string PATHS = "paths";
 public const string PARAMETERS = "parameters";

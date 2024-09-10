@@ -117,6 +117,7 @@ public function initiateGatewayConfigurations(http:ListenerConfiguration config)
     initializeAnalytics();
     initializegRPCAnalytics();
     initializeELKAnalytics();
+    initializeChoreoAnalytics();
 
     //Change the httpVersion
     if (getConfigBooleanValue(HTTP2_INSTANCE_ID, HTTP2_PROPERTY, DEFAULT_HTTP2_ENABLED)) {

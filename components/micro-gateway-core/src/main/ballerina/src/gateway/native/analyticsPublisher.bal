@@ -16,10 +16,21 @@
 
 import ballerina/java;
 
-function jinitAnalyticsDataPublisher() = @java:Method {
-    name: "initDataPublisher",
+function jinitELKAnalyticsDataPublisher() = @java:Method {
+    name: "initELKDataPublisher",
     class: "org.wso2.micro.gateway.core.analytics.DefaultAnalyticsEventPublisher"
 } external;
+
+function jinitChoreoAnalyticsDataPublisher(handle configEndpoint, handle authToken) = @java:Method {
+    name: "initChoreoDataPublisher",
+    class: "org.wso2.micro.gateway.core.analytics.DefaultAnalyticsEventPublisher"
+} external;
+
+function invokeJinitChoreoAnalyticsDataPublisher() {
+    handle configEndpoint = java:fromString(getConfigValue(CHOREO_ANALYTICS, CHOREO_ANALYTICS_CONFIG_ENDPOINT, DEFAULT_CHOREO_ANALYTICS_CONFIG_ENDPOINT));
+    handle authToken = java:fromString(getConfigValue(CHOREO_ANALYTICS, CHOREO_ANALYTICS_AUTH_TOKEN, DEFAULT_CHOREO_ANALYTICS_AUTH_TOKEN));
+    jinitChoreoAnalyticsDataPublisher(configEndpoint, authToken);
+}
 
 function jpublishAnalyticsEvent(Analytics4xEventData analyticsEvent) = @java:Method {
     name: "publishEventData",

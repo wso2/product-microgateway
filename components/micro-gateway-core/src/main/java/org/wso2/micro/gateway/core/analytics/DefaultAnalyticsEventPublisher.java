@@ -38,7 +38,7 @@ public class DefaultAnalyticsEventPublisher {
     private static final org.slf4j.Logger log1 = LoggerFactory.getLogger(DefaultAnalyticsEventPublisher.class);
     private static final org.slf4j.Logger log2 = LoggerFactory.getLogger("ballerina");
 
-    public static void initDataPublisher() {
+    public static void initELKDataPublisher() {
         HashMap<String, String> reporterProperties = new HashMap<>();
         reporterProperties.put("type", "elk");
         AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(reporterProperties);
@@ -46,6 +46,15 @@ public class DefaultAnalyticsEventPublisher {
         log.error("Data Publisher Initialized APACHE");
         log1.error("Data Publisher Initialized SLF4J");
         log2.error("Data Publisher Initialized Ballerina");
+    }
+
+    public static void initChoreoDataPublisher(String configEndpoint, String authToken) {
+        HashMap<String, String> reporterProperties = new HashMap<>();
+        reporterProperties.put("auth.api.token", authToken);
+        reporterProperties.put("auth.api.url", configEndpoint);
+        reporterProperties.put("proxy_config_enable", "false");
+        AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(reporterProperties);
+        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
     }
 
     public static void publishEventData(BMap<String, Object> eventData) {

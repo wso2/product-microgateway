@@ -20,7 +20,11 @@ import ballerina/runtime;
 public type Analytics4xRequestFilter object {
 
     public function __init() {
-        jinitAnalyticsDataPublisher();
+        if (isELKAnalyticsEnabled) {
+            jinitELKAnalyticsDataPublisher();
+        } else if (isChoreoAnalyticsEnabled) {
+            invokeJinitChoreoAnalyticsDataPublisher();
+        }
     }
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
@@ -30,7 +34,7 @@ public type Analytics4xRequestFilter object {
             return true;
         }
         //Filter only if analytics is enabled.
-        if (isELKAnalyticsEnabled) {
+        if (isELKAnalyticsEnabled || isChoreoAnalyticsEnabled) {
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
             doFilterRequest4x(request, context);
         }
@@ -43,7 +47,7 @@ public type Analytics4xRequestFilter object {
             printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skipping the filter");
             return true;
         }
-        if (isELKAnalyticsEnabled) {
+        if (isELKAnalyticsEnabled || isChoreoAnalyticsEnabled) {
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
             boolean filterFailed = <boolean>invocationContext.attributes[FILTER_FAILED];
             printDebug(KEY_ANALYTICS_FILTER, "Filter failed filter response : " + filterFailed.toString());
