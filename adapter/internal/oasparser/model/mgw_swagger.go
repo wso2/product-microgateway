@@ -169,7 +169,7 @@ type InterceptEndpoint struct {
 
 const prototypedAPI = "prototyped"
 
-// CircuitBreaker names for free tier
+// BasicCircuitBreaker is the name for free tier cluster level circuit breaker
 const BasicCircuitBreaker = "BasicCircuitBreaker"
 
 // GetCorsConfig returns the CorsConfiguration Object.
