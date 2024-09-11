@@ -201,6 +201,24 @@ retainKeys = ["self_validate_jwt", "issuer", "claim_mappings", "consumer_key_cla
   # If the connection is an HTTP/2 downstream connection a drain sequence will occur prior to closing the connection
   idleTimeoutInSeconds = 3600
 
+# Envoy configs relevant to circuit breaking. We can define multiple circuitBreakers for different organizations
+# This should be the 1st circuit breaker
+[[router.upstream.circuitBreakers]]
+organizations = "*"
+circuitBreakerName = "BasicCircuitBreaker"
+maxConnections = 3
+maxRequests = 3
+maxPendingRequests = 0
+maxConnectionPools = 3
+
+[[router.upstream.circuitBreakers]]
+organizations = "e0682456-2ba6-4c5f-8f36-3c5b6dc46913,4b9afefb-4bcc-4e63-85d3-ddd593841012,d3a7dfea-fb10-4371-b21d-85d1bc28667b"
+circuitBreakerName = "EnhancedCircuitBreaker"
+maxConnections = 50
+maxRequests = 50
+maxPendingRequests = 0
+maxConnectionPools = 50
+
 # Configs relevant to the envoy rate-limit service
 [router.ratelimit]
   # Enable/disable envoy rate-limit service

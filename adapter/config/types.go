@@ -235,11 +235,12 @@ type globalCors struct {
 // Envoy Upstream Related Configurations
 type envoyUpstream struct {
 	// UpstreamTLS related Configuration
-	TLS      upstreamTLS
-	Timeouts upstreamTimeout
-	Health   upstreamHealth
-	DNS      upstreamDNS
-	Retry    upstreamRetry
+	TLS             upstreamTLS
+	Timeouts        upstreamTimeout
+	Health          upstreamHealth
+	DNS             upstreamDNS
+	Retry           upstreamRetry
+	CircuitBreakers []upstreamCircuitBreaker
 }
 
 type upstreamTLS struct {
@@ -312,6 +313,16 @@ type upstreamRetry struct {
 	MaxInterval   time.Duration
 	RetryOn       string
 	StatusCodes   []uint32
+}
+
+type upstreamCircuitBreaker struct {
+	Organizations      string
+	CircuitBreakerName string
+	MaxConnections     uint32
+	MaxPendingRequests uint32
+	MaxRequests        uint32
+	MaxConnectionPools uint32
+	MaxRetries         uint32
 }
 
 type security struct {
