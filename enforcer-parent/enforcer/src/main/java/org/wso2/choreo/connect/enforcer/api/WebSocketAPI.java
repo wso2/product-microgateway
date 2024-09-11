@@ -25,6 +25,7 @@ import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
 import org.wso2.choreo.connect.discovery.api.SecurityList;
 import org.wso2.choreo.connect.discovery.api.SecurityScheme;
+import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.BackendJWTConfiguration;
@@ -39,6 +40,7 @@ import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
@@ -165,11 +167,18 @@ public class WebSocketAPI implements API {
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
         responseObject.setRequestPath(requestContext.getRequestPath());
+        boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
+
         responseObject.setApiUuid(apiConfig.getUuid());
         
         Utils.populateRemoveAndProtectedHeaders(requestContext);
         
         if (executeFilterChain(requestContext)) {
+
+            if (analyticsEnabled) {
+                AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
+            }
+
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
             responseObject.setQueryParamsToRemove(requestContext.getQueryParamsToRemove());
             responseObject.setQueryParamMap(requestContext.getQueryParameters());
@@ -202,6 +211,11 @@ public class WebSocketAPI implements API {
             }
             if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getAddHeaders());
+            }
+
+            if (analyticsEnabled && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
+                AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
+                responseObject.setMetaDataMap(new HashMap<>(0));
             }
         }
         return responseObject;
