@@ -33,6 +33,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.CodeGen;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPIWrapper;
 import org.wso2.apimgt.gateway.cli.model.template.BallerinaToml;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaOperation;
@@ -119,8 +120,8 @@ public class CodeGenerator {
                         ExtendedAPI api = OpenAPICodegenUtils.generateAPIFromOpenAPIDef(openAPI, openAPIAsJson);
                         BallerinaService definitionContext;
                         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
-
-                        definitionContext = new BallerinaService().buildContext(openAPI, api);
+                        ExtendedAPIWrapper apiWrapper = new ExtendedAPIWrapper(api);
+                        definitionContext = new BallerinaService().buildContext(openAPI, apiWrapper);
                         generateResourceFunctions(definitionContext, genFiles);
                         genFiles.add(generateService(definitionContext));
                         serviceList.add(definitionContext);
@@ -228,7 +229,8 @@ public class CodeGenerator {
         }
         BallerinaService definitionContext;
         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
-        definitionContext = new BallerinaService().buildContext(openAPI, api);
+        ExtendedAPIWrapper apiWrapper = new ExtendedAPIWrapper(api);
+        definitionContext = new BallerinaService().buildContext(openAPI, apiWrapper);
         return definitionContext;
     }
 
@@ -240,7 +242,8 @@ public class CodeGenerator {
                 CliConstants.YAML_EXTENSION :
                 CliConstants.JSON_EXTENSION;
         String destinationFilename = apiName + "_" + apiVersion + fileExtension;
-        CmdUtils.copyFilesToSources(openAPIFilePath.toString(), resourcesPath + File.separator + destinationFilename);
+        CmdUtils.copyFilesToSources(openAPIFilePath.toString(), resourcesPath + File.separator
+                + destinationFilename);
     }
 
     /**

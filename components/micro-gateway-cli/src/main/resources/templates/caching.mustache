@@ -1,4 +1,4 @@
-{{#equals api.apiInfo.responseCaching "Disabled"}},
+{{#equals api.responseCaching "Disabled"}},
     cache: { enabled: false }{{else}},
     cache: { enabled: true,
     isShared: true }{{/equals}}

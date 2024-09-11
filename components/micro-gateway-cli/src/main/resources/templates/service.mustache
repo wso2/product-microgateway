@@ -50,7 +50,7 @@ import wso2/gateway;
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 
 //This variable is added for logging purposes
-string {{cut qualifiedServiceName " "}}Key = "{{api.apiInfo.name}}-{{api.apiInfo.version}}";
+string {{cut qualifiedServiceName " "}}Key = "{{api.name}}-{{api.version}}";
 
 {{>kubernetes}}
 
@@ -59,23 +59,23 @@ string {{cut qualifiedServiceName " "}}Key = "{{api.apiInfo.name}}-{{api.apiInfo
     auth: {
         authHandlers: gateway:getAuthHandlers([{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}], {{applicationSecurityOptional}}, {{isMutualSSL}})
     }
-   {{#api.apiInfo.corsConfiguration.corsConfigurationEnabled}},
+   {{#api.corsConfiguration.corsConfigurationEnabled}},
     cors: {
-         allowOrigins: [{{#api.apiInfo.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.apiInfo.corsConfiguration.accessControlAllowOrigins}}],
-         allowCredentials: {{api.apiInfo.corsConfiguration.accessControlAllowCredentials}},
-         allowHeaders: [{{#api.apiInfo.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.apiInfo.corsConfiguration.accessControlAllowHeaders}}],
-         allowMethods: [{{#api.apiInfo.corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.apiInfo.corsConfiguration.accessControlAllowMethods}}],
-         exposeHeaders: [{{#api.apiInfo.corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.apiInfo.corsConfiguration.accessControlExposeHeaders}}]
+         allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
+         allowCredentials: {{api.corsConfiguration.accessControlAllowCredentials}},
+         allowHeaders: [{{#api.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowHeaders}}],
+         allowMethods: [{{#api.corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowMethods}}],
+         exposeHeaders: [{{#api.corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlExposeHeaders}}]
     }
-    {{/api.apiInfo.corsConfiguration.corsConfigurationEnabled}}
+    {{/api.corsConfiguration.corsConfigurationEnabled}}
 }
 
 @gateway:API {
-    publisher:"{{api.apiInfo.provider}}",
-    name:"{{api.apiInfo.name}}",
-    apiVersion: "{{api.apiInfo.version}}",
-    apiTier : "{{api.apiInfo.apiLevelPolicy}}" {{#if api.apiInfo.authorizationHeader}},
-    authorizationHeader : "{{api.apiInfo.authorizationHeader}}" {{/if}},
+    publisher:"{{api.provider}}",
+    name:"{{api.name}}",
+    apiVersion: "{{api.version}}",
+    apiTier : "{{api.apiLevelPolicy}}" {{#if api.authorizationHeader}},
+    authorizationHeader : "{{api.authorizationHeader}}" {{/if}},
     authProviders: [{{#authProviders}}"{{.}}"{{#unless @last}},{{/unless}}{{/authProviders}}],
     security: {
             "apikey":[{{#apiKeys}} { "in": "{{in}}", "name": "{{name}}" } {{#unless @last}},{{/unless}}{{/apiKeys}}],
@@ -83,8 +83,8 @@ string {{cut qualifiedServiceName " "}}Key = "{{api.apiInfo.name}}-{{api.apiInfo
             "applicationSecurityOptional": {{applicationSecurityOptional}}
         }
 }
-service {{cut qualifiedServiceName " "}} on {{#api.apiInfo.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
-{{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.apiInfo.transport}} {
+service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"}}apiListener{{#unless @last}},
+{{/unless}}{{/equals}}{{#equals . "https"}}apiSecureListener{{/equals}}{{/api.transport}} {
 {{#paths}}{{#value}}{{#operations}}{{#value}}
 
     @http:ResourceConfig {

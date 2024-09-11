@@ -27,7 +27,7 @@ import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
-import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPIWrapper;
 import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
@@ -102,8 +102,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
             Arrays.asList("HEAD", "OPTIONS", "PATCH", "DELETE", "POST", "PUT", "GET");
 
     @Override
-    public BallerinaOperation buildContext(Operation operation, ExtendedAPI api) throws BallerinaServiceGenException,
-            CLICompileTimeException, CLIRuntimeException {
+    public BallerinaOperation buildContext(Operation operation, ExtendedAPIWrapper api)
+            throws BallerinaServiceGenException, CLICompileTimeException, CLIRuntimeException {
         if (operation == null) {
             return getDefaultValue();
         }
@@ -119,8 +119,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         this.pathParameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
-        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(api.getApiInfo().getName(),
-                api.getApiInfo().getVersion(), operation.getExtensions(), api.getMutualSSL());
+        ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(api.getName(),
+                api.getVersion(), operation.getExtensions(), api.getMutualSSL());
         this.authProviders = OpenAPICodegenUtils.getMgwResourceSecurity(operation, appSecurity);
         this.apiKeys = OpenAPICodegenUtils.generateAPIKeysFromSecurity(operation.getSecurity(),
                 this.authProviders.contains(OpenAPIConstants.APISecurity.apikey.name()));
@@ -175,11 +175,11 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                 Optional<Object> extResourceTier = Optional.ofNullable(exts.get(OpenAPIConstants.THROTTLING_TIER));
                 extResourceTier.ifPresent(value -> this.resourceTier = value.toString());
             }
-            if (api.getApiInfo().getApiLevelPolicy() != null && this.resourceTier != null) {
+            if (api.getApiLevelPolicy() != null && this.resourceTier != null) {
                 //if api level policy exists then we are neglecting the resource level policies
                 String message = "[WARN] : Resource level policy: " + this.resourceTier
                         + " will be neglected due to the presence of API level policy: "
-                        + api.getApiInfo().getApiLevelPolicy() + " for the API : " + api.getApiInfo().getName() + "\n";
+                        + api.getApiLevelPolicy() + " for the API : " + api.getName() + "\n";
                 CmdUtils.appendMessagesToConsole(message);
                 this.resourceTier = null;
             }
@@ -222,7 +222,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
      * @throws BallerinaServiceGenException
      * @throws CLICompileTimeException
      */
-    public BallerinaOperation buildContextForNotAllowed(ExtendedAPI api) throws BallerinaServiceGenException,
+    public BallerinaOperation buildContextForNotAllowed(ExtendedAPIWrapper api) throws BallerinaServiceGenException,
             CLICompileTimeException {
         this.methodNotAllowedOperation = true;
         this.isSecured = false;
@@ -239,7 +239,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
      * @throws BallerinaServiceGenException
      * @throws CLICompileTimeException
      */
-    public BallerinaOperation buildContextForNotFound(ExtendedAPI api) throws BallerinaServiceGenException,
+    public BallerinaOperation buildContextForNotFound(ExtendedAPIWrapper api) throws BallerinaServiceGenException,
             CLICompileTimeException {
         this.methodNotFoundOperation = true;
         this.isSecured = false;
