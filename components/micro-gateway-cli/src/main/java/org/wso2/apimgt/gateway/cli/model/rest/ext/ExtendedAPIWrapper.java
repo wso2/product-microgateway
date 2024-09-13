@@ -1,7 +1,5 @@
 package org.wso2.apimgt.gateway.cli.model.rest.ext;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.wso2.apimgt.gateway.cli.hashing.Hash;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.apim3x.APIEndpointSecurityDTO;
@@ -9,47 +7,50 @@ import org.wso2.apimgt.gateway.cli.model.rest.common.APIBusinessInformationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.common.APICorsConfigurationDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.common.APIMaxTpsDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Wrapper object for ExtendedAPI to maintain backward compatibility with previous versions
  */
 public class ExtendedAPIWrapper {
-    private String id = null;
-    private String name = null;
-    private String description = null;
-    private String context = null;
-    private String version = null;
-    private String provider = null;
-    private Integer cacheTimeout = null;
-    private Boolean isDefaultVersion = null;
-    private List<String> transport = new ArrayList<String>();
-    private List<String> tags = new ArrayList<String>();
-    private String authorizationHeader = null;
-    private APIMaxTpsDTO maxTps = null;
-    private List<String> visibleRoles = new ArrayList<String>();
-    private List<String> visibleTenants = new ArrayList<String>();
-    private List<String> subscriptionAvailableTenants = new ArrayList<String>();
-    private List<String> accessControlRoles = new ArrayList<String>();
-    private APIBusinessInformationDTO businessInformation = null;
-    private APICorsConfigurationDTO corsConfiguration = null;
-    private String apiDefinition = null;
+    private String id;
+    private String name;
+    private String description;
+    private String context;
+    private String version;
+    private String provider;
+    private Integer cacheTimeout;
+    private Boolean isDefaultVersion;
+    private List<String> transport;
+    private List<String> tags;
+    private String authorizationHeader;
+    private APIMaxTpsDTO maxTps;
+    private List<String> visibleRoles;
+    private List<String> visibleTenants;
+    private List<String> subscriptionAvailableTenants;
+    private List<String> accessControlRoles;
+    private APIBusinessInformationDTO businessInformation;
+    private APICorsConfigurationDTO corsConfiguration;
+    private String apiDefinition;
     //API Level endpoint configuration
-    private MgwEndpointConfigDTO endpointConfigRepresentation = null;
+    private MgwEndpointConfigDTO endpointConfigRepresentation;
     //Basepath
-    private String specificBasepath = null;
+    private String specificBasepath;
     //Security
-    private String mgwApiSecurity = null;
+    private String mgwApiSecurity;
     //Scopes
-    private String mgwApiScope = null;
+    private String mgwApiScope;
     //isGrpc
-    private boolean isGrpc = false;
+    private boolean isGrpc;
 
-    //support apim application level security
-    private ApplicationSecurity applicationSecurity = null;
-    //support apim transport level security
-    private String mutualSSL = null;
+    //support APIM application level security
+    private ApplicationSecurity applicationSecurity;
+    //support APIM transport level security
+    private String mutualSSL;
+    private String apiLevelPolicy;
+    private String endpointConfigStr;
+    private String responseCaching;
+    private APIEndpointSecurityDTO endpointSecurity;
 
     public ExtendedAPIWrapper(ExtendedAPI extendedAPI) {
         this.id = extendedAPI.getApiInfo().getId();
@@ -78,12 +79,15 @@ public class ExtendedAPIWrapper {
         this.isGrpc = extendedAPI.isGrpc();
         this.applicationSecurity = extendedAPI.getApplicationSecurity();
         this.mutualSSL = extendedAPI.getMutualSSL();
+        this.apiLevelPolicy = extendedAPI.getApiInfo().getApiLevelPolicy();
+        this.endpointConfigStr = extendedAPI.getApiInfo().getEndpointConfigStr();
+        this.responseCaching = extendedAPI.getApiInfo().getResponseCaching();
+        this.endpointSecurity = extendedAPI.getApiInfo().getEndpointSecurity();
     }
 
     /**
      * UUID of the api registry artifact.
      **/
-    @JsonProperty("id")
     public String getId() {
         return id;
     }
@@ -95,8 +99,6 @@ public class ExtendedAPIWrapper {
     /**
      * Name of the APIDetailedDTO.
      **/
-    @Hash
-    @JsonProperty("name")
     public String getName() {
         return name;
     }
@@ -108,7 +110,6 @@ public class ExtendedAPIWrapper {
     /**
      * A brief description about the APIDetailedDTO.
      **/
-    @JsonProperty("description")
     public String getDescription() {
         return description;
     }
@@ -120,8 +121,6 @@ public class ExtendedAPIWrapper {
     /**
      * A string that represents the context of the user's request.
      **/
-    @Hash
-    @JsonProperty("context")
     public String getContext() {
         return context;
     }
@@ -133,8 +132,6 @@ public class ExtendedAPIWrapper {
     /**
      * The version of the APIDetailedDTO.
      **/
-    @Hash
-    @JsonProperty("version")
     public String getVersion() {
         return version;
     }
@@ -146,7 +143,6 @@ public class ExtendedAPIWrapper {
     /**
      * If the provider value is not given, the user invoking the APIDetailedDTO will be used as the provider.
      **/
-    @JsonProperty("provider")
     public String getProvider() {
         return provider;
     }
@@ -159,14 +155,10 @@ public class ExtendedAPIWrapper {
         return cacheTimeout;
     }
 
-    @Hash
-    @JsonProperty("cacheTimeout")
     public void setCacheTimeout(Integer cacheTimeout) {
         this.cacheTimeout = cacheTimeout;
     }
 
-    @Hash
-    @JsonProperty("isDefaultVersion")
     public Boolean getIsDefaultVersion() {
         return isDefaultVersion;
     }
@@ -175,11 +167,6 @@ public class ExtendedAPIWrapper {
         isDefaultVersion = defaultVersion;
     }
 
-    /**
-     * Supported transports for the APIDetailedDTO (http and/or https).
-     **/
-    @Hash
-    @JsonProperty("transport")
     public List<String> getTransport() {
         return transport;
     }
@@ -188,10 +175,6 @@ public class ExtendedAPIWrapper {
         this.transport = transport;
     }
 
-    /**
-     * Search keywords related to the APIDetailedDTO.
-     **/
-    @JsonProperty("tags")
     public List<String> getTags() {
         return tags;
     }
@@ -203,8 +186,6 @@ public class ExtendedAPIWrapper {
     /**
      * * The authorization header of the API.
      **/
-    @Hash
-    @JsonProperty("authorizationHeader")
     public String getAuthorizationHeader() {
         return authorizationHeader;
     }
@@ -213,7 +194,6 @@ public class ExtendedAPIWrapper {
         this.authorizationHeader = authorizationHeader;
     }
 
-    @JsonProperty("maxTps")
     public APIMaxTpsDTO getMaxTps() {
         return maxTps;
     }
@@ -225,7 +205,6 @@ public class ExtendedAPIWrapper {
     /**
      * The user roles that are able to access the APIDetailedDTO.
      **/
-    @JsonProperty("visibleRoles")
     public List<String> getVisibleRoles() {
         return visibleRoles;
     }
@@ -234,7 +213,6 @@ public class ExtendedAPIWrapper {
         this.visibleRoles = visibleRoles;
     }
 
-    @JsonProperty("visibleTenants")
     public List<String> getVisibleTenants() {
         return visibleTenants;
     }
@@ -243,7 +221,6 @@ public class ExtendedAPIWrapper {
         this.visibleTenants = visibleTenants;
     }
 
-    @JsonProperty("subscriptionAvailableTenants")
     public List<String> getSubscriptionAvailableTenants() {
         return subscriptionAvailableTenants;
     }
@@ -255,7 +232,6 @@ public class ExtendedAPIWrapper {
     /**
      * The user roles that are able to view/modify as APIDetailedDTO publisher or creator.
      **/
-    @JsonProperty("accessControlRoles")
     public List<String> getAccessControlRoles() {
         return accessControlRoles;
     }
@@ -264,7 +240,6 @@ public class ExtendedAPIWrapper {
         this.accessControlRoles = accessControlRoles;
     }
 
-    @JsonProperty("businessInformation")
     public APIBusinessInformationDTO getBusinessInformation() {
         return businessInformation;
     }
@@ -273,8 +248,6 @@ public class ExtendedAPIWrapper {
         this.businessInformation = businessInformation;
     }
 
-    @Hash
-    @JsonProperty("corsConfiguration")
     public APICorsConfigurationDTO getCorsConfiguration() {
         return corsConfiguration;
     }
@@ -288,8 +261,6 @@ public class ExtendedAPIWrapper {
     /**
      * Swagger definition of the APIDetailedDTO which contains details about URI templates and scopes.
      **/
-    @Hash
-    @JsonProperty("apiDefinition")
     public String getApiDefinition() {
         return apiDefinition;
     }
@@ -299,32 +270,36 @@ public class ExtendedAPIWrapper {
     }
 
     public String getApiLevelPolicy() {
-        return null;
+        return apiLevelPolicy;
     }
 
     public void setApiLevelPolicy(String apiLevelPolicy) {
+        this.apiLevelPolicy = apiLevelPolicy;
     }
 
     public String getResponseCaching() {
-        return null;
+        return responseCaching;
     }
 
     public void setResponseCaching(String responseCaching) {
+        this.responseCaching = responseCaching;
     }
 
     //TODO: Fix the endpoint config and endpoint security to be compatible with both 3.x and 4.x models
     public String getEndpointConfigStr() {
-        return null;
+        return endpointConfigStr;
     }
 
     public void setEndpointConfigStr(String endpointConfig) {
+        this.endpointConfigStr = endpointConfig;
     }
 
     public APIEndpointSecurityDTO getEndpointSecurity() {
-        return null;
+        return endpointSecurity;
     }
 
     public void setEndpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
+        this.endpointSecurity = endpointSecurity;
     }
 
     public MgwEndpointConfigDTO getEndpointConfigRepresentation() {
