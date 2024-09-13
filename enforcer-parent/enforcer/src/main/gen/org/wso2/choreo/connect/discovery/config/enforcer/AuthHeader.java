@@ -89,6 +89,11 @@ private static final long serialVersionUID = 0L;
             tempTestConsoleHeadersMode_ = s;
             break;
           }
+          case 48: {
+
+            dropConsoleTestHeaders_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -296,6 +301,17 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int DROPCONSOLETESTHEADERS_FIELD_NUMBER = 6;
+  private boolean dropConsoleTestHeaders_;
+  /**
+   * <code>bool dropConsoleTestHeaders = 6;</code>
+   * @return The dropConsoleTestHeaders.
+   */
+  @java.lang.Override
+  public boolean getDropConsoleTestHeaders() {
+    return dropConsoleTestHeaders_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -324,6 +340,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getTempTestConsoleHeadersModeBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 5, tempTestConsoleHeadersMode_);
+    }
+    if (dropConsoleTestHeaders_ != false) {
+      output.writeBool(6, dropConsoleTestHeaders_);
     }
     unknownFields.writeTo(output);
   }
@@ -355,6 +374,10 @@ private static final long serialVersionUID = 0L;
     if (!getTempTestConsoleHeadersModeBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, tempTestConsoleHeadersMode_);
     }
+    if (dropConsoleTestHeaders_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(6, dropConsoleTestHeaders_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -380,6 +403,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTempTestConsoleHeaderNamesList())) return false;
     if (!getTempTestConsoleHeadersMode()
         .equals(other.getTempTestConsoleHeadersMode())) return false;
+    if (getDropConsoleTestHeaders()
+        != other.getDropConsoleTestHeaders()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -404,6 +429,9 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + TEMPTESTCONSOLEHEADERSMODE_FIELD_NUMBER;
     hash = (53 * hash) + getTempTestConsoleHeadersMode().hashCode();
+    hash = (37 * hash) + DROPCONSOLETESTHEADERS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getDropConsoleTestHeaders());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -551,6 +579,8 @@ private static final long serialVersionUID = 0L;
       bitField0_ = (bitField0_ & ~0x00000001);
       tempTestConsoleHeadersMode_ = "";
 
+      dropConsoleTestHeaders_ = false;
+
       return this;
     }
 
@@ -587,6 +617,7 @@ private static final long serialVersionUID = 0L;
       }
       result.tempTestConsoleHeaderNames_ = tempTestConsoleHeaderNames_;
       result.tempTestConsoleHeadersMode_ = tempTestConsoleHeadersMode_;
+      result.dropConsoleTestHeaders_ = dropConsoleTestHeaders_;
       onBuilt();
       return result;
     }
@@ -659,6 +690,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getTempTestConsoleHeadersMode().isEmpty()) {
         tempTestConsoleHeadersMode_ = other.tempTestConsoleHeadersMode_;
         onChanged();
+      }
+      if (other.getDropConsoleTestHeaders() != false) {
+        setDropConsoleTestHeaders(other.getDropConsoleTestHeaders());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1087,6 +1121,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       tempTestConsoleHeadersMode_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean dropConsoleTestHeaders_ ;
+    /**
+     * <code>bool dropConsoleTestHeaders = 6;</code>
+     * @return The dropConsoleTestHeaders.
+     */
+    @java.lang.Override
+    public boolean getDropConsoleTestHeaders() {
+      return dropConsoleTestHeaders_;
+    }
+    /**
+     * <code>bool dropConsoleTestHeaders = 6;</code>
+     * @param value The dropConsoleTestHeaders to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDropConsoleTestHeaders(boolean value) {
+      
+      dropConsoleTestHeaders_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool dropConsoleTestHeaders = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDropConsoleTestHeaders() {
+      
+      dropConsoleTestHeaders_ = false;
       onChanged();
       return this;
     }

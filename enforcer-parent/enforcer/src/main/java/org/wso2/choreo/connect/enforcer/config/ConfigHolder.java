@@ -210,6 +210,7 @@ public class ConfigHolder {
         authHeaderDto.setTestConsoleHeaderName(authHeader.getTestConsoleHeaderName());
         authHeaderDto.setTempTestConsoleHeaderNames(authHeader.getTempTestConsoleHeaderNamesList());
         authHeaderDto.setTempTestConsoleTestHeadersMode(authHeader.getTempTestConsoleHeadersMode());
+        authHeaderDto.setDropConsoleTestHeaders(authHeader.getDropConsoleTestHeaders());
         config.setAuthHeader(authHeaderDto);
     }
 

@@ -372,6 +372,7 @@ enabled = true
   # Temporary additional headers for testConsoleHeaderName
   tempTestConsoleHeaderNames = ["test-key"]
   tempTestConsoleHeadersMode = "monitor"
+  dropConsoleTestHeaders = true
   
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1

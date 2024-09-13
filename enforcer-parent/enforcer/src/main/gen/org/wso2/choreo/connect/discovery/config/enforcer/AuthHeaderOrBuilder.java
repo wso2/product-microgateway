@@ -85,4 +85,10 @@ public interface AuthHeaderOrBuilder extends
    */
   com.google.protobuf.ByteString
       getTempTestConsoleHeadersModeBytes();
+
+  /**
+   * <code>bool dropConsoleTestHeaders = 6;</code>
+   * @return The dropConsoleTestHeaders.
+   */
+  boolean getDropConsoleTestHeaders();
 }

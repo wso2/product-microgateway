@@ -216,6 +216,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				TestConsoleHeaderName:      config.Enforcer.Security.AuthHeader.TestConsoleHeaderName,
 				TempTestConsoleHeaderNames: config.Enforcer.Security.AuthHeader.TempTestConsoleHeaderNames,
 				TempTestConsoleHeadersMode: config.Enforcer.Security.AuthHeader.TempTestConsoleHeadersMode,
+				DropConsoleTestHeaders:     config.Enforcer.Security.AuthHeader.DropConsoleTestHeaders,
 			},
 		},
 		Cache:     cache,

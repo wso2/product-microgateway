@@ -225,6 +225,7 @@ var defaultConfig = &Config{
 				TestConsoleHeaderName:      "Internal-Key",
 				TempTestConsoleHeaderNames: []string{},
 				TempTestConsoleHeadersMode: "monitor",
+				DropConsoleTestHeaders:     true,
 			},
 		},
 		AuthService: authService{
