@@ -22,4 +22,6 @@ message AuthHeader {
     repeated string tempTestConsoleHeaderNames = 4;
 
     string tempTestConsoleHeadersMode = 5;
+
+    bool dropConsoleTestHeaders = 6;
 }

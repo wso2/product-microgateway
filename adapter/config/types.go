@@ -494,6 +494,7 @@ type authHeader struct {
 	TestConsoleHeaderName      string
 	TempTestConsoleHeaderNames []string
 	TempTestConsoleHeadersMode string
+	DropConsoleTestHeaders     bool
 }
 
 type jwtIssuer struct {

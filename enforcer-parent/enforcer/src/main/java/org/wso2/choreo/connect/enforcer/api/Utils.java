@@ -119,22 +119,25 @@ public class Utils {
         // Internal-Key credential is considered to be protected headers, such that the
         // header would not be sent
         // to backend and traffic manager.
-        String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
-                .getTestConsoleHeaderName().toLowerCase();
+        if (ConfigHolder.getInstance().getConfig().getAuthHeader().isDropConsoleTestHeaders()) {
+            String internalKeyHeader = ConfigHolder.getInstance().getConfig().getAuthHeader()
+                    .getTestConsoleHeaderName().toLowerCase();
+            requestContext.getRemoveHeaders().add(internalKeyHeader);
+            // Avoid internal key being published to the Traffic Manager
+            requestContext.getProtectedHeaders().add(internalKeyHeader);
+        }
 
         // If the temp test console headers are in active mode,
         // then those headers are also removed and considered as protected.
         String tempConsoleTestHeadersMode = ConfigHolder.getInstance().getConfig().getAuthHeader()
                 .getTempTestConsoleTestHeadersMode();
-        if (Constants.TEMP_CONSOLE_TEST_HEADERS_ACTIVE_MODE.equals(tempConsoleTestHeadersMode)) {
+        if (Constants.TEMP_CONSOLE_TEST_HEADERS_ACTIVE_MODE.equals(tempConsoleTestHeadersMode) &&
+                ConfigHolder.getInstance().getConfig().getAuthHeader().isDropConsoleTestHeaders()) {
             List<String> tempConsoleTestHeaders = ConfigHolder.getInstance().getConfig().getAuthHeader()
                     .getTempTestConsoleHeaderNames();
             requestContext.getRemoveHeaders().addAll(tempConsoleTestHeaders);
             requestContext.getProtectedHeaders().addAll(tempConsoleTestHeaders);
         }
-        requestContext.getRemoveHeaders().add(internalKeyHeader);
-        // Avoid internal key being published to the Traffic Manager
-        requestContext.getProtectedHeaders().add(internalKeyHeader);
 
         // Remove Authorization Header
         AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();

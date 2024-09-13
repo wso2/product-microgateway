@@ -32,6 +32,7 @@ public class AuthHeaderDto {
     private String testConsoleHeaderName = "";
     private List<String> tempTestConsoleHeaderNames = new ArrayList<>();
     private String tempTestConsoleTestHeadersMode = "";
+    private boolean dropConsoleTestHeaders = true;
 
     public String getAuthorizationHeader() {
         return authorizationHeader;
@@ -75,5 +76,13 @@ public class AuthHeaderDto {
 
     public String getTempTestConsoleTestHeadersMode() {
         return tempTestConsoleTestHeadersMode;
+    }
+
+    public boolean isDropConsoleTestHeaders() {
+        return dropConsoleTestHeaders;
+    }
+
+    public void setDropConsoleTestHeaders(boolean dropConsoleTestHeaders) {
+        this.dropConsoleTestHeaders = dropConsoleTestHeaders;
     }
 }
