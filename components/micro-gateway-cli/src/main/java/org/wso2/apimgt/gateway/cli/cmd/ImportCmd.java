@@ -358,6 +358,10 @@ public class ImportCmd implements LauncherCmd {
             if (StringUtils.isEmpty(label)) {
                 throw CmdUtils.createUsageException(
                         "Missing \"-l <label>\" parameter");
+            } else if (StringUtils.isNotEmpty(apiName) && StringUtils.isEmpty(version)) {
+                throw CmdUtils.createUsageException("Missing \"-v <version>\" parameter");
+            } else if (StringUtils.isNotEmpty(version) && StringUtils.isEmpty(apiName)) {
+                throw CmdUtils.createUsageException("Missing \"-a <api-name>\" parameter");
             }
         } else {
             if ((StringUtils.isEmpty(label) && (StringUtils.isEmpty(apiName) || StringUtils.isEmpty(version))) ||
