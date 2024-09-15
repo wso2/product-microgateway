@@ -59,6 +59,11 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
                 logEntry.getResponse().getResponseCodeDetails())) {
             logger.debug("Is success event");
             return EventCategory.SUCCESS;
+        } else if (logEntry.getResponse() != null && AnalyticsConstants.WEBSOCKET_101_STATUS.equals(
+                String.valueOf(logEntry.getResponse().getResponseCode().getValue()))) {
+            // TODO: (thushani) Need to handle the websocket success event with ChoreoAnalyticsForWSProvider.
+            logger.debug("Is success websocket event");
+            return EventCategory.SUCCESS;
         } else if (logEntry.getResponse() != null
                 && logEntry.getResponse().getResponseCode() != null
                 && logEntry.getResponse().getResponseCode().getValue() != 200
@@ -87,7 +92,10 @@ public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public FaultCategory getFaultType() {
-        if (isTargetFaultRequest()) {
+        if (AnalyticsConstants.UPSTREAM_OVERFLOW_RESPONSE_DETAIL.
+            equals(logEntry.getResponse().getResponseCodeDetails())) {
+            return  FaultCategory.THROTTLED;
+        } else if (isTargetFaultRequest()) {
             return FaultCategory.TARGET_CONNECTIVITY;
         } else {
             return FaultCategory.OTHER;

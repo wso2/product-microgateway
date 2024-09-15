@@ -29,6 +29,8 @@ public class AnalyticsConstants {
     public static final String EXT_AUTH_ERROR_RESPONSE_DETAIL = "ext_authz_error";
     public static final String ROUTE_NOT_FOUND_RESPONSE_DETAIL = "route_not_found";
     public static final String GATEWAY_LABEL = "ENVOY";
+    public static final String WEBSOCKET_101_STATUS = "101";
+    public static final String UPSTREAM_OVERFLOW_RESPONSE_DETAIL = "upstream_reset_before_response_started{overflow}";
 
     public static final String TOKEN_ENDPOINT_PATH = "/testkey";
     public static final String HEALTH_ENDPOINT_PATH = "/health";
