@@ -114,6 +114,7 @@ public class ImportCmd implements LauncherCmd {
     private boolean isOverwriteRequired;
     private String restVersion;
     private String dcrVersion;
+    private String apimVersion;
     private Boolean apim4xVersion;
 
     @Override
@@ -302,7 +303,7 @@ public class ImportCmd implements LauncherCmd {
                     .setClientSecret(encryptedCS)
                     .setTrustStoreLocation(trustStoreLocation)
                     .setTrustStorePassword(encryptedTrustStorePass)
-                    .setApim4xVersion(apim4xVersion)
+                    .setApimVersion(apimVersion)
                     .build();
             newConfig.setToken(token);
             newConfig.setCorsConfiguration(config.getCorsConfiguration());
@@ -395,6 +396,7 @@ public class ImportCmd implements LauncherCmd {
         adminEndpoint = token.getAdminEndpoint();
         registrationEndpoint = token.getRegistrationEndpoint();
         tokenEndpoint = token.getTokenEndpoint();
+        apimVersion = token.getApimVersion();
         apim4xVersion = token.isApim4xVersion();
 
         //copy current token config values
@@ -405,7 +407,7 @@ public class ImportCmd implements LauncherCmd {
         configTokenValues.setRestVersion(restVersion);
         configTokenValues.setDCRVersion(dcrVersion);
         configTokenValues.setBaseURL(token.getBaseURL());
-        configTokenValues.setApim4xVersion(apim4xVersion);
+        configTokenValues.setApimVersion(apimVersion);
 
         isEndPointsNeeded = StringUtils.isEmpty(publisherEndpoint) || StringUtils.isEmpty(adminEndpoint) || StringUtils
                 .isEmpty(registrationEndpoint) || StringUtils.isEmpty(tokenEndpoint);

@@ -1,7 +1,7 @@
 [client]
 httpRequestTimeout = 1000000
 [token]
-apim4xVersion = false
+apimVersion = ""
 publisherEndpoint = ""
 adminEndpoint = ""
 registrationEndpoint = ""
