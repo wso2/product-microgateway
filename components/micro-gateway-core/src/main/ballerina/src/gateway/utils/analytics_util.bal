@@ -335,3 +335,11 @@ function populateFaultAnalytics4xDTO(http:Response response, http:FilterContext 
     }
     return eventDto;
 }
+
+function validateEvent(RequestResponseExecutionDTO requestResponseExecutionDTO) returns boolean {
+    //considered as a malformed even when request timestamp is less than or equal to zero
+    if(requestResponseExecutionDTO.requestTimestamp <= 0) {
+        return false;
+    }
+    return true;
+}
