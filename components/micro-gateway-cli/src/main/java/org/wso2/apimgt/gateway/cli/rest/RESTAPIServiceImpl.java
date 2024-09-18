@@ -449,16 +449,15 @@ public class RESTAPIServiceImpl implements RESTAPIService {
             String urlStr = publisherEp + RESTServiceConstants.APIS_EXPORT_URI;
             String queryParams = "?";
             if (StringUtils.isNotEmpty(apiName)) {
-                queryParams = "name=" + apiName + "&";
+                queryParams += "name=" + apiName + "&";
             }
             if (StringUtils.isNotEmpty(apiVersion)) {
                 queryParams += "version=" + apiVersion + "&";
             }
             if (StringUtils.isNotEmpty(gatewayLabel)) {
                 gatewayLabelEncoded = Base64.getEncoder().encodeToString(gatewayLabel.getBytes(StandardCharsets.UTF_8));
-                queryParams += "gatewayLabel=" + gatewayLabelEncoded + "&";
+                queryParams += "gatewayEnvironment=" + gatewayLabelEncoded;
             }
-            queryParams += "gatewayType=Envoy";
             urlStr += queryParams;
             logger.debug("Export APIs URL: {}", urlStr);
             url = new URL(urlStr);

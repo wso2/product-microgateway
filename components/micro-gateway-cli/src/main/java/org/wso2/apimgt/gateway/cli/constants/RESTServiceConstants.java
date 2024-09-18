@@ -43,7 +43,7 @@ public class RESTServiceConstants {
             "apis?query=name:" + CliConstants.API_NAME_PLACEHOLDER + "%20version:" + CliConstants.VERSION_PLACEHOLDER
                     + "%20status:PUBLISHED&expand=" + CliConstants.EXPAND_PLACEHOLDER;
     public static final String API_OPEN_API_GET_URI = "apis/" + CliConstants.API_ID_PLACEHOLDER + "/swagger";
-    public static final String APIS_EXPORT_URI = "apis/export/apis";
+    public static final String APIS_EXPORT_URI = "apis/export";
 
     public static final String CONFIG_REST_VERSION = "v1.2";
     public static final String CONFIG_DCR_VERSION = "v0.17";
