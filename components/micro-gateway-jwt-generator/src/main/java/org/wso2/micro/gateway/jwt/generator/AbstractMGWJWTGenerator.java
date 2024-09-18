@@ -336,7 +336,8 @@ public abstract class AbstractMGWJWTGenerator {
             jwtClaimSetBuilder.claim(claimEntry.getKey(), claimEntry.getValue());
         }
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
-        return jwtClaimsSet.toJSONObject().toString();
+        Map<String, Object> claimMap = jwtClaimsSet.toJSONObject();
+        return new JSONObject(claimMap).toJSONString();
     }
 
     /**
