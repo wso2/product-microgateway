@@ -73,9 +73,9 @@ const (
 	DescriptorKeyForPolicy            = "policy"
 	DescriptorKeyForOrganization      = "organization"
 
-	descriptorMetadataKeyForSubscription          = "ratelimit:subscription"
-	descriptorMetadataKeyForUsagePolicy           = "ratelimit:usage-policy"
-	descriptorMetadataKeyForOrganization          = "ratelimit:organization"
+	descriptorMetadataKeyForSubscription = "ratelimit:subscription"
+	descriptorMetadataKeyForUsagePolicy  = "ratelimit:usage-policy"
+	descriptorMetadataKeyForOrganization = "ratelimit:organization"
 )
 
 // CreateRoutesWithClusters creates envoy routes along with clusters and endpoint instances.
@@ -1601,7 +1601,7 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 	if apiType == model.WS {
 		maxStreamDuration = &routev3.RouteAction_MaxStreamDuration{
 			MaxStreamDuration: &durationpb.Duration{
-				Seconds: 60 * 60 * 1,
+				Seconds: 60 * 15,
 			},
 		}
 	}
