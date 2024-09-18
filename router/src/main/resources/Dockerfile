@@ -67,7 +67,7 @@ ENV ENVOY_UID=0
 ENV ENVOY_GID=0
 
 COPY maven/LICENSE.txt .
-# COPY maven/wasm /home/wso2/wasm
+COPY maven/wasm /home/wso2/wasm
 COPY maven/security/truststore/ca-certificates.crt /etc/ssl/certs
 COPY maven/interceptor /home/wso2/interceptor
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml
