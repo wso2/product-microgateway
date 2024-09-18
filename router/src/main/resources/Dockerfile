@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
-FROM envoyproxy/envoy:v1.24.7
+FROM envoyproxy/envoy:v1.27.5
 LABEL maintainer="WSO2 Docker Maintainers <wso2.com>"
 
 RUN apt-get update && apt-get upgrade -y \
@@ -67,7 +67,7 @@ ENV ENVOY_UID=0
 ENV ENVOY_GID=0
 
 COPY maven/LICENSE.txt .
-COPY maven/wasm /home/wso2/wasm
+# COPY maven/wasm /home/wso2/wasm
 COPY maven/security/truststore/ca-certificates.crt /etc/ssl/certs
 COPY maven/interceptor /home/wso2/interceptor
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml

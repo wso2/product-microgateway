@@ -134,6 +134,9 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
 			IdleTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.IdleTimeoutInSeconds * time.Second), // Default 1 hr
 		},
+		AccessLogOptions: &hcmv3.HttpConnectionManager_HcmAccessLogOptions{
+			FlushLogOnTunnelSuccessfullyEstablished: true,
+		},
 	}
 
 	if len(accessLogs) > 0 {
