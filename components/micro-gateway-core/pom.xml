@@ -46,11 +46,6 @@
             <version>${slf4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${org.apache.logging.log4j.version}</version>
-        </dependency>
-        <dependency>
             <groupId>commons-pool.wso2</groupId>
             <artifactId>commons-pool</artifactId>
             <version>${apache.commons.version}</version>
@@ -336,16 +331,16 @@
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds,
                                 net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core,
-                                org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2, org.slf4j,
+                                org.wso2.carbon.apimgt, org.wso2.am.analytics.publisher, ua.parser.wso2,
                                 org.wso2.orbit.com.azure, org.reactivestreams, io.github.openfeign,
                                 org.wso2.orbit.io.projectreactor, org.apache.qpid
                             </includeGroupIds>
                             <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm,
-                                log4j-api, log4j-core, log4j-slf4j-impl, jackson-databind, jackson-core,
+                                log4j-api, log4j-core, jackson-databind, jackson-core,
                                 jackson-annotations, org.wso2.carbon.apimgt.common.analytics,
-                                org.wso2.am.analytics.publisher.client, ua-parser, slf4j-api, azure-core,
-                                azure-core-amqp, azure-messaging-eventhubs, reactive-streams, feign-core, feign-slf4j,
-                                feign-gson, reactor-core, proton-j
+                                org.wso2.am.analytics.publisher.client, ua-parser, azure-core, azure-core-amqp,
+                                azure-messaging-eventhubs, reactive-streams, feign-core, feign-slf4j, feign-gson,
+                                reactor-core, proton-j
                             </includeArtifactIds>
                         </configuration>
                     </execution>
