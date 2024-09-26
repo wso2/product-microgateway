@@ -361,9 +361,10 @@ var defaultConfig = &Config{
 		RetryInterval:       5,
 		SkipSSLVerification: false,
 		BrokerConnectionParameters: brokerConnectionParameters{
-			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
-			ReconnectInterval:       5000, //in milli seconds
-			ReconnectRetryCount:     60,
+			EventListeningEndpoints:   []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
+			AmqpOverWebsocketsEnabled: false,
+			ReconnectInterval:         5000, //in milli seconds
+			ReconnectRetryCount:       60,
 		},
 		SendRevisionUpdate: false,
 		HTTPClient: httpClient{
