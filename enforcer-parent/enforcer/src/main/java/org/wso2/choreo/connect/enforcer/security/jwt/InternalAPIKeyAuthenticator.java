@@ -47,7 +47,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.BackendJwtUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
-import org.wso2.choreo.connect.enforcer.util.InternalAPIKeyUtils;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -94,7 +93,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
             if (internalKey == null) {
                 internalKey = extractInternalKeyInWSProtocolHeader(requestContext);
             }
-            InternalAPIKeyUtils.addWSProtocolResponseHeaderIfRequired(requestContext);
+            AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext, Constants.WS_API_KEY_IDENTIFIER);
         }
 
         return isAPIKey(internalKey);

@@ -20,7 +20,14 @@ package org.wso2.choreo.connect.enforcer.security.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 
 /**
@@ -38,6 +45,26 @@ public class AuthenticatorUtils {
                 JSONObject subTierInfo = (JSONObject) tierInfo.get(subTier);
                 validationInfo.setStopOnQuotaReach((Boolean)
                         subTierInfo.get(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH));
+            }
+        }
+    }
+
+    public static void addWSProtocolResponseHeaderIfRequired(RequestContext requestContext, String protocolKeyword) {
+        String secProtocolHeader = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
+        if (secProtocolHeader != null) {
+            String[] secProtocolHeaderValues = secProtocolHeader.split(",");
+            if (secProtocolHeaderValues[0].equals(protocolKeyword) &&
+                    secProtocolHeaderValues.length == 2) {
+                Map<String, String> responseHeadersToAddMap = requestContext
+                        .getResponseHeadersToAddMap();
+
+                if (responseHeadersToAddMap == null) {
+                    responseHeadersToAddMap = new HashMap<>();
+                }
+                responseHeadersToAddMap.put(
+                        HttpConstants.WEBSOCKET_PROTOCOL_HEADER,
+                        protocolKeyword);
+                requestContext.setResponseHeadersToAddMap(responseHeadersToAddMap);
             }
         }
     }

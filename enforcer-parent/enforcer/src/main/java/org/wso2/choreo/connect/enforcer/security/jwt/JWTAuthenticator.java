@@ -41,7 +41,9 @@ import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
@@ -102,9 +104,19 @@ public class JWTAuthenticator implements Authenticator {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
+        String apiType = requestContext.getMatchedAPI().getApiType();
         if (isJWTEnabled(requestContext)) {
             String jwt = retrieveAuthHeaderValue(requestContext);
-            return jwt != null && jwt.split("\\.").length == 3;
+
+            if (apiType.equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
+                if (jwt == null) {
+                    jwt = extractJWTInWSProtocolHeader(requestContext);
+                }
+                AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
+                        Constants.WS_OAUTH2_KEY_IDENTIFIED);
+
+                return jwt != null && jwt.split("\\.").length == 3;
+            }
         }
         return false;
     }
@@ -147,6 +159,7 @@ public class JWTAuthenticator implements Authenticator {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
+
             if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
@@ -765,5 +778,18 @@ public class JWTAuthenticator implements Authenticator {
             return jwtid;
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
+    }
+
+    public String extractJWTInWSProtocolHeader(RequestContext requestContext) {
+        String protocolHeader = requestContext.getHeaders().get(
+                HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
+        if (protocolHeader != null) {
+            String[] secProtocolHeaderValues = protocolHeader.split(",");
+            if (secProtocolHeaderValues.length > 1 && secProtocolHeaderValues[0].equals(
+                    Constants.WS_OAUTH2_KEY_IDENTIFIED)) {
+                return secProtocolHeaderValues[1].trim();
+            }
+        }
+        return "";
     }
 }
