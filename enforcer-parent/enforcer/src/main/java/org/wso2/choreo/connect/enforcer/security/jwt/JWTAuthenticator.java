@@ -114,9 +114,8 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
                         Constants.WS_OAUTH2_KEY_IDENTIFIED);
-
-                return jwt != null && jwt.split("\\.").length == 3;
             }
+            return jwt != null && jwt.split("\\.").length == 3;
         }
         return false;
     }
