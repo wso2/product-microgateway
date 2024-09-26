@@ -20,15 +20,13 @@ package org.wso2.choreo.connect.enforcer.security.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONObject;
+import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
-import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.Constants;
-import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
-import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 
 /**
  * Utility functions shared between different authenticators.
