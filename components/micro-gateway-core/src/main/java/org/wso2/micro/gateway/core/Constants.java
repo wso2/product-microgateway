@@ -121,20 +121,5 @@ public class Constants {
         public static final String API_CONTEXT_KEY = "apiContext";
         public static final String RESPONSE_SIZE = "responseSize";
         public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
-        public static final String PUBLISHER_IMPL_CONFIG_KEY = "publisherImpl";
-        public static final String IS_CHOREO_DEPLOYMENT_CONFIG_KEY = "isChoreoDeployment";
-        public static final String TYPE_CONFIG_KEY = "type";
-        public static final String PUBLISHER_REPORTER_CLASS_CONFIG_KEY = "publisher.reporter.class";
-        public static final String AUTH_URL_CONFIG_KEY = "authURL";
-        public static final String AUTH_TOKEN_CONFIG_KEY = "authToken";
-        public static final String RESPONSE_SCHEMA = "RESPONSE";
-        public static final String ERROR_SCHEMA = "ERROR";
-        public static final String CHOREO_RESPONSE_SCHEMA = "CHOREO_RESPONSE";
-        public static final String CHOREO_FAULT_SCHEMA = "CHOREO_ERROR";
-
-        public static final String ELK_TYPE = "elk";
-        public static final String DEFAULT_ELK_PUBLISHER_REPORTER_CLASS
-                = "org.wso2.am.analytics.publisher.reporter.elk.ELKMetricReporter";
-
     }
 }

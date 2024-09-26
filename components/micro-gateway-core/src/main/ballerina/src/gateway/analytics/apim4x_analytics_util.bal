@@ -33,9 +33,6 @@ function doFilterResponse4x(http:Response response, http:FilterContext context) 
     }
     if (invocationContext.attributes.hasKey(ERROR_CODE) || invocationContext.attributes.hasKey(ERROR_RESPONSE_CODE) 
         || context.attributes.hasKey(ERROR_CODE)) {
-        printDebug(KEY_ANALYTICS_FILTER, "doFilterResponse4x INVOCATION CONTEXT: " + invocationContext.attributes.toString());
-        printDebug(KEY_ANALYTICS_FILTER, "doFilterResponse4x FILTER CONTEXT: " + context.attributes.toString());
-        printDebug(KEY_ANALYTICS_FILTER, "doFilterResponse4x RESPONSE CODE: " + response.statusCode.toString());
         Analytics4xEventData | error analyticsEvent = generateFalut4xEventData(response, context);
         if (analyticsEvent is error) {
             printError(KEY_ANALYTICS_FILTER, "Error while generating analytics event", analyticsEvent);
@@ -56,9 +53,6 @@ function doFilterResponse4x(http:Response response, http:FilterContext context) 
 
 function generateAnalytics4xEventData(http:Response response, http:FilterContext context) returns @tainted Analytics4xEventData | error {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    printDebug(KEY_ANALYTICS_FILTER, "Invocation context: " + invocationContext.attributes.toString());
-    printDebug(KEY_ANALYTICS_FILTER, "Context: " + context.attributes.toString());
-    printDebug(KEY_ANALYTICS_FILTER, "Response: " + response.toString());
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response, context);
     if ((requestResponseExecutionDTO is RequestResponseExecutionDTO && !validateEvent(requestResponseExecutionDTO)) || requestResponseExecutionDTO is error) {
         return error("Event dropped without publishing due to malformation of attributes");
@@ -104,9 +98,6 @@ function generateAnalytics4xEventData(http:Response response, http:FilterContext
 
 function generateFalut4xEventData(http:Response response, http:FilterContext context) returns @tainted (Analytics4xEventData | error) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-    printDebug(KEY_ANALYTICS_FILTER, "Invocation context: " + invocationContext.attributes.toString());
-    printDebug(KEY_ANALYTICS_FILTER, "Context: " + context.attributes.toString());
-    printDebug(KEY_ANALYTICS_FILTER, "Response: " + response.toString());
     FaultDTO|error faultDTO = trap populateFaultAnalytics4xDTO(response, context);
     if (faultDTO is error) {
         return error("Event dropped without publishing due to malformation of attributes");

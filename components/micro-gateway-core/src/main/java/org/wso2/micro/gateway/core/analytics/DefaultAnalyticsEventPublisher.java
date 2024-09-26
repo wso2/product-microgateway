@@ -43,9 +43,6 @@ public class DefaultAnalyticsEventPublisher {
         reporterProperties.put("type", "elk");
         AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(reporterProperties);
         AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
-        log.error("Data Publisher Initialized APACHE");
-        log1.error("Data Publisher Initialized SLF4J");
-        log2.error("Data Publisher Initialized Ballerina");
     }
 
     public static void initChoreoDataPublisher(String configEndpoint, String authToken) {
@@ -60,15 +57,10 @@ public class DefaultAnalyticsEventPublisher {
     public static void publishEventData(BMap<String, Object> eventData) {
         AnalyticsDataProvider provider = new MGWAnalyticsDataProvider(eventData);
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        log.error("Publish Event");
         try {
             dataCollector.collectData();
         } catch (Exception e) {
             log.error("Error Occurred when collecting data", e);
         }
-    }
-
-    public void publishFaultData() {
-
     }
 }

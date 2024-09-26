@@ -104,8 +104,6 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
 }
 
 function populateFaultAnalyticsDTO(http:FilterContext context, string err) returns (FaultDTO | error) {
-    printDebug(KEY_ANALYTICS_FILTER, "Populating fault analytics DTO context attributes : " + context.attributes.toString());
-    printDebug(KEY_ANALYTICS_FILTER, "Populating fault analytics DTO Error message : " + err);
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
     FaultDTO eventDto = {};
     time:Time time = time:currentTime();
