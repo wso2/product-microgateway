@@ -123,6 +123,10 @@ func (asyncAPI AsyncAPI) getResources() []*Resource {
 	val := asyncAPI.isAPILevelSecurityDisabled()
 	for channel, channelItem := range asyncAPI.Channels {
 		// ex: channel = /notify, channelItem = { Publish:map, Subscribe:map }
+		if !strings.HasPrefix(channel, "/") {
+			channel = "/" + channel
+		}
+		loggers.LoggerOasparser.Debugf("Processing the topic %v", channel)
 		var pubOrSubVendorExtensions map[string]interface{}
 
 		if channelItem.Publish != nil {
