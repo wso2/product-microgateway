@@ -27,7 +27,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
-func startBrokerConsumer(connectionString string, sub Subscription, reconnectInterval time.Duration) {
+func startBrokerConsumer(connectionString string, clientOptions *asb.ClientOptions, sub Subscription, reconnectInterval time.Duration) {
 	var topic = sub.topicName
 	var subName = sub.subscriptionName
 
@@ -47,7 +47,7 @@ func startBrokerConsumer(connectionString string, sub Subscription, reconnectInt
 
 	for {
 		// initializing the receiver client
-		subClient, err := asb.NewClientFromConnectionString(connectionString, nil)
+		subClient, err := asb.NewClientFromConnectionString(connectionString, clientOptions)
 		if err != nil {
 			logger.LoggerMsg.Errorf("Failed to create ASB client for %s , topic:  %s. error: %v.",
 				subName, topic, err)

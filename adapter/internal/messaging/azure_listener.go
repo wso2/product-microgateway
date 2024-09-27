@@ -19,6 +19,10 @@
 package messaging
 
 import (
+	"context"
+	"github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
+	"net"
+	"nhooyr.io/websocket"
 	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -37,13 +41,30 @@ func InitiateAndProcessEvents(config *config.Config) {
 	var err error
 	var reconnectRetryCount = config.ControlPlane.BrokerConnectionParameters.ReconnectRetryCount
 	var reconnectInterval = config.ControlPlane.BrokerConnectionParameters.ReconnectInterval
+
 	connectionString := config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints[0]
-	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(connectionString, componentName,
+	var clientOpts *azservicebus.ClientOptions
+	if config.ControlPlane.BrokerConnectionParameters.AmqpOverWebsocketsEnabled {
+		logger.LoggerMgw.Info("AMQP over Websockets is enabled. Initiating brokers with AMQP over Websockets.")
+		newWebSocketConnFn := func(ctx context.Context, args azservicebus.NewWebSocketConnArgs) (net.Conn, error) {
+			opts := &websocket.DialOptions{Subprotocols: []string{"amqp"}}
+			wssConn, _, err := websocket.Dial(ctx, args.Host, opts)
+			if err != nil {
+				return nil, err
+			}
+			return websocket.NetConn(ctx, wssConn, websocket.MessageBinary), nil
+		}
+		clientOpts = &azservicebus.ClientOptions{
+			NewWebSocketConn: newWebSocketConnFn,
+		}
+	}
+
+	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(connectionString, clientOpts, componentName,
 		reconnectRetryCount, reconnectInterval*time.Millisecond, subscriptionIdleTimeDuration)
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
 		logger.LoggerMgw.Info("Service bus meta data successfully initialized.")
-		msg.InitiateConsumers(connectionString, subscriptionMetaDataList, reconnectInterval*time.Millisecond)
+		msg.InitiateConsumers(connectionString, clientOpts, subscriptionMetaDataList, reconnectInterval*time.Millisecond)
 		go handleAzureNotification()
 		go handleAzureTokenRevocation()
 		go handleAzureOrganizationPurge()

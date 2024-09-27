@@ -571,9 +571,10 @@ type globalAdapter struct {
 }
 
 type brokerConnectionParameters struct {
-	EventListeningEndpoints []string
-	ReconnectInterval       time.Duration
-	ReconnectRetryCount     int
+	EventListeningEndpoints   []string
+	AmqpOverWebsocketsEnabled bool
+	ReconnectInterval         time.Duration
+	ReconnectRetryCount       int
 }
 
 // Configuration for Enforcer admin rest api

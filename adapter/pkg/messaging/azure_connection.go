@@ -76,13 +76,13 @@ func init() {
 
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
 // further process
-func InitiateBrokerConnectionAndValidate(connectionString string, componentName string, reconnectRetryCount int,
+func InitiateBrokerConnectionAndValidate(connectionString string, clientOptions *asb.ClientOptions, componentName string, reconnectRetryCount int,
 	reconnectInterval time.Duration, subscriptionIdleTimeDuration string) ([]Subscription, error) {
 	subscriptionMetaDataList := make([]Subscription, 0)
 	subProps := &admin.SubscriptionProperties{
 		AutoDeleteOnIdle: &subscriptionIdleTimeDuration,
 	}
-	_, err := asb.NewClientFromConnectionString(connectionString, nil)
+	_, err := asb.NewClientFromConnectionString(connectionString, clientOptions)
 
 	if err == nil {
 		if logger.LoggerMsg.IsLevelEnabled(logrus.DebugLevel) {
@@ -115,10 +115,10 @@ func InitiateBrokerConnectionAndValidate(connectionString string, componentName 
 }
 
 // InitiateConsumers to pass event consumption
-func InitiateConsumers(connectionString string, subscriptionMetaDataList []Subscription, reconnectInterval time.Duration) {
+func InitiateConsumers(connectionString string, clientOptions *asb.ClientOptions, subscriptionMetaDataList []Subscription, reconnectInterval time.Duration) {
 	for _, subscriptionMetaData := range subscriptionMetaDataList {
 		go func(subscriptionMetaData Subscription) {
-			startBrokerConsumer(connectionString, subscriptionMetaData, reconnectInterval)
+			startBrokerConsumer(connectionString, clientOptions, subscriptionMetaData, reconnectInterval)
 		}(subscriptionMetaData)
 	}
 }
