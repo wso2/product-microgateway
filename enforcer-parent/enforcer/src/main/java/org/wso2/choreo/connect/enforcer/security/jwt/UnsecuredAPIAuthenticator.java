@@ -24,6 +24,8 @@ import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
@@ -31,7 +33,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
-import org.wso2.choreo.connect.enforcer.util.InternalAPIKeyUtils;
 
 /**
  * Implements the authenticator interface to authenticate non-secured APIs.
@@ -78,7 +79,14 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 //                        GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
 //            }
             if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
-                InternalAPIKeyUtils.addWSProtocolResponseHeaderIfRequired(requestContext);
+                String secProtocolHeader = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
+                if (secProtocolHeader.contains(Constants.WS_API_KEY_IDENTIFIER)) {
+                    AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
+                            Constants.WS_API_KEY_IDENTIFIER);
+                } else if (secProtocolHeader.contains(Constants.WS_OAUTH2_KEY_IDENTIFIED)) {
+                    AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
+                            Constants.WS_OAUTH2_KEY_IDENTIFIED);
+                }
             }
             return FilterUtils.generateAuthenticationContextForUnsecured(requestContext);
         } finally {
