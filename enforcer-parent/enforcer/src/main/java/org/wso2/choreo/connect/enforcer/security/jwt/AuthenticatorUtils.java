@@ -51,8 +51,7 @@ public class AuthenticatorUtils {
         String secProtocolHeader = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
         if (secProtocolHeader != null) {
             String[] secProtocolHeaderValues = secProtocolHeader.split(",");
-            if (secProtocolHeaderValues[0].equals(protocolKeyword) &&
-                    secProtocolHeaderValues.length == 2) {
+            if (secProtocolHeaderValues.length == 2 && secProtocolHeaderValues[0].equals(protocolKeyword)) {
                 Map<String, String> responseHeadersToAddMap = requestContext
                         .getResponseHeadersToAddMap();
 
