@@ -78,14 +78,21 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 //                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
 //                        GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
 //            }
+
+            // Since the Choreo console/ Devportal sends the token in the
+            // sec-websocket-protocol header, regardless of security enabled or not, we need
+            // to add the "choreo-internal-API-Key" to the sec-websocket-protocol response
+            // header.
             if (requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
                 String secProtocolHeader = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
-                if (secProtocolHeader.contains(Constants.WS_API_KEY_IDENTIFIER)) {
-                    AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
-                            Constants.WS_API_KEY_IDENTIFIER);
-                } else if (secProtocolHeader.contains(Constants.WS_OAUTH2_KEY_IDENTIFIED)) {
-                    AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
-                            Constants.WS_OAUTH2_KEY_IDENTIFIED);
+                if (secProtocolHeader != null) {
+                    if (secProtocolHeader.contains(Constants.WS_API_KEY_IDENTIFIER)) {
+                        AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
+                                Constants.WS_API_KEY_IDENTIFIER);
+                    } else if (secProtocolHeader.contains(Constants.WS_OAUTH2_KEY_IDENTIFIED)) {
+                        AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
+                                Constants.WS_OAUTH2_KEY_IDENTIFIED);
+                    }
                 }
             }
             return FilterUtils.generateAuthenticationContextForUnsecured(requestContext);
