@@ -76,6 +76,32 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 26: {
+            org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.Builder subBuilder = null;
+            if (apiKeyConfig_ != null) {
+              subBuilder = apiKeyConfig_.toBuilder();
+            }
+            apiKeyConfig_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(apiKeyConfig_);
+              apiKeyConfig_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 34: {
+            org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.Builder subBuilder = null;
+            if (patConfig_ != null) {
+              subBuilder = patConfig_.toBuilder();
+            }
+            patConfig_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(patConfig_);
+              patConfig_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -177,6 +203,58 @@ private static final long serialVersionUID = 0L;
     return getAuthHeader();
   }
 
+  public static final int APIKEYCONFIG_FIELD_NUMBER = 3;
+  private org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig apiKeyConfig_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+   * @return Whether the apiKeyConfig field is set.
+   */
+  @java.lang.Override
+  public boolean hasApiKeyConfig() {
+    return apiKeyConfig_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+   * @return The apiKeyConfig.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig getApiKeyConfig() {
+    return apiKeyConfig_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.getDefaultInstance() : apiKeyConfig_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigOrBuilder getApiKeyConfigOrBuilder() {
+    return getApiKeyConfig();
+  }
+
+  public static final int PATCONFIG_FIELD_NUMBER = 4;
+  private org.wso2.choreo.connect.discovery.config.enforcer.PATConfig patConfig_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+   * @return Whether the patConfig field is set.
+   */
+  @java.lang.Override
+  public boolean hasPatConfig() {
+    return patConfig_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+   * @return The patConfig.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.PATConfig getPatConfig() {
+    return patConfig_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.getDefaultInstance() : patConfig_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.PATConfigOrBuilder getPatConfigOrBuilder() {
+    return getPatConfig();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -197,6 +275,12 @@ private static final long serialVersionUID = 0L;
     if (authHeader_ != null) {
       output.writeMessage(2, getAuthHeader());
     }
+    if (apiKeyConfig_ != null) {
+      output.writeMessage(3, getApiKeyConfig());
+    }
+    if (patConfig_ != null) {
+      output.writeMessage(4, getPatConfig());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -213,6 +297,14 @@ private static final long serialVersionUID = 0L;
     if (authHeader_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, getAuthHeader());
+    }
+    if (apiKeyConfig_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(3, getApiKeyConfig());
+    }
+    if (patConfig_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(4, getPatConfig());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -236,6 +328,16 @@ private static final long serialVersionUID = 0L;
       if (!getAuthHeader()
           .equals(other.getAuthHeader())) return false;
     }
+    if (hasApiKeyConfig() != other.hasApiKeyConfig()) return false;
+    if (hasApiKeyConfig()) {
+      if (!getApiKeyConfig()
+          .equals(other.getApiKeyConfig())) return false;
+    }
+    if (hasPatConfig() != other.hasPatConfig()) return false;
+    if (hasPatConfig()) {
+      if (!getPatConfig()
+          .equals(other.getPatConfig())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -254,6 +356,14 @@ private static final long serialVersionUID = 0L;
     if (hasAuthHeader()) {
       hash = (37 * hash) + AUTHHEADER_FIELD_NUMBER;
       hash = (53 * hash) + getAuthHeader().hashCode();
+    }
+    if (hasApiKeyConfig()) {
+      hash = (37 * hash) + APIKEYCONFIG_FIELD_NUMBER;
+      hash = (53 * hash) + getApiKeyConfig().hashCode();
+    }
+    if (hasPatConfig()) {
+      hash = (37 * hash) + PATCONFIG_FIELD_NUMBER;
+      hash = (53 * hash) + getPatConfig().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -405,6 +515,18 @@ private static final long serialVersionUID = 0L;
         authHeader_ = null;
         authHeaderBuilder_ = null;
       }
+      if (apiKeyConfigBuilder_ == null) {
+        apiKeyConfig_ = null;
+      } else {
+        apiKeyConfig_ = null;
+        apiKeyConfigBuilder_ = null;
+      }
+      if (patConfigBuilder_ == null) {
+        patConfig_ = null;
+      } else {
+        patConfig_ = null;
+        patConfigBuilder_ = null;
+      }
       return this;
     }
 
@@ -445,6 +567,16 @@ private static final long serialVersionUID = 0L;
         result.authHeader_ = authHeader_;
       } else {
         result.authHeader_ = authHeaderBuilder_.build();
+      }
+      if (apiKeyConfigBuilder_ == null) {
+        result.apiKeyConfig_ = apiKeyConfig_;
+      } else {
+        result.apiKeyConfig_ = apiKeyConfigBuilder_.build();
+      }
+      if (patConfigBuilder_ == null) {
+        result.patConfig_ = patConfig_;
+      } else {
+        result.patConfig_ = patConfigBuilder_.build();
       }
       onBuilt();
       return result;
@@ -522,6 +654,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasAuthHeader()) {
         mergeAuthHeader(other.getAuthHeader());
+      }
+      if (other.hasApiKeyConfig()) {
+        mergeApiKeyConfig(other.getApiKeyConfig());
+      }
+      if (other.hasPatConfig()) {
+        mergePatConfig(other.getPatConfig());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -910,6 +1048,244 @@ private static final long serialVersionUID = 0L;
         authHeader_ = null;
       }
       return authHeaderBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig apiKeyConfig_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig, org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.Builder, org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigOrBuilder> apiKeyConfigBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     * @return Whether the apiKeyConfig field is set.
+     */
+    public boolean hasApiKeyConfig() {
+      return apiKeyConfigBuilder_ != null || apiKeyConfig_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     * @return The apiKeyConfig.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig getApiKeyConfig() {
+      if (apiKeyConfigBuilder_ == null) {
+        return apiKeyConfig_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.getDefaultInstance() : apiKeyConfig_;
+      } else {
+        return apiKeyConfigBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     */
+    public Builder setApiKeyConfig(org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig value) {
+      if (apiKeyConfigBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        apiKeyConfig_ = value;
+        onChanged();
+      } else {
+        apiKeyConfigBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     */
+    public Builder setApiKeyConfig(
+        org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.Builder builderForValue) {
+      if (apiKeyConfigBuilder_ == null) {
+        apiKeyConfig_ = builderForValue.build();
+        onChanged();
+      } else {
+        apiKeyConfigBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     */
+    public Builder mergeApiKeyConfig(org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig value) {
+      if (apiKeyConfigBuilder_ == null) {
+        if (apiKeyConfig_ != null) {
+          apiKeyConfig_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.newBuilder(apiKeyConfig_).mergeFrom(value).buildPartial();
+        } else {
+          apiKeyConfig_ = value;
+        }
+        onChanged();
+      } else {
+        apiKeyConfigBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     */
+    public Builder clearApiKeyConfig() {
+      if (apiKeyConfigBuilder_ == null) {
+        apiKeyConfig_ = null;
+        onChanged();
+      } else {
+        apiKeyConfig_ = null;
+        apiKeyConfigBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.Builder getApiKeyConfigBuilder() {
+      
+      onChanged();
+      return getApiKeyConfigFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigOrBuilder getApiKeyConfigOrBuilder() {
+      if (apiKeyConfigBuilder_ != null) {
+        return apiKeyConfigBuilder_.getMessageOrBuilder();
+      } else {
+        return apiKeyConfig_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.getDefaultInstance() : apiKeyConfig_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig, org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.Builder, org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigOrBuilder> 
+        getApiKeyConfigFieldBuilder() {
+      if (apiKeyConfigBuilder_ == null) {
+        apiKeyConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig, org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.Builder, org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigOrBuilder>(
+                getApiKeyConfig(),
+                getParentForChildren(),
+                isClean());
+        apiKeyConfig_ = null;
+      }
+      return apiKeyConfigBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.PATConfig patConfig_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.PATConfig, org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.Builder, org.wso2.choreo.connect.discovery.config.enforcer.PATConfigOrBuilder> patConfigBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     * @return Whether the patConfig field is set.
+     */
+    public boolean hasPatConfig() {
+      return patConfigBuilder_ != null || patConfig_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     * @return The patConfig.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.PATConfig getPatConfig() {
+      if (patConfigBuilder_ == null) {
+        return patConfig_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.getDefaultInstance() : patConfig_;
+      } else {
+        return patConfigBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     */
+    public Builder setPatConfig(org.wso2.choreo.connect.discovery.config.enforcer.PATConfig value) {
+      if (patConfigBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        patConfig_ = value;
+        onChanged();
+      } else {
+        patConfigBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     */
+    public Builder setPatConfig(
+        org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.Builder builderForValue) {
+      if (patConfigBuilder_ == null) {
+        patConfig_ = builderForValue.build();
+        onChanged();
+      } else {
+        patConfigBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     */
+    public Builder mergePatConfig(org.wso2.choreo.connect.discovery.config.enforcer.PATConfig value) {
+      if (patConfigBuilder_ == null) {
+        if (patConfig_ != null) {
+          patConfig_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.newBuilder(patConfig_).mergeFrom(value).buildPartial();
+        } else {
+          patConfig_ = value;
+        }
+        onChanged();
+      } else {
+        patConfigBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     */
+    public Builder clearPatConfig() {
+      if (patConfigBuilder_ == null) {
+        patConfig_ = null;
+        onChanged();
+      } else {
+        patConfig_ = null;
+        patConfigBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.Builder getPatConfigBuilder() {
+      
+      onChanged();
+      return getPatConfigFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.PATConfigOrBuilder getPatConfigOrBuilder() {
+      if (patConfigBuilder_ != null) {
+        return patConfigBuilder_.getMessageOrBuilder();
+      } else {
+        return patConfig_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.getDefaultInstance() : patConfig_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.PATConfig, org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.Builder, org.wso2.choreo.connect.discovery.config.enforcer.PATConfigOrBuilder> 
+        getPatConfigFieldBuilder() {
+      if (patConfigBuilder_ == null) {
+        patConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.PATConfig, org.wso2.choreo.connect.discovery.config.enforcer.PATConfig.Builder, org.wso2.choreo.connect.discovery.config.enforcer.PATConfigOrBuilder>(
+                getPatConfig(),
+                getParentForChildren(),
+                isClean());
+        patConfig_ = null;
+      }
+      return patConfigBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

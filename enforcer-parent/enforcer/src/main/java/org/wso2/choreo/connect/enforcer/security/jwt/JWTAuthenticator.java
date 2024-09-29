@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -115,7 +116,9 @@ public class JWTAuthenticator implements Authenticator {
                 AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
                         Constants.WS_OAUTH2_KEY_IDENTIFIED);
             }
-            return jwt != null && jwt.split("\\.").length == 3;
+            // Check whether the token is a JWT or a PAT.
+            return jwt != null && (jwt.split("\\.").length == 3 ||
+                    jwt.split("\\s")[1].startsWith(APIKeyConstants.PAT_PREFIX));
         }
         return false;
     }
@@ -157,16 +160,41 @@ public class JWTAuthenticator implements Authenticator {
                 Utils.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
-            String jwtToken = retrieveAuthHeaderValue(requestContext);
-
-            if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
+            String authHeaderVal = retrieveAuthHeaderValue(requestContext);
+            if (authHeaderVal == null || !authHeaderVal.toLowerCase().contains(JWTConstants.BEARER)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
             }
-            String[] splitToken = jwtToken.split("\\s");
+            String[] splitToken = authHeaderVal.split("\\s");
+            String token = authHeaderVal;
             // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
             if (splitToken.length > 1) {
-                jwtToken = splitToken[1];
+                token = splitToken[1];
+            }
+            // Handle PAT logic
+            if (token.startsWith(APIKeyConstants.PAT_PREFIX)) {
+                if (!APIKeyUtils.isValidAPIKey(token)) {
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                }
+                String keyHash = APIKeyUtils.generateAPIKeyHash(token);
+                Object cachedJWT = CacheProvider.getGatewayAPIKeyJWTCache().getIfPresent(keyHash);
+                if (cachedJWT != null && !APIKeyUtils.isJWTExpired((String) cachedJWT)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Token retrieved from the cache. Token: " + FilterUtils.getMaskedToken(token));
+                    }
+                    token = (String) cachedJWT;
+                } else {
+                    Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(token);
+                    if (jwt.isEmpty()) {
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    }
+                    CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
+                    token = jwt.get();
+                }
             }
             String context = requestContext.getMatchedAPI().getBasePath();
             String name = requestContext.getMatchedAPI().getName();
@@ -182,7 +210,7 @@ public class JWTAuthenticator implements Authenticator {
                     Utils.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
-                signedJWTInfo = JWTUtils.getSignedJwt(jwtToken);
+                signedJWTInfo = JWTUtils.getSignedJwt(token);
             } catch (ParseException | IllegalArgumentException e) {
                 log.error("Failed to decode the token header", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -323,7 +351,7 @@ public class JWTAuthenticator implements Authenticator {
 
                     AuthenticationContext authenticationContext = FilterUtils
                             .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
-                                    apiKeyValidationInfoDTO, endUserToken, jwtToken, true);
+                                    apiKeyValidationInfoDTO, endUserToken, token, true);
                     //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
                     if (claims.getClaim("keytype") != null) {
                         authenticationContext.setKeyType(claims.getClaim("keytype").toString());

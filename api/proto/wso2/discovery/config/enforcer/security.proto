@@ -3,6 +3,8 @@ syntax = "proto3";
 package wso2.discovery.config.enforcer;
 import "wso2/discovery/config/enforcer/issuer.proto";
 import "wso2/discovery/config/enforcer/auth_header.proto";
+import "wso2/discovery/config/enforcer/api_key_config.proto";
+import "wso2/discovery/config/enforcer/pat_config.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.choreo.connect.discovery.config.enforcer";
@@ -16,4 +18,8 @@ message Security {
     repeated Issuer tokenService = 1;
 
     AuthHeader authHeader = 2;
+
+    APIKeyConfig apiKeyConfig = 3;
+
+    PATConfig patConfig = 4;
 }

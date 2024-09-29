@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
+import org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig;
 import org.wso2.choreo.connect.discovery.config.enforcer.Analytics;
 import org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader;
 import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
@@ -46,6 +47,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.Keypair;
 import org.wso2.choreo.connect.discovery.config.enforcer.Management;
 import org.wso2.choreo.connect.discovery.config.enforcer.Metrics;
+import org.wso2.choreo.connect.discovery.config.enforcer.PATConfig;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
 import org.wso2.choreo.connect.discovery.config.enforcer.RestServer;
 import org.wso2.choreo.connect.discovery.config.enforcer.Service;
@@ -53,6 +55,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
 import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
 import org.wso2.choreo.connect.discovery.config.enforcer.Tracing;
+import org.wso2.choreo.connect.enforcer.config.dto.APIKeyDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
@@ -65,6 +68,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.PATDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -179,6 +183,10 @@ public class ConfigHolder {
 
         populateAuthHeaderConfigurations(config.getSecurity().getAuthHeader());
 
+        populateAPIKeyConfigs(config.getSecurity().getApiKeyConfig());
+
+        populatePATConfigs(config.getSecurity().getPatConfig());
+
         populateManagementCredentials(config.getManagement());
 
         populateRestServer(config.getRestServer());
@@ -212,6 +220,18 @@ public class ConfigHolder {
         authHeaderDto.setTempTestConsoleTestHeadersMode(authHeader.getTempTestConsoleHeadersMode());
         authHeaderDto.setDropConsoleTestHeaders(authHeader.getDropConsoleTestHeaders());
         config.setAuthHeader(authHeaderDto);
+    }
+
+    private void populateAPIKeyConfigs(APIKeyConfig apiKeyConfig) {
+        APIKeyDTO apiKeyDTO = new APIKeyDTO();
+        apiKeyDTO.setOauthAgentURL(apiKeyConfig.getOauthAgentURL());
+        config.setApiKeyConfig(apiKeyDTO);
+    }
+
+    private void populatePATConfigs(PATConfig patConfig) {
+        PATDTO patDTO = new PATDTO();
+        patDTO.setTokenExpirySkewSeconds(patConfig.getTokenExpiryTimeSkew());
+        config.setPatConfig(patDTO);
     }
 
     private void populateAuthService(Service cdsAuth) {
