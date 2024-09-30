@@ -171,6 +171,15 @@ public class JWTAuthenticator implements Authenticator {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String authHeaderVal = retrieveAuthHeaderValue(requestContext);
+
+            if (authHeaderVal == null
+                    && requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
+                String tokenValue = extractJWTInWSProtocolHeader(requestContext);
+                if (StringUtils.isNotEmpty(tokenValue)) {
+                    authHeaderVal = JWTConstants.BEARER + " " + tokenValue;
+                }
+            }
+
             if (authHeaderVal == null || !authHeaderVal.toLowerCase().contains(JWTConstants.BEARER)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
