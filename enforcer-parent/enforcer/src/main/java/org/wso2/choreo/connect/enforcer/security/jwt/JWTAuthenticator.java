@@ -159,6 +159,14 @@ public class JWTAuthenticator implements Authenticator {
             }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
 
+            if (jwtToken == null
+                    && requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
+                String tokenValue = extractJWTInWSProtocolHeader(requestContext);
+                if (StringUtils.isNotEmpty(tokenValue)) {
+                    jwtToken = JWTConstants.BEARER + " " + tokenValue;
+                }
+            }
+
             if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
