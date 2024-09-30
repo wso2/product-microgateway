@@ -87,11 +87,17 @@ public class JWTAuthenticator implements Authenticator {
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private static final Set<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
+    private static boolean isPATEnabled;
 
     static {
         if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
             Collections.addAll(prodTokenNonProdAllowedOrgs,
                     System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
+        }
+        if (System.getenv("PAT_ENABLED") != null) {
+            if (System.getenv("PAT_ENABLED").equalsIgnoreCase("true")) {
+                isPATEnabled = true;
+            }
         }
     }
 
@@ -172,7 +178,7 @@ public class JWTAuthenticator implements Authenticator {
                 token = splitToken[1];
             }
             // Handle PAT logic
-            if (token.startsWith(APIKeyConstants.PAT_PREFIX)) {
+            if (isPATEnabled && token.startsWith(APIKeyConstants.PAT_PREFIX)) {
                 token = exchangeJWTForPAT(token);
             }
             String context = requestContext.getMatchedAPI().getBasePath();
