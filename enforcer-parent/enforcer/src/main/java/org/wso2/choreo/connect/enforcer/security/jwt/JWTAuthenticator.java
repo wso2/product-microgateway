@@ -113,18 +113,22 @@ public class JWTAuthenticator implements Authenticator {
     public boolean canAuthenticate(RequestContext requestContext) {
         String apiType = requestContext.getMatchedAPI().getApiType();
         if (isJWTEnabled(requestContext)) {
-            String jwt = retrieveAuthHeaderValue(requestContext);
+            String token = retrieveAuthHeaderValue(requestContext);
 
             if (apiType.equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
-                if (jwt == null) {
-                    jwt = extractJWTInWSProtocolHeader(requestContext);
+                if (token == null) {
+                    token = extractJWTInWSProtocolHeader(requestContext);
                 }
                 AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
                         Constants.WS_OAUTH2_KEY_IDENTIFIED);
             }
+            // Extract token in case header value is in Bearer <token> format.
+            if (token.split("\\s").length > 1) {
+                token = token.split("\\s")[1];
+            }
             // Check whether the token is a JWT or a PAT.
-            return jwt != null && (jwt.split("\\.").length == 3 ||
-                    jwt.split("\\s")[1].startsWith(APIKeyConstants.PAT_PREFIX));
+            return token != null && (token.split("\\.").length == 3 ||
+                    token.contains(APIKeyConstants.PAT_PREFIX));
         }
         return false;
     }
