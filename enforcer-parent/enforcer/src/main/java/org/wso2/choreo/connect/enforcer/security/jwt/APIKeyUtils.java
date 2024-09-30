@@ -44,6 +44,8 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.zip.CRC32;
 
@@ -53,6 +55,8 @@ import java.util.zip.CRC32;
 public class APIKeyUtils {
 
     private static final Logger log = LogManager.getLogger(APIKeyUtils.class);
+
+    private static final Gson gson = new Gson();
 
     /**
      * Check if the provided API key is valid.
@@ -109,12 +113,12 @@ public class APIKeyUtils {
             // Create a request to exchange API key to JWT.
             HttpPost exchangeRequest = new HttpPost(url.toURI());
             exchangeRequest.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
-            exchangeRequest.setEntity(new StringEntity("{\"apiKeyHash\": \"" + keyHash + "\"}"));
+            exchangeRequest.setEntity(new StringEntity(createPATExchangeRequest(keyHash)));
             try (CloseableHttpResponse response = httpClient.execute(exchangeRequest)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
                     HttpEntity entity = response.getEntity();
                     try (InputStream content = entity.getContent()) {
-                        OAuthAgentResponse resp = new Gson().fromJson(IOUtils.toString(content),
+                        OAuthAgentResponse resp = gson.fromJson(IOUtils.toString(content),
                                 OAuthAgentResponse.class);
                         return Optional.of(resp.getAccessToken());
                     }
@@ -153,5 +157,11 @@ public class APIKeyUtils {
         long crcValue = crc32.getValue();
         byte[] checksumBytes = ByteBuffer.allocate(4).putInt((int) crcValue).array();
         return Base64.getEncoder().withoutPadding().encodeToString(checksumBytes);
+    }
+
+    private static String createPATExchangeRequest(String keyHash) {
+        Map<String, Object> patRequest = new HashMap<>();
+        patRequest.put("apiKeyHash", keyHash);
+        return gson.toJson(patRequest);
     }
 }

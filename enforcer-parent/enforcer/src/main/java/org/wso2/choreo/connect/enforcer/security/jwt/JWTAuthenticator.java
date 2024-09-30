@@ -173,28 +173,7 @@ public class JWTAuthenticator implements Authenticator {
             }
             // Handle PAT logic
             if (token.startsWith(APIKeyConstants.PAT_PREFIX)) {
-                if (!APIKeyUtils.isValidAPIKey(token)) {
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                }
-                String keyHash = APIKeyUtils.generateAPIKeyHash(token);
-                Object cachedJWT = CacheProvider.getGatewayAPIKeyJWTCache().getIfPresent(keyHash);
-                if (cachedJWT != null && !APIKeyUtils.isJWTExpired((String) cachedJWT)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Token retrieved from the cache. Token: " + FilterUtils.getMaskedToken(token));
-                    }
-                    token = (String) cachedJWT;
-                } else {
-                    Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(token);
-                    if (jwt.isEmpty()) {
-                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                    }
-                    CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
-                    token = jwt.get();
-                }
+                token = exchangeJWTForPAT(token);
             }
             String context = requestContext.getMatchedAPI().getBasePath();
             String name = requestContext.getMatchedAPI().getName();
@@ -805,6 +784,30 @@ public class JWTAuthenticator implements Authenticator {
             return jwtid;
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
+    }
+
+    private String exchangeJWTForPAT(String pat) throws APISecurityException {
+        if (!APIKeyUtils.isValidAPIKey(pat)) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        String keyHash = APIKeyUtils.generateAPIKeyHash(pat);
+        Object cachedJWT = CacheProvider.getGatewayAPIKeyJWTCache().getIfPresent(keyHash);
+        if (cachedJWT != null && !APIKeyUtils.isJWTExpired((String) cachedJWT)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Token retrieved from the cache. Token: " + FilterUtils.getMaskedToken(pat));
+            }
+            return (String) cachedJWT;
+        }
+        Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(pat);
+        if (jwt.isEmpty()) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
+        return jwt.get();
     }
 
     public String extractJWTInWSProtocolHeader(RequestContext requestContext) {
