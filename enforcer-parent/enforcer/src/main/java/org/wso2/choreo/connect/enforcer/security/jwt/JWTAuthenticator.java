@@ -161,13 +161,9 @@ public class JWTAuthenticator implements Authenticator {
 
             if (jwtToken == null
                     && requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
-                String secProtocolHeader = requestContext.getHeaders().get(HttpConstants.WEBSOCKET_PROTOCOL_HEADER);
-                if (secProtocolHeader != null) {
-                    String[] secProtocolHeaderValues = secProtocolHeader.split(",");
-                    if (secProtocolHeaderValues.length > 1
-                            && secProtocolHeaderValues[0].equals(Constants.WS_OAUTH2_KEY_IDENTIFIED)) {
-                        jwtToken = JWTConstants.BEARER + " " + secProtocolHeaderValues[1].trim();
-                    }
+                String tokenValue = extractJWTInWSProtocolHeader(requestContext);
+                if (StringUtils.isNotEmpty(tokenValue)) {
+                    jwtToken = JWTConstants.BEARER + " " + tokenValue;
                 }
             }
 
