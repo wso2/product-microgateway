@@ -104,7 +104,9 @@ public class APIKeyUtils {
 
         URL url = null;
         try {
-            url = new URL(ConfigHolder.getInstance().getConfig().getApiKeyConfig().getOauthAgentURL());
+            String patExchangeURL = String.format("%s%s", ConfigHolder.getInstance().getConfig()
+                    .getApiKeyConfig().getOauthAgentURL(), APIKeyConstants.PAT_EXCHANGE_ENDPOINT);
+            url = new URL(patExchangeURL);
         } catch (MalformedURLException e) {
             log.error("Error occurred while parsing OAuth agent URL", e);
             return Optional.empty();
