@@ -26,4 +26,6 @@ public class APIKeyConstants {
     public static final String PAT_PREFIX = "chp_";
 
     public static final String API_KEY_JSON_KEY = "key";
+
+    public static final String PAT_EXCHANGE_ENDPOINT = "/auth/pat";
 }
