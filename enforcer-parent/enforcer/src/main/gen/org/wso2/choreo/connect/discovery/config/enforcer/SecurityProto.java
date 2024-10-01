@@ -32,29 +32,39 @@ public final class SecurityProto {
       "y.proto\022\036wso2.discovery.config.enforcer\032" +
       "+wso2/discovery/config/enforcer/issuer.p" +
       "roto\0320wso2/discovery/config/enforcer/aut" +
-      "h_header.proto\"\210\001\n\010Security\022<\n\014tokenServ" +
-      "ice\030\001 \003(\0132&.wso2.discovery.config.enforc" +
-      "er.Issuer\022>\n\nauthHeader\030\002 \001(\0132*.wso2.dis" +
-      "covery.config.enforcer.AuthHeaderB\224\001\n1or" +
-      "g.wso2.choreo.connect.discovery.config.e" +
-      "nforcerB\rSecurityProtoP\001ZNgithub.com/env" +
-      "oyproxy/go-control-plane/wso2/discovery/" +
-      "config/enforcer;enforcerb\006proto3"
+      "h_header.proto\0323wso2/discovery/config/en" +
+      "forcer/api_key_config.proto\032/wso2/discov" +
+      "ery/config/enforcer/pat_config.proto\"\212\002\n" +
+      "\010Security\022<\n\014tokenService\030\001 \003(\0132&.wso2.d" +
+      "iscovery.config.enforcer.Issuer\022>\n\nauthH" +
+      "eader\030\002 \001(\0132*.wso2.discovery.config.enfo" +
+      "rcer.AuthHeader\022B\n\014apiKeyConfig\030\003 \001(\0132,." +
+      "wso2.discovery.config.enforcer.APIKeyCon" +
+      "fig\022<\n\tpatConfig\030\004 \001(\0132).wso2.discovery." +
+      "config.enforcer.PATConfigB\224\001\n1org.wso2.c" +
+      "horeo.connect.discovery.config.enforcerB" +
+      "\rSecurityProtoP\001ZNgithub.com/envoyproxy/" +
+      "go-control-plane/wso2/discovery/config/e" +
+      "nforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.wso2.choreo.connect.discovery.config.enforcer.IssuerProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.config.enforcer.PATConfigProto.getDescriptor(),
         });
     internal_static_wso2_discovery_config_enforcer_Security_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_config_enforcer_Security_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Security_descriptor,
-        new java.lang.String[] { "TokenService", "AuthHeader", });
+        new java.lang.String[] { "TokenService", "AuthHeader", "ApiKeyConfig", "PatConfig", });
     org.wso2.choreo.connect.discovery.config.enforcer.IssuerProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderProto.getDescriptor();
+    org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigProto.getDescriptor();
+    org.wso2.choreo.connect.discovery.config.enforcer.PATConfigProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

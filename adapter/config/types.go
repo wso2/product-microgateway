@@ -328,6 +328,8 @@ type upstreamCircuitBreaker struct {
 type security struct {
 	TokenService []tokenService
 	AuthHeader   authHeader
+	APIKeyConfig apiKeyConfig
+	PATConfig    patConfig
 }
 
 type authService struct {
@@ -495,6 +497,14 @@ type authHeader struct {
 	TempTestConsoleHeaderNames []string
 	TempTestConsoleHeadersMode string
 	DropConsoleTestHeaders     bool
+}
+
+type apiKeyConfig struct {
+	OAuthAgentURL string
+}
+
+type patConfig struct {
+	TokenExpiryTimeSkew int32
 }
 
 type jwtIssuer struct {

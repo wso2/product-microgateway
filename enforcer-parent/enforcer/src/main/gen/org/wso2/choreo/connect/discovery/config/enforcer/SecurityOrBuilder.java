@@ -45,4 +45,34 @@ public interface SecurityOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+   * @return Whether the apiKeyConfig field is set.
+   */
+  boolean hasApiKeyConfig();
+  /**
+   * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+   * @return The apiKeyConfig.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig getApiKeyConfig();
+  /**
+   * <code>.wso2.discovery.config.enforcer.APIKeyConfig apiKeyConfig = 3;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfigOrBuilder getApiKeyConfigOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+   * @return Whether the patConfig field is set.
+   */
+  boolean hasPatConfig();
+  /**
+   * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+   * @return The patConfig.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.PATConfig getPatConfig();
+  /**
+   * <code>.wso2.discovery.config.enforcer.PATConfig patConfig = 4;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.PATConfigOrBuilder getPatConfigOrBuilder();
 }

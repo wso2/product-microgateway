@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -86,11 +87,17 @@ public class JWTAuthenticator implements Authenticator {
     private final boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private static final Set<String> prodTokenNonProdAllowedOrgs = new HashSet<>();
+    private static boolean isPATEnabled;
 
     static {
         if (System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS") != null) {
             Collections.addAll(prodTokenNonProdAllowedOrgs,
                     System.getenv("PROD_TOKEN_NONPROD_ALLOWED_ORGS").split("\\s+"));
+        }
+        if (System.getenv("PAT_ENABLED") != null) {
+            if (System.getenv("PAT_ENABLED").equalsIgnoreCase("true")) {
+                isPATEnabled = true;
+            }
         }
     }
 
@@ -106,16 +113,23 @@ public class JWTAuthenticator implements Authenticator {
     public boolean canAuthenticate(RequestContext requestContext) {
         String apiType = requestContext.getMatchedAPI().getApiType();
         if (isJWTEnabled(requestContext)) {
-            String jwt = retrieveAuthHeaderValue(requestContext);
+            String token = retrieveAuthHeaderValue(requestContext);
 
             if (apiType.equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
-                if (jwt == null) {
-                    jwt = extractJWTInWSProtocolHeader(requestContext);
+                if (token == null) {
+                    token = extractJWTInWSProtocolHeader(requestContext);
                 }
                 AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
                         Constants.WS_OAUTH2_KEY_IDENTIFIED);
             }
-            return jwt != null && jwt.split("\\.").length == 3;
+            if (token != null) {
+                // Extract token in case header value is in Bearer <token> format.
+                if (token.split("\\s").length > 1) {
+                    token = token.split("\\s")[1];
+                }
+                // Check whether the token is a JWT or a PAT.
+                return (token.split("\\.").length == 3 || token.startsWith(APIKeyConstants.PAT_PREFIX));
+            }
         }
         return false;
     }
@@ -157,24 +171,29 @@ public class JWTAuthenticator implements Authenticator {
                 Utils.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
-            String jwtToken = retrieveAuthHeaderValue(requestContext);
+            String authHeaderVal = retrieveAuthHeaderValue(requestContext);
 
-            if (jwtToken == null
+            if (authHeaderVal == null
                     && requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
                 String tokenValue = extractJWTInWSProtocolHeader(requestContext);
                 if (StringUtils.isNotEmpty(tokenValue)) {
-                    jwtToken = JWTConstants.BEARER + " " + tokenValue;
+                    authHeaderVal = JWTConstants.BEARER + " " + tokenValue;
                 }
             }
 
-            if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
+            if (authHeaderVal == null || !authHeaderVal.toLowerCase().contains(JWTConstants.BEARER)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
             }
-            String[] splitToken = jwtToken.split("\\s");
+            String[] splitToken = authHeaderVal.split("\\s");
+            String token = authHeaderVal;
             // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
             if (splitToken.length > 1) {
-                jwtToken = splitToken[1];
+                token = splitToken[1];
+            }
+            // Handle PAT logic
+            if (isPATEnabled && token.startsWith(APIKeyConstants.PAT_PREFIX)) {
+                token = exchangeJWTForPAT(token);
             }
             String context = requestContext.getMatchedAPI().getBasePath();
             String name = requestContext.getMatchedAPI().getName();
@@ -190,7 +209,7 @@ public class JWTAuthenticator implements Authenticator {
                     Utils.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
-                signedJWTInfo = JWTUtils.getSignedJwt(jwtToken);
+                signedJWTInfo = JWTUtils.getSignedJwt(token);
             } catch (ParseException | IllegalArgumentException e) {
                 log.error("Failed to decode the token header", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -331,7 +350,7 @@ public class JWTAuthenticator implements Authenticator {
 
                     AuthenticationContext authenticationContext = FilterUtils
                             .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
-                                    apiKeyValidationInfoDTO, endUserToken, jwtToken, true);
+                                    apiKeyValidationInfoDTO, endUserToken, token, true);
                     //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
                     if (claims.getClaim("keytype") != null) {
                         authenticationContext.setKeyType(claims.getClaim("keytype").toString());
@@ -785,6 +804,30 @@ public class JWTAuthenticator implements Authenticator {
             return jwtid;
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
+    }
+
+    private String exchangeJWTForPAT(String pat) throws APISecurityException {
+        if (!APIKeyUtils.isValidAPIKey(pat)) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        String keyHash = APIKeyUtils.generateAPIKeyHash(pat);
+        Object cachedJWT = CacheProvider.getGatewayAPIKeyJWTCache().getIfPresent(keyHash);
+        if (cachedJWT != null && !APIKeyUtils.isJWTExpired((String) cachedJWT)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Token retrieved from the cache. Token: " + FilterUtils.getMaskedToken(pat));
+            }
+            return (String) cachedJWT;
+        }
+        Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(pat);
+        if (jwt.isEmpty()) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
+        return jwt.get();
     }
 
     public String extractJWTInWSProtocolHeader(RequestContext requestContext) {

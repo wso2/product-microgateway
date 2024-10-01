@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.choreo.connect.enforcer.config.dto.APIKeyDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
@@ -30,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.PATDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.jwks.BackendJWKSDto;
@@ -59,6 +61,8 @@ public class EnforcerConfig {
     private ManagementCredentialsDto management;
     private AdminRestServerDto restServer;
     private FilterDTO[] customFilters;
+    private APIKeyDTO apiKeyConfig;
+    private PATDTO patConfig;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -194,6 +198,22 @@ public class EnforcerConfig {
 
     public void setCustomFilters(FilterDTO[] customFilters) {
         this.customFilters = customFilters;
+    }
+
+    public APIKeyDTO getApiKeyConfig() {
+        return apiKeyConfig;
+    }
+
+    public void setApiKeyConfig(APIKeyDTO apiKeyConfig) {
+        this.apiKeyConfig = apiKeyConfig;
+    }
+
+    public PATDTO getPatConfig() {
+        return patConfig;
+    }
+
+    public void setPatConfig(PATDTO patConfig) {
+        this.patConfig = patConfig;
     }
 }
 
