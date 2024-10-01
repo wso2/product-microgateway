@@ -122,13 +122,14 @@ public class JWTAuthenticator implements Authenticator {
                 AuthenticatorUtils.addWSProtocolResponseHeaderIfRequired(requestContext,
                         Constants.WS_OAUTH2_KEY_IDENTIFIED);
             }
-            // Extract token in case header value is in Bearer <token> format.
-            if (token.split("\\s").length > 1) {
-                token = token.split("\\s")[1];
+            if (token != null) {
+                // Extract token in case header value is in Bearer <token> format.
+                if (token.split("\\s").length > 1) {
+                    token = token.split("\\s")[1];
+                }
+                // Check whether the token is a JWT or a PAT.
+                return (token.split("\\.").length == 3 || token.startsWith(APIKeyConstants.PAT_PREFIX));
             }
-            // Check whether the token is a JWT or a PAT.
-            return token != null && (token.split("\\.").length == 3 ||
-                    token.contains(APIKeyConstants.PAT_PREFIX));
         }
         return false;
     }
