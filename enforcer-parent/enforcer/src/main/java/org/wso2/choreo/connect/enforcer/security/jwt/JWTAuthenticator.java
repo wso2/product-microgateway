@@ -820,7 +820,7 @@ public class JWTAuthenticator implements Authenticator {
             }
             return (String) cachedJWT;
         }
-        Optional<String> jwt = APIKeyUtils.exchangeAPIKeyToJWT(pat);
+        Optional<String> jwt = APIKeyUtils.exchangePATToJWT(pat);
         if (jwt.isEmpty()) {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,

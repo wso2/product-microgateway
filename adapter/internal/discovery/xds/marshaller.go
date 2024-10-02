@@ -219,10 +219,10 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				DropConsoleTestHeaders:     config.Enforcer.Security.AuthHeader.DropConsoleTestHeaders,
 			},
 			ApiKeyConfig: &enforcer.APIKeyConfig{
-				OauthAgentURL: config.Enforcer.Security.APIKeyConfig.OAuthAgentURL,
+				OauthAgentURL: config.Enforcer.Security.ApiKeyConfig.OauthAgentURL,
 			},
 			PatConfig: &enforcer.PATConfig{
-				TokenExpiryTimeSkew: config.Enforcer.Security.PATConfig.TokenExpiryTimeSkew,
+				TokenExpiryTimeSkew: config.Enforcer.Security.PatConfig.TokenExpiryTimeSkew,
 			},
 		},
 		Cache:     cache,

@@ -227,10 +227,10 @@ var defaultConfig = &Config{
 				TempTestConsoleHeadersMode: "monitor",
 				DropConsoleTestHeaders:     true,
 			},
-			APIKeyConfig: apiKeyConfig{
-				OAuthAgentURL: "https://localhost:9443",
+			ApiKeyConfig: apiKeyConfig{
+				OauthAgentURL: "https://localhost:9443",
 			},
-			PATConfig: patConfig{
+			PatConfig: patConfig{
 				TokenExpiryTimeSkew: 1,
 			},
 		},
