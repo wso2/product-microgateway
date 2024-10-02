@@ -328,8 +328,8 @@ type upstreamCircuitBreaker struct {
 type security struct {
 	TokenService []tokenService
 	AuthHeader   authHeader
-	ApiKeyConfig apiKeyConfig
-	PatConfig    patConfig
+	APIKeyConfig apiKeyConfig `toml:"apiKeyConfig"`
+	PATConfig    patConfig    `toml:"patConfig"`
 }
 
 type authService struct {
@@ -500,7 +500,7 @@ type authHeader struct {
 }
 
 type apiKeyConfig struct {
-	OauthAgentURL string
+	OAuthAgentURL string `toml:"oauthAgentURL"`
 }
 
 type patConfig struct {
