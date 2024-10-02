@@ -97,10 +97,10 @@ public class APIKeyUtils {
     /**
      * This function exchanges a given API key to an JWT token.
      *
-     * @param keyHash    Key hash
-     * @return          JWT corresponding to given key hash.
+     * @param pat    PAT
+     * @return JWT corresponding to given PAT.
      */
-    public static Optional<String> exchangeAPIKeyToJWT(String keyHash) {
+    public static Optional<String> exchangePATToJWT(String pat) {
 
         URL url = null;
         try {
@@ -115,6 +115,7 @@ public class APIKeyUtils {
             // Create a request to exchange API key to JWT.
             HttpPost exchangeRequest = new HttpPost(url.toURI());
             exchangeRequest.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
+            String keyHash = generateAPIKeyHash(pat);
             exchangeRequest.setEntity(new StringEntity(createPATExchangeRequest(keyHash)));
             try (CloseableHttpResponse response = httpClient.execute(exchangeRequest)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
