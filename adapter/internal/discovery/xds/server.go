@@ -21,6 +21,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -358,6 +359,19 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	mgwSwagger.EnvironmentID = deployedEnvironments[0].ID
 	mgwSwagger.EnvironmentName = deployedEnvironments[0].Name
+
+	choreoComponentInfo := mgw.ChoreoComponentInfo{
+		OrganizationID: apiYaml.ChoreoComponentInfo.OrganizationID,
+		ProjectID:      apiYaml.ChoreoComponentInfo.ProjectID,
+		ComponentID:    apiYaml.ChoreoComponentInfo.ComponentID,
+		VersionID:      apiYaml.ChoreoComponentInfo.VersionID,
+	}
+
+	mgwSwagger.ChoreoComponentInfo = &choreoComponentInfo
+
+	apiYamlJSON, _ := json.Marshal(mgwSwagger)
+	logger.LoggerOasparser.Info("mgwSwagger.ChoreoComponentInfo", string(apiYamlJSON))
+
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 
@@ -511,12 +525,18 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	}
 
 	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
-		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger,
+		aapi := oasParser.GetEnforcerAPI(mgwSwagger,
 			apiProject.APILifeCycleStatus, vHost)
+		apiYamlJSON, _ := json.Marshal(aapi)
+		logger.LoggerOasparser.Info("oasParser.GetEnforcerAPI.api1", string(apiYamlJSON))
+		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = aapi
 	} else {
 		enforcerAPIMap := make(map[string]types.Resource)
-		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
+		aapi := oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
 			vHost)
+		apiYamlJSON, _ := json.Marshal(aapi)
+		logger.LoggerOasparser.Info("oasParser.GetEnforcerAPI.api2", string(apiYamlJSON))
+		enforcerAPIMap[apiIdentifier] = aapi
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 

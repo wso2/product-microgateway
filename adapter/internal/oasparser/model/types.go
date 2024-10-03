@@ -148,6 +148,14 @@ type apiData struct {
 	BackendJWTConfiguration    backendJWTConfiguration `json:"backendJWTConfiguration,omitempty"`
 	EndpointConfig             endpointConfigStruct    `json:"endpointConfig,omitempty"`
 	Operations                 []OperationYaml         `json:"Operations,omitempty"`
+	ChoreoComponentInfo        choreoComponentInfo     `json:"choreoComponentInfo,omitempty"`
+}
+
+type choreoComponentInfo struct {
+	OrganizationID string `json:"organizationId,omitempty"`
+	ProjectID      string `json:"projectId,omitempty"`
+	ComponentID    string `json:"componentId,omitempty"`
+	VersionID      string `json:"versionId,omitempty"`
 }
 
 type backendJWTConfiguration struct {

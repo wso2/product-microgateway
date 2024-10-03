@@ -37,6 +37,63 @@ import (
 )
 
 // getAccessLogConfigs provides file access log configurations for envoy
+func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
+	var logFormat *file_accesslogv3.FileAccessLog_LogFormat
+	logpath := defaultAccessLogPath //default access log path
+
+	logConf := config.ReadLogConfigs()
+
+	if !logConf.InsightsLogs.Enable {
+		return nil
+	}
+
+	formatters := []*corev3.TypedExtensionConfig{
+		{
+			Name: "envoy.formatter.req_without_query",
+			TypedConfig: &anypb.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
+			},
+		},
+	}
+	// Set the default log format
+	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
+		LogFormat: &corev3.SubstitutionFormatString{
+			Format: &corev3.SubstitutionFormatString_TextFormatSource{
+				TextFormatSource: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: logConf.InsightsLogs.LoggingFormat,
+					},
+				},
+			},
+			OmitEmptyValues: logConf.InsightsLogs.OmitEmptyValues,
+			Formatters:      formatters,
+		},
+	}
+
+	logpath = logConf.InsightsLogs.LogFile
+	accessLogConf := &file_accesslogv3.FileAccessLog{
+		Path:            logpath,
+		AccessLogFormat: logFormat,
+	}
+
+	accessLogTypedConf, err := anypb.New(accessLogConf)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marshaling access log configs. ", err)
+		return nil
+	}
+
+	accessLog := config_access_logv3.AccessLog{
+		Name:   fileAccessLogName,
+		Filter: nil,
+		ConfigType: &config_access_logv3.AccessLog_TypedConfig{
+			TypedConfig: accessLogTypedConf,
+		},
+	}
+
+	return &accessLog
+}
+
+// getAccessLogConfigs provides file access log configurations for envoy
 func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	var logFormat *file_accesslogv3.FileAccessLog_LogFormat
 	logpath := defaultAccessLogPath //default access log path
@@ -197,11 +254,15 @@ func getAccessLogs() []*config_access_logv3.AccessLog {
 	var accessLoggers []*config_access_logv3.AccessLog
 	fileAccessLog := getFileAccessLogConfigs()
 	grpcAccessLog := getGRPCAccessLogConfigs(conf)
+	insightsAccessLog := getInsightsAccessLogConfigs()
 	if fileAccessLog != nil {
 		accessLoggers = append(accessLoggers, fileAccessLog)
 	}
 	if grpcAccessLog != nil {
 		accessLoggers = append(accessLoggers, getGRPCAccessLogConfigs(conf))
+	}
+	if insightsAccessLog != nil {
+		accessLoggers = append(accessLoggers, insightsAccessLog)
 	}
 	return accessLoggers
 }
