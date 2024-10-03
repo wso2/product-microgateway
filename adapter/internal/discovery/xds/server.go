@@ -21,7 +21,6 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -369,9 +368,6 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 
 	mgwSwagger.ChoreoComponentInfo = &choreoComponentInfo
 
-	apiYamlJSON, _ := json.Marshal(mgwSwagger)
-	logger.LoggerOasparser.Info("mgwSwagger.ChoreoComponentInfo", string(apiYamlJSON))
-
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 
@@ -525,18 +521,12 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	}
 
 	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
-		aapi := oasParser.GetEnforcerAPI(mgwSwagger,
+		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger,
 			apiProject.APILifeCycleStatus, vHost)
-		apiYamlJSON, _ := json.Marshal(aapi)
-		logger.LoggerOasparser.Info("oasParser.GetEnforcerAPI.api1", string(apiYamlJSON))
-		orgIDOpenAPIEnforcerApisMap[organizationID][apiIdentifier] = aapi
 	} else {
 		enforcerAPIMap := make(map[string]types.Resource)
-		aapi := oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
+		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiProject.APILifeCycleStatus,
 			vHost)
-		apiYamlJSON, _ := json.Marshal(aapi)
-		logger.LoggerOasparser.Info("oasParser.GetEnforcerAPI.api2", string(apiYamlJSON))
-		enforcerAPIMap[apiIdentifier] = aapi
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 
