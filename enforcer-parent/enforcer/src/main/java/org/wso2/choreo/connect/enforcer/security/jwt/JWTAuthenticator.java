@@ -193,7 +193,7 @@ public class JWTAuthenticator implements Authenticator {
             }
             // Handle PAT logic
             if (isPATEnabled && token.startsWith(APIKeyConstants.PAT_PREFIX)) {
-                token = exchangeJWTForPAT(token);
+                token = exchangeJWTForPAT(requestContext, token);
             }
             String context = requestContext.getMatchedAPI().getBasePath();
             String name = requestContext.getMatchedAPI().getName();
@@ -806,7 +806,7 @@ public class JWTAuthenticator implements Authenticator {
         return signedJWTInfo.getSignedJWT().getSignature().toString();
     }
 
-    private String exchangeJWTForPAT(String pat) throws APISecurityException {
+    private String exchangeJWTForPAT(RequestContext requestContext, String pat) throws APISecurityException {
         if (!APIKeyUtils.isValidAPIKey(pat)) {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -820,13 +820,15 @@ public class JWTAuthenticator implements Authenticator {
             }
             return (String) cachedJWT;
         }
-        Optional<String> jwt = APIKeyUtils.exchangePATToJWT(pat);
+        Optional<String> jwt = APIKeyUtils.exchangePATToJWT(keyHash);
         if (jwt.isEmpty()) {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
         CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
+        // Add jwt to x-forwarded-authorization header.
+        requestContext.addOrModifyHeaders("x-forwarded-authorization", jwt.get());
         return jwt.get();
     }
 
