@@ -818,6 +818,7 @@ public class JWTAuthenticator implements Authenticator {
             if (log.isDebugEnabled()) {
                 log.debug("Token retrieved from the cache. Token: " + FilterUtils.getMaskedToken(pat));
             }
+            setXForwardedAuthorizationHeader(requestContext, (String) cachedJWT);
             return (String) cachedJWT;
         }
         Optional<String> jwt = APIKeyUtils.exchangePATToJWT(keyHash);
@@ -828,8 +829,12 @@ public class JWTAuthenticator implements Authenticator {
         }
         CacheProvider.getGatewayAPIKeyJWTCache().put(keyHash, jwt.get());
         // Add jwt to x-forwarded-authorization header.
-        requestContext.addOrModifyHeaders("x-forwarded-authorization", jwt.get());
+        setXForwardedAuthorizationHeader(requestContext, jwt.get());
         return jwt.get();
+    }
+
+    private void setXForwardedAuthorizationHeader(RequestContext requestContext, String jwt) {
+        requestContext.addOrModifyHeaders("x-forwarded-authorization", String.format("Bearer %s", jwt));
     }
 
     public String extractJWTInWSProtocolHeader(RequestContext requestContext) {
