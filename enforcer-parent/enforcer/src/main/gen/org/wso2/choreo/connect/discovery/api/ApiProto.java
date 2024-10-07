@@ -34,30 +34,33 @@ public final class ApiProto {
       "ce.proto\032*wso2/discovery/api/endpoint_se" +
       "curity.proto\032(wso2/discovery/api/securit" +
       "y_scheme.proto\0322wso2/discovery/api/backe" +
-      "nd_jwt_configuration.proto\"\226\006\n\003Api\022\n\n\002id" +
-      "\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\022\017" +
-      "\n\007apiType\030\004 \001(\t\022\023\n\013description\030\005 \001(\t\022@\n\023" +
-      "productionEndpoints\030\006 \001(\0132#.wso2.discove" +
-      "ry.api.EndpointCluster\022=\n\020sandboxEndpoin" +
-      "ts\030\007 \001(\0132#.wso2.discovery.api.EndpointCl" +
-      "uster\022/\n\tresources\030\010 \003(\0132\034.wso2.discover" +
-      "y.api.Resource\022\020\n\010basePath\030\t \001(\t\022\014\n\004tier" +
-      "\030\n \001(\t\022\031\n\021apiLifeCycleState\030\013 \001(\t\022:\n\016sec" +
-      "urityScheme\030\014 \003(\0132\".wso2.discovery.api.S" +
-      "ecurityScheme\0222\n\010security\030\r \003(\0132 .wso2.d" +
-      "iscovery.api.SecurityList\022>\n\020endpointSec" +
-      "urity\030\016 \001(\0132$.wso2.discovery.api.Endpoin" +
-      "tSecurity\022\033\n\023authorizationHeader\030\017 \001(\t\022\027" +
-      "\n\017disableSecurity\030\020 \001(\010\022\r\n\005vhost\030\021 \001(\t\022\026" +
-      "\n\016organizationId\030\022 \001(\t\022\023\n\013apiProvider\030\023 " +
-      "\001(\t\022\030\n\020enableBackendJWT\030\024 \001(\010\022\026\n\016deploym" +
-      "entType\030\025 \001(\t\022\025\n\renvironmentId\030\026 \001(\t\022\027\n\017" +
-      "environmentName\030\027 \001(\t\022L\n\027backendJWTConfi" +
-      "guration\030\030 \001(\0132+.wso2.discovery.api.Back" +
-      "endJWTConfigurationBr\n%org.wso2.choreo.c" +
-      "onnect.discovery.apiB\010ApiProtoP\001Z=github" +
-      ".com/envoyproxy/go-control-plane/wso2/di" +
-      "scovery/api;apib\006proto3"
+      "nd_jwt_configuration.proto\032.wso2/discove" +
+      "ry/api/choreo_component_info.proto\"\334\006\n\003A" +
+      "pi\022\n\n\002id\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022\017\n\007version" +
+      "\030\003 \001(\t\022\017\n\007apiType\030\004 \001(\t\022\023\n\013description\030\005" +
+      " \001(\t\022@\n\023productionEndpoints\030\006 \001(\0132#.wso2" +
+      ".discovery.api.EndpointCluster\022=\n\020sandbo" +
+      "xEndpoints\030\007 \001(\0132#.wso2.discovery.api.En" +
+      "dpointCluster\022/\n\tresources\030\010 \003(\0132\034.wso2." +
+      "discovery.api.Resource\022\020\n\010basePath\030\t \001(\t" +
+      "\022\014\n\004tier\030\n \001(\t\022\031\n\021apiLifeCycleState\030\013 \001(" +
+      "\t\022:\n\016securityScheme\030\014 \003(\0132\".wso2.discove" +
+      "ry.api.SecurityScheme\0222\n\010security\030\r \003(\0132" +
+      " .wso2.discovery.api.SecurityList\022>\n\020end" +
+      "pointSecurity\030\016 \001(\0132$.wso2.discovery.api" +
+      ".EndpointSecurity\022\033\n\023authorizationHeader" +
+      "\030\017 \001(\t\022\027\n\017disableSecurity\030\020 \001(\010\022\r\n\005vhost" +
+      "\030\021 \001(\t\022\026\n\016organizationId\030\022 \001(\t\022\023\n\013apiPro" +
+      "vider\030\023 \001(\t\022\030\n\020enableBackendJWT\030\024 \001(\010\022\026\n" +
+      "\016deploymentType\030\025 \001(\t\022\025\n\renvironmentId\030\026" +
+      " \001(\t\022\027\n\017environmentName\030\027 \001(\t\022L\n\027backend" +
+      "JWTConfiguration\030\030 \001(\0132+.wso2.discovery." +
+      "api.BackendJWTConfiguration\022D\n\023choreoCom" +
+      "ponentInfo\030\031 \001(\0132\'.wso2.discovery.api.Ch" +
+      "oreoComponentInfoBr\n%org.wso2.choreo.con" +
+      "nect.discovery.apiB\010ApiProtoP\001Z=github.c" +
+      "om/envoyproxy/go-control-plane/wso2/disc" +
+      "overy/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -67,18 +70,20 @@ public final class ApiProto {
           org.wso2.choreo.connect.discovery.api.EndpointSecurityProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoProto.getDescriptor(),
         });
     internal_static_wso2_discovery_api_Api_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_api_Api_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Api_descriptor,
-        new java.lang.String[] { "Id", "Title", "Version", "ApiType", "Description", "ProductionEndpoints", "SandboxEndpoints", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "Security", "EndpointSecurity", "AuthorizationHeader", "DisableSecurity", "Vhost", "OrganizationId", "ApiProvider", "EnableBackendJWT", "DeploymentType", "EnvironmentId", "EnvironmentName", "BackendJWTConfiguration", });
+        new java.lang.String[] { "Id", "Title", "Version", "ApiType", "Description", "ProductionEndpoints", "SandboxEndpoints", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "Security", "EndpointSecurity", "AuthorizationHeader", "DisableSecurity", "Vhost", "OrganizationId", "ApiProvider", "EnableBackendJWT", "DeploymentType", "EnvironmentId", "EnvironmentName", "BackendJWTConfiguration", "ChoreoComponentInfo", });
     org.wso2.choreo.connect.discovery.api.EndpointClusterProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.ResourceProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.EndpointSecurityProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.SecuritySchemeProto.getDescriptor();
     org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationProto.getDescriptor();
+    org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

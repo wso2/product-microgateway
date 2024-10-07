@@ -124,7 +124,10 @@ func getDefaultLogConfig() *LogConfig {
 			},
 		},
 		InsightsLogs: &insightsLog{
-			Enable: false,
+			Enable:          false,
+			LogFile:         "/dev/stdout",
+			LoggingFormat:   "-",
+			OmitEmptyValues: true,
 		},
 	}
 	adapterLogConfig.Rotation.MaxSize = 10

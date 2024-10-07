@@ -330,4 +330,19 @@ public interface ApiOrBuilder extends
    * <code>.wso2.discovery.api.BackendJWTConfiguration backendJWTConfiguration = 24;</code>
    */
   org.wso2.choreo.connect.discovery.api.BackendJWTConfigurationOrBuilder getBackendJWTConfigurationOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   * @return Whether the choreoComponentInfo field is set.
+   */
+  boolean hasChoreoComponentInfo();
+  /**
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   * @return The choreoComponentInfo.
+   */
+  org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo getChoreoComponentInfo();
+  /**
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder getChoreoComponentInfoOrBuilder();
 }
