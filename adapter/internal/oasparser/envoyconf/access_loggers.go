@@ -49,9 +49,7 @@ func getDefaultFormatters() []*corev3.TypedExtensionConfig {
 }
 
 // getDefaultTextLogFormat provides default text log format
-func getDefaultTextLogFormat() *file_accesslogv3.FileAccessLog_LogFormat {
-	logConf := config.ReadLogConfigs()
-
+func getDefaultTextLogFormat(loggingFormat string) *file_accesslogv3.FileAccessLog_LogFormat {
 	formatters := getDefaultFormatters()
 
 	return &file_accesslogv3.FileAccessLog_LogFormat{
@@ -59,8 +57,7 @@ func getDefaultTextLogFormat() *file_accesslogv3.FileAccessLog_LogFormat {
 			Format: &corev3.SubstitutionFormatString_TextFormatSource{
 				TextFormatSource: &corev3.DataSource{
 					Specifier: &corev3.DataSource_InlineString{
-						InlineString: logConf.AccessLogs.ReservedLogFormat +
-							strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n",
+						InlineString: loggingFormat,
 					},
 				},
 			},
@@ -81,7 +78,8 @@ func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
 	}
 
 	// Set the default log format
-	logFormat = getDefaultTextLogFormat()
+	loggingFormat := logConf.InsightsLogs.LoggingFormat + "\n"
+	logFormat = getDefaultTextLogFormat(loggingFormat)
 
 	logpath = logConf.InsightsLogs.LogFile
 	accessLogConf := &file_accesslogv3.FileAccessLog{
@@ -119,7 +117,9 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	}
 
 	// Set the default log format
-	logFormat = getDefaultTextLogFormat()
+	loggingFormat := logConf.AccessLogs.ReservedLogFormat +
+		strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n"
+	logFormat = getDefaultTextLogFormat(loggingFormat)
 
 	// Configure the log format based on the log type
 	switch logConf.AccessLogs.LogType {
