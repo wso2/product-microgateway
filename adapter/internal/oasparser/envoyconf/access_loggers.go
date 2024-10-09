@@ -36,6 +36,39 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+// getAccessLogConfigs provides default formatters
+func getDefaultFormatters() []*corev3.TypedExtensionConfig {
+	return []*corev3.TypedExtensionConfig{
+		{
+			Name: "envoy.formatter.req_without_query",
+			TypedConfig: &anypb.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
+			},
+		},
+	}
+}
+
+// getDefaultTextLogFormat provides default text log format
+func getDefaultTextLogFormat() *file_accesslogv3.FileAccessLog_LogFormat {
+	logConf := config.ReadLogConfigs()
+
+	formatters := getDefaultFormatters()
+
+	return &file_accesslogv3.FileAccessLog_LogFormat{
+		LogFormat: &corev3.SubstitutionFormatString{
+			Format: &corev3.SubstitutionFormatString_TextFormatSource{
+				TextFormatSource: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: logConf.AccessLogs.ReservedLogFormat +
+							strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n",
+					},
+				},
+			},
+			Formatters: formatters,
+		},
+	}
+}
+
 // getAccessLogConfigs provides file access log configurations for envoy
 func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
 	var logFormat *file_accesslogv3.FileAccessLog_LogFormat
@@ -47,28 +80,8 @@ func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
 		return nil
 	}
 
-	formatters := []*corev3.TypedExtensionConfig{
-		{
-			Name: "envoy.formatter.req_without_query",
-			TypedConfig: &anypb.Any{
-				TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
-			},
-		},
-	}
 	// Set the default log format
-	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
-		LogFormat: &corev3.SubstitutionFormatString{
-			Format: &corev3.SubstitutionFormatString_TextFormatSource{
-				TextFormatSource: &corev3.DataSource{
-					Specifier: &corev3.DataSource_InlineString{
-						InlineString: logConf.InsightsLogs.LoggingFormat,
-					},
-				},
-			},
-			OmitEmptyValues: logConf.InsightsLogs.OmitEmptyValues,
-			Formatters:      formatters,
-		},
-	}
+	logFormat = getDefaultTextLogFormat()
 
 	logpath = logConf.InsightsLogs.LogFile
 	accessLogConf := &file_accesslogv3.FileAccessLog{
@@ -105,28 +118,8 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 		return nil
 	}
 
-	formatters := []*corev3.TypedExtensionConfig{
-		{
-			Name: "envoy.formatter.req_without_query",
-			TypedConfig: &anypb.Any{
-				TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
-			},
-		},
-	}
 	// Set the default log format
-	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
-		LogFormat: &corev3.SubstitutionFormatString{
-			Format: &corev3.SubstitutionFormatString_TextFormatSource{
-				TextFormatSource: &corev3.DataSource{
-					Specifier: &corev3.DataSource_InlineString{
-						InlineString: logConf.AccessLogs.ReservedLogFormat +
-							strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n",
-					},
-				},
-			},
-			Formatters: formatters,
-		},
-	}
+	logFormat = getDefaultTextLogFormat()
 
 	// Configure the log format based on the log type
 	switch logConf.AccessLogs.LogType {
@@ -152,7 +145,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 						Fields: logFields,
 					},
 				},
-				Formatters: formatters,
+				Formatters: getDefaultFormatters(),
 			},
 		}
 		logger.LoggerOasparser.Debug("Access log type is set to json.")
