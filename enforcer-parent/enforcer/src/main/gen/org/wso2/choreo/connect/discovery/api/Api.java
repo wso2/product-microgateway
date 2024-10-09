@@ -250,6 +250,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 202: {
+            org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder subBuilder = null;
+            if (choreoComponentInfo_ != null) {
+              subBuilder = choreoComponentInfo_.toBuilder();
+            }
+            choreoComponentInfo_ = input.readMessage(org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(choreoComponentInfo_);
+              choreoComponentInfo_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -1107,6 +1120,32 @@ private static final long serialVersionUID = 0L;
     return getBackendJWTConfiguration();
   }
 
+  public static final int CHOREOCOMPONENTINFO_FIELD_NUMBER = 25;
+  private org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo choreoComponentInfo_;
+  /**
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   * @return Whether the choreoComponentInfo field is set.
+   */
+  @java.lang.Override
+  public boolean hasChoreoComponentInfo() {
+    return choreoComponentInfo_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   * @return The choreoComponentInfo.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo getChoreoComponentInfo() {
+    return choreoComponentInfo_ == null ? org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.getDefaultInstance() : choreoComponentInfo_;
+  }
+  /**
+   * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder getChoreoComponentInfoOrBuilder() {
+    return getChoreoComponentInfo();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1192,6 +1231,9 @@ private static final long serialVersionUID = 0L;
     }
     if (backendJWTConfiguration_ != null) {
       output.writeMessage(24, getBackendJWTConfiguration());
+    }
+    if (choreoComponentInfo_ != null) {
+      output.writeMessage(25, getChoreoComponentInfo());
     }
     unknownFields.writeTo(output);
   }
@@ -1283,6 +1325,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(24, getBackendJWTConfiguration());
     }
+    if (choreoComponentInfo_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(25, getChoreoComponentInfo());
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1358,6 +1404,11 @@ private static final long serialVersionUID = 0L;
       if (!getBackendJWTConfiguration()
           .equals(other.getBackendJWTConfiguration())) return false;
     }
+    if (hasChoreoComponentInfo() != other.hasChoreoComponentInfo()) return false;
+    if (hasChoreoComponentInfo()) {
+      if (!getChoreoComponentInfo()
+          .equals(other.getChoreoComponentInfo())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1432,6 +1483,10 @@ private static final long serialVersionUID = 0L;
     if (hasBackendJWTConfiguration()) {
       hash = (37 * hash) + BACKENDJWTCONFIGURATION_FIELD_NUMBER;
       hash = (53 * hash) + getBackendJWTConfiguration().hashCode();
+    }
+    if (hasChoreoComponentInfo()) {
+      hash = (37 * hash) + CHOREOCOMPONENTINFO_FIELD_NUMBER;
+      hash = (53 * hash) + getChoreoComponentInfo().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -1649,6 +1704,12 @@ private static final long serialVersionUID = 0L;
         backendJWTConfiguration_ = null;
         backendJWTConfigurationBuilder_ = null;
       }
+      if (choreoComponentInfoBuilder_ == null) {
+        choreoComponentInfo_ = null;
+      } else {
+        choreoComponentInfo_ = null;
+        choreoComponentInfoBuilder_ = null;
+      }
       return this;
     }
 
@@ -1739,6 +1800,11 @@ private static final long serialVersionUID = 0L;
         result.backendJWTConfiguration_ = backendJWTConfiguration_;
       } else {
         result.backendJWTConfiguration_ = backendJWTConfigurationBuilder_.build();
+      }
+      if (choreoComponentInfoBuilder_ == null) {
+        result.choreoComponentInfo_ = choreoComponentInfo_;
+      } else {
+        result.choreoComponentInfo_ = choreoComponentInfoBuilder_.build();
       }
       onBuilt();
       return result;
@@ -1943,6 +2009,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasBackendJWTConfiguration()) {
         mergeBackendJWTConfiguration(other.getBackendJWTConfiguration());
+      }
+      if (other.hasChoreoComponentInfo()) {
+        mergeChoreoComponentInfo(other.getChoreoComponentInfo());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -4370,6 +4439,125 @@ private static final long serialVersionUID = 0L;
         backendJWTConfiguration_ = null;
       }
       return backendJWTConfigurationBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo choreoComponentInfo_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder> choreoComponentInfoBuilder_;
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * @return Whether the choreoComponentInfo field is set.
+     */
+    public boolean hasChoreoComponentInfo() {
+      return choreoComponentInfoBuilder_ != null || choreoComponentInfo_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     * @return The choreoComponentInfo.
+     */
+    public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo getChoreoComponentInfo() {
+      if (choreoComponentInfoBuilder_ == null) {
+        return choreoComponentInfo_ == null ? org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.getDefaultInstance() : choreoComponentInfo_;
+      } else {
+        return choreoComponentInfoBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     */
+    public Builder setChoreoComponentInfo(org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo value) {
+      if (choreoComponentInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        choreoComponentInfo_ = value;
+        onChanged();
+      } else {
+        choreoComponentInfoBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     */
+    public Builder setChoreoComponentInfo(
+        org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder builderForValue) {
+      if (choreoComponentInfoBuilder_ == null) {
+        choreoComponentInfo_ = builderForValue.build();
+        onChanged();
+      } else {
+        choreoComponentInfoBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     */
+    public Builder mergeChoreoComponentInfo(org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo value) {
+      if (choreoComponentInfoBuilder_ == null) {
+        if (choreoComponentInfo_ != null) {
+          choreoComponentInfo_ =
+            org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.newBuilder(choreoComponentInfo_).mergeFrom(value).buildPartial();
+        } else {
+          choreoComponentInfo_ = value;
+        }
+        onChanged();
+      } else {
+        choreoComponentInfoBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     */
+    public Builder clearChoreoComponentInfo() {
+      if (choreoComponentInfoBuilder_ == null) {
+        choreoComponentInfo_ = null;
+        onChanged();
+      } else {
+        choreoComponentInfo_ = null;
+        choreoComponentInfoBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder getChoreoComponentInfoBuilder() {
+      
+      onChanged();
+      return getChoreoComponentInfoFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     */
+    public org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder getChoreoComponentInfoOrBuilder() {
+      if (choreoComponentInfoBuilder_ != null) {
+        return choreoComponentInfoBuilder_.getMessageOrBuilder();
+      } else {
+        return choreoComponentInfo_ == null ?
+            org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.getDefaultInstance() : choreoComponentInfo_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.ChoreoComponentInfo choreoComponentInfo = 25;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder> 
+        getChoreoComponentInfoFieldBuilder() {
+      if (choreoComponentInfoBuilder_ == null) {
+        choreoComponentInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo.Builder, org.wso2.choreo.connect.discovery.api.ChoreoComponentInfoOrBuilder>(
+                getChoreoComponentInfo(),
+                getParentForChildren(),
+                isClean());
+        choreoComponentInfo_ = null;
+      }
+      return choreoComponentInfoBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

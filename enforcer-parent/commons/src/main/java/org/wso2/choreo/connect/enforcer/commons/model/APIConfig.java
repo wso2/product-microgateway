@@ -50,6 +50,7 @@ public class APIConfig {
     private String deploymentType;
     private String environmentId;
     private String environmentName;
+    private ChoreoComponentInfo choreoComponentInfo;
 
     /**
      * getApiType returns the API type. This could be one of the following.
@@ -228,6 +229,10 @@ public class APIConfig {
         this.backendJWTConfiguration = backendJWTConfiguration;
     }
 
+    public ChoreoComponentInfo getChoreoComponentInfo() {
+        return choreoComponentInfo;
+    }
+
     /**
      * Implements builder pattern to build an API Config object.
      */
@@ -255,6 +260,7 @@ public class APIConfig {
         private String environmentName;
         private boolean enableBackendJWT;
         private BackendJWTConfiguration backendJWTConfiguration;
+        private ChoreoComponentInfo choreoComponentInfo;
 
         public Builder(String name) {
             this.name = name;
@@ -371,6 +377,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder choreoComponentInfo(ChoreoComponentInfo choreoComponentInfo) {
+            this.choreoComponentInfo = choreoComponentInfo;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -395,6 +406,7 @@ public class APIConfig {
             apiConfig.deploymentType = this.deploymentType;
             apiConfig.environmentId = this.environmentId;
             apiConfig.environmentName = this.environmentName;
+            apiConfig.choreoComponentInfo = this.choreoComponentInfo;
             return apiConfig;
         }
     }

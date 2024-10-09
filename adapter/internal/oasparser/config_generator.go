@@ -196,6 +196,14 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		}
 	}
 
+	choreoComponentInfo := &api.ChoreoComponentInfo{}
+	if mgwSwagger.ChoreoComponentInfo != nil {
+		choreoComponentInfo.ComponentID = mgwSwagger.ChoreoComponentInfo.ComponentID
+		choreoComponentInfo.VersionID = mgwSwagger.ChoreoComponentInfo.VersionID
+		choreoComponentInfo.OrganizationID = mgwSwagger.ChoreoComponentInfo.OrganizationID
+		choreoComponentInfo.ProjectID = mgwSwagger.ChoreoComponentInfo.ProjectID
+	}
+
 	return &api.Api{
 		Id:                      mgwSwagger.GetID(),
 		Title:                   mgwSwagger.GetTitle(),
@@ -221,6 +229,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, vhost st
 		DeploymentType:          mgwSwagger.DeploymentType,
 		EnvironmentId:           mgwSwagger.EnvironmentID,
 		EnvironmentName:         mgwSwagger.EnvironmentName,
+		ChoreoComponentInfo:     choreoComponentInfo,
 	}
 }
 

@@ -35,6 +35,13 @@ type accessLog struct {
 	JSONFormat         map[string]string
 }
 
+type insightsLog struct {
+	Enable          bool
+	LogFile         string
+	LoggingFormat   string
+	OmitEmptyValues bool
+}
+
 // AccessLogExcludes represents the configurations related to excludes from access logs.
 type AccessLogExcludes struct {
 	SystemHost AccessLogExcludesSystemHost
@@ -60,8 +67,9 @@ type LogConfig struct {
 		Compress   bool
 	}
 
-	Pkg        []pkg
-	AccessLogs *accessLog
+	Pkg          []pkg
+	AccessLogs   *accessLog
+	InsightsLogs *insightsLog
 }
 
 func getDefaultLogConfig() *LogConfig {
@@ -114,6 +122,12 @@ func getDefaultLogConfig() *LogConfig {
 				"apiUuid":       "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:apiUUID)%",
 				"extAuthDtls":   "%DYNAMIC_METADATA(envoy.filters.http.ext_authz:extAuthDetails)%",
 			},
+		},
+		InsightsLogs: &insightsLog{
+			Enable:          false,
+			LogFile:         "/dev/stdout",
+			LoggingFormat:   "-",
+			OmitEmptyValues: true,
 		},
 	}
 	adapterLogConfig.Rotation.MaxSize = 10

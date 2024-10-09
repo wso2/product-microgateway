@@ -358,6 +358,16 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, deployedEnvironments []*
 	mgwSwagger.APIProvider = apiProject.APIYaml.Data.Provider
 	mgwSwagger.EnvironmentID = deployedEnvironments[0].ID
 	mgwSwagger.EnvironmentName = deployedEnvironments[0].Name
+
+	choreoComponentInfo := mgw.ChoreoComponentInfo{
+		OrganizationID: apiYaml.ChoreoComponentInfo.OrganizationID,
+		ProjectID:      apiYaml.ChoreoComponentInfo.ProjectID,
+		ComponentID:    apiYaml.ChoreoComponentInfo.ComponentID,
+		VersionID:      apiYaml.ChoreoComponentInfo.VersionID,
+	}
+
+	mgwSwagger.ChoreoComponentInfo = &choreoComponentInfo
+
 	organizationID := apiProject.OrganizationID
 	apiHashValue := generateHashValue(apiYaml.Name, apiYaml.Version)
 

@@ -69,9 +69,18 @@ type MgwSwagger struct {
 	// APIProvider is required for analytics purposes as /apis call is avoided temporarily.
 	APIProvider string
 	// DeploymentType could be either "PRODUCTION" or "SANDBOX"
-	DeploymentType  string
-	EnvironmentID   string
-	EnvironmentName string
+	DeploymentType      string
+	EnvironmentID       string
+	EnvironmentName     string
+	ChoreoComponentInfo *ChoreoComponentInfo
+}
+
+// ChoreoComponentInfo represents the information of the Choreo component
+type ChoreoComponentInfo struct {
+	OrganizationID string
+	ProjectID      string
+	ComponentID    string
+	VersionID      string
 }
 
 // EndpointCluster represent an upstream cluster

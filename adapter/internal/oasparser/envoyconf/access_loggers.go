@@ -36,6 +36,74 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+// getAccessLogConfigs provides default formatters
+func getDefaultFormatters() []*corev3.TypedExtensionConfig {
+	return []*corev3.TypedExtensionConfig{
+		{
+			Name: "envoy.formatter.req_without_query",
+			TypedConfig: &anypb.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
+			},
+		},
+	}
+}
+
+// getDefaultTextLogFormat provides default text log format
+func getDefaultTextLogFormat(loggingFormat string) *file_accesslogv3.FileAccessLog_LogFormat {
+	formatters := getDefaultFormatters()
+
+	return &file_accesslogv3.FileAccessLog_LogFormat{
+		LogFormat: &corev3.SubstitutionFormatString{
+			Format: &corev3.SubstitutionFormatString_TextFormatSource{
+				TextFormatSource: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: loggingFormat,
+					},
+				},
+			},
+			Formatters: formatters,
+		},
+	}
+}
+
+// getAccessLogConfigs provides file access log configurations for envoy
+func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
+	var logFormat *file_accesslogv3.FileAccessLog_LogFormat
+	logpath := defaultAccessLogPath //default access log path
+
+	logConf := config.ReadLogConfigs()
+
+	if !logConf.InsightsLogs.Enable {
+		return nil
+	}
+
+	// Set the default log format
+	loggingFormat := logConf.InsightsLogs.LoggingFormat + "\n"
+	logFormat = getDefaultTextLogFormat(loggingFormat)
+
+	logpath = logConf.InsightsLogs.LogFile
+	accessLogConf := &file_accesslogv3.FileAccessLog{
+		Path:            logpath,
+		AccessLogFormat: logFormat,
+	}
+
+	accessLogTypedConf, err := anypb.New(accessLogConf)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marshaling access log configs. ", err)
+		return nil
+	}
+
+	accessLog := config_access_logv3.AccessLog{
+		Name:   fileAccessLogName,
+		Filter: nil,
+		ConfigType: &config_access_logv3.AccessLog_TypedConfig{
+			TypedConfig: accessLogTypedConf,
+		},
+	}
+
+	return &accessLog
+}
+
 // getAccessLogConfigs provides file access log configurations for envoy
 func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	var logFormat *file_accesslogv3.FileAccessLog_LogFormat
@@ -48,28 +116,10 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 		return nil
 	}
 
-	formatters := []*corev3.TypedExtensionConfig{
-		{
-			Name: "envoy.formatter.req_without_query",
-			TypedConfig: &anypb.Any{
-				TypeUrl: "type.googleapis.com/envoy.extensions.formatter.req_without_query.v3.ReqWithoutQuery",
-			},
-		},
-	}
 	// Set the default log format
-	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
-		LogFormat: &corev3.SubstitutionFormatString{
-			Format: &corev3.SubstitutionFormatString_TextFormatSource{
-				TextFormatSource: &corev3.DataSource{
-					Specifier: &corev3.DataSource_InlineString{
-						InlineString: logConf.AccessLogs.ReservedLogFormat +
-							strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n",
-					},
-				},
-			},
-			Formatters: formatters,
-		},
-	}
+	loggingFormat := logConf.AccessLogs.ReservedLogFormat +
+		strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n"
+	logFormat = getDefaultTextLogFormat(loggingFormat)
 
 	// Configure the log format based on the log type
 	switch logConf.AccessLogs.LogType {
@@ -95,7 +145,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 						Fields: logFields,
 					},
 				},
-				Formatters: formatters,
+				Formatters: getDefaultFormatters(),
 			},
 		}
 		logger.LoggerOasparser.Debug("Access log type is set to json.")
@@ -197,11 +247,15 @@ func getAccessLogs() []*config_access_logv3.AccessLog {
 	var accessLoggers []*config_access_logv3.AccessLog
 	fileAccessLog := getFileAccessLogConfigs()
 	grpcAccessLog := getGRPCAccessLogConfigs(conf)
+	insightsAccessLog := getInsightsAccessLogConfigs()
 	if fileAccessLog != nil {
 		accessLoggers = append(accessLoggers, fileAccessLog)
 	}
 	if grpcAccessLog != nil {
 		accessLoggers = append(accessLoggers, getGRPCAccessLogConfigs(conf))
+	}
+	if insightsAccessLog != nil {
+		accessLoggers = append(accessLoggers, insightsAccessLog)
 	}
 	return accessLoggers
 }
