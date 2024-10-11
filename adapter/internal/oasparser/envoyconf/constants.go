@@ -95,7 +95,7 @@ const (
 	xWso2requestInterceptor string = "x-wso2-request-interceptor"
 	// xWso2responseInterceptor used to provide response interceptor details for api and resource level
 	xWso2responseInterceptor string = "x-wso2-response-interceptor"
-	xWso2ApiOrganizationId   string = "x-wso2-api-organization-id"
+	xWso2ApiOrganizationID   string = "x-wso2-api-organization-id"
 )
 
 // interceptor levels

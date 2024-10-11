@@ -102,7 +102,7 @@ func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
 					Path: []*matcherv3.MetadataMatcher_PathSegment{
 						{
 							Segment: &matcherv3.MetadataMatcher_PathSegment_Key{
-								Key: xWso2ApiOrganizationId,
+								Key: xWso2ApiOrganizationID,
 							},
 						},
 					},
