@@ -26,6 +26,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -108,59 +110,7 @@ public class AnalyticsFilter {
                 Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
-            String apiName = requestContext.getMatchedAPI().getName();
-            String apiVersion = requestContext.getMatchedAPI().getVersion();
-            String apiType = requestContext.getMatchedAPI().getApiType();
-            AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
-
-            requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
-            requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,
-                    AnalyticsUtils.setDefaultIfNull(authContext.getApiPublisher()));
-            requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
-            requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
-            requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
-
-            requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
-                    APIConstants.SUPER_TENANT_DOMAIN_NAME);
-            requestContext.addMetadataToMap(MetadataConstants.API_ENVIRONMENT_ID,
-                    requestContext.getMatchedAPI().getEnvironmentId() == null ? APIConstants.DEFAULT_ENVIRONMENT_NAME :
-                            requestContext.getMatchedAPI().getEnvironmentId());
-
-            // Default Value would be PRODUCTION
-            requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
-                    authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
-            requestContext.addMetadataToMap(MetadataConstants.APP_UUID_KEY,
-                    AnalyticsUtils.setDefaultIfNull(authContext.getApplicationUUID()));
-            requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
-                    AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
-            requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
-                    AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
-
-            requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
-            requestContext.addMetadataToMap(MetadataConstants.REGION_KEY,
-                    ConfigHolder.getInstance().getEnvVarConfig().getEnforcerRegionId());
-
-            // As in the matched API, only the resources under the matched resource template are selected.
-            requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
-                    requestContext.getMatchedResourcePath().getPath());
-
-            requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
-
-            requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
-                    requestContext.getMatchedAPI().getOrganizationId());
-            // Adding UserName and the APIContext
-            String endUserName = requestContext.getAuthenticationContext().getUsername();
-            requestContext.addMetadataToMap(MetadataConstants.API_USER_NAME_KEY,
-                    endUserName == null ? APIConstants.END_USER_UNKNOWN : endUserName);
-            requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
-                    requestContext.getMatchedAPI().getBasePath());
-            requestContext.addMetadataToMap(MetadataConstants.DEPLOYMENT_TYPE,
-                    requestContext.getMatchedAPI().getDeploymentType());
-
-            // Adding Gateway URL
-            String gatewayUrl = requestContext.getHeaders().get(GATEWAY_URL);
-            requestContext.addMetadataToMap(MetadataConstants.GATEWAY_URL,
-                    gatewayUrl);
+            this.addInsightsMetaData(requestContext);
         } finally {
             if (Utils.tracingEnabled()) {
                 analyticsSpanScope.close();
@@ -188,11 +138,13 @@ public class AnalyticsFilter {
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
 
             }
+            this.addInsightsMetaData(requestContext);
             if (publisher == null) {
                 logger.error("Cannot publish the failure event as analytics publisher is null.");
                 return;
             }
             ChoreoFaultAnalyticsProvider provider = new ChoreoFaultAnalyticsProvider(requestContext);
+            this.addFailureDetailsToInsightsMetaData(requestContext, provider);
             // To avoid incrementing counter for options call
             if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
                 return;
@@ -210,6 +162,80 @@ public class AnalyticsFilter {
                 Utils.finishSpan(analyticsSpan);
             }
         }
+    }
+
+    private void addInsightsMetaData(RequestContext requestContext) {
+        String apiName = requestContext.getMatchedAPI().getName();
+        String apiVersion = requestContext.getMatchedAPI().getVersion();
+        String apiType = requestContext.getMatchedAPI().getApiType();
+        String projectId = requestContext.getMatchedAPI().getChoreoComponentInfo().getProjectID();
+        String componentId = requestContext.getMatchedAPI().getChoreoComponentInfo().getComponentID();
+        String versionId = requestContext.getMatchedAPI().getChoreoComponentInfo().getVersionID();
+
+        AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
+
+        requestContext.addMetadataToMap(MetadataConstants.API_PROJECT_ID_KEY, projectId);
+        requestContext.addMetadataToMap(MetadataConstants.API_COMPONENT_ID_KEY, componentId);
+        requestContext.addMetadataToMap(MetadataConstants.API_VERSION_ID_KEY, versionId);
+
+        requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
+        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,
+                AnalyticsUtils.setDefaultIfNull(authContext.getApiPublisher()));
+        requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
+        requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
+        requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
+
+        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
+                APIConstants.SUPER_TENANT_DOMAIN_NAME);
+        requestContext.addMetadataToMap(MetadataConstants.API_ENVIRONMENT_ID,
+                requestContext.getMatchedAPI().getEnvironmentId() == null ? APIConstants.DEFAULT_ENVIRONMENT_NAME :
+                        requestContext.getMatchedAPI().getEnvironmentId());
+
+        // Default Value would be PRODUCTION
+        requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
+                authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
+        requestContext.addMetadataToMap(MetadataConstants.APP_UUID_KEY,
+                AnalyticsUtils.setDefaultIfNull(authContext.getApplicationUUID()));
+        requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
+                AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
+        requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
+                AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
+
+        requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
+        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY,
+                ConfigHolder.getInstance().getEnvVarConfig().getEnforcerRegionId());
+
+        // As in the matched API, only the resources under the matched resource template are selected.
+        requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
+                requestContext.getMatchedResourcePath().getPath());
+
+        requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
+
+        requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
+                requestContext.getMatchedAPI().getOrganizationId());
+        // Adding UserName and the APIContext
+        String endUserName = requestContext.getAuthenticationContext().getUsername();
+        requestContext.addMetadataToMap(MetadataConstants.API_USER_NAME_KEY,
+                endUserName == null ? APIConstants.END_USER_UNKNOWN : endUserName);
+        requestContext.addMetadataToMap(MetadataConstants.API_CONTEXT_KEY,
+                requestContext.getMatchedAPI().getBasePath());
+        requestContext.addMetadataToMap(MetadataConstants.DEPLOYMENT_TYPE,
+                requestContext.getMatchedAPI().getDeploymentType());
+
+        // Adding Gateway URL
+        String gatewayUrl = requestContext.getHeaders().get(GATEWAY_URL);
+        requestContext.addMetadataToMap(MetadataConstants.GATEWAY_URL,
+                gatewayUrl);
+    }
+
+    private void addFailureDetailsToInsightsMetaData(RequestContext requestContext,
+            ChoreoFaultAnalyticsProvider provider) {
+        FaultCategory faultCategory = provider.getFaultType();
+        Error error = provider.getError(faultCategory);
+
+        requestContext.addMetadataToMap(MetadataConstants.INSIGHTS_ERROR_TYPE, faultCategory.toString());
+        requestContext.addMetadataToMap(MetadataConstants.INSIGHTS_ERROR_CODE, String.valueOf(error.getErrorCode()));
+        requestContext.addMetadataToMap(MetadataConstants.INSIGHTS_ERROR_MESSAGE, error.getErrorMessage().toString());
     }
 
     private static AnalyticsEventPublisher loadAnalyticsPublisher(String className, boolean isChoreoDeployment) {

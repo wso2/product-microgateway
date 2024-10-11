@@ -25,6 +25,14 @@ public class MetadataConstants {
     public static final String EXT_AUTH_METADATA_CONTEXT_KEY = "envoy.filters.http.ext_authz";
 
     public static final String WSO2_METADATA_PREFIX = "x-wso2-";
+
+    public static final String API_PROJECT_ID_KEY = WSO2_METADATA_PREFIX + "project-id";
+    public static final String API_COMPONENT_ID_KEY = WSO2_METADATA_PREFIX + "component-id";
+    public static final String API_VERSION_ID_KEY = WSO2_METADATA_PREFIX + "version-id";
+    public static final String INSIGHTS_ERROR_TYPE = WSO2_METADATA_PREFIX + "error-type";
+    public static final String INSIGHTS_ERROR_CODE = WSO2_METADATA_PREFIX + "error-code";
+    public static final String INSIGHTS_ERROR_MESSAGE = WSO2_METADATA_PREFIX + "error-message";
+
     public static final String API_ID_KEY = WSO2_METADATA_PREFIX + "api-id";
     public static final String API_CREATOR_KEY = WSO2_METADATA_PREFIX + "api-creator";
     public static final String API_NAME_KEY = WSO2_METADATA_PREFIX + "api-name";

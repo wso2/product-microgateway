@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.api.ChoreoComponentInfo;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.discovery.api.Scopes;
@@ -146,6 +147,9 @@ public class RestAPI implements API {
                             api.getEndpointSecurity().getSandBoxSecurityInfo()));
         }
 
+        org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo choreoComponentInfo = getChoreoComponentInfo(
+                api);
+
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState).tier(api.getTier())
@@ -156,10 +160,24 @@ public class RestAPI implements API {
                 .enableBackendJWT(api.getEnableBackendJWT()).backendJWTConfiguration(backendJWTConfiguration)
                 .deploymentType(api.getDeploymentType())
                 .environmentId(api.getEnvironmentId())
-                .environmentName(api.getEnvironmentName()).build();
+                .environmentName(api.getEnvironmentName())
+                .choreoComponentInfo(choreoComponentInfo)
+                .build();
 
         initFilters();
         return basePath;
+    }
+
+    private static org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo getChoreoComponentInfo(
+            Api api) {
+        ChoreoComponentInfo infoProto = api.getChoreoComponentInfo();
+        org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo choreoComponentInfo =
+                new org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo();
+        choreoComponentInfo.setOrganizationID(infoProto.getOrganizationID());
+        choreoComponentInfo.setProjectID(infoProto.getProjectID());
+        choreoComponentInfo.setComponentID(infoProto.getComponentID());
+        choreoComponentInfo.setVersionID(infoProto.getVersionID());
+        return choreoComponentInfo;
     }
 
     @Override
@@ -206,8 +224,8 @@ public class RestAPI implements API {
             }
             if (analyticsEnabled && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
                 AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
-                responseObject.setMetaDataMap(new HashMap<>(0));
             }
+            responseObject.setMetaDataMap(requestContext.getMetadataMap());
         }
 
         return responseObject;
