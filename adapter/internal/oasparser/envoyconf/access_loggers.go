@@ -49,7 +49,7 @@ func getDefaultFormatters() []*corev3.TypedExtensionConfig {
 }
 
 // getDefaultTextLogFormat provides default text log format
-func getDefaultTextLogFormat(loggingFormat string) *file_accesslogv3.FileAccessLog_LogFormat {
+func getDefaultTextLogFormat(loggingFormat string, omitEmptyValues bool) *file_accesslogv3.FileAccessLog_LogFormat {
 	formatters := getDefaultFormatters()
 
 	return &file_accesslogv3.FileAccessLog_LogFormat{
@@ -61,7 +61,8 @@ func getDefaultTextLogFormat(loggingFormat string) *file_accesslogv3.FileAccessL
 					},
 				},
 			},
-			Formatters: formatters,
+			Formatters:      formatters,
+			OmitEmptyValues: omitEmptyValues,
 		},
 	}
 }
@@ -79,7 +80,7 @@ func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
 
 	// Set the default log format
 	loggingFormat := logConf.InsightsLogs.LoggingFormat + "\n"
-	logFormat = getDefaultTextLogFormat(loggingFormat)
+	logFormat = getDefaultTextLogFormat(loggingFormat, logConf.InsightsLogs.OmitEmptyValues)
 
 	logpath = logConf.InsightsLogs.LogFile
 	accessLogConf := &file_accesslogv3.FileAccessLog{
@@ -93,9 +94,42 @@ func getInsightsAccessLogConfigs() *config_access_logv3.AccessLog {
 		return nil
 	}
 
+	orgIDFilter := &config_access_logv3.AccessLogFilter{
+		FilterSpecifier: &config_access_logv3.AccessLogFilter_MetadataFilter{
+			MetadataFilter: &config_access_logv3.MetadataFilter{
+				Matcher: &matcherv3.MetadataMatcher{
+					Filter: extAuthzFilterName,
+					Path: []*matcherv3.MetadataMatcher_PathSegment{
+						{
+							Segment: &matcherv3.MetadataMatcher_PathSegment_Key{
+								Key: xWso2ApiOrganizationId,
+							},
+						},
+					},
+					Value: &matcherv3.ValueMatcher{
+						MatchPattern: &matcherv3.ValueMatcher_StringMatch{
+							StringMatch: &matcherv3.StringMatcher{
+								MatchPattern: &matcherv3.StringMatcher_SafeRegex{
+									SafeRegex: &matcherv3.RegexMatcher{
+										EngineType: &matcherv3.RegexMatcher_GoogleRe2{
+											GoogleRe2: &matcherv3.RegexMatcher_GoogleRE2{},
+										},
+										Regex: "^.{2,}$",
+									},
+								},
+							},
+						},
+					},
+					Invert: false,
+				},
+				MatchIfKeyNotFound: &wrapperspb.BoolValue{Value: false},
+			},
+		},
+	}
+
 	accessLog := config_access_logv3.AccessLog{
 		Name:   fileAccessLogName,
-		Filter: nil,
+		Filter: orgIDFilter,
 		ConfigType: &config_access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
 		},
@@ -119,7 +153,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	// Set the default log format
 	loggingFormat := logConf.AccessLogs.ReservedLogFormat +
 		strings.TrimLeft(logConf.AccessLogs.SecondaryLogFormat, "'") + "\n"
-	logFormat = getDefaultTextLogFormat(loggingFormat)
+	logFormat = getDefaultTextLogFormat(loggingFormat, false)
 
 	// Configure the log format based on the log type
 	switch logConf.AccessLogs.LogType {
