@@ -173,6 +173,9 @@ public class RestAPI implements API {
         ChoreoComponentInfo infoProto = api.getChoreoComponentInfo();
         org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo choreoComponentInfo =
                 new org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo();
+        if (infoProto == null) {
+            return choreoComponentInfo;
+        }
         choreoComponentInfo.setOrganizationID(infoProto.getOrganizationID());
         choreoComponentInfo.setProjectID(infoProto.getProjectID());
         choreoComponentInfo.setComponentID(infoProto.getComponentID());
