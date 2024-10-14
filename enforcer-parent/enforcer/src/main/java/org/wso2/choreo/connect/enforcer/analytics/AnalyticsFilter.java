@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.commons.model.ChoreoComponentInfo;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -168,9 +169,16 @@ public class AnalyticsFilter {
         String apiName = requestContext.getMatchedAPI().getName();
         String apiVersion = requestContext.getMatchedAPI().getVersion();
         String apiType = requestContext.getMatchedAPI().getApiType();
-        String projectId = requestContext.getMatchedAPI().getChoreoComponentInfo().getProjectID();
-        String componentId = requestContext.getMatchedAPI().getChoreoComponentInfo().getComponentID();
-        String versionId = requestContext.getMatchedAPI().getChoreoComponentInfo().getVersionID();
+
+        ChoreoComponentInfo choreoComponentInfo = requestContext.getMatchedAPI().getChoreoComponentInfo();
+        String projectId = null;
+        String componentId = null;
+        String versionId = null;
+        if (choreoComponentInfo != null) {
+            projectId = choreoComponentInfo.getProjectID();
+            componentId = choreoComponentInfo.getComponentID();
+            versionId = choreoComponentInfo.getVersionID();
+        }
 
         AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
