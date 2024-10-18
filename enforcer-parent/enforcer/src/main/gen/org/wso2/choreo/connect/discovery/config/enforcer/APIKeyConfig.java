@@ -17,6 +17,7 @@ private static final long serialVersionUID = 0L;
   }
   private APIKeyConfig() {
     oauthAgentURL_ = "";
+    internalAPIKeyHeader_ = "";
   }
 
   @java.lang.Override
@@ -53,6 +54,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             oauthAgentURL_ = s;
+            break;
+          }
+          case 18: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            internalAPIKeyHeader_ = s;
             break;
           }
           default: {
@@ -125,6 +132,44 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int INTERNALAPIKEYHEADER_FIELD_NUMBER = 2;
+  private volatile java.lang.Object internalAPIKeyHeader_;
+  /**
+   * <code>string internalAPIKeyHeader = 2;</code>
+   * @return The internalAPIKeyHeader.
+   */
+  @java.lang.Override
+  public java.lang.String getInternalAPIKeyHeader() {
+    java.lang.Object ref = internalAPIKeyHeader_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      internalAPIKeyHeader_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string internalAPIKeyHeader = 2;</code>
+   * @return The bytes for internalAPIKeyHeader.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getInternalAPIKeyHeaderBytes() {
+    java.lang.Object ref = internalAPIKeyHeader_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      internalAPIKeyHeader_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -142,6 +187,9 @@ private static final long serialVersionUID = 0L;
     if (!getOauthAgentURLBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, oauthAgentURL_);
     }
+    if (!getInternalAPIKeyHeaderBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, internalAPIKeyHeader_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -153,6 +201,9 @@ private static final long serialVersionUID = 0L;
     size = 0;
     if (!getOauthAgentURLBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, oauthAgentURL_);
+    }
+    if (!getInternalAPIKeyHeaderBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, internalAPIKeyHeader_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -171,6 +222,8 @@ private static final long serialVersionUID = 0L;
 
     if (!getOauthAgentURL()
         .equals(other.getOauthAgentURL())) return false;
+    if (!getInternalAPIKeyHeader()
+        .equals(other.getInternalAPIKeyHeader())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -184,6 +237,8 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + OAUTHAGENTURL_FIELD_NUMBER;
     hash = (53 * hash) + getOauthAgentURL().hashCode();
+    hash = (37 * hash) + INTERNALAPIKEYHEADER_FIELD_NUMBER;
+    hash = (53 * hash) + getInternalAPIKeyHeader().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -319,6 +374,8 @@ private static final long serialVersionUID = 0L;
       super.clear();
       oauthAgentURL_ = "";
 
+      internalAPIKeyHeader_ = "";
+
       return this;
     }
 
@@ -346,6 +403,7 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig result = new org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig(this);
       result.oauthAgentURL_ = oauthAgentURL_;
+      result.internalAPIKeyHeader_ = internalAPIKeyHeader_;
       onBuilt();
       return result;
     }
@@ -396,6 +454,10 @@ private static final long serialVersionUID = 0L;
       if (other == org.wso2.choreo.connect.discovery.config.enforcer.APIKeyConfig.getDefaultInstance()) return this;
       if (!other.getOauthAgentURL().isEmpty()) {
         oauthAgentURL_ = other.oauthAgentURL_;
+        onChanged();
+      }
+      if (!other.getInternalAPIKeyHeader().isEmpty()) {
+        internalAPIKeyHeader_ = other.internalAPIKeyHeader_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -499,6 +561,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       oauthAgentURL_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object internalAPIKeyHeader_ = "";
+    /**
+     * <code>string internalAPIKeyHeader = 2;</code>
+     * @return The internalAPIKeyHeader.
+     */
+    public java.lang.String getInternalAPIKeyHeader() {
+      java.lang.Object ref = internalAPIKeyHeader_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        internalAPIKeyHeader_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string internalAPIKeyHeader = 2;</code>
+     * @return The bytes for internalAPIKeyHeader.
+     */
+    public com.google.protobuf.ByteString
+        getInternalAPIKeyHeaderBytes() {
+      java.lang.Object ref = internalAPIKeyHeader_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        internalAPIKeyHeader_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string internalAPIKeyHeader = 2;</code>
+     * @param value The internalAPIKeyHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInternalAPIKeyHeader(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      internalAPIKeyHeader_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string internalAPIKeyHeader = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearInternalAPIKeyHeader() {
+      
+      internalAPIKeyHeader_ = getDefaultInstance().getInternalAPIKeyHeader();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string internalAPIKeyHeader = 2;</code>
+     * @param value The bytes for internalAPIKeyHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInternalAPIKeyHeaderBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      internalAPIKeyHeader_ = value;
       onChanged();
       return this;
     }

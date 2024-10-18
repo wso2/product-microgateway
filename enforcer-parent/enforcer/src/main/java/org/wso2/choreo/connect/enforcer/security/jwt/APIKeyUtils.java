@@ -95,12 +95,12 @@ public class APIKeyUtils {
     }
 
     /**
-     * This function exchanges a given API key to an JWT token.
+     * This function exchanges a given PAT hash to an JWT token.
      *
-     * @param keyHash    Key Hash
+     * @param patHash    Key Hash
      * @return JWT corresponding to given PAT.
      */
-    public static Optional<String> exchangePATToJWT(String keyHash) {
+    public static Optional<String> exchangePATToJWT(String patHash) {
 
         URL url = null;
         try {
@@ -115,7 +115,45 @@ public class APIKeyUtils {
             // Create a request to exchange API key to JWT.
             HttpPost exchangeRequest = new HttpPost(url.toURI());
             exchangeRequest.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
-            exchangeRequest.setEntity(new StringEntity(createPATExchangeRequest(keyHash)));
+            exchangeRequest.setEntity(new StringEntity(createKeyHashExchangeRequest(patHash)));
+            try (CloseableHttpResponse response = httpClient.execute(exchangeRequest)) {
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    HttpEntity entity = response.getEntity();
+                    try (InputStream content = entity.getContent()) {
+                        OAuthAgentResponse resp = gson.fromJson(IOUtils.toString(content),
+                                OAuthAgentResponse.class);
+                        return Optional.of(resp.getAccessToken());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while exchanging API key to JWT", e);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Exchange a given API key hash to a JWT token.
+     *
+     * @param apiKeyHash    API Key Hash
+     * @return JWT corresponding to given API Key.
+     */
+    public static Optional<String> exchangeAPIKeyToJWT(String apiKeyHash) {
+
+        URL url = null;
+        try {
+            String apiKeyExchangeURL = String.format("%s%s", ConfigHolder.getInstance().getConfig()
+                    .getApiKeyConfig().getOauthAgentURL(), APIKeyConstants.API_KEY_EXCHANGE_ENDPOINT);
+            url = new URL(apiKeyExchangeURL);
+        } catch (MalformedURLException e) {
+            log.error("Error occurred while parsing OAuth agent URL", e);
+            return Optional.empty();
+        }
+        try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
+            // Create a request to exchange API key to JWT.
+            HttpPost exchangeRequest = new HttpPost(url.toURI());
+            exchangeRequest.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
+            exchangeRequest.setEntity(new StringEntity(createKeyHashExchangeRequest(apiKeyHash)));
             try (CloseableHttpResponse response = httpClient.execute(exchangeRequest)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
                     HttpEntity entity = response.getEntity();
@@ -161,7 +199,7 @@ public class APIKeyUtils {
         return Base64.getEncoder().withoutPadding().encodeToString(checksumBytes);
     }
 
-    private static String createPATExchangeRequest(String keyHash) {
+    private static String createKeyHashExchangeRequest(String keyHash) {
         Map<String, Object> patRequest = new HashMap<>();
         patRequest.put("apiKeyHash", keyHash);
         return gson.toJson(patRequest);

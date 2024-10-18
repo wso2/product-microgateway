@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.InterceptorConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
+import org.wso2.choreo.connect.enforcer.security.jwt.ChoreoAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
@@ -66,6 +67,7 @@ public class AuthFilter implements Filter {
         boolean isApiKeyProtected = false;
         boolean isMutualSSLMandatory = false;
         boolean isOAuthBasicAuthMandatory = false;
+        boolean isChoreoApiKeyProtected = false;
 
         // Set security conditions
         if (apiConfig.getSecuritySchemeDefinitions() == null) {
@@ -87,6 +89,8 @@ public class AuthFilter implements Filter {
                     isOAuthBasicAuthMandatory = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
                     isApiKeyProtected = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_CHOREO_API_KEY)) {
+                    isChoreoApiKeyProtected = true;
                 }
             }
         }
@@ -100,6 +104,11 @@ public class AuthFilter implements Filter {
         if (isApiKeyProtected) {
             APIKeyAuthenticator apiKeyAuthenticator = new APIKeyAuthenticator();
             authenticators.add(apiKeyAuthenticator);
+        }
+
+        if (isChoreoApiKeyProtected) {
+            ChoreoAPIKeyAuthenticator choreoAPIKeyAuthenticator = new ChoreoAPIKeyAuthenticator();
+            authenticators.add(choreoAPIKeyAuthenticator);
         }
 
         Authenticator authenticator = new InternalAPIKeyAuthenticator(

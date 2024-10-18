@@ -500,7 +500,8 @@ type authHeader struct {
 }
 
 type apiKeyConfig struct {
-	OAuthAgentURL string `toml:"oauthAgentURL"`
+	InternalAPIKeyHeader string `toml:"internalAPIKeyHeader"`
+	OAuthAgentURL        string `toml:"oauthAgentURL"`
 }
 
 type patConfig struct {
