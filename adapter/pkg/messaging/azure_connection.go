@@ -21,7 +21,7 @@ package messaging
 import (
 	"context"
 	"errors"
-	"os"
+	"fmt"
 	"regexp"
 	"strconv"
 	"time"
@@ -29,19 +29,21 @@ import (
 	asb "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus/admin"
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
-// TODO: (erandi) when refactoring, refactor organization purge flow as well
-var bindingKeys = []string{tokenRevocation, notification, stepQuotaThreshold, stepQuotaReset}
-
-const orgPurgeEnabled = "ORG_PURGE_ENABLED"
-
-// Subscription stores the meta data of a specific subscription
+// Subscription stores the metadata of a specific subscription
+// TopicName: the topic name of the subscription
+// SubscriptionName: the name of the subscription
+// ConnectionString: the connection string of the service bus
+// ClientOptions: the client options for initiating the client
+// ReconnectInterval: the interval to wait before reconnecting
 type Subscription struct {
-	topicName        string
-	subscriptionName string
+	TopicName         string
+	SubscriptionName  string
+	ConnectionString  string
+	ClientOptions     *asb.ClientOptions
+	ReconnectInterval time.Duration
 }
 
 var (
@@ -63,107 +65,77 @@ func init() {
 	AzureStepQuotaThresholdChannel = make(chan []byte)
 	AzureStepQuotaResetChannel = make(chan []byte)
 	AzureOrganizationPurgeChannel = make(chan []byte)
-
-	// Temporarily disable reacting organization Purge
-	orgPurgeEnabled, envParseErr := strconv.ParseBool(os.Getenv(orgPurgeEnabled))
-
-	if envParseErr == nil {
-		if orgPurgeEnabled {
-			bindingKeys = append(bindingKeys, organizationPurge)
-		}
-	}
 }
 
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
 // further process
-func InitiateBrokerConnectionAndValidate(connectionString string, clientOptions *asb.ClientOptions, componentName string, reconnectRetryCount int,
-	reconnectInterval time.Duration, subscriptionIdleTimeDuration string) ([]Subscription, error) {
-	subscriptionMetaDataList := make([]Subscription, 0)
+func InitiateBrokerConnectionAndValidate(connectionString string, topic string, clientOptions *asb.ClientOptions, componentName string, reconnectRetryCount int,
+	reconnectInterval time.Duration, subscriptionIdleTimeDuration string) (*Subscription, error) {
 	subProps := &admin.SubscriptionProperties{
 		AutoDeleteOnIdle: &subscriptionIdleTimeDuration,
 	}
 	_, err := asb.NewClientFromConnectionString(connectionString, clientOptions)
 
 	if err == nil {
-		if logger.LoggerMsg.IsLevelEnabled(logrus.DebugLevel) {
-			logger.LoggerMsg.Debugf("ASB client initialized for connection url: %s", maskSharedAccessKey(connectionString))
-		}
+		logger.LoggerMsg.Debugf("ASB client initialized for connection url: %s", maskSharedAccessKey(connectionString))
 
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
-			err = nil
-			subscriptionMetaDataList, err = retrieveSubscriptionMetadata(subscriptionMetaDataList,
-				connectionString, componentName, subProps)
+			sub, err := RetrieveSubscriptionMetadataForTopic(connectionString, topic,
+				clientOptions, componentName, subProps, reconnectInterval)
 			if err != nil {
 				logError(reconnectRetryCount, reconnectInterval, err)
-				subscriptionMetaDataList = nil
 				time.Sleep(reconnectInterval)
 				continue
 			}
-			return subscriptionMetaDataList, err
+			return sub, err
 		}
-		if err != nil {
-			logger.LoggerMsg.Errorf("%v. Retry attempted %d times.", err, reconnectRetryCount)
-			return subscriptionMetaDataList, err
-		}
-	} else {
-		// any error which comes to this point is because the connection url is not up to the expected format
-		// hence not retrying
-		logger.LoggerMsg.Errorf("Error occurred while trying to create ASB client using the connection url %s, err: %v",
-			connectionString, err)
+		return nil, fmt.Errorf("failed to create subscription for topic %s", topic)
 	}
-	return subscriptionMetaDataList, err
+	logger.LoggerMsg.Errorf("Error occurred while trying to create ASB client using the connection url %s, err: %v",
+		maskSharedAccessKey(connectionString), err)
+	return nil, err
 }
 
-// InitiateConsumers to pass event consumption
-func InitiateConsumers(connectionString string, clientOptions *asb.ClientOptions, subscriptionMetaDataList []Subscription, reconnectInterval time.Duration) {
-	for _, subscriptionMetaData := range subscriptionMetaDataList {
-		go func(subscriptionMetaData Subscription) {
-			startBrokerConsumer(connectionString, clientOptions, subscriptionMetaData, reconnectInterval)
-		}(subscriptionMetaData)
-	}
+// InitiateConsumer to start the broker consumer in a separate go routine
+func InitiateConsumer(sub *Subscription, consumerType string) {
+	go startBrokerConsumer(sub, consumerType)
 }
 
-func retrieveSubscriptionMetadata(metaDataList []Subscription, connectionString string, componentName string,
-	opts *admin.SubscriptionProperties) ([]Subscription, error) {
-	parentContext := context.Background()
+func RetrieveSubscriptionMetadataForTopic(connectionString string, topicName string, clientOptions *asb.ClientOptions,
+	componentName string, opts *admin.SubscriptionProperties, reconnectInterval time.Duration) (*Subscription, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	adminClient, clientErr := admin.NewClientFromConnectionString(connectionString, nil)
 	if clientErr != nil {
 		logger.LoggerMsg.Errorf("Error occurred while trying to create ASB admin client using the connection url %s", connectionString)
 		return nil, clientErr
 	}
+	// Todo (vajira) : move this comment to parent method
+	// we are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
+	// idle for three days
 
-	for _, key := range bindingKeys {
-		var errorValue error
-		subscriptionMetaData := Subscription{
-			topicName:        key,
-			subscriptionName: "",
-		}
-		// we are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
-		// idle for three days
-		uniqueID := uuid.New()
+	// in ASB, subscription names can contain letters, numbers, periods (.), hyphens (-), and
+	// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
 
-		// in ASB, subscription names can contain letters, numbers, periods (.), hyphens (-), and
-		// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
-		var subscriptionName = componentName + "_" + uniqueID.String() + "_sub"
-		var subscriptionCreationError error
-		func() {
-			ctx, cancel := context.WithCancel(parentContext)
-			defer cancel()
-			_, subscriptionCreationError = adminClient.CreateSubscription(ctx, key, subscriptionName, &admin.CreateSubscriptionOptions{
-				Properties: opts,
-			})
-		}()
-		if subscriptionCreationError != nil {
-			errorValue = errors.New("Error occurred while trying to create subscription " + subscriptionName + " in ASB for topic name " +
-				key + "." + subscriptionCreationError.Error())
-			return metaDataList, errorValue
-		}
-		logger.LoggerMsg.Debugf("Subscription %s created.", subscriptionName)
-		subscriptionMetaData.subscriptionName = subscriptionName
-		subscriptionMetaData.topicName = key
-		metaDataList = append(metaDataList, subscriptionMetaData)
+	subscriptionName := fmt.Sprintf("%s_%s_sub", componentName, uuid.New().String())
+	_, err := adminClient.CreateSubscription(ctx, topicName, subscriptionName, &admin.CreateSubscriptionOptions{
+		Properties: opts,
+	})
+
+	if err != nil {
+		return nil, errors.New("Error occurred while trying to create subscription " + subscriptionName + " in ASB for topic name " +
+			topicName + "." + err.Error())
 	}
-	return metaDataList, nil
+
+	logger.LoggerMsg.Debugf("Subscription %s created.", subscriptionName)
+
+	return &Subscription{
+		TopicName:         topicName,
+		SubscriptionName:  subscriptionName,
+		ConnectionString:  connectionString,
+		ClientOptions:     clientOptions,
+		ReconnectInterval: reconnectInterval,
+	}, nil
 }
 
 func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal error) {

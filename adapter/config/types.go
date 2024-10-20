@@ -543,6 +543,7 @@ type controlPlane struct {
 	SyncApisOnStartUp          bool
 	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
+	ASBDataplaneTopics         []ASBDataplaneTopic `toml:"asbDataplaneTopics"`
 	DynamicEnvironments        dynamicEnvironments
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
@@ -550,6 +551,15 @@ type controlPlane struct {
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
 	InitialFetch               initialFetch
+}
+
+type ASBDataplaneTopic struct {
+	Type                      string `toml:"type"`
+	TopicName                 string `toml:"topicName"`
+	ConnectionString          string `toml:"connectionString"`
+	AmqpOverWebsocketsEnabled bool
+	ReconnectInterval         time.Duration
+	ReconnectRetryCount       int
 }
 
 type dynamicEnvironments struct {
