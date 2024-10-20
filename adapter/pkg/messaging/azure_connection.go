@@ -110,13 +110,12 @@ func RetrieveSubscriptionMetadataForTopic(connectionString string, topicName str
 		logger.LoggerMsg.Errorf("Error occurred while trying to create ASB admin client using the connection url %s", connectionString)
 		return nil, clientErr
 	}
-	// Todo (vajira) : move this comment to parent method
+
 	// we are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
 	// idle for three days
 
 	// in ASB, subscription names can contain letters, numbers, periods (.), hyphens (-), and
 	// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
-
 	subscriptionName := fmt.Sprintf("%s_%s_sub", componentName, uuid.New().String())
 	_, err := adminClient.CreateSubscription(ctx, topicName, subscriptionName, &admin.CreateSubscriptionOptions{
 		Properties: opts,
