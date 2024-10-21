@@ -80,7 +80,7 @@ func InitiateBrokerConnectionAndValidate(connectionString string, topic string, 
 		logger.LoggerMsg.Debugf("ASB client initialized for connection url: %s", maskSharedAccessKey(connectionString))
 
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
-			sub, err := RetrieveSubscriptionMetadataForTopic(connectionString, topic,
+			sub, err := retrieveSubscriptionMetadataForTopic(connectionString, topic,
 				clientOptions, componentName, subProps, reconnectInterval)
 			if err != nil {
 				logError(reconnectRetryCount, reconnectInterval, err)
@@ -101,7 +101,7 @@ func InitiateConsumer(sub *Subscription, consumerType string) {
 	go startBrokerConsumer(sub, consumerType)
 }
 
-func RetrieveSubscriptionMetadataForTopic(connectionString string, topicName string, clientOptions *asb.ClientOptions,
+func retrieveSubscriptionMetadataForTopic(connectionString string, topicName string, clientOptions *asb.ClientOptions,
 	componentName string, opts *admin.SubscriptionProperties, reconnectInterval time.Duration) (*Subscription, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

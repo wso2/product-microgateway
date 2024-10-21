@@ -543,7 +543,7 @@ type controlPlane struct {
 	SyncApisOnStartUp          bool
 	SendRevisionUpdate         bool
 	EnvironmentLabels          []string
-	ASBDataplaneTopics         []ASBDataplaneTopic `toml:"asbDataplaneTopics"`
+	ASBDataplaneTopics         []asbDataplaneTopic `toml:"asbDataplaneTopics"`
 	DynamicEnvironments        dynamicEnvironments
 	RetryInterval              time.Duration
 	SkipSSLVerification        bool
@@ -553,7 +553,7 @@ type controlPlane struct {
 	InitialFetch               initialFetch
 }
 
-type ASBDataplaneTopic struct {
+type asbDataplaneTopic struct {
 	Type                      string `toml:"type"`
 	TopicName                 string `toml:"topicName"`
 	ConnectionString          string `toml:"connectionString"`
