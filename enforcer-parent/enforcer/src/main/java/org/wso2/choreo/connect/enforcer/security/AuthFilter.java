@@ -88,9 +88,8 @@ public class AuthFilter implements Filter {
                         equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOAuthBasicAuthMandatory = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME)) {
-                    isApiKeyProtected = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_CHOREO_API_KEY)) {
                     isChoreoApiKeyProtected = true;
+                    isApiKeyProtected = true;
                 }
             }
         }
