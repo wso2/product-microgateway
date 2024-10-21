@@ -30,12 +30,12 @@ public final class APIKeyConfigProto {
     java.lang.String[] descriptorData = {
       "\n3wso2/discovery/config/enforcer/api_key" +
       "_config.proto\022\036wso2.discovery.config.enf" +
-      "orcer\"%\n\014APIKeyConfig\022\025\n\roauthAgentURL\030\001" +
-      " \001(\tB\230\001\n1org.wso2.choreo.connect.discove" +
-      "ry.config.enforcerB\021APIKeyConfigProtoP\001Z" +
-      "Ngithub.com/envoyproxy/go-control-plane/" +
-      "wso2/discovery/config/enforcer;enforcerb" +
-      "\006proto3"
+      "orcer\"C\n\014APIKeyConfig\022\025\n\roauthAgentURL\030\001" +
+      " \001(\t\022\034\n\024internalAPIKeyHeader\030\002 \001(\tB\230\001\n1o" +
+      "rg.wso2.choreo.connect.discovery.config." +
+      "enforcerB\021APIKeyConfigProtoP\001ZNgithub.co" +
+      "m/envoyproxy/go-control-plane/wso2/disco" +
+      "very/config/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -46,7 +46,7 @@ public final class APIKeyConfigProto {
     internal_static_wso2_discovery_config_enforcer_APIKeyConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_APIKeyConfig_descriptor,
-        new java.lang.String[] { "OauthAgentURL", });
+        new java.lang.String[] { "OauthAgentURL", "InternalAPIKeyHeader", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

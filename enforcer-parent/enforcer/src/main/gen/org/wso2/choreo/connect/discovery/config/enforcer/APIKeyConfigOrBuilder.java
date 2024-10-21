@@ -18,4 +18,16 @@ public interface APIKeyConfigOrBuilder extends
    */
   com.google.protobuf.ByteString
       getOauthAgentURLBytes();
+
+  /**
+   * <code>string internalAPIKeyHeader = 2;</code>
+   * @return The internalAPIKeyHeader.
+   */
+  java.lang.String getInternalAPIKeyHeader();
+  /**
+   * <code>string internalAPIKeyHeader = 2;</code>
+   * @return The bytes for internalAPIKeyHeader.
+   */
+  com.google.protobuf.ByteString
+      getInternalAPIKeyHeaderBytes();
 }
