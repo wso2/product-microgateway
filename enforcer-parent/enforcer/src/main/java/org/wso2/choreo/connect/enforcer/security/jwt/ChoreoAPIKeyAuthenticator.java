@@ -25,9 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
-import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 
 import java.util.Base64;
 import java.util.Map;

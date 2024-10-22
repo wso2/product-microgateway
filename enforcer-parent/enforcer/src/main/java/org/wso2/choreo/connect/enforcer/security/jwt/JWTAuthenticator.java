@@ -624,8 +624,8 @@ public class JWTAuthenticator implements Authenticator {
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
-    private JSONObject validateSubscriptionFromClaim(String name, String version, JWTClaimsSet payload,
-                                                     String token, APIKeyValidationInfoDTO validationInfo, boolean isOauth)
+    private JSONObject validateSubscriptionFromClaim(String name, String version, JWTClaimsSet payload, String token,
+                                                     APIKeyValidationInfoDTO validationInfo, boolean isOauth)
             throws APISecurityException {
         JSONObject api = null;
         try {
