@@ -171,30 +171,8 @@ public class JWTAuthenticator implements Authenticator {
                 Utils.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
-            String authHeaderVal = retrieveAuthHeaderValue(requestContext);
 
-            if (authHeaderVal == null
-                    && requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
-                String tokenValue = extractJWTInWSProtocolHeader(requestContext);
-                if (StringUtils.isNotEmpty(tokenValue)) {
-                    authHeaderVal = JWTConstants.BEARER + " " + tokenValue;
-                }
-            }
-
-            if (authHeaderVal == null || !authHeaderVal.toLowerCase().contains(JWTConstants.BEARER)) {
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
-            }
-            String[] splitToken = authHeaderVal.split("\\s");
-            String token = authHeaderVal;
-            // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
-            if (splitToken.length > 1) {
-                token = splitToken[1];
-            }
-            // Handle PAT logic
-            if (isPATEnabled && token.startsWith(APIKeyConstants.PAT_PREFIX)) {
-                token = exchangeJWTForPAT(requestContext, token);
-            }
+            String token = retrieveTokenFromRequestCtx(requestContext);
             String context = requestContext.getMatchedAPI().getBasePath();
             String name = requestContext.getMatchedAPI().getName();
             String version = requestContext.getMatchedAPI().getVersion();
@@ -266,7 +244,7 @@ public class JWTAuthenticator implements Authenticator {
                                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
                             }
                             // if the token is self contained, validation subscription from `subscribedApis` claim
-                            JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
+                            JSONObject api = validateSubscriptionFromClaim(name, version, claims, token,
                                     apiKeyValidationInfoDTO, true);
                             if (api == null) {
                                 if (log.isDebugEnabled()) {
@@ -527,6 +505,40 @@ public class JWTAuthenticator implements Authenticator {
         return headers.get(FilterUtils.getAuthHeaderName(requestContext));
     }
 
+    /**
+     * Extract the JWT token from the request context.
+     *
+     * @param requestContext    Request context
+     * @return JWT token
+     * @throws APISecurityException If an error occurs while extracting the JWT token
+     */
+    protected String retrieveTokenFromRequestCtx(RequestContext requestContext) throws APISecurityException {
+
+        String authHeaderVal = retrieveAuthHeaderValue(requestContext);
+        if (authHeaderVal == null
+                && requestContext.getMatchedAPI().getApiType().equalsIgnoreCase(APIConstants.ApiType.WEB_SOCKET)) {
+            String tokenValue = extractJWTInWSProtocolHeader(requestContext);
+            if (StringUtils.isNotEmpty(tokenValue)) {
+                authHeaderVal = JWTConstants.BEARER + " " + tokenValue;
+            }
+        }
+        if (authHeaderVal == null || !authHeaderVal.toLowerCase().contains(JWTConstants.BEARER)) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
+        }
+        String[] splitToken = authHeaderVal.split("\\s");
+        String token = authHeaderVal;
+        // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
+        if (splitToken.length > 1) {
+            token = splitToken[1];
+        }
+        // Handle PAT logic
+        if (isPATEnabled && token.startsWith(APIKeyConstants.PAT_PREFIX)) {
+            token = exchangeJWTForPAT(requestContext, token);
+        }
+        return token;
+    }
+
     @Override
     public int getPriority() {
         return 10;
@@ -612,9 +624,9 @@ public class JWTAuthenticator implements Authenticator {
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
-    private JSONObject validateSubscriptionFromClaim(String name, String version, JWTClaimsSet payload,
-                                                     String[] splitToken, APIKeyValidationInfoDTO validationInfo,
-                                                     boolean isOauth) throws APISecurityException {
+    private JSONObject validateSubscriptionFromClaim(String name, String version, JWTClaimsSet payload, String token,
+                                                     APIKeyValidationInfoDTO validationInfo, boolean isOauth)
+            throws APISecurityException {
         JSONObject api = null;
         try {
             validationInfo.setEndUserName(payload.getSubject());
@@ -678,7 +690,7 @@ public class JWTAuthenticator implements Authenticator {
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + name + ", " +
-                                "version: " + version + ". Token: " + FilterUtils.getMaskedToken(splitToken[0]));
+                                "version: " + version + ". Token: " + FilterUtils.getMaskedToken(token));
                     }
                     break;
                 }
@@ -686,7 +698,7 @@ public class JWTAuthenticator implements Authenticator {
             if (api == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + name +
-                            ", version: " + version + ". Token: " + FilterUtils.getMaskedToken(splitToken[0]));
+                            ", version: " + version + ". Token: " + FilterUtils.getMaskedToken(token));
                 }
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),

@@ -25,9 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
-import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 
 import java.util.Base64;
 import java.util.Map;
@@ -65,6 +63,18 @@ public class ChoreoAPIKeyAuthenticator extends JWTAuthenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
 
+        return super.authenticate(requestContext);
+    }
+
+    private String getAPIKeyFromRequest(RequestContext requestContext) {
+        Map<String, String> headers = requestContext.getHeaders();
+        return headers.get(ConfigHolder.getInstance().getConfig().getApiKeyConfig()
+                .getApiKeyInternalHeader().toLowerCase());
+    }
+
+    @Override
+    protected String retrieveTokenFromRequestCtx(RequestContext requestContext) {
+
         String apiKeyHeaderValue = getAPIKeyFromRequest(requestContext);
         // Skipping the prefix(`chk_`) and checksum.
         String apiKeyData = apiKeyHeaderValue.substring(4, apiKeyHeaderValue.length() - 6);
@@ -73,16 +83,7 @@ public class ChoreoAPIKeyAuthenticator extends JWTAuthenticator {
         // Convert data into JSON.
         JSONObject jsonObject = (JSONObject) JSONValue.parse(decodedKeyData);
         // Extracting the jwt token.
-        String jwtToken = jsonObject.getAsString(APIKeyConstants.API_KEY_JSON_KEY);
-        // Add the JWT as the Authorization header to authenticate the request.
-        requestContext.getHeaders().put(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                JWTConstants.BEARER + " " + jwtToken);
-        return super.authenticate(requestContext);
-    }
-
-    private String getAPIKeyFromRequest(RequestContext requestContext) {
-        Map<String, String> headers = requestContext.getHeaders();
-        return headers.get(ConfigHolder.getInstance().getConfig().getApiKeyConfig().getApiKeyInternalHeader());
+        return jsonObject.getAsString(APIKeyConstants.API_KEY_JSON_KEY);
     }
 
     @Override

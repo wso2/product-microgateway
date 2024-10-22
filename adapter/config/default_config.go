@@ -228,7 +228,7 @@ var defaultConfig = &Config{
 				DropConsoleTestHeaders:     true,
 			},
 			APIKeyConfig: apiKeyConfig{
-				InternalAPIKeyHeader: "Choreo-API-Key",
+				InternalAPIKeyHeader: "choreo-api-key",
 				OAuthAgentURL:        "https://localhost:9443",
 			},
 			PATConfig: patConfig{
