@@ -525,6 +525,21 @@ enabled = true
     amqpOverWebsocketsEnabled = false
     reconnectInterval = 5000
     reconnectRetryCount = 60
+  # Configurations to specify the ASB topics for the control plane
+  [[controlPlane.asbDataplaneTopics]]
+    type = "notification"
+    topicName = "00000000-0000-0000-0000-000000000005-notification"
+    connectionString = "Endpoint=sb://servicebus.windows.net/;SharedAccessKeyName=00000000-0000-0000-0000-000000000005-notification-sap;SharedAccessKey=************"
+    amqpOverWebsocketsEnabled = false
+    reconnectInterval = 5000
+    reconnectRetryCount = 60
+  [[controlPlane.asbDataplaneTopics]]
+    type = "tokenRevocation"
+    topicName = "00000000-0000-0000-0000-000000000005-tokenrevocation"
+    connectionString = "Endpoint=sb://servicebus.windows.net/;SharedAccessKeyName=00000000-0000-0000-0000-000000000005-tokenrevocation-sap;SharedAccessKey=************"
+    amqpOverWebsocketsEnabled = false
+    reconnectInterval = 5000
+    reconnectRetryCount = 60
   # Worker Pool for sending requests to API Manager to reduce the load if the adapter tries to reconnect.
   [controlPlane.requestWorkerPool]
     # Number of workers

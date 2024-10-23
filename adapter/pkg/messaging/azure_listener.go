@@ -27,27 +27,27 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
-func startBrokerConsumer(connectionString string, clientOptions *asb.ClientOptions, sub Subscription, reconnectInterval time.Duration) {
-	var topic = sub.topicName
-	var subName = sub.subscriptionName
+func startBrokerConsumer(sub *Subscription, consumerType string) {
+	var topic = sub.TopicName
+	var subName = sub.SubscriptionName
 
 	dataChannel := make(chan []byte)
-	if strings.EqualFold(topic, notification) {
+	if strings.EqualFold(consumerType, notification) {
 		dataChannel = AzureNotificationChannel
-	} else if strings.EqualFold(topic, tokenRevocation) {
+	} else if strings.EqualFold(consumerType, tokenRevocation) {
 		dataChannel = AzureRevokedTokenChannel
-	} else if strings.EqualFold(topic, stepQuotaThreshold) {
+	} else if strings.EqualFold(consumerType, stepQuotaThreshold) {
 		dataChannel = AzureStepQuotaThresholdChannel
-	} else if strings.EqualFold(topic, stepQuotaReset) {
+	} else if strings.EqualFold(consumerType, stepQuotaReset) {
 		dataChannel = AzureStepQuotaResetChannel
-	} else if strings.EqualFold(topic, organizationPurge) {
+	} else if strings.EqualFold(consumerType, organizationPurge) {
 		dataChannel = AzureOrganizationPurgeChannel
 	}
 	parentContext := context.Background()
 
 	for {
 		// initializing the receiver client
-		subClient, err := asb.NewClientFromConnectionString(connectionString, clientOptions)
+		subClient, err := asb.NewClientFromConnectionString(sub.ConnectionString, sub.ClientOptions)
 		if err != nil {
 			logger.LoggerMsg.Errorf("Failed to create ASB client for %s , topic:  %s. error: %v.",
 				subName, topic, err)
@@ -70,7 +70,7 @@ func startBrokerConsumer(connectionString string, clientOptions *asb.ClientOptio
 				messages, err := receiver.ReceiveMessages(ctx, 10, nil)
 				if err != nil {
 					logger.LoggerMsg.Errorf("Failed to receive messages from ASB. Subscription: %s, topic: %s error: %v", subName, topic, err)
-					time.Sleep(reconnectInterval)
+					time.Sleep(sub.ReconnectInterval)
 					continue
 				}
 				for _, message := range messages {
